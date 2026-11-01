@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://1mv20egw3207"
+path="res://.godot/imported/weapon.vox-5059eb32b20f474673e4982cdf763ea7.tscn"
+
+[deps]
+
+source_file="res://creatures/cinder_cultist/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-5059eb32b20f474673e4982cdf763ea7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

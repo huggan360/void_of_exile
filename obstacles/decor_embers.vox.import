@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://k6a31hx3rv7n"
+path="res://.godot/imported/decor_embers.vox-a849423fa9b327652697fe5298c3119d.tscn"
+
+[deps]
+
+source_file="res://obstacles/decor_embers.vox"
+dest_files=["res://.godot/imported/decor_embers.vox-a849423fa9b327652697fe5298c3119d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

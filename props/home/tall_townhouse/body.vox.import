@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwc52ryr8311g"
+path="res://.godot/imported/body.vox-9853dd8c06e7f61ded35a28a6193344b.tscn"
+
+[deps]
+
+source_file="res://props/home/tall_townhouse/body.vox"
+dest_files=["res://.godot/imported/body.vox-9853dd8c06e7f61ded35a28a6193344b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

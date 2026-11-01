@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwla8oq757xpi"
+path="res://.godot/imported/wing_l.vox-2b7371d2b1b4054b35d05f675b365a61.tscn"
+
+[deps]
+
+source_file="res://creatures/moss_bat/wing_l.vox"
+dest_files=["res://.godot/imported/wing_l.vox-2b7371d2b1b4054b35d05f675b365a61.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

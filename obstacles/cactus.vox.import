@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cn8xqaw5rth0o"
+path="res://.godot/imported/cactus.vox-2e2b3293752e4bca8f24dc469f3cc2d7.tscn"
+
+[deps]
+
+source_file="res://obstacles/cactus.vox"
+dest_files=["res://.godot/imported/cactus.vox-2e2b3293752e4bca8f24dc469f3cc2d7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

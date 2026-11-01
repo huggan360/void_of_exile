@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://phi6omwd1dvu"
+path="res://.godot/imported/model.vox-afb7c6f90df902e05e674fb9b2448173.tscn"
+
+[deps]
+
+source_file="res://creatures/gloam_bat/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-afb7c6f90df902e05e674fb9b2448173.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_kejuv"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/garden_bed.res" id="2_2euql"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_kejuv")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nxhpp"]
+size = Vector3(7.7, 1.3, 11.5)
+
+[node name="GardenBed" type="Node3D" unique_id=163103765]
+metadata/voxel_source = "res://props/home/garden_bed/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1102397241]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -3.875, -0.125, -5.75)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_2euql")
+
+[node name="SolidEnvelope2" type="StaticBody3D" parent="." unique_id=979833041]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope2" unique_id=1018756299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+shape = SubResource("BoxShape3D_nxhpp")

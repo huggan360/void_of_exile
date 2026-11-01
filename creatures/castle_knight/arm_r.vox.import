@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cpmxu3wvjgl84"
+path="res://.godot/imported/arm_r.vox-e481843b5cbbd8eeebb9757050b43b4a.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_knight/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-e481843b5cbbd8eeebb9757050b43b4a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

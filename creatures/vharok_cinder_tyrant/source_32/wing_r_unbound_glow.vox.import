@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyvgin6okmdrx"
+path="res://.godot/imported/wing_r_unbound_glow.vox-70d06b049bf1c37a44abd33e0ee89fcf.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/source_32/wing_r_unbound_glow.vox"
+dest_files=["res://.godot/imported/wing_r_unbound_glow.vox-70d06b049bf1c37a44abd33e0ee89fcf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

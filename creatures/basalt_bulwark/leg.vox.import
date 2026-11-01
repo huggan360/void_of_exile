@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bsnnwoqys3olu"
+path="res://.godot/imported/leg.vox-c59709f937f551bb43f60059dbc9d401.tscn"
+
+[deps]
+
+source_file="res://creatures/basalt_bulwark/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-c59709f937f551bb43f60059dbc9d401.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

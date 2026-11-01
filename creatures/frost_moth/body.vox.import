@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cvi5ji1ik41j8"
+path="res://.godot/imported/body.vox-bfefdceb3565d799f076f0e6f42ca33f.tscn"
+
+[deps]
+
+source_file="res://creatures/frost_moth/body.vox"
+dest_files=["res://.godot/imported/body.vox-bfefdceb3565d799f076f0e6f42ca33f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

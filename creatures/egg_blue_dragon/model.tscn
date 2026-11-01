@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_cmm77"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_blue_dragon/meshes/body.res" id="2_7krli"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g15ur"]
+render_priority = 0
+shader = ExtResource("1_cmm77")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[node name="EggBlueDragonDefault" type="Node3D" unique_id=219516042]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/egg_blue_dragon/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1687472635]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=1622118760]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 0, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=806162930]
+material_override = SubResource("ShaderMaterial_g15ur")
+mesh = ExtResource("2_7krli")

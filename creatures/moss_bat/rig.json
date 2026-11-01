@@ -1,0 +1,70 @@
+{
+  "voxel_size": 0.12,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -3,
+        2,
+        -3
+      ],
+      "frame_size": [
+        6,
+        6,
+        5
+      ]
+    },
+    "wing_r": {
+      "frame_min": [
+        0,
+        -2,
+        0
+      ],
+      "frame_size": [
+        10,
+        7,
+        1
+      ]
+    },
+    "wing_l": {
+      "frame_min": [
+        -9,
+        -2,
+        0
+      ],
+      "frame_size": [
+        10,
+        7,
+        1
+      ]
+    }
+  },
+  "limbs": {
+    "wing_l": {
+      "part": "wing_l",
+      "pivot": [
+        -2,
+        6,
+        0
+      ],
+      "role": "wing",
+      "phase": -1
+    },
+    "wing_r": {
+      "part": "wing_r",
+      "pivot": [
+        2,
+        6,
+        0
+      ],
+      "role": "wing",
+      "phase": 1
+    }
+  },
+  "hand": [
+    3,
+    6,
+    -2
+  ],
+  "bob": 0.04,
+  "waddle": 0.06
+}

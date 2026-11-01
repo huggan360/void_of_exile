@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_80jph"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_vharok/meshes/body.res" id="2_l3702"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6xnq3"]
+render_priority = 0
+shader = ExtResource("1_80jph")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[node name="EggVharokDefault" type="Node3D" unique_id=554521550]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/egg_vharok/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=490282898]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=1227186054]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 0, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1691398421]
+material_override = SubResource("ShaderMaterial_6xnq3")
+mesh = ExtResource("2_l3702")

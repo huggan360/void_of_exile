@@ -1,0 +1,112 @@
+{
+  "voxel_size": 0.12,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -4,
+        1,
+        -6
+      ],
+      "frame_size": [
+        8,
+        7,
+        11
+      ],
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        0,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        5,
+        4,
+        2
+      ]
+    }
+  },
+  "limbs": {
+    "-1leg0": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        3,
+        -3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": -1,
+      "yaw": 180
+    },
+    "-1leg1": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        3,
+        0
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": 1,
+      "yaw": 180
+    },
+    "-1leg2": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        3,
+        3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": -1,
+      "yaw": 180
+    },
+    "1leg0": {
+      "part": "leg",
+      "pivot": [
+        3,
+        3,
+        -3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": 1,
+      "yaw": 0
+    },
+    "1leg1": {
+      "part": "leg",
+      "pivot": [
+        3,
+        3,
+        0
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": -1,
+      "yaw": 0
+    },
+    "1leg2": {
+      "part": "leg",
+      "pivot": [
+        3,
+        3,
+        3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": 1,
+      "yaw": 0
+    }
+  },
+  "hand": [
+    3,
+    8,
+    -3
+  ],
+  "bob": 0.035,
+  "waddle": 0.15,
+  "hover": 0
+}

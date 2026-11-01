@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cyoqdexjs8mwj"
+path="res://.godot/imported/body.vox-e17d297d8d8895d8c2ebee50b6331a01.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_scarab/source_32/body.vox"
+dest_files=["res://.godot/imported/body.vox-e17d297d8d8895d8c2ebee50b6331a01.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

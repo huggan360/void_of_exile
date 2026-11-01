@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://clnepsu13qabs"
+path="res://.godot/imported/body_glow.vox-0ef447e4ab13c4cf159fe8ed32f20268.tscn"
+
+[deps]
+
+source_file="res://creatures/vine_mantis/projectile/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-0ef447e4ab13c4cf159fe8ed32f20268.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://21ofe1r11k57"
+path="res://.godot/imported/wing_l_sunwings.vox-0cd842a2624442dae242d73e312c368b.tscn"
+
+[deps]
+
+source_file="res://creatures/aureate_scarab_regent/source_32/wing_l_sunwings.vox"
+dest_files=["res://.godot/imported/wing_l_sunwings.vox-0cd842a2624442dae242d73e312c368b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

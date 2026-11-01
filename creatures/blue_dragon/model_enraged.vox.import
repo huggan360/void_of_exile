@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0bk06o4esjuh"
+path="res://.godot/imported/model_enraged.vox-3336e8ef14653927443ca151808ede23.tscn"
+
+[deps]
+
+source_file="res://creatures/blue_dragon/model_enraged.vox"
+dest_files=["res://.godot/imported/model_enraged.vox-3336e8ef14653927443ca151808ede23.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

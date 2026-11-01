@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dhwvf6ujgmuo"
+path="res://.godot/imported/leg.vox-af3c9ed69155ee2ee0a11aa8f4bdab6c.tscn"
+
+[deps]
+
+source_file="res://creatures/aurora_sentinel/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-af3c9ed69155ee2ee0a11aa8f4bdab6c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

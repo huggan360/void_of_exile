@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cjmnbj1womc1i"
+path="res://.godot/imported/model.vox-7709376389870d20e9fbad1b4a0c3787.tscn"
+
+[deps]
+
+source_file="res://props/houses/woodland_2/model.vox"
+dest_files=["res://.godot/imported/model.vox-7709376389870d20e9fbad1b4a0c3787.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

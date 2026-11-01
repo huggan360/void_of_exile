@@ -1,0 +1,237 @@
+[
+  {
+    "id": "rimeheart_prism",
+    "display_name": "Rimeheart Prism",
+    "biome": "Fosen",
+    "folder": "creatures/staging/realm_bosses_01/rimeheart_prism",
+    "status": "art_staging_only",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "petal",
+      "body_conduit",
+      "petal_conduit",
+      "body_tempest",
+      "petal_tempest"
+    ],
+    "variants": [
+      "conduit",
+      "tempest"
+    ],
+    "poses": {
+      "sealed": {
+        "file": "model.vox",
+        "frame_min": [
+          -49,
+          8,
+          -53
+        ],
+        "size": [
+          99,
+          181,
+          107
+        ],
+        "voxels": 130054
+      },
+      "conduit": {
+        "file": "model_conduit.vox",
+        "frame_min": [
+          -73,
+          8,
+          -81
+        ],
+        "size": [
+          147,
+          187,
+          163
+        ],
+        "voxels": 151044
+      },
+      "tempest": {
+        "file": "model_tempest.vox",
+        "frame_min": [
+          -95,
+          8,
+          -110
+        ],
+        "size": [
+          191,
+          187,
+          221
+        ],
+        "voxels": 130615
+      }
+    }
+  },
+  {
+    "id": "rimeheart_conduit",
+    "display_name": "Rimeheart Healing Conduit",
+    "biome": "Fosen support",
+    "folder": "creatures/staging/realm_bosses_01/rimeheart_conduit",
+    "status": "art_staging_only",
+    "voxel_size": 0.032,
+    "parts": [
+      "body"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -19,
+          0,
+          -22
+        ],
+        "size": [
+          38,
+          113,
+          44
+        ],
+        "voxels": 19052
+      }
+    }
+  },
+  {
+    "id": "rimeheart_shardling",
+    "display_name": "Rimeheart Shardling",
+    "biome": "Fosen support",
+    "folder": "creatures/staging/realm_bosses_01/rimeheart_shardling",
+    "status": "art_staging_only",
+    "voxel_size": 0.03,
+    "parts": [
+      "body"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -25,
+          5,
+          -17
+        ],
+        "size": [
+          50,
+          52,
+          32
+        ],
+        "voxels": 7380
+      }
+    }
+  },
+  {
+    "id": "vharok_cinder_tyrant",
+    "display_name": "Vharok, the Cinder Tyrant",
+    "biome": "Lava",
+    "folder": "creatures/staging/realm_bosses_01/vharok_cinder_tyrant",
+    "status": "art_staging_only",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "arm_l",
+      "leg_l",
+      "wing_l",
+      "arm_r",
+      "leg_r",
+      "wing_r",
+      "tail",
+      "body_infernal"
+    ],
+    "variants": [
+      "infernal"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -119,
+          0,
+          -33
+        ],
+        "size": [
+          238,
+          236,
+          130
+        ],
+        "voxels": 142720
+      },
+      "infernal": {
+        "file": "model_infernal.vox",
+        "frame_min": [
+          -119,
+          0,
+          -33
+        ],
+        "size": [
+          238,
+          236,
+          130
+        ],
+        "voxels": 142720
+      }
+    }
+  },
+  {
+    "id": "aureate_scarab_regent",
+    "display_name": "Aureate Scarab Regent",
+    "biome": "Desert",
+    "folder": "creatures/staging/realm_bosses_01/aureate_scarab_regent",
+    "status": "art_staging_only",
+    "voxel_size": 0.044,
+    "parts": [
+      "body",
+      "leg_l",
+      "wing_l",
+      "leg_r",
+      "wing_r"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -93,
+          9,
+          -78
+        ],
+        "size": [
+          186,
+          182,
+          149
+        ],
+        "voxels": 114512
+      }
+    }
+  },
+  {
+    "id": "hollow_crown",
+    "display_name": "The Hollow Crown",
+    "biome": "Dark",
+    "folder": "creatures/staging/realm_bosses_01/hollow_crown",
+    "status": "art_staging_only",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "halo"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -79,
+          6,
+          -37
+        ],
+        "size": [
+          158,
+          218,
+          74
+        ],
+        "voxels": 122107
+      }
+    }
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "tier": 5,
+  "name": "Winged Legend Monument",
+  "rank_hint": "Legend",
+  "status": "art_only",
+  "voxel_size": 0.08,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -12,
+        0,
+        -6
+      ],
+      "frame_size": [
+        25,
+        31,
+        13
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {},
+  "hand": [
+    0,
+    0,
+    0
+  ],
+  "facing": "-Z",
+  "size_m": [
+    2.0,
+    2.48,
+    1.04
+  ]
+}

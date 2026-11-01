@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c4ceekpitv0tp"
+path="res://.godot/imported/body_glow.vox-8bb49cc6c9ecb5656467b4fe768d904b.tscn"
+
+[deps]
+
+source_file="res://creatures/slag_seraph/projectile/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-8bb49cc6c9ecb5656467b4fe768d904b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

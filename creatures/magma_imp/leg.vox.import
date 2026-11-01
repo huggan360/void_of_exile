@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bynl5jffj342q"
+path="res://.godot/imported/leg.vox-bab7902cd75b4f0779e699681e38b560.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_imp/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-bab7902cd75b4f0779e699681e38b560.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

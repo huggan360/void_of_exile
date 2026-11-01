@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0s6wt7ooocvx"
+path="res://.godot/imported/wing_l_enraged_glow.vox-3409dd26efcccfa71a53ed56361f4b6c.tscn"
+
+[deps]
+
+source_file="res://creatures/blue_dragon/source_32/wing_l_enraged_glow.vox"
+dest_files=["res://.godot/imported/wing_l_enraged_glow.vox-3409dd26efcccfa71a53ed56361f4b6c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dgb54nfu3ne8q"
+path="res://.godot/imported/body_glow.vox-1785fd32d4ce25f386d238c7ac235a07.tscn"
+
+[deps]
+
+source_file="res://creatures/glacier_hermit/projectile/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-1785fd32d4ce25f386d238c7ac235a07.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

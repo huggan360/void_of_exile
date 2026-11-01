@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7wgoecdoe0qt"
+path="res://.godot/imported/model.vox-a65636eb53183c8234b03ae023187303.tscn"
+
+[deps]
+
+source_file="res://creatures/moss_tortoise/model.vox"
+dest_files=["res://.godot/imported/model.vox-a65636eb53183c8234b03ae023187303.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

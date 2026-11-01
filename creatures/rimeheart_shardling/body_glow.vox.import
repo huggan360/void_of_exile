@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dn2u3g6aapfi2"
+path="res://.godot/imported/body_glow.vox-bd0018234dc4c4e7cf693ce997046947.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_shardling/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-bd0018234dc4c4e7cf693ce997046947.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

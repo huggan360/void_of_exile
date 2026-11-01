@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b5k2rjn8f8g8d"
+path="res://.godot/imported/halo_fractured.vox-fc8dff176ca1a25805e7c0d99743a0b9.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_crown/source_32/halo_fractured.vox"
+dest_files=["res://.godot/imported/halo_fractured.vox-fc8dff176ca1a25805e7c0d99743a0b9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

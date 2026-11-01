@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwouk5u6bjme4"
+path="res://.godot/imported/weapon.vox-1ceeddca2c0b7d19c649306234b948b8.tscn"
+
+[deps]
+
+source_file="res://creatures/reef_guardian/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-1ceeddca2c0b7d19c649306234b948b8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

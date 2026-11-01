@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c6k57c82ukfq1"
+path="res://.godot/imported/tail_enraged.vox-443e466cc1b273c5d568a0b06938b3dc.tscn"
+
+[deps]
+
+source_file="res://creatures/blue_dragon/source_32/tail_enraged.vox"
+dest_files=["res://.godot/imported/tail_enraged.vox-443e466cc1b273c5d568a0b06938b3dc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

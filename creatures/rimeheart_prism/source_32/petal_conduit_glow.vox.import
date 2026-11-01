@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b4h656n7fboth"
+path="res://.godot/imported/petal_conduit_glow.vox-98b4f8598c482274f3fa78fd2a39f88e.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_prism/source_32/petal_conduit_glow.vox"
+dest_files=["res://.godot/imported/petal_conduit_glow.vox-98b4f8598c482274f3fa78fd2a39f88e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

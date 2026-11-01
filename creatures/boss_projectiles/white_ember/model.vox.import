@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b5ssgh53kn4ho"
+path="res://.godot/imported/model.vox-f73a1bfa5aacb2fbae6cd290d89fcbed.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/white_ember/model.vox"
+dest_files=["res://.godot/imported/model.vox-f73a1bfa5aacb2fbae6cd290d89fcbed.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

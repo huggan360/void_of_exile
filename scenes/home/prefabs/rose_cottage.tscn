@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_3lt7k"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/rose_cottage.res" id="2_yrbr5"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/rose_cottage_glow.res" id="3_l3v7x"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_3lt7k")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_3lt7k")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vjmdx"]
+size = Vector3(7.225, 7.2, 7.65)
+
+[node name="RoseCottage" type="Node3D" unique_id=997133535]
+metadata/voxel_source = "res://props/home/rose_cottage/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1438552339]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -3.625, -0.125, -4.5)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_yrbr5")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=10192212]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -3.625, -0.125, -4.5)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_l3v7x")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=935087574]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=461519063]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 0)
+shape = SubResource("BoxShape3D_vjmdx")

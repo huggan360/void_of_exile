@@ -1,0 +1,3116 @@
+{
+	"biomes": [
+		{
+			"features": [],
+			"god_stat": "magic",
+			"god_stats": [],
+			"id": 0,
+			"name": "The Tavern",
+			"packs": []
+		},
+		{
+			"features": [],
+			"god_stat": "magic",
+			"god_stats": [],
+			"id": 1,
+			"name": "Ocean",
+			"packs": []
+		},
+		{
+			"features": [
+				{
+					"chance": 0.7,
+					"optional": 8,
+					"packs": [
+						{
+							"chance": 0.85,
+							"pack": "crab_pack"
+						}
+					],
+					"required": 2,
+					"type": "tide_rocks"
+				}
+			],
+			"god_stat": "dexterity",
+			"god_stats": [],
+			"id": 2,
+			"name": "Shores",
+			"packs": [
+				{
+					"density": 0.18,
+					"pack": "tide_snail_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"chance": 0.6,
+					"optional": 4,
+					"type": "stone_circle"
+				},
+				{
+					"chance": 0.7,
+					"optional": 14,
+					"packs": [
+						{
+							"chance": 0.135,
+							"pack": "spirit_brown_pack"
+						},
+						{
+							"chance": 0.036,
+							"pack": "spirit_blue_pack"
+						},
+						{
+							"chance": 0.015,
+							"pack": "spirit_purple_pack"
+						}
+					],
+					"type": "ruins"
+				}
+			],
+			"god_stat": "speed",
+			"god_stats": [],
+			"id": 3,
+			"name": "Woods",
+			"packs": [
+				{
+					"density": 0.26,
+					"pack": "goblin_pack"
+				},
+				{
+					"density": 0.12,
+					"pack": "sporeback_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "cinder_beetle_pack"
+				},
+				{
+					"density": 0.12,
+					"pack": "thorn_hopper_pack"
+				},
+				{
+					"density": 0.12,
+					"pack": "bramble_fox_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "moss_tortoise_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"chance": 0.8,
+					"optional": 2,
+					"type": "ziggurat"
+				},
+				{
+					"chance": 0.7,
+					"optional": 8,
+					"packs": [
+						{
+							"chance": 0.135,
+							"pack": "spirit_brown_pack"
+						},
+						{
+							"chance": 0.036,
+							"pack": "spirit_blue_pack"
+						},
+						{
+							"chance": 0.015,
+							"pack": "spirit_purple_pack"
+						}
+					],
+					"type": "ruins"
+				}
+			],
+			"god_stat": "dexterity",
+			"god_stats": [],
+			"id": 4,
+			"name": "Jungle",
+			"packs": [
+				{
+					"density": 0.2,
+					"pack": "green_dragon_pack"
+				},
+				{
+					"density": 0.16,
+					"pack": "thorn_hopper_pack"
+				},
+				{
+					"density": 0.18,
+					"pack": "vine_mantis_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"chance": 0.8,
+					"optional": 2,
+					"type": "sunken_temple"
+				},
+				{
+					"chance": 0.7,
+					"optional": 8,
+					"packs": [
+						{
+							"chance": 0.135,
+							"pack": "spirit_brown_pack"
+						},
+						{
+							"chance": 0.036,
+							"pack": "spirit_blue_pack"
+						},
+						{
+							"chance": 0.015,
+							"pack": "spirit_purple_pack"
+						}
+					],
+					"type": "ruins"
+				}
+			],
+			"god_stat": "defense",
+			"god_stats": [
+				"defense",
+				"hp"
+			],
+			"id": 5,
+			"name": "Desert",
+			"packs": [
+				{
+					"density": 0.18,
+					"pack": "sand_scorpion_pack"
+				},
+				{
+					"density": 0.05,
+					"pack": "black_scorpion_pack"
+				},
+				{
+					"density": 0.12,
+					"pack": "sun_jackal_pack"
+				},
+				{
+					"density": 0.12,
+					"pack": "dune_monolith_pack"
+				},
+				{
+					"density": 0.12,
+					"pack": "glass_scorpion_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "dune_crawler_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"required": 1,
+					"type": "ember_shrine"
+				},
+				{
+					"chance": 0.5,
+					"optional": 4,
+					"required": 4,
+					"type": "lava_scar"
+				},
+				{
+					"chance": 0.6,
+					"optional": 6,
+					"type": "ruins"
+				}
+			],
+			"god_stat": "attack",
+			"god_stats": [
+				"attack",
+				"defense"
+			],
+			"id": 6,
+			"name": "Doom",
+			"packs": [
+				{
+					"density": 0.11,
+					"pack": "basalt_bulwark_pack"
+				},
+				{
+					"density": 0.11,
+					"pack": "furnace_maw_pack"
+				},
+				{
+					"density": 0.11,
+					"pack": "cinder_oracle_pack"
+				},
+				{
+					"density": 0.015,
+					"pack": "spirit_purple_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "slag_seraph_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "obsidian_ram_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "ember_lich_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "ember_mite_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"required": 1,
+					"type": "frost_tower"
+				},
+				{
+					"chance": 0.5,
+					"optional": 2,
+					"required": 1,
+					"type": "ravine"
+				},
+				{
+					"chance": 0.5,
+					"optional": 4,
+					"packs": [
+						{
+							"chance": 0.135,
+							"pack": "spirit_brown_pack"
+						},
+						{
+							"chance": 0.036,
+							"pack": "spirit_blue_pack"
+						},
+						{
+							"chance": 0.015,
+							"pack": "spirit_purple_pack"
+						}
+					],
+					"type": "ruins"
+				}
+			],
+			"god_stat": "magic",
+			"god_stats": [
+				"magic",
+				"dexterity"
+			],
+			"id": 7,
+			"name": "Fosen",
+			"packs": [
+				{
+					"density": 0.12,
+					"pack": "frost_moth_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "rime_stag_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "glacier_hermit_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "hail_harrier_pack"
+				},
+				{
+					"density": 0.09,
+					"pack": "aurora_sentinel_pack"
+				},
+				{
+					"density": 0.09,
+					"pack": "hoarfrost_owl_pack"
+				},
+				{
+					"density": 0.09,
+					"pack": "icebound_colossus_pack"
+				},
+				{
+					"density": 0.05,
+					"pack": "rime_skitter_pack"
+				},
+				{
+					"density": 0.05,
+					"pack": "snow_wisp_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"required": 1,
+					"type": "crystal_spire"
+				},
+				{
+					"chance": 0.6,
+					"optional": 4,
+					"required": 1,
+					"type": "glow_pool"
+				},
+				{
+					"chance": 0.5,
+					"optional": 3,
+					"packs": [
+						{
+							"chance": 0.135,
+							"pack": "spirit_brown_pack"
+						},
+						{
+							"chance": 0.06,
+							"pack": "spirit_blue_pack"
+						},
+						{
+							"chance": 0.015,
+							"pack": "spirit_purple_pack"
+						}
+					],
+					"type": "ruins"
+				}
+			],
+			"god_stat": "mp",
+			"god_stats": [],
+			"id": 8,
+			"name": "Bluelay",
+			"packs": [
+				{
+					"density": 0.22,
+					"pack": "ruin_watcher_pack"
+				},
+				{
+					"density": 0.1,
+					"pack": "blue_genie_pack"
+				},
+				{
+					"density": 0.021,
+					"pack": "spirit_blue_pack"
+				},
+				{
+					"density": 0.11,
+					"pack": "prism_ray_pack"
+				},
+				{
+					"density": 0.11,
+					"pack": "runic_archivist_pack"
+				},
+				{
+					"density": 0.11,
+					"pack": "azure_medusa_pack"
+				},
+				{
+					"density": 0.06,
+					"pack": "tide_snail_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"chance": 0.6,
+					"optional": 1,
+					"required": 1,
+					"type": "sunken_temple"
+				},
+				{
+					"chance": 0.6,
+					"optional": 6,
+					"type": "ruins"
+				}
+			],
+			"god_stat": "hp",
+			"god_stats": [],
+			"id": 9,
+			"name": "Deep Desert",
+			"packs": [
+				{
+					"density": 0.072,
+					"pack": "spirit_brown_pack"
+				},
+				{
+					"density": 0.042,
+					"pack": "spirit_blue_pack"
+				},
+				{
+					"density": 0.036,
+					"pack": "spirit_purple_pack"
+				},
+				{
+					"density": 0.2,
+					"pack": "dune_crawler_pack"
+				}
+			]
+		},
+		{
+			"features": [
+				{
+					"required": 1,
+					"type": "stone_circle"
+				},
+				{
+					"chance": 0.6,
+					"optional": 4,
+					"type": "ruins"
+				}
+			],
+			"god_stat": "speed",
+			"god_stats": [
+				"speed",
+				"mp"
+			],
+			"id": 10,
+			"name": "The Deep Dark",
+			"packs": [
+				{
+					"density": 0.036,
+					"pack": "spirit_purple_pack"
+				},
+				{
+					"density": 0.04,
+					"pack": "blue_genie_pack"
+				},
+				{
+					"density": 0.13,
+					"pack": "umbral_reaper_pack"
+				},
+				{
+					"density": 0.13,
+					"pack": "amethyst_widow_pack"
+				},
+				{
+					"density": 0.13,
+					"pack": "nightbell_idol_pack"
+				},
+				{
+					"density": 0.14,
+					"pack": "bile_bandit_patrol"
+				},
+				{
+					"density": 0.11,
+					"pack": "gloam_bat_pack"
+				}
+			]
+		}
+	],
+	"enemies": {
+		"amethyst_widow": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.6,
+					"count": 3,
+					"damage_max": 175,
+					"damage_min": 155,
+					"magic": false,
+					"pattern": "burst",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "dart",
+			"defense": 18,
+			"god_potion_stats": [
+				"defense"
+			],
+			"hp": 3900,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Amethyst Widow",
+			"speed": 4.1,
+			"xp": 400
+		},
+		"aurora_sentinel": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.4,
+					"count": 3,
+					"damage_max": 170,
+					"damage_min": 150,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 20,
+			"god_potion_stats": [
+				"magic"
+			],
+			"hp": 4100,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Aurora Sentinel",
+			"speed": 2.8,
+			"xp": 400
+		},
+		"azure_medusa": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 3.4,
+					"count": 8,
+					"damage_max": 160,
+					"damage_min": 140,
+					"magic": true,
+					"pattern": "ring",
+					"speed": 9.5,
+					"windup": 0.85
+				}
+			],
+			"behavior": "spirit",
+			"defense": 12,
+			"god_potion_stats": [
+				"mp"
+			],
+			"hp": 3500,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Azure Medusa",
+			"speed": 2.8,
+			"xp": 400
+		},
+		"basalt_bulwark": {
+			"aggro": 16.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.2,
+					"count": 3,
+					"damage_max": 210,
+					"damage_min": 190,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.0,
+					"windup": 0.7
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 28,
+			"god_potion_stats": [],
+			"hp": 5500,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Basalt Bulwark",
+			"speed": 2.7,
+			"xp": 500
+		},
+		"bile_bandit": {
+			"aggro": 16.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.7,
+					"count": 1,
+					"damage_max": 58,
+					"damage_min": 48,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 7.5,
+					"windup": 0.65
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 8,
+			"god_potion_stats": [],
+			"hp": 600,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Bile Bandit",
+			"speed": 3.6,
+			"xp": 65
+		},
+		"black_scorpion": {
+			"aggro": 11.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.7,
+					"count": 2,
+					"damage_max": 34,
+					"damage_min": 26,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 12.0,
+					"windup": 0.45
+				},
+				{
+					"armor_piercing": false,
+					"cooldown": 3.2,
+					"count": 1,
+					"damage_max": 44,
+					"damage_min": 34,
+					"magic": true,
+					"pattern": "aimed",
+					"speed": 9.0,
+					"windup": 0.75
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 15,
+			"god_potion_stats": [],
+			"hp": 625,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Black Scorpion",
+			"speed": 4.0,
+			"xp": 110
+		},
+		"blue_dragon": {
+			"aggro": 24.0,
+			"attacks": [],
+			"behavior": "stationary",
+			"defense": 20,
+			"god_potion_stats": [],
+			"hp": 40000,
+			"is_boss": true,
+			"is_god": false,
+			"name": "Blue Dragon",
+			"speed": 3.0,
+			"xp": 4000
+		},
+		"blue_genie": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.7,
+					"count": 3,
+					"damage_max": 185,
+					"damage_min": 165,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 10.0,
+					"windup": 0.5
+				},
+				{
+					"armor_piercing": false,
+					"cooldown": 4.5,
+					"count": 8,
+					"damage_max": 165,
+					"damage_min": 145,
+					"magic": false,
+					"pattern": "ring",
+					"speed": 8.0,
+					"windup": 0.7
+				}
+			],
+			"behavior": "spirit",
+			"defense": 14,
+			"god_potion_stats": [],
+			"hp": 5000,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Blue Genie",
+			"speed": 5.5,
+			"xp": 550
+		},
+		"bramble_fox": {
+			"aggro": 12.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.1,
+					"count": 2,
+					"damage_max": 34,
+					"damage_min": 24,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.0,
+					"windup": 0.65
+				}
+			],
+			"behavior": "dart",
+			"defense": 3,
+			"god_potion_stats": [],
+			"hp": 240,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Bramble Fox",
+			"speed": 4.0,
+			"xp": 30
+		},
+		"cinder_beetle": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.2,
+					"count": 1,
+					"damage_max": 46,
+					"damage_min": 36,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 8.0,
+					"windup": 0.65
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 550,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Cinder Beetle",
+			"speed": 2.7,
+			"xp": 55
+		},
+		"cinder_oracle": {
+			"aggro": 16.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.7,
+					"count": 5,
+					"damage_max": 205,
+					"damage_min": 185,
+					"magic": true,
+					"pattern": "sweep",
+					"speed": 9.0,
+					"windup": 0.7
+				}
+			],
+			"behavior": "spirit",
+			"defense": 14,
+			"god_potion_stats": [],
+			"hp": 4800,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Cinder Oracle",
+			"speed": 4.2,
+			"xp": 500
+		},
+		"cinder_sentinel": {
+			"aggro": 60.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.8,
+					"count": 3,
+					"damage_max": 60,
+					"damage_min": 45,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 7.0,
+					"windup": 0.8
+				}
+			],
+			"behavior": "stationary",
+			"defense": 14,
+			"god_potion_stats": [],
+			"hp": 2000,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Cinder Sentinel",
+			"speed": 4.0,
+			"xp": 0
+		},
+		"crab": {
+			"aggro": 11.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.7,
+					"count": 3,
+					"damage_max": 22,
+					"damage_min": 15,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.0,
+					"windup": 0.3
+				}
+			],
+			"behavior": "spirit",
+			"defense": 4,
+			"god_potion_stats": [],
+			"hp": 180,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Shore Crab",
+			"speed": 3.6,
+			"xp": 18
+		},
+		"dawn_scarab": {
+			"aggro": 60.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.4,
+					"count": 1,
+					"damage_max": 50,
+					"damage_min": 40,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 9.0,
+					"windup": 0.6
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 8,
+			"god_potion_stats": [],
+			"hp": 700,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Dawn Scarab",
+			"speed": 2.5,
+			"xp": 0
+		},
+		"dragonling_blue": {
+			"aggro": 40.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.1,
+					"count": 1,
+					"damage_max": 40,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 11.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "orbit",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 2400,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Blue Dragonling",
+			"speed": 5.5,
+			"xp": 120
+		},
+		"dragonling_cyan": {
+			"aggro": 40.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.1,
+					"count": 1,
+					"damage_max": 40,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 11.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 3000,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Cyan Dragonling",
+			"speed": 5.5,
+			"xp": 120
+		},
+		"dragonling_gold": {
+			"aggro": 40.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.1,
+					"count": 1,
+					"damage_max": 40,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 11.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 3000,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Gold Dragonling",
+			"speed": 5.5,
+			"xp": 120
+		},
+		"dragonling_pink": {
+			"aggro": 40.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.1,
+					"count": 1,
+					"damage_max": 40,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 11.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 3000,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Pink Dragonling",
+			"speed": 5.5,
+			"xp": 120
+		},
+		"dragonling_purple": {
+			"aggro": 40.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.1,
+					"count": 1,
+					"damage_max": 40,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 11.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 3000,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Purple Dragonling",
+			"speed": 5.5,
+			"xp": 120
+		},
+		"dragonling_red": {
+			"aggro": 40.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.1,
+					"count": 1,
+					"damage_max": 40,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 11.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 3000,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Red Dragonling",
+			"speed": 5.5,
+			"xp": 120
+		},
+		"dune_crawler": {
+			"aggro": 12.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.0,
+					"count": 1,
+					"damage_max": 38,
+					"damage_min": 28,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 9.0,
+					"windup": 0.65
+				}
+			],
+			"behavior": "chase",
+			"defense": 5,
+			"god_potion_stats": [],
+			"hp": 300,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Dune Crawler",
+			"speed": 3.2,
+			"xp": 30
+		},
+		"dune_monolith": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.6,
+					"count": 1,
+					"damage_max": 175,
+					"damage_min": 155,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 24,
+			"god_potion_stats": [
+				"hp"
+			],
+			"hp": 4500,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Dune Monolith",
+			"speed": 1.7,
+			"xp": 400
+		},
+		"ember_lich": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.9,
+					"count": 4,
+					"damage_max": 180,
+					"damage_min": 160,
+					"magic": true,
+					"pattern": "sweep",
+					"speed": 8.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "spirit",
+			"defense": 12,
+			"god_potion_stats": [
+				"magic"
+			],
+			"hp": 3600,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Ember Lich",
+			"speed": 3.2,
+			"xp": 500
+		},
+		"ember_mite": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.8,
+					"count": 1,
+					"damage_max": 44,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 10.0,
+					"windup": 0.35
+				}
+			],
+			"behavior": "dart",
+			"defense": 3,
+			"god_potion_stats": [],
+			"hp": 220,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Ember Mite",
+			"speed": 4.2,
+			"xp": 25
+		},
+		"frost_moth": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.8,
+					"count": 3,
+					"damage_max": 170,
+					"damage_min": 150,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 11.0,
+					"windup": 0.6
+				}
+			],
+			"behavior": "strafe",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 3200,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Frost Moth",
+			"speed": 4.2,
+			"xp": 350
+		},
+		"furnace_maw": {
+			"aggro": 16.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.6,
+					"count": 3,
+					"damage_max": 220,
+					"damage_min": 200,
+					"magic": false,
+					"pattern": "burst",
+					"speed": 9.0,
+					"windup": 0.7
+				}
+			],
+			"behavior": "chase",
+			"defense": 18,
+			"god_potion_stats": [],
+			"hp": 6500,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Furnace Maw",
+			"speed": 3.1,
+			"xp": 500
+		},
+		"genie_blue": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.2,
+					"count": 2,
+					"damage_max": 32,
+					"damage_min": 24,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 12.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 4,
+			"god_potion_stats": [],
+			"hp": 500,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Genie",
+			"speed": 5.0,
+			"xp": 40
+		},
+		"genie_brown": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.2,
+					"count": 2,
+					"damage_max": 32,
+					"damage_min": 24,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 12.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 4,
+			"god_potion_stats": [],
+			"hp": 500,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Genie",
+			"speed": 5.0,
+			"xp": 40
+		},
+		"genie_purple": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.2,
+					"count": 2,
+					"damage_max": 32,
+					"damage_min": 24,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 12.0,
+					"windup": 0.2
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 4,
+			"god_potion_stats": [],
+			"hp": 500,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Genie",
+			"speed": 5.0,
+			"xp": 40
+		},
+		"glacier_hermit": {
+			"aggro": 16.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.2,
+					"count": 2,
+					"damage_max": 190,
+					"damage_min": 170,
+					"magic": false,
+					"pattern": "burst",
+					"speed": 11.0,
+					"windup": 0.7
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 24,
+			"god_potion_stats": [],
+			"hp": 4900,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Glacier Hermit",
+			"speed": 2.4,
+			"xp": 400
+		},
+		"glass_scorpion": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.5,
+					"count": 3,
+					"damage_max": 165,
+					"damage_min": 145,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 18,
+			"god_potion_stats": [
+				"defense"
+			],
+			"hp": 3700,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Glass Scorpion",
+			"speed": 3.4,
+			"xp": 400
+		},
+		"gloam_bat": {
+			"aggro": 12.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.0,
+					"count": 1,
+					"damage_max": 32,
+					"damage_min": 22,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 9.0,
+					"windup": 0.65
+				}
+			],
+			"behavior": "strafe",
+			"defense": 2,
+			"god_potion_stats": [],
+			"hp": 150,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Gloam Bat",
+			"speed": 4.4,
+			"xp": 30
+		},
+		"goblin": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.5,
+					"count": 1,
+					"damage_max": 15,
+					"damage_min": 10,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 11.0,
+					"windup": 0.25
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 0,
+			"god_potion_stats": [],
+			"hp": 75,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Goblin",
+			"speed": 4.2,
+			"xp": 10
+		},
+		"goblin_master": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.9,
+					"count": 3,
+					"damage_max": 25,
+					"damage_min": 15,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 10.0,
+					"windup": 0.4
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 15,
+			"god_potion_stats": [],
+			"hp": 150,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Goblin Master",
+			"speed": 2.8,
+			"xp": 30
+		},
+		"green_dragon": {
+			"aggro": 13.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.4,
+					"count": 1,
+					"damage_max": 55,
+					"damage_min": 55,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 10.0,
+					"windup": 0.35
+				},
+				{
+					"armor_piercing": false,
+					"cooldown": 4.0,
+					"count": 3,
+					"damage_max": 55,
+					"damage_min": 55,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.0,
+					"windup": 0.6
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 12,
+			"god_potion_stats": [],
+			"hp": 1300,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Green Dragon",
+			"speed": 4.4,
+			"xp": 160
+		},
+		"hail_harrier": {
+			"aggro": 16.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.4,
+					"count": 5,
+					"damage_max": 175,
+					"damage_min": 155,
+					"magic": false,
+					"pattern": "sweep",
+					"speed": 11.0,
+					"windup": 0.7
+				}
+			],
+			"behavior": "strafe",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 3400,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Hail Harrier",
+			"speed": 5.1,
+			"xp": 400
+		},
+		"hoarfrost_owl": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.3,
+					"count": 3,
+					"damage_max": 165,
+					"damage_min": 145,
+					"magic": false,
+					"pattern": "sweep",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "strafe",
+			"defense": 10,
+			"god_potion_stats": [
+				"dexterity"
+			],
+			"hp": 3100,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Hoarfrost Owl",
+			"speed": 4.3,
+			"xp": 400
+		},
+		"hollow_crown": {
+			"aggro": 30.0,
+			"attacks": [],
+			"behavior": "stationary",
+			"defense": 18,
+			"god_potion_stats": [],
+			"hp": 46000,
+			"is_boss": true,
+			"is_god": false,
+			"name": "The Hollow Crown",
+			"speed": 4.0,
+			"xp": 4800
+		},
+		"icebound_colossus": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.9,
+					"count": 2,
+					"damage_max": 195,
+					"damage_min": 175,
+					"magic": false,
+					"pattern": "burst",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "chase",
+			"defense": 25,
+			"god_potion_stats": [
+				"hp"
+			],
+			"hp": 5400,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Icebound Colossus",
+			"speed": 2.1,
+			"xp": 400
+		},
+		"mirror_shade": {
+			"aggro": 60.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.8,
+					"count": 2,
+					"damage_max": 55,
+					"damage_min": 40,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 6.5,
+					"windup": 0.5
+				}
+			],
+			"behavior": "stationary",
+			"defense": 8,
+			"god_potion_stats": [],
+			"hp": 1000,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Mirror Shade",
+			"speed": 4.0,
+			"xp": 0
+		},
+		"moss_tortoise": {
+			"aggro": 12.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.6,
+					"count": 3,
+					"damage_max": 40,
+					"damage_min": 30,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.0,
+					"windup": 0.65
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 12,
+			"god_potion_stats": [],
+			"hp": 460,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Moss Tortoise",
+			"speed": 1.8,
+			"xp": 30
+		},
+		"nightbell_idol": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 3.6,
+					"count": 8,
+					"damage_max": 170,
+					"damage_min": 150,
+					"magic": true,
+					"pattern": "ring",
+					"speed": 9.5,
+					"windup": 0.85
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 20,
+			"god_potion_stats": [
+				"mp"
+			],
+			"hp": 4400,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Nightbell Idol",
+			"speed": 2.1,
+			"xp": 400
+		},
+		"obsidian_ram": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.7,
+					"count": 2,
+					"damage_max": 205,
+					"damage_min": 185,
+					"magic": false,
+					"pattern": "burst",
+					"speed": 8.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "chase",
+			"defense": 24,
+			"god_potion_stats": [
+				"defense"
+			],
+			"hp": 5200,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Obsidian Ram",
+			"speed": 3.5,
+			"xp": 500
+		},
+		"pact_ember_mite": {
+			"aggro": 60.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.0,
+					"count": 1,
+					"damage_max": 45,
+					"damage_min": 35,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 7.0,
+					"windup": 0.55
+				}
+			],
+			"behavior": "chase",
+			"defense": 3,
+			"god_potion_stats": [],
+			"hp": 300,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Pact Ember Mite",
+			"speed": 3.5,
+			"xp": 0
+		},
+		"prism_ray": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.2,
+					"count": 3,
+					"damage_max": 165,
+					"damage_min": 145,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "strafe",
+			"defense": 10,
+			"god_potion_stats": [
+				"dexterity"
+			],
+			"hp": 3000,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Prism Ray",
+			"speed": 4.4,
+			"xp": 400
+		},
+		"rime_skitter": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.8,
+					"count": 1,
+					"damage_max": 44,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 10.0,
+					"windup": 0.35
+				}
+			],
+			"behavior": "dart",
+			"defense": 3,
+			"god_potion_stats": [],
+			"hp": 220,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Rime Skitter",
+			"speed": 4.2,
+			"xp": 25
+		},
+		"rime_stag": {
+			"aggro": 16.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.9,
+					"count": 3,
+					"damage_max": 180,
+					"damage_min": 160,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 11.0,
+					"windup": 0.7
+				}
+			],
+			"behavior": "dart",
+			"defense": 12,
+			"god_potion_stats": [],
+			"hp": 3800,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Rime Stag",
+			"speed": 4.6,
+			"xp": 400
+		},
+		"rimeheart_conduit": {
+			"aggro": 60.0,
+			"attacks": [],
+			"behavior": "stationary",
+			"defense": 10,
+			"god_potion_stats": [],
+			"hp": 1200,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Rimeheart Conduit",
+			"speed": 4.0,
+			"xp": 0
+		},
+		"rimeheart_prism": {
+			"aggro": 30.0,
+			"attacks": [],
+			"behavior": "stationary",
+			"defense": 24,
+			"god_potion_stats": [],
+			"hp": 44000,
+			"is_boss": true,
+			"is_god": false,
+			"name": "Rimeheart Prism",
+			"speed": 4.0,
+			"xp": 4500
+		},
+		"rimeheart_shardling": {
+			"aggro": 60.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.5,
+					"count": 1,
+					"damage_max": 45,
+					"damage_min": 35,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 7.0,
+					"windup": 0.4
+				}
+			],
+			"behavior": "dart",
+			"defense": 5,
+			"god_potion_stats": [],
+			"hp": 500,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Rimeheart Shardling",
+			"speed": 3.0,
+			"xp": 0
+		},
+		"ruin_watcher": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.5,
+					"count": 3,
+					"damage_max": 180,
+					"damage_min": 160,
+					"magic": true,
+					"pattern": "burst",
+					"speed": 10.0,
+					"windup": 0.7
+				},
+				{
+					"armor_piercing": false,
+					"cooldown": 5.0,
+					"count": 8,
+					"damage_max": 160,
+					"damage_min": 140,
+					"magic": true,
+					"pattern": "ring",
+					"speed": 7.0,
+					"windup": 0.9
+				}
+			],
+			"behavior": "stationary",
+			"defense": 16,
+			"god_potion_stats": [],
+			"hp": 4200,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Ruin Watcher",
+			"speed": 0.0,
+			"xp": 420
+		},
+		"runic_archivist": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.5,
+					"count": 4,
+					"damage_max": 175,
+					"damage_min": 155,
+					"magic": true,
+					"pattern": "cross",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 16,
+			"god_potion_stats": [
+				"magic"
+			],
+			"hp": 3800,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Runic Archivist",
+			"speed": 2.6,
+			"xp": 400
+		},
+		"sand_scorpion": {
+			"aggro": 9.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.8,
+					"count": 3,
+					"damage_max": 28,
+					"damage_min": 20,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 12.0,
+					"windup": 0.55
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 6,
+			"god_potion_stats": [],
+			"hp": 220,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Sand Scorpion",
+			"speed": 4.6,
+			"xp": 35
+		},
+		"scarab_regent": {
+			"aggro": 30.0,
+			"attacks": [],
+			"behavior": "stationary",
+			"defense": 28,
+			"god_potion_stats": [],
+			"hp": 42000,
+			"is_boss": true,
+			"is_god": false,
+			"name": "Aureate Scarab Regent",
+			"speed": 4.0,
+			"xp": 4500
+		},
+		"slag_seraph": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.8,
+					"count": 5,
+					"damage_max": 185,
+					"damage_min": 165,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 8.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "strafe",
+			"defense": 14,
+			"god_potion_stats": [
+				"attack"
+			],
+			"hp": 3900,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Slag Seraph",
+			"speed": 3.5,
+			"xp": 500
+		},
+		"snow_wisp": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.8,
+					"count": 1,
+					"damage_max": 44,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 10.0,
+					"windup": 0.35
+				}
+			],
+			"behavior": "orbit",
+			"defense": 3,
+			"god_potion_stats": [],
+			"hp": 180,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Snow Wisp",
+			"speed": 4.2,
+			"xp": 25
+		},
+		"spirit_blue": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.25,
+					"count": 1,
+					"damage_max": 175,
+					"damage_min": 165,
+					"magic": false,
+					"pattern": "cross",
+					"speed": 11.0,
+					"windup": 0.4
+				}
+			],
+			"behavior": "spirit",
+			"defense": 12,
+			"god_potion_stats": [],
+			"hp": 4500,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Blue Spirit",
+			"speed": 5.5,
+			"xp": 450
+		},
+		"spirit_brown": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.25,
+					"count": 1,
+					"damage_max": 155,
+					"damage_min": 145,
+					"magic": false,
+					"pattern": "cross",
+					"speed": 11.0,
+					"windup": 0.4
+				}
+			],
+			"behavior": "spirit",
+			"defense": 8,
+			"god_potion_stats": [],
+			"hp": 3000,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Brown Spirit",
+			"speed": 5.0,
+			"xp": 300
+		},
+		"spirit_purple": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 1.25,
+					"count": 1,
+					"damage_max": 195,
+					"damage_min": 185,
+					"magic": false,
+					"pattern": "cross",
+					"speed": 11.0,
+					"windup": 0.4
+				}
+			],
+			"behavior": "spirit",
+			"defense": 16,
+			"god_potion_stats": [],
+			"hp": 6500,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Purple Spirit",
+			"speed": 6.0,
+			"xp": 700
+		},
+		"sporeback": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.1,
+					"count": 3,
+					"damage_max": 34,
+					"damage_min": 26,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 8.5,
+					"windup": 0.6
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 4,
+			"god_potion_stats": [],
+			"hp": 360,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Sporeback",
+			"speed": 2.8,
+			"xp": 40
+		},
+		"star": {
+			"aggro": 12.0,
+			"attacks": [],
+			"behavior": "orbit",
+			"defense": 0,
+			"god_potion_stats": [],
+			"hp": 40,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Star",
+			"speed": 5.0,
+			"xp": 4
+		},
+		"sun_jackal": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.2,
+					"count": 2,
+					"damage_max": 155,
+					"damage_min": 135,
+					"magic": false,
+					"pattern": "burst",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "dart",
+			"defense": 10,
+			"god_potion_stats": [
+				"speed"
+			],
+			"hp": 2900,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Sun Jackal",
+			"speed": 4.6,
+			"xp": 400
+		},
+		"thorn_hopper": {
+			"aggro": 14.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.3,
+					"count": 2,
+					"damage_max": 32,
+					"damage_min": 24,
+					"magic": false,
+					"pattern": "burst",
+					"speed": 12.0,
+					"windup": 0.5
+				}
+			],
+			"behavior": "dart",
+			"defense": 3,
+			"god_potion_stats": [],
+			"hp": 300,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Thorn Hopper",
+			"speed": 4.2,
+			"xp": 35
+		},
+		"tide_snail": {
+			"aggro": 12.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.4,
+					"count": 1,
+					"damage_max": 28,
+					"damage_min": 18,
+					"magic": false,
+					"pattern": "aimed",
+					"speed": 9.0,
+					"windup": 0.65
+				}
+			],
+			"behavior": "skirmish",
+			"defense": 7,
+			"god_potion_stats": [],
+			"hp": 190,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Tide Snail",
+			"speed": 1.5,
+			"xp": 30
+		},
+		"umbral_reaper": {
+			"aggro": 15.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.8,
+					"count": 4,
+					"damage_max": 185,
+					"damage_min": 165,
+					"magic": false,
+					"pattern": "sweep",
+					"speed": 9.5,
+					"windup": 0.7
+				}
+			],
+			"behavior": "spirit",
+			"defense": 16,
+			"god_potion_stats": [
+				"speed"
+			],
+			"hp": 4200,
+			"is_boss": false,
+			"is_god": true,
+			"name": "Umbral Reaper",
+			"speed": 3.8,
+			"xp": 400
+		},
+		"vharok": {
+			"aggro": 30.0,
+			"attacks": [],
+			"behavior": "stationary",
+			"defense": 24,
+			"god_potion_stats": [],
+			"hp": 48000,
+			"is_boss": true,
+			"is_god": false,
+			"name": "Vharok, the Cinder Tyrant",
+			"speed": 4.0,
+			"xp": 5000
+		},
+		"vine_mantis": {
+			"aggro": 12.0,
+			"attacks": [
+				{
+					"armor_piercing": false,
+					"cooldown": 2.2,
+					"count": 2,
+					"damage_max": 42,
+					"damage_min": 32,
+					"magic": false,
+					"pattern": "spread",
+					"speed": 9.0,
+					"windup": 0.65
+				}
+			],
+			"behavior": "dart",
+			"defense": 6,
+			"god_potion_stats": [],
+			"hp": 380,
+			"is_boss": false,
+			"is_god": false,
+			"name": "Vine Mantis",
+			"speed": 3.8,
+			"xp": 30
+		}
+	},
+	"example": {
+		"Bluelay": {
+			"enemies": {
+				"azure_medusa": 7,
+				"blue_dragon": 1,
+				"blue_genie": 3,
+				"genie_brown": 4,
+				"prism_ray": 7,
+				"ruin_watcher": 14,
+				"runic_archivist": 2,
+				"spirit_brown": 1,
+				"star": 22,
+				"tide_snail": 7
+			},
+			"feature_packs": 2,
+			"god_enemies": 34,
+			"packs": {
+				"azure_medusa_pack": 7,
+				"blue_dragon_lair": 1,
+				"blue_genie_pack": 3,
+				"prism_ray_pack": 7,
+				"ruin_watcher_pack": 9,
+				"runic_archivist_pack": 2,
+				"spirit_brown_pack": 1,
+				"tide_snail_pack": 3
+			},
+			"total_enemies": 68,
+			"total_packs": 33
+		},
+		"Deep Desert": {
+			"enemies": {
+				"dune_crawler": 6,
+				"genie_blue": 1,
+				"genie_brown": 8,
+				"spirit_blue": 1,
+				"spirit_brown": 3,
+				"star": 32
+			},
+			"feature_packs": 0,
+			"god_enemies": 4,
+			"packs": {
+				"dune_crawler_pack": 2,
+				"spirit_blue_pack": 1,
+				"spirit_brown_pack": 3
+			},
+			"total_enemies": 51,
+			"total_packs": 6
+		},
+		"Desert": {
+			"enemies": {
+				"dune_crawler": 16,
+				"dune_monolith": 3,
+				"glass_scorpion": 7,
+				"sand_scorpion": 4,
+				"scarab_regent": 1,
+				"sun_jackal": 2
+			},
+			"feature_packs": 1,
+			"god_enemies": 12,
+			"packs": {
+				"dune_crawler_pack": 5,
+				"dune_monolith_pack": 3,
+				"glass_scorpion_pack": 7,
+				"sand_scorpion_pack": 4,
+				"scarab_lair": 1,
+				"sun_jackal_pack": 2
+			},
+			"total_enemies": 33,
+			"total_packs": 22
+		},
+		"Doom": {
+			"enemies": {
+				"basalt_bulwark": 6,
+				"cinder_oracle": 3,
+				"ember_lich": 8,
+				"ember_mite": 42,
+				"furnace_maw": 4,
+				"obsidian_ram": 8,
+				"slag_seraph": 8,
+				"vharok": 1
+			},
+			"feature_packs": 1,
+			"god_enemies": 37,
+			"packs": {
+				"basalt_bulwark_pack": 6,
+				"cinder_oracle_pack": 3,
+				"ember_lich_pack": 8,
+				"ember_mite_pack": 6,
+				"furnace_maw_pack": 4,
+				"obsidian_ram_pack": 8,
+				"slag_seraph_pack": 8,
+				"vharok_lair": 1
+			},
+			"total_enemies": 80,
+			"total_packs": 44
+		},
+		"Fosen": {
+			"enemies": {
+				"aurora_sentinel": 3,
+				"frost_moth": 1,
+				"glacier_hermit": 5,
+				"hail_harrier": 5,
+				"hoarfrost_owl": 6,
+				"icebound_colossus": 4,
+				"rime_skitter": 32,
+				"rime_stag": 8,
+				"rimeheart_prism": 1,
+				"snow_wisp": 19
+			},
+			"feature_packs": 1,
+			"god_enemies": 32,
+			"packs": {
+				"aurora_sentinel_pack": 3,
+				"frost_moth_pack": 1,
+				"glacier_hermit_pack": 5,
+				"hail_harrier_pack": 5,
+				"hoarfrost_owl_pack": 6,
+				"icebound_colossus_pack": 4,
+				"rime_skitter_pack": 1,
+				"rime_stag_pack": 8,
+				"rimeheart_lair": 1,
+				"snow_wisp_pack": 2
+			},
+			"total_enemies": 84,
+			"total_packs": 36
+		},
+		"Jungle": {
+			"enemies": {
+				"green_dragon": 2,
+				"vine_mantis": 2
+			},
+			"feature_packs": 0,
+			"god_enemies": 0,
+			"packs": {
+				"green_dragon_pack": 1,
+				"vine_mantis_pack": 1
+			},
+			"total_enemies": 4,
+			"total_packs": 2
+		},
+		"Shores": {
+			"enemies": {
+				"crab": 44,
+				"tide_snail": 38
+			},
+			"feature_packs": 9,
+			"god_enemies": 0,
+			"packs": {
+				"crab_pack": 9,
+				"tide_snail_pack": 13
+			},
+			"total_enemies": 82,
+			"total_packs": 22
+		},
+		"The Deep Dark": {
+			"enemies": {
+				"amethyst_widow": 6,
+				"bile_bandit": 30,
+				"blue_genie": 2,
+				"gloam_bat": 34,
+				"hollow_crown": 1,
+				"nightbell_idol": 6,
+				"star": 8,
+				"umbral_reaper": 10
+			},
+			"feature_packs": 1,
+			"god_enemies": 24,
+			"packs": {
+				"amethyst_widow_pack": 6,
+				"bile_bandit_patrol": 10,
+				"blue_genie_pack": 2,
+				"gloam_bat_pack": 9,
+				"hollow_crown_lair": 1,
+				"nightbell_idol_pack": 6,
+				"umbral_reaper_pack": 10
+			},
+			"total_enemies": 97,
+			"total_packs": 44
+		},
+		"Woods": {
+			"enemies": {
+				"bramble_fox": 17,
+				"cinder_beetle": 5,
+				"goblin": 74,
+				"goblin_master": 9,
+				"moss_tortoise": 5,
+				"sporeback": 14,
+				"thorn_hopper": 6
+			},
+			"feature_packs": 0,
+			"god_enemies": 0,
+			"packs": {
+				"bramble_fox_pack": 6,
+				"cinder_beetle_pack": 3,
+				"goblin_pack": 12,
+				"moss_tortoise_pack": 3,
+				"sporeback_pack": 5,
+				"thorn_hopper_pack": 3
+			},
+			"total_enemies": 130,
+			"total_packs": 32
+		}
+	},
+	"example_seed": 20261031,
+	"packs": {
+		"amethyst_widow_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "amethyst_widow",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"aurora_sentinel_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "aurora_sentinel",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"azure_medusa_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "azure_medusa",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"basalt_bulwark_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "basalt_bulwark",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "ember_mite",
+					"max": 3,
+					"min": 2
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"bile_bandit_patrol": {
+			"activate_radius": 40.0,
+			"leader": {
+				"enemy": "bile_bandit",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "bile_bandit",
+					"max": 2,
+					"min": 2
+				}
+			],
+			"patrol_radius": 18.0,
+			"respawn_time": 240.0
+		},
+		"black_scorpion_pack": {
+			"activate_radius": 30.0,
+			"members": [
+				{
+					"enemy": "black_scorpion",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": 300.0
+		},
+		"blue_dragon_lair": {
+			"activate_radius": 60.0,
+			"leader": {
+				"enemy": "blue_dragon",
+				"min_members": 0
+			},
+			"members": [],
+			"respawn_time": -1.0
+		},
+		"blue_genie_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "blue_genie",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "star",
+					"max": 6,
+					"min": 3
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"bramble_fox_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "bramble_fox",
+					"max": 3,
+					"min": 2
+				}
+			],
+			"respawn_time": 150.0
+		},
+		"cinder_beetle_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "cinder_beetle",
+					"max": 3,
+					"min": 1
+				}
+			],
+			"respawn_time": 180.0
+		},
+		"cinder_oracle_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "cinder_oracle",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "ember_mite",
+					"max": 3,
+					"min": 2
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"crab_pack": {
+			"activate_radius": 30.0,
+			"members": [
+				{
+					"enemy": "crab",
+					"max": 6,
+					"min": 3
+				}
+			],
+			"respawn_time": 120.0
+		},
+		"dune_crawler_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "dune_crawler",
+					"max": 4,
+					"min": 2
+				}
+			],
+			"respawn_time": 180.0
+		},
+		"dune_monolith_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "dune_monolith",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"ember_lich_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "ember_lich",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"ember_mite_pack": {
+			"activate_radius": 30.0,
+			"members": [
+				{
+					"enemy": "ember_mite",
+					"max": 4,
+					"min": 2
+				}
+			],
+			"respawn_time": 180.0
+		},
+		"frost_moth_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "frost_moth",
+					"max": 2,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"furnace_maw_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "furnace_maw",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"glacier_hermit_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "glacier_hermit",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "rime_skitter",
+					"max": 3,
+					"min": 2
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"glass_scorpion_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "glass_scorpion",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"gloam_bat_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "gloam_bat",
+					"max": 5,
+					"min": 3
+				}
+			],
+			"respawn_time": 150.0
+		},
+		"goblin_pack": {
+			"activate_radius": 34.0,
+			"leader": {
+				"enemy": "goblin_master",
+				"min_members": 4
+			},
+			"members": [
+				{
+					"enemy": "goblin",
+					"max": 10,
+					"min": 3
+				}
+			],
+			"respawn_time": 120.0
+		},
+		"green_dragon_pack": {
+			"activate_radius": 34.0,
+			"members": [
+				{
+					"enemy": "green_dragon",
+					"max": 1,
+					"min": 1
+				},
+				{
+					"chance": 0.3,
+					"enemy": "green_dragon",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": 240.0
+		},
+		"hail_harrier_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "hail_harrier",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "snow_wisp",
+					"max": 3,
+					"min": 2
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"hoarfrost_owl_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "hoarfrost_owl",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"hollow_crown_lair": {
+			"activate_radius": 60.0,
+			"leader": {
+				"enemy": "hollow_crown",
+				"min_members": 0
+			},
+			"members": [],
+			"respawn_time": -1.0
+		},
+		"icebound_colossus_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "icebound_colossus",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"moss_tortoise_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "moss_tortoise",
+					"max": 2,
+					"min": 1
+				}
+			],
+			"respawn_time": 180.0
+		},
+		"nightbell_idol_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "nightbell_idol",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"obsidian_ram_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "obsidian_ram",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"prism_ray_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "prism_ray",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"rime_skitter_pack": {
+			"activate_radius": 30.0,
+			"members": [
+				{
+					"enemy": "rime_skitter",
+					"max": 4,
+					"min": 2
+				}
+			],
+			"respawn_time": 180.0
+		},
+		"rime_stag_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "rime_stag",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "rime_skitter",
+					"max": 3,
+					"min": 2
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"rimeheart_lair": {
+			"activate_radius": 60.0,
+			"leader": {
+				"enemy": "rimeheart_prism",
+				"min_members": 0
+			},
+			"members": [],
+			"respawn_time": -1.0
+		},
+		"ruin_watcher_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "ruin_watcher",
+					"max": 2,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"runic_archivist_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "runic_archivist",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"sand_scorpion_pack": {
+			"activate_radius": 30.0,
+			"members": [
+				{
+					"enemy": "sand_scorpion",
+					"max": 1,
+					"min": 1
+				},
+				{
+					"chance": 0.2,
+					"enemy": "sand_scorpion",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": 150.0
+		},
+		"scarab_lair": {
+			"activate_radius": 60.0,
+			"leader": {
+				"enemy": "scarab_regent",
+				"min_members": 0
+			},
+			"members": [],
+			"respawn_time": -1.0
+		},
+		"slag_seraph_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "slag_seraph",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"snow_wisp_pack": {
+			"activate_radius": 30.0,
+			"members": [
+				{
+					"enemy": "snow_wisp",
+					"max": 4,
+					"min": 2
+				}
+			],
+			"respawn_time": 180.0
+		},
+		"spirit_blue_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "spirit_blue",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "star",
+					"max": 10,
+					"min": 5
+				},
+				{
+					"enemy": "genie_blue",
+					"max": 4,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"spirit_brown_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "spirit_brown",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "star",
+					"max": 10,
+					"min": 5
+				},
+				{
+					"enemy": "genie_brown",
+					"max": 4,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"spirit_purple_pack": {
+			"activate_radius": 36.0,
+			"leader": {
+				"enemy": "spirit_purple",
+				"min_members": 0
+			},
+			"members": [
+				{
+					"enemy": "star",
+					"max": 10,
+					"min": 5
+				},
+				{
+					"enemy": "genie_purple",
+					"max": 4,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"sporeback_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "sporeback",
+					"max": 4,
+					"min": 2
+				}
+			],
+			"respawn_time": 150.0
+		},
+		"sun_jackal_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "sun_jackal",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"thorn_hopper_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "thorn_hopper",
+					"max": 4,
+					"min": 2
+				}
+			],
+			"respawn_time": 150.0
+		},
+		"tide_snail_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "tide_snail",
+					"max": 4,
+					"min": 2
+				}
+			],
+			"respawn_time": 120.0
+		},
+		"umbral_reaper_pack": {
+			"activate_radius": 36.0,
+			"members": [
+				{
+					"enemy": "umbral_reaper",
+					"max": 1,
+					"min": 1
+				}
+			],
+			"respawn_time": -1.0
+		},
+		"vharok_lair": {
+			"activate_radius": 60.0,
+			"leader": {
+				"enemy": "vharok",
+				"min_members": 0
+			},
+			"members": [],
+			"respawn_time": -1.0
+		},
+		"vine_mantis_pack": {
+			"activate_radius": 32.0,
+			"members": [
+				{
+					"enemy": "vine_mantis",
+					"max": 3,
+					"min": 2
+				}
+			],
+			"respawn_time": 180.0
+		}
+	},
+	"spirit_packs": [
+		{
+			"chance": 0.135,
+			"pack": "spirit_brown_pack"
+		},
+		{
+			"chance": 0.036,
+			"pack": "spirit_blue_pack"
+		},
+		{
+			"chance": 0.015,
+			"pack": "spirit_purple_pack"
+		}
+	],
+	"spirit_packs_bluelay": [
+		{
+			"chance": 0.135,
+			"pack": "spirit_brown_pack"
+		},
+		{
+			"chance": 0.06,
+			"pack": "spirit_blue_pack"
+		},
+		{
+			"chance": 0.015,
+			"pack": "spirit_purple_pack"
+		}
+	],
+	"streamed_example": {
+		"Bluelay": {
+			"packs": {
+				"azure_medusa_pack": 7,
+				"blue_dragon_lair": 1,
+				"blue_genie_pack": 3,
+				"prism_ray_pack": 7,
+				"ruin_watcher_pack": 9,
+				"runic_archivist_pack": 2,
+				"spirit_brown_pack": 1,
+				"tide_snail_pack": 3
+			},
+			"total_packs": 33
+		},
+		"Deep Desert": {
+			"packs": {
+				"dune_crawler_pack": 2,
+				"spirit_blue_pack": 1,
+				"spirit_brown_pack": 3
+			},
+			"total_packs": 6
+		},
+		"Desert": {
+			"packs": {
+				"dune_crawler_pack": 5,
+				"dune_monolith_pack": 3,
+				"glass_scorpion_pack": 7,
+				"sand_scorpion_pack": 4,
+				"scarab_lair": 1,
+				"sun_jackal_pack": 2
+			},
+			"total_packs": 22
+		},
+		"Doom": {
+			"packs": {
+				"basalt_bulwark_pack": 6,
+				"cinder_oracle_pack": 3,
+				"ember_lich_pack": 8,
+				"ember_mite_pack": 6,
+				"furnace_maw_pack": 4,
+				"obsidian_ram_pack": 8,
+				"slag_seraph_pack": 8,
+				"vharok_lair": 1
+			},
+			"total_packs": 44
+		},
+		"Fosen": {
+			"packs": {
+				"aurora_sentinel_pack": 3,
+				"frost_moth_pack": 1,
+				"glacier_hermit_pack": 5,
+				"hail_harrier_pack": 5,
+				"hoarfrost_owl_pack": 6,
+				"icebound_colossus_pack": 4,
+				"rime_skitter_pack": 1,
+				"rime_stag_pack": 8,
+				"rimeheart_lair": 1,
+				"snow_wisp_pack": 2
+			},
+			"total_packs": 36
+		},
+		"Jungle": {
+			"packs": {
+				"green_dragon_pack": 1,
+				"vine_mantis_pack": 1
+			},
+			"total_packs": 2
+		},
+		"Shores": {
+			"packs": {
+				"crab_pack": 9,
+				"tide_snail_pack": 13
+			},
+			"total_packs": 22
+		},
+		"The Deep Dark": {
+			"packs": {
+				"amethyst_widow_pack": 6,
+				"bile_bandit_patrol": 10,
+				"blue_genie_pack": 2,
+				"gloam_bat_pack": 9,
+				"hollow_crown_lair": 1,
+				"nightbell_idol_pack": 6,
+				"umbral_reaper_pack": 10
+			},
+			"total_packs": 44
+		},
+		"Woods": {
+			"packs": {
+				"bramble_fox_pack": 6,
+				"cinder_beetle_pack": 3,
+				"goblin_pack": 12,
+				"moss_tortoise_pack": 3,
+				"sporeback_pack": 5,
+				"thorn_hopper_pack": 3
+			},
+			"total_packs": 32
+		}
+	},
+	"streamed_missing": {}
+}

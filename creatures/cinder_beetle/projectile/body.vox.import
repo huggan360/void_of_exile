@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://djeld7weec03g"
+path="res://.godot/imported/body.vox-f83e6b494817dcdc0e2fcbc2cee5ccc0.tscn"
+
+[deps]
+
+source_file="res://creatures/cinder_beetle/projectile/body.vox"
+dest_files=["res://.godot/imported/body.vox-f83e6b494817dcdc0e2fcbc2cee5ccc0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

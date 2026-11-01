@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dd1uka0uhr4jw"
+path="res://.godot/imported/claw_l.vox-f445cd1bee948e41abe04f1c943f44e6.tscn"
+
+[deps]
+
+source_file="res://creatures/glacier_hermit/claw_l.vox"
+dest_files=["res://.godot/imported/claw_l.vox-f445cd1bee948e41abe04f1c943f44e6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

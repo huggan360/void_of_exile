@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b7bbpp6wt32nt"
+path="res://.godot/imported/arm.vox-8f26f3e8f4fa222c7dc7a62e7eb90640.tscn"
+
+[deps]
+
+source_file="res://creatures/sun_priest/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-8f26f3e8f4fa222c7dc7a62e7eb90640.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

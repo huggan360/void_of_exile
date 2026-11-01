@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dcwbp7owpa01w"
+path="res://.godot/imported/body.vox-8fc342ef8924d31e9b1a02f025aac680.tscn"
+
+[deps]
+
+source_file="res://creatures/cinder_cultist/body.vox"
+dest_files=["res://.godot/imported/body.vox-8fc342ef8924d31e9b1a02f025aac680.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

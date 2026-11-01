@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwpl03fdtlpfi"
+path="res://.godot/imported/body.vox-e1e28e7de74a18289bcdb548032dd90f.tscn"
+
+[deps]
+
+source_file="res://creatures/deep_angler/body.vox"
+dest_files=["res://.godot/imported/body.vox-e1e28e7de74a18289bcdb548032dd90f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

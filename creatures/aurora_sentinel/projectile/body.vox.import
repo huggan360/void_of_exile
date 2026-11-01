@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b3cejub7i7rgh"
+path="res://.godot/imported/body.vox-3b156303a5362b718e1ab23816a72c39.tscn"
+
+[deps]
+
+source_file="res://creatures/aurora_sentinel/projectile/body.vox"
+dest_files=["res://.godot/imported/body.vox-3b156303a5362b718e1ab23816a72c39.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

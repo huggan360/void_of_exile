@@ -1,0 +1,73 @@
+{
+  "voxel_size": 0.19,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -5,
+        1,
+        -5
+      ],
+      "frame_size": [
+        10,
+        20,
+        9
+      ],
+      "glow": true
+    },
+    "arm": {
+      "frame_min": [
+        -1,
+        -6,
+        -1
+      ],
+      "frame_size": [
+        2,
+        6,
+        2
+      ]
+    },
+    "weapon": {
+      "frame_min": [
+        -2,
+        -8,
+        -5
+      ],
+      "frame_size": [
+        5,
+        17,
+        6
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm",
+      "pivot": [
+        -4,
+        13,
+        0
+      ],
+      "role": "arm",
+      "phase": -1
+    },
+    "arm_r": {
+      "part": "weapon",
+      "pivot": [
+        4,
+        13,
+        0
+      ],
+      "role": "arm",
+      "phase": 1
+    }
+  },
+  "hand": [
+    3,
+    8,
+    -3
+  ],
+  "bob": 0.035,
+  "waddle": 0.15,
+  "hover": 0
+}

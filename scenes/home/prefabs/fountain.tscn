@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_5wflo"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/fountain.res" id="2_7qs0f"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/fountain_glow.res" id="3_1kf71"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_5wflo")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_5wflo")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d8013"]
+size = Vector3(12.5, 7.5, 12.5)
+
+[node name="Fountain" type="Node3D" unique_id=288560347]
+metadata/voxel_source = "res://props/home/fountain/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1409945479]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -6.25, -0.125, -6.25)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_7qs0f")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=92091086]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -6.25, -0.125, -6.25)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_1kf71")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=1222732734]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=1794262903]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, 0)
+shape = SubResource("BoxShape3D_d8013")

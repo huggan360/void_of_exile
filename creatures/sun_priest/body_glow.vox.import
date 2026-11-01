@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cfafj4mn0v3jn"
+path="res://.godot/imported/body_glow.vox-4b15f7d4ea54a4a775cafd5344d031cc.tscn"
+
+[deps]
+
+source_file="res://creatures/sun_priest/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-4b15f7d4ea54a4a775cafd5344d031cc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

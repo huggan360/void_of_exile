@@ -1,0 +1,144 @@
+{
+  "voxel_size": 0.13,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -6,
+        1,
+        -6
+      ],
+      "frame_size": [
+        13,
+        13,
+        11
+      ],
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        0,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        5,
+        4,
+        2
+      ]
+    },
+    "claw": {
+      "frame_min": [
+        0,
+        0,
+        -6
+      ],
+      "frame_size": [
+        5,
+        2,
+        8
+      ]
+    }
+  },
+  "limbs": {
+    "leg-1_0": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        3,
+        -3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": -1,
+      "yaw": 180
+    },
+    "leg-1_1": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        3,
+        0
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": 1,
+      "yaw": 180
+    },
+    "leg-1_2": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        3,
+        3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": -1,
+      "yaw": 180
+    },
+    "claw-1": {
+      "part": "claw",
+      "pivot": [
+        -4,
+        4,
+        -3
+      ],
+      "role": "arm",
+      "yaw": 180
+    },
+    "leg1_0": {
+      "part": "leg",
+      "pivot": [
+        3,
+        3,
+        -3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": 1,
+      "yaw": 0
+    },
+    "leg1_1": {
+      "part": "leg",
+      "pivot": [
+        3,
+        3,
+        0
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": -1,
+      "yaw": 0
+    },
+    "leg1_2": {
+      "part": "leg",
+      "pivot": [
+        3,
+        3,
+        3
+      ],
+      "role": "leg",
+      "axis": "y",
+      "phase": 1,
+      "yaw": 0
+    },
+    "claw1": {
+      "part": "claw",
+      "pivot": [
+        4,
+        4,
+        -3
+      ],
+      "role": "arm",
+      "yaw": 0
+    }
+  },
+  "hand": [
+    3,
+    8,
+    -3
+  ],
+  "bob": 0.035,
+  "waddle": 0.15,
+  "hover": 0
+}

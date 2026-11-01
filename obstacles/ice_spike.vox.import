@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://m28i4t1jp724"
+path="res://.godot/imported/ice_spike.vox-8fb76c30f265e29054ee47635708636b.tscn"
+
+[deps]
+
+source_file="res://obstacles/ice_spike.vox"
+dest_files=["res://.godot/imported/ice_spike.vox-8fb76c30f265e29054ee47635708636b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

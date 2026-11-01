@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_abuep"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/nature_tree_small.res" id="2_4aaw4"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2lc0o"]
+render_priority = 0
+shader = ExtResource("1_abuep")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_k8dsn"]
+size = Vector3(0.25, 3.5, 0.25)
+
+[node name="TreeSmall" type="Node3D" unique_id=1311782298]
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1686910090]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -1.25, 0, -1)
+material_override = SubResource("ShaderMaterial_2lc0o")
+mesh = ExtResource("2_4aaw4")
+
+[node name="SolidEnvelope" type="StaticBody3D" parent="." unique_id=388156074]
+collision_layer = 2
+collision_mask = 0
+
+[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="SolidEnvelope" unique_id=1328380202]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.125, 1.75, 0.125)
+shape = SubResource("BoxShape3D_k8dsn")

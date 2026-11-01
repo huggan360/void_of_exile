@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://4wytasip20kw"
+path="res://.godot/imported/model.vox-de88adc2b202f4eed15f4bcc5b940978.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/pyre_leaf/model.vox"
+dest_files=["res://.godot/imported/model.vox-de88adc2b202f4eed15f4bcc5b940978.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

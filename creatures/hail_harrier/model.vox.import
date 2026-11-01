@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b70l370fd6s0j"
+path="res://.godot/imported/model.vox-e6c585c17ccd6d3156079398558703fb.tscn"
+
+[deps]
+
+source_file="res://creatures/hail_harrier/model.vox"
+dest_files=["res://.godot/imported/model.vox-e6c585c17ccd6d3156079398558703fb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

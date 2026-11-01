@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b3hqrhoym1fdg"
+path="res://.godot/imported/body_enraged_glow.vox-f36d1655068304c1b235f2818c466704.tscn"
+
+[deps]
+
+source_file="res://creatures/blue_dragon/body_enraged_glow.vox"
+dest_files=["res://.godot/imported/body_enraged_glow.vox-f36d1655068304c1b235f2818c466704.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

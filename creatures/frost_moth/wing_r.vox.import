@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://oy86us6dt1bu"
+path="res://.godot/imported/wing_r.vox-c3511c0d41c54af75e7a986ee3022ccc.tscn"
+
+[deps]
+
+source_file="res://creatures/frost_moth/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-c3511c0d41c54af75e7a986ee3022ccc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

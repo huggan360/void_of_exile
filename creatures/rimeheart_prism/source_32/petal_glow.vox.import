@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bbnecv03r4if7"
+path="res://.godot/imported/petal_glow.vox-87bb57eb747940e97370692da7edef33.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_prism/source_32/petal_glow.vox"
+dest_files=["res://.godot/imported/petal_glow.vox-87bb57eb747940e97370692da7edef33.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

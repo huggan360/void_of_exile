@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bplqmrqlsfurh"
+path="res://.godot/imported/arrow.vox-34966fe36655c62f9c055e1fc1539f66.tscn"
+
+[deps]
+
+source_file="res://characters/archer/arrow.vox"
+dest_files=["res://.godot/imported/arrow.vox-34966fe36655c62f9c055e1fc1539f66.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

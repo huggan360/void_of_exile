@@ -1,0 +1,114 @@
+{
+  "voxel_size": 0.0185,
+  "parts": {
+    "arm": {
+      "frame_min": [
+        -16,
+        -56,
+        -24
+      ],
+      "frame_size": [
+        32,
+        56,
+        40
+      ]
+    },
+    "leg": {
+      "frame_min": [
+        -16,
+        -40,
+        -32
+      ],
+      "frame_size": [
+        32,
+        40,
+        48
+      ]
+    },
+    "body": {
+      "frame_min": [
+        -88,
+        32,
+        -48
+      ],
+      "frame_size": [
+        176,
+        216,
+        88
+      ],
+      "glow": true
+    },
+    "club": {
+      "frame_min": [
+        -32,
+        -72,
+        -48
+      ],
+      "frame_size": [
+        64,
+        120,
+        64
+      ]
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm",
+      "pivot": [
+        -56,
+        152,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0
+    },
+    "arm_r": {
+      "part": "club",
+      "pivot": [
+        56,
+        152,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -32,
+        40,
+        0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        32,
+        40,
+        0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0
+    }
+  },
+  "variants": {},
+  "hand": [
+    56,
+    104,
+    -24
+  ],
+  "hover": 0,
+  "bob": 0.06,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1,
+  "animation_style": "goblin_king"
+}

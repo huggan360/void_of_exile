@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cidy3twcirilk"
+path="res://.godot/imported/body_glow.vox-67c04514ce48c629e33ace157e8a01ce.tscn"
+
+[deps]
+
+source_file="res://props/home/magicians_house/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-67c04514ce48c629e33ace157e8a01ce.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

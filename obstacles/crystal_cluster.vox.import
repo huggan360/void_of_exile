@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cc7j7hbs88uvf"
+path="res://.godot/imported/crystal_cluster.vox-74c5d361eecb9f6964edd050596823d7.tscn"
+
+[deps]
+
+source_file="res://obstacles/crystal_cluster.vox"
+dest_files=["res://.godot/imported/crystal_cluster.vox-74c5d361eecb9f6964edd050596823d7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

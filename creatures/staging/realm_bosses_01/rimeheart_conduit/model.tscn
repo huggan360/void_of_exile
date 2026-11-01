@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_fhhit"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_conduit/meshes/body.res" id="2_ur1jq"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_conduit/meshes/body_glow.res" id="3_50vlx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hf64f"]
+render_priority = 0
+shader = ExtResource("1_fhhit")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u5wij"]
+render_priority = 0
+shader = ExtResource("1_fhhit")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="RimeheartConduitDefault" type="Node3D" unique_id=585591052]
+metadata/status = "art_staging_only"
+metadata/voxel_source = "res://creatures/staging/realm_bosses_01/rimeheart_conduit/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=625599306]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=1073457843]
+transform = Transform3D(0.032, 0, 0, 0, 0.032, 0, 0, 0, 0.032, -0.64000005, -0.032, -0.73600006)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=272096929]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("2_ur1jq")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=807075822]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("3_50vlx")

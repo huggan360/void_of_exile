@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://by27uogf6rme8"
+path="res://.godot/imported/body_glow.vox-d5d008002b5a510d416bb68837253ef0.tscn"
+
+[deps]
+
+source_file="res://props/houses/desert_0/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-d5d008002b5a510d416bb68837253ef0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

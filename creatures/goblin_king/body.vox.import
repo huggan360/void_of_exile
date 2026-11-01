@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cgpr0mdt5ieta"
+path="res://.godot/imported/body.vox-d9eca31a660752b46164ac1c41a89dd7.tscn"
+
+[deps]
+
+source_file="res://creatures/goblin_king/body.vox"
+dest_files=["res://.godot/imported/body.vox-d9eca31a660752b46164ac1c41a89dd7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

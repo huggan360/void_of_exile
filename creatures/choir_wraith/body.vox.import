@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://1x6e1ucbu4i1"
+path="res://.godot/imported/body.vox-8372e106f652db2950974b34c2bdee32.tscn"
+
+[deps]
+
+source_file="res://creatures/choir_wraith/body.vox"
+dest_files=["res://.godot/imported/body.vox-8372e106f652db2950974b34c2bdee32.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

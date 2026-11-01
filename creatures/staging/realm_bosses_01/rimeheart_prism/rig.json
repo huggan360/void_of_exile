@@ -1,0 +1,168 @@
+{
+  "voxel_size": 0.04,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -39,
+        7,
+        -36
+      ],
+      "frame_size": [
+        78,
+        189,
+        72
+      ],
+      "glow": true
+    },
+    "petal": {
+      "frame_min": [
+        -22,
+        -50,
+        -11
+      ],
+      "frame_size": [
+        44,
+        122,
+        89
+      ]
+    },
+    "body_conduit": {
+      "frame_min": [
+        -39,
+        7,
+        -36
+      ],
+      "frame_size": [
+        78,
+        189,
+        72
+      ],
+      "glow": true
+    },
+    "petal_conduit": {
+      "frame_min": [
+        -22,
+        -50,
+        -11
+      ],
+      "frame_size": [
+        44,
+        122,
+        89
+      ],
+      "glow": true
+    },
+    "body_tempest": {
+      "frame_min": [
+        -39,
+        7,
+        -36
+      ],
+      "frame_size": [
+        78,
+        189,
+        72
+      ],
+      "glow": true
+    },
+    "petal_tempest": {
+      "frame_min": [
+        -22,
+        -50,
+        -11
+      ],
+      "frame_size": [
+        44,
+        122,
+        89
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "shard_0": {
+      "part": "petal",
+      "pivot": [
+        0,
+        100,
+        34
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0
+    },
+    "shard_1": {
+      "part": "petal",
+      "pivot": [
+        29,
+        108,
+        17
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 60
+    },
+    "shard_2": {
+      "part": "petal",
+      "pivot": [
+        29,
+        100,
+        -17
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 120
+    },
+    "shard_3": {
+      "part": "petal",
+      "pivot": [
+        0,
+        108,
+        -34
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 180
+    },
+    "shard_4": {
+      "part": "petal",
+      "pivot": [
+        -29,
+        100,
+        -17
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 240
+    },
+    "shard_5": {
+      "part": "petal",
+      "pivot": [
+        -29,
+        108,
+        17
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 300
+    }
+  },
+  "hand": [
+    0,
+    111,
+    -30
+  ],
+  "waddle": 0,
+  "hover": 0.6,
+  "bob": 0.07,
+  "variants": {
+    "conduit": {
+      "body": "body_conduit",
+      "petal": "petal_conduit"
+    },
+    "tempest": {
+      "body": "body_tempest",
+      "petal": "petal_tempest"
+    }
+  }
+}

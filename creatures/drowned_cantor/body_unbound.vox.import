@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://wgc66q0ld65i"
+path="res://.godot/imported/body_unbound.vox-34c67e94b522ff7a3955d2d12c402330.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_cantor/body_unbound.vox"
+dest_files=["res://.godot/imported/body_unbound.vox-34c67e94b522ff7a3955d2d12c402330.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

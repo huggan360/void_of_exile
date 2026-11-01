@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://5vy5rvnyjlus"
+path="res://.godot/imported/arm_r.vox-78d0a69e9449f10048f930d8fd51b82e.tscn"
+
+[deps]
+
+source_file="res://characters/priest/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-78d0a69e9449f10048f930d8fd51b82e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

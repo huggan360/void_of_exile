@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bueyorb6jglw1"
+path="res://.godot/imported/wing_r.vox-ad104050e868ed844f173aedd544255e.tscn"
+
+[deps]
+
+source_file="res://creatures/green_dragon/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-ad104050e868ed844f173aedd544255e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

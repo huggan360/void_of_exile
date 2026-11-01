@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dn2hveeipn2xt"
+path="res://.godot/imported/model.vox-21efc1f339280e7567c34d2c9939cc51.tscn"
+
+[deps]
+
+source_file="res://creatures/rime_skitter/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-21efc1f339280e7567c34d2c9939cc51.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

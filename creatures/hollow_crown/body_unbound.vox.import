@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bujx8ntj53x8r"
+path="res://.godot/imported/body_unbound.vox-35fb0492efdd5788276c55312728e478.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_crown/body_unbound.vox"
+dest_files=["res://.godot/imported/body_unbound.vox-35fb0492efdd5788276c55312728e478.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0g0kvn0ymtbh"
+path="res://.godot/imported/body.vox-050dbf00c17a1a2e464f4f7b9b18aa2b.tscn"
+
+[deps]
+
+source_file="res://creatures/mummy_guard/body.vox"
+dest_files=["res://.godot/imported/body.vox-050dbf00c17a1a2e464f4f7b9b18aa2b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

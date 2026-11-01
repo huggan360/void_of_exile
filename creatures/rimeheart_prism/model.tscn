@@ -1,0 +1,193 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_xn3lk"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_prism/meshes/body.res" id="2_x33ag"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_prism/meshes/body_glow.res" id="3_kudx2"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_prism/meshes/petal.res" id="4_4tulg"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_prism/meshes/petal_glow.res" id="5_of2fi"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pkpij"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p7bfd"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_la7ht"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ve4qi"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_87d72"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7t3oe"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_003ky"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ct7sm"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_autax"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0vm47"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_02rnl"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_57usu"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xbf7l"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pr3x0"]
+render_priority = 0
+shader = ExtResource("1_xn3lk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="RimeheartPrismDefault" type="Node3D" unique_id=1015802783]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/rimeheart_prism/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1549295669]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=1880654696]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 1.28, -1.92)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1739042264]
+material_override = SubResource("ShaderMaterial_pkpij")
+mesh = ExtResource("2_x33ag")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1228450978]
+material_override = SubResource("ShaderMaterial_p7bfd")
+mesh = ExtResource("3_kudx2")
+
+[node name="Shard0" type="Node3D" parent="Rig" unique_id=2071269672]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7999997, 1.5999999)
+
+[node name="Petal" type="Node3D" parent="Rig/Shard0" unique_id=1436528269]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard0/Petal" unique_id=1387498998]
+material_override = SubResource("ShaderMaterial_la7ht")
+mesh = ExtResource("4_4tulg")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard0/Petal" unique_id=1050544858]
+material_override = SubResource("ShaderMaterial_ve4qi")
+mesh = ExtResource("5_of2fi")
+
+[node name="Shard1" type="Node3D" parent="Rig" unique_id=1020580974]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 1.28, 5.12, 0.96)
+
+[node name="Petal" type="Node3D" parent="Rig/Shard1" unique_id=1563662511]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard1/Petal" unique_id=1359743569]
+material_override = SubResource("ShaderMaterial_87d72")
+mesh = ExtResource("4_4tulg")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard1/Petal" unique_id=981974270]
+material_override = SubResource("ShaderMaterial_7t3oe")
+mesh = ExtResource("5_of2fi")
+
+[node name="Shard2" type="Node3D" parent="Rig" unique_id=1575491508]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 1.28, 4.7999997, -0.64)
+
+[node name="Petal" type="Node3D" parent="Rig/Shard2" unique_id=1145289953]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard2/Petal" unique_id=394612247]
+material_override = SubResource("ShaderMaterial_003ky")
+mesh = ExtResource("4_4tulg")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard2/Petal" unique_id=1824841054]
+material_override = SubResource("ShaderMaterial_ct7sm")
+mesh = ExtResource("5_of2fi")
+
+[node name="Shard3" type="Node3D" parent="Rig" unique_id=1919195904]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 5.12, -1.5999999)
+
+[node name="Petal" type="Node3D" parent="Rig/Shard3" unique_id=1275839209]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard3/Petal" unique_id=2143679480]
+material_override = SubResource("ShaderMaterial_autax")
+mesh = ExtResource("4_4tulg")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard3/Petal" unique_id=2115194791]
+material_override = SubResource("ShaderMaterial_0vm47")
+mesh = ExtResource("5_of2fi")
+
+[node name="Shard4" type="Node3D" parent="Rig" unique_id=2068127795]
+transform = Transform3D(-0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, -0.4999999, -1.28, 4.7999997, -0.96)
+
+[node name="Petal" type="Node3D" parent="Rig/Shard4" unique_id=271038136]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard4/Petal" unique_id=1297727329]
+material_override = SubResource("ShaderMaterial_02rnl")
+mesh = ExtResource("4_4tulg")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard4/Petal" unique_id=988960355]
+material_override = SubResource("ShaderMaterial_57usu")
+mesh = ExtResource("5_of2fi")
+
+[node name="Shard5" type="Node3D" parent="Rig" unique_id=486161768]
+transform = Transform3D(0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.4999999, -1.28, 5.12, 0.96)
+
+[node name="Petal" type="Node3D" parent="Rig/Shard5" unique_id=686131076]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard5/Petal" unique_id=1813372629]
+material_override = SubResource("ShaderMaterial_xbf7l")
+mesh = ExtResource("4_4tulg")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard5/Petal" unique_id=910225620]
+material_override = SubResource("ShaderMaterial_pr3x0")
+mesh = ExtResource("5_of2fi")

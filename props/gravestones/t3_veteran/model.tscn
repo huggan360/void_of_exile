@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_slihi"]
+[ext_resource type="ArrayMesh" path="res://props/gravestones/t3_veteran/meshes/body.res" id="2_iaxup"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_46cwk"]
+render_priority = 0
+shader = ExtResource("1_slihi")
+shader_parameter/jitter = 0.035
+shader_parameter/glow_strength = 0.0
+
+[node name="T3Veteran" type="Node3D" unique_id=1592290324]
+metadata/tier = 3.0
+metadata/rank_hint = "Veteran"
+metadata/voxel_source = "res://props/gravestones/t3_veteran/model.vox"
+metadata/status = "art_only"
+
+[node name="CarvedMarker" type="Node3D" parent="." unique_id=1178296022]
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, -0.64, 0, -0.39999998)
+
+[node name="StoneAndWood" type="MeshInstance3D" parent="CarvedMarker" unique_id=1388427540]
+material_override = SubResource("ShaderMaterial_46cwk")
+mesh = ExtResource("2_iaxup")

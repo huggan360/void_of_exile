@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ffhd2qscsg6b"
+path="res://.godot/imported/arm.vox-e80d25d9b3db4432b863e4d06b069c48.tscn"
+
+[deps]
+
+source_file="res://creatures/cave_shaman/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-e80d25d9b3db4432b863e4d06b069c48.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

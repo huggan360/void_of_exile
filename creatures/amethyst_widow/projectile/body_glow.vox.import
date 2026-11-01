@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://crfkdbcntsp27"
+path="res://.godot/imported/body_glow.vox-9964dd34a3e4135f54800897a0f2aba0.tscn"
+
+[deps]
+
+source_file="res://creatures/amethyst_widow/projectile/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-9964dd34a3e4135f54800897a0f2aba0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

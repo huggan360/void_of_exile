@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d0rgqjo3lml6y"
+path="res://.godot/imported/body.vox-07b626cff8eb52e51e4ba94847a78e4c.tscn"
+
+[deps]
+
+source_file="res://creatures/ash_crawler/body.vox"
+dest_files=["res://.godot/imported/body.vox-07b626cff8eb52e51e4ba94847a78e4c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

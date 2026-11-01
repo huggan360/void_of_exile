@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkxqc718gfvjy"
+path="res://.godot/imported/body.vox-c3885080c50d3af91acb5a98b148d948.tscn"
+
+[deps]
+
+source_file="res://creatures/genie_purple/body.vox"
+dest_files=["res://.godot/imported/body.vox-c3885080c50d3af91acb5a98b148d948.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

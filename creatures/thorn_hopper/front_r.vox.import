@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c1tkoq3ju4oio"
+path="res://.godot/imported/front_r.vox-cf8f1a99687e2578f86e211df0757a97.tscn"
+
+[deps]
+
+source_file="res://creatures/thorn_hopper/front_r.vox"
+dest_files=["res://.godot/imported/front_r.vox-cf8f1a99687e2578f86e211df0757a97.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

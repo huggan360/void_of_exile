@@ -1,0 +1,166 @@
+{
+  "voxel_size": 0.04,
+  "parts": {
+    "arm_r": {
+      "frame_min": [
+        0,
+        -80,
+        -40
+      ],
+      "frame_size": [
+        48,
+        96,
+        56
+      ]
+    },
+    "body": {
+      "frame_min": [
+        -56,
+        8,
+        -40
+      ],
+      "frame_size": [
+        112,
+        240,
+        64
+      ],
+      "glow": true
+    },
+    "body_unbound": {
+      "frame_min": [
+        -56,
+        8,
+        -40
+      ],
+      "frame_size": [
+        112,
+        240,
+        64
+      ],
+      "glow": true
+    },
+    "body_fractured": {
+      "frame_min": [
+        -56,
+        8,
+        -40
+      ],
+      "frame_size": [
+        112,
+        240,
+        64
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -48,
+        -80,
+        -40
+      ],
+      "frame_size": [
+        64,
+        96,
+        56
+      ]
+    },
+    "halo_fractured": {
+      "frame_min": [
+        -72,
+        96,
+        32
+      ],
+      "frame_size": [
+        152,
+        152,
+        16
+      ],
+      "glow": true
+    },
+    "halo_unbound": {
+      "frame_min": [
+        -72,
+        96,
+        32
+      ],
+      "frame_size": [
+        152,
+        152,
+        16
+      ],
+      "glow": true
+    },
+    "halo": {
+      "frame_min": [
+        -72,
+        96,
+        32
+      ],
+      "frame_size": [
+        152,
+        152,
+        16
+      ]
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -40,
+        160,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        40,
+        160,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "halo": {
+      "part": "halo",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0
+    }
+  },
+  "variants": {
+    "fractured_court": {
+      "body": "body_fractured",
+      "halo": "halo_fractured"
+    },
+    "unbound": {
+      "body": "body_unbound",
+      "halo": "halo_unbound"
+    }
+  },
+  "hand": [
+    0,
+    136,
+    -40
+  ],
+  "hover": 0.55,
+  "bob": 0.06,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1,
+  "animation_style": "wraith"
+}

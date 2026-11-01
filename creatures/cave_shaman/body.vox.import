@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b7t2gviqjxq7j"
+path="res://.godot/imported/body.vox-1bf8de788eeb8bec6fe19ec07ef4f70b.tscn"
+
+[deps]
+
+source_file="res://creatures/cave_shaman/body.vox"
+dest_files=["res://.godot/imported/body.vox-1bf8de788eeb8bec6fe19ec07ef4f70b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

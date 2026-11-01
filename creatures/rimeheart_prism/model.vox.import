@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0jqvsfp41phk"
+path="res://.godot/imported/model.vox-7cb746a6583a3f498982cf5c6c1c9d23.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_prism/model.vox"
+dest_files=["res://.godot/imported/model.vox-7cb746a6583a3f498982cf5c6c1c9d23.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

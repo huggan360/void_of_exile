@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dav7wbb5fu5q"
+path="res://.godot/imported/body_glow.vox-b4605496cd4adb27b40d9ee6327c6161.tscn"
+
+[deps]
+
+source_file="res://creatures/nightbell_idol/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-b4605496cd4adb27b40d9ee6327c6161.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

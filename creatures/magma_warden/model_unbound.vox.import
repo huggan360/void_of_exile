@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bis2uxd6a0icu"
+path="res://.godot/imported/model_unbound.vox-2a9fce99d8fafd64667d0acb2a3546b5.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/model_unbound.vox"
+dest_files=["res://.godot/imported/model_unbound.vox-2a9fce99d8fafd64667d0acb2a3546b5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

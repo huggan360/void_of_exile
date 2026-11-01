@@ -1,0 +1,174 @@
+{
+  "voxel_size": 0.035,
+  "parts": {
+    "knee_r": {
+      "frame_min": [
+        -16,
+        -48,
+        -32
+      ],
+      "frame_size": [
+        32,
+        56,
+        48
+      ]
+    },
+    "knee_l": {
+      "frame_min": [
+        -16,
+        -48,
+        -32
+      ],
+      "frame_size": [
+        32,
+        56,
+        48
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -24,
+        -56,
+        -24
+      ],
+      "frame_size": [
+        48,
+        72,
+        48
+      ]
+    },
+    "leg_r": {
+      "frame_min": [
+        -16,
+        -40,
+        -24
+      ],
+      "frame_size": [
+        32,
+        48,
+        40
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        -32,
+        -80,
+        -32
+      ],
+      "frame_size": [
+        64,
+        152,
+        56
+      ]
+    },
+    "leg_l": {
+      "frame_min": [
+        -16,
+        -40,
+        -24
+      ],
+      "frame_size": [
+        32,
+        48,
+        40
+      ]
+    },
+    "body": {
+      "frame_min": [
+        -32,
+        96,
+        -32
+      ],
+      "frame_size": [
+        64,
+        160,
+        64
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -48,
+        168,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0
+    },
+    "leg_l": {
+      "part": "leg_l",
+      "pivot": [
+        -16,
+        96,
+        0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0
+    },
+    "knee_l": {
+      "part": "knee_l",
+      "pivot": [
+        0,
+        -40,
+        0
+      ],
+      "role": "knee",
+      "phase": -1,
+      "yaw": 0,
+      "parent_limb": "leg_l"
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        48,
+        168,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0
+    },
+    "leg_r": {
+      "part": "leg_r",
+      "pivot": [
+        16,
+        96,
+        0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0
+    },
+    "knee_r": {
+      "part": "knee_r",
+      "pivot": [
+        0,
+        -40,
+        0
+      ],
+      "role": "knee",
+      "phase": 1,
+      "yaw": 0,
+      "parent_limb": "leg_r"
+    }
+  },
+  "variants": {},
+  "hand": [
+    56,
+    112,
+    -24
+  ],
+  "hover": 0,
+  "bob": 0,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1,
+  "animation_style": "knight"
+}

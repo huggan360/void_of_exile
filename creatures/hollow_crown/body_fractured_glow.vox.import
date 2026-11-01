@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://0b8xliirawpk"
+path="res://.godot/imported/body_fractured_glow.vox-019346cc4160375ed6cff18f452a0b41.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_crown/body_fractured_glow.vox"
+dest_files=["res://.godot/imported/body_fractured_glow.vox-019346cc4160375ed6cff18f452a0b41.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_cx5j3"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_hollow_crown/meshes/body.res" id="2_04w5s"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l84qv"]
+render_priority = 0
+shader = ExtResource("1_cx5j3")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[node name="EggHollowCrownDefault" type="Node3D" unique_id=1309015183]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/egg_hollow_crown/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=46142643]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=1014370363]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 0, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1678036167]
+material_override = SubResource("ShaderMaterial_l84qv")
+mesh = ExtResource("2_04w5s")

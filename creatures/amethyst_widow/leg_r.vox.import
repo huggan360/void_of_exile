@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://5vaan74u3luy"
+path="res://.godot/imported/leg_r.vox-d1358ec68a8a72b04cadcdf2f66f0535.tscn"
+
+[deps]
+
+source_file="res://creatures/amethyst_widow/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-d1358ec68a8a72b04cadcdf2f66f0535.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,25 @@
+{
+  "voxel_size": 0.12,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -6,
+        1,
+        -5
+      ],
+      "frame_size": [
+        12,
+        9,
+        10
+      ]
+    }
+  },
+  "limbs": {},
+  "hand": [
+    3,
+    6,
+    -2
+  ],
+  "bob": 0.04,
+  "waddle": 0.06
+}

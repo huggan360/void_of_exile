@@ -1,0 +1,209 @@
+[
+  {
+    "id": "gilded_vizier",
+    "display_name": "Gilded Vizier",
+    "biome": "Desert",
+    "folder": "creatures/gilded_vizier",
+    "status": "live",
+    "voxel_size": 0.026,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "body_kindled",
+      "body_unbound"
+    ],
+    "variants": [
+      "kindled",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 126360
+      },
+      "kindled": {
+        "file": "model_kindled.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 126360
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 126360
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "magma_warden",
+    "display_name": "Magma Warden",
+    "biome": "Lava",
+    "folder": "creatures/magma_warden",
+    "status": "live",
+    "voxel_size": 0.029,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "body_kindled",
+      "body_unbound"
+    ],
+    "variants": [
+      "kindled",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 154291
+      },
+      "kindled": {
+        "file": "model_kindled.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 154291
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 154291
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "pyre_ent",
+    "display_name": "Pyre Ent",
+    "biome": "Lava",
+    "folder": "creatures/pyre_ent",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "body_kindled",
+      "body_unbound"
+    ],
+    "variants": [
+      "kindled",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 155136
+      },
+      "kindled": {
+        "file": "model_kindled.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 155136
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 155136
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  }
+]

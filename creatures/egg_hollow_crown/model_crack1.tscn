@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_gqtrk"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_hollow_crown/meshes/body_crack1.res" id="2_7cy4r"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_hollow_crown/meshes/body_crack1_glow.res" id="3_abum3"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_15g2w"]
+render_priority = 0
+shader = ExtResource("1_gqtrk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ahw7j"]
+render_priority = 0
+shader = ExtResource("1_gqtrk")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="EggHollowCrownCrack1" type="Node3D" unique_id=1947170898]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/egg_hollow_crown/model_crack1.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1252940322]
+
+[node name="BodyCrack1" type="Node3D" parent="Rig" unique_id=1058967470]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 0, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyCrack1" unique_id=1973463083]
+material_override = SubResource("ShaderMaterial_15g2w")
+mesh = ExtResource("2_7cy4r")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyCrack1" unique_id=400743917]
+material_override = SubResource("ShaderMaterial_ahw7j")
+mesh = ExtResource("3_abum3")

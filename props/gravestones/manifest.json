@@ -1,0 +1,92 @@
+[
+  {
+	"id": "t1_wooden",
+	"tier": 1,
+	"name": "Wooden Marker",
+	"rank_hint": "Novice",
+	"folder": "props/gravestones/t1_wooden",
+	"scene": "props/gravestones/t1_wooden/model.tscn",
+	"size_voxels": [
+	  9,
+	  13,
+	  7
+	],
+	"size_m": [
+	  0.72,
+	  1.04,
+	  0.56
+	]
+  },
+  {
+	"id": "t2_fieldstone",
+	"tier": 2,
+	"name": "Weathered Headstone",
+	"rank_hint": "Adventurer",
+	"folder": "props/gravestones/t2_fieldstone",
+	"scene": "props/gravestones/t2_fieldstone/model.tscn",
+	"size_voxels": [
+	  15,
+	  16,
+	  9
+	],
+	"size_m": [
+	  1.2,
+	  1.28,
+	  0.72
+	]
+  },
+  {
+	"id": "t3_veteran",
+	"tier": 3,
+	"name": "Carved Veteran Grave",
+	"rank_hint": "Veteran",
+	"folder": "props/gravestones/t3_veteran",
+	"scene": "props/gravestones/t3_veteran/model.tscn",
+	"size_voxels": [
+	  17,
+	  21,
+	  10
+	],
+	"size_m": [
+	  1.36,
+	  1.68,
+	  0.8
+	]
+  },
+  {
+	"id": "t4_hero",
+	"tier": 4,
+	"name": "Hero Memorial",
+	"rank_hint": "Hero",
+	"folder": "props/gravestones/t4_hero",
+	"scene": "props/gravestones/t4_hero/model.tscn",
+	"size_voxels": [
+	  19,
+	  25,
+	  11
+	],
+	"size_m": [
+	  1.52,
+	  2.0,
+	  0.88
+	]
+  },
+  {
+	"id": "t5_legend",
+	"tier": 5,
+	"name": "Winged Legend Monument",
+	"rank_hint": "Legend",
+	"folder": "props/gravestones/t5_legend",
+	"scene": "props/gravestones/t5_legend/model.tscn",
+	"size_voxels": [
+	  25,
+	  31,
+	  13
+	],
+	"size_m": [
+	  2.0,
+	  2.48,
+	  1.04
+	]
+  }
+]

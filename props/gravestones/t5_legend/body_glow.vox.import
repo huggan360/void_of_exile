@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bj7slhbxhifxu"
+path="res://.godot/imported/body_glow.vox-6ec9fc119c234884606f4cf64c89f619.tscn"
+
+[deps]
+
+source_file="res://props/gravestones/t5_legend/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-6ec9fc119c234884606f4cf64c89f619.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

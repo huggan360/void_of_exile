@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b837nb30dqsbl"
+path="res://.godot/imported/arm.vox-e10a8110942c69b2d5150455a5b5e1a0.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_imp/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-e10a8110942c69b2d5150455a5b5e1a0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

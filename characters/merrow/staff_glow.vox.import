@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dlvlti7t43p8i"
+path="res://.godot/imported/staff_glow.vox-6f9cbebde80bd79833abdfa3a3d2cf07.tscn"
+
+[deps]
+
+source_file="res://characters/merrow/staff_glow.vox"
+dest_files=["res://.godot/imported/staff_glow.vox-6f9cbebde80bd79833abdfa3a3d2cf07.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

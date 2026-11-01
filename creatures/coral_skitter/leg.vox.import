@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7jtgbqx4qks8"
+path="res://.godot/imported/leg.vox-7b9b1415fc7e7988e017da8b06ebb7f0.tscn"
+
+[deps]
+
+source_file="res://creatures/coral_skitter/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-7b9b1415fc7e7988e017da8b06ebb7f0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

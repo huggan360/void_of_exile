@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://clexfljtey7h4"
+path="res://.godot/imported/model_tempest.vox-59cd4014369daf8999d9a137f4056a2c.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_prism/model_tempest.vox"
+dest_files=["res://.godot/imported/model_tempest.vox-59cd4014369daf8999d9a137f4056a2c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cd4gfj618ah52"
+path="res://.godot/imported/tail.vox-51da044f31f3daea0ba36913f710cd28.tscn"
+
+[deps]
+
+source_file="res://creatures/bramble_fox/tail.vox"
+dest_files=["res://.godot/imported/tail.vox-51da044f31f3daea0ba36913f710cd28.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

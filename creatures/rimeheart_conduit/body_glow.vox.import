@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://brasa1v1x2r5k"
+path="res://.godot/imported/body_glow.vox-8e0491f2aea7a88d3d3f94c3651f6fe6.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_conduit/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-8e0491f2aea7a88d3d3f94c3651f6fe6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

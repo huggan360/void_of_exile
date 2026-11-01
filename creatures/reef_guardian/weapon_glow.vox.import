@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://belno3v7wy7bd"
+path="res://.godot/imported/weapon_glow.vox-6fbb23f0b0dff2ef95c0a4808616fbd4.tscn"
+
+[deps]
+
+source_file="res://creatures/reef_guardian/weapon_glow.vox"
+dest_files=["res://.godot/imported/weapon_glow.vox-6fbb23f0b0dff2ef95c0a4808616fbd4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

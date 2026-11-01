@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ipwtce6r8xv4"
+path="res://.godot/imported/wing_l_glow.vox-3d29dc0e3f3f7a81883146664beb5483.tscn"
+
+[deps]
+
+source_file="res://creatures/aureate_scarab_regent/wing_l_glow.vox"
+dest_files=["res://.godot/imported/wing_l_glow.vox-3d29dc0e3f3f7a81883146664beb5483.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

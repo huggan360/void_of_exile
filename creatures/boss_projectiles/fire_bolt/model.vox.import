@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dt4h578pppwpv"
+path="res://.godot/imported/model.vox-6d98b29f0384d45f7ee28307e945b6bd.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/fire_bolt/model.vox"
+dest_files=["res://.godot/imported/model.vox-6d98b29f0384d45f7ee28307e945b6bd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

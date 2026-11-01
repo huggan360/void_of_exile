@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bclhfv130ff6m"
+path="res://.godot/imported/weapon_glow.vox-f4e938ad1d7775fbe4e139594639dd13.tscn"
+
+[deps]
+
+source_file="res://creatures/cinder_cultist/weapon_glow.vox"
+dest_files=["res://.godot/imported/weapon_glow.vox-f4e938ad1d7775fbe4e139594639dd13.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

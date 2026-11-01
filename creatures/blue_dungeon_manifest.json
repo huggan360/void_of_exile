@@ -1,0 +1,140 @@
+[
+  {
+    "id": "abyssal_siren",
+    "display_name": "Abyssal Siren",
+    "biome": "Bluelay",
+    "folder": "creatures/abyssal_siren",
+    "status": "live",
+    "voxel_size": 0.027,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "body_resonant",
+      "body_unbound"
+    ],
+    "variants": [
+      "resonant",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 116777
+      },
+      "resonant": {
+        "file": "model_resonant.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 116777
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 116777
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "drowned_cantor",
+    "display_name": "Drowned Cantor",
+    "biome": "Bluelay",
+    "folder": "creatures/drowned_cantor",
+    "status": "live",
+    "voxel_size": 0.029,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "body_resonant",
+      "body_unbound"
+    ],
+    "variants": [
+      "resonant",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 155528
+      },
+      "resonant": {
+        "file": "model_resonant.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 155528
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 155528
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  }
+]

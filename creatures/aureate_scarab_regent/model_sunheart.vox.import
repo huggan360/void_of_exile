@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0nyn70wbftr5"
+path="res://.godot/imported/model_sunheart.vox-207f629de34724d511451645f0f7687f.tscn"
+
+[deps]
+
+source_file="res://creatures/aureate_scarab_regent/model_sunheart.vox"
+dest_files=["res://.godot/imported/model_sunheart.vox-207f629de34724d511451645f0f7687f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

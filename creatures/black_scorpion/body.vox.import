@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b7facvvx0hi2c"
+path="res://.godot/imported/body.vox-5e65ac30f15c4bae27403677a5d79f0c.tscn"
+
+[deps]
+
+source_file="res://creatures/black_scorpion/body.vox"
+dest_files=["res://.godot/imported/body.vox-5e65ac30f15c4bae27403677a5d79f0c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bx5sjoa7xwrs7"
+path="res://.godot/imported/model_crack3.vox-d6e045042642984d189bfbb431c88ce9.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_hollow_crown/model_crack3.vox"
+dest_files=["res://.godot/imported/model_crack3.vox-d6e045042642984d189bfbb431c88ce9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

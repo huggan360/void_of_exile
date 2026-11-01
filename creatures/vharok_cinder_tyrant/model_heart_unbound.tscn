@@ -1,0 +1,220 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_fe7ym"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/body_unbound.res" id="2_ek0fo"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/body_unbound_glow.res" id="3_lfiqv"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/arm_l.res" id="4_yla0n"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/leg_l.res" id="5_ik2g0"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/shin_l.res" id="6_tf2go"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/wing_l_unbound.res" id="7_km212"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/wing_l_unbound_glow.res" id="8_3ek8n"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/arm_r.res" id="9_hufw7"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/leg_r.res" id="10_jv7xp"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/shin_r.res" id="11_be4vh"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/wing_r_unbound.res" id="12_yl4wd"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/wing_r_unbound_glow.res" id="13_1rb3r"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/tail.res" id="14_js5uf"]
+[ext_resource type="ArrayMesh" path="res://creatures/vharok_cinder_tyrant/meshes/tail_glow.res" id="15_5f6wp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xbr8v"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g4so4"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5drvg"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vbgnj"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v6icw"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tbce7"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0vvb1"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_18jbo"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l0rmi"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o3r78"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ir55b"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dw6en"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e2vpu"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6gce8"]
+render_priority = 0
+shader = ExtResource("1_fe7ym")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="VharokCinderTyrantHeartUnbound" type="Node3D" unique_id=1978689913]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/vharok_cinder_tyrant/model_heart_unbound.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1943806205]
+
+[node name="BodyUnbound" type="Node3D" parent="Rig" unique_id=1045991085]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -2.56, 2.24, -2.24)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyUnbound" unique_id=1285283142]
+material_override = SubResource("ShaderMaterial_xbr8v")
+mesh = ExtResource("2_ek0fo")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyUnbound" unique_id=1996964241]
+material_override = SubResource("ShaderMaterial_g4so4")
+mesh = ExtResource("3_lfiqv")
+
+[node name="ArmL" type="Node3D" parent="Rig" unique_id=1872896052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.92, 5.7599998, -0.32)
+
+[node name="ArmL" type="Node3D" parent="Rig/ArmL" unique_id=783633111]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.28, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmL/ArmL" unique_id=125295711]
+material_override = SubResource("ShaderMaterial_5drvg")
+mesh = ExtResource("4_yla0n")
+
+[node name="LegL" type="Node3D" parent="Rig" unique_id=2042835588]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.96, 2.56, 0.32)
+
+[node name="LegL" type="Node3D" parent="Rig/LegL" unique_id=607720076]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.96, -1.28, -1.28)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL/LegL" unique_id=186872222]
+material_override = SubResource("ShaderMaterial_vbgnj")
+mesh = ExtResource("5_ik2g0")
+
+[node name="ShinL" type="Node3D" parent="Rig/LegL" unique_id=964047141]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32, -1.28, -0.96)
+
+[node name="ShinL" type="Node3D" parent="Rig/LegL/ShinL" unique_id=112579485]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -1.28, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL/ShinL/ShinL" unique_id=1837433689]
+material_override = SubResource("ShaderMaterial_v6icw")
+mesh = ExtResource("6_tf2go")
+
+[node name="WingL" type="Node3D" parent="Rig" unique_id=1568967482]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5999999, 5.7599998, 0.96)
+
+[node name="WingLUnbound" type="Node3D" parent="Rig/WingL" unique_id=1511596100]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -3.1999998, -2.24, -0.32)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/WingL/WingLUnbound" unique_id=1962722328]
+material_override = SubResource("ShaderMaterial_tbce7")
+mesh = ExtResource("7_km212")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/WingL/WingLUnbound" unique_id=677475964]
+material_override = SubResource("ShaderMaterial_0vvb1")
+mesh = ExtResource("8_3ek8n")
+
+[node name="ArmR" type="Node3D" parent="Rig" unique_id=1616118471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.92, 5.7599998, -0.32)
+
+[node name="ArmR" type="Node3D" parent="Rig/ArmR" unique_id=1803158182]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, 0, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmR/ArmR" unique_id=2132928931]
+material_override = SubResource("ShaderMaterial_18jbo")
+mesh = ExtResource("9_hufw7")
+
+[node name="LegR" type="Node3D" parent="Rig" unique_id=718197187]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.96, 2.56, 0.32)
+
+[node name="LegR" type="Node3D" parent="Rig/LegR" unique_id=555841767]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.32, -1.28, -0.32)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR/LegR" unique_id=1929035261]
+material_override = SubResource("ShaderMaterial_l0rmi")
+mesh = ExtResource("10_jv7xp")
+
+[node name="ShinR" type="Node3D" parent="Rig/LegR" unique_id=548650205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.32, -1.28, 0.32)
+
+[node name="ShinR" type="Node3D" parent="Rig/LegR/ShinR" unique_id=173339463]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -1.28, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR/ShinR/ShinR" unique_id=1984176473]
+material_override = SubResource("ShaderMaterial_o3r78")
+mesh = ExtResource("11_be4vh")
+
+[node name="WingR" type="Node3D" parent="Rig" unique_id=1653620375]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5999999, 5.7599998, 0.96)
+
+[node name="WingRUnbound" type="Node3D" parent="Rig/WingR" unique_id=697829682]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, 0, -2.24, -0.32)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/WingR/WingRUnbound" unique_id=1544237304]
+material_override = SubResource("ShaderMaterial_ir55b")
+mesh = ExtResource("12_yl4wd")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/WingR/WingRUnbound" unique_id=105910804]
+material_override = SubResource("ShaderMaterial_dw6en")
+mesh = ExtResource("13_1rb3r")
+
+[node name="Tail" type="Node3D" parent="Rig" unique_id=1617768853]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.56, 0.96)
+
+[node name="Tail" type="Node3D" parent="Rig/Tail" unique_id=281068130]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, 0, -1.28, 0)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Tail/Tail" unique_id=1566378066]
+material_override = SubResource("ShaderMaterial_e2vpu")
+mesh = ExtResource("14_js5uf")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Tail/Tail" unique_id=698088348]
+material_override = SubResource("ShaderMaterial_6gce8")
+mesh = ExtResource("15_5f6wp")

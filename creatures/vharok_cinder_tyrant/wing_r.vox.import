@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://df62pbd6e480k"
+path="res://.godot/imported/wing_r.vox-8cf32784319cba8cd4249ba7259713a7.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-8cf32784319cba8cd4249ba7259713a7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

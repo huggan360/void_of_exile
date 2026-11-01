@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://60lry04q1eb8"
+path="res://.godot/imported/body_glow.vox-7a442c7c61be88c72672b84fc3acca74.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_champion/source_32/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-7a442c7c61be88c72672b84fc3acca74.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

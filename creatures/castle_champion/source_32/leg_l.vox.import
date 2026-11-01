@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cfiqq8so0ilvp"
+path="res://.godot/imported/leg_l.vox-9fbd3f810b8f7de69facef0c901a23d0.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_champion/source_32/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-9fbd3f810b8f7de69facef0c901a23d0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

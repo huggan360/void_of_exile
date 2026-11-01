@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bu60lvg6t0w5k"
+path="res://.godot/imported/bow.vox-85872fd6cbb731f591c34a4169fb4587.tscn"
+
+[deps]
+
+source_file="res://characters/archer/bow.vox"
+dest_files=["res://.godot/imported/bow.vox-85872fd6cbb731f591c34a4169fb4587.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

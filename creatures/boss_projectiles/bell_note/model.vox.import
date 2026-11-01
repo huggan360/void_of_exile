@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://8y60oq0cp5xb"
+path="res://.godot/imported/model.vox-51be466cdc52731b2e942e228a7ef9ce.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/bell_note/model.vox"
+dest_files=["res://.godot/imported/model.vox-51be466cdc52731b2e942e228a7ef9ce.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

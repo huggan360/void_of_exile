@@ -1,0 +1,307 @@
+{
+  "voxel_size": 0.04,
+  "parts": {
+    "leg_r": {
+      "frame_min": [
+        -8,
+        -32,
+        -8
+      ],
+      "frame_size": [
+        32,
+        48,
+        56
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        0,
+        -80,
+        -40
+      ],
+      "frame_size": [
+        48,
+        112,
+        64
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -32,
+        -80,
+        -40
+      ],
+      "frame_size": [
+        56,
+        112,
+        64
+      ]
+    },
+    "leg_l": {
+      "frame_min": [
+        -24,
+        -32,
+        -32
+      ],
+      "frame_size": [
+        40,
+        48,
+        48
+      ]
+    },
+    "shin_r": {
+      "frame_min": [
+        -16,
+        -32,
+        -16
+      ],
+      "frame_size": [
+        32,
+        32,
+        56
+      ]
+    },
+    "wing_l_unbound": {
+      "frame_min": [
+        -80,
+        -56,
+        -8
+      ],
+      "frame_size": [
+        88,
+        120,
+        16
+      ],
+      "glow": true
+    },
+    "wing_l": {
+      "frame_min": [
+        -80,
+        -56,
+        -8
+      ],
+      "frame_size": [
+        88,
+        120,
+        16
+      ]
+    },
+    "body_infernal": {
+      "frame_min": [
+        -64,
+        56,
+        -56
+      ],
+      "frame_size": [
+        144,
+        184,
+        80
+      ],
+      "glow": true
+    },
+    "body_unbound": {
+      "frame_min": [
+        -64,
+        56,
+        -56
+      ],
+      "frame_size": [
+        144,
+        184,
+        80
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -64,
+        56,
+        -56
+      ],
+      "frame_size": [
+        144,
+        184,
+        80
+      ],
+      "glow": true
+    },
+    "wing_r": {
+      "frame_min": [
+        0,
+        -56,
+        -8
+      ],
+      "frame_size": [
+        88,
+        120,
+        16
+      ]
+    },
+    "wing_r_unbound": {
+      "frame_min": [
+        0,
+        -56,
+        -8
+      ],
+      "frame_size": [
+        88,
+        120,
+        16
+      ],
+      "glow": true
+    },
+    "tail": {
+      "frame_min": [
+        0,
+        -32,
+        0
+      ],
+      "frame_size": [
+        56,
+        48,
+        80
+      ],
+      "glow": true
+    },
+    "shin_l": {
+      "frame_min": [
+        -16,
+        -32,
+        -40
+      ],
+      "frame_size": [
+        32,
+        32,
+        64
+      ]
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -48,
+        144,
+        -8
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l": {
+      "part": "leg_l",
+      "pivot": [
+        -24,
+        64,
+        8
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0
+    },
+    "shin_l": {
+      "part": "shin_l",
+      "pivot": [
+        -8,
+        -32,
+        -24
+      ],
+      "role": "knee",
+      "phase": 1,
+      "yaw": 0,
+      "parent_limb": "leg_l"
+    },
+    "wing_l": {
+      "part": "wing_l",
+      "pivot": [
+        -40,
+        144,
+        24
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        48,
+        144,
+        -8
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r": {
+      "part": "leg_r",
+      "pivot": [
+        24,
+        64,
+        8
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0
+    },
+    "shin_r": {
+      "part": "shin_r",
+      "pivot": [
+        8,
+        -32,
+        8
+      ],
+      "role": "knee",
+      "phase": -1,
+      "yaw": 0,
+      "parent_limb": "leg_r"
+    },
+    "wing_r": {
+      "part": "wing_r",
+      "pivot": [
+        40,
+        144,
+        24
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0
+    },
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        0,
+        64,
+        24
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0
+    }
+  },
+  "variants": {
+    "infernal": {
+      "body": "body_infernal"
+    },
+    "heart_unbound": {
+      "body": "body_unbound",
+      "wing_l": "wing_l_unbound",
+      "wing_r": "wing_r_unbound"
+    }
+  },
+  "hand": [
+    0,
+    120,
+    -48
+  ],
+  "hover": 0,
+  "bob": 0.0,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1,
+  "animation_style": "tyrant"
+}

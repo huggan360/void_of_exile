@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b7o8lsjt7keer"
+path="res://.godot/imported/leg.vox-e1109e7cef2f3fce13fc728a391db07b.tscn"
+
+[deps]
+
+source_file="res://creatures/obsidian_ram/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-e1109e7cef2f3fce13fc728a391db07b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

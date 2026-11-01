@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_auotg"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_shardling/meshes/body.res" id="2_38i43"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_shardling/meshes/body_glow.res" id="3_2ncav"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hf64f"]
+render_priority = 0
+shader = ExtResource("1_auotg")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u5wij"]
+render_priority = 0
+shader = ExtResource("1_auotg")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="RimeheartShardlingDefault" type="Node3D" unique_id=2005771635]
+metadata/status = "art_staging_only"
+metadata/voxel_source = "res://creatures/staging/realm_bosses_01/rimeheart_shardling/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1039443256]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=716936445]
+transform = Transform3D(0.03, 0, 0, 0, 0.03, 0, 0, 0, 0.03, -0.78, 0.12, -0.53999996)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1437165933]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("2_38i43")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=859535639]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("3_2ncav")

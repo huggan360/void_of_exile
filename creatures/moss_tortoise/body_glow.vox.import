@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dg7mm41dm3idd"
+path="res://.godot/imported/body_glow.vox-49cc818b5bcc0bb41272dc8f7d322a3c.tscn"
+
+[deps]
+
+source_file="res://creatures/moss_tortoise/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-49cc818b5bcc0bb41272dc8f7d322a3c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

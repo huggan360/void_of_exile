@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b2dwd1nt2fv6x"
+path="res://.godot/imported/body.vox-9c76991b03dcdf78cc519aea62e11198.tscn"
+
+[deps]
+
+source_file="res://creatures/staging/common_batch_01/thorn_hopper/body.vox"
+dest_files=["res://.godot/imported/body.vox-9c76991b03dcdf78cc519aea62e11198.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

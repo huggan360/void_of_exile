@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://byqt70k2hhps"
+path="res://.godot/imported/ruin_wall.vox-3cfd210d1a4f6c7b6501b11d42f8e651.tscn"
+
+[deps]
+
+source_file="res://obstacles/ruin_wall.vox"
+dest_files=["res://.godot/imported/ruin_wall.vox-3cfd210d1a4f6c7b6501b11d42f8e651.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

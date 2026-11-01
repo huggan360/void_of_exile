@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://buyxisb12vq3j"
+path="res://.godot/imported/ruin_house.vox-af8cd735ee40c4ff5dc38e4dd362ad1d.tscn"
+
+[deps]
+
+source_file="res://obstacles/ruin_house.vox"
+dest_files=["res://.godot/imported/ruin_house.vox-af8cd735ee40c4ff5dc38e4dd362ad1d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

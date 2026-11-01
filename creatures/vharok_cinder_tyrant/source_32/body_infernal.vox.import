@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dpa6pvgu3nc4v"
+path="res://.godot/imported/body_infernal.vox-f5774daa874f2f0737b21b1ee01bd67e.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/source_32/body_infernal.vox"
+dest_files=["res://.godot/imported/body_infernal.vox-f5774daa874f2f0737b21b1ee01bd67e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

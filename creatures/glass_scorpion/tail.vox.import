@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bx0bf6i7bt78i"
+path="res://.godot/imported/tail.vox-5f3dac6703116ae56df0d74b9a1dea80.tscn"
+
+[deps]
+
+source_file="res://creatures/glass_scorpion/tail.vox"
+dest_files=["res://.godot/imported/tail.vox-5f3dac6703116ae56df0d74b9a1dea80.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

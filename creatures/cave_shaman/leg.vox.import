@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b4yialawolv8d"
+path="res://.godot/imported/leg.vox-26fdb06f31727f9c0398f197e1edf652.tscn"
+
+[deps]
+
+source_file="res://creatures/cave_shaman/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-26fdb06f31727f9c0398f197e1edf652.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,120 @@
+class_name DungeonServer
+extends Node
+## Portal lifetimes and travel grants live only on the authoritative server.
+var server: NetServer
+var portals := {}
+var grants := {}
+var _serial := 0
+
+func _process(_delta: float) -> void:
+	for id: String in portals.keys():
+		var portal: Dictionary = portals[id]
+		if not server.realms.has(portal.realm) or (portal.expires > 0.0 and Net.now() >= portal.expires):
+			despawn(id)
+
+func despawn(id: String) -> void:
+	var portal: Dictionary = portals.get(id, {})
+	if portal.is_empty(): return
+	portals.erase(id)
+	server._to_realm(portal.realm, Vector3.INF, ["dng-", id])
+
+## story: a campaign's portal, open until its dungeon's boss falls.
+func spawn(realm_id: String, pos: Vector3, dungeon: String, exit := false, story := false) -> Dictionary:
+	if not server.realms.has(realm_id) or Dungeons.definition(dungeon).is_empty(): return {}
+	if story:
+		pos = Campaigns.open_spot(pos, server.realms[realm_id].world)
+		if pos == Vector3.INF: return {}
+	_serial += 1
+	var portal := {id = "portal_%d" % _serial, realm = realm_id, pos = pos, dungeon = dungeon,
+		exit = exit, expires = -1.0 if exit or story else Net.now() + 30.0, instance = "", story = story}
+	portals[portal.id] = portal
+	server._to_realm(realm_id, Vector3.INF, ["dng+", wire(portal)])
+	return portal
+
+func wire(portal: Dictionary) -> Dictionary:
+	return {id = portal.id, pos = portal.pos, dungeon = portal.dungeon, exit = portal.exit,
+		remaining = -1.0 if portal.expires < 0.0 else maxf(0.0, portal.expires - Net.now())}
+
+func entered(p: Dictionary) -> void:
+	var realm: RealmInstance = server.realms.get(p.realm)
+	if realm and realm.record.has("dungeon"):
+		server._to_peer(p.peer_id, ["dng+", {id = "spawn_exit", pos = realm.world.spawn_point + Vector3(0, 0, 4), dungeon = realm.record.dungeon, exit = true, remaining = -1.0}])
+	for portal: Dictionary in portals.values():
+		if portal.realm == p.realm: server._to_peer(p.peer_id, ["dng+", wire(portal)])
+
+func enemy_killed(realm_id: String, definition: EnemyDef, pos: Vector3) -> void:
+	var realm: RealmInstance = server.realms.get(realm_id)
+	if realm == null: return
+	if realm.record.has("dungeon"):
+		if definition.id == Dungeons.definition(realm.record.dungeon).boss:
+			# A campaign's story portals stay until its whole chain is done.
+			for id: String in portals.keys():
+				if portals[id].instance == realm_id and not portals[id].get("story", false): despawn(id)
+			spawn(realm_id, pos, realm.record.dungeon, true)
+			# Some bosses can open a follow-up (an encore): by chance, or always in a campaign.
+			var follow := str(Dungeons.definition(realm.record.dungeon).get("follow_up", ""))
+			var rule: Variant = definition.get("follow_up")
+			var chance := float(rule.get("chance", 0.5)) if rule is Dictionary else 0.5
+			var campaigns: CampaignServer = server.campaigns if is_instance_valid(server.campaigns) else null
+			if follow != "" and not (campaigns and campaigns.story_dungeon(realm_id)) and randf() < chance:
+				spawn(realm_id, pos + Vector3(4, 0, 0), follow)
+			if campaigns: campaigns.dungeon_cleared(realm_id, pos)
+	elif not definition.portal_drop.is_empty() and randf() < float(definition.portal_drop.chance):
+		spawn(realm_id, pos, str(definition.portal_drop.dungeon))
+
+func interact(p: Dictionary, id: String) -> void:
+	if p.dead or p.switching or not p.joined: return
+	var realm: RealmInstance = server.realms.get(p.realm)
+	if realm == null: return
+	var portal: Dictionary = portals.get(id, {})
+	if id == "spawn_exit" and realm.record.has("dungeon"):
+		portal = {realm = p.realm, pos = realm.world.spawn_point + Vector3(0, 0, 4), expires = -1.0, exit = true}
+	if portal.is_empty() or portal.realm != p.realm: return
+	if portal.expires > 0.0 and Net.now() >= portal.expires: return
+	if (p.pos as Vector3).distance_to(portal.pos) > 4.5: return
+	if portal.exit:
+		var origin: String = realm.record.get("origin", "hall")
+		var back: Vector3 = realm.record.get("origin_pos", Vector3.INF)
+		if not server.realms.has(origin): origin = "hall"
+		grants[p.player_id] = origin
+		# Back out where the portal opened.
+		server.social.send_to(p.player_id, origin, back if server.realms.has(origin) else Vector3.INF)
+		return
+	if portal.instance == "" or not server.realms.has(portal.instance):
+		_serial += 1
+		portal.instance = "dng_%s_%d" % [portal.dungeon, _serial]
+		var record := Dungeons.record(portal.instance, portal.dungeon, randi(), p.realm)
+		record.origin_pos = portal.pos
+		server.open_realm_record(record.id, record)
+	var members: Array = [p.player_id]
+	var party := server.social.party_for(p.player_id)
+	if not party.is_empty():
+		members = party.members.duplicate()
+	var line := "%s led the party into %s" % [p.name, Dungeons.definition(portal.dungeon).name]
+	for player_id: int in members:
+		var other := server.social.record(player_id)
+		if other.is_empty() or not other.joined or other.realm != p.realm or other.dead or other.switching: continue
+		grants[player_id] = portal.instance
+		if not party.is_empty(): server.social.system(player_id, line)
+		server.social.send_to(player_id, portal.instance)
+
+func may_enter(p: Dictionary, destination: String) -> bool:
+	if str(grants.get(p.player_id, "")) != destination: return false
+	grants.erase(p.player_id)
+	return server.realms.has(destination)
+
+
+## Only reached from NetServer's --test action; normal damage/phase handling stays intact.
+func debug_defeat(p: Dictionary) -> void:
+	var realm: RealmInstance = server.realms.get(p.realm)
+	if realm == null or not realm.world is DungeonWorld: return
+	var actor: Boss
+	for enemy: Enemy in realm.enemies.values():
+		if enemy.def.id == realm.world.definition.boss: actor = enemy as Boss
+	if actor == null: return
+	var elapsed := 0.0
+	while is_instance_valid(actor) and actor.is_alive() and elapsed < 25.0:
+		if actor.state == Enemy.State.ACTIVE:
+			actor.take_hit(actor.global_position + Vector3.UP, Vector3.ZERO, 100000, realm.proxies.get(p.player_id))
+		await get_tree().create_timer(0.4).timeout
+		elapsed += 0.4

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://clv6sh0tc5hjd"
+path="res://.godot/imported/model.vox-550031e384113c42d2f98386476a973d.tscn"
+
+[deps]
+
+source_file="res://creatures/moss_tortoise/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-550031e384113c42d2f98386476a973d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

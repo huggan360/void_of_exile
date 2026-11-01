@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ilj6318hvpnf"
+path="res://.godot/imported/obelisk.vox-9eb13aa60c398249cd81d85e14bc865d.tscn"
+
+[deps]
+
+source_file="res://obstacles/obelisk.vox"
+dest_files=["res://.godot/imported/obelisk.vox-9eb13aa60c398249cd81d85e14bc865d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,121 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_4b38t"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_prism/meshes/body_tempest.res" id="2_caw5y"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_prism/meshes/body_tempest_glow.res" id="3_r0fa8"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_prism/meshes/petal_tempest.res" id="4_dmsod"]
+[ext_resource type="ArrayMesh" path="res://creatures/staging/realm_bosses_01/rimeheart_prism/meshes/petal_tempest_glow.res" id="5_ncf5r"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hf64f"]
+render_priority = 0
+shader = ExtResource("1_4b38t")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u5wij"]
+render_priority = 0
+shader = ExtResource("1_4b38t")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="RimeheartPrismTempest" type="Node3D" unique_id=1604781807]
+metadata/status = "art_staging_only"
+metadata/voxel_source = "res://creatures/staging/realm_bosses_01/rimeheart_prism/model_tempest.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1055572344]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="BodyTempest" type="Node3D" parent="Rig" unique_id=1943503490]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.56, 0.28, -1.4399999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyTempest" unique_id=1862494482]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("2_caw5y")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyTempest" unique_id=1583159034]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("3_r0fa8")
+
+[node name="Shard0" type="Node3D" parent="Rig" unique_id=288209606]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 1.36)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard0" unique_id=2011597426]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.88, -2, -0.44)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard0/PetalTempest" unique_id=2115073792]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("4_dmsod")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard0/PetalTempest" unique_id=1030168598]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("5_ncf5r")
+
+[node name="Shard1" type="Node3D" parent="Rig" unique_id=919717961]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 1.16, 4.3199997, 0.68)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard1" unique_id=715665460]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.88, -2, -0.44)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard1/PetalTempest" unique_id=1479574521]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("4_dmsod")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard1/PetalTempest" unique_id=1478499968]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("5_ncf5r")
+
+[node name="Shard2" type="Node3D" parent="Rig" unique_id=792970661]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 1.16, 4, -0.68)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard2" unique_id=2084282887]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.88, -2, -0.44)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard2/PetalTempest" unique_id=789321437]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("4_dmsod")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard2/PetalTempest" unique_id=56149175]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("5_ncf5r")
+
+[node name="Shard3" type="Node3D" parent="Rig" unique_id=2102706833]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 4.3199997, -1.36)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard3" unique_id=430494869]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.88, -2, -0.44)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard3/PetalTempest" unique_id=1879222929]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("4_dmsod")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard3/PetalTempest" unique_id=1320794768]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("5_ncf5r")
+
+[node name="Shard4" type="Node3D" parent="Rig" unique_id=1955384808]
+transform = Transform3D(-0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, -0.4999999, -1.16, 4, -0.68)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard4" unique_id=1568624956]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.88, -2, -0.44)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard4/PetalTempest" unique_id=1605482098]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("4_dmsod")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard4/PetalTempest" unique_id=741336149]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("5_ncf5r")
+
+[node name="Shard5" type="Node3D" parent="Rig" unique_id=611566859]
+transform = Transform3D(0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.4999999, -1.16, 4.3199997, 0.68)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard5" unique_id=86038419]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.88, -2, -0.44)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard5/PetalTempest" unique_id=1094684727]
+material_override = SubResource("ShaderMaterial_hf64f")
+mesh = ExtResource("4_dmsod")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Shard5/PetalTempest" unique_id=1447782706]
+material_override = SubResource("ShaderMaterial_u5wij")
+mesh = ExtResource("5_ncf5r")

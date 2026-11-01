@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cm7s8ya6ur2t"
+path="res://.godot/imported/body.vox-d4bf16369f3670c105c849612be1c7ff.tscn"
+
+[deps]
+
+source_file="res://characters/alchemist/body.vox"
+dest_files=["res://.godot/imported/body.vox-d4bf16369f3670c105c849612be1c7ff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

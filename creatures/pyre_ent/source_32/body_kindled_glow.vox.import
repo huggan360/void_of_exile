@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bm0uucv4vshy5"
+path="res://.godot/imported/body_kindled_glow.vox-8953fe957eb52e7ed51f1137974f5399.tscn"
+
+[deps]
+
+source_file="res://creatures/pyre_ent/source_32/body_kindled_glow.vox"
+dest_files=["res://.godot/imported/body_kindled_glow.vox-8953fe957eb52e7ed51f1137974f5399.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

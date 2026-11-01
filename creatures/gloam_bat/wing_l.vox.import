@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ccqd0barnglle"
+path="res://.godot/imported/wing_l.vox-3c8095f6833dbd8786746daee72e80ac.tscn"
+
+[deps]
+
+source_file="res://creatures/gloam_bat/wing_l.vox"
+dest_files=["res://.godot/imported/wing_l.vox-3c8095f6833dbd8786746daee72e80ac.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

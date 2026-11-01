@@ -1,0 +1,44 @@
+{
+  "default": {
+    "file": "model.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 160703
+  },
+  "sunwings": {
+    "file": "model_sunwings.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 147173
+  },
+  "sunheart": {
+    "file": "model_sunheart.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 147173
+  }
+}

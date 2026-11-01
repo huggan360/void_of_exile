@@ -1,0 +1,16 @@
+{
+  "default": {
+    "file": "model.vox",
+    "frame_min": [
+      -93,
+      9,
+      -78
+    ],
+    "size": [
+      186,
+      182,
+      149
+    ],
+    "voxels": 114512
+  }
+}

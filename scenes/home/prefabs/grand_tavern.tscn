@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_5o2mc"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/grand_tavern.res" id="2_k7g2d"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/grand_tavern_glow.res" id="3_jmsla"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_5o2mc")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_5o2mc")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wxabg"]
+size = Vector3(15.3, 10.8, 11.25)
+
+[node name="GrandTavern" type="Node3D" unique_id=1223768602]
+metadata/voxel_source = "res://props/home/grand_tavern/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1105926005]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -7.375, -0.125, -8)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_k7g2d")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=1025533763]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -7.375, -0.125, -8)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_jmsla")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=1340730870]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=1056062371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.4, 0)
+shape = SubResource("BoxShape3D_wxabg")

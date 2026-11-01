@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bx6p2oqwsaki5"
+path="res://.godot/imported/tail.vox-ed5061dc32cc4de626f01bc2cac3d8cf.tscn"
+
+[deps]
+
+source_file="res://creatures/dragonling_purple/tail.vox"
+dest_files=["res://.godot/imported/tail.vox-ed5061dc32cc4de626f01bc2cac3d8cf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

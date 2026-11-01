@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bmix7qlmy7iah"
+path="res://.godot/imported/leg_l.vox-42ff95c289d7623cf4d153efe8c961c8.tscn"
+
+[deps]
+
+source_file="res://creatures/dawn_scarab/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-42ff95c289d7623cf4d153efe8c961c8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

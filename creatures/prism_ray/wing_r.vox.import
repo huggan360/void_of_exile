@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bprtme2hibdfe"
+path="res://.godot/imported/wing_r.vox-ed2e4e8a3f9793df83c11131faaf6f14.tscn"
+
+[deps]
+
+source_file="res://creatures/prism_ray/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-ed2e4e8a3f9793df83c11131faaf6f14.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

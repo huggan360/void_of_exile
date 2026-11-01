@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c8xv2nkfqxbon"
+path="res://.godot/imported/arm_r.vox-85f0448a80320daad3f24bae8b56e906.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/source_32/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-85f0448a80320daad3f24bae8b56e906.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

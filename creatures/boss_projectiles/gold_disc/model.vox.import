@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://3u47ugdq8hxd"
+path="res://.godot/imported/model.vox-57a0897e593f1e9c9303defad98acc65.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/gold_disc/model.vox"
+dest_files=["res://.godot/imported/model.vox-57a0897e593f1e9c9303defad98acc65.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

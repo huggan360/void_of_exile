@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://64djsf3n1fm3"
+path="res://.godot/imported/leg.vox-b1e7ad65b60cbc41b2923a25a85fd33d.tscn"
+
+[deps]
+
+source_file="res://creatures/rime_stag/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-b1e7ad65b60cbc41b2923a25a85fd33d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

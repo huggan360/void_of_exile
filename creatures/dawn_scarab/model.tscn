@@ -1,0 +1,96 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_2ws3v"]
+[ext_resource type="ArrayMesh" path="res://creatures/dawn_scarab/meshes/body.res" id="2_pydqh"]
+[ext_resource type="ArrayMesh" path="res://creatures/dawn_scarab/meshes/body_glow.res" id="3_n8qtt"]
+[ext_resource type="ArrayMesh" path="res://creatures/dawn_scarab/meshes/leg_r.res" id="4_vrrtn"]
+[ext_resource type="ArrayMesh" path="res://creatures/dawn_scarab/meshes/leg_l.res" id="5_nlw6f"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5as1"]
+render_priority = 0
+shader = ExtResource("1_2ws3v")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4xq7x"]
+render_priority = 0
+shader = ExtResource("1_2ws3v")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="DawnScarabDefault" type="Node3D" unique_id=1425656212]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/dawn_scarab/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1704550069]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=2038736176]
+transform = Transform3D(0.035, 0, 0, 0, 0.035, 0, 0, 0, 0.035, -0.42000002, 0.175, -0.875)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1058339332]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("2_pydqh")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=165333347]
+material_override = SubResource("ShaderMaterial_4xq7x")
+mesh = ExtResource("3_n8qtt")
+
+[node name="LegL0" type="Node3D" parent="Rig" unique_id=41221806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.315, 0.42000002, -0.28)
+
+[node name="LegR" type="Node3D" parent="Rig/LegL0" unique_id=702626454]
+transform = Transform3D(0.035, 0, 0, 0, 0.035, 0, 0, 0, 0.035, -0.105000004, -0.455, -0.105000004)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL0/LegR" unique_id=1430045928]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("4_vrrtn")
+
+[node name="LegR0" type="Node3D" parent="Rig" unique_id=2081156750]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.315, 0.42000002, -0.28)
+
+[node name="LegL" type="Node3D" parent="Rig/LegR0" unique_id=289821686]
+transform = Transform3D(0.035, 0, 0, 0, 0.035, 0, 0, 0, 0.035, -0.385, -0.455, -0.105000004)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR0/LegL" unique_id=1320892038]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("5_nlw6f")
+
+[node name="LegL1" type="Node3D" parent="Rig" unique_id=258145441]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.315, 0.42000002, 0.07)
+
+[node name="LegR" type="Node3D" parent="Rig/LegL1" unique_id=1019632190]
+transform = Transform3D(0.035, 0, 0, 0, 0.035, 0, 0, 0, 0.035, -0.105000004, -0.455, -0.105000004)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL1/LegR" unique_id=2042214211]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("4_vrrtn")
+
+[node name="LegR1" type="Node3D" parent="Rig" unique_id=986525866]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.315, 0.42000002, 0.07)
+
+[node name="LegL" type="Node3D" parent="Rig/LegR1" unique_id=948884300]
+transform = Transform3D(0.035, 0, 0, 0, 0.035, 0, 0, 0, 0.035, -0.385, -0.455, -0.105000004)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR1/LegL" unique_id=122224770]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("5_nlw6f")
+
+[node name="LegL2" type="Node3D" parent="Rig" unique_id=1847650237]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.315, 0.42000002, 0.42000002)
+
+[node name="LegR" type="Node3D" parent="Rig/LegL2" unique_id=1216608856]
+transform = Transform3D(0.035, 0, 0, 0, 0.035, 0, 0, 0, 0.035, -0.105000004, -0.455, -0.105000004)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL2/LegR" unique_id=2128616385]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("4_vrrtn")
+
+[node name="LegR2" type="Node3D" parent="Rig" unique_id=159608370]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.315, 0.42000002, 0.42000002)
+
+[node name="LegL" type="Node3D" parent="Rig/LegR2" unique_id=1229883629]
+transform = Transform3D(0.035, 0, 0, 0, 0.035, 0, 0, 0, 0.035, -0.385, -0.455, -0.105000004)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR2/LegL" unique_id=695474889]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("5_nlw6f")

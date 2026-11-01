@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cr48s3bjdhk7t"
+path="res://.godot/imported/leg.vox-c5b2ff61c625a19a2a37aabb0eba0829.tscn"
+
+[deps]
+
+source_file="res://creatures/vine_mantis/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-c5b2ff61c625a19a2a37aabb0eba0829.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

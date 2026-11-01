@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://8yw308qx7765"
+path="res://.godot/imported/body.vox-5058eb823c8e18c01fa07fb678017c73.tscn"
+
+[deps]
+
+source_file="res://creatures/cinder_sentinel/body.vox"
+dest_files=["res://.godot/imported/body.vox-5058eb823c8e18c01fa07fb678017c73.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

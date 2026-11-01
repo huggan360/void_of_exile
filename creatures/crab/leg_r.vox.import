@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ixut23k44uqb"
+path="res://.godot/imported/leg_r.vox-e6c131cd371aac86a17f63d47646ab89.tscn"
+
+[deps]
+
+source_file="res://creatures/crab/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-e6c131cd371aac86a17f63d47646ab89.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

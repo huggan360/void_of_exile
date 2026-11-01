@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_y3p32"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/blossom_tree.res" id="2_lsfqt"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_y3p32")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_881wx"]
+size = Vector3(1, 4, 1)
+
+[node name="BlossomTree" type="Node3D" unique_id=1123008919]
+metadata/voxel_source = "res://props/home/blossom_tree/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=829485085]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -3.125, -0.125, -3.125)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_lsfqt")
+
+[node name="SolidEnvelope2" type="StaticBody3D" parent="." unique_id=1215222266]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope2" unique_id=1611199354]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("BoxShape3D_881wx")

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://r1f3svn5pgw8"
+path="res://.godot/imported/tail_glow.vox-6b773fc8429ab6b62ee2864c890b9501.tscn"
+
+[deps]
+
+source_file="res://creatures/dragonling_purple/tail_glow.vox"
+dest_files=["res://.godot/imported/tail_glow.vox-6b773fc8429ab6b62ee2864c890b9501.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_wgw8c"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/market.res" id="2_xf3r2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_wgw8c")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ml2wl"]
+size = Vector3(3.5, 3.8, 2.8)
+
+[node name="Market" type="Node3D" unique_id=1035617957]
+metadata/voxel_source = "res://props/town/market/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1149080279]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -2, -0.125, -1.375)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_xf3r2")
+
+[node name="SolidEnvelope2" type="StaticBody3D" parent="." unique_id=127996835]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope2" unique_id=862101654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+shape = SubResource("BoxShape3D_ml2wl")

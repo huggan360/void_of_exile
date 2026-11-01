@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c31vkqcnvpub8"
+path="res://.godot/imported/body_glow.vox-eb4556fc93c7c694a9941fdc8e627b41.tscn"
+
+[deps]
+
+source_file="res://creatures/staging/common_batch_01/frost_moth/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-eb4556fc93c7c694a9941fdc8e627b41.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

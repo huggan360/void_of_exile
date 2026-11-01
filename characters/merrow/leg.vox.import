@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0ds0yy6a57j"
+path="res://.godot/imported/leg.vox-caacab4073e254af621c794784a29743.tscn"
+
+[deps]
+
+source_file="res://characters/merrow/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-caacab4073e254af621c794784a29743.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

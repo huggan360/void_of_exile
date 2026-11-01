@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c031ncncje1ys"
+path="res://.godot/imported/arm.vox-5c32d257c9cd2adc72c94115093d5e43.tscn"
+
+[deps]
+
+source_file="res://creatures/sporeback/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-5c32d257c9cd2adc72c94115093d5e43.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

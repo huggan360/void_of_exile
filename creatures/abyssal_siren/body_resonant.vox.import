@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cyykrotyd8ku4"
+path="res://.godot/imported/body_resonant.vox-b40d78280e5ff3aa6c148b76f70493a4.tscn"
+
+[deps]
+
+source_file="res://creatures/abyssal_siren/body_resonant.vox"
+dest_files=["res://.godot/imported/body_resonant.vox-b40d78280e5ff3aa6c148b76f70493a4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

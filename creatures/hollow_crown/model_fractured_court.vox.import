@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d1wqx0jvx05t3"
+path="res://.godot/imported/model_fractured_court.vox-73502927bd8086982e08003cf08792b4.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_crown/model_fractured_court.vox"
+dest_files=["res://.godot/imported/model_fractured_court.vox-73502927bd8086982e08003cf08792b4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

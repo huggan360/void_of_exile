@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b1kqoji80yoan"
+path="res://.godot/imported/arm.vox-89e3bb6901e8cbe2e04a75929369f52a.tscn"
+
+[deps]
+
+source_file="res://creatures/reef_guardian/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-89e3bb6901e8cbe2e04a75929369f52a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bk8dtw7lobyp4"
+path="res://.godot/imported/body_crack1_glow.vox-39f3c5acb3217e9943272e8071cb107c.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_hollow_crown/body_crack1_glow.vox"
+dest_files=["res://.godot/imported/body_crack1_glow.vox-39f3c5acb3217e9943272e8071cb107c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://myq1vgedkj2q"
+path="res://.godot/imported/wing_l.vox-8cb52c86cd6550a874681f0b3a57b33e.tscn"
+
+[deps]
+
+source_file="res://creatures/hail_harrier/wing_l.vox"
+dest_files=["res://.godot/imported/wing_l.vox-8cb52c86cd6550a874681f0b3a57b33e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

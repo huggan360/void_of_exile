@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bcpve5ivgnqnn"
+path="res://.godot/imported/arm_l.vox-31d2501a1835b6e9e37c5f7ac919cfc2.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_champion/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-31d2501a1835b6e9e37c5f7ac919cfc2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bsoyscsmsgifp"
+path="res://.godot/imported/arm.vox-aba4dd9c76e508454361becde2d04ef6.tscn"
+
+[deps]
+
+source_file="res://creatures/lava_golem/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-aba4dd9c76e508454361becde2d04ef6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

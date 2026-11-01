@@ -1,0 +1,46 @@
+{
+  "name": "Ruin Watcher",
+  "biome": "Bluelay ruins",
+  "role": "Small floating stone sentry",
+  "hp": 135,
+  "defense": 6,
+  "xp": 26,
+  "behavior": "stationary",
+  "move_speed": 0,
+  "keep_distance": 7.0,
+  "body_height": 1.6,
+  "hit_radius": 0.6,
+  "attack": {
+    "style": "orb",
+    "pattern": "aimed",
+    "count": 1,
+    "damage_min": 14,
+    "damage_max": 20,
+    "speed": 8.5,
+    "range": 11,
+    "size": 0.65,
+    "cooldown": 2.4,
+    "windup": 0.7,
+    "root": true,
+    "recover": 0.4,
+    "from_hand": true,
+    "magic": true,
+    "color": [
+      0.31,
+      0.76,
+      0.85
+    ]
+  },
+  "telegraph": "The single recessed cyan eye is the projectile origin; long visible attack pause.",
+  "counterplay": "Slow stationary target, single orb, no teleport, summons, shield, or boss phases.",
+  "projectile": "Small rune orb with the existing magic halo; no impact ripple.",
+  "status": "ACTIVE_REALM_ENEMY",
+  "model": "ruin_watcher",
+  "model_scale": 1.0,
+  "spawn_anim": "pop",
+  "suggested_pack_size": [
+    2,
+    4
+  ],
+  "notes": "Live stats and loot are defined in scripts/enemies/enemies.gd; staged design values are authoring references."
+}

@@ -1,0 +1,44 @@
+{
+  "default": {
+    "file": "model.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 91265
+  },
+  "conduit": {
+    "file": "model_conduit.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 83552
+  },
+  "tempest": {
+    "file": "model_tempest.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 82410
+  }
+}

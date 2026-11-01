@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dt16ccp4dd028"
+path="res://.godot/imported/burnt_tree.vox-2b10a8e89e23df60f0f08e81cd2357e4.tscn"
+
+[deps]
+
+source_file="res://obstacles/burnt_tree.vox"
+dest_files=["res://.godot/imported/burnt_tree.vox-2b10a8e89e23df60f0f08e81cd2357e4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

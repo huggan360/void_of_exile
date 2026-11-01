@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dpq0ubkf6kt5v"
+path="res://.godot/imported/body_glow.vox-6af5e972b7347c2f2a4d518ebd77579c.tscn"
+
+[deps]
+
+source_file="res://creatures/choir_wraith/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-6af5e972b7347c2f2a4d518ebd77579c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

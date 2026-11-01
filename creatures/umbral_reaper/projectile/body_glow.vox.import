@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cl61x5ftsk6bd"
+path="res://.godot/imported/body_glow.vox-2a19706d4bc53a51901952869eec0fd6.tscn"
+
+[deps]
+
+source_file="res://creatures/umbral_reaper/projectile/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-2a19706d4bc53a51901952869eec0fd6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dxqexiv65itr2"
+path="res://.godot/imported/model.vox-4146b58dcf932a9365256686e8d9cefe.tscn"
+
+[deps]
+
+source_file="res://creatures/rime_stag/model.vox"
+dest_files=["res://.godot/imported/model.vox-4146b58dcf932a9365256686e8d9cefe.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

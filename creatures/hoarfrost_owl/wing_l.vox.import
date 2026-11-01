@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cx1gt272tw87q"
+path="res://.godot/imported/wing_l.vox-0875cd47e18e50618c03c19fa4db9236.tscn"
+
+[deps]
+
+source_file="res://creatures/hoarfrost_owl/wing_l.vox"
+dest_files=["res://.godot/imported/wing_l.vox-0875cd47e18e50618c03c19fa4db9236.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

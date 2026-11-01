@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnaf83nborn2c"
+path="res://.godot/imported/arm_glow.vox-3b72088b1a28f6a32f8171ce5b8a4608.tscn"
+
+[deps]
+
+source_file="res://creatures/cinder_sapling/arm_glow.vox"
+dest_files=["res://.godot/imported/arm_glow.vox-3b72088b1a28f6a32f8171ce5b8a4608.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

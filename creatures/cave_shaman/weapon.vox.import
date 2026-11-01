@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bhhojj7km4gax"
+path="res://.godot/imported/weapon.vox-eefa583ec083f910b5867eed2e1651b5.tscn"
+
+[deps]
+
+source_file="res://creatures/cave_shaman/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-eefa583ec083f910b5867eed2e1651b5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

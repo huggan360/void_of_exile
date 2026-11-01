@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dawe5oichj6k0"
+path="res://.godot/imported/body.vox-e1b7f9cc492d6b7f46c5d57419fa7f37.tscn"
+
+[deps]
+
+source_file="res://creatures/tomb_scarab/body.vox"
+dest_files=["res://.godot/imported/body.vox-e1b7f9cc492d6b7f46c5d57419fa7f37.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

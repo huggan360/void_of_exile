@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://tpmjhqeujlf0"
+path="res://.godot/imported/body.vox-5343d9071626ad3f8ee3f0777eca0d74.tscn"
+
+[deps]
+
+source_file="res://creatures/hoarfrost_owl/projectile/body.vox"
+dest_files=["res://.godot/imported/body.vox-5343d9071626ad3f8ee3f0777eca0d74.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

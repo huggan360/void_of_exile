@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d0pb0c0oqcx7l"
+path="res://.godot/imported/body.vox-5389151c183a2f8c5ef550a90418859f.tscn"
+
+[deps]
+
+source_file="res://creatures/glacier_hermit/body.vox"
+dest_files=["res://.godot/imported/body.vox-5389151c183a2f8c5ef550a90418859f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

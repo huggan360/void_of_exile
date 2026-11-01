@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bqcboi6oxeque"
+path="res://.godot/imported/weapon_glow.vox-21cfc353e1f09b3ad3c80dd3aa5b4650.tscn"
+
+[deps]
+
+source_file="res://creatures/sand_imp/weapon_glow.vox"
+dest_files=["res://.godot/imported/weapon_glow.vox-21cfc353e1f09b3ad3c80dd3aa5b4650.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

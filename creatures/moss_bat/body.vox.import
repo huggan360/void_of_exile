@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bodw7a4dxohlc"
+path="res://.godot/imported/body.vox-11d8318bf9115cf85c24c39e57283f95.tscn"
+
+[deps]
+
+source_file="res://creatures/moss_bat/body.vox"
+dest_files=["res://.godot/imported/body.vox-11d8318bf9115cf85c24c39e57283f95.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

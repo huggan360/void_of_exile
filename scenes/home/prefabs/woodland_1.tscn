@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_dw3hr"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/woodland_1.res" id="2_wl244"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/woodland_1_glow.res" id="3_cr6l3"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_dw3hr")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_dw3hr")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mt00r"]
+size = Vector3(8.5, 9, 9)
+
+[node name="Woodland1" type="Node3D" unique_id=1977457860]
+metadata/voxel_source = "res://props/houses/woodland_1/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1614219415]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.125, -0.125, -5.375)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_wl244")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=334922337]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.125, -0.125, -5.375)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_cr6l3")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=1843945687]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=1960280907]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+shape = SubResource("BoxShape3D_mt00r")

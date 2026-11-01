@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d2j31c1sx3bs2"
+path="res://.godot/imported/leg_r.vox-5b1cf9cca74291dad3d694d10501ab08.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_king/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-5b1cf9cca74291dad3d694d10501ab08.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,84 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_ydowd"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/nature_pine.res" id="2_ayrc4"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2lc0o"]
+render_priority = 0
+shader = ExtResource("1_ydowd")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2l0v7"]
+size = Vector3(1.5, 6.5, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_udaay"]
+size = Vector3(0.25, 6.5, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6k0eg"]
+size = Vector3(0.25, 6.5, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7auv8"]
+size = Vector3(0.25, 6.5, 2.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nmsb4"]
+size = Vector3(0.25, 6.5, 2.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_w65n2"]
+size = Vector3(0.25, 6.5, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1o10a"]
+size = Vector3(0.25, 6.5, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_w10lk"]
+size = Vector3(0.25, 6.5, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_n0bsb"]
+size = Vector3(0.25, 6.5, 1.5)
+
+[node name="Pine" type="Node3D" unique_id=476448565]
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1794441457]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -1.75, 0, -1.75)
+material_override = SubResource("ShaderMaterial_2lc0o")
+mesh = ExtResource("2_ayrc4")
+
+[node name="SolidEnvelope" type="StaticBody3D" parent="." unique_id=1553228176]
+collision_layer = 2
+collision_mask = 0
+
+[node name="@CollisionShape3D@9" type="CollisionShape3D" parent="SolidEnvelope" unique_id=479226358]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.25, 0)
+shape = SubResource("BoxShape3D_2l0v7")
+
+[node name="@CollisionShape3D@10" type="CollisionShape3D" parent="SolidEnvelope" unique_id=870130674]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.875, 3.25, 0)
+shape = SubResource("BoxShape3D_udaay")
+
+[node name="@CollisionShape3D@11" type="CollisionShape3D" parent="SolidEnvelope" unique_id=52114443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.875, 3.25, 0)
+shape = SubResource("BoxShape3D_6k0eg")
+
+[node name="@CollisionShape3D@12" type="CollisionShape3D" parent="SolidEnvelope" unique_id=21776061]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.125, 3.25, 0)
+shape = SubResource("BoxShape3D_7auv8")
+
+[node name="@CollisionShape3D@13" type="CollisionShape3D" parent="SolidEnvelope" unique_id=8736107]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.125, 3.25, 0)
+shape = SubResource("BoxShape3D_nmsb4")
+
+[node name="@CollisionShape3D@14" type="CollisionShape3D" parent="SolidEnvelope" unique_id=1754326065]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, 3.25, 0)
+shape = SubResource("BoxShape3D_w65n2")
+
+[node name="@CollisionShape3D@15" type="CollisionShape3D" parent="SolidEnvelope" unique_id=757668668]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.375, 3.25, 0)
+shape = SubResource("BoxShape3D_1o10a")
+
+[node name="@CollisionShape3D@16" type="CollisionShape3D" parent="SolidEnvelope" unique_id=954902909]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.625, 3.25, 0)
+shape = SubResource("BoxShape3D_w10lk")
+
+[node name="@CollisionShape3D@17" type="CollisionShape3D" parent="SolidEnvelope" unique_id=1149298307]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.625, 3.25, 0)
+shape = SubResource("BoxShape3D_n0bsb")

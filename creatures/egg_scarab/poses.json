@@ -1,0 +1,58 @@
+{
+  "default": {
+    "file": "model.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 49205
+  },
+  "crack1": {
+    "file": "model_crack1.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 49205
+  },
+  "crack2": {
+    "file": "model_crack2.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 49205
+  },
+  "crack3": {
+    "file": "model_crack3.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 49205
+  }
+}

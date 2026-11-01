@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://q75opk8poby6"
+path="res://.godot/imported/body_crack2.vox-a165f38ae1400812c0f7b1b4edf6163e.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_rimeheart/body_crack2.vox"
+dest_files=["res://.godot/imported/body_crack2.vox-a165f38ae1400812c0f7b1b4edf6163e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

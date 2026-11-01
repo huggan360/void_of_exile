@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ckdhw3xmekvd3"
+path="res://.godot/imported/weapon.vox-92c70a25ab5b0f5bc179c853bfa0457a.tscn"
+
+[deps]
+
+source_file="res://creatures/goblin_warlord/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-92c70a25ab5b0f5bc179c853bfa0457a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

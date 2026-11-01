@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://props/gravestones/t1_wooden/model.tscn" id="1_jxwuc"]
+[ext_resource type="PackedScene" path="res://props/gravestones/t2_fieldstone/model.tscn" id="2_i612y"]
+[ext_resource type="PackedScene" path="res://props/gravestones/t3_veteran/model.tscn" id="3_mepsw"]
+[ext_resource type="PackedScene" path="res://props/gravestones/t4_hero/model.tscn" id="4_n5jxi"]
+[ext_resource type="PackedScene" path="res://props/gravestones/t5_legend/model.tscn" id="5_usjl0"]
+
+[node name="GravestoneTiers" type="Node3D" unique_id=1619868254]
+metadata/status = "art_only"
+
+[node name="T1Wooden" type="Node3D" parent="." unique_id=46400636 instance=ExtResource("1_jxwuc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4, 0, 0)
+metadata/tier = 1.0
+metadata/rank_hint = "Novice"
+metadata/voxel_source = "res://props/gravestones/t1_wooden/model.vox"
+metadata/status = "art_only"
+
+[node name="T2Fieldstone" type="Node3D" parent="." unique_id=1948091611 instance=ExtResource("2_i612y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7, 0, 0)
+metadata/tier = 2.0
+metadata/rank_hint = "Adventurer"
+metadata/voxel_source = "res://props/gravestones/t2_fieldstone/model.vox"
+metadata/status = "art_only"
+
+[node name="T3Veteran" type="Node3D" parent="." unique_id=1592290324 instance=ExtResource("3_mepsw")]
+metadata/tier = 3.0
+metadata/rank_hint = "Veteran"
+metadata/voxel_source = "res://props/gravestones/t3_veteran/model.vox"
+metadata/status = "art_only"
+
+[node name="T4Hero" type="Node3D" parent="." unique_id=103369774 instance=ExtResource("4_n5jxi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7, 0, 0)
+metadata/tier = 4.0
+metadata/rank_hint = "Hero"
+metadata/voxel_source = "res://props/gravestones/t4_hero/model.vox"
+metadata/status = "art_only"
+
+[node name="T5Legend" type="Node3D" parent="." unique_id=1513484107 instance=ExtResource("5_usjl0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4, 0, 0)
+metadata/tier = 5.0
+metadata/rank_hint = "Legend"
+metadata/voxel_source = "res://props/gravestones/t5_legend/model.vox"
+metadata/status = "art_only"

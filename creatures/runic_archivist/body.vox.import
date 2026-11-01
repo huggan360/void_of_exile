@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ookxl3bdwjlg"
+path="res://.godot/imported/body.vox-2a93be80b256a9ed5f54c17c3820b38c.tscn"
+
+[deps]
+
+source_file="res://creatures/runic_archivist/body.vox"
+dest_files=["res://.godot/imported/body.vox-2a93be80b256a9ed5f54c17c3820b38c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dkndg614s8km6"
+path="res://.godot/imported/wing_l_glow.vox-f7f8ee1ab55449d21a5accea4a13049c.tscn"
+
+[deps]
+
+source_file="res://creatures/frost_moth/wing_l_glow.vox"
+dest_files=["res://.godot/imported/wing_l_glow.vox-f7f8ee1ab55449d21a5accea4a13049c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

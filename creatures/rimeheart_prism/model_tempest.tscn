@@ -1,0 +1,132 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_4k4j7"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_prism/meshes/body_tempest.res" id="2_fkb68"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_prism/meshes/body_tempest_glow.res" id="3_2r0nc"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_prism/meshes/petal_tempest.res" id="4_roc81"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_edmk0"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7ijdy"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hbiqy"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uqktu"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dipif"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b16pc"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hhgf2"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ed0dn"]
+render_priority = 0
+shader = ExtResource("1_4k4j7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[node name="RimeheartPrismTempest" type="Node3D" unique_id=29325252]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/rimeheart_prism/model_tempest.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=7759699]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="BodyTempest" type="Node3D" parent="Rig" unique_id=1118307274]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 1.28, -1.92)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyTempest" unique_id=397520151]
+material_override = SubResource("ShaderMaterial_edmk0")
+mesh = ExtResource("2_fkb68")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyTempest" unique_id=582737268]
+material_override = SubResource("ShaderMaterial_7ijdy")
+mesh = ExtResource("3_2r0nc")
+
+[node name="Shard0" type="Node3D" parent="Rig" unique_id=992099389]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7999997, 1.5999999)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard0" unique_id=1722963051]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard0/PetalTempest" unique_id=974487084]
+material_override = SubResource("ShaderMaterial_hbiqy")
+mesh = ExtResource("4_roc81")
+
+[node name="Shard1" type="Node3D" parent="Rig" unique_id=1131468124]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 1.28, 5.12, 0.96)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard1" unique_id=2122882151]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard1/PetalTempest" unique_id=1165664932]
+material_override = SubResource("ShaderMaterial_uqktu")
+mesh = ExtResource("4_roc81")
+
+[node name="Shard2" type="Node3D" parent="Rig" unique_id=1931658459]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 1.28, 4.7999997, -0.64)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard2" unique_id=918620683]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard2/PetalTempest" unique_id=1648093833]
+material_override = SubResource("ShaderMaterial_dipif")
+mesh = ExtResource("4_roc81")
+
+[node name="Shard3" type="Node3D" parent="Rig" unique_id=1350195471]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 5.12, -1.5999999)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard3" unique_id=513822261]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard3/PetalTempest" unique_id=2141280474]
+material_override = SubResource("ShaderMaterial_b16pc")
+mesh = ExtResource("4_roc81")
+
+[node name="Shard4" type="Node3D" parent="Rig" unique_id=566159114]
+transform = Transform3D(-0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, -0.4999999, -1.28, 4.7999997, -0.96)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard4" unique_id=496228043]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard4/PetalTempest" unique_id=486138679]
+material_override = SubResource("ShaderMaterial_hhgf2")
+mesh = ExtResource("4_roc81")
+
+[node name="Shard5" type="Node3D" parent="Rig" unique_id=359091207]
+transform = Transform3D(0.4999999, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.4999999, -1.28, 5.12, 0.96)
+
+[node name="PetalTempest" type="Node3D" parent="Rig/Shard5" unique_id=578528424]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -0.64, -2.24, -0.64)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Shard5/PetalTempest" unique_id=1535281746]
+material_override = SubResource("ShaderMaterial_ed0dn")
+mesh = ExtResource("4_roc81")

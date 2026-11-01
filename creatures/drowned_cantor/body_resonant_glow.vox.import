@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cqstevba2gkqw"
+path="res://.godot/imported/body_resonant_glow.vox-e162b3d5e9589bc6ae4d58f95fc44d3a.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_cantor/body_resonant_glow.vox"
+dest_files=["res://.godot/imported/body_resonant_glow.vox-e162b3d5e9589bc6ae4d58f95fc44d3a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

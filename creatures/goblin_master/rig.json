@@ -1,0 +1,65 @@
+{
+ "voxel_size": 0.1125,
+ "parts": {
+  "body": {
+   "frame_min": [
+    -8,
+    0,
+    -6
+   ]
+  },
+  "arm": {
+   "frame_min": [
+    -1,
+    -6,
+    -1
+   ]
+  },
+  "leg": {
+   "frame_min": [
+    -1,
+    -4,
+    -2
+   ]
+  }
+ },
+ "limbs": {
+  "arm_l": {
+   "part": "arm",
+   "pivot": [
+    -6,
+    9,
+    0
+   ]
+  },
+  "arm_r": {
+   "part": "arm",
+   "pivot": [
+    5,
+    9,
+    0
+   ]
+  },
+  "leg_l": {
+   "part": "leg",
+   "pivot": [
+    -3,
+    4,
+    0
+   ]
+  },
+  "leg_r": {
+   "part": "leg",
+   "pivot": [
+    2,
+    4,
+    0
+   ]
+  }
+ },
+ "hand": [
+  5.5,
+  3.5,
+  -1
+ ]
+}

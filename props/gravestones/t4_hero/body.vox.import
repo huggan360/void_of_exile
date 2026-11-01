@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c3wydarc6rwkj"
+path="res://.godot/imported/body.vox-118e7530c3e38729dd200f43df059b01.tscn"
+
+[deps]
+
+source_file="res://props/gravestones/t4_hero/body.vox"
+dest_files=["res://.godot/imported/body.vox-118e7530c3e38729dd200f43df059b01.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

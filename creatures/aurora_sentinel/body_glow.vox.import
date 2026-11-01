@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c84dbwus2ails"
+path="res://.godot/imported/body_glow.vox-62d90f0e690a9e08013544bd02ea6f9f.tscn"
+
+[deps]
+
+source_file="res://creatures/aurora_sentinel/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-62d90f0e690a9e08013544bd02ea6f9f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

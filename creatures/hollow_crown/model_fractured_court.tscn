@@ -1,0 +1,96 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_5gcvs"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/body_fractured.res" id="2_lqqqn"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/body_fractured_glow.res" id="3_mriao"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/arm_l.res" id="4_mleyr"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/arm_r.res" id="5_17fxu"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/halo_fractured.res" id="6_s4ldv"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/halo_fractured_glow.res" id="7_21qov"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7vb2v"]
+render_priority = 0
+shader = ExtResource("1_5gcvs")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uhb3f"]
+render_priority = 0
+shader = ExtResource("1_5gcvs")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_so4qp"]
+render_priority = 0
+shader = ExtResource("1_5gcvs")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_w8dlf"]
+render_priority = 0
+shader = ExtResource("1_5gcvs")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cyw7v"]
+render_priority = 0
+shader = ExtResource("1_5gcvs")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ioi7u"]
+render_priority = 0
+shader = ExtResource("1_5gcvs")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="HollowCrownFracturedCourt" type="Node3D" unique_id=2137453394]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/hollow_crown/model_fractured_court.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1675395624]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+
+[node name="BodyFractured" type="Node3D" parent="Rig" unique_id=415776818]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -2.24, 0.32, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyFractured" unique_id=513878924]
+material_override = SubResource("ShaderMaterial_7vb2v")
+mesh = ExtResource("2_lqqqn")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyFractured" unique_id=1361658693]
+material_override = SubResource("ShaderMaterial_uhb3f")
+mesh = ExtResource("3_mriao")
+
+[node name="ArmL" type="Node3D" parent="Rig" unique_id=729647978]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5999999, 6.3999996, 0)
+
+[node name="ArmL" type="Node3D" parent="Rig/ArmL" unique_id=748801972]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.92, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmL/ArmL" unique_id=1151923764]
+material_override = SubResource("ShaderMaterial_so4qp")
+mesh = ExtResource("4_mleyr")
+
+[node name="ArmR" type="Node3D" parent="Rig" unique_id=1936005874]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5999999, 6.3999996, 0)
+
+[node name="ArmR" type="Node3D" parent="Rig/ArmR" unique_id=424405985]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, 0, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmR/ArmR" unique_id=1378431444]
+material_override = SubResource("ShaderMaterial_w8dlf")
+mesh = ExtResource("5_17fxu")
+
+[node name="Halo" type="Node3D" parent="Rig" unique_id=2086047726]
+
+[node name="HaloFractured" type="Node3D" parent="Rig/Halo" unique_id=553414745]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -2.8799999, 3.84, 1.28)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Halo/HaloFractured" unique_id=1762022834]
+material_override = SubResource("ShaderMaterial_cyw7v")
+mesh = ExtResource("6_s4ldv")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Halo/HaloFractured" unique_id=659810698]
+material_override = SubResource("ShaderMaterial_ioi7u")
+mesh = ExtResource("7_21qov")

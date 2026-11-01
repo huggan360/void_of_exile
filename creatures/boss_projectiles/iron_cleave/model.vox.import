@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://hmrx52u2fk71"
+path="res://.godot/imported/model.vox-1261cb9ae636bb93c3cb64f2b25edda3.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/iron_cleave/model.vox"
+dest_files=["res://.godot/imported/model.vox-1261cb9ae636bb93c3cb64f2b25edda3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

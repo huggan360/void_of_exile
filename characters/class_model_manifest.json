@@ -1,0 +1,38 @@
+[
+  {
+	"id": "wizard",
+	"name": "Wizard",
+	"folder": "characters/wizard",
+	"status": "playable",
+	"scene": "characters/wizard/model.tscn",
+	"voxel_size": 0.1125,
+	"held_in": "right_hand"
+  },
+  {
+	"id": "priest",
+	"name": "Priest",
+	"folder": "characters/priest",
+	"status": "playable",
+	"scene": "characters/priest/model.tscn",
+	"voxel_size": 0.1125,
+	"held_in": "right_hand"
+  },
+  {
+	"id": "alchemist",
+	"name": "Alchemist",
+	"folder": "characters/alchemist",
+	"status": "playable",
+	"scene": "characters/alchemist/model.tscn",
+	"voxel_size": 0.1125,
+	"held_in": "right_hand"
+  },
+  {
+	"id": "merrow",
+	"name": "Merrow",
+	"folder": "characters/merrow",
+	"status": "playable",
+	"scene": "characters/merrow/model.tscn",
+	"voxel_size": 0.1125,
+	"held_in": "right_hand"
+  }
+]

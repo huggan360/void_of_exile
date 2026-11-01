@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b5jh6ssj1mdvc"
+path="res://.godot/imported/wing_r_glow.vox-94119f8c8896f12afe785e1a014d3576.tscn"
+
+[deps]
+
+source_file="res://creatures/hail_harrier/wing_r_glow.vox"
+dest_files=["res://.godot/imported/wing_r_glow.vox-94119f8c8896f12afe785e1a014d3576.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

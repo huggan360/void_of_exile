@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bap5thi6ecogj"
+path="res://.godot/imported/body.vox-36e99ed4fa6bb76f8a355c485b20b1f2.tscn"
+
+[deps]
+
+source_file="res://creatures/slag_seraph/body.vox"
+dest_files=["res://.godot/imported/body.vox-36e99ed4fa6bb76f8a355c485b20b1f2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

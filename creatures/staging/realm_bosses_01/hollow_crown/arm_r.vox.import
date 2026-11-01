@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dboo2xx61espo"
+path="res://.godot/imported/arm_r.vox-dee49ab85c950a8b8f51270f48c6d960.tscn"
+
+[deps]
+
+source_file="res://creatures/staging/realm_bosses_01/hollow_crown/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-dee49ab85c950a8b8f51270f48c6d960.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

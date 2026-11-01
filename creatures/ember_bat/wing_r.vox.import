@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b8ieuutuba6no"
+path="res://.godot/imported/wing_r.vox-59439ed7f77d50b84c77ca697ccf9c6f.tscn"
+
+[deps]
+
+source_file="res://creatures/ember_bat/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-59439ed7f77d50b84c77ca697ccf9c6f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

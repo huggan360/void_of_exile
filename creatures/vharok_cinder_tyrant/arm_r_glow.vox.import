@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dvi47v61mgr4s"
+path="res://.godot/imported/arm_r_glow.vox-5dce96c76acef3ef8bed801b2d35b141.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-5dce96c76acef3ef8bed801b2d35b141.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

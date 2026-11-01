@@ -1,0 +1,161 @@
+{
+  "voxel_size": 0.36,
+  "parts": {
+    "wing_r": {
+      "frame_min": [
+        0,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        13,
+        21,
+        3
+      ]
+    },
+    "wing_r_enraged": {
+      "frame_min": [
+        0,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        13,
+        21,
+        3
+      ],
+      "glow": true
+    },
+    "tail_enraged": {
+      "frame_min": [
+        0,
+        -5,
+        0
+      ],
+      "frame_size": [
+        6,
+        8,
+        9
+      ],
+      "glow": true
+    },
+    "tail": {
+      "frame_min": [
+        0,
+        -5,
+        0
+      ],
+      "frame_size": [
+        6,
+        8,
+        9
+      ]
+    },
+    "body_enraged": {
+      "frame_min": [
+        -6,
+        0,
+        -16
+      ],
+      "frame_size": [
+        13,
+        24,
+        25
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -6,
+        0,
+        -16
+      ],
+      "frame_size": [
+        13,
+        24,
+        25
+      ],
+      "glow": true
+    },
+    "wing_l_enraged": {
+      "frame_min": [
+        -12,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        14,
+        21,
+        3
+      ],
+      "glow": true
+    },
+    "wing_l": {
+      "frame_min": [
+        -12,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        14,
+        21,
+        3
+      ]
+    }
+  },
+  "limbs": {
+    "wing_l": {
+      "part": "wing_l",
+      "pivot": [
+        -3.0,
+        13.0,
+        1.0
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0
+    },
+    "wing_r": {
+      "part": "wing_r",
+      "pivot": [
+        3.0,
+        13.0,
+        1.0
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0
+    },
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        0.0,
+        9.0,
+        7.0
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0
+    }
+  },
+  "variants": {
+    "enraged": {
+      "body": "body_enraged",
+      "wing_l": "wing_l_enraged",
+      "wing_r": "wing_r_enraged",
+      "tail": "tail_enraged"
+    }
+  },
+  "hand": [
+    0.0,
+    14.0,
+    -15.0
+  ],
+  "hover": 0.12,
+  "bob": 0.06,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1
+}

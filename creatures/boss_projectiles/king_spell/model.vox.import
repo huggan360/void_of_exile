@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://brpqbfbdlikte"
+path="res://.godot/imported/model.vox-0fedf7e74431516cf39803281d18338e.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/king_spell/model.vox"
+dest_files=["res://.godot/imported/model.vox-0fedf7e74431516cf39803281d18338e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

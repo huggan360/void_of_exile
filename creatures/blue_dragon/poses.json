@@ -1,0 +1,30 @@
+{
+  "default": {
+    "file": "model.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 178085
+  },
+  "enraged": {
+    "file": "model_enraged.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 178085
+  }
+}

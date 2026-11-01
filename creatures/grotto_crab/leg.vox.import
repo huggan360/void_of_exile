@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cqxmsasb3eitp"
+path="res://.godot/imported/leg.vox-f5bff4d7d5df58756dd382a898586c56.tscn"
+
+[deps]
+
+source_file="res://creatures/grotto_crab/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-f5bff4d7d5df58756dd382a898586c56.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,30 @@
+{
+  "default": {
+    "file": "model.vox",
+    "frame_min": [
+      -119,
+      0,
+      -33
+    ],
+    "size": [
+      238,
+      236,
+      130
+    ],
+    "voxels": 142720
+  },
+  "infernal": {
+    "file": "model_infernal.vox",
+    "frame_min": [
+      -119,
+      0,
+      -33
+    ],
+    "size": [
+      238,
+      236,
+      130
+    ],
+    "voxels": 142720
+  }
+}

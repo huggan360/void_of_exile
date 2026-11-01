@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dkq0lnge7oihg"
+path="res://.godot/imported/body.vox-208563b42ff07518466250be330fde4b.tscn"
+
+[deps]
+
+source_file="res://creatures/bubble_jelly/body.vox"
+dest_files=["res://.godot/imported/body.vox-208563b42ff07518466250be330fde4b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

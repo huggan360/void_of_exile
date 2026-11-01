@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b4i03sr3t2nw0"
+path="res://.godot/imported/tree_small.vox-3d61527afec83f128e9d7bc5e570ed22.tscn"
+
+[deps]
+
+source_file="res://obstacles/tree_small.vox"
+dest_files=["res://.godot/imported/tree_small.vox-3d61527afec83f128e9d7bc5e570ed22.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

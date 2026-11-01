@@ -1,0 +1,45 @@
+{
+  "name": "Cinder Beetle",
+  "biome": "Doom",
+  "role": "Low armored ember shooter",
+  "hp": 180,
+  "defense": 8,
+  "xp": 32,
+  "behavior": "skirmish",
+  "move_speed": 2.7,
+  "keep_distance": 6.0,
+  "body_height": 1.0,
+  "hit_radius": 0.8,
+  "attack": {
+    "style": "fireball",
+    "pattern": "aimed",
+    "count": 1,
+    "damage_min": 17,
+    "damage_max": 23,
+    "speed": 8,
+    "range": 10,
+    "size": 0.65,
+    "cooldown": 2.2,
+    "windup": 0.65,
+    "root": true,
+    "recover": 0.4,
+    "from_hand": true,
+    "color": [
+      0.96,
+      0.39,
+      0.1
+    ]
+  },
+  "telegraph": "Furnace mouth and hot wing-case seam indicate fire. Stops before firing a small ember.",
+  "counterplay": "One slow straight shot; use rocks or sidestep. No boss ring or persistent fire field.",
+  "projectile": "Small ember; intended to use the existing procedural voxel-fire style.",
+  "status": "ACTIVE_REALM_ENEMY",
+  "model": "cinder_beetle",
+  "model_scale": 1.0,
+  "spawn_anim": "pop",
+  "suggested_pack_size": [
+    2,
+    4
+  ],
+  "notes": "Live stats and loot are defined in scripts/enemies/enemies.gd; staged design values are authoring references."
+}

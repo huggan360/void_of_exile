@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c3rcofu88nmvx"
+path="res://.godot/imported/tentacle_glow.vox-a3ab2b9f6165c593136d13bae31648eb.tscn"
+
+[deps]
+
+source_file="res://creatures/bubble_jelly/tentacle_glow.vox"
+dest_files=["res://.godot/imported/tentacle_glow.vox-a3ab2b9f6165c593136d13bae31648eb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cm7bijwny0427"
+path="res://.godot/imported/body.vox-fe58e3616bd1d3b1cb70038972ca9847.tscn"
+
+[deps]
+
+source_file="res://creatures/umbral_reaper/body.vox"
+dest_files=["res://.godot/imported/body.vox-fe58e3616bd1d3b1cb70038972ca9847.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

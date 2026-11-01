@@ -1,0 +1,117 @@
+{
+  "voxel_size": 0.32,
+  "parts": {
+    "arm_l": {
+      "frame_min": [
+        -9,
+        -12,
+        -4
+      ],
+      "frame_size": [
+        12,
+        15,
+        7
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        0,
+        -12,
+        -4
+      ],
+      "frame_size": [
+        10,
+        15,
+        7
+      ],
+      "glow": true
+    },
+    "body_kindled": {
+      "frame_min": [
+        -15,
+        0,
+        -8
+      ],
+      "frame_size": [
+        31,
+        32,
+        12
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -15,
+        0,
+        -8
+      ],
+      "frame_size": [
+        31,
+        32,
+        12
+      ],
+      "glow": true
+    },
+    "body_unbound": {
+      "frame_min": [
+        -15,
+        0,
+        -8
+      ],
+      "frame_size": [
+        31,
+        32,
+        12
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -5.0,
+        18.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        5.0,
+        18.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {
+    "kindled": {
+      "body": "body_kindled"
+    },
+    "unbound": {
+      "body": "body_unbound"
+    }
+  },
+  "hand": [
+    0.0,
+    16.0,
+    -5.0
+  ],
+  "hover": 0,
+  "bob": 0.025,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1,
+  "animation_style": "tyrant"
+}

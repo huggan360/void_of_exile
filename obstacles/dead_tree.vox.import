@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bpjtsx8edw88n"
+path="res://.godot/imported/dead_tree.vox-a7592021e4e54c30f208b020e733e683.tscn"
+
+[deps]
+
+source_file="res://obstacles/dead_tree.vox"
+dest_files=["res://.godot/imported/dead_tree.vox-a7592021e4e54c30f208b020e733e683.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

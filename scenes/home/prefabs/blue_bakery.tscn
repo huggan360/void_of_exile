@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_b3cca"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/blue_bakery.res" id="2_yw5ig"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/blue_bakery_glow.res" id="3_vob8l"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_b3cca")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_b3cca")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_eea56"]
+size = Vector3(8.5, 7.65, 7.65)
+
+[node name="BlueBakery" type="Node3D" unique_id=708767157]
+metadata/voxel_source = "res://props/home/blue_bakery/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1838064064]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.125, -0.125, -4.625)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_yw5ig")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=74218515]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.125, -0.125, -4.625)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_vob8l")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=2074733497]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=764796240]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.825, 0)
+shape = SubResource("BoxShape3D_eea56")

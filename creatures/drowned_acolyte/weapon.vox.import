@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bfd5u58ks5bhb"
+path="res://.godot/imported/weapon.vox-4e4a3d020991e5a92034daa87e022be6.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_acolyte/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-4e4a3d020991e5a92034daa87e022be6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

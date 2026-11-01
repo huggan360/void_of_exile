@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b1ir3gf4roa2u"
+path="res://.godot/imported/body_crack3_glow.vox-a45cca4a1b6951a34fdba5cfa9f0da24.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_blue_dragon/body_crack3_glow.vox"
+dest_files=["res://.godot/imported/body_crack3_glow.vox-a45cca4a1b6951a34fdba5cfa9f0da24.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

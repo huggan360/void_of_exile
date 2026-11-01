@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bcd0h3gm1376f"
+path="res://.godot/imported/leg.vox-8a0104e6b3018de2d9d6c8f8e95491dc.tscn"
+
+[deps]
+
+source_file="res://characters/archer/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-8a0104e6b3018de2d9d6c8f8e95491dc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

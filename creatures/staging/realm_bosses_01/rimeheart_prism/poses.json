@@ -1,0 +1,44 @@
+{
+  "sealed": {
+    "file": "model.vox",
+    "frame_min": [
+      -49,
+      8,
+      -53
+    ],
+    "size": [
+      99,
+      181,
+      107
+    ],
+    "voxels": 130054
+  },
+  "conduit": {
+    "file": "model_conduit.vox",
+    "frame_min": [
+      -73,
+      8,
+      -81
+    ],
+    "size": [
+      147,
+      187,
+      163
+    ],
+    "voxels": 151044
+  },
+  "tempest": {
+    "file": "model_tempest.vox",
+    "frame_min": [
+      -95,
+      8,
+      -110
+    ],
+    "size": [
+      191,
+      187,
+      221
+    ],
+    "voxels": 130615
+  }
+}

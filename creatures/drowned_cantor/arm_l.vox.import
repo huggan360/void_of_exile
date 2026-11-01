@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cxlqf71pefb58"
+path="res://.godot/imported/arm_l.vox-65530508b635ff32990a88009224d747.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_cantor/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-65530508b635ff32990a88009224d747.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

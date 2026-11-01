@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://x41eouniudhj"
+path="res://.godot/imported/wing_r.vox-5703b8bd9e5c210fb9d94994c34778e5.tscn"
+
+[deps]
+
+source_file="res://creatures/slag_seraph/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-5703b8bd9e5c210fb9d94994c34778e5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

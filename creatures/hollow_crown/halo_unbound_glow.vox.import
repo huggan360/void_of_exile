@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://q1l5rktdmoun"
+path="res://.godot/imported/halo_unbound_glow.vox-4bc7a3db213e2d4741d9d426b9935c9b.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_crown/halo_unbound_glow.vox"
+dest_files=["res://.godot/imported/halo_unbound_glow.vox-4bc7a3db213e2d4741d9d426b9935c9b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

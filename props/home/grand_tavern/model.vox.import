@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d23h4ltgecl78"
+path="res://.godot/imported/model.vox-616283c2111621536f8de71c652b49cd.tscn"
+
+[deps]
+
+source_file="res://props/home/grand_tavern/model.vox"
+dest_files=["res://.godot/imported/model.vox-616283c2111621536f8de71c652b49cd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

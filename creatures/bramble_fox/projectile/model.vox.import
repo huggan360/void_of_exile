@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cey8ifb8lah15"
+path="res://.godot/imported/model.vox-e706a3e3025bbb3adad38e7cd699df8b.tscn"
+
+[deps]
+
+source_file="res://creatures/bramble_fox/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-e706a3e3025bbb3adad38e7cd699df8b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

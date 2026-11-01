@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dweryyw4510ao"
+path="res://.godot/imported/model.vox-ff5e598c6615817bf0826c96608839fa.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_rimeheart/model.vox"
+dest_files=["res://.godot/imported/model.vox-ff5e598c6615817bf0826c96608839fa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

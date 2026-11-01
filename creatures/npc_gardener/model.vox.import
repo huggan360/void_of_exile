@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chk03t75h7225"
+path="res://.godot/imported/model.vox-c359dd6820dc6fd5f62b692ceef9e970.tscn"
+
+[deps]
+
+source_file="res://creatures/npc_gardener/model.vox"
+dest_files=["res://.godot/imported/model.vox-c359dd6820dc6fd5f62b692ceef9e970.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,139 @@
+{
+  "status": "art_only_not_registered",
+  "voxel_size": 0.1125,
+  "facing": "-Z",
+  "right_hand": "+X",
+  "body_height_voxels": 16,
+  "reference": "characters/archer",
+  "parts": {
+	"body": {
+	  "frame_min": [
+		-8,
+		0,
+		-8
+	  ],
+	  "frame_size": [
+		16,
+		21,
+		16
+	  ]
+	},
+	"arm_l": {
+	  "frame_min": [
+		-1,
+		-5,
+		-1
+	  ],
+	  "frame_size": [
+		2,
+		5,
+		2
+	  ]
+	},
+	"arm_r": {
+	  "frame_min": [
+		-1,
+		-5,
+		-1
+	  ],
+	  "frame_size": [
+		2,
+		5,
+		2
+	  ]
+	},
+	"leg": {
+	  "frame_min": [
+		-1,
+		-4,
+		-2
+	  ],
+	  "frame_size": [
+		3,
+		4,
+		4
+	  ]
+	},
+	"staff": {
+	  "frame_min": [
+		-2,
+		-3,
+		-1
+	  ],
+	  "frame_size": [
+		5,
+		17,
+		2
+	  ],
+	  "glow": true
+	},
+	"book": {
+	  "frame_min": [
+		-1,
+		-1,
+		-2
+	  ],
+	  "frame_size": [
+		3,
+		3,
+		4
+	  ]
+	}
+  },
+  "limbs": {
+	"arm_l": {
+	  "part": "arm_l",
+	  "pivot": [
+		-4,
+		9,
+		0
+	  ]
+	},
+	"arm_r": {
+	  "part": "arm_r",
+	  "pivot": [
+		4,
+		9,
+		0
+	  ]
+	},
+	"leg_l": {
+	  "part": "leg",
+	  "pivot": [
+		-2,
+		4,
+		0
+	  ]
+	},
+	"leg_r": {
+	  "part": "leg",
+	  "pivot": [
+		1,
+		4,
+		0
+	  ]
+	}
+  },
+  "attachments": {
+	"staff": {
+	  "part": "staff",
+	  "parent": "arm_r",
+	  "pivot": [
+		0,
+		-4,
+		-1
+	  ],
+	  "label": "Right-hand Staff"
+	},
+	"book": {
+	  "part": "book",
+	  "parent": "arm_l",
+	  "pivot": [
+		0,
+		-4,
+		-2
+	  ],
+	  "label": "Prayer Book"
+	}
+  }
+}

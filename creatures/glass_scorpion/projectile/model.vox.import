@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://22wgr84e7p0u"
+path="res://.godot/imported/model.vox-061f02a42fd6a611527758d6cb3b6643.tscn"
+
+[deps]
+
+source_file="res://creatures/glass_scorpion/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-061f02a42fd6a611527758d6cb3b6643.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

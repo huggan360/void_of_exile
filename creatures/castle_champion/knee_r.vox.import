@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bndc1di47r81h"
+path="res://.godot/imported/knee_r.vox-e72f5e8314f81d02caa86fa4eaaf68ae.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_champion/knee_r.vox"
+dest_files=["res://.godot/imported/knee_r.vox-e72f5e8314f81d02caa86fa4eaaf68ae.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

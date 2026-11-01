@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dtcsdytvknkmb"
+path="res://.godot/imported/tail_enraged_glow.vox-16385f0ccb2177567920a8a310dce02b.tscn"
+
+[deps]
+
+source_file="res://creatures/blue_dragon/tail_enraged_glow.vox"
+dest_files=["res://.godot/imported/tail_enraged_glow.vox-16385f0ccb2177567920a8a310dce02b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

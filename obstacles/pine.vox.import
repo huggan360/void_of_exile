@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://vo7u1q4fvskv"
+path="res://.godot/imported/pine.vox-a2478ac31e9d3826a27cabb9c8f904b7.tscn"
+
+[deps]
+
+source_file="res://obstacles/pine.vox"
+dest_files=["res://.godot/imported/pine.vox-a2478ac31e9d3826a27cabb9c8f904b7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

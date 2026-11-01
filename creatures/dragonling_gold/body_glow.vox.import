@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://heoslwhsb7nq"
+path="res://.godot/imported/body_glow.vox-14a1aef4f8caad79135f0549ead27b9b.tscn"
+
+[deps]
+
+source_file="res://creatures/dragonling_gold/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-14a1aef4f8caad79135f0549ead27b9b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

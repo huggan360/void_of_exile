@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cgkipn56cavll"
+path="res://.godot/imported/model.vox-30b9126cacdd296b36013dd1d1120df0.tscn"
+
+[deps]
+
+source_file="res://creatures/ruin_watcher/model.vox"
+dest_files=["res://.godot/imported/model.vox-30b9126cacdd296b36013dd1d1120df0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

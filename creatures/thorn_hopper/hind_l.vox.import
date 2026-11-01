@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://blklhj1s3prss"
+path="res://.godot/imported/hind_l.vox-d30074a8e95deb1cdd2404eec9479f6d.tscn"
+
+[deps]
+
+source_file="res://creatures/thorn_hopper/hind_l.vox"
+dest_files=["res://.godot/imported/hind_l.vox-d30074a8e95deb1cdd2404eec9479f6d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

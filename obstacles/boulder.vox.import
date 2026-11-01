@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dn6ci016kook5"
+path="res://.godot/imported/boulder.vox-4c16c4ac069509ba58f9c8c262d06cce.tscn"
+
+[deps]
+
+source_file="res://obstacles/boulder.vox"
+dest_files=["res://.godot/imported/boulder.vox-4c16c4ac069509ba58f9c8c262d06cce.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cjl70q1pndx2n"
+path="res://.godot/imported/model.vox-8ba03633bac769f6eac554cea0238c80.tscn"
+
+[deps]
+
+source_file="res://creatures/dune_monolith/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-8ba03633bac769f6eac554cea0238c80.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

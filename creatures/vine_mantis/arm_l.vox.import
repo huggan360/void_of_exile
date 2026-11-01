@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c32jibsli8ik3"
+path="res://.godot/imported/arm_l.vox-23a77593e6b5a890dc5d2637827cfaeb.tscn"
+
+[deps]
+
+source_file="res://creatures/vine_mantis/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-23a77593e6b5a890dc5d2637827cfaeb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

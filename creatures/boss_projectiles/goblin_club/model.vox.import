@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c52ccvntoi4jl"
+path="res://.godot/imported/model.vox-6a7775e1e0eaed9b5283c4a2ccdff593.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/goblin_club/model.vox"
+dest_files=["res://.godot/imported/model.vox-6a7775e1e0eaed9b5283c4a2ccdff593.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b82uncpmtmpxf"
+path="res://.godot/imported/arm_glow.vox-3b32abf3e71d7b4f99d71af41729965e.tscn"
+
+[deps]
+
+source_file="res://creatures/basalt_bulwark/arm_glow.vox"
+dest_files=["res://.godot/imported/arm_glow.vox-3b32abf3e71d7b4f99d71af41729965e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

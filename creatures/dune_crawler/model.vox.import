@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cmhyirtlqh4pb"
+path="res://.godot/imported/model.vox-c56ae5522fd9d59964279dab53150504.tscn"
+
+[deps]
+
+source_file="res://creatures/dune_crawler/model.vox"
+dest_files=["res://.godot/imported/model.vox-c56ae5522fd9d59964279dab53150504.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

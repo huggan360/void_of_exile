@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://q3884ghw5ula"
+path="res://.godot/imported/wing_r_glow.vox-c8d8a928bcd9455a1699c7234b5e34d1.tscn"
+
+[deps]
+
+source_file="res://creatures/dragonling_purple/wing_r_glow.vox"
+dest_files=["res://.godot/imported/wing_r_glow.vox-c8d8a928bcd9455a1699c7234b5e34d1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

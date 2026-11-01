@@ -1,0 +1,269 @@
+{
+  "voxel_size": 0.044,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -48,
+        56,
+        -88
+      ],
+      "frame_size": [
+        96,
+        200,
+        168
+      ],
+      "glow": true
+    },
+    "body_sunwings": {
+      "frame_min": [
+        -48,
+        56,
+        -88
+      ],
+      "frame_size": [
+        96,
+        200,
+        168
+      ],
+      "glow": true
+    },
+    "body_sunheart": {
+      "frame_min": [
+        -48,
+        56,
+        -88
+      ],
+      "frame_size": [
+        96,
+        200,
+        168
+      ],
+      "glow": true
+    },
+    "leg_r": {
+      "frame_min": [
+        0,
+        -64,
+        -8
+      ],
+      "frame_size": [
+        56,
+        80,
+        24
+      ]
+    },
+    "wing_l_sunwings": {
+      "frame_min": [
+        -80,
+        -48,
+        0
+      ],
+      "frame_size": [
+        88,
+        112,
+        48
+      ]
+    },
+    "wing_l": {
+      "frame_min": [
+        -80,
+        -48,
+        0
+      ],
+      "frame_size": [
+        88,
+        112,
+        48
+      ]
+    },
+    "wing_l_sunheart": {
+      "frame_min": [
+        -80,
+        -48,
+        0
+      ],
+      "frame_size": [
+        88,
+        112,
+        48
+      ],
+      "glow": true
+    },
+    "wing_r_sunheart": {
+      "frame_min": [
+        0,
+        -48,
+        0
+      ],
+      "frame_size": [
+        88,
+        112,
+        48
+      ],
+      "glow": true
+    },
+    "wing_r_sunwings": {
+      "frame_min": [
+        0,
+        -48,
+        0
+      ],
+      "frame_size": [
+        88,
+        112,
+        48
+      ]
+    },
+    "wing_r": {
+      "frame_min": [
+        0,
+        -48,
+        0
+      ],
+      "frame_size": [
+        88,
+        112,
+        48
+      ]
+    },
+    "leg_l": {
+      "frame_min": [
+        -48,
+        -64,
+        -8
+      ],
+      "frame_size": [
+        64,
+        80,
+        24
+      ]
+    }
+  },
+  "limbs": {
+    "leg_l_0": {
+      "part": "leg_l",
+      "pivot": [
+        -40,
+        80,
+        -32
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "axis": "y",
+      "amount": 0.35
+    },
+    "leg_l_1": {
+      "part": "leg_l",
+      "pivot": [
+        -40,
+        80,
+        8
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "axis": "y",
+      "amount": 0.35
+    },
+    "leg_l_2": {
+      "part": "leg_l",
+      "pivot": [
+        -40,
+        80,
+        48
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "axis": "y",
+      "amount": 0.35
+    },
+    "wing_l": {
+      "part": "wing_l",
+      "pivot": [
+        -32,
+        144,
+        8
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0
+    },
+    "leg_r_0": {
+      "part": "leg_r",
+      "pivot": [
+        40,
+        80,
+        -32
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "axis": "y",
+      "amount": 0.35
+    },
+    "leg_r_1": {
+      "part": "leg_r",
+      "pivot": [
+        40,
+        80,
+        8
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "axis": "y",
+      "amount": 0.35
+    },
+    "leg_r_2": {
+      "part": "leg_r",
+      "pivot": [
+        40,
+        80,
+        48
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "axis": "y",
+      "amount": 0.35
+    },
+    "wing_r": {
+      "part": "wing_r",
+      "pivot": [
+        32,
+        144,
+        8
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0
+    }
+  },
+  "variants": {
+    "sunwings": {
+      "body": "body_sunwings",
+      "wing_l": "wing_l_sunwings",
+      "wing_r": "wing_r_sunwings"
+    },
+    "sunheart": {
+      "body": "body_sunheart",
+      "wing_l": "wing_l_sunheart",
+      "wing_r": "wing_r_sunheart"
+    }
+  },
+  "hand": [
+    0,
+    176,
+    -80
+  ],
+  "hover": 0.15,
+  "bob": 0.06,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1,
+  "animation_style": "scarab"
+}

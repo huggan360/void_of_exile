@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_ei5re"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/lantern.res" id="2_yevo7"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/lantern_glow.res" id="3_dunr0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_ei5re")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_ei5re")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nqt5c"]
+size = Vector3(1.4, 4, 1.4)
+
+[node name="Lantern" type="Node3D" unique_id=867575998]
+metadata/voxel_source = "res://props/home/lantern/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1050963992]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -0.5, -0.125, -0.5)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_yevo7")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=891476321]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -0.5, -0.125, -0.5)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_dunr0")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=1896140977]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=1694993511]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("BoxShape3D_nqt5c")

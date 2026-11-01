@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_oly17"]
+[ext_resource type="ArrayMesh" path="res://props/gravestones/t2_fieldstone/meshes/body.res" id="2_emjx1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5fwhm"]
+render_priority = 0
+shader = ExtResource("1_oly17")
+shader_parameter/jitter = 0.035
+shader_parameter/glow_strength = 0.0
+
+[node name="T2Fieldstone" type="Node3D" unique_id=1948091611]
+metadata/tier = 2.0
+metadata/rank_hint = "Adventurer"
+metadata/voxel_source = "res://props/gravestones/t2_fieldstone/model.vox"
+metadata/status = "art_only"
+
+[node name="CarvedMarker" type="Node3D" parent="." unique_id=212728047]
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, -0.56, 0, -0.32)
+
+[node name="StoneAndWood" type="MeshInstance3D" parent="CarvedMarker" unique_id=638085393]
+material_override = SubResource("ShaderMaterial_5fwhm")
+mesh = ExtResource("2_emjx1")

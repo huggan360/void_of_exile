@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d36ne1i52rp3v"
+path="res://.godot/imported/wing_l_glow.vox-cdcbf3b3c5526d06c33bb1adb2c92975.tscn"
+
+[deps]
+
+source_file="res://creatures/ember_bat/wing_l_glow.vox"
+dest_files=["res://.godot/imported/wing_l_glow.vox-cdcbf3b3c5526d06c33bb1adb2c92975.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

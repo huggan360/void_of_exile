@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://j4n84uaqtdtc"
+path="res://.godot/imported/weapon_glow.vox-43d61b807c5c26c163ef79640c275b3c.tscn"
+
+[deps]
+
+source_file="res://creatures/choir_wraith/weapon_glow.vox"
+dest_files=["res://.godot/imported/weapon_glow.vox-43d61b807c5c26c163ef79640c275b3c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

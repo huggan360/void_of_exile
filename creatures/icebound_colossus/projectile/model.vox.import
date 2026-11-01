@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://i2ink6ki213v"
+path="res://.godot/imported/model.vox-290aa2b171b96f8180b722a4674a79ab.tscn"
+
+[deps]
+
+source_file="res://creatures/icebound_colossus/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-290aa2b171b96f8180b722a4674a79ab.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

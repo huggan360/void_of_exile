@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cxyhgamj1lfqr"
+path="res://.godot/imported/arm_glow.vox-216e5b1143e472566a37187fd6e63395.tscn"
+
+[deps]
+
+source_file="res://creatures/aurora_sentinel/arm_glow.vox"
+dest_files=["res://.godot/imported/arm_glow.vox-216e5b1143e472566a37187fd6e63395.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

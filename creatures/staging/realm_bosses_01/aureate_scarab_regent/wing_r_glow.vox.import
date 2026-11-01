@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cuuq6gnm28wuc"
+path="res://.godot/imported/wing_r_glow.vox-80c3c0c0a0f928e08ebc25ca12585e9a.tscn"
+
+[deps]
+
+source_file="res://creatures/staging/realm_bosses_01/aureate_scarab_regent/wing_r_glow.vox"
+dest_files=["res://.godot/imported/wing_r_glow.vox-80c3c0c0a0f928e08ebc25ca12585e9a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

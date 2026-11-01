@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c6r6sgg5s7ss8"
+path="res://.godot/imported/body_glow.vox-54750c4880853fa5a961247a6411b348.tscn"
+
+[deps]
+
+source_file="res://creatures/furnace_maw/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-54750c4880853fa5a961247a6411b348.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

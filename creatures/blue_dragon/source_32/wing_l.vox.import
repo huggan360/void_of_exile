@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c5n4odvt5of85"
+path="res://.godot/imported/wing_l.vox-0da8ea26c70dad608872a3f3b4d3002e.tscn"
+
+[deps]
+
+source_file="res://creatures/blue_dragon/source_32/wing_l.vox"
+dest_files=["res://.godot/imported/wing_l.vox-0da8ea26c70dad608872a3f3b4d3002e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

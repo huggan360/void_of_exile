@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bctx2jtj1ucie"
+path="res://.godot/imported/runes.vox-282f4f6f8fa523e9da5a56955a7a680b.tscn"
+
+[deps]
+
+source_file="res://props/portal/runes.vox"
+dest_files=["res://.godot/imported/runes.vox-282f4f6f8fa523e9da5a56955a7a680b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

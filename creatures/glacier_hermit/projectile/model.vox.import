@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://qxtulslsfc51"
+path="res://.godot/imported/model.vox-1652759c8a1f045754987fd769c6faa5.tscn"
+
+[deps]
+
+source_file="res://creatures/glacier_hermit/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-1652759c8a1f045754987fd769c6faa5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

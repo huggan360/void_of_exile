@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ckpnvyjk58lxh"
+path="res://.godot/imported/body_fractured.vox-d54a4e964cfcbe1bd07ca71b67e62648.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_crown/body_fractured.vox"
+dest_files=["res://.godot/imported/body_fractured.vox-d54a4e964cfcbe1bd07ca71b67e62648.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

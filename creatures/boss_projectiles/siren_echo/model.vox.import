@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b73hol5ichmqn"
+path="res://.godot/imported/model.vox-d6ce6d8dc2d90e5bfe39ccc38f3c1702.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/siren_echo/model.vox"
+dest_files=["res://.godot/imported/model.vox-d6ce6d8dc2d90e5bfe39ccc38f3c1702.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

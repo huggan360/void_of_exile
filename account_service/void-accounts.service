@@ -1,0 +1,13 @@
+[Unit]
+Description=Void Realms account service (player sync)
+After=network.target
+
+[Service]
+User=hugohansson
+WorkingDirectory=/home/hugohansson/void_accounts
+ExecStart=/usr/bin/python3 /home/hugohansson/void_accounts/void_accounts.py --config /home/hugohansson/void_accounts/config.json serve
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

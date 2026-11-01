@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyithhso81754"
+path="res://.godot/imported/arm_l_glow.vox-8b354017f061ae83db6a9423d4cb2bc2.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-8b354017f061ae83db6a9423d4cb2bc2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

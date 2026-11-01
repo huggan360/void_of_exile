@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d22nab3k0n248"
+path="res://.godot/imported/body_glow.vox-cd00fad3f6252274f654581f15a31e1d.tscn"
+
+[deps]
+
+source_file="res://creatures/staging/common_batch_01/cinder_beetle/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-cd00fad3f6252274f654581f15a31e1d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

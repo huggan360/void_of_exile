@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bh3t3adv13xtb"
+path="res://.godot/imported/model.vox-5279a6e5323bf732c7113950cd30103d.tscn"
+
+[deps]
+
+source_file="res://creatures/ember_mite/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-5279a6e5323bf732c7113950cd30103d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d0v2e8mqs1grl"
+path="res://.godot/imported/model.vox-9febad680c29ba29dac1382c87e104a7.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/fire_shard/model.vox"
+dest_files=["res://.godot/imported/model.vox-9febad680c29ba29dac1382c87e104a7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

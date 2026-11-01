@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dikf03uoa2sli"
+path="res://.godot/imported/model.vox-e302c07235d0c4d4265fae18bc1cfda8.tscn"
+
+[deps]
+
+source_file="res://creatures/amethyst_widow/model.vox"
+dest_files=["res://.godot/imported/model.vox-e302c07235d0c4d4265fae18bc1cfda8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

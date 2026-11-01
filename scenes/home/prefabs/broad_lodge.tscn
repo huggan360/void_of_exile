@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_q2jiw"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/broad_lodge.res" id="2_sdyjb"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/broad_lodge_glow.res" id="3_mdg2w"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_q2jiw")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_q2jiw")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c6wwq"]
+size = Vector3(11.475, 9, 9.45)
+
+[node name="BroadLodge" type="Node3D" unique_id=1455890556]
+metadata/voxel_source = "res://props/home/broad_lodge/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1352823678]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.625, -0.125, -5.75)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_sdyjb")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=1302212464]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.625, -0.125, -5.75)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_mdg2w")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=1908761609]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=539881823]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+shape = SubResource("BoxShape3D_c6wwq")

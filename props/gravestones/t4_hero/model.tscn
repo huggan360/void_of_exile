@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_t3doh"]
+[ext_resource type="ArrayMesh" path="res://props/gravestones/t4_hero/meshes/body.res" id="2_52ouy"]
+[ext_resource type="ArrayMesh" path="res://props/gravestones/t4_hero/meshes/body_glow.res" id="3_can2e"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jwtb2"]
+render_priority = 0
+shader = ExtResource("1_t3doh")
+shader_parameter/jitter = 0.035
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rmikf"]
+render_priority = 0
+shader = ExtResource("1_t3doh")
+shader_parameter/jitter = 0.035
+shader_parameter/glow_strength = 0.95
+
+[node name="T4Hero" type="Node3D" unique_id=103369774]
+metadata/tier = 4.0
+metadata/rank_hint = "Hero"
+metadata/voxel_source = "res://props/gravestones/t4_hero/model.vox"
+metadata/status = "art_only"
+
+[node name="CarvedMarker" type="Node3D" parent="." unique_id=416529026]
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, -0.71999997, 0, -0.39999998)
+
+[node name="StoneAndWood" type="MeshInstance3D" parent="CarvedMarker" unique_id=1317705983]
+material_override = SubResource("ShaderMaterial_jwtb2")
+mesh = ExtResource("2_52ouy")
+
+[node name="SpiritAccent" type="MeshInstance3D" parent="CarvedMarker" unique_id=1116044667]
+material_override = SubResource("ShaderMaterial_rmikf")
+mesh = ExtResource("3_can2e")

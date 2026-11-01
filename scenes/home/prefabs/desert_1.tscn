@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_4c1cn"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/desert_1.res" id="2_grsh1"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/desert_1_glow.res" id="3_12qwx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t4pua"]
+render_priority = 0
+shader = ExtResource("1_4c1cn")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0b8wn"]
+render_priority = 0
+shader = ExtResource("1_4c1cn")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cauwh"]
+size = Vector3(8.5, 9, 9)
+
+[node name="Desert1" type="Node3D" unique_id=2005517630]
+metadata/voxel_source = "res://props/houses/desert_1/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=219431000]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.125, -0.125, -5.375)
+material_override = SubResource("ShaderMaterial_t4pua")
+mesh = ExtResource("2_grsh1")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=2027306371]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.125, -0.125, -5.375)
+material_override = SubResource("ShaderMaterial_0b8wn")
+mesh = ExtResource("3_12qwx")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=1843544883]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=1231473053]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+shape = SubResource("BoxShape3D_cauwh")

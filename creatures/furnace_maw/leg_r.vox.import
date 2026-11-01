@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnjx7nycrmqe8"
+path="res://.godot/imported/leg_r.vox-1e2c01defeabad3084cc17590e056023.tscn"
+
+[deps]
+
+source_file="res://creatures/furnace_maw/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-1e2c01defeabad3084cc17590e056023.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

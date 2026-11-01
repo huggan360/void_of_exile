@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cvfg8s8uvgyc7"
+path="res://.godot/imported/leg_r.vox-a9e3e3f92a84073f28ef1d64a90315e7.tscn"
+
+[deps]
+
+source_file="res://creatures/sand_scorpion/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-a9e3e3f92a84073f28ef1d64a90315e7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

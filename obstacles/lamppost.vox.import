@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwuqtigcf1xhg"
+path="res://.godot/imported/lamppost.vox-ac18f654ce942f2a8c9239786021bc02.tscn"
+
+[deps]
+
+source_file="res://obstacles/lamppost.vox"
+dest_files=["res://.godot/imported/lamppost.vox-ac18f654ce942f2a8c9239786021bc02.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

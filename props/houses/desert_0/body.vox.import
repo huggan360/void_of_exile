@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b57vl1bqj4oqa"
+path="res://.godot/imported/body.vox-6fefc8e3b5c74931e7282fa82ebf5ecf.tscn"
+
+[deps]
+
+source_file="res://props/houses/desert_0/body.vox"
+dest_files=["res://.godot/imported/body.vox-6fefc8e3b5c74931e7282fa82ebf5ecf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

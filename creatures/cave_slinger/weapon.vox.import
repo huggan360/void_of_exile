@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dp8v62i0cb6pu"
+path="res://.godot/imported/weapon.vox-1871a9bc4f6765642742e420f54f7af5.tscn"
+
+[deps]
+
+source_file="res://creatures/cave_slinger/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-1871a9bc4f6765642742e420f54f7af5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

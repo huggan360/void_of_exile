@@ -1,0 +1,29 @@
+{
+	"_about": "tunables: health/magic regeneration (per second, after a delay), warp shield drain and share of damage still taken, ring cooldown, XP orbs. starting_kit: what a new character has besides its class gear (backpack and quickslot item ids). Class gear comes from the class, graded up by account level rewards.",
+	"starting_kit": {
+		"backpack": [],
+		"quick": [
+			{
+				"count": 2,
+				"id": "elixir_hp"
+			},
+			{
+				"count": 2,
+				"id": "elixir_mp"
+			}
+		]
+	},
+	"tunables": {
+		"hp_regen": 1.5,
+		"hp_regen_delay": 4.0,
+		"max_orbs_per_drop": 14,
+		"mp_regen": 7.0,
+		"mp_regen_delay": 0.8,
+		"ring_cooldown": 0.6,
+		"shield_damage_taken": 0.4,
+		"shield_drain": 16.0,
+		"shield_min_mp": 5.0,
+		"xp_orb_lifetime": 45.0,
+		"xp_per_orb": 3
+	}
+}

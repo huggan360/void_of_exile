@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c3toqknybm8mm"
+path="res://.godot/imported/model.vox-8d75bb39112970e2a2abd0edf2b4d2e0.tscn"
+
+[deps]
+
+source_file="res://creatures/furnace_maw/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-8d75bb39112970e2a2abd0edf2b4d2e0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

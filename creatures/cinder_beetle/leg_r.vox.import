@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://oyghtukouasp"
+path="res://.godot/imported/leg_r.vox-06418dc2815efef8cf37c71b897bae59.tscn"
+
+[deps]
+
+source_file="res://creatures/cinder_beetle/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-06418dc2815efef8cf37c71b897bae59.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

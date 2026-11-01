@@ -1,0 +1,119 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_vk43s"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/body_enraged.res" id="2_jjncn"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/body_enraged_glow.res" id="3_ulsq3"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/wing_l_enraged.res" id="4_xnqpi"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/wing_l_enraged_glow.res" id="5_clsr6"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/wing_r_enraged.res" id="6_ot0wi"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/wing_r_enraged_glow.res" id="7_phdio"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/tail_enraged.res" id="8_q6ibl"]
+[ext_resource type="ArrayMesh" path="res://creatures/blue_dragon/meshes/tail_enraged_glow.res" id="9_6oq4x"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kkwnw"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1k1w7"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_45ejq"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1qev5"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_23cot"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_m8tsi"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o4q0o"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2d11e"]
+render_priority = 0
+shader = ExtResource("1_vk43s")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="BlueDragonEnraged" type="Node3D" unique_id=1928093542]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/blue_dragon/model_enraged.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1878648204]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+
+[node name="BodyEnraged" type="Node3D" parent="Rig" unique_id=1180702518]
+transform = Transform3D(0.045, 0, 0, 0, 0.045, 0, 0, 0, 0.045, -2.16, 0, -5.76)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyEnraged" unique_id=218475014]
+material_override = SubResource("ShaderMaterial_kkwnw")
+mesh = ExtResource("2_jjncn")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyEnraged" unique_id=648023805]
+material_override = SubResource("ShaderMaterial_1k1w7")
+mesh = ExtResource("3_ulsq3")
+
+[node name="WingL" type="Node3D" parent="Rig" unique_id=451433092]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.08, 4.6800003, 0.36)
+
+[node name="WingLEnraged" type="Node3D" parent="Rig/WingL" unique_id=472602428]
+transform = Transform3D(0.045, 0, 0, 0, 0.045, 0, 0, 0, 0.045, -4.32, -1.08, -0.36)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/WingL/WingLEnraged" unique_id=364438894]
+material_override = SubResource("ShaderMaterial_45ejq")
+mesh = ExtResource("4_xnqpi")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/WingL/WingLEnraged" unique_id=942146131]
+material_override = SubResource("ShaderMaterial_1qev5")
+mesh = ExtResource("5_clsr6")
+
+[node name="WingR" type="Node3D" parent="Rig" unique_id=140593104]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.08, 4.6800003, 0.36)
+
+[node name="WingREnraged" type="Node3D" parent="Rig/WingR" unique_id=1346567291]
+transform = Transform3D(0.045, 0, 0, 0, 0.045, 0, 0, 0, 0.045, 0, -1.08, -0.36)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/WingR/WingREnraged" unique_id=644660297]
+material_override = SubResource("ShaderMaterial_23cot")
+mesh = ExtResource("6_ot0wi")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/WingR/WingREnraged" unique_id=642562895]
+material_override = SubResource("ShaderMaterial_m8tsi")
+mesh = ExtResource("7_phdio")
+
+[node name="Tail" type="Node3D" parent="Rig" unique_id=43395006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2400002, 2.52)
+
+[node name="TailEnraged" type="Node3D" parent="Rig/Tail" unique_id=502971911]
+transform = Transform3D(0.045, 0, 0, 0, 0.045, 0, 0, 0, 0.045, 0, -1.8000001, 0)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Tail/TailEnraged" unique_id=1835638013]
+material_override = SubResource("ShaderMaterial_o4q0o")
+mesh = ExtResource("8_q6ibl")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Tail/TailEnraged" unique_id=393917374]
+material_override = SubResource("ShaderMaterial_2d11e")
+mesh = ExtResource("9_6oq4x")

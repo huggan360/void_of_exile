@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwkvir34rpwc3"
+path="res://.godot/imported/body_conduit_glow.vox-6a0b7713cb8f5659a3415d44c21f0483.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_prism/source_32/body_conduit_glow.vox"
+dest_files=["res://.godot/imported/body_conduit_glow.vox-6a0b7713cb8f5659a3415d44c21f0483.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

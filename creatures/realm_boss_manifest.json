@@ -1,0 +1,1031 @@
+[
+  {
+    "id": "egg_blue_dragon",
+    "display_name": "Azure Egg",
+    "biome": "Bluelay",
+    "folder": "creatures/egg_blue_dragon",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_crack1",
+      "body_crack2",
+      "body_crack3"
+    ],
+    "variants": [
+      "crack1",
+      "crack2",
+      "crack3"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack1": {
+        "file": "model_crack1.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack2": {
+        "file": "model_crack2.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack3": {
+        "file": "model_crack3.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "egg_rimeheart",
+    "display_name": "Frost Geode",
+    "biome": "Fosen",
+    "folder": "creatures/egg_rimeheart",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_crack1",
+      "body_crack2",
+      "body_crack3"
+    ],
+    "variants": [
+      "crack1",
+      "crack2",
+      "crack3"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack1": {
+        "file": "model_crack1.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack2": {
+        "file": "model_crack2.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack3": {
+        "file": "model_crack3.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "egg_vharok",
+    "display_name": "Obsidian Cocoon",
+    "biome": "Lava",
+    "folder": "creatures/egg_vharok",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_crack1",
+      "body_crack2",
+      "body_crack3"
+    ],
+    "variants": [
+      "crack1",
+      "crack2",
+      "crack3"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 41892
+      },
+      "crack1": {
+        "file": "model_crack1.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 41892
+      },
+      "crack2": {
+        "file": "model_crack2.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 41892
+      },
+      "crack3": {
+        "file": "model_crack3.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 41892
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "egg_scarab",
+    "display_name": "Solar Reliquary",
+    "biome": "Desert",
+    "folder": "creatures/egg_scarab",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_crack1",
+      "body_crack2",
+      "body_crack3"
+    ],
+    "variants": [
+      "crack1",
+      "crack2",
+      "crack3"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 49205
+      },
+      "crack1": {
+        "file": "model_crack1.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 49205
+      },
+      "crack2": {
+        "file": "model_crack2.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 49205
+      },
+      "crack3": {
+        "file": "model_crack3.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 49205
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "egg_hollow_crown",
+    "display_name": "Black Reliquary",
+    "biome": "Dark",
+    "folder": "creatures/egg_hollow_crown",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_crack1",
+      "body_crack2",
+      "body_crack3"
+    ],
+    "variants": [
+      "crack1",
+      "crack2",
+      "crack3"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack1": {
+        "file": "model_crack1.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack2": {
+        "file": "model_crack2.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      },
+      "crack3": {
+        "file": "model_crack3.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 39469
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "rimeheart_prism",
+    "display_name": "Rimeheart Prism",
+    "biome": "Fosen",
+    "folder": "creatures/rimeheart_prism",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_conduit",
+      "body_tempest",
+      "petal",
+      "petal_conduit",
+      "petal_tempest"
+    ],
+    "variants": [
+      "conduit",
+      "tempest"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 91265
+      },
+      "conduit": {
+        "file": "model_conduit.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 83552
+      },
+      "tempest": {
+        "file": "model_tempest.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 82410
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "rimeheart_conduit",
+    "display_name": "Rimeheart Healing Conduit",
+    "biome": "Fosen",
+    "folder": "creatures/rimeheart_conduit",
+    "status": "art_staging_only",
+    "voxel_size": 0.032,
+    "parts": [
+      "body"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -19,
+          0,
+          -22
+        ],
+        "size": [
+          38,
+          113,
+          44
+        ],
+        "voxels": 18192
+      }
+    }
+  },
+  {
+    "id": "rimeheart_shardling",
+    "display_name": "Rimeheart Shardling",
+    "biome": "Fosen",
+    "folder": "creatures/rimeheart_shardling",
+    "status": "art_staging_only",
+    "voxel_size": 0.03,
+    "parts": [
+      "body"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -25,
+          5,
+          -17
+        ],
+        "size": [
+          50,
+          52,
+          32
+        ],
+        "voxels": 7380
+      }
+    }
+  },
+  {
+    "id": "vharok_cinder_tyrant",
+    "display_name": "Vharok, the Cinder Tyrant",
+    "biome": "Lava",
+    "folder": "creatures/vharok_cinder_tyrant",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_infernal",
+      "body_unbound",
+      "arm_l",
+      "leg_l",
+      "shin_l",
+      "wing_l",
+      "wing_l_unbound",
+      "arm_r",
+      "leg_r",
+      "shin_r",
+      "wing_r",
+      "wing_r_unbound",
+      "tail"
+    ],
+    "variants": [
+      "infernal",
+      "heart_unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 178672
+      },
+      "infernal": {
+        "file": "model_infernal.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 178672
+      },
+      "heart_unbound": {
+        "file": "model_heart_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 178574
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "cinder_sentinel",
+    "display_name": "Cinder Sentinel",
+    "biome": "Lava",
+    "folder": "creatures/cinder_sentinel",
+    "status": "art_staging_only",
+    "voxel_size": 0.04,
+    "parts": [
+      "body"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -30,
+          0,
+          -17
+        ],
+        "size": [
+          60,
+          78,
+          31
+        ],
+        "voxels": 17591
+      }
+    }
+  },
+  {
+    "id": "aureate_scarab_regent",
+    "display_name": "Aureate Scarab Regent",
+    "biome": "Desert",
+    "folder": "creatures/aureate_scarab_regent",
+    "status": "live",
+    "voxel_size": 0.044,
+    "parts": [
+      "body",
+      "body_sunwings",
+      "body_sunheart",
+      "leg_l",
+      "wing_l",
+      "wing_l_sunwings",
+      "wing_l_sunheart",
+      "leg_r",
+      "wing_r",
+      "wing_r_sunwings",
+      "wing_r_sunheart"
+    ],
+    "variants": [
+      "sunwings",
+      "sunheart"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 160703
+      },
+      "sunwings": {
+        "file": "model_sunwings.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 147173
+      },
+      "sunheart": {
+        "file": "model_sunheart.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 147173
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "dawn_scarab",
+    "display_name": "Dawn Scarab",
+    "biome": "Desert",
+    "folder": "creatures/dawn_scarab",
+    "status": "art_staging_only",
+    "voxel_size": 0.035,
+    "parts": [
+      "body",
+      "leg_l",
+      "leg_r"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -19,
+          0,
+          -24
+        ],
+        "size": [
+          38,
+          25,
+          42
+        ],
+        "voxels": 8986
+      }
+    }
+  },
+  {
+    "id": "hollow_crown",
+    "display_name": "The Hollow Crown",
+    "biome": "Dark",
+    "folder": "creatures/hollow_crown",
+    "status": "live",
+    "voxel_size": 0.04,
+    "parts": [
+      "body",
+      "body_fractured",
+      "body_unbound",
+      "arm_l",
+      "arm_r",
+      "halo",
+      "halo_fractured",
+      "halo_unbound"
+    ],
+    "variants": [
+      "fractured_court",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 103546
+      },
+      "fractured_court": {
+        "file": "model_fractured_court.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 103546
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 103546
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "mirror_shade",
+    "display_name": "Mirror Shade",
+    "biome": "Dark",
+    "folder": "creatures/mirror_shade",
+    "status": "art_staging_only",
+    "voxel_size": 0.04,
+    "parts": [
+      "body"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -26,
+          4,
+          -18
+        ],
+        "size": [
+          52,
+          114,
+          32
+        ],
+        "voxels": 12032
+      }
+    }
+  },
+  {
+    "id": "blue_dragon",
+    "display_name": "Blue Dragon",
+    "biome": "Bluelay",
+    "folder": "creatures/blue_dragon",
+    "status": "live",
+    "voxel_size": 0.045,
+    "parts": [
+      "body",
+      "body_enraged",
+      "wing_l",
+      "wing_l_enraged",
+      "wing_r",
+      "wing_r_enraged",
+      "tail",
+      "tail_enraged"
+    ],
+    "variants": [
+      "enraged"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 178085
+      },
+      "enraged": {
+        "file": "model_enraged.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 178085
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "hollow_king",
+    "display_name": "The Hollow King",
+    "biome": "Dark",
+    "folder": "creatures/hollow_king",
+    "status": "live",
+    "voxel_size": 0.035,
+    "parts": [
+      "body",
+      "arm_l",
+      "leg_l",
+      "knee_l",
+      "arm_r",
+      "leg_r",
+      "knee_r"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 118048
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "castle_knight",
+    "display_name": "Castle Knight",
+    "biome": "Dark",
+    "folder": "creatures/castle_knight",
+    "status": "live",
+    "voxel_size": 0.035,
+    "parts": [
+      "body",
+      "arm_l",
+      "leg_l",
+      "knee_l",
+      "arm_r",
+      "leg_r",
+      "knee_r"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 125590
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "castle_champion",
+    "display_name": "Castle Champion",
+    "biome": "Dark",
+    "folder": "creatures/castle_champion",
+    "status": "live",
+    "voxel_size": 0.035,
+    "parts": [
+      "body",
+      "arm_l",
+      "leg_l",
+      "knee_l",
+      "arm_r",
+      "leg_r",
+      "knee_r"
+    ],
+    "variants": [],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 113834
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  }
+]

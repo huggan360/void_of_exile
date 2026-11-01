@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_ple4m"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_conduit/meshes/body.res" id="2_t1b0n"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_conduit/meshes/body_glow.res" id="3_i05us"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5as1"]
+render_priority = 0
+shader = ExtResource("1_ple4m")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4xq7x"]
+render_priority = 0
+shader = ExtResource("1_ple4m")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="RimeheartConduitDefault" type="Node3D" unique_id=460456210]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/rimeheart_conduit/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=613403606]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=369381518]
+transform = Transform3D(0.032, 0, 0, 0, 0.032, 0, 0, 0, 0.032, -0.64000005, -0.032, -0.73600006)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=2052321235]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("2_t1b0n")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=827867395]
+material_override = SubResource("ShaderMaterial_4xq7x")
+mesh = ExtResource("3_i05us")

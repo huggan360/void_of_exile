@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://nno5aaxwewgx"
+path="res://.godot/imported/leg_l.vox-63369fa1eb0f555abad46232a370e21f.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/source_32/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-63369fa1eb0f555abad46232a370e21f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

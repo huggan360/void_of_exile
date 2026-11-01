@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bto1ud41y4f1"
+path="res://.godot/imported/claw_r.vox-d1256b3699a4dd3c988d86620361a9c1.tscn"
+
+[deps]
+
+source_file="res://creatures/sand_scorpion/claw_r.vox"
+dest_files=["res://.godot/imported/claw_r.vox-d1256b3699a4dd3c988d86620361a9c1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

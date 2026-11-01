@@ -1,0 +1,92 @@
+{
+  "voxel_size": 0.035,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -18,
+        37,
+        -15
+      ],
+      "glow": true
+    },
+    "tentacle": {
+      "frame_min": [
+        -4,
+        -34,
+        -3
+      ],
+      "solid": false,
+      "glow": true
+    }
+  },
+  "limbs": {
+    "tentacle_0": {
+      "part": "tentacle",
+      "pivot": [
+        9,
+        42,
+        0
+      ],
+      "role": "sway",
+      "phase": 1
+    },
+    "tentacle_1": {
+      "part": "tentacle",
+      "pivot": [
+        5,
+        42,
+        5
+      ],
+      "role": "sway",
+      "phase": 1
+    },
+    "tentacle_2": {
+      "part": "tentacle",
+      "pivot": [
+        -4,
+        42,
+        5
+      ],
+      "role": "sway",
+      "phase": 1
+    },
+    "tentacle_3": {
+      "part": "tentacle",
+      "pivot": [
+        -9,
+        42,
+        0
+      ],
+      "role": "sway",
+      "phase": 1
+    },
+    "tentacle_4": {
+      "part": "tentacle",
+      "pivot": [
+        -5,
+        42,
+        -5
+      ],
+      "role": "sway",
+      "phase": 1
+    },
+    "tentacle_5": {
+      "part": "tentacle",
+      "pivot": [
+        5,
+        42,
+        -5
+      ],
+      "role": "sway",
+      "phase": 1
+    }
+  },
+  "hand": [
+    0,
+    57.857142857142854,
+    -12
+  ],
+  "hover": 0.45,
+  "bob": 0.05,
+  "waddle": 0.3
+}

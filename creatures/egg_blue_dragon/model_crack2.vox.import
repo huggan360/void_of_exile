@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cksp003wpcceo"
+path="res://.godot/imported/model_crack2.vox-c41636ee141f7074aefabc5aed242dee.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_blue_dragon/model_crack2.vox"
+dest_files=["res://.godot/imported/model_crack2.vox-c41636ee141f7074aefabc5aed242dee.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

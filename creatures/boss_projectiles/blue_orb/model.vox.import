@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ene84lgdcovs"
+path="res://.godot/imported/model.vox-ae4d30e02ebf3b361d70ebe6dd1fbcb6.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/blue_orb/model.vox"
+dest_files=["res://.godot/imported/model.vox-ae4d30e02ebf3b361d70ebe6dd1fbcb6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dgf5xc62nsakj"
+path="res://.godot/imported/wing_r.vox-4a56709e2f561bc24b879b63d972d87a.tscn"
+
+[deps]
+
+source_file="res://creatures/dragonling_cyan/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-4a56709e2f561bc24b879b63d972d87a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://blfcs6sd427uh"
+path="res://.godot/imported/body_glow.vox-0fb0508380905cdd5b6c81db918f3f1c.tscn"
+
+[deps]
+
+source_file="res://creatures/glass_scorpion/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-0fb0508380905cdd5b6c81db918f3f1c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

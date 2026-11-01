@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://mlfr5v7bw5ac"
+path="res://.godot/imported/model.vox-79f403907e790762e31d5ddc0f48bc80.tscn"
+
+[deps]
+
+source_file="res://creatures/rimeheart_conduit/model.vox"
+dest_files=["res://.godot/imported/model.vox-79f403907e790762e31d5ddc0f48bc80.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

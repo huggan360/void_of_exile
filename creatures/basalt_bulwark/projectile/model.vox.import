@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwdf03y2p7uqi"
+path="res://.godot/imported/model.vox-4b675e2623e2bc59d8ea02e9188f429b.tscn"
+
+[deps]
+
+source_file="res://creatures/basalt_bulwark/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-4b675e2623e2bc59d8ea02e9188f429b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

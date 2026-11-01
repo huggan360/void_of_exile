@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkuxqvdewdc3x"
+path="res://.godot/imported/arm.vox-87d460143200b6aeedc34835dc1cffa0.tscn"
+
+[deps]
+
+source_file="res://creatures/basalt_bulwark/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-87d460143200b6aeedc34835dc1cffa0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

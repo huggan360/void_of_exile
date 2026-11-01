@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bqy6wlaq0c5vt"
+path="res://.godot/imported/body.vox-4897a230ae76106fa8521cf3717e7f48.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_champion/source_32/body.vox"
+dest_files=["res://.godot/imported/body.vox-4897a230ae76106fa8521cf3717e7f48.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

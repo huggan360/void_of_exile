@@ -1,0 +1,96 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_jqy74"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/body_unbound.res" id="2_5ivn7"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/body_unbound_glow.res" id="3_ic4th"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/arm_l.res" id="4_cykm7"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/arm_r.res" id="5_vsm45"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/halo_unbound.res" id="6_a86mp"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/halo_unbound_glow.res" id="7_1qbh0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ch6o3"]
+render_priority = 0
+shader = ExtResource("1_jqy74")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qx8w8"]
+render_priority = 0
+shader = ExtResource("1_jqy74")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p6y4e"]
+render_priority = 0
+shader = ExtResource("1_jqy74")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5x465"]
+render_priority = 0
+shader = ExtResource("1_jqy74")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nlrch"]
+render_priority = 0
+shader = ExtResource("1_jqy74")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v42uc"]
+render_priority = 0
+shader = ExtResource("1_jqy74")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="HollowCrownUnbound" type="Node3D" unique_id=1665215909]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/hollow_crown/model_unbound.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=2012848314]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+
+[node name="BodyUnbound" type="Node3D" parent="Rig" unique_id=1098497944]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -2.24, 0.32, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyUnbound" unique_id=410772435]
+material_override = SubResource("ShaderMaterial_ch6o3")
+mesh = ExtResource("2_5ivn7")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyUnbound" unique_id=936725078]
+material_override = SubResource("ShaderMaterial_qx8w8")
+mesh = ExtResource("3_ic4th")
+
+[node name="ArmL" type="Node3D" parent="Rig" unique_id=596278239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5999999, 6.3999996, 0)
+
+[node name="ArmL" type="Node3D" parent="Rig/ArmL" unique_id=1836082560]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.92, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmL/ArmL" unique_id=2093330810]
+material_override = SubResource("ShaderMaterial_p6y4e")
+mesh = ExtResource("4_cykm7")
+
+[node name="ArmR" type="Node3D" parent="Rig" unique_id=1752096090]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5999999, 6.3999996, 0)
+
+[node name="ArmR" type="Node3D" parent="Rig/ArmR" unique_id=1445604254]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, 0, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmR/ArmR" unique_id=1016501451]
+material_override = SubResource("ShaderMaterial_5x465")
+mesh = ExtResource("5_vsm45")
+
+[node name="Halo" type="Node3D" parent="Rig" unique_id=384803668]
+
+[node name="HaloUnbound" type="Node3D" parent="Rig/Halo" unique_id=297984334]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -2.8799999, 3.84, 1.28)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Halo/HaloUnbound" unique_id=1592746031]
+material_override = SubResource("ShaderMaterial_nlrch")
+mesh = ExtResource("6_a86mp")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Halo/HaloUnbound" unique_id=2043868314]
+material_override = SubResource("ShaderMaterial_v42uc")
+mesh = ExtResource("7_1qbh0")

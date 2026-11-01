@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dflhpg344gf0f"
+path="res://.godot/imported/model.vox-74be98baed4109f8a55b5858f74a6c90.tscn"
+
+[deps]
+
+source_file="res://props/gravestones/t1_wooden/model.vox"
+dest_files=["res://.godot/imported/model.vox-74be98baed4109f8a55b5858f74a6c90.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

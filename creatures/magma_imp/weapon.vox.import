@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dhnevvucwx803"
+path="res://.godot/imported/weapon.vox-e0618ee8c950baeb32996e49b5f2d1dc.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_imp/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-e0618ee8c950baeb32996e49b5f2d1dc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

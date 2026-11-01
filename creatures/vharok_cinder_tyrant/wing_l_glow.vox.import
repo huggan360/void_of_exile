@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://xl3o3lkxom8p"
+path="res://.godot/imported/wing_l_glow.vox-cbfe818471c7955a2af410c2b5794e34.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/wing_l_glow.vox"
+dest_files=["res://.godot/imported/wing_l_glow.vox-cbfe818471c7955a2af410c2b5794e34.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

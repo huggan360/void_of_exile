@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cp5l14crran0n"
+path="res://.godot/imported/leg_l.vox-44b9c7cfa395df5f2700751140f09826.tscn"
+
+[deps]
+
+source_file="res://creatures/black_scorpion/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-44b9c7cfa395df5f2700751140f09826.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

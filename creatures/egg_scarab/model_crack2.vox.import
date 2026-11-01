@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://by1ctnbirfxlt"
+path="res://.godot/imported/model_crack2.vox-40be4464122cb897f79fe4ab53140740.tscn"
+
+[deps]
+
+source_file="res://creatures/egg_scarab/model_crack2.vox"
+dest_files=["res://.godot/imported/model_crack2.vox-40be4464122cb897f79fe4ab53140740.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_vi6lo"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_shardling/meshes/body.res" id="2_mxcjp"]
+[ext_resource type="ArrayMesh" path="res://creatures/rimeheart_shardling/meshes/body_glow.res" id="3_nh2bv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5as1"]
+render_priority = 0
+shader = ExtResource("1_vi6lo")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4xq7x"]
+render_priority = 0
+shader = ExtResource("1_vi6lo")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="RimeheartShardlingDefault" type="Node3D" unique_id=886462811]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/rimeheart_shardling/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1775841567]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=740375900]
+transform = Transform3D(0.03, 0, 0, 0, 0.03, 0, 0, 0, 0.03, -0.78, 0.12, -0.53999996)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1317001112]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("2_mxcjp")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1162067257]
+material_override = SubResource("ShaderMaterial_4xq7x")
+mesh = ExtResource("3_nh2bv")

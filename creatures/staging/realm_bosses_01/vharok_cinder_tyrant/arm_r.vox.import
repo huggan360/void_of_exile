@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cu1ux0sktw0w3"
+path="res://.godot/imported/arm_r.vox-5c26546581af2c7d7d05d9ef57a7717c.tscn"
+
+[deps]
+
+source_file="res://creatures/staging/realm_bosses_01/vharok_cinder_tyrant/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-5c26546581af2c7d7d05d9ef57a7717c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d2pi7n6o6bgh3"
+path="res://.godot/imported/body.vox-d5ee1eaee6fee52c1ef4fbcfdc7506f7.tscn"
+
+[deps]
+
+source_file="res://creatures/prism_ray/projectile/body.vox"
+dest_files=["res://.godot/imported/body.vox-d5ee1eaee6fee52c1ef4fbcfdc7506f7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

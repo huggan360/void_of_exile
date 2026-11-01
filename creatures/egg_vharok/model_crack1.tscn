@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_j67xx"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_vharok/meshes/body_crack1.res" id="2_6su40"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_vharok/meshes/body_crack1_glow.res" id="3_o5h6t"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5ckgg"]
+render_priority = 0
+shader = ExtResource("1_j67xx")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pg70u"]
+render_priority = 0
+shader = ExtResource("1_j67xx")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="EggVharokCrack1" type="Node3D" unique_id=2122819631]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/egg_vharok/model_crack1.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=221588650]
+
+[node name="BodyCrack1" type="Node3D" parent="Rig" unique_id=667149703]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 0, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyCrack1" unique_id=1219382548]
+material_override = SubResource("ShaderMaterial_5ckgg")
+mesh = ExtResource("2_6su40")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyCrack1" unique_id=785389745]
+material_override = SubResource("ShaderMaterial_pg70u")
+mesh = ExtResource("3_o5h6t")

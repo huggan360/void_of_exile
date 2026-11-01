@@ -1,0 +1,189 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_8h122"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/body_sunheart.res" id="2_c8xsv"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/body_sunheart_glow.res" id="3_8ne37"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/leg_l.res" id="4_pew6m"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/wing_l_sunheart.res" id="5_ovhlv"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/wing_l_sunheart_glow.res" id="6_u8odo"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/leg_r.res" id="7_hqeco"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/wing_r_sunheart.res" id="8_8jotv"]
+[ext_resource type="ArrayMesh" path="res://creatures/aureate_scarab_regent/meshes/wing_r_sunheart_glow.res" id="9_nm4ky"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0651o"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4p7qv"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_iwirn"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uav43"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4wirv"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e3q77"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8nefd"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cwscd"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qqfd1"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uebqb"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_68cxf"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yoqw2"]
+render_priority = 0
+shader = ExtResource("1_8h122")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="AureateScarabRegentSunheart" type="Node3D" unique_id=1709932446]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/aureate_scarab_regent/model_sunheart.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=201574072]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+
+[node name="BodySunheart" type="Node3D" parent="Rig" unique_id=2016005863]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, -2.112, 2.464, -3.872)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodySunheart" unique_id=955742995]
+material_override = SubResource("ShaderMaterial_0651o")
+mesh = ExtResource("2_c8xsv")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodySunheart" unique_id=411332873]
+material_override = SubResource("ShaderMaterial_4p7qv")
+mesh = ExtResource("3_8ne37")
+
+[node name="LegL0" type="Node3D" parent="Rig" unique_id=520653360]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.76, 3.52, -1.408)
+
+[node name="LegL" type="Node3D" parent="Rig/LegL0" unique_id=578236387]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, -2.112, -2.816, -0.352)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL0/LegL" unique_id=600110454]
+material_override = SubResource("ShaderMaterial_iwirn")
+mesh = ExtResource("4_pew6m")
+
+[node name="LegL1" type="Node3D" parent="Rig" unique_id=2038004608]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.76, 3.52, 0.352)
+
+[node name="LegL" type="Node3D" parent="Rig/LegL1" unique_id=820455168]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, -2.112, -2.816, -0.352)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL1/LegL" unique_id=1282520911]
+material_override = SubResource("ShaderMaterial_uav43")
+mesh = ExtResource("4_pew6m")
+
+[node name="LegL2" type="Node3D" parent="Rig" unique_id=1110560551]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.76, 3.52, 2.112)
+
+[node name="LegL" type="Node3D" parent="Rig/LegL2" unique_id=32401852]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, -2.112, -2.816, -0.352)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegL2/LegL" unique_id=1741701090]
+material_override = SubResource("ShaderMaterial_4wirv")
+mesh = ExtResource("4_pew6m")
+
+[node name="WingL" type="Node3D" parent="Rig" unique_id=40775205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.408, 6.336, 0.352)
+
+[node name="WingLSunheart" type="Node3D" parent="Rig/WingL" unique_id=293535526]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, -3.52, -2.112, 0)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/WingL/WingLSunheart" unique_id=1374683186]
+material_override = SubResource("ShaderMaterial_e3q77")
+mesh = ExtResource("5_ovhlv")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/WingL/WingLSunheart" unique_id=318697753]
+material_override = SubResource("ShaderMaterial_8nefd")
+mesh = ExtResource("6_u8odo")
+
+[node name="LegR0" type="Node3D" parent="Rig" unique_id=915460058]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.76, 3.52, -1.408)
+
+[node name="LegR" type="Node3D" parent="Rig/LegR0" unique_id=2108848517]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, 0, -2.816, -0.352)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR0/LegR" unique_id=1710089299]
+material_override = SubResource("ShaderMaterial_cwscd")
+mesh = ExtResource("7_hqeco")
+
+[node name="LegR1" type="Node3D" parent="Rig" unique_id=817626377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.76, 3.52, 0.352)
+
+[node name="LegR" type="Node3D" parent="Rig/LegR1" unique_id=1101273982]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, 0, -2.816, -0.352)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR1/LegR" unique_id=195474082]
+material_override = SubResource("ShaderMaterial_qqfd1")
+mesh = ExtResource("7_hqeco")
+
+[node name="LegR2" type="Node3D" parent="Rig" unique_id=42302470]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.76, 3.52, 2.112)
+
+[node name="LegR" type="Node3D" parent="Rig/LegR2" unique_id=1465323987]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, 0, -2.816, -0.352)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/LegR2/LegR" unique_id=1407609850]
+material_override = SubResource("ShaderMaterial_uebqb")
+mesh = ExtResource("7_hqeco")
+
+[node name="WingR" type="Node3D" parent="Rig" unique_id=946252241]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.408, 6.336, 0.352)
+
+[node name="WingRSunheart" type="Node3D" parent="Rig/WingR" unique_id=946336986]
+transform = Transform3D(0.044, 0, 0, 0, 0.044, 0, 0, 0, 0.044, 0, -2.112, 0)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/WingR/WingRSunheart" unique_id=2065312433]
+material_override = SubResource("ShaderMaterial_68cxf")
+mesh = ExtResource("8_8jotv")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/WingR/WingRSunheart" unique_id=1505432520]
+material_override = SubResource("ShaderMaterial_yoqw2")
+mesh = ExtResource("9_nm4ky")

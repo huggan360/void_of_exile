@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dpvsmw166k7vf"
+path="res://.godot/imported/weapon.vox-5b571a58c714f5e5b480f7dd79ae1e6c.tscn"
+
+[deps]
+
+source_file="res://creatures/obsidian_brute/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-5b571a58c714f5e5b480f7dd79ae1e6c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b23vskshlondu"
+path="res://.godot/imported/leg_r.vox-4eada061b6d821b8d9aebc85320be832.tscn"
+
+[deps]
+
+source_file="res://creatures/aureate_scarab_regent/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-4eada061b6d821b8d9aebc85320be832.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

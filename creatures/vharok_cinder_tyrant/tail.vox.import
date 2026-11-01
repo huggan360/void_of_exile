@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dldduijiiwfo6"
+path="res://.godot/imported/tail.vox-6a14dc8ccd7aa8c22afbaa9ae7d9e2f2.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/tail.vox"
+dest_files=["res://.godot/imported/tail.vox-6a14dc8ccd7aa8c22afbaa9ae7d9e2f2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

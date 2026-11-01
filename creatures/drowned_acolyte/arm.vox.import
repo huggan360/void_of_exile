@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bjrf6735dwawe"
+path="res://.godot/imported/arm.vox-6bcf6acb36960ea2336555790e0904ef.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_acolyte/arm.vox"
+dest_files=["res://.godot/imported/arm.vox-6bcf6acb36960ea2336555790e0904ef.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

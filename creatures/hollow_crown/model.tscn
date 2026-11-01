@@ -1,0 +1,85 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_pk7mm"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/body.res" id="2_qt5yb"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/body_glow.res" id="3_7fvtv"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/arm_l.res" id="4_gxuhy"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/arm_r.res" id="5_ep6xi"]
+[ext_resource type="ArrayMesh" path="res://creatures/hollow_crown/meshes/halo.res" id="6_lbfeh"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4psls"]
+render_priority = 0
+shader = ExtResource("1_pk7mm")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jytpi"]
+render_priority = 0
+shader = ExtResource("1_pk7mm")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g0cxt"]
+render_priority = 0
+shader = ExtResource("1_pk7mm")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lwfop"]
+render_priority = 0
+shader = ExtResource("1_pk7mm")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5rwpa"]
+render_priority = 0
+shader = ExtResource("1_pk7mm")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[node name="HollowCrownDefault" type="Node3D" unique_id=2006121531]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/hollow_crown/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1924129024]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=1955278383]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -2.24, 0.32, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=183205638]
+material_override = SubResource("ShaderMaterial_4psls")
+mesh = ExtResource("2_qt5yb")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1312336830]
+material_override = SubResource("ShaderMaterial_jytpi")
+mesh = ExtResource("3_7fvtv")
+
+[node name="ArmL" type="Node3D" parent="Rig" unique_id=1517749505]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5999999, 6.3999996, 0)
+
+[node name="ArmL" type="Node3D" parent="Rig/ArmL" unique_id=2121520875]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.92, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmL/ArmL" unique_id=1101603849]
+material_override = SubResource("ShaderMaterial_g0cxt")
+mesh = ExtResource("4_gxuhy")
+
+[node name="ArmR" type="Node3D" parent="Rig" unique_id=385367180]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5999999, 6.3999996, 0)
+
+[node name="ArmR" type="Node3D" parent="Rig/ArmR" unique_id=245604168]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, 0, -3.1999998, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/ArmR/ArmR" unique_id=157295456]
+material_override = SubResource("ShaderMaterial_lwfop")
+mesh = ExtResource("5_ep6xi")
+
+[node name="Halo" type="Node3D" parent="Rig" unique_id=1587998665]
+
+[node name="Halo" type="Node3D" parent="Rig/Halo" unique_id=1110527637]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -2.8799999, 3.84, 1.28)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Halo/Halo" unique_id=23593798]
+material_override = SubResource("ShaderMaterial_5rwpa")
+mesh = ExtResource("6_lbfeh")

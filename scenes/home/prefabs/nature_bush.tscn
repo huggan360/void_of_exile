@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_7snkv"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/nature_bush.res" id="2_pi8nd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2lc0o"]
+render_priority = 0
+shader = ExtResource("1_7snkv")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vxc80"]
+size = Vector3(1, 1.25, 1.75)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nhsuk"]
+size = Vector3(0.25, 1.25, 1.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ygnom"]
+size = Vector3(0.5, 1.25, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_n6m5v"]
+size = Vector3(0.25, 1.25, 1)
+
+[node name="Bush" type="Node3D" unique_id=859354890]
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=1018368700]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, -1.25, 0, -1)
+material_override = SubResource("ShaderMaterial_2lc0o")
+mesh = ExtResource("2_pi8nd")
+
+[node name="SolidEnvelope" type="StaticBody3D" parent="." unique_id=518457407]
+collision_layer = 2
+collision_mask = 0
+
+[node name="@CollisionShape3D@5" type="CollisionShape3D" parent="SolidEnvelope" unique_id=1300601231]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.625, 0.125)
+shape = SubResource("BoxShape3D_vxc80")
+
+[node name="@CollisionShape3D@6" type="CollisionShape3D" parent="SolidEnvelope" unique_id=2083644156]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.625, 0.625, 0.125)
+shape = SubResource("BoxShape3D_nhsuk")
+
+[node name="@CollisionShape3D@7" type="CollisionShape3D" parent="SolidEnvelope" unique_id=54093921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0.625, 0.25)
+shape = SubResource("BoxShape3D_ygnom")
+
+[node name="@CollisionShape3D@8" type="CollisionShape3D" parent="SolidEnvelope" unique_id=1507867549]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.125, 0.625, 0.5)
+shape = SubResource("BoxShape3D_n6m5v")

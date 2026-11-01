@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c2r0guhifnmq2"
+path="res://.godot/imported/body.vox-8a0fbf5c7226e3d5e77ed0be60f43a66.tscn"
+
+[deps]
+
+source_file="res://creatures/sun_jackal/body.vox"
+dest_files=["res://.godot/imported/body.vox-8a0fbf5c7226e3d5e77ed0be60f43a66.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

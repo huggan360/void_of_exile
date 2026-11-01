@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dk2cdrh7b2fsj"
+path="res://.godot/imported/arm_glow.vox-1ba6f3e387ebf74e44f5911d04411cc8.tscn"
+
+[deps]
+
+source_file="res://creatures/umbral_reaper/arm_glow.vox"
+dest_files=["res://.godot/imported/arm_glow.vox-1ba6f3e387ebf74e44f5911d04411cc8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

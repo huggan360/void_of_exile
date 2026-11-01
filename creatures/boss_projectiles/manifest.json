@@ -1,0 +1,182 @@
+[
+  {
+    "id": "blue_bolt",
+    "folder": "creatures/boss_projectiles/blue_bolt",
+    "size": [
+      56,
+      24,
+      88
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "blue_orb",
+    "folder": "creatures/boss_projectiles/blue_orb",
+    "size": [
+      56,
+      48,
+      72
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "ice_bolt",
+    "folder": "creatures/boss_projectiles/ice_bolt",
+    "size": [
+      56,
+      24,
+      112
+    ],
+    "voxel_size": 0.009
+  },
+  {
+    "id": "ice_orb",
+    "folder": "creatures/boss_projectiles/ice_orb",
+    "size": [
+      56,
+      56,
+      88
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "fire_bolt",
+    "folder": "creatures/boss_projectiles/fire_bolt",
+    "size": [
+      56,
+      24,
+      96
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "fire_orb",
+    "folder": "creatures/boss_projectiles/fire_orb",
+    "size": [
+      56,
+      56,
+      56
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "gold_bolt",
+    "folder": "creatures/boss_projectiles/gold_bolt",
+    "size": [
+      48,
+      24,
+      88
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "gold_orb",
+    "folder": "creatures/boss_projectiles/gold_orb",
+    "size": [
+      64,
+      48,
+      48
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "void_bolt",
+    "folder": "creatures/boss_projectiles/void_bolt",
+    "size": [
+      56,
+      16,
+      88
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "void_orb",
+    "folder": "creatures/boss_projectiles/void_orb",
+    "size": [
+      72,
+      48,
+      56
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "gold_disc",
+    "folder": "creatures/boss_projectiles/gold_disc",
+    "size": [
+      72,
+      16,
+      72
+    ],
+    "voxel_size": 0.014
+  },
+  {
+    "id": "fire_cleave",
+    "folder": "creatures/boss_projectiles/fire_cleave",
+    "size": [
+      200,
+      24,
+      80
+    ],
+    "voxel_size": 0.014
+  },
+  {
+    "id": "fire_shard",
+    "folder": "creatures/boss_projectiles/fire_shard",
+    "size": [
+      200,
+      24,
+      80
+    ],
+    "voxel_size": 0.0044800000000000005
+  },
+  {
+    "id": "white_ember",
+    "folder": "creatures/boss_projectiles/white_ember",
+    "size": [
+      48,
+      48,
+      48
+    ],
+    "voxel_size": 0.009
+  },
+  {
+    "id": "gold_sunmote",
+    "folder": "creatures/boss_projectiles/gold_sunmote",
+    "size": [
+      88,
+      24,
+      88
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "iron_bolt",
+    "folder": "creatures/boss_projectiles/iron_bolt",
+    "size": [
+      24,
+      24,
+      104
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "iron_cleave",
+    "folder": "creatures/boss_projectiles/iron_cleave",
+    "size": [
+      248,
+      24,
+      64
+    ],
+    "voxel_size": 0.024
+  },
+  {
+    "id": "king_spell",
+    "folder": "creatures/boss_projectiles/king_spell",
+    "size": [
+      48,
+      48,
+      80
+    ],
+    "voxel_size": 0.012
+  }
+]

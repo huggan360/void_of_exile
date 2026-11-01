@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dfkpd5yd3rh1k"
+path="res://.godot/imported/body_kindled_glow.vox-2543e4f643112a31817c0c97798acaea.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/body_kindled_glow.vox"
+dest_files=["res://.godot/imported/body_kindled_glow.vox-2543e4f643112a31817c0c97798acaea.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

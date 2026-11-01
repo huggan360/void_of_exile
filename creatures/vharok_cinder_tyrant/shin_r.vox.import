@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://8ielp6bybtkp"
+path="res://.godot/imported/shin_r.vox-9dde1b842eb738c9d19f2af0d74a5e1e.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/shin_r.vox"
+dest_files=["res://.godot/imported/shin_r.vox-9dde1b842eb738c9d19f2af0d74a5e1e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

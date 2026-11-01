@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cnxkikrbchh4"
+path="res://.godot/imported/body.vox-91c44233db527f376bad5e5a4cba5f14.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_sentinel/body.vox"
+dest_files=["res://.godot/imported/body.vox-91c44233db527f376bad5e5a4cba5f14.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

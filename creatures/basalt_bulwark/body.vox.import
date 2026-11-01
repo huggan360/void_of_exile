@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://umgm0ad5rali"
+path="res://.godot/imported/body.vox-8260068b2943bdc7a4a12141dd81e2cf.tscn"
+
+[deps]
+
+source_file="res://creatures/basalt_bulwark/body.vox"
+dest_files=["res://.godot/imported/body.vox-8260068b2943bdc7a4a12141dd81e2cf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

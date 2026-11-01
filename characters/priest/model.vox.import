@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://xlam4qie7hui"
+path="res://.godot/imported/model.vox-3a806215d47cfe1b34960bdee15e5b9e.tscn"
+
+[deps]
+
+source_file="res://characters/priest/model.vox"
+dest_files=["res://.godot/imported/model.vox-3a806215d47cfe1b34960bdee15e5b9e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

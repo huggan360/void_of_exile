@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://i4cy10gql656"
+path="res://.godot/imported/model.vox-250f0faa429b95a81d4d83428171e600.tscn"
+
+[deps]
+
+source_file="res://creatures/tide_snail/model.vox"
+dest_files=["res://.godot/imported/model.vox-250f0faa429b95a81d4d83428171e600.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

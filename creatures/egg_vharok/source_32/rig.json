@@ -1,0 +1,80 @@
+{
+  "voxel_size": 0.32,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -5,
+        0,
+        -5
+      ],
+      "frame_size": [
+        11,
+        18,
+        10
+      ]
+    },
+    "body_crack1": {
+      "frame_min": [
+        -5,
+        0,
+        -5
+      ],
+      "frame_size": [
+        11,
+        18,
+        10
+      ],
+      "glow": true
+    },
+    "body_crack3": {
+      "frame_min": [
+        -5,
+        0,
+        -5
+      ],
+      "frame_size": [
+        11,
+        18,
+        10
+      ],
+      "glow": true
+    },
+    "body_crack2": {
+      "frame_min": [
+        -5,
+        0,
+        -5
+      ],
+      "frame_size": [
+        11,
+        18,
+        10
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {},
+  "variants": {
+    "crack1": {
+      "body": "body_crack1"
+    },
+    "crack2": {
+      "body": "body_crack2"
+    },
+    "crack3": {
+      "body": "body_crack3"
+    }
+  },
+  "hand": [
+    0.0,
+    8.0,
+    -5.0
+  ],
+  "hover": 0,
+  "bob": 0.06,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1
+}

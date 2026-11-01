@@ -1,0 +1,46 @@
+{
+  "name": "Thorn Hopper",
+  "biome": "Jungle",
+  "role": "Darting seed spitter",
+  "hp": 140,
+  "defense": 3,
+  "xp": 24,
+  "behavior": "dart",
+  "move_speed": 4.2,
+  "keep_distance": 6.5,
+  "body_height": 1.25,
+  "hit_radius": 0.8,
+  "attack": {
+    "style": "bolt",
+    "pattern": "burst",
+    "count": 2,
+    "interval": 0.22,
+    "damage_min": 12,
+    "damage_max": 18,
+    "speed": 12,
+    "range": 10.5,
+    "size": 0.8,
+    "cooldown": 2.3,
+    "windup": 0.5,
+    "root": true,
+    "recover": 0.3,
+    "from_hand": true,
+    "color": [
+      0.68,
+      0.86,
+      0.25
+    ]
+  },
+  "telegraph": "The throat nozzle and thorn pods advertise the seed attack; pauses before the two aimed shots.",
+  "counterplay": "Keep moving through the second shot; each burst shot re-aims.",
+  "projectile": "Barbed seed dart. Uses ordinary hit damage; no new poison system.",
+  "status": "ACTIVE_REALM_ENEMY",
+  "model": "thorn_hopper",
+  "model_scale": 1.0,
+  "spawn_anim": "pop",
+  "suggested_pack_size": [
+    2,
+    4
+  ],
+  "notes": "Live stats and loot are defined in scripts/enemies/enemies.gd; staged design values are authoring references."
+}

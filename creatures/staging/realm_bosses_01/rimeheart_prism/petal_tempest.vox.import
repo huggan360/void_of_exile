@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://htalwe4xbcde"
+path="res://.godot/imported/petal_tempest.vox-57b50de8670c180f01964919d1bd0ff6.tscn"
+
+[deps]
+
+source_file="res://creatures/staging/realm_bosses_01/rimeheart_prism/petal_tempest.vox"
+dest_files=["res://.godot/imported/petal_tempest.vox-57b50de8670c180f01964919d1bd0ff6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

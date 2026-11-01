@@ -1,0 +1,83 @@
+[
+  {
+    "id": "sporeback",
+    "display_name": "Sporeback",
+    "folder": "creatures/staging/common_batch_01/sporeback",
+    "body_voxels": 1662,
+    "rest_pose_voxels": 1717,
+    "voxel_size": 0.095,
+    "parts": [
+      "body",
+      "arm",
+      "leg"
+    ],
+    "rig_limbs": 4,
+    "projectile_style": "pellet",
+    "status": "art_staging_only"
+  },
+  {
+    "id": "thorn_hopper",
+    "display_name": "Thorn Hopper",
+    "folder": "creatures/staging/common_batch_01/thorn_hopper",
+    "body_voxels": 1152,
+    "rest_pose_voxels": 1394,
+    "voxel_size": 0.09,
+    "parts": [
+      "body",
+      "hind_r",
+      "hind_l",
+      "front_r",
+      "front_l"
+    ],
+    "rig_limbs": 4,
+    "projectile_style": "bolt",
+    "status": "art_staging_only"
+  },
+  {
+    "id": "cinder_beetle",
+    "display_name": "Cinder Beetle",
+    "folder": "creatures/staging/common_batch_01/cinder_beetle",
+    "body_voxels": 1202,
+    "rest_pose_voxels": 1346,
+    "voxel_size": 0.09,
+    "parts": [
+      "body",
+      "leg_l",
+      "leg_r"
+    ],
+    "rig_limbs": 6,
+    "projectile_style": "fireball",
+    "status": "art_staging_only"
+  },
+  {
+    "id": "frost_moth",
+    "display_name": "Frost Moth",
+    "folder": "creatures/staging/common_batch_01/frost_moth",
+    "body_voxels": 286,
+    "rest_pose_voxels": 1042,
+    "voxel_size": 0.075,
+    "parts": [
+      "body",
+      "wing_r",
+      "wing_l"
+    ],
+    "rig_limbs": 2,
+    "projectile_style": "bolt",
+    "status": "art_staging_only"
+  },
+  {
+    "id": "ruin_watcher",
+    "display_name": "Ruin Watcher",
+    "folder": "creatures/staging/common_batch_01/ruin_watcher",
+    "body_voxels": 416,
+    "rest_pose_voxels": 452,
+    "voxel_size": 0.095,
+    "parts": [
+      "body",
+      "bracket"
+    ],
+    "rig_limbs": 2,
+    "projectile_style": "orb",
+    "status": "art_staging_only"
+  }
+]

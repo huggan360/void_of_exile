@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b60os7x43yl5k"
+path="res://.godot/imported/claw.vox-55ad678cbcb2b21a5f83f6ce6a70d819.tscn"
+
+[deps]
+
+source_file="res://creatures/grotto_crab/claw.vox"
+dest_files=["res://.godot/imported/claw.vox-55ad678cbcb2b21a5f83f6ce6a70d819.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

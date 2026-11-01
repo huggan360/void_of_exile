@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://clsqswgxg6xey"
+path="res://.godot/imported/arm_r.vox-8bbedd2417ebdf4ee9d441e3655a33b5.tscn"
+
+[deps]
+
+source_file="res://characters/alchemist/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-8bbedd2417ebdf4ee9d441e3655a33b5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

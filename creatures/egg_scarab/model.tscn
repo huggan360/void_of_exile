@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_eo0cp"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_scarab/meshes/body.res" id="2_cq7c4"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0sa45"]
+render_priority = 0
+shader = ExtResource("1_eo0cp")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[node name="EggScarabDefault" type="Node3D" unique_id=1315304162]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/egg_scarab/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=22089731]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=1468481115]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 0, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=713104732]
+material_override = SubResource("ShaderMaterial_0sa45")
+mesh = ExtResource("2_cq7c4")

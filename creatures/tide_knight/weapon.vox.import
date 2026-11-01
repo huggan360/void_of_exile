@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://jk20b2asd32d"
+path="res://.godot/imported/weapon.vox-e37cf3a94cecdae68398f2a38d888427.tscn"
+
+[deps]
+
+source_file="res://creatures/tide_knight/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-e37cf3a94cecdae68398f2a38d888427.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

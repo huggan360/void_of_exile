@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_j68nk"]
+[ext_resource type="ArrayMesh" path="res://props/gravestones/t1_wooden/meshes/body.res" id="2_i6qc6"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2whim"]
+render_priority = 0
+shader = ExtResource("1_j68nk")
+shader_parameter/jitter = 0.035
+shader_parameter/glow_strength = 0.0
+
+[node name="T1Wooden" type="Node3D" unique_id=46400636]
+metadata/tier = 1.0
+metadata/rank_hint = "Novice"
+metadata/voxel_source = "res://props/gravestones/t1_wooden/model.vox"
+metadata/status = "art_only"
+
+[node name="CarvedMarker" type="Node3D" parent="." unique_id=1633431698]
+transform = Transform3D(0.08, 0, 0, 0, 0.08, 0, 0, 0, 0.08, -0.32, 0, -0.24)
+
+[node name="StoneAndWood" type="MeshInstance3D" parent="CarvedMarker" unique_id=279593008]
+material_override = SubResource("ShaderMaterial_2whim")
+mesh = ExtResource("2_i6qc6")

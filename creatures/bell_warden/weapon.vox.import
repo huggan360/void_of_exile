@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0sgysbv4bolm"
+path="res://.godot/imported/weapon.vox-9049247db1917fb9d384e33e5706cf61.tscn"
+
+[deps]
+
+source_file="res://creatures/bell_warden/weapon.vox"
+dest_files=["res://.godot/imported/weapon.vox-9049247db1917fb9d384e33e5706cf61.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

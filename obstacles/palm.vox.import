@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c6no7nkw4bj6d"
+path="res://.godot/imported/palm.vox-f70cb772d2271b3e2925ef2c1ea40fad.tscn"
+
+[deps]
+
+source_file="res://obstacles/palm.vox"
+dest_files=["res://.godot/imported/palm.vox-f70cb772d2271b3e2925ef2c1ea40fad.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

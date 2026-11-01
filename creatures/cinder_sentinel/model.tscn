@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_qrp18"]
+[ext_resource type="ArrayMesh" path="res://creatures/cinder_sentinel/meshes/body.res" id="2_5iubw"]
+[ext_resource type="ArrayMesh" path="res://creatures/cinder_sentinel/meshes/body_glow.res" id="3_vfvrl"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5as1"]
+render_priority = 0
+shader = ExtResource("1_qrp18")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4xq7x"]
+render_priority = 0
+shader = ExtResource("1_qrp18")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="CinderSentinelDefault" type="Node3D" unique_id=39726925]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/cinder_sentinel/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=272752092]
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=886229232]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.24, -0.04, -0.71999997)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=524112711]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("2_5iubw")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=2059634045]
+material_override = SubResource("ShaderMaterial_4xq7x")
+mesh = ExtResource("3_vfvrl")

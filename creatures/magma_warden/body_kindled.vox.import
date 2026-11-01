@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyjc3cdja66ye"
+path="res://.godot/imported/body_kindled.vox-f906ec59a9b3d1e6412ddcfc25a64880.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/body_kindled.vox"
+dest_files=["res://.godot/imported/body_kindled.vox-f906ec59a9b3d1e6412ddcfc25a64880.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

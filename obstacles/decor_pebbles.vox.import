@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://0c454airbog7"
+path="res://.godot/imported/decor_pebbles.vox-ce8e2f39aa336ca1288aedd50a1179e8.tscn"
+
+[deps]
+
+source_file="res://obstacles/decor_pebbles.vox"
+dest_files=["res://.godot/imported/decor_pebbles.vox-ce8e2f39aa336ca1288aedd50a1179e8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

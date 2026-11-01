@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chv0c2dmrjahe"
+path="res://.godot/imported/model.vox-324ee7e2ae6d556962ef4bd0eb3595db.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/magma_seed/model.vox"
+dest_files=["res://.godot/imported/model.vox-324ee7e2ae6d556962ef4bd0eb3595db.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

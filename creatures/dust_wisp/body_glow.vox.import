@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d3qfevataoun3"
+path="res://.godot/imported/body_glow.vox-3795a1ae55da5df5b93108e9fdd367f5.tscn"
+
+[deps]
+
+source_file="res://creatures/dust_wisp/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-3795a1ae55da5df5b93108e9fdd367f5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

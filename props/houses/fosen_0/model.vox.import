@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cf7anyqkpfd7j"
+path="res://.godot/imported/model.vox-feaa1b45cd69f630de1365ea445eb30e.tscn"
+
+[deps]
+
+source_file="res://props/houses/fosen_0/model.vox"
+dest_files=["res://.godot/imported/model.vox-feaa1b45cd69f630de1365ea445eb30e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

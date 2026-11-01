@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_htsp7"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_blue_dragon/meshes/body_crack2.res" id="2_74s8v"]
+[ext_resource type="ArrayMesh" path="res://creatures/egg_blue_dragon/meshes/body_crack2_glow.res" id="3_vn7b2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xpuxp"]
+render_priority = 0
+shader = ExtResource("1_htsp7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xshkt"]
+render_priority = 0
+shader = ExtResource("1_htsp7")
+shader_parameter/jitter = 0.0
+shader_parameter/glow_strength = 1.1
+
+[node name="EggBlueDragonCrack2" type="Node3D" unique_id=816287939]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/egg_blue_dragon/model_crack2.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1355367085]
+
+[node name="BodyCrack2" type="Node3D" parent="Rig" unique_id=994104486]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.5999999, 0, -1.5999999)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/BodyCrack2" unique_id=689938133]
+material_override = SubResource("ShaderMaterial_xpuxp")
+mesh = ExtResource("2_74s8v")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/BodyCrack2" unique_id=1407364416]
+material_override = SubResource("ShaderMaterial_xshkt")
+mesh = ExtResource("3_vn7b2")

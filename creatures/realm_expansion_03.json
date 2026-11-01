@@ -1,0 +1,228 @@
+[
+  {
+    "id": "slag_seraph",
+    "biome": "doom",
+    "folder": "creatures/slag_seraph",
+    "parts": [
+      "body",
+      "wing_l",
+      "wing_r"
+    ],
+    "art_voxels": 8030
+  },
+  {
+    "id": "obsidian_ram",
+    "biome": "doom",
+    "folder": "creatures/obsidian_ram",
+    "parts": [
+      "body",
+      "leg"
+    ],
+    "art_voxels": 14784
+  },
+  {
+    "id": "ember_lich",
+    "biome": "doom",
+    "folder": "creatures/ember_lich",
+    "parts": [
+      "body",
+      "arm"
+    ],
+    "art_voxels": 7463
+  },
+  {
+    "id": "aurora_sentinel",
+    "biome": "fosen",
+    "folder": "creatures/aurora_sentinel",
+    "parts": [
+      "body",
+      "arm",
+      "leg"
+    ],
+    "art_voxels": 8523
+  },
+  {
+    "id": "hoarfrost_owl",
+    "biome": "fosen",
+    "folder": "creatures/hoarfrost_owl",
+    "parts": [
+      "body",
+      "wing_l",
+      "wing_r"
+    ],
+    "art_voxels": 11942
+  },
+  {
+    "id": "icebound_colossus",
+    "biome": "fosen",
+    "folder": "creatures/icebound_colossus",
+    "parts": [
+      "body",
+      "arm",
+      "leg"
+    ],
+    "art_voxels": 18849
+  },
+  {
+    "id": "prism_ray",
+    "biome": "blue",
+    "folder": "creatures/prism_ray",
+    "parts": [
+      "body",
+      "wing_l",
+      "wing_r"
+    ],
+    "art_voxels": 6282
+  },
+  {
+    "id": "runic_archivist",
+    "biome": "blue",
+    "folder": "creatures/runic_archivist",
+    "parts": [
+      "body"
+    ],
+    "art_voxels": 6160
+  },
+  {
+    "id": "azure_medusa",
+    "biome": "blue",
+    "folder": "creatures/azure_medusa",
+    "parts": [
+      "body",
+      "tentacle"
+    ],
+    "art_voxels": 11604
+  },
+  {
+    "id": "sun_jackal",
+    "biome": "desert",
+    "folder": "creatures/sun_jackal",
+    "parts": [
+      "body",
+      "leg"
+    ],
+    "art_voxels": 9438
+  },
+  {
+    "id": "dune_monolith",
+    "biome": "desert",
+    "folder": "creatures/dune_monolith",
+    "parts": [
+      "body"
+    ],
+    "art_voxels": 8660
+  },
+  {
+    "id": "glass_scorpion",
+    "biome": "desert",
+    "folder": "creatures/glass_scorpion",
+    "parts": [
+      "body",
+      "tail"
+    ],
+    "art_voxels": 10348
+  },
+  {
+    "id": "umbral_reaper",
+    "biome": "dark",
+    "folder": "creatures/umbral_reaper",
+    "parts": [
+      "body",
+      "arm"
+    ],
+    "art_voxels": 8046
+  },
+  {
+    "id": "amethyst_widow",
+    "biome": "dark",
+    "folder": "creatures/amethyst_widow",
+    "parts": [
+      "body",
+      "leg_l",
+      "leg_r"
+    ],
+    "art_voxels": 14240
+  },
+  {
+    "id": "nightbell_idol",
+    "biome": "dark",
+    "folder": "creatures/nightbell_idol",
+    "parts": [
+      "body"
+    ],
+    "art_voxels": 12462
+  },
+  {
+    "id": "bramble_fox",
+    "biome": "normal",
+    "folder": "creatures/bramble_fox",
+    "parts": [
+      "body",
+      "leg",
+      "tail"
+    ],
+    "art_voxels": 5130
+  },
+  {
+    "id": "moss_tortoise",
+    "biome": "normal",
+    "folder": "creatures/moss_tortoise",
+    "parts": [
+      "body"
+    ],
+    "art_voxels": 11612
+  },
+  {
+    "id": "vine_mantis",
+    "biome": "normal",
+    "folder": "creatures/vine_mantis",
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "art_voxels": 4790
+  },
+  {
+    "id": "tide_snail",
+    "biome": "blue",
+    "folder": "creatures/tide_snail",
+    "parts": [
+      "body"
+    ],
+    "art_voxels": 7924
+  },
+  {
+    "id": "dune_crawler",
+    "biome": "desert",
+    "folder": "creatures/dune_crawler",
+    "parts": [
+      "body"
+    ],
+    "art_voxels": 6022
+  },
+  {
+    "id": "gloam_bat",
+    "biome": "dark",
+    "folder": "creatures/gloam_bat",
+    "parts": [
+      "body",
+      "wing_l",
+      "wing_r"
+    ],
+    "art_voxels": 1596
+  },
+  {
+    "id": "bile_bandit",
+    "biome": "dark",
+    "folder": "creatures/bile_bandit",
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "art_voxels": 6214
+  }
+]

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bofsgwge6f74n"
+path="res://.godot/imported/weapon_glow.vox-437ef6189f429159bf72d28e97287c18.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_sentinel/weapon_glow.vox"
+dest_files=["res://.godot/imported/weapon_glow.vox-437ef6189f429159bf72d28e97287c18.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

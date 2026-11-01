@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dvuuyd6oeoeb0"
+path="res://.godot/imported/model.vox-ca9ce368a2eb638fee6da86dcc4a2006.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/sun_seal/model.vox"
+dest_files=["res://.godot/imported/model.vox-ca9ce368a2eb638fee6da86dcc4a2006.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

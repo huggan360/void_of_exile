@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_bo144"]
+[ext_resource type="ArrayMesh" path="res://creatures/mirror_shade/meshes/body.res" id="2_15ijc"]
+[ext_resource type="ArrayMesh" path="res://creatures/mirror_shade/meshes/body_glow.res" id="3_hwqal"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5as1"]
+render_priority = 0
+shader = ExtResource("1_bo144")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4xq7x"]
+render_priority = 0
+shader = ExtResource("1_bo144")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[node name="MirrorShadeDefault" type="Node3D" unique_id=1472155931]
+metadata/status = "live"
+metadata/voxel_source = "res://creatures/mirror_shade/model.vox"
+
+[node name="Rig" type="Node3D" parent="." unique_id=1871847106]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+
+[node name="Body" type="Node3D" parent="Rig" unique_id=186079353]
+transform = Transform3D(0.04, 0, 0, 0, 0.04, 0, 0, 0, 0.04, -1.0799999, 0.12, -0.76)
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=260903115]
+material_override = SubResource("ShaderMaterial_v5as1")
+mesh = ExtResource("2_15ijc")
+
+[node name="EmissiveVoxels" type="MeshInstance3D" parent="Rig/Body" unique_id=1054402931]
+material_override = SubResource("ShaderMaterial_4xq7x")
+mesh = ExtResource("3_hwqal")

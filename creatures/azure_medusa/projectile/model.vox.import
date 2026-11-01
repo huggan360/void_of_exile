@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://gcv6dk00c3im"
+path="res://.godot/imported/model.vox-40bce009168245dc1ca8069e781f7105.tscn"
+
+[deps]
+
+source_file="res://creatures/azure_medusa/projectile/model.vox"
+dest_files=["res://.godot/imported/model.vox-40bce009168245dc1ca8069e781f7105.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

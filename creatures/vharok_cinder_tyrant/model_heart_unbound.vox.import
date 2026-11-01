@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dmcqa1qd30n6"
+path="res://.godot/imported/model_heart_unbound.vox-f2fa80987aa7273804dd00c35d92c8a5.tscn"
+
+[deps]
+
+source_file="res://creatures/vharok_cinder_tyrant/model_heart_unbound.vox"
+dest_files=["res://.godot/imported/model_heart_unbound.vox-f2fa80987aa7273804dd00c35d92c8a5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

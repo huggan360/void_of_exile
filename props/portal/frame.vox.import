@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://mpilj2ckl0ny"
+path="res://.godot/imported/frame.vox-0832b48b513aad3e7d7208262fe4b2f8.tscn"
+
+[deps]
+
+source_file="res://props/portal/frame.vox"
+dest_files=["res://.godot/imported/frame.vox-0832b48b513aad3e7d7208262fe4b2f8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,55 @@
+{
+  "voxel_size": 0.05,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -64,
+        0,
+        -64
+      ],
+      "frame_size": [
+        144,
+        136,
+        144
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -64,
+        -16,
+        -72
+      ],
+      "frame_size": [
+        136,
+        88,
+        120
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        120,
+        -8
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0
+    }
+  },
+  "variants": {},
+  "hand": [
+    0,
+    136,
+    -72
+  ],
+  "hover": 0,
+  "bob": 0.06,
+  "waddle": 0,
+  "flap_rate": 1.4,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.1
+}
