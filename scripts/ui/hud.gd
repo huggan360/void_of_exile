@@ -103,7 +103,7 @@ func _ready() -> void:
 	# Under the account bar: the bar of the boss you're fighting.
 	_boss_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_boss_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_boss_bar.position.y = MARGIN + 86
+	_boss_bar.position.y = MARGIN + 58
 	var boss_width := BossBar.BAR_SIZE.x + BossBar.PORTRAIT + 14
 	_boss_bar.offset_left = -boss_width * 0.5
 	_boss_bar.offset_right = boss_width * 0.5
@@ -378,11 +378,12 @@ func _process(_delta: float) -> void:
 		social_panel.reset_size()
 		social_panel.global_position = Vector2(chat.button_row.global_position.x,
 				chat.button_row.global_position.y - social_panel.size.y - 4.0)
-	# The quest banner sits under the account bar, or under a boss's bar.
-	quest_banner.offset_top = (_boss_bar.position.y + _boss_bar.size.y + 8.0) if _boss_bar.visible else MARGIN + 86.0
+	# Boss health takes priority over campaign objectives so neither blocks the fight.
+	_boss_bar.track(Boss.nearest_active(player.global_position))
+	quest_banner.hidden_by_boss = _boss_bar.visible
+	quest_banner.offset_top = MARGIN + 64.0
 
 	player.ui_blocked = tab or interaction.opened
-	_boss_bar.track(Boss.nearest_active(player.global_position))
 	# Only catch drops while something is being dragged (so clicks still shoot).
 	_drop_zone.mouse_filter = Control.MOUSE_FILTER_STOP if dragging else Control.MOUSE_FILTER_IGNORE
 	if not player.frozen and not player.controls_locked():
