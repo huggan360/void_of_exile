@@ -2,8 +2,8 @@ class_name AccountBar
 extends VBoxContainer
 ## Top center of the HUD: the account's XP bar (it warms from yellow to red
 ## as it fills) with the account level in a diamond at its right end. The
-## little arrow under it rolls a drawer down: the reward track, one row per
-## level, showing what you've unlocked and what's coming. Levels without a
+## XP bar itself opens a drawer: the reward track, one row per level,
+## showing what you've unlocked and what's coming. Levels without a
 ## reward yet are left open for things the game doesn't have yet.
 
 const BAR_SIZE := Vector2(620, 24)
@@ -14,7 +14,6 @@ const RED := Color(0.92, 0.18, 0.12)
 
 var _bar := Control.new()
 var _diamond := LevelDiamond.new(52.0)
-var _arrow := Button.new()
 var _drawer := PanelContainer.new()
 var _clip := Control.new()
 var _rows := VBoxContainer.new()
@@ -35,20 +34,16 @@ func _ready() -> void:
 	add_child(top)
 	_bar.custom_minimum_size = BAR_SIZE
 	_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_bar.mouse_filter = Control.MOUSE_FILTER_PASS
+	_bar.mouse_filter = Control.MOUSE_FILTER_STOP
+	_bar.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_bar.tooltip_text = "Click to view account rewards"
+	_bar.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			toggle()
+			_bar.accept_event())
 	_bar.draw.connect(_draw_bar)
 	top.add_child(_bar)
 	top.add_child(_diamond)
-	_arrow.text = "▼"
-	_arrow.flat = true
-	_arrow.focus_mode = Control.FOCUS_NONE
-	_arrow.custom_minimum_size = Vector2(46, 22)
-	_arrow.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_arrow.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	_arrow.tooltip_text = "Account rewards"
-	UIStyle.text(_arrow, 16, UIStyle.GOLD)
-	_arrow.pressed.connect(toggle)
-	add_child(_arrow)
 	# The drawer: clipped so it can roll down and up.
 	_clip.clip_contents = true
 	_clip.custom_minimum_size = Vector2(BAR_SIZE.x + 40, 0)
@@ -78,7 +73,6 @@ func _ready() -> void:
 
 func toggle() -> void:
 	_open = not _open
-	_arrow.text = "▲" if _open else "▼"
 	if _open:
 		_fill_rows()
 	var tw := create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
