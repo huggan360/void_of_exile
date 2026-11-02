@@ -241,6 +241,7 @@ func _update_binding_hints() -> void:
 func toggle_stats() -> void:
 	_stats_panel.visible = not _stats_panel.visible
 	if _stats_panel.visible:
+		account_bar.close_rewards()
 		_stats_panel.refresh()
 		_stats_panel.modulate.a = 0.0
 		_stats_panel.create_tween().tween_property(_stats_panel, "modulate:a", 1.0, 0.15)
@@ -374,6 +375,9 @@ func _process(_delta: float) -> void:
 		if not open:
 			_tooltip.hide()
 	interaction.update_prompt(player, open or dragging)
+	# Reward details are secondary to all other HUD tabs and dialogs.
+	if account_bar.is_open() and ((_stats_panel and _stats_panel.visible) or (social_panel and social_panel.visible) or (picker and picker.visible and picker.has_method("is_open") and picker.is_open())):
+		account_bar.close_rewards()
 	if social_panel and social_panel.visible:
 		social_panel.reset_size()
 		social_panel.global_position = Vector2(chat.button_row.global_position.x,
