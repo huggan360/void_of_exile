@@ -2,19 +2,19 @@ class_name AccountBar
 extends VBoxContainer
 ## Top center of the HUD: the account's XP bar (it warms from yellow to red
 ## as it fills) with the account level in a diamond at its right end. The
-## little arrow under it rolls a drawer down: the reward track, one row per
-## level, showing what you've unlocked and what's coming. Levels without a
+## XP bar itself opens a drawer: the reward track, one row per level,
+## showing what you've unlocked and what's coming. Levels without a
 ## reward yet are left open for things the game doesn't have yet.
 
 const BAR_SIZE := Vector2(620, 24)
 const DRAWER_HEIGHT := 420.0
+const DRAWER_BOTTOM_MARGIN := 18.0
 const SHOW_LEVELS := 50
 const YELLOW := Color(1.0, 0.86, 0.25)
 const RED := Color(0.92, 0.18, 0.12)
 
 var _bar := Control.new()
 var _diamond := LevelDiamond.new(52.0)
-var _arrow := Button.new()
 var _drawer := PanelContainer.new()
 var _clip := Control.new()
 var _rows := VBoxContainer.new()
@@ -35,28 +35,26 @@ func _ready() -> void:
 	add_child(top)
 	_bar.custom_minimum_size = BAR_SIZE
 	_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_bar.mouse_filter = Control.MOUSE_FILTER_PASS
+	_bar.mouse_filter = Control.MOUSE_FILTER_STOP
+	_bar.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_bar.tooltip_text = "Click to view account rewards"
+	_bar.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			toggle()
+			_bar.accept_event())
 	_bar.draw.connect(_draw_bar)
 	top.add_child(_bar)
 	top.add_child(_diamond)
-	_arrow.text = "▼"
-	_arrow.flat = true
-	_arrow.focus_mode = Control.FOCUS_NONE
-	_arrow.custom_minimum_size = Vector2(46, 22)
-	_arrow.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_arrow.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	_arrow.tooltip_text = "Account rewards"
-	UIStyle.text(_arrow, 16, UIStyle.GOLD)
-	_arrow.pressed.connect(toggle)
-	add_child(_arrow)
 	# The drawer: clipped so it can roll down and up.
 	_clip.clip_contents = true
 	_clip.custom_minimum_size = Vector2(BAR_SIZE.x + 40, 0)
 	_clip.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_clip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_clip.mouse_filter = Control.MOUSE_FILTER_PASS
 	add_child(_clip)
 	_drawer.add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
-	_drawer.size = Vector2(BAR_SIZE.x + 40, DRAWER_HEIGHT)
+	_drawer.custom_minimum_size = Vector2(BAR_SIZE.x + 40, DRAWER_HEIGHT)
+	_drawer.size = _drawer.custom_minimum_size
+	_drawer.mouse_filter = Control.MOUSE_FILTER_STOP
 	_clip.add_child(_drawer)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
@@ -65,7 +63,8 @@ func _ready() -> void:
 	_next.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(_next)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(BAR_SIZE.x + 10, DRAWER_HEIGHT - 110)
+	scroll.custom_minimum_size = Vector2(0, 0)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_rows.add_theme_constant_override("separation", 4)
 	_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -77,13 +76,24 @@ func _ready() -> void:
 
 
 func toggle() -> void:
-	_open = not _open
-	_arrow.text = "▲" if _open else "▼"
+	if _open:
+		close_rewards()
+		return
+	_open = true
 	if _open:
 		_fill_rows()
 	var tw := create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_clip, "custom_minimum_size:y", DRAWER_HEIGHT if _open else 0.0, 0.3)
 	tw.tween_property(_drawer, "position:y", 0.0 if _open else -DRAWER_HEIGHT, 0.3)
+
+
+func close_rewards() -> void:
+	if not _open:
+		return
+	_open = false
+	var tw := create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_clip, "custom_minimum_size:y", 0.0, 0.2)
+	tw.tween_property(_drawer, "position:y", -DRAWER_HEIGHT, 0.2)
 
 
 func is_open() -> bool:

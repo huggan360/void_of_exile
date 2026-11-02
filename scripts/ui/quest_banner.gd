@@ -9,6 +9,8 @@ extends PanelContainer
 var social: SocialClient
 ## The place you're in ("hall", a realm id...), to say where objectives are.
 var place := ""
+## The HUD hides the objective while a boss health bar is on screen.
+var hidden_by_boss := false
 var _title := Label.new()
 var _time := Label.new()
 var _objective := Label.new()
@@ -101,7 +103,7 @@ func _button(caption: String, action: Callable) -> Button:
 
 func _process(_delta: float) -> void:
 	var camp := social.campaign_state() if social else {}
-	visible = not camp.is_empty() and camp.get("status", "") != "done"
+	visible = not hidden_by_boss and not camp.is_empty() and camp.get("status", "") != "done"
 	if not visible:
 		_details.hide()
 		return

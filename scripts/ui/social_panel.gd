@@ -9,12 +9,14 @@ extends PanelContainer
 ##            invite by name, leave, kick (leader), and the campaign you play.
 
 const WIDTH := 440.0
+const MAX_BODY_HEIGHT := 340.0
 
 var social: SocialClient
 var chat: ChatPanel
 var tab := ""
 var _title := Label.new()
 var _body := VBoxContainer.new()
+var _list_scroll := ScrollContainer.new()
 var _search := LineEdit.new()
 var _results: Array = []
 var _searching := false
@@ -33,8 +35,14 @@ func _ready() -> void:
 	head.add_child(_title)
 	var close := _button("×", func() -> void: show_tab(""))
 	head.add_child(close)
+	# Scroll changing friend/party lists instead of growing the whole panel.
+	_list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_list_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_list_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_child(_list_scroll)
 	_body.add_theme_constant_override("separation", 6)
-	column.add_child(_body)
+	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list_scroll.add_child(_body)
 	_search.placeholder_text = "Find a player by name"
 	_search.add_theme_font_override("font", UIStyle.font())
 	_search.add_theme_font_size_override("font_size", UIStyle.SIZE_SMALL)
@@ -60,6 +68,9 @@ func _rebuild() -> void:
 	if _search.get_parent():
 		_search.get_parent().remove_child(_search)
 	for child in _body.get_children():
+		# queue_free() alone leaves old rows contributing to minimum size until
+		# the end of the frame, which makes the panel grow with every refresh.
+		_body.remove_child(child)
 		child.queue_free()
 	if tab == "friends":
 		_title.text = "Friends"
@@ -67,6 +78,14 @@ func _rebuild() -> void:
 	else:
 		_title.text = "Party"
 		_party()
+	call_deferred("_fit_body_height")
+
+
+func _fit_body_height() -> void:
+	if not visible:
+		return
+	_list_scroll.custom_minimum_size.y = minf(_body.get_combined_minimum_size().y, MAX_BODY_HEIGHT)
+	reset_size()
 
 
 # --- Friends --------------------------------------------------------------------------
