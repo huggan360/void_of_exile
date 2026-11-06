@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://btidclm7a8n6l"
+path="res://.godot/imported/jaw_unbound.vox-31648172133a72c7502b71039787e3eb.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_cantor/jaw_unbound.vox"
+dest_files=["res://.godot/imported/jaw_unbound.vox-31648172133a72c7502b71039787e3eb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -11,9 +11,20 @@ var _fire: Dictionary = {}
 const COLORS := [Color("23252c"), Color("454851"), Color("bfc0b8"), Color("ebe8d8"), Color("090b10"), Color("ff5d16"), Color("ffba50"), Color("fff1c6"), Color("242024"), Color("4a4140"), Color("70605a"), Color("b59777")]
 
 func _ready() -> void:
+	warm_asset()
+	var world: Node = get_parent()
+	while world!=null and not world is GameWorld: world = world.get_parent()
+	if world is GameWorld and world.get_meta("asynchronous_load",false):
+		world.queue_load_step(_build_instances)
+	else:
+		_build_instances()
+
+func warm_asset() -> void:
 	if not _cache.has(kind):
 		_sculpt()
 		_cache[kind] = [_mesh(_voxels), _mesh(_fire)]
+
+func _build_instances() -> void:
 	for i in 2:
 		if _cache[kind][i] == null: continue
 		var instance := MeshInstance3D.new()

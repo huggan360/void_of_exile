@@ -68,10 +68,18 @@ var xp_orbs := XpOrbs.new()
 var loot_bags := LootBags.new()
 var hud: Hud
 var transition := Transition.new()
+var _world_loader := WorldLoader.new()
+var _preparing_world := false
+var _world_generation := 0
+var _async_world_build := false
 var low_health := LowHealthOverlay.new()
 var menus := Menus.new()
 var _traveling := false
 var _dead := false  # online: our character died, waiting for the next one
+var _switching := false
+var _creating_character := false
+var _connecting := false
+var _death_record := {}
 
 var _args := {}
 
@@ -83,6 +91,13 @@ var campaign := CampaignClient.new()
 var _name_timer := 0.0
 
 func _ready() -> void:
+	# The game started as a Singleplayer server (see _start_singleplayer):
+	# exported builds can't be given another scene on the command line.
+	if "--dedicated" in OS.get_cmdline_user_args():
+		set_process(false)
+		set_process_unhandled_input(false)
+		get_tree().change_scene_to_file.call_deferred("res://scenes/server/dedicated.tscn")
+		return
 	get_tree().node_added.connect(_readable_world_label)
 	_setup_input()
 	_parse_args()
@@ -92,6 +107,8 @@ func _ready() -> void:
 	stats = GameServer.character(player.player_id)
 	player.stats = stats
 	add_child(player)
+	add_child(player.aim_marker)
+	add_child(GameCursor.new())
 	add_child(fog_of_war)
 	add_child(arrows)
 	add_child(enemy_bullets)
@@ -130,7 +147,10 @@ func _ready() -> void:
 	social.goto.connect(func(place: String, at: Vector3) -> void:
 		if not _dead: travel.call_deferred(place, at))
 	social.warp.connect(_warp)
+	social.join_requested.connect(join_friend)
 	add_child(transition)
+	add_child(_world_loader)
+	_world_loader.progress_changed.connect(transition.set_progress)
 	menus.singleplayer_pressed.connect(_start_singleplayer)
 	menus.join_requested.connect(_join_server)
 	menus.leave_pressed.connect(func() -> void: _return_offline("You left."))
@@ -142,6 +162,17 @@ func _ready() -> void:
 	hud.picker.record_requested.connect(func(record: Dictionary) -> void:
 		hud.add_dialog(DeathRecord.new(record, true, "Close")))
 
+	if _args.has("play-winter"):
+		_start_winter_play()
+		return
+	if _args.has("play-dungeon"):
+		_start_dungeon_play()
+		return
+	if _args.has("play-space"):
+		_prepare_manual_archer()
+		_load_world(SpaceWorld.REALM, {id = SpaceWorld.REALM, seed = 0, destroyed = [], space = true, intro = _args.has("intro")})
+		hud.toasts.push("The Astral Reach (offline preview). Command table: launch a ship.", UIStyle.GOOD, 7.0)
+		return
 	if _args.has("watch-dungeon"):
 		GameServer.debug_godmode = true
 		_load_world("dng_goblins_cave_preview", Dungeons.record("dng_goblins_cave_preview", "goblins_cave", int(_args.get("seed", "4217"))))
@@ -169,15 +200,121 @@ func _ready() -> void:
 		_take_screenshot()
 		return
 	# The start screen, over the Tavern turning slowly in the background.
-	_load_world("hall")
+	_traveling = true
+	hud.visible = false
+	player.input_locked = true
+	# Branding is the first visible scene. Prepare the menu world underneath it;
+	# booting is not portal travel and must never play the assembly animation.
+	var intro := preload("res://scripts/ui/launch_intro.gd").new()
+	add_child(intro)
+	intro.play(true)
+	if not await _load_world_async("hall"): return
+	await _arrive(false)
 	hud.visible = false
 	player.input_locked = true
 	menus.show_start()
-	var intro := preload("res://scripts/ui/launch_intro.gd").new()
-	add_child(intro)
-	await intro.play()
+	intro.release_to_menu()
+	await intro.finished
 	if not await Account.refresh():
 		menus.show_login(false)
+
+
+## A human-controlled development session, isolated by its launcher data folder.
+func _prepare_manual_archer() -> void:
+	GameServer.debug_godmode = false
+	stats.class_id = "archer"
+	stats.reset()
+	stats.gear = {weapon = Items.make("G8_bow"), armor = Items.make("D_cloak_ofiron"),
+		spell = Items.make("D_spell_oftheblue"), bonus = Items.make("G8_bonus_flame")}
+	stats.add_backpack()
+	stats.give(["D_bow_offrost", "D_bow_ofstorm", "D_bow_ofiron", "D_bow_dragon", "D_bow_Fallenwoods",
+		"G8_cloak", "D_cloak_silvershield", "D_spell_ofthedivine", "D_spell_ofstorm",
+		"D_bonus_crucifix_ofiron", "G8_bonus_eye", "G8_bonus_crystal"].map(func(id: String) -> Item: return Items.make(id)).filter(func(item: Item) -> bool: return item != null))
+	for index in PlayerStats.QUICKSLOTS:
+		stats.quick[index] = Items.make("elixir_hp" if index == 0 else "elixir_mp")
+		stats.quick[index].count = stats.quick[index].stack_max
+	stats.level = PlayerStats.MAX_LEVEL
+	stats.developer_max_stats()
+	player.refresh_gear()
+	menus.hide_all()
+	hud.show()
+	player.input_locked = false
+
+
+func _start_dungeon_play() -> void:
+	_prepare_manual_archer()
+	var id := str(_args.get("play-dungeon", "goblins_cave"))
+	if not Dungeons.DEFINITIONS.has(id): id = "goblins_cave"
+	var realm := "dng_%s_manual" % id
+	_load_world(realm, Dungeons.record(realm, id, int(_args.get("seed", "4217"))))
+	hud.toasts.push("Level 50 archer - maxed stats and endgame gear. Tab: spare gear, F/G: potions.", UIStyle.GOOD, 7.0)
+	print("[play] Ready in ", id, " as a maxed archer; gear ", stats.gear.values().map(func(item: Item) -> String: return item.id))
+
+
+## Chapter-two checkpoint for a human-controlled local play session.
+func _start_winter_play() -> void:
+	_prepare_manual_archer()
+	stats.home = "Snowbell"
+	stats.give([Items.make("key_crown_of_the_rime"), Items.make("story_clue"), Items.make("story_ice_card")])
+	var realm := Campaigns.realm_id(0, "frozen_whisper")
+	WorldServer.reset_realm(realm)
+	var chapter := Campaigns.get_def("frozen_whisper")
+	social.party_at = Time.get_ticks_msec() / 1000.0
+	social.party = {id = 1, leader = social.my_name, members = [{player_id = player.player_id,
+		name = social.my_name, leader = true, class_id = "archer", level = 50, dead = false, place = "Crown of the Rime"}],
+		campaign = {id = "frozen_whisper", title = chapter.title, owner = 0, status = "active", realm = realm,
+			tavern = Campaigns.tavern_id(0, "frozen_whisper"), step = Campaigns.step_index("frozen_whisper", "stronghold"),
+			count = 0, needed = 1, side_step = 0, side_done = true, done_objects = [], elapsed = 0.0, deaths = 0,
+			revealed = ["tobias", "halvard"], objective = {}, side_objective = {}, links = []}}
+	social.local_campaign_requested.connect(_manual_winter_action)
+	stats.changed.connect(_manual_winter_inventory)
+	_load_world(realm, {}, _winter_gate_spawn)
+	(world as IslandWorld).enemy_director.enemy_killed.connect(_manual_winter_killed)
+	hud.toasts.push("Chapter 2 - the Crown of the Rime key is in your backpack. E: talk to the gate lock.", UIStyle.GOOD, 8.0)
+	print("[play] Chapter 2 ready outside winter gate at ", player.global_position, "; level ", stats.level,
+		"; key ", not stats.find_item("key_crown_of_the_rime").is_empty())
+
+
+func _winter_gate_spawn(place: GameWorld) -> Vector3:
+	var island := place as IslandWorld
+	for fort in island.generator.strongholds:
+		if fort.biome_id != Biomes.FOSEN: continue
+		var gate: Node3D = island.gates.entries[fort.center].root
+		var at := gate.to_global(Vector3(0.5, 0, -38.0))
+		at.y = island.ground_height(at.x, at.z)
+		return at
+	return place.spawn_point
+
+
+func _manual_winter_killed(enemy: Enemy) -> void:
+	var checkpoint := social.campaign_state()
+	if enemy.def.id != "rimeheart_prism" or int(checkpoint.step) != Campaigns.step_index(checkpoint.id, "stronghold"): return
+	checkpoint.step = Campaigns.step_index(checkpoint.id, "shard")
+	checkpoint.chest = GameServer.spawn_bag(world.realm_id, [Items.make("story_clue")], enemy.global_position, GameServer.PUBLIC, "story")
+	var chest := GameServer.bag(int(checkpoint.chest))
+	checkpoint.objective = {world = world.realm_id, pos = chest.pos}
+	social.party_changed.emit()
+
+
+func _manual_winter_inventory() -> void:
+	var checkpoint := social.campaign_state()
+	if checkpoint.is_empty() or int(checkpoint.step) != Campaigns.step_index(checkpoint.id, "shard"): return
+	var piece := stats.find_item("story_clue")
+	if piece.is_empty() or stats.item_at(piece).count < 2: return
+	checkpoint.step = Campaigns.step_index(checkpoint.id, "return")
+	checkpoint.objective = {}
+	social.party_changed.emit()
+
+
+func _manual_winter_action(args: Array) -> void:
+	var checkpoint := social.campaign_state()
+	if args.size() < 2 or args[0] != "quest" or args[1] != "npc:halvard": return
+	if int(checkpoint.step) != Campaigns.step_index(checkpoint.id, "return"): return
+	if is_instance_valid(hud.interaction.target):
+		hud.interaction.target.response = str(Campaigns.step_def(checkpoint.id, int(checkpoint.step)).say)
+	checkpoint.status = "done"
+	hud.toasts.push("Chapter 2 complete!", UIStyle.GOOD, 5.0)
+	social.party_changed.emit()
 
 
 ## What the loading screen calls a place.
@@ -188,6 +325,10 @@ static func place_name(destination: String) -> String:
 		return "Dungeon"
 	if Campaigns.is_tavern(destination):
 		return "Tavern"
+	if ChambersWorld.is_chambers(destination):
+		return "Chambers"
+	if SpaceWorld.is_space(destination):
+		return "The Astral Reach"
 	if destination == "castle" or Campaigns.is_castle(destination):
 		return "The Hollow Castle"
 	return "Campaign" if destination == "campaign" or Campaigns.is_campaign_realm(destination) else "Realm"
@@ -197,39 +338,61 @@ static func place_name(destination: String) -> String:
 ## new place loads, and we drop out of hyperspace into it (at `at`, when
 ## set: a teleport to another player).
 func travel(destination: String, at := Vector3.INF) -> void:
-	if _traveling:
+	if _traveling or _dead:
+		return
+	if ChambersWorld.is_chambers(destination) and not Net.is_client():
+		hud.toasts.push("The Chambers open when you play online or in Singleplayer.", UIStyle.HP_LIGHT, 3.0)
 		return
 	_traveling = true
+	boss_introduction.cancel()
+	if world is CastleWorld and is_instance_valid(world.encounter): world.encounter._restore_camera()
+	player.input_locked = true
+	if menus.is_open(): menus.hide_all()
+	hud.visible = false
+	var original_client := Net.client
+	var original_generation := _world_generation
+	if not _args.has("qa-quick"): await transition.jump_in(place_name(destination))
+	if original_client!=Net.client or original_generation!=_world_generation: return
 	var record := {}
 	if Net.is_client():
 		record = await Net.client.enter(destination)
 		if record.has("error"):
+			hud.visible = true
+			if not _args.has("qa-quick"): await transition.jump_out()
+			player.input_locked = false
 			hud.toasts.push(record.error, UIStyle.HP_LIGHT, 3.0)
 			_traveling = false
+			boss_introduction.clear_world()
 			return
-	player.input_locked = true
-	if menus.is_open():
-		menus.hide_all()
-	hud.visible = false
-	if not _args.has("qa-quick"): await transition.jump_in(place_name(destination))
-	_load_world(destination, record)
+	if not await _load_world_async(destination,record):
+		_preparing_world = false
+		if is_instance_valid(world): world.process_mode = Node.PROCESS_MODE_INHERIT
+		hud.visible = true
+		if not _args.has("qa-quick"): await transition.jump_out()
+		player.input_locked = _dead
+		_traveling = false
+		return
+	if record.has("arrival_pos"): at = record.arrival_pos
 	if at != Vector3.INF and world.is_walkable(at):
-		_place_player(Vector3(at.x, world.ground_height(at.x, at.z), at.z))
+		_place_player(at if record.has("arrival_pos") else Vector3(at.x, world.ground_height(at.x, at.z), at.z))
 	await _arrive()
 
 
 ## Waits until the new place is ready around the player (as short as
 ## possible), then drops out of hyperspace into it.
-func _arrive() -> void:
+func _arrive(animate := true) -> void:
 	await get_tree().process_frame
-	while player.frozen:
+	while player.frozen or (is_instance_valid(world) and not world.is_presentation_ready()):
 		await get_tree().process_frame
 	await get_tree().create_timer(0.15).timeout  # a moment for the first frames to settle
+	transition.set_progress(1.0)
+	if animate and not _args.has("qa-quick"): await transition.jump_out()
 	hud.visible = true
-	if not _args.has("qa-quick"): await transition.jump_out()
+	_async_world_build = false
+	if is_instance_valid(world): world.set_meta("asynchronous_load",false)
 	GameServer.grant_arrival_protection(player.player_id)
 	if Net.is_client(): Net.s_action.rpc_id(1, "arrived", [])
-	player.input_locked = false
+	player.input_locked = _dead
 	_traveling = false
 
 
@@ -237,37 +400,67 @@ func _arrive() -> void:
 ## Blue Dragon alone is a few hundred thousand voxels).
 func _preload_creatures() -> void:
 	for id in Enemies.all_ids():
-		CreatureModel.preload_creature(Enemies.get_def(id).model)
+		CreatureModel.preload_creature(Enemies.get_def(id).model,true)
 
 
 ## Swaps in another world (no transition).
 ## online_record: the place the server gave us (online only).
-func _load_world(destination: String, online_record := {}) -> void:
+func _load_world_async(destination: String, online_record := {}) -> bool:
+	_world_generation += 1
+	var generation := _world_generation
+	_preparing_world = true
+	if is_instance_valid(world): world.process_mode = Node.PROCESS_MODE_DISABLED
+	var record: Dictionary = online_record if Net.is_client() or online_record.has("dungeon") else GameServer.enter_realm(player.player_id,destination)
+	var actual_destination := str(record.get("id",destination)) if Net.is_client() else destination
+	var prepared := await _world_loader.prepare(actual_destination,record)
+	if generation!=_world_generation or not is_instance_valid(prepared):
+		if is_instance_valid(prepared): _world_loader.retire(prepared)
+		if generation==_world_generation:
+			_preparing_world = false
+			if is_instance_valid(world): world.process_mode = Node.PROCESS_MODE_INHERIT
+		return false
+	_async_world_build = true
+	transition.set_destination_name(prepared.display_name)
+	_load_world(actual_destination,record,Callable(),prepared)
+	_preparing_world = false
+	transition.set_progress(0.9)
+	return true
+
+
+func _load_world(destination: String, online_record := {}, spawn_resolver := Callable(), prepared: GameWorld = null) -> void:
+	_world_generation += 1
+	_world_loader.cancel_prepare()
+	player.set_spatial_world(null)
 	boss_introduction.clear_world()
 	if world:
-		remove_child(world)
-		world.queue_free()
+		_world_loader.retire(world)
 	arrows.clear()
 	enemy_bullets.clear()
 	xp_orbs.clear()
-	var record := GameServer.enter_realm(player.player_id, destination) if not Net.is_client() else online_record
+	var record: Dictionary = online_record if prepared!=null or Net.is_client() else GameServer.enter_realm(player.player_id,destination)
 	if online_record.has("dungeon"): record = online_record
 	if Net.is_client():
 		destination = str(record.get("id", destination))
-	if not Campaigns.is_tavern(destination):
+	if prepared==null and not Campaigns.is_tavern(destination) and not record.get("chambers", false) and not record.get("space", false) and str(record.get("dungeon",""))!="theory_of_everything":
 		_preload_creatures()
-	if Campaigns.is_tavern(destination):
-		world = preload("res://scenes/home/tavern.tscn").instantiate()
+	if prepared!=null:
+		world = prepared
+	elif Campaigns.is_tavern(destination):
+		world = load("res://scenes/home/tavern.tscn").instantiate()
 		if destination != "hall":  # a campaign's own Tavern
 			(world as HallWorld).campaign_tavern = true
 			world.realm_id = destination
 			world.display_name = str(record.get("name", world.display_name))
+	elif record.get("chambers", false):
+		world = ChambersWorld.new(record)
+	elif record.get("space", false):
+		world = SpaceWorld.new(record)
 	elif record.get("castle", false):
 		world = load("res://scenes/castle/hollow_castle.tscn").instantiate()
 		world.realm_id = str(record.id)
 		world.display_name = str(record.get("name", "The Hollow Castle"))
 	elif record.has("dungeon"):
-		world = DungeonWorld.new(record)
+		world = Dungeons.create_world(record)
 	else:
 		world = IslandWorld.new(record)
 	add_child(world)
@@ -281,43 +474,52 @@ func _load_world(destination: String, online_record := {}) -> void:
 	if world is IslandWorld:
 		var island := world as IslandWorld
 		island.enemy_director.setup(player, enemy_bullets, island.cleared_packs(), island.pack_survivors())
-	if world is DungeonWorld:
+	if world is DungeonWorld or world is TheoryWorld or world is SpaceWorld:
 		world.enemy_director.setup(player, enemy_bullets, [], {})
+	if world is HallWorld: (world as HallWorld).set_astral_unlocked(bool(record.get("astral_unlocked", false)))
 	if Net.is_client():
 		Net.client.attach_world(world, enemy_bullets, arrows, player)
 
+	GameServer.set_environment(world)
 	loot_bags.show_realm(world.realm_id, world)
 	xp_orbs.realm_id = world.realm_id
 	player.ground_height = world.ground_height
 	player.hazard = world.is_hazard
 	player.road = world.is_road
 	xp_orbs.ground_height = world.ground_height
-	fog_of_war.setup(world.half_extent, world.biome_at, world.ground_height)
+	if world is SpatialWorld: fog_of_war.setup(32)
+	else: fog_of_war.setup(world.half_extent,world.biome_at,world.ground_height,world.get_meta("prepared_fog",{}))
+	world.remove_meta("prepared_fog")
 	if world is IslandWorld: fog_of_war.set_strongholds((world as IslandWorld).generator.strongholds)
 	var arrive := world.spawn_point
 	if world is IslandWorld and stats.home != "":
 		var home := (world as IslandWorld).home_point(stats.home)
 		if home != Vector3.INF:
 			arrive = home  # the town you call home
+	if spawn_resolver.is_valid():
+		var requested: Vector3 = spawn_resolver.call(world)
+		if requested.is_finite(): arrive = requested
 	if Net.is_client():  # online, don't all land on the same spot
 		var off := Vector2.from_angle(randf() * TAU) * randf_range(0.8, 2.2)
 		var spot := arrive + Vector3(off.x, 0.0, off.y)
 		if world.is_walkable(spot):
 			arrive = Vector3(spot.x, maxf(arrive.y, world.ground_height(spot.x, spot.z)), spot.z)
 	_place_player(arrive)
+	player.set_spatial_world(world)
 	player.facing = PI  # face the camera on arrival
 	atmosphere.snap_to(world.biome_at(world.spawn_point))
 	hud.set_world(world, fog_of_war)
 	hud.picker.enabled = Net.is_client() and Campaigns.is_tavern(world.realm_id)
 	hud.quest_banner.place = world.realm_id
 	# The Hollow Castle is meant to be seen whole: no fog of war inside it.
-	atmosphere.fog_of_war_hidden = world is CastleWorld
+	atmosphere.fog_of_war_hidden = world is CastleWorld or world is ChambersWorld or world is SpatialWorld
 	campaign.set_world(world)
 	hud.toasts.push("Entered %s" % world.display_name, Color(0.75, 0.55, 1.0), 2.5)
 
 
 func _on_shot(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase: float,
 		mods: Dictionary) -> void:
+	GameAudio.weapon_shot(weapon,origin)
 	var trail: Variant = stats.effect("trail", "")
 	arrows.spawn(origin, direction, damage, weapon, phase, trail if trail == "gold" else "", mods)
 	if Net.is_client():
@@ -326,12 +528,13 @@ func _on_shot(origin: Vector3, direction: Vector3, damage: int, weapon: Item, ph
 
 ## Charged shots that end in a burst: Dark Matter collapses into a warp ring,
 ## Dragonbreath bursts into a ring of fire and leaves flames behind.
-func _on_shot_burst(pos: Vector3, burst: String, weapon: Item) -> void:
+func _on_shot_burst(pos: Vector3, burst: String, weapon: Item, hit_object: bool) -> void:
+	if hit_object: GameAudio.play("magic_explosion", pos, {cooldown = 0.12})
 	var c: Dictionary = weapon.charge
 	var blast := Item.new()  # a one-off "spell" describing the ring
 	blast.ring = {damage = c.get("ring_damage", 150), range = c.get("ring_range", 6.0), speed = 14.0}
 	blast.id = weapon.id
-	blast.secondary_effects = weapon.secondary_effects
+	blast.secondary_effects = weapon.attack_effects(true)
 	blast.tier = Item.DIVINE
 	blast.shield_tint = weapon.projectile.get("color2", Color.BLACK)
 	blast.shield_arcs = weapon.projectile.get("color", Color.WHITE)
@@ -339,7 +542,8 @@ func _on_shot_burst(pos: Vector3, burst: String, weapon: Item) -> void:
 	blast.warp = 0.12 if burst == "singularity" else 0.06
 	var ground := Vector3(pos.x, world.ground_height(pos.x, pos.z), pos.z)
 	var ring := MagicRing.cast(world, ground, blast)
-	ring.hit.connect(func(_t: Node, _d: int) -> void: _heal_from_hit())
+	ring.hit.connect(func(_t: Node, _d: int) -> void:
+			if not _t is TheorySurface: _heal_from_hit())
 	if burst == "inferno":
 		var fire := VoxelFire.new(2.0)
 		world.add_child(fire)
@@ -356,6 +560,8 @@ func _on_ring_cast(spell: Item) -> void:
 
 ## Drinking an elixir: the amount floats up over the character.
 func _on_consumed(item: Item) -> void:
+	GameAudio.play("equip" if item.consumable.has("backpack") else "potion")
+	if item.consumable.has("hp"): GameAudio.play("heal",Vector3.INF,{volume_db=-6})
 	var origin := player.global_position + Vector3.UP * 2.3
 	if item.consumable.has("stat"):
 		var stat: String = item.consumable.stat
@@ -372,7 +578,7 @@ func _on_consumed(item: Item) -> void:
 
 
 func _on_projectile_hit(_target: Node, _damage: int, _weapon: Item) -> void:
-	_heal_from_hit()
+	if not _target is TheorySurface: _heal_from_hit()
 
 
 ## Lifesteal from gear (Blood items): the server heals us for the hit.
@@ -381,6 +587,7 @@ func _heal_from_hit() -> void:
 
 
 func _on_level_up(level: int, gains: Dictionary) -> void:
+	GameAudio.play("heal",Vector3.INF,{volume_db=-4})
 	LevelUpEffect.play(player)
 	hud.toasts.push("Level %d!" % level, Color(1.0, 0.85, 0.4))
 	for stat in gains:
@@ -393,6 +600,8 @@ func _on_level_up(level: int, gains: Dictionary) -> void:
 func _on_died(player_id: int, items_lost: int) -> void:
 	if player_id != player.player_id or Net.is_online():
 		return
+	GameAudio.shield(false)
+	GameAudio.play("player.death", Vector3.INF, {bus = "SFX", priority = 3, fixed_pitch = true})
 	hud.toasts.push("You died. Your character is gone, with everything it carried.", UIStyle.HP)
 	if items_lost > 0:
 		hud.toasts.push("%d items lost. A new adventurer wakes in the Tavern." % items_lost, UIStyle.HP, 3.5)
@@ -407,10 +616,10 @@ func _on_died(player_id: int, items_lost: int) -> void:
 func _start_singleplayer() -> void:
 	if not await _ensure_character():
 		return
-	menus.close()
+	menus.show_servers()
+	menus.servers.show_joining("Singleplayer")
 	player.input_locked = true
 	_traveling = true
-	transition.fade_in("Singleplayer")
 	var key := await Account.singleplayer_key()
 	var port := 24600 + randi() % 300
 	var args := PackedStringArray()
@@ -418,19 +627,15 @@ func _start_singleplayer() -> void:
 		args.append_array(["--headless", "--path", ProjectSettings.globalize_path("res://")])
 	else:
 		args.append("--headless")
-	args.append_array(["res://scenes/server/dedicated.tscn", "--", "--singleplayer", "--key=" + key,
+	args.append_array(["--", "--dedicated", "--singleplayer", "--key=" + key,
 			"--port=%d" % port, "--parent=%d" % OS.get_process_id(), "--accounts=" + Account.url()])
 	if key == "" or OS.create_process(OS.get_executable_path(), args) <= 0:
 		_traveling = false
-		await transition.jump_out()
-		menus.show_start()
-		hud.visible = false
+		menus.show_servers("Singleplayer couldn't start.", UIStyle.HP_LIGHT)
 		return
 	if not await _wait_for_server(port, 40.0):
 		_traveling = false
-		await transition.jump_out()
-		menus.show_start()
-		hud.visible = false
+		menus.show_servers("Singleplayer didn't start.", UIStyle.HP_LIGHT)
 		Account.problem.emit("Singleplayer didn't start.")
 		return
 	_traveling = false
@@ -467,34 +672,65 @@ func _ensure_character() -> bool:
 	return made[0]
 
 
+## Social travel keeps the selected character and waits for its old server to save.
+func join_friend(target: Dictionary) -> void:
+	if _traveling or _switching or _dead or _connecting or not target.get("joinable", false):
+		return
+	var session := Account.token()
+	var character_id := Account.character_id()
+	if Net.is_client():
+		_return_offline("Joining %s..." % str(target.username))
+	menus.close()
+	player.input_locked = true
+	_traveling = true
+	await transition.fade_in("Joining %s" % str(target.username))
+	var released := await Account.wait_for_release(character_id, session)
+	_traveling = false
+	if not released or Account.token() != session:
+		await transition.jump_out()
+		menus.show_servers("Your previous server is still saving, or the character is unavailable. Try joining again.", UIStyle.HP_LIGHT)
+		return
+	Account.choose(character_id)
+	social.join_target = "" if target.get("party_invite", false) else str(target.username)
+	_join_server(str(target.address), int(target.port))
+
+
 ## A server was picked: connect with our login and the character we play.
 func _join_server(address: String, port: int) -> void:
+	if _connecting:
+		return
+	_connecting = true
+	menus.servers.show_joining(menus.servers.server_name(address, port))
 	if not await _ensure_character():
+		_connecting = false
+		menus.servers.clear_joining()
 		return
 	var client := Net.join(address, port, Account.token(), Account.character_id(), Account.username())
 	social.attach(client)
 	Account.friends()
 	client.refused.connect(func(reason: String) -> void:
 		Net.leave()
+		_connecting = false
 		_traveling = false
-		transition.jump_out()
 		menus.show_servers(reason, UIStyle.HP_LIGHT), CONNECT_ONE_SHOT)
 	client.welcomed.connect(_on_welcomed, CONNECT_ONE_SHOT)
 	client.lost.connect(func(reason: String) -> void: _return_offline(reason, UIStyle.HP_LIGHT))
 	client.died.connect(_on_online_death)
 	client.switched.connect(_on_switched)
-	client.switch_failed.connect(func(reason: String) -> void: hud.toasts.push(reason, UIStyle.HP_LIGHT, 3.0))
+	client.switch_failed.connect(_on_switch_failed)
 	client.account_xp.connect(Account.set_total_xp)
 
 
 ## The server took us in: play our character, starting in its Tavern.
 func _on_welcomed(info: Dictionary) -> void:
+	_connecting = false
 	GameServer.adopt(player.player_id, int(info.player_id))
 	player.player_id = int(info.player_id)
 	Net.client.stats = stats
 	Net.client.player = player
 	stats.load_data(info.data)
 	Account.set_total_xp(int(info.get("account_xp", Account.progress().xp)))
+	Account.set_dots(int(info.get("dots", Account.dots())))
 	player.collision_mask = Player.TERRAIN_LAYER | Player.OBSTACLE_LAYER \
 			| (Player.PLAYER_LAYER if info.get("player_collision", false) else 0)
 	menus.close()
@@ -502,8 +738,9 @@ func _on_welcomed(info: Dictionary) -> void:
 	_traveling = true
 	var record: Dictionary = await Net.client.enter("hall")
 	await transition.fade_in(place_name("hall"))
-	_load_world("hall", record)
+	if not await _load_world_async("hall",record): return
 	await _arrive()
+	social.arrived()
 	if not info.get("singleplayer", false):
 		hud.toasts.push("Welcome to %s" % info.get("server_name", "the server"), Color(0.75, 0.55, 1.0), 3.0)
 		if str(info.get("motd", "")) != "":
@@ -512,43 +749,96 @@ func _on_welcomed(info: Dictionary) -> void:
 
 ## The picker (in the Tavern, or after dying): play another character.
 func _switch_character(character_id: int) -> void:
-	if Net.is_client():
-		hud.toasts.push("Changing character...", UIStyle.TEXT_DIM, 1.5)
-		Net.client.switch_character(character_id)
+	if not Net.is_client() or _switching or _traveling:
+		return
+	_switching = true
+	_traveling = true
+	player.input_locked = true
+	hud.picker.close_drop()
+	hud.visible = false
+	var client := Net.client
+	if not _args.has("qa-quick"): await transition.jump_in(place_name("hall"))
+	if not Net.is_client() or Net.client != client:
+		return
+	client.switch_character(character_id)
 
 
 func _new_character() -> void:
+	if _creating_character or _switching:
+		return
+	_creating_character = true
 	var dialog := NewCharacterDialog.new()
 	hud.add_dialog(dialog)
-	dialog.created.connect(_switch_character)
+	var made := [0]
+	dialog.created.connect(func(id: int) -> void: made[0] = id)
+	await dialog.closed
+	_creating_character = false
+	if not Net.is_client():
+		return
+	if made[0] != 0:
+		_switch_character(made[0])
+	elif _dead:
+		_death_choice(_death_record)
 
 
-## Now playing another character (the server has sent its data already).
+## The switch completes under the loading screen; only the Tavern reveals
+## the new character. Keep the dead model hidden until the old world is gone.
 func _on_switched(character_id: int, class_id: String) -> void:
 	Account.choose(character_id)
 	Account.refresh()
+	var client := Net.client
+	var record: Dictionary = await client.enter("hall")
+	if not Net.is_client() or Net.client != client:
+		return
+	if record.has("error"):
+		_return_offline(str(record.error), UIStyle.HP_LIGHT)
+		return
+	if not await _load_world_async("hall",record): return
+	_dead = false
+	_death_record = {}
 	low_health.dead = false
 	player.model.visible = true
+	await _arrive()
+	_switching = false
 	hud.toasts.push("Now playing your %s" % PlayerClasses.display_name(class_id), PlayerClasses.get_def(class_id).color, 2.5)
+
+
+func _on_switch_failed(reason: String) -> void:
+	if not _switching:
+		return
+	hud.visible = true
+	if not _args.has("qa-quick"): await transition.jump_out()
+	_switching = false
+	_traveling = false
+	player.input_locked = _dead
+	hud.toasts.push(reason, UIStyle.HP_LIGHT, 3.0)
 	if _dead:
-		_dead = false
-		travel("hall")
+		_death_choice(_death_record)
 
 
 ## The server says our character died. It's gone for good (the account
 ## service moved it to the dead table, and the account got its share): its
 ## record shows, then we pick or make another character and go home.
 func _on_online_death(info: Dictionary) -> void:
+	if _dead: return
+	GameAudio.shield(false)
+	GameAudio.play("player.death", Vector3.INF, {bus = "SFX", priority = 3, fixed_pitch = true})
 	_dead = true
 	player.input_locked = true
 	low_health.dead = true
 	player.model.visible = false  # its gravestone rises where it stood
 	Account.set_total_xp(int(info.get("total_account_xp", Account.progress().xp)))
+	var client := Net.client
+	var reveal := get_tree().create_timer(1.6)
 	await Account.refresh()
-	await get_tree().create_timer(1.6).timeout
+	if reveal.time_left > 0.0:
+		await reveal.timeout
+	if not _dead or not Net.is_client() or Net.client != client:
+		return
 	var record := info.duplicate()
 	record.class = str(info.data.get("class_id", stats.class_id))
 	record.id = int(info.character_id)
+	_death_record = record
 	_death_choice(record)
 
 
@@ -558,24 +848,17 @@ func _death_choice(record: Dictionary) -> void:
 	var screen := DeathRecord.new(record, false, "", true)
 	hud.add_dialog(screen)
 	var choice: String = await screen.chosen
+	if not _dead or not Net.is_client():
+		return
 	if choice == "new":
-		var dialog := NewCharacterDialog.new()
-		hud.add_dialog(dialog)
-		var made := [0]
-		dialog.created.connect(func(id: int) -> void: made[0] = id)
-		await dialog.closed
-		if made[0] != 0:
-			_switch_character(made[0])
-		elif _dead:
-			_death_choice(record)
+		_new_character()
 		return
 	hud.picker.enabled = true
 	hud.picker.open()
 	await get_tree().process_frame
 	while _dead and hud.picker.is_open():
 		await get_tree().process_frame
-	await get_tree().create_timer(0.5).timeout
-	if _dead and not hud.picker.is_open():
+	if _dead and not _switching and not _creating_character:
 		_death_choice(record)
 
 
@@ -585,12 +868,20 @@ func _return_offline(message: String, color := UIStyle.TEXT_DIM) -> void:
 		return
 	var was_singleplayer: bool = Net.client.info.get("singleplayer", false)
 	Net.leave()
+	_switching = false
+	_death_record = {}
 	social.reset()
 	GameServer.forget_world()
 	player.collision_mask = Player.TERRAIN_LAYER | Player.OBSTACLE_LAYER
-	_traveling = false
+	_traveling = true
 	_dead = false
-	_load_world("hall")
+	_world_generation += 1
+	_world_loader.cancel_prepare()
+	while _world_loader.is_preparing(): await get_tree().process_frame
+	while transition.is_animating(): await get_tree().process_frame
+	await transition.fade_in(place_name("hall"))
+	if not await _load_world_async("hall"): return
+	await _arrive()
 	hud.visible = false
 	player.input_locked = true
 	Account.refresh()
@@ -615,25 +906,29 @@ func _notification(what: int) -> void:
 		_quit()
 
 
-## Puts the player somewhere in the current world, with everything around
-## them built right away (no pop-in).
+## Places the player and requests nearby content. Animated travel waits for
+## the bounded build queue under the loader; synchronous preview tools build now.
 func _place_player(pos: Vector3) -> void:
 	player.place(pos, world.terrain, world.is_walkable)
 	if world is IslandWorld:
-		(world as IslandWorld).update_streaming(pos, true)
+		(world as IslandWorld).update_streaming(pos,not _async_world_build)
 
 
-## Pulled to the party in the same world: only the portal flash, no loading.
+## Pulled to the party in the same world: the same fracture and assembly,
+## with nearby chunks prepared under the portal instead of a blocking rebuild.
 func _warp(at: Vector3) -> void:
 	if _traveling or _dead or not is_instance_valid(world):
 		return
 	_traveling = true
 	player.input_locked = true
-	await transition.jump_in("")
+	var had_hud := hud.visible
+	hud.visible = false
+	_async_world_build = true
+	world.set_meta("asynchronous_load",true)
+	await transition.jump_in(world.display_name)
 	_place_player(Vector3(at.x, world.ground_height(at.x, at.z), at.z))
-	await transition.jump_out()
-	player.input_locked = false
-	_traveling = false
+	await _arrive()
+	hud.visible = had_hud
 
 
 ## The body of a player (for speech bubbles): ours or one we see online.
@@ -651,6 +946,10 @@ func _color_names() -> void:
 
 
 func _process(delta: float) -> void:
+	if not is_instance_valid(world) or _preparing_world:
+		if is_instance_valid(world): GameAudio.set_context(player,world)
+		return
+	var profile_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	_name_timer -= delta
 	if _name_timer <= 0.0:
 		_name_timer = 0.5
@@ -662,6 +961,7 @@ func _process(delta: float) -> void:
 		player.camera_yaw += delta * 0.08  # the start screen's world turns slowly
 	if world is IslandWorld:
 		(world as IslandWorld).update_streaming(player.global_position)
+	GameAudio.set_context(player,world)
 	var biome := world.biome_at(player.global_position)
 	atmosphere.blend_to(biome, delta)
 	player.torch_strength = atmosphere.torch_energy()
@@ -669,13 +969,14 @@ func _process(delta: float) -> void:
 
 	var where := world.display_name
 	if world is IslandWorld:
-		where += "  ·  %s" % biome.biome_name
+		where += "  -  %s" % biome.biome_name
 		var region := world.region_at(player.global_position)
 		if region != "":
-			where += "  ·  %s" % region
+			where += "  -  %s" % region
 	if Net.is_client() and Net.client.connected:
-		where += "  ·  %s  ·  %d ms" % [Net.client.info.get("server_name", ""), roundi(Net.client.rtt * 1000.0)]
-	hud.set_location(where + ("  ·  loading..." if player.frozen else ""))
+		where += "  -  %s  -  %d ms" % [Net.client.info.get("server_name", ""), roundi(Net.client.rtt * 1000.0)]
+	hud.set_location(where + ("  -  loading..." if player.frozen else ""))
+	if FrameTrace.enabled: FrameTrace.record("main_process",profile_started)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -684,7 +985,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Escape: straight back to the Tavern from anywhere in a realm.
 		if not _traveling and not _dead and not menus.is_open() and not Campaigns.is_tavern(world.realm_id) and not player.frozen:
 			get_viewport().set_input_as_handled()
-			travel("hall")
+			# In the Astral Reach, R returns to the Nexus station instead.
+			if world is SpaceWorld: (world as SpaceWorld).request(["home"])
+			else: travel("hall")
 		return
 	if event.is_action_pressed("menu"):
 		if _traveling or (menus.is_open() and not menus.is_game_menu_open()): return
@@ -878,7 +1181,7 @@ func _take_screenshot() -> void:
 	elif _args.has("walk"):
 		var xy: PackedFloat64Array = _args.walk.split_floats(",")
 		player.debug_input = Vector2(xy[0], xy[1])
-		await get_tree().create_timer(4.07).timeout  # ends mid-stride
+		await get_tree().create_timer(float(_args.get("walk-seconds",4.07))).timeout  # ends mid-stride
 	elif _args.has("fight"):
 		var until := Time.get_ticks_msec() + int(float(_args.fight) * 1000.0)
 		while Time.get_ticks_msec() < until:
@@ -1069,6 +1372,100 @@ func _social_test() -> void:
 		hud.chat.close()
 
 
+## --xsocial-test=host|guest (online, two servers): the host invites the
+## guest (a friend, on another server) to its party; the guest accepts and
+## must land on the host's server, in the party.
+func _xsocial_test(role: String) -> void:
+	var until := Time.get_ticks_msec() + 120000
+	if role == "host":
+		while Time.get_ticks_msec() < until:
+			Net.client.send_action("chat", ["/invite p3"])
+			await get_tree().create_timer(4.0).timeout
+			var members: Array = social.party.get("members", [])
+			if members.size() >= 2:
+				print("[test] host: party has %d members: %s" % [members.size(), members])
+				await get_tree().create_timer(5.0).timeout
+				await _quit()
+				return
+		print("[test] host: nobody joined")
+		get_tree().quit(20)
+		return
+	var port := Net.client.port
+	print("[test] guest on port %d, waiting for an invite" % port)
+	while Time.get_ticks_msec() < until:
+		await Account.friends(true)
+		if not Account.party_invites.is_empty():
+			print("[test] guest: invite ", Account.party_invites[0])
+			social.respond_invite(int(Account.party_invites[0].id), true)
+			break
+		await get_tree().create_timer(2.0).timeout
+	while Time.get_ticks_msec() < until:
+		await get_tree().create_timer(1.0).timeout
+		if Net.client and Net.client.port != port and Net.client.connected and not _traveling:
+			await get_tree().create_timer(5.0).timeout
+			print("[test] guest: now on port %d in %s, party %s" % [Net.client.port, world.realm_id, social.party.get("members", [])])
+			await _quit()
+			return
+	print("[test] guest: never moved")
+	get_tree().quit(21)
+
+
+## --economy-test (online): the Chambers vault, the forge and /give.
+func _economy_test() -> void:
+	var client := Net.client
+	var wait := func(seconds: float) -> void:
+		await get_tree().create_timer(seconds).timeout
+		while _traveling or player.frozen: await get_tree().process_frame
+	print("[test] dots %d, developer %s" % [Account.dots(), Account.is_developer()])
+	await travel("chambers")
+	await wait.call(1.5)
+	var vault_bags := GameServer.bags_in(world.realm_id, player.player_id).filter(func(b: Dictionary) -> bool: return b.type == "vault")
+	print("[test] in %s (%s): %d vault chests" % [world.display_name, world.realm_id, vault_bags.size()])
+	if vault_bags.is_empty():
+		get_tree().quit(10)
+		return
+	var first: Dictionary = vault_bags[0]
+	client.send_action("chat", ["/give %s G2_bow" % Account.username()])
+	await wait.call(1.5)
+	var held := stats.backpack.find_custom(func(i: Variant) -> bool: return i != null)
+	print("[test] chest 1 holds %s; backpack slot %d" % [first.items.map(func(i: Variant) -> String: return i.id if i else "-"), held])
+	# Walk there (the server checks moves are believable).
+	var start := player.global_position
+	if _args.has("economy-shot"):
+		await get_tree().create_timer(2.0).timeout
+		get_viewport().get_texture().get_image().save_png(str(_args["economy-shot"]))
+	var steps := maxi(40, ceili(start.distance_to(first.pos) / 0.2))
+	for k in steps:
+		player.global_position = start.lerp(Vector3(first.pos.x, start.y, first.pos.z), (k + 1.0) / steps)
+		await get_tree().create_timer(0.05).timeout
+	await wait.call(1.0)
+	if held >= 0:
+		var moving: String = stats.backpack[held].id
+		var free: int = first.items.find(null)
+		GameServer.request_move(player.player_id, {kind = "pack", key = held}, {kind = "bag", key = free, bag = first.id})
+		await wait.call(3.0)
+		print("[test] moved %s into the vault: chest now %s" % [moving, GameServer.bag(first.id).items.map(func(i: Variant) -> String: return i.id if i else "-")])
+	await travel("hall")
+	await wait.call(1.5)
+	var forge_place := {}
+	for i in stats.backpack.size():
+		if Dots.dismantle_value(stats.backpack[i]) > 0:
+			forge_place = {kind = "pack", key = i}
+			break
+	if forge_place.is_empty():
+		client.send_action("chat", ["/give %s G5_bow" % Account.username()])
+		await wait.call(1.5)
+		forge_place = {kind = "pack", key = stats.backpack.find_custom(func(i: Variant) -> bool: return i != null and i.id == "G5_bow")}
+	var before := Account.dots()
+	var item: Item = stats.item_at(forge_place) if forge_place.key >= 0 else null
+	print("[test] dismantling %s (worth %d) at %s" % [item.id if item else "nothing", Dots.dismantle_value(item), forge_place])
+	if item:
+		client.send_action("forge", [forge_place, item.id])
+		await wait.call(3.0)
+	print("[test] dots %d -> %d" % [before, Account.dots()])
+	await _quit()
+
+
 func _debug_online() -> void:
 	if _args.has("account"):
 		Account.set_url(_args.account)
@@ -1108,6 +1505,14 @@ func _debug_online() -> void:
 		qa.main = self
 		add_child(qa)
 		await qa.run(_args)
+		return
+	if _args.has("economy-test"):
+		await _economy_test()
+		return
+	if _args.has("space-test"):
+		return  # tools/test_space_online.gd drives the session
+	if _args.has("xsocial-test"):
+		await _xsocial_test(str(_args["xsocial-test"]))
 		return
 	if _args.has("dungeon-test"):
 		await travel("realm_1")
@@ -1252,6 +1657,13 @@ func _debug_online() -> void:
 			if is_instance_valid(b) and b.mirror:
 				print("[test] boss %s: state %d phase %d hp %d/%d shell %d/%d hazards %d" % [b.def.id, b.state, b.phase,
 						b.hp, b.max_hp, b.shell_hp, b.shell_max, b.hazards.count()])
+	if _args.has("die-now"):  # test: go to the realm and take a lethal hit
+		await travel("realm_1")
+		while _traveling or player.frozen: await get_tree().process_frame
+		await get_tree().create_timer(4.5).timeout  # past the arrival protection
+		print("[test] stats before death: level %d, %s" % [stats.level, stats.to_data().get("stats", {})])
+		Net.client.send_action("hurt", [999999, 5000.0, true, false, "test"])
+		if not _args.has("die-wait"): _args["die-wait"] = "10"
 	if _args.has("die-wait"):
 		var until := Time.get_ticks_msec() + int(float(_args["die-wait"]) * 1000.0)
 		while not _dead and Time.get_ticks_msec() < until:

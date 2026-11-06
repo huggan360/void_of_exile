@@ -1,0 +1,231 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_gjsu7"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/forge_house.res" id="2_3pk4f"]
+[ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/forge_house_glow.res" id="3_dfg62"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_byc7l"]
+render_priority = 0
+shader = ExtResource("1_gjsu7")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eagex"]
+render_priority = 0
+shader = ExtResource("1_gjsu7")
+shader_parameter/jitter = null
+shader_parameter/glow_strength = 3.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_uqdqi"]
+size = Vector3(0.5, 4.25, 8.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_51dxc"]
+size = Vector3(0.5, 4.25, 8.25)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fyjb3"]
+size = Vector3(8.5, 4.25, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jq5g8"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_h0fsq"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6qj3r"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_t74tv"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_22cc3"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_08dyq"]
+size = Vector3(0.5, 4.5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2s5ar"]
+size = Vector3(2.625, 0.875, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_c1irr"]
+size = Vector3(0.5, 1.875, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_on7xk"]
+size = Vector3(0.5, 1.875, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xm81e"]
+size = Vector3(1.625, 1.875, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g6iwj"]
+size = Vector3(2.625, 0.625, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7hmqf"]
+size = Vector3(1.625, 4, 1.875)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3kffm"]
+size = Vector3(1, 0.875, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bhg16"]
+size = Vector3(1.25, 0.25, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kjdng"]
+size = Vector3(1.375, 1, 2.25)
+
+[node name="ForgeHouse" type="Node3D" unique_id=835135883]
+metadata/voxel_source = "res://props/home/forge_house/model.vox"
+
+[node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=660983682]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.125, -0.375, -4.875)
+material_override = SubResource("ShaderMaterial_byc7l")
+mesh = ExtResource("2_3pk4f")
+
+[node name="LitWindows" type="MeshInstance3D" parent="." unique_id=796516360]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.125, -0.375, -4.875)
+material_override = SubResource("ShaderMaterial_eagex")
+mesh = ExtResource("3_dfg62")
+
+[node name="SolidEnvelope3" type="StaticBody3D" parent="." unique_id=93787318]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=1305639439]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.125, 0.125)
+shape = SubResource("BoxShape3D_uqdqi")
+
+[node name="SolidEnvelope4" type="StaticBody3D" parent="." unique_id=79274281]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope4" unique_id=782343993]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.125, 0.125)
+shape = SubResource("BoxShape3D_51dxc")
+
+[node name="SolidEnvelope5" type="StaticBody3D" parent="." unique_id=1800719789]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope5" unique_id=242597818]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.125, 4)
+shape = SubResource("BoxShape3D_fyjb3")
+
+[node name="SolidEnvelope6" type="StaticBody3D" parent="." unique_id=1694532577]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope6" unique_id=1384925125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.25, -3.75)
+shape = SubResource("BoxShape3D_jq5g8")
+
+[node name="SolidEnvelope7" type="StaticBody3D" parent="." unique_id=1849835605]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope7" unique_id=1357579579]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.25, 1.375)
+shape = SubResource("BoxShape3D_h0fsq")
+
+[node name="SolidEnvelope8" type="StaticBody3D" parent="." unique_id=33820187]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope8" unique_id=1918097837]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.25, 4)
+shape = SubResource("BoxShape3D_6qj3r")
+
+[node name="SolidEnvelope9" type="StaticBody3D" parent="." unique_id=302896014]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope9" unique_id=1593465576]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.25, -3.75)
+shape = SubResource("BoxShape3D_t74tv")
+
+[node name="SolidEnvelope10" type="StaticBody3D" parent="." unique_id=2137713904]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope10" unique_id=1652214854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.25, 1.375)
+shape = SubResource("BoxShape3D_22cc3")
+
+[node name="SolidEnvelope11" type="StaticBody3D" parent="." unique_id=1068287895]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope11" unique_id=156722877]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2.25, 4)
+shape = SubResource("BoxShape3D_08dyq")
+
+[node name="SolidEnvelope12" type="StaticBody3D" parent="." unique_id=1235811204]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope12" unique_id=1730232073]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6875, 0.4375, 2.125)
+shape = SubResource("BoxShape3D_2s5ar")
+
+[node name="SolidEnvelope13" type="StaticBody3D" parent="." unique_id=2084238410]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope13" unique_id=1692177597]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.625, 1.8125, 2.125)
+shape = SubResource("BoxShape3D_c1irr")
+
+[node name="SolidEnvelope14" type="StaticBody3D" parent="." unique_id=991000541]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope14" unique_id=1757314595]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.75, 1.8125, 2.125)
+shape = SubResource("BoxShape3D_on7xk")
+
+[node name="SolidEnvelope15" type="StaticBody3D" parent="." unique_id=525007524]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope15" unique_id=1525102118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6875, 1.8125, 3.375)
+shape = SubResource("BoxShape3D_xm81e")
+
+[node name="SolidEnvelope16" type="StaticBody3D" parent="." unique_id=189548339]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope16" unique_id=1415009089]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6875, 3.0625, 2.125)
+shape = SubResource("BoxShape3D_g6iwj")
+
+[node name="SolidEnvelope17" type="StaticBody3D" parent="." unique_id=476513545]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope17" unique_id=1269508538]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6875, 6.5, 2.1875)
+shape = SubResource("BoxShape3D_7hmqf")
+
+[node name="SolidEnvelope18" type="StaticBody3D" parent="." unique_id=1107148976]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope18" unique_id=1515563132]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.4375, -1.25)
+shape = SubResource("BoxShape3D_3kffm")
+
+[node name="SolidEnvelope19" type="StaticBody3D" parent="." unique_id=705638358]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope19" unique_id=1313527129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.625, -1.25)
+shape = SubResource("BoxShape3D_bhg16")
+
+[node name="SolidEnvelope20" type="StaticBody3D" parent="." unique_id=1416355956]
+collision_layer = 2
+collision_mask = 0
+
+[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope20" unique_id=358982240]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1875, 0.5, -1.25)
+shape = SubResource("BoxShape3D_kjdng")
+
+[node name="ForgeMouth" type="Marker3D" parent="." unique_id=10059396]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6875, 1.75, 0.625)

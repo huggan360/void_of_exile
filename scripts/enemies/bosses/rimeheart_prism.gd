@@ -18,6 +18,11 @@ extends Boss
 ##    ring burst; almost no pause between storms.
 ## Phase changes are a three-second rest (Boss.begin_rest).
 
+## Stronger shots in every phase, including the shards inside bloom orbs.
+func shoot(origin: Vector3, dir: Vector3, attack: Dictionary) -> void:
+	super.shoot(origin, dir, Enemies.scale_attack_damage(attack, 1.3))
+
+
 const ICE := Color(0.55, 0.9, 1.0)
 const WARN := Color(0.45, 0.8, 1.0)
 const INNER_RADIUS := 6.2
@@ -116,7 +121,8 @@ func _bloom() -> void:
 	after(0.7, func() -> void:
 		var burst := Boss.shot("shard", ICE, Vector2i(45, 55), 6.0, 0.14, 12.0)
 		var orb := Boss.shot("orb", Color(0.7, 0.95, 1.0), Vector2i(70, 85), 4.0, 0.4, 8.0,
-				{size = 1.5, terminal = {delay = 0.35, count = 6, attack = burst}})
+				{size = 1.5, effects = [{id = "static", duration = 3.0}], effect_source = "Rimeheart crystal bloom",
+					terminal = {delay = 0.35, count = 6, attack = burst}})
 		for k in 8:
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, offset + k * TAU / 8.0), orb))
 
@@ -345,7 +351,7 @@ func _end_conduit_visuals() -> void:
 func _on_blocked() -> void:
 	if phase == 1 and not _conduit_done:
 		var left := SHARDLING_TOTAL - _shardlings_spawned + support("add").size()
-		status_text = "Break the conduits  ·  %d towers, %d shardlings left" % [_living_towers().size(), left]
+		status_text = "Break the conduits  -  %d towers, %d shardlings left" % [_living_towers().size(), left]
 
 
 func bar_pips() -> Array:

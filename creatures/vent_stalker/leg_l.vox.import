@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bu61wh6uia8kv"
+path="res://.godot/imported/leg_l.vox-577ed37b576b219ac99266f464ccebe6.tscn"
+
+[deps]
+
+source_file="res://creatures/vent_stalker/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-577ed37b576b219ac99266f464ccebe6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

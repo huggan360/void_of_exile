@@ -197,7 +197,10 @@ func _fireball_fan() -> void:
 	model.boss_pose("cast",0.8)
 	pulse_glow(1.8, 0.6)
 	after(0.6, func() -> void:
-		fire_fan(shot_origin(), aim_dir(), 5, 15.0, Boss.shot("fireball", FIRE, Vector2i(70, 85), 8.0, 0.22, 60.0, {size = 1.3})))
+		var heavy := Boss.shot("fireball", Color("ffd578"), Vector2i(70, 85), 7.0, 0.29, 60.0,
+			{size = 1.65, effects = [{id = "defense", amount = -8, duration = 2.0}], effect_source = "Vharok searing fireball"})
+		fire_fan(shot_origin(), aim_dir(), 5, 15.0,
+			Boss.shot("fireball", FIRE, Vector2i(70, 85), 8.0, 0.22, 60.0, {size = 1.3}), heavy))
 
 
 func _cleave() -> void:

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b44weol7t4m8h"
+path="res://.godot/imported/jaw_glow.vox-1a5f0133e289b143a055246786f43cfb.tscn"
+
+[deps]
+
+source_file="res://creatures/spirit_brown/jaw_glow.vox"
+dest_files=["res://.godot/imported/jaw_glow.vox-1a5f0133e289b143a055246786f43cfb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

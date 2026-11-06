@@ -12,6 +12,10 @@ var _angle := 0.0
 var _seen := {}
 var _name: Label
 var _place: Label
+var _active := false
+var _was_locked := false
+var _hidden_layers: Array[CanvasLayer] = []
+var _intro_audio := {}
 
 func _ready() -> void:
 	layer = 72
@@ -45,8 +49,7 @@ func _ready() -> void:
 	hide()
 
 func update(player: Player, world: GameWorld, delta: float, allowed: bool) -> void:
-	_player = player
-	if not allowed or not world is IslandWorld or player.frozen:
+	if not allowed or not is_instance_valid(world) or player.frozen:
 		cancel()
 		return
 	if is_instance_valid(_boss):
@@ -64,6 +67,7 @@ func update(player: Player, world: GameWorld, delta: float, allowed: bool) -> vo
 			_begin(boss,player)
 			break
 	if not is_instance_valid(_boss): return
+	_hide_ui(get_tree().root)
 	_elapsed += delta
 	var left := maxf(0,minf(_boss._intro_left,_duration-_elapsed))
 	if left<=0:
@@ -83,6 +87,9 @@ func update(player: Player, world: GameWorld, delta: float, allowed: bool) -> vo
 	_ui_root.modulate.a = minf(clampf(_elapsed/.9,0,1),clampf(left/.9,0,1))
 
 func _begin(boss: Boss, player: Player) -> void:
+	_player = player
+	_active = true
+	_was_locked = player.cinematic_locked
 	_boss = boss
 	_duration = maxf(.01,boss._intro_left)
 	_elapsed = 0
@@ -99,14 +106,29 @@ func _begin(boss: Boss, player: Player) -> void:
 	_name.text = boss.def.enemy_name
 	_place.text = {"blue_dragon":"THE AZURE CRUCIBLE","rimeheart_prism":"CROWN OF THE RIME","vharok":"THE CINDER BASTION","scarab_regent":"COURT OF THE SUN","hollow_crown":"THE HOLLOW THRONE"}.get(boss.def.id,"AWAKENING")
 	_ui_root.modulate.a = 0
+	_intro_audio = GameAudio.play("boss_intro", Vector3.INF, {bus="SFX", priority=3, duration=_duration})
+	_hide_ui(get_tree().root)
 	show()
 
+func _hide_ui(node: Node) -> void:
+	if node == self: return
+	if node is CanvasLayer and node.get_viewport() == get_viewport() and node.visible:
+		if not node in _hidden_layers: _hidden_layers.append(node)
+		node.hide()
+	for child in node.get_children(): _hide_ui(child)
+
 func cancel() -> void:
-	if is_instance_valid(_player): _player.cinematic_locked = false
+	if _active and is_instance_valid(_player): _player.cinematic_locked = _was_locked
 	if is_instance_valid(_previous) and _camera.current: _previous.make_current()
 	elif is_instance_valid(_player) and is_instance_valid(_player.camera) and _camera.current: _player.camera.make_current()
 	_previous = null
 	_boss = null
+	_active = false
+	GameAudio.stop(_intro_audio, .12)
+	_intro_audio = {}
+	for ui in _hidden_layers:
+		if is_instance_valid(ui): ui.show()
+	_hidden_layers.clear()
 	hide()
 
 func clear_world() -> void:

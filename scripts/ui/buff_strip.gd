@@ -21,7 +21,7 @@ func _process(_delta: float) -> void:
 		var card: Control = _badges.get(e.key)
 		if not is_instance_valid(card): continue
 		var left := maxf(0.0,float(e.expires)-Net.now())
-		var timer: Label = card.get_node("Timer")
+		var timer: Label = card.get_node("TimerPill/Timer")
 		timer.text = StatusEffects.time_text(left)
 		timer.modulate = Color(1,.7,.65) if left<3.0 else Color.WHITE
 
@@ -40,16 +40,33 @@ func _sync() -> void:
 			card.mouse_filter = Control.MOUSE_FILTER_PASS
 			card.size = CELL
 			card.pivot_offset = CELL*.5
+			var stone := Panel.new()
+			stone.name = "Stone"
+			stone.set_anchors_preset(Control.PRESET_FULL_RECT)
+			stone.add_theme_stylebox_override("panel", UIStyle.panel())
+			stone.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			card.add_child(stone)
+			var timer_pill := PanelContainer.new()
+			timer_pill.name = "TimerPill"
+			timer_pill.position = Vector2(3, 0)
+			timer_pill.size = Vector2(54, 22)
+			var timer_style: StyleBoxTexture = UIStyle.panel_outlined(UIStyle.ACCENT).duplicate()
+			timer_style.set_content_margin_all(2)
+			timer_pill.add_theme_stylebox_override("panel", timer_style)
+			timer_pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			card.add_child(timer_pill)
 			var timer := Label.new()
 			timer.name = "Timer"
-			timer.size = Vector2(54,20)
+			timer.set_anchors_preset(Control.PRESET_FULL_RECT)
 			timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			UIStyle.text(timer,16)
+			timer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			UIStyle.text(timer, 14, UIStyle.TEXT)
+			timer.add_theme_font_override("font", UIStyle.bold())
 			timer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			card.add_child(timer)
+			timer_pill.add_child(timer)
 			var image := TextureRect.new()
 			image.name = "Flag"
-			image.position = Vector2(0,22)
+			image.position = Vector2(3,25)
 			image.size = Vector2(54,54)
 			image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			image.mouse_filter = Control.MOUSE_FILTER_IGNORE

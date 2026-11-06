@@ -1,6 +1,11 @@
 extends Node3D
 var checks := 0
 var failures := 0
+class IntroDungeon extends DungeonWorld:
+	func _ready() -> void:
+		enemy_director.world = self
+		enemy_director.realm_id = realm_id
+		add_child(enemy_director)
 func check(ok: bool, message: String) -> void:
 	checks += 1
 	if not ok: failures += 1; push_error(message)
@@ -29,6 +34,7 @@ func _run() -> void:
 		player.player_id = GameServer.join(false)
 		player.stats = GameServer.character(player.player_id)
 		add_child(player)
+		add_child(player.aim_marker)
 		player.set_physics_process(false)
 		player.frozen = false
 		players.append(player)
@@ -49,6 +55,7 @@ func _run() -> void:
 			GameServer.report_position(players[i].player_id,world.realm_id,players[i].global_position)
 		# Enter through an unlocked fortress, as a real keyed attempt does.
 		world.gates.apply_state(fort.center, false, false)
+		world.gates._end_shot()
 		boss._hatch()
 		check(boss.intro_duration>=10,"Longer intro: "+boss.def.id)
 		check(boss.intro_players.size()==2,"Both participants admitted: "+boss.def.id)
@@ -91,6 +98,44 @@ func _run() -> void:
 			boss._start_dying()
 			check(not entry.locked,"Boss death reopens gates immediately")
 		boss.free()
+	world.gates._end_shot()
+	var dungeon := IntroDungeon.new(Dungeons.record("dng_intro_check", "goblins_cave", 4217))
+	add_child(dungeon)
+	dungeon.enemy_director.set_physics_process(false)
+	dungeon.enemy_director.setup(players[0], shots, [])
+	dungeon.enemy_director.players.append(players[1])
+	var king := EnemyDirector._make_actor(Enemies.get_def("goblin_king")) as Boss
+	king.setup(Enemies.get_def("goblin_king"), EnemyPack.new(), dungeon.enemy_director)
+	king.position = dungeon.layout.boss
+	dungeon.enemy_director.add_child(king)
+	king.set_physics_process(false)
+	for player in players:
+		player.global_position = king.global_position + Vector3(0,0,8)
+		GameServer.report_position(player.player_id, dungeon.realm_id, player.global_position)
+	king._start_intro()
+	var gui := CanvasLayer.new()
+	var hidden_gui := CanvasLayer.new()
+	add_child(gui)
+	add_child(hidden_gui)
+	hidden_gui.hide()
+	players[0].camera.make_current()
+	cinematic.update(players[0], dungeon, .2, true)
+	check(cinematic.visible and players[0].cinematic_locked and cinematic._camera.current,
+		"Dungeon boss loading uses the intro camera and locks local movement consistently with the server")
+	check(not gui.visible and not hidden_gui.visible, "Boss intro hides game GUI")
+	check(cinematic._intro_audio.get("event", "") == "boss_intro", "Boss reveal plays the cinematic horror impact")
+	king.state = Enemy.State.ACTIVE
+	cinematic.update(players[0], dungeon, .2, true)
+	check(gui.visible and not hidden_gui.visible and not players[0].cinematic_locked,
+		"Intro end restores only previously visible GUI and returns local control")
+	players[0].cinematic_locked = true
+	cinematic.update(players[0], dungeon, .1, false)
+	check(players[0].cinematic_locked, "Idle boss presenter cannot cancel another cinematic's input lock")
+	players[0].cinematic_locked = false
+	GameServer.cancel_boss_intro(king.encounter_id)
+	gui.free()
+	hidden_gui.free()
+	dungeon.queue_free()
 	# Preserve killed packs while relocating their fortresses.
 	var old := {layout_version=5,cleared_packs=["feature_97_-268","pack_0_0"],pack_survivors={"feature_97_-268_1":["cinder_oracle"]},destroyed=["tree_old"]}
 	WorldServer._migrate_expansion(old)
@@ -101,6 +146,8 @@ func _run() -> void:
 	for player in players: GameServer.remove_player(player.player_id); player.free()
 	shots.free()
 	world.queue_free()
-	await get_tree().process_frame
+	GameAudio.set_context(null, null)
+	for voice in GameAudio.voices: GameAudio.stop(voice, .01)
+	await get_tree().create_timer(.2).timeout
 	print("BOSS INTRODUCTIONS: %d checks; %d failures" % [checks,failures])
 	get_tree().quit(1 if failures else 0)

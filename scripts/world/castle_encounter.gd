@@ -21,6 +21,17 @@ var _cut_serial := 0
 var _cut_player: Player
 var _prior_lock := false
 var _seated: CreatureModel
+var _hidden_gui: Array[CanvasLayer] = []
+var _cut_audio := {}
+
+func _process(_delta: float) -> void:
+	if is_instance_valid(_camera): _hide_gui(get_tree().root)
+
+func _hide_gui(node: Node) -> void:
+	if node is CanvasLayer and node.get_viewport() == get_viewport() and node.visible:
+		if not node in _hidden_gui: _hidden_gui.append(node)
+		node.hide()
+	for child in node.get_children(): _hide_gui(child)
 
 func _ready() -> void:
 	_pack.site = {id = "castle_encounter", pack = "", pos = Vector3(0, 0, -8), seed = 4107}
@@ -55,6 +66,7 @@ func _ready() -> void:
 	_seated.rotation.y = PI
 	add_child(_seated)
 	_seated.boss_pose("sit", 86400.0)
+	_seated.animate(0.0,2.0)  # Show the seated pose on the first visible frame.
 
 func _physics_process(delta: float) -> void:
 	if is_instance_valid(_seated) and _seated.visible: _seated.animate(0.0, delta)
@@ -120,7 +132,7 @@ func _spawn_pair(id: String, z: float) -> void:
 		var definition := Enemies.get_def(id).duplicate(true) as EnemyDef
 		definition.hp = roundi(definition.hp * (1.0 + 0.2 * (count - 1)))
 		var actor := Enemy.new().setup(definition, _pack, world.enemy_director)
-		actor.position = Vector3(side * (21.0 if id == "castle_champion" else 7.0), 0, z)
+		actor.position = Campaigns.open_spot(Vector3(side * (21.0 if id == "castle_champion" else 7.0), 0, z), world)
 		_pack.members.append(actor)
 		_living.append(actor)
 		world.enemy_director.add_child(actor)
@@ -288,11 +300,16 @@ func _cutscene(kind: String, duration: float) -> void:
 		if is_instance_valid(_cut_player):
 			_prior_lock = _cut_player.input_locked
 			_cut_player.input_locked = true
+			_cut_player.begin_interaction(get_instance_id())
 		_camera = Camera3D.new()
 		add_child(_camera)
 		if is_instance_valid(_prior_camera): _camera.environment = _prior_camera.environment
 	_camera.make_current()
 	var throne := kind == "throne"
+	_hide_gui(get_tree().root)
+	if throne:
+		GameAudio.stop(_cut_audio, .08)
+		_cut_audio = GameAudio.play("boss_intro", Vector3.INF, {bus="SFX", priority=3, duration=duration})
 	_camera.global_position = world.to_global(Vector3(10, 11, -48) if throne else Vector3(4, 15, 8))
 	var look := world.to_global(Vector3(0, 6, -71) if throne else Vector3(0, 2, -7))
 	_camera.look_at(look)
@@ -303,8 +320,15 @@ func _cutscene(kind: String, duration: float) -> void:
 	_restore_camera()
 
 func _restore_camera() -> void:
+	GameAudio.stop(_cut_audio, .12)
+	_cut_audio = {}
+	for gui in _hidden_gui:
+		if is_instance_valid(gui): gui.show()
+	_hidden_gui.clear()
 	if is_instance_valid(_prior_camera): _prior_camera.make_current()
-	if is_instance_valid(_cut_player): _cut_player.input_locked = _prior_lock
+	if is_instance_valid(_cut_player):
+		_cut_player.input_locked = _prior_lock
+		_cut_player.end_interaction(get_instance_id())
 	if is_instance_valid(_camera): _camera.queue_free()
 	_camera = null
 

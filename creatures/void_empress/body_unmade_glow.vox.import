@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b1d7hys4dn577"
+path="res://.godot/imported/body_unmade_glow.vox-7d9944779f8dab5e6285fe662a08de04.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/body_unmade_glow.vox"
+dest_files=["res://.godot/imported/body_unmade_glow.vox-7d9944779f8dab5e6285fe662a08de04.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -30,6 +30,7 @@ static func cast(parent: Node3D, origin: Vector3, p_spell: Item, delay := 0.0, m
 	ring.damage_multiplier = multiplier
 	parent.add_child(ring)
 	ring.global_position = origin
+	if parent is SpatialWorld: ring.global_basis = parent.surface_frame(origin).basis
 	if delay > 0.0:
 		ring.visible = false
 		ring.set_physics_process(false)
@@ -105,13 +106,14 @@ func _damage_band(inner: float, outer: float) -> void:
 	var sphere := SphereShape3D.new()
 	sphere.radius = outer + BAND * 0.5
 	query.shape = sphere
-	query.transform = Transform3D(Basis(), global_position + Vector3.UP * 0.9)
+	query.transform = Transform3D(Basis(), global_position + global_basis.y * 0.9)
 	query.collision_mask = Player.OBSTACLE_LAYER | Player.ENEMY_LAYER
 	for result in get_world_3d().direct_space_state.intersect_shape(query, 64):
 		var target: Node = result.collider
 		if _hit.has(target.get_instance_id()) or not target.has_method("take_hit"):
 			continue
-		var flat := Vector2(target.global_position.x - global_position.x, target.global_position.z - global_position.z)
+		var point: Vector3 = global_basis.inverse()*(target.global_position-global_position)
+		var flat := Vector2(point.x,point.z)
 		if flat.length() < inner - BAND:
 			continue
 		_hit[target.get_instance_id()] = true
@@ -120,9 +122,9 @@ func _damage_band(inner: float, outer: float) -> void:
 			continue  # this part of the ring was cancelled out
 		var damage := damage_at_distance(flat.length(), strength)
 		if target is Enemy:
-			(target as Enemy).receive_weapon_hit(target.global_position + Vector3.UP, Vector3(flat.x, 0, flat.y).normalized(), damage, spell, true)
+			(target as Enemy).receive_weapon_hit(target.global_position + global_basis.y, (global_basis*Vector3(flat.x,0,flat.y)).normalized(), damage, spell, true)
 		else:
-			target.take_hit(target.global_position + Vector3.UP, Vector3(flat.x, 0, flat.y).normalized(), damage)
+			target.take_hit(target.global_position + global_basis.y, (global_basis*Vector3(flat.x,0,flat.y)).normalized(), damage)
 		hit.emit(target, damage)
 
 

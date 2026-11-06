@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://qekyrxk54nbx"
+path="res://.godot/imported/arm_l.vox-5c5f94023db9b920aa8326aafd563f19.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-5c5f94023db9b920aa8326aafd563f19.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://hpjieqvj54ho"
+path="res://.godot/imported/leg_l_2.vox-fa3c8b0865931f2dc7c7cf1e32383196.tscn"
+
+[deps]
+
+source_file="res://creatures/hull_skitter/leg_l_2.vox"
+dest_files=["res://.godot/imported/leg_l_2.vox-fa3c8b0865931f2dc7c7cf1e32383196.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

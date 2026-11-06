@@ -8,7 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TEXTURES = Path('/home/hugo/Documents/Voidrealm_textures')
 DIVINE = TEXTURES / 'Divine'
-BOSSES = {  # set -> (boss, stronghold, biome, boss id, model folder)
+BOSSES = {  # set -> (encounter, location, biome, enemy id, model folder)
+    'Spirit': ('Purple Spirit', 'realm spirit encounters', 'Spirit biomes', 'spirit_purple', 'creatures/spirit_purple/'),
     'The_Blue': ('Blue Dragon', 'The Azure Crucible', 'Bluelay', 'blue_dragon', 'creatures/blue_dragon/'),
     'Frost': ('Rimeheart Prism', 'Crown of the Rime', 'Fosen', 'rimeheart_prism', 'creatures/rimeheart_prism/'),
     'Satan': ('Vharok, the Cinder Tyrant', 'The Cinder Bastion', 'Lava (Doom)', 'vharok', 'creatures/vharok_cinder_tyrant/'),
@@ -40,6 +41,12 @@ assert 'b.loot_threshold = 0.04' in bosses_src and 'chance = 0.03' in bosses_src
 
 
 def boss_table(boss_id):
+    if boss_id == 'spirit_purple':
+        return ['Eligibility: 10% of encounter maximum HP in damage (god encounter).',
+                'Wand of the Spirit: 3% independently per eligible player, personal WHITE CHEST.',
+                'HP / MP refill elixirs: 40% each, public.',
+                'Biome stat potion: 35%; G3 gear: 12%; G4 gear: 10%; G5 gear: 0.1%; backpack: 2%.',
+                'Equipped wand: +5 Speed and +5 Dexterity. Charged secondary: Dreadcoil Trinity.']
     blue = boss_id == 'blue_dragon'
     rows = ['HP refill elixir: 100% (gray bag, public)', 'MP refill elixir: 100% (gray bag, public)']
     if blue:
@@ -58,14 +65,14 @@ def boss_table(boss_id):
 
 
 index = ['DIVINE SET OWNERSHIP AND DROPS', 'Updated: 2026-10-31', '',
-         'LIVE = drops in the game now, from the named stronghold boss. AVAILABLE = not assigned; free for a future encounter.',
+         'LIVE = drops in the game now, from the named encounter (Purple Spirit uses the explicit god exception below). AVAILABLE = not assigned; free for a future encounter.',
          'Every divine item rolls 3.00% on its own, per eligible player, per boss kill: rolls are independent, so several',
          'divine items can drop together and 3% is NOT split across the set. Divine items go in personal WHITE bags (soulbound).',
          'Eligibility: deal at least 4% of the boss\'s scaled maximum health (health is scaled once when it hatches:',
          '+20% per extra player). Shell, tower, guard and minion damage does not count. Divine rolls stay 3% for every eligible',
          'player; only personal non-divine rewards drop to 90% for non-top contributors.',
          'Shells, conduits, Sentinels, Dawn Scarabs, Mirror Shades, shardlings and pact mites drop nothing and give no XP.',
-         'No god or ordinary enemy drops divine items. An item with PNG and PXO is counted once; original spelling kept.', '']
+         'Purple Spirit is the god exception: its Spirit wand requires 10% damage eligibility and rolls 3% into a WHITE CHEST. Other unassigned gods and ordinary enemies cannot drop Divine items. An item with PNG and PXO is counted once; original spelling kept.', '']
 records = []
 for folder in sorted(p for p in DIVINE.iterdir() if p.is_dir()):
     sources = sorted(folder.glob('*.pxo'))

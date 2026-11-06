@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://k7brqqmj5xda"
+path="res://.godot/imported/tail.vox-e0a7e2d740fda62549443881ec28cb29.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/tail.vox"
+dest_files=["res://.godot/imported/tail.vox-e0a7e2d740fda62549443881ec28cb29.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

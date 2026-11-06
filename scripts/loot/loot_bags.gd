@@ -49,11 +49,15 @@ func bag_at(player: Node3D) -> LootBag:
 		var d := Vector2(view.global_position.x - player.global_position.x,
 				view.global_position.z - player.global_position.z).length()
 		if d <= STAND_RADIUS and absf(view.global_position.y - player.global_position.y) < 1.5:
-			if not view.opened and "player_id" in player:
+			if view.type == "vault":
+				view.open_chest()
+			elif not view.opened and "player_id" in player:
 				if GameServer.request_open_chest(player.player_id, view.bag_id): view.open_chest()
 			if d < best_d:
 				best = view
 				best_d = d
+		elif view.type == "vault" and view.opened:
+			view.close_chest()
 	return best
 
 
@@ -71,7 +75,7 @@ func _on_chest_changed(chest_id: int) -> void:
 	var view: LootBag = _views.get(chest_id)
 	if not is_instance_valid(view): return
 	var record := GameServer.bag(chest_id)
-	if bool(record.get("opened", false)): view.open_chest()
+	if bool(record.get("opened", false)) and view.type != "vault": view.open_chest()
 
 
 func _on_bag_removed(bag_id: int) -> void:

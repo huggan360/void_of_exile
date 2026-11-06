@@ -1,6 +1,15 @@
 class_name Dungeons
 ## Dungeon records are ephemeral. A portal owns one instance, never a dungeon type.
 const DEFINITIONS := {
+	theory_of_everything = {
+		id="theory_of_everything",name="Theory of Everything",rating=6.0,damage_hint="enemies hit hard, gravity and puzzles",
+		portal_colors=[Color("67f0ff"),Color("ef70ff")],
+		portal_hole={seed=8291,radius=1.9,voxel=0.18,earth=Color("151a30"),stone=Color("42516f"),moss=Color("7257d6"),leaf=Color("67f0ff"),root=Color("ef70ff")},
+		generator_style="theory",params={},low_enemies=["hull_skitter","void_lamprey","gloom_spitter"],
+		mid_enemies=["vent_stalker","crest_brute"],boss="void_empress",miniboss="",
+		miniboss_chance=0.0,treasure_room_chance=0.0,enemy_hp_multiplier=1.0,enemy_damage_multiplier=1.0,
+		loot_tier_bias=2,common_tier=6,theme="drowned_spire",
+	},
 	goblins_cave = {
 		id = "goblins_cave", name = "Goblins Cave", rating = 2.5, damage_hint = "enemies hit lightly",
 		portal_colors = [Color("79c646"), Color("ef963f")],
@@ -132,3 +141,7 @@ static func definition(id: String) -> Dictionary:
 static func record(id: String, dungeon: String, seed_value: int, origin := "hall") -> Dictionary:
 	return {id = id, dungeon = dungeon, seed = seed_value, origin = origin,
 		name = definition(dungeon).name, destroyed = []}
+
+
+static func create_world(data: Dictionary) -> GameWorld:
+	return TheoryWorld.new(data) if str(data.get("dungeon",""))=="theory_of_everything" else DungeonWorld.new(data)

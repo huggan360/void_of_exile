@@ -27,14 +27,18 @@ func _threshold_reached(next: int) -> void:
 	begin_rest(func() -> void: _enter_phase(next), "The bloom droops... then opens wide", "kneel")
 
 
-func _seed(speed := 6.5) -> Dictionary:
-	return Boss.shot("orb", SEED, Vector2i(22, 30), speed, 0.22, 16.0, {size = 1.2})
+func _seed(speed := 6.5, snaring := false) -> Dictionary:
+	var attack := Boss.shot("orb", SEED, Vector2i(22, 30), speed, 0.22, 16.0, {size = 1.2})
+	if snaring:
+		attack.merge({color = Color("e6ec8b"), size = 1.5, radius = 0.26,
+			effects = [{id = "speed", amount = -10, duration = 1.75}], effect_source = "Thornmaw thorn seed"}, true)
+	return attack
 
 
 func _spit() -> void:
 	model.play_attack(0.5)
 	pulse_glow(1.4, 0.5)
-	after(0.5, func() -> void: fire_fan(shot_origin(), aim_dir(), 5, 14.0, _seed()))
+	after(0.5, func() -> void: fire_fan(shot_origin(), aim_dir(), 5, 14.0, _seed(), _seed(5.5, true)))
 
 
 func _snap() -> void:
@@ -54,7 +58,7 @@ func _ring() -> void:
 	_ring_angle += 0.35
 	after(0.4, func() -> void:
 		for k in 12:
-			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, _ring_angle + k * TAU / 12.0), _seed(5.0)))
+			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, _ring_angle + k * TAU / 12.0), _seed(5.0, k % 4 == 0)))
 
 
 func _reset_hook() -> void:

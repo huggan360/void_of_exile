@@ -74,6 +74,7 @@ func _physics_process(delta: float) -> void:
 		var dist := to.length()
 		if dist < COLLECT_RADIUS and o.age > 0.25:
 			GameServer.collect_xp(player.player_id, o.id)
+			GameAudio.play("xp_pickup",Vector3.INF,{cooldown=.055,volume_db=-9})
 			o.age = LIFETIME + 1.0  # collected
 			continue
 		if o.age > MAGNET_DELAY and dist < MAGNET_RADIUS and not player.frozen:

@@ -35,6 +35,25 @@ Three parts:
 * Each town's Steward (at the plaza, "Town Hall") makes it your home: you arrive there in realms; it's the
   house on the minimap. Other townsfolk have a line or two (TownTalk); talking swings the camera to the side.
 
+## Chambers, Dots and developers
+
+* **Chambers** (`ChambersWorld`, realm `chm_<account id>`): the account vault, through the red Chambers Gate in the
+  Tavern. 4 wooden chests to start, +1 at the "chest" reward levels (`REWARDS` in void_accounts.py) and any bonus
+  chests (`grant-chests`). Chests are vault bags in GameServer while you're inside (drag items as with loot chests);
+  every change is saved together with the character (`/server/vault/save`, one transaction), so nothing is duplicated
+  or lost. Story items can't go in.
+* **Dots**: account currency (counter right of the account bar, `DotsCounter`). Dismantle items at Bram's forge in the
+  Tavern (`ForgePanel` -> action `forge` -> `/server/dismantle`, which removes the item and pays in one transaction;
+  values in `Dots` and `DISMANTLE_DOTS`, keep them in step). Also 250 the first time an account finishes a campaign and
+  1000 for a pack (`/server/dots/award`).
+* **Developers** (`set-developer NAME`): may use `/give <player> <item id> [count]` on any server.
+* Graphics quality: Options -> Graphics (`GraphicsSettings`): Low / Medium / High presets plus per-feature settings.
+
+    python3 void_accounts.py set-developer p1          # (0 to revoke)
+    python3 void_accounts.py grant-chests p1 12
+    python3 void_accounts.py fill-vault p1 ids.txt     # account must be offline; ids from tools/net/export_item_ids.gd
+    python3 void_accounts.py give-dots p1 500
+
 ## Running a server
 
     tools/net/run_server.sh                      # uses server_config/ (created on first start)

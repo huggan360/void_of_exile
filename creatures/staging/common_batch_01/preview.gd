@@ -85,7 +85,7 @@ func _ready() -> void:
 	heading.add_theme_font_size_override("font_size", 26)
 	ui.add_child(heading)
 	var instructions := Label.new()
-	instructions.text = "Space: pause  •  A/D: turn  •  Enter: attack pose     |     Small models beside each creature are projectile concepts."
+	instructions.text = "Space: pause  -  A/D: turn  -  Enter: attack pose     |     Small models beside each creature are projectile concepts."
 	instructions.position = Vector2(32, 66)
 	instructions.add_theme_font_size_override("font_size", 18)
 	ui.add_child(instructions)

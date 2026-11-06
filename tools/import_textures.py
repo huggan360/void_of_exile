@@ -6,7 +6,7 @@ import json,sys,zipfile
 from pathlib import Path
 from PIL import Image
 # Boss-assigned sets (keep in step with Items.DIVINE_SETS).
-LIVE_SETS = {"Iron", "The_Blue", "Frost", "Satan", "Holy_Divine", "Void", "Fallenwood", "Silver", "Dragon_Fire", "Storm"}
+LIVE_SETS = {"Spirit", "Iron", "The_Blue", "Frost", "Satan", "Holy_Divine", "Void", "Fallenwood", "Silver", "Dragon_Fire", "Storm"}
 # Legacy source filenames -> runtime item ids.
 ALIASES = {"crucefix of thalao": "D_bonus_crucifix_ofthalao",
            "flame of the broken": "D_bonus_flame_ofthebroken","crucefix of the blue": "D_bonus_crucifix_oftheblue",

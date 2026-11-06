@@ -20,6 +20,7 @@ const ACTIONS := [
 	{id="minimap_zoom_out",title="Zoom minimap out",category="Camera",mouse=MOUSE_BUTTON_WHEEL_DOWN},
 	{id="inventory",title="Hold backpack open",category="Interface",key=KEY_TAB},
 	{id="stats",title="Toggle character stats",category="Interface",key=KEY_C},
+	{id="map",title="Toggle large map",category="Interface",key=KEY_M},
 	{id="interact",title="Interact / leave conversation",category="Interface",key=KEY_X},
 	{id="chat",title="Open chat / send message",category="Interface",key=KEY_ENTER},
 	{id="menu",title="Pause menu",category="Interface",key=KEY_ESCAPE},

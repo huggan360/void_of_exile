@@ -11,6 +11,7 @@ const RING_IN := 9.5
 var level := 1
 var progress := 0.0  # 0..1
 var _shown := 0.0
+var _initialized := false
 var _pulse := 0.0
 var _level_label := Label.new()
 
@@ -30,13 +31,18 @@ func _ready() -> void:
 
 
 func set_values(p_level: int, p_progress: float) -> void:
-	if p_level > level:
+	var target := 1.0 if p_level >= PlayerStats.MAX_LEVEL else clampf(p_progress, 0.0, 1.0)
+	if _initialized and p_level == level and is_equal_approx(target, progress): return
+	if not _initialized or p_level < level:
+		_shown = target
+	elif p_level > level:
 		_pulse = 1.0
 		_shown = 0.0
+	_initialized = true
 	level = p_level
-	progress = p_progress
+	progress = target
 	_level_label.text = str(level)
-	tooltip_text = "Level %d · %d%% to next" % [level, int(progress * 100)]
+	tooltip_text = "Level %d - MAX" % level if level >= PlayerStats.MAX_LEVEL else "Level %d - %d%% to next" % [level, int(progress * 100)]
 
 
 func _process(delta: float) -> void:
@@ -60,15 +66,21 @@ func _draw() -> void:
 				# Angle from the top, clockwise, 0..1.
 				var a := fposmod(atan2(d.x, -d.y) / TAU, 1.0)
 				if a <= _shown:
-					col = UIStyle.ACCENT.lerp(UIStyle.XP, a)
+					col = UIStyle.ACCENT.lerp(UIStyle.GOLD, a)
 					if r > RING_OUT - 1.0:
-						col = col.lightened(0.3)  # lit outer edge
+						col = col.lightened(0.16)  # lit outer edge
 				else:
-					col = Color(0.08, 0.08, 0.15)
+					col = Color("294966")
+				# Four small brass ticks keep an empty ring visible without
+				# suggesting XP that has not been earned.
+				var cardinal_tick := (absf(d.x) <= 1.0 and absf(d.y) > RING_IN) \
+					or (absf(d.y) <= 1.0 and absf(d.x) > RING_IN)
+				if cardinal_tick:
+					col = UIStyle.GOLD.darkened(0.18)
 			elif r > RING_IN - 1.0:
 				col = UIStyle.OUTLINE
 			else:
-				col = UIStyle.BG if d.y > 0 else UIStyle.BG_LIGHT  # two-tone center
+				col = Color("101d30") if d.y > 0 else Color("1b2b43")  # opaque blue-stone center
 			if _pulse > 0.0 and r > RING_IN:
 				col = col.lerp(UIStyle.GOLD, _pulse * 0.7)
 			draw_rect(Rect2(Vector2(x, y) * PX, Vector2.ONE * PX), col)

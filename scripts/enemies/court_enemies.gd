@@ -45,6 +45,8 @@ static func build(defs: Dictionary) -> void:
 		if d.id in ["gilded_sentinel", "obsidian_brute"]:
 			d.attacks.append({style = "orb", color = tint, pattern = "ring", count = 12, speed = 4.5, range = 12.0,
 				damage_min = spec[3] - 10, damage_max = spec[3], cooldown = 6.0, windup = 1.1})
+		if not sand:
+			for attack: Dictionary in d.attacks: attack.element = "fire"
 		d.loot.assign([{item = "elixir_hp", chance = 0.25}, {pool = {tier = 3}, chance = 0.12}, {pool = {tier = 4}, chance = 0.03}])
 		defs[d.id] = d
 	for spec in [["gilded_vizier", "Gilded Vizier", 22000, 16, 5.8, ["defense", "hp"]],

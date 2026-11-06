@@ -1,8 +1,9 @@
 class_name DungeonScenery
-extends MultiMeshInstance3D
+extends Node3D
 ## Seeded, batched voxel dressing. No colliders or changes to navigation.
 var _points: Array[Transform3D] = []
 var _colors := PackedColorArray()
+var _prepared := PackedFloat32Array()
 var _rng := RandomNumberGenerator.new()
 const STONE := Color("51594e")
 const MOSS := Color("4c7139")
@@ -11,6 +12,11 @@ const BONE := Color("b1aa82")
 
 ## theme: Dungeons.THEMES key ("moss_cave", "sand_hall", "volcano", "burning_forest").
 func build(layout: DungeonLayout, theme := "moss_cave") -> void:
+	prepare(layout,theme)
+	publish()
+
+## CPU-only geometry plan; safe on the world preparation worker.
+func prepare(layout: DungeonLayout, theme := "moss_cave") -> void:
 	_rng.seed = layout.seed_value + 87133
 	var props: Array[Callable] = [_rock, _stalagmites, _mushrooms, _bones, _crate, _camp]
 	match theme:
@@ -49,20 +55,35 @@ func build(layout: DungeonLayout, theme := "moss_cave") -> void:
 						Vector3(0.2, 0.09, 0.2), MOSS.lightened(_rng.randf() * 0.18))
 			for k in 5:
 				_voxel(base - n * k * 0.14 + tangent * _rng.randf_range(-0.2, 0.2), Vector3(0.22, 0.045, 0.22), MOSS.darkened(0.12))
-	multimesh = MultiMesh.new()
-	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_colors = true
-	multimesh.mesh = BoxMesh.new()
-	multimesh.instance_count = _points.size()
+	_prepared.resize(_points.size()*16)
 	for i in _points.size():
-		multimesh.set_instance_transform(i, _points[i])
-		multimesh.set_instance_color(i, _colors[i])
-	var material := ShaderMaterial.new()
-	material.shader = preload("res://shaders/dungeon_voxel.gdshader")
-	material_override = material
-	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var t := _points[i]
+		var c := _colors[i]
+		var o := i*16
+		# MultiMesh's packed 3D transform uses three matrix rows.
+		var values := [t.basis.x.x,t.basis.y.x,t.basis.z.x,t.origin.x,
+			t.basis.x.y,t.basis.y.y,t.basis.z.y,t.origin.y,
+			t.basis.x.z,t.basis.y.z,t.basis.z.z,t.origin.z,c.r,c.g,c.b,c.a]
+		for j in 16: _prepared[o+j] = values[j]
 	_points.clear()
 	_colors.clear()
+
+## Rendering objects are published only on the main thread.
+func publish() -> void:
+	var multi := MultiMesh.new()
+	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.use_colors = true
+	multi.mesh = BoxMesh.new()
+	multi.instance_count = _prepared.size()/16
+	multi.buffer = _prepared
+	var visual := MultiMeshInstance3D.new()
+	visual.multimesh = multi
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://shaders/dungeon_voxel.gdshader")
+	visual.material_override = material
+	visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(visual)
+	_prepared.clear()
 
 func _voxel(at: Vector3, size: Vector3, color: Color) -> void:
 	_points.append(Transform3D(Basis.IDENTITY.scaled(size), at))

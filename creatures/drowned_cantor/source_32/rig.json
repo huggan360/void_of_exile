@@ -1,77 +1,290 @@
 {
   "voxel_size": 0.232,
   "parts": {
-    "arm_l": {
+    "robe_-1": {
       "frame_min": [
-        -2,
-        -9,
-        -3
+        -5,
+        -11,
+        -2
       ],
       "frame_size": [
-        4,
-        9,
-        5
+        6,
+        11,
+        4
       ]
     },
-    "body_resonant": {
+    "body": {
       "frame_min": [
-        -12,
-        2,
+        -8,
+        10,
         -6
       ],
       "frame_size": [
-        24,
-        29,
-        10
+        18,
+        16,
+        13
+      ],
+      "glow": true
+    },
+    "body_resonant": {
+      "frame_min": [
+        -8,
+        10,
+        -6
+      ],
+      "frame_size": [
+        18,
+        16,
+        13
       ],
       "glow": true
     },
     "body_unbound": {
       "frame_min": [
-        -12,
-        2,
+        -8,
+        10,
         -6
       ],
       "frame_size": [
-        24,
-        29,
-        10
+        18,
+        16,
+        13
       ],
       "glow": true
     },
-    "body": {
+    "arm_l": {
       "frame_min": [
-        -12,
-        2,
-        -6
+        -4,
+        -9,
+        -5
       ],
       "frame_size": [
-        24,
-        29,
-        10
-      ],
-      "glow": true
+        6,
+        11,
+        9
+      ]
     },
     "arm_r": {
       "frame_min": [
-        -4,
-        -12,
-        -6
+        -2,
+        -16,
+        -7
+      ],
+      "frame_size": [
+        10,
+        27,
+        11
+      ],
+      "glow": true
+    },
+    "tail_-1": {
+      "frame_min": [
+        -6,
+        -8,
+        -2
       ],
       "frame_size": [
         8,
-        21,
-        8
+        10,
+        10
+      ]
+    },
+    "jaw_resonant": {
+      "frame_min": [
+        -3,
+        -4,
+        -5
+      ],
+      "frame_size": [
+        6,
+        4,
+        6
       ],
       "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -3,
+        -4,
+        -5
+      ],
+      "frame_size": [
+        6,
+        4,
+        6
+      ],
+      "glow": true
+    },
+    "jaw_unbound": {
+      "frame_min": [
+        -3,
+        -4,
+        -5
+      ],
+      "frame_size": [
+        6,
+        4,
+        6
+      ],
+      "glow": true
+    },
+    "robe_1": {
+      "frame_min": [
+        -1,
+        -11,
+        -2
+      ],
+      "frame_size": [
+        6,
+        11,
+        4
+      ]
+    },
+    "tail_tip_-1": {
+      "frame_min": [
+        -4,
+        -4,
+        -8
+      ],
+      "frame_size": [
+        5,
+        5,
+        9
+      ],
+      "glow": true
+    },
+    "tail_tip_1": {
+      "frame_min": [
+        -1,
+        -4,
+        -8
+      ],
+      "frame_size": [
+        6,
+        5,
+        9
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -5,
+        -3,
+        -6
+      ],
+      "frame_size": [
+        11,
+        10,
+        11
+      ],
+      "glow": true
+    },
+    "head_unbound": {
+      "frame_min": [
+        -5,
+        -3,
+        -6
+      ],
+      "frame_size": [
+        11,
+        10,
+        11
+      ],
+      "glow": true
+    },
+    "head_resonant": {
+      "frame_min": [
+        -5,
+        -3,
+        -6
+      ],
+      "frame_size": [
+        11,
+        10,
+        11
+      ],
+      "glow": true
+    },
+    "tail_1": {
+      "frame_min": [
+        -2,
+        -8,
+        -2
+      ],
+      "frame_size": [
+        8,
+        10,
+        10
+      ]
     }
   },
   "limbs": {
+    "robe_-1": {
+      "part": "robe_-1",
+      "pivot": [
+        -3.0,
+        14.0,
+        2.0
+      ],
+      "role": "cloth",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "robe_1": {
+      "part": "robe_1",
+      "pivot": [
+        3.0,
+        14.0,
+        2.0
+      ],
+      "role": "cloth",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "head": {
+      "part": "head",
+      "pivot": [
+        0.0,
+        24.0,
+        0.0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
     "arm_l": {
       "part": "arm_l",
       "pivot": [
-        -5.0,
-        18.0,
+        -7.0,
+        21.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        7.0,
+        21.0,
         0.0
       ],
       "role": "arm",
@@ -79,38 +292,81 @@
       "yaw": 0,
       "throws": false
     },
-    "arm_r": {
-      "part": "arm_r",
+    "tail_-1": {
+      "part": "tail_-1",
       "pivot": [
-        5.0,
-        18.0,
-        0.0
+        -2.0,
+        12.0,
+        3.0
       ],
-      "role": "arm",
+      "role": "tail",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "tail_tip_-1": {
+      "part": "tail_tip_-1",
+      "pivot": [
+        -5.0,
+        -7.0,
+        6.0
+      ],
+      "role": "tail_tip",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "tail_-1"
+    },
+    "tail_1": {
+      "part": "tail_1",
+      "pivot": [
+        2.0,
+        12.0,
+        3.0
+      ],
+      "role": "tail",
       "phase": 1,
       "yaw": 0,
       "throws": false
+    },
+    "tail_tip_1": {
+      "part": "tail_tip_1",
+      "pivot": [
+        5.0,
+        -7.0,
+        6.0
+      ],
+      "role": "tail_tip",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "tail_1"
     }
   },
   "variants": {
     "resonant": {
-      "body": "body_resonant"
+      "body": "body_resonant",
+      "head": "head_resonant",
+      "jaw": "jaw_resonant"
     },
     "unbound": {
-      "body": "body_unbound"
+      "body": "body_unbound",
+      "head": "head_unbound",
+      "jaw": "jaw_unbound"
     }
   },
   "hand": [
-    0.0,
-    16.0,
-    -5.0
+    4,
+    -7,
+    -4
   ],
   "hover": 0,
-  "bob": 0.025,
+  "bob": 0.018,
   "waddle": 0,
   "flap_rate": 1.4,
   "pixel_art": true,
   "material_jitter": 0.0,
-  "glow_strength": 1.1,
-  "animation_style": "wraith"
+  "glow_strength": 1.25,
+  "animation_style": "cantor",
+  "hand_limb": "arm_r"
 }

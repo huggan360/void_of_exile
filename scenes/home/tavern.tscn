@@ -9,7 +9,7 @@
 [ext_resource type="Shader" uid="uid://d0vsdpgy5lqr7" path="res://shaders/water.gdshader" id="E6"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/grand_tavern.tscn" id="E7"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/chapel.tscn" id="E8"]
-[ext_resource type="PackedScene" path="res://scenes/home/prefabs/smithy.tscn" id="E9"]
+[ext_resource type="PackedScene" path="res://scenes/home/prefabs/forge_house.tscn" id="E9"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/magicians_house.tscn" id="E10"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/fountain.tscn" id="E11"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/garden_bed.tscn" id="E12"]
@@ -578,6 +578,9 @@ transform = Transform3D(-1, 0, -7.2399803e-06, 0, 1, 0, 7.2399803e-06, 0, -1, 0.
 [node name="CampaignGate" type="Marker3D" parent="."]
 transform = Transform3D(0.65, 0, 0.76, 0, 1, 0, -0.76, 0, 0.65, -13, 10, 11)
 
+[node name="ChambersGate" type="Marker3D" parent="."]
+transform = Transform3D(0.65, 0, -0.76, 0, 1, 0, 0.76, 0, 0.65, 13, 10, 11)
+
 [node name="Coastline" type="Path3D" parent="." unique_id=510201788]
 curve = SubResource("Curve2")
 
@@ -1086,7 +1089,7 @@ transform = Transform3D(-1, 0, -7.2399803e-06, 0, 1, 0, 7.2399803e-06, 0, -1, 0,
 [node name="Chapel" parent="Buildings" unique_id=676263125 instance=ExtResource("E8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 84)
 
-[node name="Smithy" parent="Buildings" unique_id=260341663 instance=ExtResource("E9")]
+[node name="ForgeHouse" parent="Buildings" unique_id=260341663 instance=ExtResource("E9")]
 transform = Transform3D(-1, 0, -7.2399803e-06, 0, 1, 0, 7.2399803e-06, 0, -1, -36, 10, -12.5)
 
 [node name="MagiciansHouse" parent="Buildings" unique_id=1555557117 instance=ExtResource("E10")]

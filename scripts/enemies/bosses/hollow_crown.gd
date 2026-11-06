@@ -121,7 +121,8 @@ func _black_sun(count: int) -> void:
 		for k in count:
 			var dir := aim if count == 1 else aim.rotated(Vector3.UP, deg_to_rad(25.0) * (k * 2 - 1))
 			shoot(shot_origin(), dir, Boss.shot("orb", Color(0.25, 0.08, 0.35), Vector2i(75, 90), 3.5, 0.45, 10.0,
-					{size = 1.6, terminal = {delay = 0.4, count = 12 if count > 1 else 8, attack = needles}})))
+					{size = 1.6, effects = [{id = "quiet", duration = 1.75}], effect_source = "Hollow Crown black sun",
+						terminal = {delay = 0.4, count = 12 if count > 1 else 8, attack = needles}})))
 
 
 func _rune_pairs() -> void:

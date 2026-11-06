@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b3bjexa716rxk"
+path="res://.godot/imported/head_kindled.vox-950b32a0e98e8d2c428e187d36d2ff3d.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/head_kindled.vox"
+dest_files=["res://.godot/imported/head_kindled.vox-950b32a0e98e8d2c428e187d36d2ff3d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

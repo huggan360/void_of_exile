@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c6ejm0y5h8dij"
+path="res://.godot/imported/head.vox-93f496cc770a3d39499931bab83844c6.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/head.vox"
+dest_files=["res://.godot/imported/head.vox-93f496cc770a3d39499931bab83844c6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -18,7 +18,7 @@ extends CharacterBody3D
 signal shot(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase: float, mods: Dictionary)
 signal ring_cast(spell: Item)
 
-## Movement at 0 speed stat; each point of speed adds 1% (8 speed = ~5 m/s).
+## Movement at 0 speed stat; PlayerStats applies the per-point Speed bonus.
 const BASE_SPEED := 4.63
 ## Walking on roads and town streets is this much faster.
 const ROAD_SPEED := 1.5
@@ -26,9 +26,8 @@ const ROAD_SPEED := 1.5
 const TALK_DISTANCE := 4.4
 const TALK_HEIGHT := 1.5
 const TALK_BLEND_SPEED := 3.0
-## Seconds between shots at 0 dexterity; each point makes it 1.5% faster.
+## Seconds between shots at 0 dexterity; PlayerStats applies the Dexterity bonus.
 const BASE_FIRE_COOLDOWN := 0.41
-const SHIELD_BREAK_LOCKOUT := 1.5  # seconds before a broken shield can rise again
 const KNOCKBACK_MAX := 14.0  # m/s
 const KNOCKBACK_DRAG := 7.0  # how quickly a push dies down
 const KNOCKBACK_HOP := 0.3   # share of a push that lifts you off your feet
@@ -39,10 +38,11 @@ const STEP_HEIGHT := 1.05  # climbs single 1 m blocks, walls of 2+ still block
 const STEP_SMOOTHING := 12.0  # how fast the model catches up after a step
 
 const CAMERA_PITCH := deg_to_rad(55.0)
+const OVERHEAD_PITCH := deg_to_rad(72.0)
 const CAMERA_FOV := 35.0
 const ZOOM_MIN := 6.0
-const ZOOM_MAX := 45.0
-const ZOOM_DEFAULT := 30.0
+const ZOOM_MAX := 60.0
+const ZOOM_DEFAULT := 38.0
 const ZOOM_SPEED := 16.0  # meters per second while I/O is held
 const ZOOM_SMOOTHING := 10.0
 const ORBIT_SPEED := 2.0  # radians per second
@@ -54,9 +54,6 @@ const ENEMY_LAYER := 4
 ## Other players online (see RemotePlayer); only solid when the server has
 ## player collision on.
 const PLAYER_LAYER := 8
-## Standing in a lava pit: armor-piercing damage once a second.
-const LAVA_DAMAGE := 40.0
-const LAVA_TICK := 1.0
 const CAMERA_PULL_OUT_SPEED := 2.0  # how quickly a zoom change settles
 const AIM_HOLD := 0.5  # keep facing the aim this long after the last shot
 const AIM_TURN_SPEED := 18.0
@@ -99,6 +96,9 @@ var road := Callable()
 var talk_partner: Node3D
 var _talk_blend := 0.0
 var _talk_last := Vector3.ZERO
+var _talk_camera_offset := Vector3.ZERO
+var _talk_camera_timer := 0.0
+var _talk_camera_partner: Node3D
 ## Debug/test hooks: when non-zero, used instead of WASD / the mouse aim.
 var debug_input := Vector2.ZERO
 var debug_aim := Vector3.ZERO  # world point
@@ -108,6 +108,7 @@ var stats: PlayerStats
 var model: Node3D
 var class_id := "archer"
 var camera: Camera3D
+var spatial_controller: SpatialController
 var shield := MagicShield.new()
 var aura := GearAura.new()
 var charge_effect := ChargeEffect.new()
@@ -116,8 +117,27 @@ var player_id := 0
 ## True while a UI panel (inventory) is open: clicks don't shoot.
 var ui_blocked := false
 ## True while a menu or a loading transition is up: no moving, shooting or magic.
-var input_locked := false
+var input_locked := false:
+	set(value):
+		input_locked = value
+		if value and is_instance_valid(spatial_controller): spatial_controller.hide_overlay()
 var cinematic_locked := false
+var _interaction_sources := {}
+var _interaction_refresh := 0.0
+
+func begin_interaction(source_id: int) -> void:
+	_interaction_sources[source_id] = true
+	_interaction_refresh = 1.0
+	GameServer.set_interaction_protection(player_id, true)
+	_cancel_weapon_actions()
+
+func end_interaction(source_id: int) -> void:
+	if not _interaction_sources.has(source_id): return
+	_interaction_sources.erase(source_id)
+	if _interaction_sources.is_empty(): GameServer.set_interaction_protection(player_id, false)
+
+func interacting() -> bool:
+	return not _interaction_sources.is_empty()
 
 ## Writing in the chat: keys type, the mouse doesn't aim.
 var typing := false
@@ -132,11 +152,11 @@ var _camera_y := 0.0
 var _cooldown := 0.0
 var _aim_hold := 0.0
 var _aim_point := Vector3.ZERO
+## The ring on the ground where your shots go (only you see it).
+var aim_marker := AimMarker.new()
 var _torch := OmniLight3D.new()
 var _torch_time := 0.0
 var _torch_level := 0.0
-var _shield_pool := 0.0
-var _shield_lockout := 0.0
 var _last_magic_press := -10.0
 var _ring_cooldown := 0.0
 var _winding := 0.0  # seconds left drawing before a windup shot fires
@@ -146,11 +166,20 @@ var _charge_weapon: Item
 var _burst_left := 0
 var _burst_timer := 0.0
 var _burst := {}  # the burst being fired: weapon, mods, damage mult
-var _lava_timer := 0.0
 var _trauma := 0.0
 var _shake_time := 0.0
 var _knock := Vector3.ZERO
 var _hop := 0.0
+
+
+func set_spatial_world(place: GameWorld) -> void:
+	if is_instance_valid(spatial_controller):
+		remove_child(spatial_controller)
+		spatial_controller.free()
+		spatial_controller = null
+	if place is SpatialWorld:
+		spatial_controller = (place as SpatialWorld).make_controller(self)
+		if spatial_controller!=null: add_child(spatial_controller)
 
 
 func _ready() -> void:
@@ -198,6 +227,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	if interacting(): GameServer.set_interaction_protection(player_id, false)
 	CameraShake.unregister(self)
 
 
@@ -229,6 +259,11 @@ func add_trauma(amount: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if interacting():
+		_interaction_refresh -= delta
+		if _interaction_refresh <= 0.0:
+			_interaction_refresh = 1.0
+			GameServer.set_interaction_protection(player_id, true)
 	if stats:
 		status_visuals.effects = stats.buffs
 		status_visuals.player_name = Net.client.account_name if Net.is_client() and Net.client else Account.username() if Account.username() != "" else "Adventurer"
@@ -255,6 +290,9 @@ func place(pos: Vector3, p_terrain: VoxelTerrain, p_walkable := Callable()) -> v
 
 func _physics_process(delta: float) -> void:
 	_update_zoom(delta)
+	if is_instance_valid(spatial_controller):
+		spatial_controller.physics_step(delta)
+		return
 	if frozen:
 		var area := AABB(global_position - Vector3(8, 8, 8), Vector3(16, 16, 16))
 		if terrain and terrain.is_area_meshed(area):
@@ -264,7 +302,7 @@ func _physics_process(delta: float) -> void:
 
 	# Resolve magic before movement and weapon updates, including the first frame.
 	_update_magic(delta)
-	if shield.active or stats.buffs.has_effect("quiet") or controls_locked(): _cancel_weapon_actions()
+	if shield.active or stats.buffs.has_effect("quiet") or controls_locked() or interacting(): _cancel_weapon_actions()
 	if not controls_locked():
 		camera_yaw += Input.get_axis("orbit_right", "orbit_left") * ORBIT_SPEED * delta
 
@@ -307,18 +345,27 @@ func _physics_process(delta: float) -> void:
 	model.position.y = _visual_offset
 
 	_update_camera(delta)
-	_aim_point = debug_aim if debug_aim != Vector3.ZERO else _mouse_point()
+	_update_combat(delta,dir,speed)
+
+
+func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
+	_aim_point = debug_aim if debug_aim != Vector3.ZERO else spatial_controller.mouse_point() if is_instance_valid(spatial_controller) else _mouse_point()
 	# Clicks on the UI (buttons, slots) don't shoot.
-	var free_hands := not stats.buffs.has_effect("quiet") and not shield.active and not ui_blocked and not controls_locked() and get_viewport().gui_get_hovered_control() == null
+	var free_hands := not interacting() and not stats.buffs.has_effect("quiet") and not shield.active and not ui_blocked and not controls_locked() and get_viewport().gui_get_hovered_control() == null
 	_update_charge(delta, free_hands)
 	var shooting := Input.is_action_pressed("shoot") and free_hands and not _charging and _burst_left == 0
 	_aim_hold = AIM_HOLD if shooting or _charging or _winding > 0.0 else _aim_hold - delta
-	if _aim_hold > 0.0:
+	if aim_marker.is_inside_tree():
+		# On the cursor's own ray, so the ring's middle is always at the cursor's tip.
+		aim_marker.track(_aim_point,
+				(Input.is_action_pressed("shoot") or _charging) and free_hands and stats.gear.weapon != null, delta)
+	if _aim_hold > 0.0 or (is_instance_valid(spatial_controller) and spatial_controller.first_person>0.8):
 		facing = lerp_angle(facing, aim_yaw(), minf(1.0, delta * AIM_TURN_SPEED))
 	elif dir != Vector3.ZERO:
-		facing = lerp_angle(facing, atan2(-dir.x, -dir.z), minf(1.0, delta * TURN_SPEED))
+		var local_dir := global_basis.inverse()*dir if is_instance_valid(spatial_controller) else dir
+		facing = lerp_angle(facing, atan2(-local_dir.x, -local_dir.z), minf(1.0, delta * TURN_SPEED))
 	model.rotation.y = facing
-	model.animate(Vector2(velocity.x, velocity.z).length() / speed, delta)
+	model.animate((velocity.slide(up_direction).length() if is_instance_valid(spatial_controller) else Vector2(velocity.x,velocity.z).length())/maxf(0.01,speed),delta)
 
 	_cooldown -= delta
 	if _winding > 0.0:
@@ -331,13 +378,13 @@ func _physics_process(delta: float) -> void:
 	elif shooting and _cooldown <= 0.0:
 		shoot()
 	_update_burst(delta)
-	_update_lava(delta)
 
 
 ## Fires in a straight line toward the aim point, at SHOT_HEIGHT above the
 ## ground there, so shots go up or down slopes directly. Multi-shot weapons
 ## fan their shots out (spread) or send weaving pairs (opposite phases).
 func shoot() -> void:
+	if interacting(): return
 	var weapon: Item = stats.gear.weapon
 	if stats.buffs.has_effect("quiet") or shield.active or weapon == null or _winding > 0.0:
 		return
@@ -350,6 +397,7 @@ func shoot() -> void:
 
 
 func _fire() -> void:
+	if interacting(): return
 	if shield.active or stats.buffs.has_effect("quiet"): return
 	var weapon: Item = stats.gear.weapon
 	if weapon == null:
@@ -363,12 +411,13 @@ func _fire() -> void:
 		if weapon.shots % 2 == 1 and float(weapon.projectile.get("wave_amp", 0.0)) > 0.0:
 			if i == weapon.shots / 2: mods.wave_amp = 0.0
 			phase = PI if i > weapon.shots / 2 else 0.0
-		shot.emit(aim[0], (aim[1] as Vector3).rotated(Vector3.UP, offset), roundi(stats.roll_damage() * weapon.shot_share(i)), weapon, phase, mods)
+		shot.emit(aim[0], (aim[1] as Vector3).rotated(up_direction, offset), roundi(stats.roll_damage() * weapon.shot_share(i)), weapon, phase, mods)
 
 
 ## [origin, direction] for a shot toward the aim point at SHOT_HEIGHT above
 ## the ground there.
 func _aim_origin_and_direction() -> Array:
+	if is_instance_valid(spatial_controller): return spatial_controller.aim_ray()
 	var forward := Basis(Vector3.UP, aim_yaw()) * Vector3.FORWARD
 	var origin := global_position + Vector3(0, SHOT_HEIGHT, 0) + forward * 0.6
 	var target := _aim_point
@@ -430,6 +479,12 @@ func _release_charge(weapon: Item, power: float) -> void:
 	_cooldown = BASE_FIRE_COOLDOWN / stats.shots_per_second_multiplier()
 	var big := {speed = 1.6, size = 1.7, range = 1.5, spiral = true}
 	match c.style:
+		"serpent_fan":
+			var count: int = c.get("count", 3)
+			for i in count:
+				var offset := (i - (count - 1) * 0.5) * deg_to_rad(float(c.get("spread", 12.0)))
+				_emit_charged(origin, direction.rotated(up_direction, offset), weapon, mult / count, TAU * i / count,
+					{speed = 1.12, size = 1.65, range = 1.25, spiral = true, wave_amp = 0.85, pierce = true, style = "serpent"})
 		"arcane":
 			_emit_charged(origin, direction, weapon, mult, 0.0,
 				{speed=1.15, size=1.6, range=1.25, spiral=true, wave_amp=0.0, cone_deg=8.0, pierce=true})
@@ -442,7 +497,7 @@ func _release_charge(weapon: Item, power: float) -> void:
 			var count: int = c.get("count", 7)
 			for i in count:
 				var offset := ((count - 1) * 0.5 - i) * deg_to_rad(c.get("spread", 6.0))
-				_emit_charged(origin, direction.rotated(Vector3.UP, offset), weapon, mult * weapon.shot_share(i, count), 0.0,
+				_emit_charged(origin, direction.rotated(up_direction, offset), weapon, mult * weapon.shot_share(i, count), 0.0,
 						{speed = 1.3, size = 1.2, range = 1.2, spiral = i == count / 2})
 		"helix":
 			for i in 2:
@@ -461,13 +516,14 @@ func _release_charge(weapon: Item, power: float) -> void:
 		_:  # "power": the bow's normal pattern, but big, fast and strong
 			for i in weapon.shots:
 				var offset := ((weapon.shots - 1) * 0.5 - i) * deg_to_rad(weapon.spread_deg)
-				_emit_charged(origin, direction.rotated(Vector3.UP, offset), weapon, mult * weapon.shot_share(i), PI * i, big)
+				_emit_charged(origin, direction.rotated(up_direction, offset), weapon, mult * weapon.shot_share(i), PI * i, big)
 	if power >= 1.0:
 		CameraShake.shake_at(global_position, 0.12, 6.0)
 
 
 func _emit_charged(origin: Vector3, direction: Vector3, weapon: Item, mult: float, phase: float,
 		mods: Dictionary) -> void:
+	if interacting(): return
 	mods["secondary"] = true
 	shot.emit(origin, direction, int(round(stats.roll_damage() * mult)), weapon, phase, mods)
 
@@ -492,27 +548,26 @@ func _update_burst(delta: float) -> void:
 		return
 	var jitter := randf_range(-1.0, 1.0) * deg_to_rad(2.5)
 	model.play_shot()
-	_emit_charged(aim[0], (aim[1] as Vector3).rotated(Vector3.UP, jitter), _burst.weapon, _burst.mult, 0.0,
+	_emit_charged(aim[0], (aim[1] as Vector3).rotated(up_direction, jitter), _burst.weapon, _burst.mult, 0.0,
 			{speed = 1.4, size = 1.25, range = 1.2})
 
 
 ## Takes a hit (this client detected it; the server applies it). Defence
-## softens normal hits; the warp shield blocks magic completely and soaks up
-## most of a normal hit until it breaks.
+## softens the remainder after the shield's MAG-based reduction. The warp
+## shield still blocks magic completely and has no damage capacity to exhaust.
 func take_damage(amount: float, armor_piercing := false, magic := false) -> bool:
-	if GameServer.intro_protected(player_id) or stats.buffs.has_effect("invincible"): return false
-	if shield.active and magic:
-		shield.flash()
-		return false
-	var before := stats.hp
-	var result := GameServer.hit_player(player_id, amount, armor_piercing, shield.active)
 	if shield.active:
 		shield.flash()
-		_shield_pool -= result.soaked
-		if _shield_pool <= 0.0:
-			_set_shield(false)
-			_shield_lockout = SHIELD_BREAK_LOCKOUT
+		GameAudio.play("magic_shield_hit", global_position + Vector3.UP * 0.9, {source_id = get_instance_id(), cooldown = 0.08})
+		if Net.is_client(): Net.client.send_action("shield_contact", [])
+	if GameServer.intro_protected(player_id) or stats.buffs.has_effect("invincible"): return false
+	if shield.active and magic:
+		return false
+	var before := stats.hp
+	var result := GameServer.hit_player(player_id, amount, armor_piercing, shield.active,last_hit_by)
 	var landed: float = result.landed
+	if landed >= 0.5:
+		GameAudio.play("hurt", global_position, {source_id = get_instance_id(), cooldown = 0.2})
 	if landed >= 0.5:
 		FloatingText.spawn(get_parent(), global_position + Vector3.UP * 2.3, "-%d" % roundi(landed),
 				FloatingText.PLAYER_PIERCED if armor_piercing else FloatingText.PLAYER_DAMAGE, true)
@@ -534,11 +589,9 @@ func knockback(push: Vector3) -> void:
 
 
 func _update_magic(delta: float) -> void:
-	if shield.active: _shield_pool = minf(_shield_pool,stats.shield_capacity())
-	_shield_lockout -= delta
 	_ring_cooldown -= delta
 	var now := Time.get_ticks_msec() / 1000.0
-	if Input.is_action_just_pressed("magic") and not controls_locked():
+	if Input.is_action_just_pressed("magic") and not controls_locked() and not interacting():
 		if now - _last_magic_press < DOUBLE_TAP:
 			cast_ring()
 			_last_magic_press = -10.0
@@ -546,45 +599,35 @@ func _update_magic(delta: float) -> void:
 			_last_magic_press = now
 	# No spell, no magic. The server drains magic while it's up (and may
 	# refuse to raise it).
-	var want := Input.is_action_pressed("magic") and not controls_locked() and _shield_lockout <= 0.0 and stats.gear.spell != null
+	var want := Input.is_action_pressed("magic") and not controls_locked() and not interacting() and stats.gear.spell != null
 	if want and not shield.active:
-		if _set_shield(true):
-			_shield_pool = stats.shield_capacity()
+		_set_shield(true)
 	elif shield.active and (not want or stats.mp <= 0.0):
 		_set_shield(false)
 
 
 func _set_shield(up: bool) -> bool:
 	shield.active = GameServer.set_shield(player_id, up)
+	GameAudio.shield(shield.active)
 	return shield.active
-
-
-## Lava pits burn: armor-piercing damage as soon as you step in, then every
-## second you stay.
-func _update_lava(delta: float) -> void:
-	if not hazard.is_valid() or not is_on_floor() or not hazard.call(global_position):
-		_lava_timer = 0.0
-		return
-	_lava_timer -= delta
-	if _lava_timer <= 0.0:
-		_lava_timer = LAVA_TICK
-		last_hit_by = "Lava"
-		take_damage(LAVA_DAMAGE, true)
 
 
 ## Sends out the equipped spell's warped ring, if it has one and there's
 ## enough magic.
 func cast_ring() -> void:
+	if interacting(): return
 	var spell: Item = stats.gear.spell
 	if spell == null or spell.ring.is_empty() or _ring_cooldown > 0.0 or not GameServer.request_ring(player_id):
 		return
 	_ring_cooldown = maxf(RING_COOLDOWN, spell.ring.get("cooldown", RING_COOLDOWN))
 	ring_cast.emit(spell)
+	GameAudio.play("magic_ring", global_position, {source_id = get_instance_id(), cooldown = 0.2})
 
 
 ## Yaw from the player toward the aim point.
 func aim_yaw() -> float:
 	var to := _aim_point - global_position
+	if is_instance_valid(spatial_controller): to = global_basis.inverse()*to
 	return atan2(-to.x, -to.z) if Vector2(to.x, to.z).length() > 0.05 else facing
 
 
@@ -597,7 +640,20 @@ func _mouse_point() -> Vector3:
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():
-		return hit.position
+		var body := hit.collider as CollisionObject3D
+		if body and body.collision_layer & TERRAIN_LAYER:
+			return hit.position  # ground: aim at it (shots climb to higher ground)
+		# An enemy or object: shots fly SHOT_HEIGHT above the ground, so aim
+		# where the cursor's ray crosses that height. The shot then passes
+		# right under the cursor instead of at the foot of what's hovered.
+		var point: Vector3 = hit.position
+		for i in 2:
+			var ground: float = ground_height.call(point.x, point.z) if ground_height.is_valid() else global_position.y
+			var crossing = Plane(Vector3.UP, ground + SHOT_HEIGHT).intersects_ray(from, dir)
+			if crossing == null:
+				break
+			point = crossing
+		return point
 	var on_plane = Plane(Vector3.UP, global_position.y + SHOT_HEIGHT).intersects_ray(from, dir)
 	return on_plane if on_plane != null else global_position
 
@@ -631,7 +687,8 @@ func _update_camera(delta: float) -> void:
 	var target_y := global_position.y + _visual_offset + 1.0
 	_camera_y = lerpf(_camera_y, target_y, minf(1.0, delta * CAMERA_HEIGHT_SMOOTHING))
 	var target := Vector3(global_position.x, _camera_y, global_position.z)
-	var direction := Basis(Vector3.UP, camera_yaw) * Vector3(0, sin(CAMERA_PITCH), cos(CAMERA_PITCH))
+	var pitch := OVERHEAD_PITCH if AppSettings.video.get("camera_angle", "standard") == "overhead" else CAMERA_PITCH
+	var direction := Basis(Vector3.UP, camera_yaw) * Vector3(0, sin(pitch), cos(pitch))
 	# The camera keeps the zoom the player chose: it never pulls in because a
 	# hill, wall or tree is between it and the character.
 	_camera_reach = lerpf(_camera_reach, camera_distance, minf(1.0, delta * CAMERA_PULL_OUT_SPEED))
@@ -650,7 +707,12 @@ func _update_camera(delta: float) -> void:
 		var side := across.cross(Vector3.UP).normalized() if across.length() > 0.1 else Vector3.BACK
 		if side.dot(from - mid) < 0.0:
 			side = -side
-		var close := mid + side * TALK_DISTANCE + Vector3.UP * TALK_HEIGHT - across.normalized() * 0.4
+		_talk_camera_timer -= delta
+		if talking and (talk_partner != _talk_camera_partner or _talk_camera_timer <= 0.0):
+			_talk_camera_partner = talk_partner
+			_talk_camera_timer = 0.3
+			_talk_camera_offset = _conversation_camera(mid, side, other) - mid
+		var close := mid + _talk_camera_offset
 		var k := smoothstep(0.0, 1.0, _talk_blend)
 		camera.global_position = from.lerp(close, k)
 		var look := target.lerp(mid, k)
@@ -660,6 +722,28 @@ func _update_camera(delta: float) -> void:
 			facing = lerp_angle(facing, atan2(-across.x, -across.z), minf(1.0, delta * 8.0))
 			model.rotation.y = facing
 	_apply_shake(delta)
+
+
+## Try both sides and raised views, checking both speakers against world geometry.
+func _conversation_camera(mid: Vector3, side: Vector3, other: Vector3) -> Vector3:
+	var space := get_world_3d().direct_space_state
+	var span := global_position.distance_to(other)
+	var distance := maxf(TALK_DISTANCE, span * 0.8 + 2.0)
+	var heads := [global_position + Vector3.UP * 1.2, other + Vector3.UP * 1.2]
+	for elevation in [TALK_HEIGHT, 4.5, 8.0, 16.0]:
+		for angle in [0.0, PI, PI * 0.5, -PI * 0.5, PI * 0.25, -PI * 0.25, PI * 0.75, -PI * 0.75]:
+			var candidate: Vector3 = mid + side.rotated(Vector3.UP, angle) * distance + Vector3.UP * elevation
+			var clear := true
+			for head: Vector3 in heads:
+				var query := PhysicsRayQueryParameters3D.create(candidate, head, TERRAIN_LAYER | OBSTACLE_LAYER)
+				query.exclude = [get_rid()]
+				query.hit_from_inside = true
+				if not space.intersect_ray(query).is_empty():
+					clear = false
+					break
+			if clear:
+				return candidate
+	return mid + Vector3(0.2, maxf(24.0, span * 1.5), 0.2)
 
 
 ## Shake: smooth wobble (out-of-step sine waves) scaled by trauma squared, so

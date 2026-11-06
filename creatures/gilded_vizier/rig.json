@@ -1,77 +1,267 @@
 {
   "voxel_size": 0.026,
   "parts": {
-    "arm_l": {
-      "frame_min": [
-        -16,
-        -64,
-        -24
-      ],
-      "frame_size": [
-        32,
-        64,
-        40
-      ]
-    },
-    "arm_r": {
-      "frame_min": [
-        -24,
-        -112,
-        -32
-      ],
-      "frame_size": [
-        56,
-        224,
-        48
-      ],
-      "glow": true
-    },
     "body_kindled": {
       "frame_min": [
-        -64,
+        -40,
         8,
-        -56
+        -48
       ],
       "frame_size": [
-        128,
-        232,
+        80,
+        184,
         88
       ],
       "glow": true
     },
     "body": {
       "frame_min": [
-        -64,
+        -40,
         8,
-        -56
+        -48
       ],
       "frame_size": [
-        128,
-        232,
+        80,
+        184,
         88
       ],
       "glow": true
     },
     "body_unbound": {
       "frame_min": [
-        -64,
+        -40,
         8,
-        -56
+        -48
       ],
       "frame_size": [
-        128,
-        232,
+        80,
+        184,
         88
       ],
       "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -40,
+        -80,
+        -48
+      ],
+      "frame_size": [
+        56,
+        96,
+        80
+      ],
+      "glow": true
+    },
+    "carapace": {
+      "frame_min": [
+        -56,
+        -32,
+        -24
+      ],
+      "frame_size": [
+        120,
+        72,
+        56
+      ]
+    },
+    "carapace_unbound": {
+      "frame_min": [
+        -56,
+        -32,
+        -24
+      ],
+      "frame_size": [
+        120,
+        72,
+        56
+      ],
+      "glow": true
+    },
+    "carapace_kindled": {
+      "frame_min": [
+        -56,
+        -32,
+        -24
+      ],
+      "frame_size": [
+        120,
+        72,
+        56
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -16,
+        -128,
+        -40
+      ],
+      "frame_size": [
+        96,
+        216,
+        72
+      ],
+      "glow": true
+    },
+    "tail_tip": {
+      "frame_min": [
+        -40,
+        -16,
+        -16
+      ],
+      "frame_size": [
+        120,
+        48,
+        152
+      ]
+    },
+    "jaw": {
+      "frame_min": [
+        -16,
+        -24,
+        -48
+      ],
+      "frame_size": [
+        32,
+        24,
+        56
+      ],
+      "glow": true
+    },
+    "jaw_kindled": {
+      "frame_min": [
+        -16,
+        -24,
+        -48
+      ],
+      "frame_size": [
+        32,
+        24,
+        56
+      ],
+      "glow": true
+    },
+    "jaw_unbound": {
+      "frame_min": [
+        -16,
+        -24,
+        -48
+      ],
+      "frame_size": [
+        32,
+        24,
+        56
+      ],
+      "glow": true
+    },
+    "head_kindled": {
+      "frame_min": [
+        -24,
+        -8,
+        -48
+      ],
+      "frame_size": [
+        48,
+        72,
+        72
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -24,
+        -8,
+        -48
+      ],
+      "frame_size": [
+        48,
+        72,
+        72
+      ],
+      "glow": true
+    },
+    "head_unbound": {
+      "frame_min": [
+        -24,
+        -8,
+        -48
+      ],
+      "frame_size": [
+        48,
+        72,
+        72
+      ],
+      "glow": true
+    },
+    "tail": {
+      "frame_min": [
+        -88,
+        -56,
+        -72
+      ],
+      "frame_size": [
+        112,
+        80,
+        120
+      ]
     }
   },
   "limbs": {
+    "carapace": {
+      "part": "carapace",
+      "pivot": [
+        0,
+        176,
+        24
+      ],
+      "role": "hood",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        184,
+        0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        8,
+        -16
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
     "arm_l": {
       "part": "arm_l",
       "pivot": [
-        -40,
-        144,
+        -48,
+        160,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        48,
+        160,
         0
       ],
       "role": "arm",
@@ -79,38 +269,58 @@
       "yaw": 0,
       "throws": false
     },
-    "arm_r": {
-      "part": "arm_r",
+    "tail": {
+      "part": "tail",
       "pivot": [
-        40,
-        144,
-        0
+        0,
+        56,
+        16
       ],
-      "role": "arm",
+      "role": "tail",
       "phase": 1,
       "yaw": 0,
       "throws": false
+    },
+    "tail_tip": {
+      "part": "tail_tip",
+      "pivot": [
+        0,
+        -32,
+        -56
+      ],
+      "role": "tail_tip",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "tail"
     }
   },
   "variants": {
     "kindled": {
-      "body": "body_kindled"
+      "body": "body_kindled",
+      "head": "head_kindled",
+      "jaw": "jaw_kindled",
+      "carapace": "carapace_kindled"
     },
     "unbound": {
-      "body": "body_unbound"
+      "body": "body_unbound",
+      "head": "head_unbound",
+      "jaw": "jaw_unbound",
+      "carapace": "carapace_unbound"
     }
   },
   "hand": [
-    0,
-    128,
-    -40
+    40,
+    -48,
+    -32
   ],
   "hover": 0,
-  "bob": 0.025,
+  "bob": 0.018,
   "waddle": 0,
   "flap_rate": 1.4,
   "pixel_art": true,
   "material_jitter": 0.0,
-  "glow_strength": 1.1,
-  "animation_style": "wraith"
+  "glow_strength": 1.25,
+  "animation_style": "vizier",
+  "hand_limb": "arm_r"
 }

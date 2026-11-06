@@ -29,12 +29,12 @@ size = Vector3(2.5, 1.3, 1.7)
 metadata/voxel_source = "res://props/home/smithy/model.vox"
 
 [node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=83004795]
-transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.75, -0.125, -8.25)
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.75, -0.085, -8.25)
 material_override = SubResource("ShaderMaterial_t4pua")
 mesh = ExtResource("2_pvhwc")
 
 [node name="LitWindows" type="MeshInstance3D" parent="." unique_id=774067507]
-transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.75, -0.125, -8.25)
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -4.75, -0.085, -8.25)
 material_override = SubResource("ShaderMaterial_0b8wn")
 mesh = ExtResource("3_0jttv")
 

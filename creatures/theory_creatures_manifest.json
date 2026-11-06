@@ -1,0 +1,231 @@
+[
+  {
+    "id": "hull_skitter",
+    "display_name": "Hull Skitter",
+    "biome": "Theory of Everything",
+    "folder": "creatures/hull_skitter",
+    "status": "live",
+    "height_m": 0.9,
+    "voxel_size": 0.1,
+    "parts": [
+      "body",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_l_2",
+      "leg_r_0",
+      "leg_r_1",
+      "leg_r_2",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4"
+    ],
+    "tail_segments": 5,
+    "variants": [],
+    "behavior": "dart"
+  },
+  {
+    "id": "vent_stalker",
+    "display_name": "Vent Stalker",
+    "biome": "Theory of Everything",
+    "folder": "creatures/vent_stalker",
+    "status": "live",
+    "height_m": 2.6,
+    "voxel_size": 0.1,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "leg_l",
+      "arm_l",
+      "leg_r",
+      "arm_r",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5",
+      "tail_6"
+    ],
+    "tail_segments": 7,
+    "variants": [],
+    "behavior": "chase"
+  },
+  {
+    "id": "gloom_spitter",
+    "display_name": "Gloom Spitter",
+    "biome": "Theory of Everything",
+    "folder": "creatures/gloom_spitter",
+    "status": "live",
+    "height_m": 2.0,
+    "voxel_size": 0.10526315789473684,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_r_0",
+      "leg_r_1",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5"
+    ],
+    "tail_segments": 6,
+    "variants": [],
+    "behavior": "skirmish"
+  },
+  {
+    "id": "void_lamprey",
+    "display_name": "Void Lamprey",
+    "biome": "Theory of Everything",
+    "folder": "creatures/void_lamprey",
+    "status": "live",
+    "height_m": 1.8,
+    "voxel_size": 0.16363636363636364,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5",
+      "tail_6",
+      "tail_7"
+    ],
+    "tail_segments": 8,
+    "variants": [],
+    "behavior": "strafe"
+  },
+  {
+    "id": "crest_brute",
+    "display_name": "Crest Brute",
+    "biome": "Theory of Everything",
+    "folder": "creatures/crest_brute",
+    "status": "live",
+    "height_m": 3.1,
+    "voxel_size": 0.1,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "leg_l",
+      "arm_l",
+      "leg_r",
+      "arm_r",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5"
+    ],
+    "tail_segments": 6,
+    "variants": [],
+    "behavior": "chase"
+  },
+  {
+    "id": "void_empress",
+    "display_name": "The Hollow Empress",
+    "biome": "Theory of Everything",
+    "folder": "creatures/void_empress",
+    "status": "live",
+    "height_m": 7.5,
+    "voxel_size": 0.03024193548387097,
+    "parts": [
+      "tail_3",
+      "leg_r_1",
+      "jaw",
+      "tail_0",
+      "tail_4",
+      "head_brood",
+      "head_unmade",
+      "head",
+      "leg_l_0",
+      "leg_l_1_lower",
+      "arm_r",
+      "leg_r_1_lower",
+      "tail_6",
+      "leg_r_0_lower",
+      "tail_9",
+      "chest_arm_r",
+      "leg_l_1",
+      "chest_arm_l",
+      "tail_2",
+      "tail_7",
+      "leg_l_0_lower",
+      "leg_r_0",
+      "tail_5",
+      "tail_1",
+      "body_unmade",
+      "body",
+      "body_brood",
+      "tail_8",
+      "arm_l"
+    ],
+    "tail_segments": 10,
+    "variants": [
+      "brood",
+      "unmade"
+    ],
+    "behavior": "boss",
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8,
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 190892
+      },
+      "brood": {
+        "file": "model_brood.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 190892
+      },
+      "unmade": {
+        "file": "model_unmade.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 190892
+      }
+    }
+  }
+]

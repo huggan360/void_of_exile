@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://rihwq0p0huns"
+path="res://.godot/imported/tail_5.vox-92ced97d7498b6fb453d067ce9914dcd.tscn"
+
+[deps]
+
+source_file="res://creatures/vent_stalker/tail_5.vox"
+dest_files=["res://.godot/imported/tail_5.vox-92ced97d7498b6fb453d067ce9914dcd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -39,8 +39,10 @@ flash), `shared` (everyone watches the conversation; only the starter turns page
 ("dexterity" potion / "t3" item per member, in their own chest), `xp`, `final` (ends the campaign).
 
 ## People
-`Campaigns.NPCS[id] = {name, world, at | pos, campaign, from, model}`: realm npcs are spawned by
-the client while their campaign plays (from step `from` on, or once revealed). Anchors: `{village,
+`Campaigns.NPCS[id] = {name, world, at | pos, campaign, from, model}`: stationary realm NPCs are spawned by
+CampaignServer while their campaign plays (from step `from` on, or once revealed).
+The party summary carries their authoritative positions, model and yaw; clients mirror that roster.
+Offline previews still resolve the same authored anchors locally. Anchors: `{village,
 offset}`, `{cabin: village}` (flat foot of the nearest mountain), `{summit: village}`,
 `{stronghold: biome}`.
 
@@ -48,11 +50,14 @@ offset}`, `{cabin: village}` (flat foot of the nearest mountain), `{summit: vill
 `Items.STORY_ITEMS` (slot "story", icons in ~/Documents/Voidrealm_textures/story). Double-click
 reads them (`StoryReader`). `story_clue` stacks up to 6 map pieces and keeps across the pack;
 other story items and keys are removed when a campaign ends. A dying carrier drops them in a story
-chest. Goblins are held back in a pack world until The Lily Thief is done
+chest. Ambient goblins are held back in a pack world until The Lily Thief is done; authored quest packs are exempt
 (`CampaignServer.HELD_BACK`).
 
 ## More options (campaigns 5-7)
-- kill steps: `any = true` counts every enemy that falls within 40 m of `at` (mixed ambush packs).
+- kill steps can supply `formation` (a pack definition) for guaranteed story counts. Combat anchors
+  use `encounter_position` to stay beyond town perimeters; members stay within 20 m of the marker.
+- kill steps: `any = true` counts every authored pack member (mixed ambush packs).
+  Pack identity is checked on the server, so chasing enemies away from the marker cannot strand a quest.
 - `cutscene` (a key of `Campaigns.CUTSCENES`): played for the whole party when the step ends, anywhere. A cutscene can
   `show_map` (the six pieces fitted together first) and have a `stage`: a scene (e.g. the castle,
   res://scenes/castle/hollow_castle.tscn) loaded at `stage_offset` far below the world just for the shots, whose shots
@@ -65,3 +70,58 @@ chest. Goblins are held back in a pack world until The Lily Thief is done
 - Worlds of a run: realm `camp_`, Tavern `ctav_`, and the Hollow Castle `cst_<account>_<pack>` (CastleWorld, entered
   through Aurelian's white portal; destination "castle"). Steps can use `world = "castle"`; its encounter (iron gate,
   guardian waves, throne key and door) is CastleWorld's (scenes/castle/README.md), the campaign counts its kills.
+
+## Conversations, recovery and navigation
+NPC proximity cards only show the name, quest badge and Talk action. Campaign dialogue starts a
+server scene and advances on its final Exit, including handovers and side conversations. The
+private Tavern stays accessible after dialogue; the player chooses when to leave. Gerald
+also accepts the party's quest in the public Tavern, if a member was already waiting there.
+
+Chest activation resolves its owning instance independently of the realm's lifetime. Once per
+second, an active chest step with a member present recreates a missing chest. A missing bag is
+not a completed step. Story dungeon entrances remain until the chest is taken. If its dungeon
+has closed, recovery places the chest by the saved realm entrance. Clients can request a missing
+chest mirror with `sync_chest`; the server checks the active step and the requester's world.
+
+The summary includes objective instance/position and dungeon links. CampaignClient routes
+through the current world's next portal, with matching world badges and minimap markers,
+including encore chains and the castle return. Lily Thief revision 2 maps old numeric progress
+to step ids before resuming, preserving saves across its inserted trail step.
+
+## The Astral Frontier
+
+`theory_of_everything` is the first tale in a separate, independently available
+pack. It uses the same Realm 1 island as the other campaigns. Only this pack's
+private realm carries `astral_station` in its realm record (including the client
+entry record); ordinary public realms and The Hidden Power are unchanged.
+`AstralStation.plan()` chooses one woodland clearing before terrain streaming.
+The station footprint is reserved from packs, trees and decorative grass, and
+`IslandWorld.astral_anchor()` supplies identical positions to story actors,
+markers, the chest, boarding checks and the launch camera.
+
+`AstralCampaign` extends the existing campaign authority for three step kinds:
+`astral_parts` accepts each of the three distinct parts from any party member;
+`astral_board` requires every party member to be alive, connected and at the hatch;
+`astral_route` follows shared electrical state and route arrival. All five
+unfinished cabinets have physical quest badges at once during the appropriate
+ship objective. Wreck cabinets are on the lower deck beside the main passage.
+The former algorithm gate and parity diagnostic are no longer active; the
+transit platform remains continuous with its connecting road.
+
+The authority opens the destination and publishes a future server-clock launch.
+`AstralLaunchCinematic` and the station rocket use that same clock on every
+client. A launch grants invincibility and immunity, hides the HUD and boarded
+crew, and hands travel over to the existing asynchronous portal transition.
+A member leaving or changing the boarding roster cancels the launch.
+
+The account book's `run.astral` saves installed parts, seed, route checkpoint,
+checked relays, repairs, opened doors and broken vents. Pausing evacuates the
+whole party and closes the space instance. Resuming always returns to Orin and
+requires boarding and flying again; the installed parts and ship circuits stay
+saved. The Aurora is the arrival point on a repeat flight. The campaign stops
+at the Convergence with an explicit waiting objective: no boss victory, rewards
+or pack completion are granted before the future encounter is implemented.
+
+`tools/check_astral_campaign.tscn` runs an account-free two-member flow through
+the arena and pause/resume, including an account JSON round-trip of ship state.
+Its optional `--preview` captures the launch station without using account data.

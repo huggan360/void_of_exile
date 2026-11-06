@@ -40,6 +40,7 @@ func _run() -> void:
 	player.player_id = info.player_id
 	player.stats = stats
 	add_child(player)
+	add_child(player.aim_marker)
 	player.set_physics_process(false)
 	player.frozen = false
 	player.position = Vector3(role*3,0,0)
@@ -82,6 +83,30 @@ func _run() -> void:
 	if not await wait_for(func(): return not stats.buffs.has_effect("static") and not other.buffs.has_effect("static")): return
 	check(not stats.buffs.has_effect("quiet") and not other.buffs.has_effect("quiet"),"Timed expiry reaches owner and observer")
 	mark("expired")
+	player.begin_interaction(get_instance_id())
+	if not await wait_for(func(): return stats.buffs.has_effect("invincible") and other.buffs.has_effect("invincible")): return
+	check(stats.buffs.has_effect("immune"),"Interaction protection is visible on the client and party observer")
+	mark("protected")
+	if not await wait_for(func(): return FileAccess.file_exists(DIR+"protection_checked")): return
+	player.end_interaction(get_instance_id())
+	if not await wait_for(func(): return not stats.buffs.has_effect("invincible") and not other.buffs.has_effect("invincible")): return
+	mark("unprotected")
+	if not await wait_for(func(): return FileAccess.file_exists(DIR+"shield_test")): return
+	if role == 1:
+		check(player._set_shield(true),"Network player can raise equipped shield")
+		player.take_damage(20, false, true)
+	else:
+		if not await wait_for(func(): return GameAudio.voices.any(func(v: Dictionary) -> bool: return v.event == "magic_shield_hit")): return
+		check(true,"Shield impact audio reaches the other client over the real server relay")
+		mark("shield_heard")
 	if not await wait_for(func(): return FileAccess.file_exists(DIR+"done")): return
+	Net.leave()
+	GameAudio.set_context(null, null)
+	for voice in GameAudio.voices: GameAudio.stop(voice, .01)
+	player.queue_free()
+	bullets.queue_free()
+	arrows.queue_free()
+	world.queue_free()
+	await get_tree().create_timer(.2).timeout
 	print("STATUS NETWORK CLIENT %d: %d checks, %d failures" % [role,checks,failures])
 	get_tree().quit(1 if failures else 0)

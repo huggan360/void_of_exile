@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bl2cu8o3dwvc1"
+path="res://.godot/imported/head_glow.vox-148d991c5c303f3068e6c873bd57734f.tscn"
+
+[deps]
+
+source_file="res://creatures/gloom_spitter/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-148d991c5c303f3068e6c873bd57734f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

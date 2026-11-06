@@ -513,10 +513,9 @@ BLUE_DRAGON.update({"glow_spike_hot": (220, 248, 255), "glow_membrane_hot": (130
 
 
 # --- Spirits, genies and stars -----------------------------------------------------------
-# Spirits are gods that haunt ruins: a hooded head on a body that trails off
-# into a wisp, a floating crown of light. Genies follow them around (and the
-# blue genie is a god of its own in Bluelay). Stars are harmless glowing
-# minions that circle a spirit.
+# Spirits are armored serpent gods, coiled upright and glowing throughout.
+# Smaller Coilguards follow them; golden Spirit Sparks orbit harmlessly.
+# The independent Blue Genie retains its own humanoid model in Bluelay.
 
 def spirit_palette(body, glow):
     return {"body": body, "body_b": tuple(int(v * 0.85) for v in body), "dark": (20, 14, 30),
@@ -524,32 +523,74 @@ def spirit_palette(body, glow):
 
 
 SPIRITS = {
-    "brown": spirit_palette((140, 100, 66), (255, 196, 110)),
-    "blue": spirit_palette((70, 110, 190), (130, 200, 255)),
-    "purple": spirit_palette((110, 60, 160), (220, 140, 255)),
+    "brown": spirit_palette((125, 75, 30), (255, 196, 110)),
+    "blue": spirit_palette((45, 85, 175), (130, 200, 255)),
+    "purple": spirit_palette((100, 35, 145), (220, 140, 255)),
 }
 
 
-def spirit_body(palette):
-    p = Part(14, palette)
-    p.chain([(0, 1.35, 0.02), (0, 0.95, 0.08), (0.05, 0.55, 0.2), (0.12, 0.22, 0.42)], 0.34, 0.05, "body")
-    p.ellipsoid((0, 1.55, 0), (0.33, 0.34, 0.3), "body")
-    for x in (-1, 1):
-        p.ellipsoid((0.12 * x, 1.6, -0.26), (0.06, 0.08, 0.04), "glow_eye")
-        p.chain([(0.28 * x, 1.25, 0), (0.5 * x, 1.05, -0.15), (0.55 * x, 0.92, -0.35)], 0.09, 0.05, "body")
-    p.ellipsoid((0, 1.44, -0.27), (0.07, 0.05, 0.03), "dark")
-    for k in range(5):
-        a = k * 6.2832 / 5
-        import math
-        c = (0.22 * math.cos(a), 2.0, 0.22 * math.sin(a))
-        p.capsule((c[0], c[1] - 0.04, c[2]), (c[0], c[1] + 0.12, c[2]), 0.05, 0.015, "glow_crown")
-    return p.voxels(shade={"body": ["body", "body", "body_b"]})
+def serpent_part(palette, part, royal=True):
+    """A solid, armored sky serpent: lower coil, articulated neck, skull and jaw."""
+    import math
+    p = Part(16, palette)
+    if part == "body":
+        points = []
+        for i in range(33):
+            t = i / 32
+            angle = -math.pi * 0.5 + t * math.pi * 2.3
+            radius = 0.68 - t * 0.26
+            points.append((math.cos(angle) * radius, 0.12 + t * 0.50, math.sin(angle) * radius + 0.12))
+        p.chain(points, 0.035, 0.25, "glow_scale")
+        p.chain([points[-1], (0.12, 0.74, 0.16), (0, 0.85, 0)], 0.25, 0.27, "glow_scale")
+        for i in range(5, 32, 3):
+            x,y,z = points[i]
+            p.capsule((x,y+0.10,z), (x*1.12,y+0.31,z*1.12), 0.09, 0.012, "glow_spine")
+        # Broad separated belly scutes make the coil read as a scaled animal.
+        for i in range(5, 31, 3):
+            x,y,z = points[i]
+            p.ellipsoid((x,y-0.045,z-0.10), (0.13,0.07,0.10), "glow_belly")
+    elif part == "neck":
+        p.chain([(0,0,0), (-0.15,0.25,0.12), (0.12,0.56,0.10), (0,0.85,-0.04)], 0.27,0.21,"glow_scale")
+        for y in (0.10,0.25,0.40,0.55,0.70):
+            p.ellipsoid((0,y,-0.12), (0.20,0.055,0.075), "glow_belly")
+            p.capsule((0,y,0.20),(0,y+0.15,0.42),0.085,0.012,"glow_spine")
+    elif part == "head":
+        p.ellipsoid((0,0.12,-0.02),(0.32,0.25,0.30),"glow_scale")
+        p.box((-0.25,-0.02,-0.47),(0.25,0.15,-0.12),"glow_scale")
+        p.box((-0.21,-0.08,-0.50),(0.21,-0.015,-0.14),"glow_mouth")
+        for side in (-1,1):
+            # Slanted brows and recessed eyes; no round ghost face.
+            p.capsule((side*0.10,0.17,-0.29),(side*0.29,0.23,-0.21),0.08,0.07,"glow_spine")
+            p.box((min(side*0.12,side*0.24),0.09,-0.305),(max(side*0.12,side*0.24),0.14,-0.24),"glow_eye")
+            p.capsule((side*0.22,0.28,0.03),(side*0.44,0.60,0.19),0.12,0.014,"glow_spine")
+            p.capsule((side*0.19,-0.01,-0.37),(side*0.16,-0.23,-0.40),0.045,0.012,"glow_fang")
+            p.capsule((side*0.24,0.05,0.14),(side*0.44,-0.06,0.34),0.10,0.015,"glow_spine")
+        if royal:
+            p.capsule((0,0.31,0.06),(0,0.69,0.18),0.10,0.01,"glow_spine")
+    elif part == "jaw":
+        p.box((-0.22,-0.08,-0.30),(0.22,0.02,0.06),"glow_belly")
+        for side in (-1,1):
+            p.capsule((side*0.16,0.0,-0.24),(side*0.14,0.11,-0.26),0.035,0.009,"glow_fang")
+    return p.voxels(shade={"glow_scale": ["glow_scale", "glow_scale", "glow_shadow"]})
 
 
-def spirit(color):
-    pal = SPIRITS[color]
-    return {"palette": pal, "voxel_size": 0.075, "parts": {"body": (lambda: spirit_body(pal), None, None)},
-            "rig": {}, "hand": [0, 16, -6], "waddle": 0.0, "hover": 0.35, "bob": 0.12}
+def spirit(color, helper=False, palette_override=None):
+    colors = SPIRITS[color]
+    pal = {"glow_scale": colors["body"], "glow_shadow": colors["body_b"],
+           "glow_belly": tuple(min(255,int(v*0.75+45)) for v in colors["body"]),
+           "glow_spine": tuple(int(v*0.64) for v in colors["glow_crown"]), "glow_eye": (255,242,190),
+           "glow_mouth": (24,12,32), "glow_fang": (255,230,200)}
+    if palette_override is not None:
+        pal = palette_override
+    return {"palette":pal, "voxel_size":0.0625,
+            "parts":{part:(lambda part=part:serpent_part(pal,part,not helper),None,None)
+                     for part in ("body","neck","head","jaw")},
+            "rig":{
+                "neck":{"part":"neck","pivot":[0,13.6,0],"role":"serpent_neck"},
+                "head":{"part":"head","pivot":[0,13.6,-0.64],"parent_limb":"neck","role":"serpent_head"},
+                "jaw":{"part":"jaw","pivot":[0,-1.6,-2.4],"parent_limb":"head","role":"serpent_jaw"}},
+            "hand":[0,0,-8], "hand_limb":"head", "waddle":0.0,
+            "hover":0.32, "bob":0.065, "animation_style":"serpent"}
 
 
 def genie_palette(skin, glow_all=False):
@@ -638,7 +679,10 @@ CREATURES = {
        for c in DRAGONLINGS},
     "blue_dragon": dragon(BLUE_DRAGON, 96, 0.045, True, hover=0.3, variants=True, flap_rate=1.6),
     **{f"spirit_{c}": spirit(c) for c in SPIRITS},
-    **{f"genie_{c}": genie(SPIRITS[c]["body"], 9) for c in SPIRITS},
+    **{f"genie_{c}": spirit(c, helper=True) for c in SPIRITS},
+    "spirit_spark": spirit("brown", helper=True, palette_override={
+        "glow_scale": (232,207,132), "glow_shadow": (153,118,80), "glow_belly": (255,239,178),
+        "glow_spine": (255,218,96), "glow_eye": (255,255,245), "glow_mouth": (24,16,32), "glow_fang": (255,255,228)}),
     "blue_genie": genie((70, 140, 230), 14, glow_all=True),
     "star": {"palette": STAR, "voxel_size": 0.07, "parts": {"body": (star_body, None, None)}, "rig": {},
              "hand": [0, 0, 0], "waddle": 0.0, "hover": 1.0, "bob": 0.15, "spin": 2.5},
@@ -655,7 +699,7 @@ if __name__ == "__main__":
         os.makedirs(out, exist_ok=True)
         rig = {"voxel_size": spec.get("voxel_size", VOXEL_SIZE), "parts": {}, "limbs": spec["rig"],
                "hand": spec["hand"]}
-        for key in ("hand_limb", "waddle", "hover", "bob", "spin", "variants", "flap_rate"):
+        for key in ("hand_limb", "waddle", "hover", "bob", "spin", "variants", "flap_rate", "animation_style"):
             if key in spec:
                 rig[key] = spec[key]
         for part, (fn, fmin, fsize) in spec["parts"].items():
@@ -671,6 +715,9 @@ if __name__ == "__main__":
                 write_vox(os.path.join(out, part + ".vox"), base, spec["palette"], fmin, fsize)
             else:
                 rig["parts"][part]["solid"] = False  # glows all over: only a _glow.vox
+                old_solid = os.path.join(out, part + ".vox")
+                if os.path.exists(old_solid):
+                    os.remove(old_solid)
             if glow:
                 write_vox(os.path.join(out, part + "_glow.vox"), glow, spec["palette"], fmin, fsize)
                 rig["parts"][part]["glow"] = True

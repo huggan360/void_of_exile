@@ -1,0 +1,44 @@
+{
+  "default": {
+    "file": "model.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 190892
+  },
+  "brood": {
+    "file": "model_brood.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 190892
+  },
+  "unmade": {
+    "file": "model_unmade.vox",
+    "frame_min": [
+      -128,
+      0,
+      -128
+    ],
+    "size": [
+      256,
+      256,
+      256
+    ],
+    "voxels": 190892
+  }
+}

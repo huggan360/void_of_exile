@@ -42,6 +42,8 @@ var _tooltip := ItemTooltip.new()
 var _slots := {}  # slot id -> ItemSlot
 var _inventory: InventoryPanel
 var _bag_panel: BagPanel
+## Bram's forge, under the backpack while you talk to the smith.
+var forge: ForgePanel
 var _center := CenterContainer.new()
 var _stack := VBoxContainer.new()  # backpack, and the loot bag under it
 var _quick: Array[ItemSlot] = []
@@ -55,6 +57,10 @@ var quest_banner := QuestBanner.new()
 var quest_markers := Callable()
 var _fps_readout := Label.new()
 var _fps_timer := 0.0
+var _stats_button: Button
+var _equipment_column: VBoxContainer
+var _hud_reveal_left := 0.0
+const WORLD_UI_ALPHA := 0.60
 ## Loot bags of the current world (set by Main).
 var loot: LootBags
 
@@ -81,8 +87,10 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = UIStyle.theme()
 	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST  # pixel frames stay crisp
-	_fps_readout.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_fps_readout.position = Vector2(MARGIN,-42)
+	_fps_readout.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_fps_readout.position = Vector2(8, 4)
+	_fps_readout.z_index = 100
+	_fps_readout.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	UIStyle.text(_fps_readout,16,UIStyle.TEXT_DIM)
 	root.add_child(_fps_readout)
 	root.add_child(interaction)
@@ -103,7 +111,7 @@ func _ready() -> void:
 	# Under the account bar: the bar of the boss you're fighting.
 	_boss_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_boss_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_boss_bar.position.y = MARGIN + 86
+	_boss_bar.position.y = MARGIN + AccountBar.HEADER_HEIGHT + 8
 	var boss_width := BossBar.BAR_SIZE.x + BossBar.PORTRAIT + 14
 	_boss_bar.offset_left = -boss_width * 0.5
 	_boss_bar.offset_right = boss_width * 0.5
@@ -112,13 +120,13 @@ func _ready() -> void:
 	# Bottom center: health and magic.
 	var bars := VBoxContainer.new()
 	_bars = bars
-	bars.add_theme_constant_override("separation", 6)
+	bars.add_theme_constant_override("separation", 10)
 	bars.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bars.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	bars.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_hp_bar.set_icon(PackedStringArray(HEART), {"o": UIStyle.OUTLINE, "R": UIStyle.HP, "W": Color(1, 0.8, 0.8)})
 	_mp_bar.set_icon(PackedStringArray(STAR), {"o": UIStyle.OUTLINE, "Y": UIStyle.MAGIC, "W": Color(1, 1, 0.85)})
-	var bars_size := _hp_bar.custom_minimum_size + Vector2(0, _mp_bar.custom_minimum_size.y + 6)
+	var bars_size := _hp_bar.custom_minimum_size + Vector2(0, _mp_bar.custom_minimum_size.y + 10)
 	bars.offset_top = -MARGIN - bars_size.y
 	bars.offset_bottom = -MARGIN
 	bars.offset_left = -bars_size.x * 0.5
@@ -126,23 +134,21 @@ func _ready() -> void:
 	bars.add_child(_hp_bar)
 	bars.add_child(_mp_bar)
 	root.add_child(bars)
+	UIStyle.add_shadow(_hp_bar)
+	UIStyle.add_shadow(_mp_bar)
 
 
 	# Bottom right: minimap.
-	minimap.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	minimap.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	minimap.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	minimap.offset_left = -MARGIN - minimap.custom_minimum_size.x
-	minimap.offset_top = -MARGIN - minimap.custom_minimum_size.y
-	minimap.offset_right = -MARGIN
-	minimap.offset_bottom = -MARGIN
+	_place_minimap()
 	minimap.player = player
 	root.add_child(minimap)
+	UIStyle.add_shadow(minimap, true)
 	buff_strip.effects = stats.buffs
 	root.add_child(buff_strip)
 
-	# Top right: stats button, XP ring, gear.
+	# Top right: Dots and stats button, then XP ring and gear.
 	var column := VBoxContainer.new()
+	_equipment_column = column
 	column.add_theme_constant_override("separation", 10)
 	column.alignment = BoxContainer.ALIGNMENT_BEGIN
 	column.set_anchors_preset(Control.PRESET_TOP_RIGHT)
@@ -151,12 +157,22 @@ func _ready() -> void:
 	column.offset_right = -MARGIN
 	column.offset_top = MARGIN
 	root.add_child(column)
+	var top_row := HBoxContainer.new()
+	top_row.add_theme_constant_override("separation", 12)
+	var top_spacer := Control.new()
+	top_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top_row.add_child(top_spacer)
+	top_row.add_child(account_bar.dots)
 	var stats_button := UIStyle.button("Stats")
+	_stats_button = stats_button
 	stats_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	stats_button.pressed.connect(toggle_stats)
-	column.add_child(stats_button)
+	top_row.add_child(stats_button)
+	column.add_child(top_row)
 	_xp_ring.size_flags_horizontal = Control.SIZE_SHRINK_END
 	column.add_child(_xp_ring)
+	UIStyle.add_shadow(_xp_ring, true)
 	var slot_row := HBoxContainer.new()
 	slot_row.add_theme_constant_override("separation", 6)
 	slot_row.alignment = BoxContainer.ALIGNMENT_END
@@ -185,6 +201,7 @@ func _ready() -> void:
 	_stats_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_stats_panel.offset_right = -MARGIN - 290
 	_stats_panel.offset_top = MARGIN
+	_stats_panel.z_index = 30
 	_stats_panel.hide()
 	root.add_child(_stats_panel)
 
@@ -209,11 +226,18 @@ func _ready() -> void:
 	_bag_panel.item_unhovered.connect(_tooltip.hide)
 	_bag_panel.hide()
 	_stack.add_child(_bag_panel)
+	forge = ForgePanel.new(stats)
+	forge.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	forge.interaction = interaction
+	forge.dots = account_bar.dots
+	forge.item_hovered.connect(_tooltip.show_item)
+	forge.item_unhovered.connect(_tooltip.hide)
+	_stack.add_child(forge)
 
 	# Top center: the account's XP bar, level and reward drawer.
 	account_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	account_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	var bar_width := AccountBar.BAR_SIZE.x + 60
+	var bar_width := AccountBar.BAR_SIZE.x
 	account_bar.offset_left = -bar_width * 0.5
 	account_bar.offset_right = bar_width * 0.5
 	account_bar.offset_top = MARGIN
@@ -224,6 +248,7 @@ func _ready() -> void:
 	root.add_child(picker)
 
 	_tooltip.stats = stats
+	_tooltip.z_index = 60
 	root.add_child(_tooltip)  # last, so it draws over everything
 	stats.changed.connect(_refresh)
 	AppSettings.bindings_changed.connect(_update_binding_hints)
@@ -238,12 +263,49 @@ func _update_binding_hints() -> void:
 		_quick[i].queue_redraw()
 
 
+## Bottom right normally; large and centred while the map is open.
+func _place_minimap() -> void:
+	var span := minimap.custom_minimum_size
+	if minimap.expanded:
+		minimap.set_anchors_preset(Control.PRESET_CENTER)
+		minimap.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		minimap.grow_vertical = Control.GROW_DIRECTION_BOTH
+		minimap.offset_left = -span.x * 0.5
+		minimap.offset_top = -span.y * 0.5
+		minimap.offset_right = span.x * 0.5
+		minimap.offset_bottom = span.y * 0.5
+		return
+	minimap.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	minimap.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	minimap.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	minimap.offset_left = -MARGIN - span.x
+	minimap.offset_top = -MARGIN - span.y
+	minimap.offset_right = -MARGIN
+	minimap.offset_bottom = -MARGIN
+
+
+func toggle_map() -> void:
+	if is_instance_valid(player) and player.spatial_controller is SpaceTraversal:
+		(player.spatial_controller as SpaceTraversal).toggle_map()
+		return
+	if not minimap.expanded and not minimap.visible: return  # worlds without a planar map
+	var screen := minimap.get_parent_control().size if minimap.get_parent_control() else get_viewport().get_visible_rect().size
+	var art := floorf(minf(screen.x, screen.y) * 0.78 / PixelArt.SCALE)
+	minimap.set_expanded(not minimap.expanded, maxf(Minimap.ART_PIXELS, art))
+	_place_minimap()
+
+
+## Top-left corner of the small minimap (the buff strip lines up with it).
+func _minimap_corner() -> Vector2:
+	var span := Vector2(Minimap.ART_PIXELS, Minimap.ART_PIXELS) * PixelArt.SCALE
+	return _ui_root.size - Vector2(MARGIN, MARGIN) - span
+
+
 func toggle_stats() -> void:
 	_stats_panel.visible = not _stats_panel.visible
 	if _stats_panel.visible:
 		_stats_panel.refresh()
-		_stats_panel.modulate.a = 0.0
-		_stats_panel.create_tween().tween_property(_stats_panel, "modulate:a", 1.0, 0.15)
+		_hud_reveal_left = 1.0
 
 
 ## Debug: shows a slot's tooltip as if hovered.
@@ -254,13 +316,16 @@ func debug_show_tooltip(slot_id: String) -> void:
 func set_world(world: GameWorld, fog_of_war: FogOfWar) -> void:
 	interaction.set_world(world)
 	minimap.fog_of_war = fog_of_war
+	if minimap.expanded:
+		minimap.set_expanded(false)
+		_place_minimap()
 	minimap.setup(world)
 	_world = world
 	refresh_markers()
 
 
-## Bottom left: the chat with its friends and party panel. Top: the quest
-## banner under the account bar.
+## Bottom left: chat with its friends and party panel. The quest tracker
+## sits at the left edge below the character picker, with notices below it.
 func add_social(social: SocialClient, body_of: Callable) -> void:
 	chat = ChatPanel.new()
 	chat.social = social
@@ -272,17 +337,17 @@ func add_social(social: SocialClient, body_of: Callable) -> void:
 	chat.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	chat.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	chat.offset_left = MARGIN
-	chat.offset_top = -56
-	chat.offset_bottom = -56
+	chat.offset_top = -MARGIN
+	chat.offset_bottom = -MARGIN
 	_ui_root.add_child(chat)
 	# Over the chat log, sitting right on its buttons (see _process).
 	_ui_root.add_child(social_panel)
 	chat.panel_requested.connect(social_panel.show_tab)
 	quest_banner.social = social
-	quest_banner.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	quest_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	quest_banner.offset_left = -240
-	quest_banner.offset_right = 240
+	quest_banner.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	quest_banner.offset_left = MARGIN
+	quest_banner.offset_right = MARGIN + 380
+	quest_banner.offset_top = MARGIN + 116
 	_ui_root.add_child(quest_banner)
 	_ui_root.move_child(_tooltip, -1)
 
@@ -307,6 +372,7 @@ func refresh_markers() -> void:
 
 ## A dialog or full-screen view over the HUD (death records, new character).
 func add_dialog(dialog: Control) -> void:
+	if account_bar.is_open(): account_bar.toggle()
 	get_child(0).add_child(dialog)
 
 
@@ -345,16 +411,24 @@ func drop_to_ground(from: Dictionary) -> void:
 
 
 func _process(_delta: float) -> void:
+	if not FrameTrace.enabled: _profile_process(_delta); return
+	var started := Time.get_ticks_usec()
+	_profile_process(_delta)
+	FrameTrace.record("ui/hud",started)
+
+func _profile_process(_delta: float) -> void:
+	_update_world_ui_fade(_delta, _ui_root.get_global_mouse_position())
 	_fps_readout.visible = AppSettings.video.show_fps
 	_fps_timer -= _delta
 	if _fps_readout.visible and _fps_timer<=0:
 		_fps_timer = .25
 		_fps_readout.text = "%d FPS" % Engine.get_frames_per_second()
 	var start_x := _bars.position.x+_bars.size.x+16.0
-	var end_x := minimap.position.x-16.0
+	var corner := _minimap_corner()
+	var end_x := corner.x-16.0
 	if end_x-start_x<120.0:
-		start_x = minimap.position.x+minimap.size.x-240.0
-		buff_strip.position = Vector2(start_x,minimap.position.y-12.0)
+		start_x = corner.x+Minimap.ART_PIXELS*PixelArt.SCALE-240.0
+		buff_strip.position = Vector2(start_x,corner.y-12.0)
 		buff_strip.fit_gap(240.0)
 	else:
 		buff_strip.position = Vector2(start_x,_ui_root.size.y-MARGIN)
@@ -368,21 +442,20 @@ func _process(_delta: float) -> void:
 	if bag != _bag_panel.bag or (bag == null and _bag_panel.visible):
 		_bag_panel.show_bag(bag)
 	var tab := not player.controls_locked() and (Input.is_action_pressed("inventory") or (_inventory.visible and dragging and bag == null))
-	var open := tab or bag != null
+	var open := tab or bag != null or forge.visible
 	if open != _inventory.visible:
 		_inventory.visible = open
 		if not open:
 			_tooltip.hide()
-	interaction.update_prompt(player, open or dragging)
+	interaction.update_prompt(player, account_bar.is_open() or (open or dragging) and not forge.visible)
 	if social_panel and social_panel.visible:
 		social_panel.reset_size()
 		social_panel.global_position = Vector2(chat.button_row.global_position.x,
 				chat.button_row.global_position.y - social_panel.size.y - 4.0)
-	# The quest banner sits under the account bar, or under a boss's bar.
-	quest_banner.offset_top = (_boss_bar.position.y + _boss_bar.size.y + 8.0) if _boss_bar.visible else MARGIN + 86.0
-
-	player.ui_blocked = tab or interaction.opened
+	player.ui_blocked = tab or interaction.opened or account_bar.is_open()
 	_boss_bar.track(Boss.nearest_active(player.global_position))
+	quest_banner.boss_visible = _boss_bar.visible
+	toasts.position.y = quest_banner.position.y + quest_banner.size.y + 10.0 if quest_banner.visible else MARGIN + 116
 	# Only catch drops while something is being dragged (so clicks still shoot).
 	_drop_zone.mouse_filter = Control.MOUSE_FILTER_STOP if dragging else Control.MOUSE_FILTER_IGNORE
 	if not player.frozen and not player.controls_locked():
@@ -392,12 +465,44 @@ func _process(_delta: float) -> void:
 			GameServer.request_use(player.player_id, {kind = "quick", key = 1})
 
 
+## Keep peripheral controls readable on hover without dimming combat bars/map.
+func _update_world_ui_fade(delta: float, pointer: Vector2) -> void:
+	var in_tavern := not is_instance_valid(_world) or Campaigns.is_tavern(_world.realm_id)
+	var controls: Array[Control] = [account_bar, picker, _equipment_column, _stats_panel, quest_banner, toasts, buff_strip]
+	if chat: controls.append(chat)
+	if social_panel: controls.append(social_panel)
+	var inventory_open := Input.is_action_pressed("inventory") or (is_instance_valid(_inventory) and _inventory.visible)
+	var hovered := false
+	for control in controls:
+		if is_instance_valid(control) and control.is_visible_in_tree() and control.get_global_rect().has_point(pointer):
+			hovered = true
+			break
+	if inventory_open or hovered or account_bar.is_open(): _hud_reveal_left = 0.8
+	else: _hud_reveal_left = maxf(0.0, _hud_reveal_left - delta)
+	var target := 1.0 if in_tavern or _hud_reveal_left > 0.0 else WORLD_UI_ALPHA
+	for control in controls:
+		if not is_instance_valid(control): continue
+		var blend := 1.0 - exp(-delta * (14.0 if target > control.modulate.a else 3.5))
+		control.modulate.a = lerpf(control.modulate.a, target, blend)
+
+
 ## Debug: opens the backpack as if Tab were held.
 func debug_open_inventory() -> void:
 	Input.action_press("inventory")
 
 
 func _input(event: InputEvent) -> void:
+	if account_bar.is_open():
+		_tooltip.hide()
+		if event.is_action_pressed("menu") or event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+			account_bar.toggle()
+			get_viewport().set_input_as_handled()
+		elif account_bar.handle_scroll(event):
+			get_viewport().set_input_as_handled()
+		return
+	if account_bar.handle_scroll(event):
+		get_viewport().set_input_as_handled()
+		return
 	if chat and not player.frozen and not player.input_locked and not player.cinematic_locked and chat.handle_input(event):
 		get_viewport().set_input_as_handled()
 		return
@@ -405,9 +510,17 @@ func _input(event: InputEvent) -> void:
 	if interaction.handle_input(event):
 		get_viewport().set_input_as_handled()
 		return
+	# Wheel events reach _input before Godot scroll containers handle them.
+	# Leave UI scrolling alone; only world/minimap wheel input changes zoom.
+	if event is InputEventMouseButton and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN, MOUSE_BUTTON_WHEEL_LEFT, MOUSE_BUTTON_WHEEL_RIGHT]:
+		var hovered := get_viewport().gui_get_hovered_control()
+		if hovered != null and hovered != minimap and not minimap.is_ancestor_of(hovered):
+			return
 	if event.is_action_pressed("minimap_zoom_in"):
 		minimap.zoom(-1)
 	elif event.is_action_pressed("minimap_zoom_out"):
 		minimap.zoom(1)
 	elif event.is_action_pressed("stats"):
 		toggle_stats()
+	elif event.is_action_pressed("map"):
+		toggle_map()

@@ -7,6 +7,7 @@ var enemy_director := EnemyDirector.new()
 var server_build := false
 var _biome: BiomeDef
 var theme: Dictionary
+var _prepared_scenery: DungeonScenery
 
 func _init(p_record: Dictionary) -> void:
 	record = p_record
@@ -32,6 +33,12 @@ func _init(p_record: Dictionary) -> void:
 	_biome.fog_density = 0.004
 	_biome.torch_energy = theme.torch
 
+func prepare_load() -> void:
+	_prepared_scenery = DungeonScenery.new()
+	_prepared_scenery.prepare(layout,str(definition.get("theme","moss_cave")))
+	# Own the detached data node immediately, including cancellation paths.
+	add_child(_prepared_scenery)
+
 func _ready() -> void:
 	_add_terrain(DungeonGenerator.new(layout, theme), AABB(Vector3(-half_extent, -8, -half_extent), Vector3(half_extent * 2, 24, half_extent * 2)))
 	enemy_director.world = self
@@ -39,9 +46,12 @@ func _ready() -> void:
 	enemy_director.remote = Net.is_client()
 	add_child(enemy_director)
 	if not server_build and not Net.is_server():
-		var scenery := DungeonScenery.new()
-		scenery.build(layout, str(definition.get("theme", "moss_cave")))
-		add_child(scenery)
+		if is_instance_valid(_prepared_scenery):
+			_prepared_scenery.publish()
+		else:
+			var scenery := DungeonScenery.new()
+			scenery.build(layout, str(definition.get("theme", "moss_cave")))
+			add_child(scenery)
 		if definition.get("theme", "moss_cave") == "moss_cave":
 			var fireflies := DungeonFireflies.new()
 			fireflies.build(layout)
@@ -126,7 +136,7 @@ func ground_height(_x: float, _z: float) -> float:
 func is_walkable(pos: Vector3) -> bool:
 	return layout.open(floori(pos.x), floori(pos.z))
 
-## Lava cracks burn (Player._update_lava).
+## Lava cracks apply Burning through the authoritative environment update.
 func is_hazard(pos: Vector3) -> bool:
 	return layout.is_crack(floori(pos.x), floori(pos.z))
 

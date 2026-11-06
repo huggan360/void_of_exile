@@ -51,7 +51,8 @@ func _sundial() -> void:
 	mark_ring_gaps(gap, 54.0, 1.0, GOLD)
 	after(1.0, func() -> void:
 		var attack := Boss.shot("disc", ROSE, Vector2i(38, 50), 5.0, 0.2, 23.0,
-			{voxel_model = "boss_projectiles/sun_seal", authored_projectile = true, pixel_projectile = true, turn = 0.08})
+			{voxel_model = "boss_projectiles/sun_seal", authored_projectile = true, pixel_projectile = true, turn = 0.08,
+				effects = [{id = "dexterity", amount = -10, duration = 2.0}], effect_source = "Gilded Vizier sun seal"})
 		fire_ring(shot_origin(), 18 if phase < 2 else 24, attack, gap, 54.0))
 
 func _court() -> void:
@@ -73,3 +74,9 @@ func _eclipse() -> void:
 func _reset_hook() -> void:
 	_dial = 0.0
 	model.boss_pose("idle", 0.1)
+
+func _death_started() -> void:
+	model.boss_pose("death", boss_def.death_time + 1.0)
+
+func _dying_update(_k: float) -> void:
+	model.scale = Vector3.ONE * def.model_scale

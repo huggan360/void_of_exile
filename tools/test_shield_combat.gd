@@ -17,6 +17,8 @@ func _run() -> void:
 	player.player_id = GameServer.join(false)
 	player.stats = GameServer.character(player.player_id)
 	add_child(player)
+	add_child(player.aim_marker)
+	GameAudio.set_context(player, null)
 	player.set_physics_process(false)
 	player.frozen = false
 	player.stats.gear.spell = Items.make("G4_spell")
@@ -39,6 +41,9 @@ func _run() -> void:
 	Input.action_press("magic")
 	player._physics_process(.016)
 	check(player.shield.active,"Magic raises shield before movement/shooting in the same frame")
+	var shield_loop: Dictionary = GameAudio._shield
+	var shield_raise: Dictionary = GameAudio._shield_cast
+	check(not shield_loop.is_empty() and shield_loop.get("loop", false), "Pressing magic starts the sustained shield sound")
 	check(is_equal_approx(Vector2(player.velocity.x,player.velocity.z).length(),normal*.15),"Shield movement is exactly 15% of normal stat-scaled speed")
 	check(not player._charging and player._winding==0 and player._burst_left==0,"Shield cancels charge, windup and queued burst")
 	player.shoot()
@@ -49,11 +54,11 @@ func _run() -> void:
 	for action in ["shoot","charge","magic","move_forward"]: Input.action_release(action)
 	player._physics_process(.016)
 	check(not player.shield.active,"Releasing magic immediately restores normal stance")
+	check(shield_loop.get("stopping", false) and shield_raise.get("stopping", false), "Releasing Space immediately retires both shield sounds")
 	player.shoot()
 	check(not fired.is_empty(),"Weapons work again after releasing shield")
 	player.position = Vector3.ZERO
 	player._set_shield(true)
-	player._shield_pool = 10000
 	var base_hp := player.stats.hp
 	for style in ["pellet","orb","fireball","needle","disc","crescent","shard","comet"]:
 		var attack := {style=style,magic=true,speed=60.0,range=20.0,damage_min=30,damage_max=30,size=1.0,pierce_players=true,returns=2.0,ripple={radius=4},terminal={delay=.01,count=6,attack={}}}
@@ -68,6 +73,7 @@ func _run() -> void:
 	shots.fire(Vector3(3,.95,0),Vector3.LEFT,physical)
 	shots._physics_process(.05)
 	check(shots._shots.is_empty() and player.stats.hp<base_hp,"Physical shots stop at shield and preserve existing partial damage policy")
+	check(GameAudio.voices.any(func(v: Dictionary) -> bool: return v.event == "magic_shield_hit"), "Shield collisions play a supplied magic shield-hit variation")
 	check(shots._shield_contact(player,Vector3(3,5,0),Vector3(-3,5,0),.2)<0,"High projectiles do not hit shield")
 	check(shots._shield_contact(player,Vector3(3,.95,0),Vector3(-3,.95,0),.2)>0,"Swept shield collision catches high-speed crossing shots")
 	player._set_shield(false)
@@ -107,6 +113,18 @@ func _run() -> void:
 	shots._physics_process(.01)
 	check(shots._shots.size()==1,"Physical projectiles do not clash with magic ring")
 	shots.clear()
+	wave.segments.fill(1)
+	var opposing := WaveProbe.new()
+	opposing.team = "enemies"
+	opposing.damage = wave.damage
+	opposing.radius = wave.radius
+	opposing.band = wave.band
+	add_child(opposing)
+	GameAudio._cooldowns.erase("magic_shield_hit:" + str(wave.get_instance_id()))
+	var before_clash := GameAudio.voices.filter(func(v: Dictionary) -> bool: return v.event == "magic_shield_hit").size()
+	wave._clash_with(opposing)
+	check(GameAudio.voices.filter(func(v: Dictionary) -> bool: return v.event == "magic_shield_hit").size() > before_clash, "Two opposing rings play shield contact audio where they collide")
+	opposing.queue_free()
 	wave.queue_free()
 	for attack in Enemies.get_def("ruin_watcher").attacks: check(attack.magic,"Both Ruin Watcher orb patterns remain true magic")
 	check(is_equal_approx(Biomes.SPIRIT_PACKS[0].chance,.135) and is_equal_approx(Biomes.SPIRIT_PACKS_BLUELAY[1].chance,.06),"Ruin spirits reduced to 30% of previous chances")
@@ -117,8 +135,11 @@ func _run() -> void:
 		for entry in biome.enemy_packs:
 			if str(entry.pack).begins_with("spirit_"): count += 1; check(entry.density<=.0721,"Wandering spirits use reduced densities")
 	check(count==6,"All six wandering spirit entries are covered")
+	GameAudio.set_context(null, null)
+	for voice in GameAudio.voices: GameAudio.stop(voice, .01)
+	GameServer.remove_player(player.player_id)
 	player.free()
 	shots.queue_free()
-	await get_tree().process_frame
+	await get_tree().create_timer(.2).timeout
 	print("SHIELD COMBAT: %d checks; %d failures" % [checks,failures])
 	get_tree().quit(1 if failures else 0)

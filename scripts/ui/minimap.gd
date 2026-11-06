@@ -11,13 +11,13 @@ extends Control
 ## never stalls the game. It's painted lazily from the
 ## world's colors in 16 x 16 block patches as you get near them; areas you
 ## haven't explored stay dark (it reads the fog-of-war map). The mouse wheel
-## zooms it.
+## zooms it. The map key (M) opens it large in the middle of the screen.
 
 const PATCH := 16
 const ZOOM_MIN := 16.0
 const ZOOM_MAX := 160.0
 const ART_PIXELS := 88.0  # pixel grid across the whole minimap (x3 screen pixels each)
-const MAP_EDGE := 1.0 - 4.0 / ART_PIXELS  # one blue rim pixel + one outline pixel
+const MAP_EDGE := 1.0 - 8.0 / ART_PIXELS  # carved stone, brass and inner outline
 const MAX_JOBS := 4  # patches being painted in the background at once
 const UPLOAD_INTERVAL := 0.2  # seconds between sending newly painted map to the GPU
 
@@ -27,9 +27,16 @@ var fog_of_war: FogOfWar
 var view_radius := 32.0
 ## Extra markers: [{pos: Vector3, color: Color}]
 var markers: Array[Dictionary] = []
+var main_route := PackedVector3Array()
+var side_route := PackedVector3Array()
+var expanded := false
+var _art_pixels := ART_PIXELS
+var _map_edge := MAP_EDGE
+var _small_radius := 32.0
 
 var _map: Image
 var _map_tex: ImageTexture
+var _back_tex: ImageTexture
 var _painted := {}  # Vector2i patch -> true
 var _origin := Vector2.ZERO
 var _size := 0
@@ -37,6 +44,7 @@ var _rotation := 0.0
 var _center := Vector2.ZERO  # world x/z at the minimap's middle (the player)
 var _dirty := false
 var _upload_timer := 0.0
+var _upload_task := -1
 var _tasks: Array[int] = []  # running WorkerThreadPool tasks
 var _done: Array = []  # finished [patch, Image], filled by worker threads
 var _done_lock := Mutex.new()
@@ -56,6 +64,8 @@ func _ready() -> void:
 	_material.set_shader_parameter("map_edge", MAP_EDGE)
 	_material.set_shader_parameter("frame_color", UIStyle.BG)
 	_material.set_shader_parameter("outline_color", UIStyle.OUTLINE)
+	_material.set_shader_parameter("frame_tex", UIStyle._skin_texture("stone"))
+	_material.set_shader_parameter("brass_color", UIStyle.GOLD)
 	_map_rect.material = _material
 	_map_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_map_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -71,14 +81,19 @@ func _ready() -> void:
 
 ## Starts a fresh map for a world.
 func setup(p_world: GameWorld) -> void:
+	set_routes(PackedVector3Array(), PackedVector3Array())
 	_finish_tasks()  # workers may still be reading the previous world
 	_done.clear()
 	world = p_world
+	visible = not world is SpatialWorld
+	set_process(visible)
+	if world is SpatialWorld: return
 	_size = world.half_extent * 2
 	_origin = Vector2(-world.half_extent, -world.half_extent)
 	_map = Image.create_empty(_size, _size, false, Image.FORMAT_RGB8)
 	_map.fill(Color(0.04, 0.05, 0.08))
 	_map_tex = ImageTexture.create_from_image(_map)
+	_back_tex = ImageTexture.create_from_image(_map)
 	_painted.clear()
 	_material.set_shader_parameter("map_tex", _map_tex)
 	_material.set_shader_parameter("map_origin", _origin)
@@ -87,19 +102,97 @@ func setup(p_world: GameWorld) -> void:
 	_material.set_shader_parameter("explored_tex", fog_of_war.explored_texture() if fog_on else _all_explored)
 
 
+## Large mode: `art_pixels` across (x3 screen pixels each), showing further.
+func set_expanded(on: bool, art_pixels := ART_PIXELS) -> void:
+	if on == expanded and art_pixels == _art_pixels: return
+	if on and not expanded:
+		_small_radius = view_radius
+		view_radius = clampf(view_radius * 3.0, ZOOM_MIN, ZOOM_MAX * 3.0)
+	elif not on and expanded:
+		view_radius = _small_radius
+	expanded = on
+	_art_pixels = art_pixels if on else ART_PIXELS
+	_map_edge = 1.0 - 8.0 / _art_pixels
+	custom_minimum_size = Vector2(_art_pixels, _art_pixels) * PixelArt.SCALE
+	_material.set_shader_parameter("art_pixels", _art_pixels)
+	_material.set_shader_parameter("map_edge", _map_edge)
+	queue_redraw()
+
+
 func zoom(steps: float) -> void:
-	view_radius = clampf(view_radius * pow(1.15, steps), ZOOM_MIN, ZOOM_MAX)
+	view_radius = clampf(view_radius * pow(1.15, steps), ZOOM_MIN, ZOOM_MAX * (3.0 if expanded else 1.0))
+
+
+func set_routes(main: PackedVector3Array, side: PackedVector3Array) -> void:
+	var dungeon := is_instance_valid(world) and Dungeons.is_dungeon(world.realm_id)
+	main_route = PackedVector3Array() if dungeon else main
+	side_route = PackedVector3Array() if dungeon else side
+	queue_redraw()
+
+
+## Rasterize on the same grid as the map, then draw yellow last and omit
+## overlapping green pixels. Only actual paths are drawn, never goal rays.
+func route_pixels(path: PackedVector3Array) -> Dictionary:
+	var pixels := {}
+	var radius := ART_PIXELS * 0.5 * MAP_EDGE - 2.0
+	for i in range(path.size() - 1):
+		var a := _to_art(Vector2(path[i].x, path[i].z) - _center)
+		var b := _to_art(Vector2(path[i + 1].x, path[i + 1].z) - _center)
+		# Skip distant segments before sampling, keeping long routes cheap.
+		if Geometry2D.get_closest_point_to_segment(Vector2.ZERO, a, b).length() > radius + 1: continue
+		var steps := maxi(1, ceili(a.distance_to(b) * 1.5))
+		for step in range(steps + 1):
+			var p := Vector2i(a.lerp(b, float(step) / steps).round())
+			if Vector2(p).length() <= radius: pixels[p] = true
+	return pixels
+
+
+func visible_route_pixels() -> Dictionary:
+	if is_instance_valid(world) and Dungeons.is_dungeon(world.realm_id): return {main = {}, side = {}}
+	var yellow := route_pixels(main_route)
+	var green := route_pixels(side_route)
+	for p: Vector2i in yellow: green.erase(p)
+	return {main = yellow, side = green}
+
+
+func _draw_routes() -> void:
+	var pixels := visible_route_pixels()
+	for p: Vector2i in pixels.side: _art_px(Vector2(p), QuestGuide.SIDE_COLOR)
+	for p: Vector2i in pixels.main: _art_px(Vector2(p), QuestGuide.MAIN_COLOR)
 
 
 func _process(delta: float) -> void:
+	if not FrameTrace.enabled: _profile_process(delta); return
+	var started := Time.get_ticks_usec()
+	_profile_process(delta)
+	FrameTrace.record("ui/minimap",started)
+
+func _profile_process(delta: float) -> void:
 	if world == null or player == null:
 		return
 	var pos := player.global_position
+	if _upload_task>=0 and WorkerThreadPool.is_task_completed(_upload_task):
+		WorkerThreadPool.wait_for_task_completion(_upload_task)
+		_upload_task = -1
+		var previous := _map_tex
+		_map_tex = _back_tex
+		_back_tex = previous
+		_material.set_shader_parameter("map_tex",_map_tex)
+	var profile_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	_collect_patches()
+	if FrameTrace.enabled: FrameTrace.record("minimap/collect",profile_started)
+	profile_started = Time.get_ticks_usec() if FrameTrace.enabled else 0
 	_paint_around(pos)
+	if FrameTrace.enabled: FrameTrace.record("minimap/paint",profile_started)
 	_upload_timer -= delta
-	if _dirty and _upload_timer <= 0.0:
-		_map_tex.update(_map)
+	if _dirty and _upload_timer <= 0.0 and _upload_task<0:
+		profile_started = Time.get_ticks_usec() if FrameTrace.enabled else 0
+		if _upload_task>=0: WorkerThreadPool.wait_for_task_completion(_upload_task)
+		# Snapshot mutable painting data; the worker owns its copy and a texture
+		# reference until the thread-safe RenderingServer upload finishes.
+		# Upload only to the back texture, so the GPU keeps sampling the front.
+		_upload_task = WorkerThreadPool.add_task(_upload_snapshot.bind(_back_tex,_map.duplicate()))
+		if FrameTrace.enabled: FrameTrace.record("minimap/upload",profile_started)
 		_dirty = false
 		_upload_timer = UPLOAD_INTERVAL
 	_rotation = -player.camera_yaw  # screen-up on the map = the camera's forward
@@ -167,7 +260,13 @@ func _collect_patches() -> void:
 		_dirty = true
 
 
+static func _upload_snapshot(texture: ImageTexture, snapshot: Image) -> void:
+	RenderingServer.texture_2d_update(texture.get_rid(),snapshot,0)
+
 func _finish_tasks() -> void:
+	if _upload_task>=0:
+		WorkerThreadPool.wait_for_task_completion(_upload_task)
+		_upload_task = -1
 	for task in _tasks:
 		WorkerThreadPool.wait_for_task_completion(task)
 	_tasks.clear()
@@ -179,7 +278,7 @@ func _exit_tree() -> void:
 
 ## World offset (x/z) -> minimap position in art pixels from the middle.
 func _to_art(world_offset: Vector2) -> Vector2:
-	var map_radius_art := ART_PIXELS * 0.5 * MAP_EDGE
+	var map_radius_art := _art_pixels * 0.5 * _map_edge
 	var rel := world_offset / view_radius
 	var c := cos(-_rotation)
 	var s := sin(-_rotation)
@@ -195,10 +294,15 @@ func _art_px(art: Vector2, color: Color) -> void:
 func _draw() -> void:
 	if player == null:
 		return
-	var map_radius_art := ART_PIXELS * 0.5 * MAP_EDGE - 2.0
-	for m in markers:
+	_draw_routes()
+	var map_radius_art := _art_pixels * 0.5 * _map_edge - 2.0
+	var ordered := markers.duplicate()
+	ordered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a.get("kind", "") == "quest") < int(b.get("kind", "") == "quest"))
+	for m in ordered:
 		var a := _to_art(Vector2(m.pos.x - _center.x, m.pos.z - _center.y))
 		var kind: String = m.get("kind", "")
+		if is_instance_valid(world) and Dungeons.is_dungeon(world.realm_id) and kind in ["quest", "side"]: continue
 		if kind != "" and a.length() >= map_radius_art - 3.0:
 			a = a.normalized() * (map_radius_art - 3.0)  # towns stay on the rim, pointing the way
 		if a.length() < map_radius_art - 1.0 or kind != "":
@@ -212,7 +316,7 @@ func _draw() -> void:
 							Vector2(1, 0), Vector2(-1, 1), Vector2(1, 1), Vector2(0, 1)]:
 						_art_px(a + px, m.color)
 					_art_px(a, Color(1, 1, 1))
-				"quest", "side":  # a diamond: gold for the story, cream for side quests
+				"quest", "side":  # gold main objectives and green side objectives
 					var r := 3 if kind == "quest" else 2
 					for y in range(-r - 1, r + 2):
 						for x in range(-r - 1, r + 2):
@@ -228,9 +332,9 @@ func _draw() -> void:
 						_art_px(a + d, Color(0.03, 0.03, 0.06))
 					_art_px(a, m.color)
 	# North marker just inside the thin rim.
-	var north := _to_art(Vector2(0, -1)).normalized() * (ART_PIXELS * 0.5 * MAP_EDGE - 3.0)
+	var north := _to_art(Vector2(0, -1)).normalized() * (_art_pixels * 0.5 * _map_edge - 3.0)
 	PixelArt.draw_tiny(self, ((size / PixelArt.SCALE * 0.5).floor() + north.floor() - Vector2(1, 2)) * PixelArt.SCALE,
-			"N", Color(0.9, 0.2, 0.3), PixelArt.SCALE)
+			"N", UIStyle.GOLD, PixelArt.SCALE)
 	_draw_facing_arrow()
 
 

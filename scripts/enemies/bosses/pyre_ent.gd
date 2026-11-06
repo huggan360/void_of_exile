@@ -51,7 +51,11 @@ func _canopy() -> void:
 	var gap := atan2(-direction.x, -direction.z)
 	mark_ring_gaps(gap, 64.0, 1.2, HOT)
 	after(1.2, func() -> void:
-		fire_ring(shot_origin(), 32, _ember(5.5), gap, 64.0)
+		# Only the first, brighter canopy wave carries choking ash.
+		var ash := _ember(5.5)
+		ash.merge({color = HOT, size = 1.15, radius = 0.22,
+			effects = [{id = "speed", amount = -8, duration = 1.5}], effect_source = "Pyre Ent choking ash"}, true)
+		fire_ring(shot_origin(), 32, ash, gap, 64.0)
 		after(0.5, func() -> void: fire_ring(shot_origin(), 32, _ember(6.0), gap, 74.0)))
 
 func _branches() -> void:

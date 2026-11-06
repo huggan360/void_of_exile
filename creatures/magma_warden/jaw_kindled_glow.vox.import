@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d1mj73b0uci4q"
+path="res://.godot/imported/jaw_kindled_glow.vox-f2da4ad2691838685b6ccdf3124e89af.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/jaw_kindled_glow.vox"
+dest_files=["res://.godot/imported/jaw_kindled_glow.vox-f2da4ad2691838685b6ccdf3124e89af.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

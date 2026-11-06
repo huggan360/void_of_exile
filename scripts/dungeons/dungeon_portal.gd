@@ -35,7 +35,9 @@ func _ready() -> void:
 	_build_suction()
 	target = InteractionTarget.new()
 	target.title = "Return to the Realm" if data.get("exit", false) else definition.name
-	target.description = "Return to the realm this cave opened from." if data.get("exit", false) else "Difficulty [b]%.1f/10[/b] · %s · common loot up to G%d" % [definition.rating, definition.get("damage_hint", "enemies hit hard" if definition.rating >= 7.0 else "enemies hit moderately"), definition.common_tier]
+	target.description = "Return to the realm this cave opened from." if data.get("exit", false) else "Difficulty [b]%.1f/10[/b] - %s - common loot up to G%d" % [definition.rating, definition.get("damage_hint", "enemies hit hard" if definition.rating >= 7.0 else "enemies hit moderately"), definition.common_tier]
+	if str(data.get("dungeon",""))=="theory_of_everything" and not data.get("exit",false):
+		target.description = "Cross two vessels and a gravity-bent expanse. Decipher the locks and reach the Convergence chamber."
 	target.action_text = "Enter"
 	target.difficulty = -1.0 if data.get("exit", false) else float(definition.rating)
 	target.reach = 3.5

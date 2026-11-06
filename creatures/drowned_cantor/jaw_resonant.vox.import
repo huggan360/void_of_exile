@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bcmdtid4hpln6"
+path="res://.godot/imported/jaw_resonant.vox-86aa0884e07406a62f4ba0ae3e3ffc1b.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_cantor/jaw_resonant.vox"
+dest_files=["res://.godot/imported/jaw_resonant.vox-86aa0884e07406a62f4ba0ae3e3ffc1b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

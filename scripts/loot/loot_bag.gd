@@ -4,9 +4,10 @@ extends Node3D
 ## Chests have no collision and their hinged lids never close once opened.
 
 const SLOTS := 8
-const TYPES := ["gray", "story", "green", "blue", "red", "purple", "white", "black"]
+## "vault": a Chambers chest (never expires, closes when you step off it).
+const TYPES := ["gray", "story", "green", "blue", "red", "purple", "white", "black", "vault"]
 const NAMES := {gray = "Gray Chest", green = "Green Chest", blue = "Blue Chest", red = "Red Chest",
-		purple = "Purple Chest", white = "White Chest", black = "Black Chest", story = "Story Chest"}
+		purple = "Purple Chest", white = "White Chest", black = "Black Chest", story = "Story Chest", vault = "Vault Chest"}
 ## [paint, shaded paint, metal trim]
 const COLORS := {
 	gray = [Color(0.6, 0.6, 0.63), Color(0.44, 0.44, 0.48), Color(0.72, 0.58, 0.36)],
@@ -17,11 +18,12 @@ const COLORS := {
 	white = [Color(0.97, 0.97, 0.95), Color(0.8, 0.8, 0.84), Color(1.0, 0.78, 0.3)],
 	black = [Color(0.12, 0.11, 0.14), Color(0.05, 0.05, 0.07), Color(0.75, 0.45, 1.0)],
 	story = [Color(1.0, 0.82, 0.22), Color(0.82, 0.6, 0.12), Color(0.55, 0.32, 0.14)],
+	vault = [Color(0.55, 0.36, 0.2), Color(0.4, 0.25, 0.14), Color(0.82, 0.66, 0.34)],
 }
 
 const GRID := 32
 const VOXEL := 0.035
-const SIZES := {gray=0.72, green=0.82, blue=0.98, red=1.08, purple=1.18, white=1.35, black=1.42, story=1.7}
+const SIZES := {gray=0.72, green=0.82, blue=0.98, red=1.08, purple=1.18, white=1.35, black=1.42, story=1.7, vault=1.45}
 const BLINK_TIME := 8.0
 const POP_TIME := 0.35
 static var _meshes := {}  # color -> [hollow base, hinged lid]
@@ -41,6 +43,7 @@ var _light := OmniLight3D.new()
 var _particles: GPUParticles3D
 var _divine_particles: Array[GPUParticles3D] = []
 var _open_amount := 0.0
+var _yaw := NAN
 
 
 static func is_personal(bag_type: String) -> bool:
@@ -63,6 +66,8 @@ static func type_for(contents: Array) -> String:
 ## Whether a bag may hold an item: soulbound items only go in personal
 ## bags, and elixirs only in gray ones.
 static func can_hold(bag_type: String, public: bool, item: Item) -> bool:
+	if bag_type == "vault":
+		return not item.is_story()
 	if item.is_story() or bag_type == "story":
 		return item.is_story() and bag_type == "story"
 	if item.is_elixir():
@@ -80,8 +85,9 @@ func _init(record: Dictionary = {}) -> void:
 	bag_id = record.id
 	type = record.type
 	_expires = record.expires
-	_initially_open = bool(record.get("opened", false))
+	_initially_open = bool(record.get("opened", false)) and record.type != "vault"
 	position = record.pos
+	if record.has("yaw"): _yaw = float(record.yaw)
 
 
 func _ready() -> void:
@@ -97,7 +103,7 @@ func _ready() -> void:
 	top.position = Vector3(-16.5, -1.0, -26.0) * VOXEL
 	_lid.add_child(top)
 	_model.add_child(_lid)
-	_model.rotation.y = fmod(float(bag_id) * 2.399963, TAU)
+	_model.rotation.y = _yaw if not is_nan(_yaw) else fmod(float(bag_id) * 2.399963, TAU)
 	add_child(_model)
 	_build_light_and_particles()
 	_model.scale = Vector3.ONE * float(SIZES[type]) * 0.01
@@ -125,6 +131,9 @@ func glow_color() -> Color:
 func open_chest(instant := false) -> void:
 	if opened: return
 	opened = true
+	if type == "vault":
+		_swing_lid(1.0)
+		return
 	_effects.show()
 	_particles.emitting = true
 	for sparks in _divine_particles: sparks.emitting = true
@@ -133,6 +142,19 @@ func open_chest(instant := false) -> void:
 	else:
 		var tween := create_tween()
 		tween.tween_method(_set_open_amount, 0.0, 1.0, 0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+
+## Vault chests close again when you step off them.
+func close_chest() -> void:
+	if not opened: return
+	opened = false
+	_swing_lid(0.0)
+
+
+func _swing_lid(to: float) -> void:
+	var tween := create_tween()
+	tween.tween_method(func(a: float) -> void: _lid.rotation.x = deg_to_rad(105.0) * a,
+			_lid.rotation.x / deg_to_rad(105.0), to, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 func _set_open_amount(amount: float) -> void:
@@ -159,7 +181,7 @@ func _build_light_and_particles() -> void:
 	_light.omni_range = 8.0 if divine() else 4.0 + rank(type) * 0.45
 	_light.omni_attenuation = 1.25
 	_light.light_volumetric_fog_energy = 0.35 if divine() else 0.12
-	_light.shadow_enabled = divine()
+	_light.shadow_enabled = divine() and GraphicsSettings.lamp_shadows(AppSettings.graphics)
 	_light.distance_fade_enabled = true
 	_light.distance_fade_begin = 30.0
 	_light.distance_fade_length = 12.0

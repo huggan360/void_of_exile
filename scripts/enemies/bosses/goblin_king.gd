@@ -36,7 +36,8 @@ func _clubs() -> void:
 	face_override = direction
 	after(0.85, func() -> void:
 		fire_fan(shot_origin(), direction, 3, 25.0, Boss.shot("bolt", MOSS, Vector2i(22, 30), 6.0, 0.24, 19.0,
-			{turn = 0.2 if cycle_count % 2 == 0 else -0.2, voxel_model = "boss_projectiles/goblin_club", authored_projectile = true, pixel_projectile = true}))
+			{turn = 0.2 if cycle_count % 2 == 0 else -0.2, voxel_model = "boss_projectiles/goblin_club", authored_projectile = true, pixel_projectile = true,
+				effects = [{id = "dexterity", amount = -8, duration = 1.75}], effect_source = "Goblin King bruising club"}))
 		face_override = Vector3.ZERO)
 
 func _pound() -> void:

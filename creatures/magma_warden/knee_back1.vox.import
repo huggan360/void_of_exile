@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bxi60nq3c46bt"
+path="res://.godot/imported/knee_back1.vox-7bfa268e5f77a7d768ffeb9169b46d90.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/knee_back1.vox"
+dest_files=["res://.godot/imported/knee_back1.vox-7bfa268e5f77a7d768ffeb9169b46d90.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,3 +1,3 @@
-# Merrow — model only
+# Merrow
 
-Open `model.tscn` in Godot or `model.vox` in Goxel. Parts are split for later animation, with the Archer's shoulder/hip pivots and 0.1125 m voxels. Body/face proportions match the 16-voxel Archer; hats, fins and held items may extend beyond that envelope. Facing -Z, the right hand is on +X. Staff/trident attaches beneath `ArmR/RightHand`; left-hand props are separate attachments. `rig.json` describes all source frames and pivots. No player script, class catalog, stats, UI, equipment or spawn registration uses this model.
+Playable 0.1125 m voxel rig, facing -Z with +X right. Open `model.tscn` for the articulated model; `model.vox` is a coarse, unposed voxel-editor reference. `ArmL`/`ArmR` contain separate `ForearmL`/`ForearmR` elbow pivots and wrist sockets (`LeftHand`/`RightHand`). The weapon lives below `Rig/ArmR/ForearmR/RightHand`; the fist has a shaft hole. See `../README.md` for axes, animation and regeneration. `rig.json` records frames, hierarchy, mesh offsets and scales.

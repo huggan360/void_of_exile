@@ -11,6 +11,9 @@ class_name Campaigns
 ## (red), [place]...[/place] (blue), [b]...[/b]; "|" splits speech into pages.
 
 const PACKS := {
+	astral_frontier = {id="astral_frontier",title="The Astral Frontier",
+		blurb="A woodland mechanic builds a way to the stars. Beyond the Aurora waits a universe coming apart.",
+		campaigns=["theory_of_everything","first_light","lantern_road","shardfield","hollowmoon","pale_eye"]},
 	hidden_power = {
 		id = "hidden_power", title = "The Hidden Power",
 		blurb = "Torn pieces of an old map, a power hidden in the mountains, and a Hearthhaven gardener who only wanted his lilies back.",
@@ -22,6 +25,24 @@ const PACKS := {
 ## "campaign" (its realm). campaign + from: only there during that campaign,
 ## from that step on (someone you only find by asking around...).
 const NPCS := {
+	# The Astral Reach (SpaceWorld): at = {nexus = station anchor} or {planet, spot}.
+	isolde = {name = "Captain Isolde", world = "astral", at = {nexus = "npc_captain"}, model = "npc_traveler",
+		greeting = "Charts, tea and trouble. The Reach has plenty of all three."},
+	bell = {name = "Quartermaster Bell", world = "astral", at = {nexus = "npc_quartermaster"}, model = "npc_baker",
+		greeting = "Every ship leaves my berths with full lanterns and an empty biscuit tin. Somehow."},
+	orin_nexus = {name = "Orin the Starwright", world = "astral", at = {nexus = "npc_mechanic"}, model = "npc_smith",
+		greeting = "The rocket's warm if you ever miss the Tavern. I miss the trees, a little."},
+	moss = {name = "Elder Moss", world = "astral", at = {planet = "verdance", spot = "treehouse_village"}, model = "npc_gardener",
+		greeting = "Mind the glowcaps. They sulk when you step on them."},
+	lys = {name = "Keeper Lys", world = "astral", at = {planet = "rosamund", spot = "petal_shrine"}, model = "npc_magician",
+		greeting = "The shrines sing when the crystals are happy. They have not sung in weeks."},
+	tam = {name = "Tam of the Lighthouse", world = "astral", at = {planet = "tidewell", spot = "lighthouse"}, model = "npc_villager",
+		greeting = "Lamp's lit. Always lit. Somebody out there needs to see it."},
+	hermit = {name = "The Hollow Hermit", world = "astral", at = {planet = "hollowmoon", spot = "observatory_ruin"}, model = "npc_traveler",
+		greeting = "You came through the Shardfield. Brave, or lost. Usually both."},
+	astral_mechanic = {name="Orin the Starwright",world="campaign",campaign="theory_of_everything",
+		at={astral="mechanic"},model="npc_smith",
+		greeting="Welcome to Starfall Launchworks. The Starling runs on aether, copper, and a very unreasonable amount of hope."},
 	gerald = {name = "Gerald the Gardener", world = "hall", pos = Vector3(3, 10, 36)},
 	wren = {name = "Old Wren", world = "campaign", campaign = "lily_thief", at = {village = "Bramblebrook", offset = Vector3(-7, 0, 9)}},
 	maribel = {name = "Maribel the Weaver", world = "campaign", campaign = "lily_thief", from = "maribel",
@@ -52,7 +73,7 @@ const NPCS := {
 
 const _LILY_INTRO := {
 	title = "The Lily Thief",
-	loading = {title = "The Lily Thief", subtitle = "The Hidden Power  ·  part one", seconds = 3.0},
+	loading = {title = "The Lily Thief", subtitle = "The Hidden Power  -  part one", seconds = 3.0},
 	shots = [
 		{from = Vector3(46, 32, 96), to = Vector3(26, 22, 74), look_from = Vector3(0, 10, 40), look_to = Vector3(0, 10, 46), duration = 7.5,
 			cards = [{text = "[place]Hearthhaven[/place] sleeps.", at = 0.8, hold = 2.6},
@@ -73,8 +94,175 @@ const _LILY_INTRO := {
 ## spot first), shared (everyone watches the conversation), reward
 ## ("dexterity" potions or a "t3" item each, in chests), xp.
 const LIST := {
+	# The Astral Reach tales, told by ReachCampaign. Extra step kinds:
+	# | kind | done when | fields |
+	# |---|---|---|
+	# | reach_ship | a party member is aboard a party ship | |
+	# | reach_fly | a party ship comes within `range` of `target` | target ("planet:<id>", "pass:<n>", "nexus", "point") , range, at |
+	# | reach_land | a party ship lands on `planet` | planet |
+	# | reach_dock | a party ship docks at the Nexus | |
+	# | reach_kill | party cannons destroy `count` brood (`foe` kind or any); `ambush` spawns them near `target` | count, foe, target, ambush |
+	# | reach_repair | the party ship is crippled until every `objects` spot aboard is mended | objects [{id, name, seat}] |
+	# | reach_search | searching each object at a planet spot | planet, objects [{id, name, spot, found}] |
+	# talk steps with world "astral" use the Reach NPCS.
+
+	first_light = {
+		id = "first_light", revision = 1, pack = "astral_frontier", requires = "theory_of_everything", reach = true,
+		title = "First Light", level = 40, xp = 6000,
+		blurb = "Captain Isolde needs a new crew to carry lanterns to Verdance, where the glowcaps have started to go dark.",
+		stars = [{id = "complete", text = "Finish the tale"}, {id = "time", text = "Finish within 25 minutes", seconds = 1500},
+			{id = "no_deaths", text = "Nobody falls"}],
+		steps = [
+			{id = "captain", kind = "talk", world = "astral", npc = "isolde", shared = true,
+				text = "Meet Captain Isolde by the campaign board at the Nexus",
+				say = "So you are the ones who walked out of the Convergence. Welcome to the Nexus.|Here is the trouble. [place]Verdance[/place], the forest world nearest us, is going dark. Its glowcaps are fading one by one.|Launch a ship at the [b]command table[/b], take the helm and fly there. Elder Moss will meet you at the landing pad."},
+			{id = "ship", kind = "reach_ship", world = "astral", text = "Launch a ship at the command table and go aboard"},
+			{id = "fly", kind = "reach_fly", world = "astral", target = "planet:verdance", range = 650.0,
+				text = "Take the helm and fly to Verdance (W thrust, mouse steers)"},
+			{id = "land", kind = "reach_land", world = "astral", planet = "verdance", text = "Slow down near the landing pad and press X to land on Verdance"},
+			{id = "moss", kind = "talk", world = "astral", npc = "moss", shared = true,
+				text = "Find Elder Moss in the treehouse village",
+				say = "Lanterns from the Nexus! Bless your boots.|The glowcaps feed on starlight, and something out there is drinking it first. Three of our oldest caps have gone grey.|Touch one of Isolde's lanterns to each of them. They might remember how to shine."},
+			{id = "caps", kind = "reach_search", world = "astral", planet = "verdance",
+				text = "Relight the three grey glowcaps (%d/%d)",
+				objects = [{id = "cap_a", name = "Grey glowcap", spot = "treehouse_village", found = "The cap drinks the lantern's light and blushes green again."},
+					{id = "cap_b", name = "Grey glowcap", spot = "mushroom_grove", found = "A ring of tiny caps lights up around it."},
+					{id = "cap_c", name = "Grey glowcap", spot = "firefly_shrine", found = "The old cap glows so bright the fireflies come home."}]},
+			{id = "moss2", kind = "talk", world = "astral", npc = "moss",
+				text = "Tell Elder Moss", say = "Listen to them hum! You have given us another season.|But the dimming came from deeper out, past the Haven. Ask Isolde about the [place]Shardfield[/place]. Something there is hungry for light."},
+			{id = "home", kind = "reach_dock", world = "astral", text = "Fly back and dock at the Nexus (press X near the station)"},
+			{id = "report", kind = "talk", world = "astral", npc = "isolde", final = true, shared = true,
+				text = "Report to Captain Isolde", say = "Verdance shines, and you brought my ship back in one piece. Remarkable.|Rest. The Reach will need you again before the tea goes cold."},
+		],
+	},
+	lantern_road = {
+		id = "lantern_road", revision = 1, pack = "astral_frontier", requires = "first_light", reach = true,
+		title = "The Lantern Road", level = 42, xp = 7000,
+		blurb = "The crystal shrines of Rosamund have gone silent, and brood skiffs have been seen at the edge of the Haven.",
+		stars = [{id = "complete", text = "Finish the tale"}, {id = "time", text = "Finish within 30 minutes", seconds = 1800},
+			{id = "no_deaths", text = "Nobody falls"}],
+		steps = [
+			{id = "bell", kind = "talk", world = "astral", npc = "bell", shared = true,
+				text = "Speak with Quartermaster Bell at the command table",
+				say = "Isolde says you can fly. Can you shoot?|Keeper Lys on [place]Rosamund[/place] asked for help, and the skiffs that chased her courier are still out there.|Put someone on every cannon. Left mouse fires, the ship does the rest."},
+			{id = "ship", kind = "reach_ship", world = "astral", text = "Board a party ship"},
+			{id = "skiffs", kind = "reach_kill", world = "astral", count = 6, foe = "brood_skiff", target = "planet:rosamund", ambush = 6,
+				text = "Clear the brood skiffs circling Rosamund (%d/%d)"},
+			{id = "land", kind = "reach_land", world = "astral", planet = "rosamund", text = "Land on Rosamund"},
+			{id = "lys", kind = "talk", world = "astral", npc = "lys", shared = true,
+				text = "Find Keeper Lys at the crystal shrine",
+				say = "You chased them off! The shrines will thank you, once they remember how to sing.|The brood sucked the songs out of three resonance crystals. Find them, and strike each one gently. Gently!"},
+			{id = "crystals", kind = "reach_search", world = "astral", planet = "rosamund", text = "Wake the three resonance crystals (%d/%d)",
+				objects = [{id = "res_a", name = "Silent crystal", spot = "petal_shrine", found = "A clear note rings out across the meadow."},
+					{id = "res_b", name = "Silent crystal", spot = "rose_crystal_garden", found = "Petals lift on the sound and drift upward."},
+					{id = "res_c", name = "Silent crystal", spot = "fairy_court", found = "The last crystal answers the first two. Rosamund sings."}]},
+			{id = "lys2", kind = "talk", world = "astral", npc = "lys", text = "Return to Keeper Lys",
+				say = "Hear that? A whole planet humming.|The songs told me where the brood nest. There is a heart of crystal hidden inside the [place]Shardfield[/place]. They go there to feed."},
+			{id = "home", kind = "reach_dock", world = "astral", text = "Dock at the Nexus"},
+			{id = "report", kind = "talk", world = "astral", npc = "isolde", final = true, text = "Tell Captain Isolde what the crystals said",
+				say = "A crystal heart inside the Shardfield. Of course it is. Nothing sensible ever hides in a nice open field.|Get some sleep. Bell will want to fit you with sturdier hull planks."},
+		],
+	},
+	shardfield = {
+		id = "shardfield", revision = 1, pack = "astral_frontier", requires = "lantern_road", reach = true,
+		title = "Through the Shardfield", level = 44, xp = 8000,
+		blurb = "Thread the asteroid wall, find the crystal planetoid at its heart, and survive when the ship does not.",
+		stars = [{id = "complete", text = "Finish the tale"}, {id = "time", text = "Finish within 35 minutes", seconds = 2100},
+			{id = "no_deaths", text = "Nobody falls"}],
+		steps = [
+			{id = "captain", kind = "talk", world = "astral", npc = "isolde", shared = true, text = "Get your orders from Captain Isolde",
+				say = "The Shardfield is a wall of stone and crystal with three passes through it. Lanterned buoys mark them.|Take the middle pass. Fly slow, keep your gunners awake, and do not touch the rocks."},
+			{id = "ship", kind = "reach_ship", world = "astral", text = "Board a party ship"},
+			{id = "pass", kind = "reach_fly", world = "astral", target = "pass:1", range = 260.0, text = "Fly to the middle pass of the Shardfield (lantern buoys)"},
+			{id = "ambush", kind = "reach_kill", world = "astral", count = 5, target = "pass:1", ambush = 5, text = "Fight off the brood in the pass (%d/%d)"},
+			{id = "repair", kind = "reach_repair", world = "astral", text = "The ship is crippled! Mend it from inside (%d/%d)",
+				objects = [{id = "helm", name = "Cracked helm linkage", seat = "pilot"}, {id = "map", name = "Shattered star map", seat = "map"},
+					{id = "gun", name = "Jammed top cannon", seat = "turret_top"}]},
+			{id = "heart", kind = "reach_fly", world = "astral", target = "planet:shardheart", range = 420.0, text = "Find Shardheart, hidden in the field"},
+			{id = "land", kind = "reach_land", world = "astral", planet = "shardheart", text = "Land on Shardheart"},
+			{id = "search", kind = "reach_search", world = "astral", planet = "shardheart", text = "Search the crystal heart (%d/%d)",
+				objects = [{id = "husk", name = "Brood husk", spot = "singing_spires", found = "An empty brood shell, big as a cart. It came from the Gloam."},
+					{id = "chart", name = "Scorched star chart", spot = "heart_shrine", found = "A chart burned with one word: [place]Hollowmoon[/place]."}]},
+			{id = "home", kind = "reach_dock", world = "astral", text = "Return through the field and dock at the Nexus"},
+			{id = "report", kind = "talk", world = "astral", npc = "isolde", final = true, text = "Report to Captain Isolde",
+				say = "Hollowmoon. In the Gloam.|Nobody goes to the Gloam. Which means, I suppose, that you do."},
+		],
+	},
+	hollowmoon = {
+		id = "hollowmoon", revision = 1, pack = "astral_frontier", requires = "shardfield", reach = true,
+		title = "The Hollow Moon", level = 46, xp = 9000,
+		blurb = "Beyond the Shardfield the Gloam swallows the stars. A hermit on a dead moon watches the brood grow.",
+		stars = [{id = "complete", text = "Finish the tale"}, {id = "time", text = "Finish within 35 minutes", seconds = 2100},
+			{id = "no_deaths", text = "Nobody falls"}],
+		steps = [
+			{id = "orin", kind = "talk", world = "astral", npc = "orin_nexus", shared = true, text = "Ask Orin to fit the ship for the Gloam",
+				say = "The Gloam eats lantern light, so I gave your lanterns bigger appetites.|Through any pass, then keep going until the stars go quiet. Hollowmoon is grey. Very grey. You will know it."},
+			{id = "ship", kind = "reach_ship", world = "astral", text = "Board a party ship"},
+			{id = "gloam", kind = "reach_fly", world = "astral", target = "planet:hollowmoon", range = 700.0, text = "Cross the Shardfield and fly into the Gloam to Hollowmoon"},
+			{id = "eels", kind = "reach_kill", world = "astral", count = 4, foe = "void_eel", target = "planet:hollowmoon", ambush = 4, text = "Drive off the void eels (%d/%d)"},
+			{id = "land", kind = "reach_land", world = "astral", planet = "hollowmoon", text = "Land on Hollowmoon"},
+			{id = "hermit", kind = "talk", world = "astral", npc = "hermit", shared = true, text = "Find the hermit at the ruined observatory",
+				say = "Visitors. Living ones, even.|I have watched [place]Mawgrave[/place] for nine years. The brood grow there in hives the size of towns. The Empress you slew was only a daughter.|Their mother sleeps under the storm of [place]the Pale Eye[/place]. Light my three beacons and the Nexus will see what I see."},
+			{id = "beacons", kind = "reach_search", world = "astral", planet = "hollowmoon", text = "Light the hermit's beacons (%d/%d)",
+				objects = [{id = "b_a", name = "Cold beacon", spot = "observatory_ruin", found = "Green fire climbs the beacon."},
+					{id = "b_b", name = "Cold beacon", spot = "bone_forest", found = "The bone trees glow from within."},
+					{id = "b_c", name = "Cold beacon", spot = "fallen_astrolabe", found = "Far away, the Nexus flashes back."}]},
+			{id = "home", kind = "reach_dock", world = "astral", text = "Return to the Nexus"},
+			{id = "report", kind = "talk", world = "astral", npc = "isolde", final = true, text = "Report to Captain Isolde",
+				say = "We saw the beacons. All of us. The whole station went quiet.|A mother of the brood, under the Pale Eye. Then that is where this ends."},
+		],
+	},
+	pale_eye = {
+		id = "pale_eye", revision = 1, pack = "astral_frontier", requires = "hollowmoon", reach = true,
+		title = "Under the Pale Eye", level = 48, xp = 12000,
+		blurb = "Burn the hives of Mawgrave and fly into the storm at the end of the map.",
+		stars = [{id = "complete", text = "Finish the tale"}, {id = "time", text = "Finish within 40 minutes", seconds = 2400},
+			{id = "no_deaths", text = "Nobody falls"}],
+		steps = [
+			{id = "captain", kind = "talk", world = "astral", npc = "isolde", shared = true, text = "Captain Isolde's last orders",
+				say = "Every ship of the Nexus is with you, in spirit and in biscuits.|Burn the hives on [place]Mawgrave[/place] first, or the mother will have an army. Then the storm."},
+			{id = "ship", kind = "reach_ship", world = "astral", text = "Board a party ship"},
+			{id = "maw", kind = "reach_fly", world = "astral", target = "planet:mawgrave", range = 800.0, text = "Fly deep into the Gloam to Mawgrave"},
+			{id = "swarm", kind = "reach_kill", world = "astral", count = 10, target = "planet:mawgrave", ambush = 10, text = "Break the swarm over Mawgrave (%d/%d)"},
+			{id = "land", kind = "reach_land", world = "astral", planet = "mawgrave", text = "Land on Mawgrave"},
+			{id = "hives", kind = "reach_search", world = "astral", planet = "mawgrave", text = "Set Orin's lantern charges in the hives (%d/%d)",
+				objects = [{id = "h_a", name = "Brood hive", spot = "brood_hive", found = "The charge glows green and the hive shrinks back."},
+					{id = "h_b", name = "Brood hive", spot = "hollow_nest", found = "Something inside screams and goes still."},
+					{id = "h_c", name = "Brood hive", spot = "spore_garden", found = "The last charge catches. Mawgrave burns with green fire."}]},
+			{id = "eye", kind = "reach_fly", world = "astral", target = "planet:pale_eye", range = 900.0, text = "Fly into the storm of the Pale Eye"},
+			{id = "mother", kind = "reach_kill", world = "astral", count = 12, target = "planet:pale_eye", ambush = 12,
+				text = "Destroy the Mother's last brood under the Eye (%d/%d)"},
+			{id = "home", kind = "reach_dock", world = "astral", text = "Come home to the Nexus"},
+			{id = "report", kind = "talk", world = "astral", npc = "isolde", final = true, shared = true, text = "Come home to Captain Isolde",
+				say = "The storm is breaking up. We can see stars behind the Eye for the first time in nine years.|You crossed a theory, a field of shards and the dark itself. The Nexus is yours, for as long as you like.|...Tea?"},
+		],
+	},
+	theory_of_everything = {
+		id="theory_of_everything",revision=1,pack="astral_frontier",title="Theory of Everything",level=40,
+		blurb="Help a woodland starwright finish his impossible ship. Board together, cross the chromatic void and restore a haunted vessel on the way to the Convergence.",
+		xp=8000,stars=[],side=[],
+		steps=[
+			{id="realm",kind="enter",world="campaign",text="Return to Realm 1 through the Chronicle Gate"},
+			{id="mechanic",kind="talk",world="campaign",npc="astral_mechanic",shared=true,
+				text="Find Orin at Starfall Launchworks in the woods",
+				say="You found my little clearing! [place]Starfall Launchworks[/place], first port to a very unreasonable sky.|My ship needs a [b]starcoil[/b], a [b]spellsteel nozzle[/b] and an [b]aether heart[/b]. My supply chest is beside the workshop. Bring all three to me.|Once she is ready, every member of your party must board. Nobody gets left in the trees."},
+			{id="parts",kind="astral_parts",world="campaign",npc="astral_mechanic",count=3,
+				text="Take the three rocket parts from the supply chest and bring them to Orin (%d/%d)",
+				say="Perfect. The starcoil holds, the nozzle is seated, and the heart is singing.|She is ready. Go to the boarding hatch. I'll keep the engines warm until [b]everyone[/b] is aboard."},
+			{id="board",kind="astral_board",world="campaign",text="Board the magic rocket and wait for your party"},
+			{id="relays",kind="astral_route",world="dungeon",text="Inspect the Aurora's marked electrical boxes to find the airlock relay"},
+			{id="expanse",kind="astral_route",world="dungeon",text="Leave the Aurora and cross the Chromatic Expanse to the derelict ship"},
+			{id="repairs",kind="astral_route",world="dungeon",count=5,text="Repair all five marked service bays in the derelict ship (%d/%d)"},
+			{id="unravelling",kind="astral_route",world="dungeon",text="Leave through the restored airlock and cross the Unravelling"},
+			{id="convergence",kind="astral_route",world="dungeon",text="Defeat the Hollow Empress at the Convergence"},
+			{id="beyond",kind="astral_route",world="dungeon",final=true,text="Step through the star portal to the Nexus"},
+			{id="relaunch",kind="talk",world="campaign",npc="astral_mechanic",shared=true,next="board",
+				text="Return to Orin at Starfall Launchworks and arrange another flight",
+				say="Your parts are still installed. I've brought the ship home and kept your route on the star chart.|Board together when you are ready. We'll return to the Aurora; every circuit you repaired is still saved."},
+		],
+	},
 	lily_thief = {
-		id = "lily_thief", pack = "hidden_power", title = "The Lily Thief", level = 1,
+		id = "lily_thief", revision = 2, pack = "hidden_power", title = "The Lily Thief", level = 1,
 		blurb = "Every night something creeps through Gerald's garden, and every morning another bed of moon-lilies is gone. Find out what has teeth enough to eat them.",
 		intro = _LILY_INTRO, xp = 600,
 		stars = [
@@ -87,9 +275,14 @@ const LIST := {
 		steps = [
 			{id = "gerald", kind = "talk", npc = "gerald", world = "hall", text = "Talk to Gerald in the Tavern garden",
 				say = "Gone! The last of my moon-lilies, [b]gone[/b]!|Something with [enemy]teeth[/enemy] drags them off at night, out past the realm gate.|The meadow beyond [place]Bramblebrook[/place], I'd wager. Please, find it, and bring me back one living lily!"},
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate, north of the fountain"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain"},
+			{id = "trail", kind = "interact", world = "campaign", text = "Follow the stolen lilies through the eastern meadow (%d/%d)", verb = "Examine",
+				objects = [
+					{id = "lily_tracks", name = "Dragged lily stems", at = Vector3(150, 0, 45), found = "Chewed stems lead farther into the meadow."},
+					{id = "lily_petals", name = "Scattered moon-lily petals", at = Vector3(205, 0, 110), found = "The petals end at a clearing. Something huge is feeding here."},
+				]},
 			{id = "bloom", kind = "kill", world = "campaign", text = "Find what eats the lilies in the meadow beyond Bramblebrook", count = 1,
-				enemies = ["thornmaw_bloom"], pack = "thornmaw", gather = true, at = {village = "Bramblebrook", offset = Vector3(48, 0, 20)}},
+				enemies = ["thornmaw_bloom"], pack = "thornmaw", gather = true, at = Vector3(250, 0, 155)},
 			{id = "bloom_chest", kind = "chest", world = "campaign", text = "Open the story chest the Thornmaw left behind",
 				at = "death", items = ["story_moon_lily", "story_clue"], until = "story_moon_lily"},
 			{id = "lily", kind = "hand_over", npc = "gerald", world = "hall", item = "story_moon_lily", text = "Bring the moon-lily back to Gerald",
@@ -100,11 +293,13 @@ const LIST := {
 				yes = "The map? You want [npc]Maribel[/npc] the weaver, she collects old things. She's by her loom.",
 				no = "A map? Can't say I've seen one. Ask someone else."},
 			{id = "maribel", kind = "talk", npc = "maribel", world = "campaign", text = "Talk to Maribel the weaver in Bramblebrook",
-				say = "That mark... I've seen it before, on my grandmother's [b]necklace[/b].|A [enemy]goblin[/enemy] snatched it from my window last night and ran into the woods!|Bring it back, and I'll tell you everything I know."},
-			{id = "thief", kind = "kill", world = "campaign", text = "Catch the goblin thief in the woods", count = 1,
-				enemies = ["goblin_thief"], pack = "story_goblin", at = {village = "Bramblebrook", offset = Vector3(-30, 0, 36)}},
+				say = "That mark... I've seen it before, on my grandmother's [b]necklace[/b].|A [enemy]goblin[/enemy] snatched it from my window last night! Its master camps across the forest, southwest of the city.|Bring it back, and I'll tell you everything I know."},
+			{id = "thief", kind = "kill", world = "campaign", text = "Defeat the Goblin Master's pack across the forest (%d/%d)", count = 6,
+				enemies = ["goblin_master", "goblin_thief", "goblin"], pack = "story_goblin", gather = true, at = Vector3(-225, 0, 115),
+				formation = {members = [{enemy = "goblin", min = 4, max = 4}, {enemy = "goblin_thief", min = 1, max = 1}],
+					leader = {enemy = "goblin_master", min_members = 0}, respawn_time = -1.0, activate_radius = 40.0}},
 			{id = "cave", kind = "dungeon", world = "campaign", dungeon = "goblins_cave", at = "death",
-				text = "The thief fled into a cave. Follow it down and defeat the Goblin King"},
+				text = "The pack guarded a cave. Follow it down and defeat the Goblin King"},
 			{id = "necklace", kind = "chest", world = "dungeon", text = "Take the necklace from the story chest", at = "death",
 				items = ["story_necklace"], until = "story_necklace"},
 			{id = "vote", kind = "vote", world = "campaign", item = "story_necklace", text = "Return to the realm with the necklace",
@@ -224,12 +419,12 @@ const LIST := {
 				say = "Pilgrims, with a map that burns in my hands. Hm.|The fourth edge lies beneath the mountain of fire, guarded by its [enemy]Warden[/enemy], and beyond it a forest that never stops burning.|First, prove you mean no harm: relight the three [b]oath-braziers[/b] the cultists put out."},
 			{id = "braziers", kind = "interact", world = "campaign", text = "Relight the oath-braziers around the Bastion (%d/%d)", verb = "Relight",
 				objects = [
-					{id = "brazier_1", name = "Cold oath-brazier", at = {stronghold = "Doom", offset = Vector3(-34, 0, 48)}, found = "The first brazier roars back to life."},
-					{id = "brazier_2", name = "Cold oath-brazier", at = {stronghold = "Doom", offset = Vector3(36, 0, 50)}, found = "The second brazier flares."},
-					{id = "brazier_3", name = "Cold oath-brazier", at = {stronghold = "Doom", offset = Vector3(2, 0, 76)}, found = "The third brazier burns, and the air goes still."},
+					{id = "brazier_1", name = "Cold oath-brazier", at = {stronghold = "Doom", offset = Vector3(-90, 0, 85)}, found = "The first brazier roars back to life."},
+					{id = "brazier_2", name = "Cold oath-brazier", at = {stronghold = "Doom", offset = Vector3(95, 0, 95)}, found = "The second brazier flares."},
+					{id = "brazier_3", name = "Cold oath-brazier", at = {stronghold = "Doom", offset = Vector3(5, 0, 165)}, found = "The third brazier burns, and the air goes still."},
 				]},
 			{id = "cult", kind = "kill", world = "campaign", text = "The cultists come back for their braziers: defeat them (%d/%d)", count = 6,
-				enemies = ["ember_mite", "cinder_beetle"], pack = "ash_cult", gather = true, at = {stronghold = "Doom", offset = Vector3(0, 0, 90)}},
+				enemies = ["ember_mite", "cinder_beetle"], pack = "ash_cult", gather = true, at = {stronghold = "Doom", offset = Vector3(0, 0, 180)}},
 			{id = "depths", kind = "dungeon", world = "campaign", dungeon = "cinder_depths", encore = "cinder_depths_encore", at = "death",
 				text = "Their leader's blood opened a way down: clear the Cinder Depths, then its burning Encore"},
 			{id = "piece", kind = "chest", world = "dungeon", text = "Take the fourth piece of the map from the ashes", at = "death",
@@ -250,7 +445,7 @@ const LIST := {
 		side = [],
 	},
 	drowned_choir = {
-		id = "drowned_choir", pack = "hidden_power", requires = "ember_oath", title = "The Drowned Choir", level = 20,
+		id = "drowned_choir", revision = 2, pack = "hidden_power", requires = "ember_oath", title = "The Drowned Choir", level = 20,
 		blurb = "Under the blue waters a choir still sings, and two seals hold it down: the Siren's pearl and the Cantor's bells. The fifth piece of the map sank with them.",
 		xp = 3400,
 		stars = [
@@ -265,7 +460,8 @@ const LIST := {
 			{id = "mirela", kind = "talk", npc = "mirela", world = "campaign", gather = true, text = "Find Mirela of the Tides by the Azure Crucible",
 				say = "Four pieces, and the fifth sank with the [place]Drowned Spire[/place]. I hear it every night.|Two seals hold the Spire down: the [enemy]Siren[/enemy]'s pearl in the grotto, and the [enemy]Cantor[/enemy]'s bells in the tower.|The tide-heralds guard the grotto's mouth. Break them, and the water will let you in."},
 			{id = "heralds", kind = "kill", world = "campaign", text = "Break the tide-heralds on the shore (%d/%d)", count = 5,
-				enemies = [], any = true, pack = "tide_heralds", gather = true, at = {stronghold = "Bluelay", offset = Vector3(-52, 0, 74)}},
+				enemies = [], any = true, pack = "tide_heralds", gather = true, at = {stronghold = "Bluelay", offset = Vector3(-100, 0, 120)},
+				formation = {members = [{enemy = "genie_blue", min = 2, max = 2}, {enemy = "tide_snail", min = 3, max = 3}], respawn_time = -1.0, activate_radius = 38.0}},
 			{id = "grotto", kind = "dungeon", world = "campaign", dungeon = "azure_grotto", at = "death",
 				text = "Dive into the Azure Grotto and silence the Abyssal Siren"},
 			{id = "pearl", kind = "chest", world = "dungeon", text = "Take the Siren's pearl", at = "death",
@@ -275,12 +471,12 @@ const LIST := {
 				say = "Hold it to your ear... can you hear them? The whole choir, still singing under the sea.|The second seal: ring the three [b]drowned bells[/b] along the shore. The [enemy]Spire Keeper[/enemy] will rise to stop you. Let him."},
 			{id = "bells", kind = "interact", world = "campaign", text = "Ring the drowned bells along the shore (%d/%d)", verb = "Ring",
 				objects = [
-					{id = "bell_1", look = "bell", name = "Drowned bell", at = {stronghold = "Bluelay", offset = Vector3(-40, 0, 40)}, found = "A low note rolls across the water."},
-					{id = "bell_2", look = "bell", name = "Drowned bell", at = {stronghold = "Bluelay", offset = Vector3(44, 0, 46)}, found = "The second bell answers the first."},
-					{id = "bell_3", look = "bell", name = "Drowned bell", at = {stronghold = "Bluelay", offset = Vector3(0, 0, 96)}, found = "The third bell rings... and something rings back from under the sea."},
+					{id = "bell_1", look = "bell", name = "Drowned bell", at = {stronghold = "Bluelay", offset = Vector3(-100, 0, 65)}, found = "A low note rolls across the water."},
+					{id = "bell_2", look = "bell", name = "Drowned bell", at = {stronghold = "Bluelay", offset = Vector3(105, 0, 80)}, found = "The second bell answers the first."},
+					{id = "bell_3", look = "bell", name = "Drowned bell", at = {stronghold = "Bluelay", offset = Vector3(0, 0, 180)}, found = "The third bell rings... and something rings back from under the sea."},
 				]},
 			{id = "keeper", kind = "kill", world = "campaign", text = "Defeat the Spire Keeper", count = 1,
-				enemies = ["spire_keeper"], pack = "spire_keeper", gather = true, gather_range = 30.0, at = {stronghold = "Bluelay", offset = Vector3(0, 0, 110)}},
+				enemies = ["spire_keeper"], pack = "spire_keeper", gather = true, gather_range = 30.0, at = {stronghold = "Bluelay", offset = Vector3(0, 0, 220)}},
 			{id = "spire", kind = "dungeon", world = "campaign", dungeon = "drowned_spire", at = "death",
 				text = "Descend the Drowned Spire and end the Drowned Cantor's song"},
 			{id = "piece", kind = "chest", world = "dungeon", text = "Take the fifth piece of the map", at = "death",
@@ -305,7 +501,7 @@ const LIST := {
 		],
 	},
 	hollow_hour = {
-		id = "hollow_hour", pack = "hidden_power", requires = "drowned_choir", title = "The Hollow Hour", level = 24,
+		id = "hollow_hour", revision = 2, pack = "hidden_power", requires = "drowned_choir", title = "The Hollow Hour", level = 24,
 		blurb = "The last piece of the map waits in the Deep Dark. Take a lamplighter's advice: don't listen to the stones, and don't turn around.",
 		xp = 5000,
 		stars = [
@@ -321,17 +517,18 @@ const LIST := {
 				say = "Shh. Keep your voices down. In here, they [b]listen[/b].|Before the throne will open, the stones must hear you. Four of them, out in the black. Put your ear to each.|Whatever they say... don't answer. And if you hear breathing behind you, don't turn around."},
 			{id = "stones", kind = "interact", world = "campaign", text = "Listen at the whispering stones in the dark (%d/%d)", verb = "Listen",
 				objects = [
-					{id = "stone_1", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(-60, 0, 30)},
+					{id = "stone_1", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(-105, 0, 65)},
 						found = "A voice, very close: [enemy]\"We know your name now.\"[/enemy]"},
-					{id = "stone_2", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(62, 0, 36)},
+					{id = "stone_2", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(110, 0, 70)},
 						found = "Something breathes behind you. [enemy]Don't turn around.[/enemy]"},
-					{id = "stone_3", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(-40, 0, 104)},
+					{id = "stone_3", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(-85, 0, 160)},
 						found = "The stone is warm. As if someone was just sitting against it."},
-					{id = "stone_4", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(46, 0, 110)},
+					{id = "stone_4", look = "stone", name = "Whispering stone", at = {stronghold = "The Deep Dark", offset = Vector3(90, 0, 180)},
 						found = "Silence. Then, from every direction at once: [enemy]\"Found you.\"[/enemy]"},
 				]},
 			{id = "ambush", kind = "kill", world = "campaign", text = "Survive the things that followed you (%d/%d)", count = 6,
-				enemies = [], any = true, pack = "dark_stalkers", gather = true, gather_range = 40.0, at = {stronghold = "The Deep Dark", offset = Vector3(0, 0, 80)}},
+				enemies = [], any = true, pack = "dark_stalkers", gather = true, gather_range = 40.0, at = {stronghold = "The Deep Dark", offset = Vector3(0, 0, 175)},
+				formation = {members = [{enemy = "gloam_bat", min = 3, max = 3}, {enemy = "bile_bandit", min = 3, max = 3}], respawn_time = -1.0, activate_radius = 40.0}},
 			{id = "wick_again", kind = "talk", npc = "wick", world = "campaign", shared = true, text = "Get back to Old Wick",
 				say = "They followed you. They always do.|The stones are satisfied. The throne's key lies in a chest by its gate, and the [enemy]Hollow Crown[/enemy] holds the last piece.|I'll keep the lamps lit for you. As long as I can."},
 			{id = "key", kind = "chest", world = "campaign", text = "Take the Hollow Throne's key from the chest by its gate",
@@ -484,16 +681,33 @@ static func unlocked(id: String, book: Dictionary) -> bool:
 ## (that mountain's top), {stronghold: biome name}, or a fixed Vector3
 ## (the Tavern). The nearest open, walkable spot; INF if unknown.
 static func resolve(at: Variant, world: GameWorld) -> Vector3:
+	# The open-spot search is costly and the answer never moves for a world:
+	# markers, the guide and portal badges ask several times a second.
+	if not is_instance_valid(world): return Vector3.INF
+	var key := "%d/%s" % [world.get_instance_id(), var_to_str(at)]
+	if _resolved.has(key): return _resolved[key]
+	var spot := _resolve(at, world)
+	if _resolved.size() > 4096: _resolved.clear()
+	_resolved[key] = spot
+	return spot
+
+
+static var _resolved := {}  # "world id/anchor" -> spot
+
+
+static func _resolve(at: Variant, world: GameWorld) -> Vector3:
 	if at is Vector3:
 		return open_spot(at, world) if world is IslandWorld else at
 	if not at is Dictionary or not world is IslandWorld:
 		return Vector3.INF
 	var island := world as IslandWorld
+	if at.has("astral"):
+		return island.astral_anchor(str(at.astral))
 	var want := Vector3.INF
 	if at.has("village"):
 		for v in island.generator.villages:
 			if v.display_name == str(at.village):
-				want = Vector3(v.center.x, 0, v.center.y)
+				return _town_spot(v, at.get("offset", Vector3.ZERO), island)
 	elif at.has("cabin") or at.has("summit"):
 		var spots := _mountain(island, str(at.get("cabin", at.get("summit", ""))))
 		want = spots[0] if at.has("cabin") else spots[1]
@@ -507,6 +721,40 @@ static func resolve(at: Variant, world: GameWorld) -> Vector3:
 		return Vector3.INF
 	want += at.get("offset", Vector3.ZERO)
 	return open_spot(want, island)
+
+
+## Keep social objectives in the town, close to their plaza/house offset.
+static func _town_spot(town: VillageFeature, offset: Vector3, island: IslandWorld) -> Vector3:
+	var center := Vector3(town.center.x + 0.5, 0, town.center.y + 0.5)
+	var want := center + offset
+	for ring in range(0, ceili(town.radius / 1.5)):
+		for k in maxi(1, ring * 6):
+			var angle := TAU * k / maxi(1, ring * 6)
+			var point := want + Vector3(cos(angle), 0, sin(angle)) * ring * 1.5
+			if Vector2(point.x - center.x, point.z - center.z).length() > town.radius - 3.0: continue
+			point.y = island.ground_height(point.x, point.z)
+			if spawn_clear(point, island): return point
+	push_error("No clear campaign position inside " + town.display_name)
+	return Vector3.INF
+
+
+## Combat sites reserve enough clear space beyond every town's safe perimeter.
+static func encounter_position(at: Variant, world: GameWorld) -> Vector3:
+	var center := resolve(at, world)
+	if not world is IslandWorld or center == Vector3.INF: return center
+	var island := world as IslandWorld
+	for ring in 65:
+		for k in maxi(1, ring * 6):
+			var angle := TAU * k / maxi(1, ring * 6)
+			var point := center + Vector3(cos(angle), 0, sin(angle)) * ring * 1.5
+			point.y = world.ground_height(point.x, point.z)
+			var safe := true
+			for village in island.generator.villages:
+				if Vector2(point.x, point.z).distance_to(Vector2(village.center)) < village.radius + IslandGenerator.TOWN_PACK_MARGIN + 24.0:
+					safe = false
+					break
+			if safe and spawn_clear(point, island): return point
+	return Vector3.INF
 
 
 ## Resolve against terrain and planned colliders, before streaming is available.
@@ -537,7 +785,7 @@ static var _spawn_obstacles := {}
 static func spawn_clear(p: Vector3, island: IslandWorld, radius := 0.6, height := 4.0) -> bool:
 	if not p.is_finite() or not island.is_walkable(p) or island.is_hazard(p): return false
 	if p.y < IslandGenerator.SEA_LEVEL + 1.0: return false
-	if not island.generator.enemy_spawn_clear(p, radius, height): return false
+	if not island.generator.enemy_spawn_clear(p, radius, height, true): return false
 	if radius > 3.0:
 		for offset in [Vector2(-radius, -radius), Vector2(radius, -radius), Vector2(-radius, radius), Vector2(radius, radius)]:
 			if absf(island.ground_height(p.x + offset.x, p.z + offset.y) - p.y) > 0.5: return false
@@ -553,6 +801,10 @@ static func spawn_clear(p: Vector3, island: IslandWorld, radius := 0.6, height :
 			var half := Vector3(absf(cos(yaw)) * size.x + absf(sin(yaw)) * size.z, size.y,
 				absf(sin(yaw)) * size.x + absf(cos(yaw)) * size.z) * 0.5
 			boxes.append(AABB(center - half, half * 2.0))
+		for tree: Dictionary in village.trees:
+			var prefab := ObstacleLibrary.get_prefab(tree.prefab)
+			for bounds: AABB in prefab.collision_boxes:
+				boxes.append(Transform3D(Basis(Vector3.UP, float(tree.yaw)), tree.pos) * bounds)
 	var chunk := Vector2i(floori(p.x / 32), floori(p.z / 32))
 	var key := "%d/%s" % [island.get_instance_id(), chunk]
 	if not _spawn_obstacles.has(key):
@@ -570,37 +822,53 @@ static func spawn_clear(p: Vector3, island: IslandWorld, radius := 0.6, height :
 static var _mountains := {}  # "world id/village" -> [cabin spot, summit]
 
 
-## The highest ground within reach of a village, and a flat spot at its foot
-## (on the village's side). Same on every machine: a fixed grid scan.
+## Use the generator's actual mountain, regardless of the town's distance.
+## Scan voxel columns so the chest sits on the highest clear summit column.
 static func _mountain(island: IslandWorld, village: String) -> Array:
 	var key := "%d/%s" % [island.get_instance_id(), village]
-	if _mountains.has(key):
-		return _mountains[key]
-	var home := Vector3.INF
-	for v in island.generator.villages:
-		if v.display_name == village:
-			home = Vector3(v.center.x, 0, v.center.y)
-	if home == Vector3.INF:
-		return [Vector3.INF, Vector3.INF]
-	var top := home
+	if _mountains.has(key): return _mountains[key]
+	var home := Vector2.INF
+	for town in island.generator.villages:
+		if town.display_name == village: home = Vector2(town.center)
+	if home == Vector2.INF: return [Vector3.INF, Vector3.INF]
+	var center := island.generator._mountain_center
+	var radius := island.generator._mountain_radius
+	var top := Vector3.INF
 	var best := -INF
-	for z in range(-120, 121, 4):
-		for x in range(-120, 121, 4):
-			var p := home + Vector3(x, 0, z)
-			var h := island.ground_height(p.x, p.z)
-			if h > best and island.is_walkable(p):
-				best = h
-				top = Vector3(p.x, h, p.z)
-	# Walk from the summit back toward the village until the ground is low and flat.
-	var foot := home
-	var steps := int(home.distance_to(Vector3(top.x, 0, top.z)))
-	for s in range(0, steps, 2):
-		var p := Vector3(top.x, 0, top.z).move_toward(home, s)
-		var h := island.ground_height(p.x, p.z)
-		var flat := absf(island.ground_height(p.x + 3, p.z) - h) + absf(island.ground_height(p.x, p.z + 3) - h) < 1.5
-		if flat and h < best - 8.0 and island.is_walkable(p) and not island.is_road(p):
-			foot = Vector3(p.x, h, p.z)
+	var nearest := INF
+	for z in range(floori(center.y - radius), ceili(center.y + radius) + 1):
+		for x in range(floori(center.x - radius), ceili(center.x + radius) + 1):
+			var horizontal := Vector2(x + 0.5, z + 0.5)
+			var distance := horizontal.distance_squared_to(center)
+			if distance > radius * radius: continue
+			var h := island.ground_height(horizontal.x, horizontal.y)
+			if h < best or (h == best and distance >= nearest): continue
+			var point := Vector3(horizontal.x, h, horizontal.y)
+			if not spawn_clear(point, island): continue
+			best = h
+			nearest = distance
+			top = point
+	# Search the lower mountain slopes toward the village for a clear, level
+	# cabin footprint. Both the cabin and Halvard use this same anchor.
+	var foot := Vector3.INF
+	var toward := (home - center).normalized()
+	for step in range(0, 25):
+		var distance := radius * (0.65 + step * 0.025)
+		for turn in range(0, 49):
+			var angle := deg_to_rad(5.0 * ceili(turn / 2.0) * (1 if turn % 2 == 1 else -1))
+			var horizontal := center + toward.rotated(angle) * distance
+			var point := Vector3(floorf(horizontal.x) + 0.5, 0, floorf(horizontal.y) + 0.5)
+			point.y = island.ground_height(point.x, point.z)
+			if point.y >= best - 12.0 or island.is_road(point): continue
+			if not spawn_clear(point, island, 3.3, 4.0): continue
+			var npc := point + Vector3(3, 0, 3)
+			npc.y = island.ground_height(npc.x, npc.z)
+			if not spawn_clear(npc, island): continue
+			foot = point
 			break
+		if foot != Vector3.INF: break
+	if top == Vector3.INF or foot == Vector3.INF:
+		push_error("Could not place mountain campaign landmarks for " + village)
 	_mountains[key] = [foot, top]
 	return _mountains[key]
 
@@ -615,7 +883,13 @@ static func npc_position(npc: String, realm: String, world: GameWorld) -> Vector
 
 
 ## A step's objective as the banner shows it ("... (2/3)").
-static func objective_text(step: Dictionary, count: int) -> String:
+static func objective_text(step: Dictionary, count: int, home_progress: Dictionary = {}, player_id := 0) -> String:
+	if step.get("kind", "") == "set_home" and not home_progress.is_empty():
+		var ready: Array = home_progress.get("ready", [])
+		var total := int(home_progress.get("total", 1))
+		if player_id in ready:
+			return "Wait for your party to set home in %s (%d/%d ready)" % [str(step.village), ready.size(), total]
+		return "%s (%d/%d ready)" % [str(step.get("text", "Set your home in " + str(step.village))), ready.size(), total]
 	var text := str(step.get("text", ""))
 	if not text.contains("%d"):
 		return text

@@ -36,6 +36,8 @@ func wire(portal: Dictionary) -> Dictionary:
 		remaining = -1.0 if portal.expires < 0.0 else maxf(0.0, portal.expires - Net.now())}
 
 func entered(p: Dictionary) -> void:
+	p.erase("dungeon_arrival")
+	if str(grants.get(p.player_id, "")) == p.realm: grants.erase(p.player_id)
 	var realm: RealmInstance = server.realms.get(p.realm)
 	if realm and realm.record.has("dungeon"):
 		server._to_peer(p.peer_id, ["dng+", {id = "spawn_exit", pos = realm.world.spawn_point + Vector3(0, 0, 4), dungeon = realm.record.dungeon, exit = true, remaining = -1.0}])
@@ -67,18 +69,25 @@ func interact(p: Dictionary, id: String) -> void:
 	var realm: RealmInstance = server.realms.get(p.realm)
 	if realm == null: return
 	var portal: Dictionary = portals.get(id, {})
+	if id=="theory_exit" and realm.world is TheoryWorld:
+		portal = {realm=p.realm,pos=TheoryLayout.ARENA+Vector3(0,3.3,-23),expires=-1.0,exit=true}
 	if id == "spawn_exit" and realm.record.has("dungeon"):
 		portal = {realm = p.realm, pos = realm.world.spawn_point + Vector3(0, 0, 4), expires = -1.0, exit = true}
 	if portal.is_empty() or portal.realm != p.realm: return
 	if portal.expires > 0.0 and Net.now() >= portal.expires: return
 	if (p.pos as Vector3).distance_to(portal.pos) > 4.5: return
 	if portal.exit:
-		var origin: String = realm.record.get("origin", "hall")
-		var back: Vector3 = realm.record.get("origin_pos", Vector3.INF)
-		if not server.realms.has(origin): origin = "hall"
+		var point: Dictionary = p.get("dungeon_returns", {}).get(p.realm, {
+			realm = realm.record.get("origin", "hall"), pos = realm.record.get("origin_pos", Vector3.INF)})
+		var origin := str(point.realm)
+		var back: Vector3 = point.pos
+		if not Campaigns.is_tavern(origin) and not server.realms.has(origin):
+			origin = "hall"
+			back = Vector3.INF
 		grants[p.player_id] = origin
-		# Back out where the portal opened.
-		server.social.send_to(p.player_id, origin, back if server.realms.has(origin) else Vector3.INF)
+		p.dungeon_arrival = {realm = origin, pos = back}
+		if p.has("dungeon_returns"): p.dungeon_returns.erase(p.realm)
+		server.social.send_to(p.player_id, origin, back)
 		return
 	if portal.instance == "" or not server.realms.has(portal.instance):
 		_serial += 1
@@ -94,6 +103,8 @@ func interact(p: Dictionary, id: String) -> void:
 	for player_id: int in members:
 		var other := server.social.record(player_id)
 		if other.is_empty() or not other.joined or other.realm != p.realm or other.dead or other.switching: continue
+		if not other.has("dungeon_returns"): other.dungeon_returns = {}
+		other.dungeon_returns[portal.instance] = {realm = other.realm, pos = other.pos}
 		grants[player_id] = portal.instance
 		if not party.is_empty(): server.social.system(player_id, line)
 		server.social.send_to(player_id, portal.instance)
@@ -101,7 +112,15 @@ func interact(p: Dictionary, id: String) -> void:
 func may_enter(p: Dictionary, destination: String) -> bool:
 	if str(grants.get(p.player_id, "")) != destination: return false
 	grants.erase(p.player_id)
-	return server.realms.has(destination)
+	return destination == "hall" or server.realms.has(destination)
+
+
+## A live dungeon keeps its origin (including parent dungeons) available.
+func keeps_origin_open(realm_id: String) -> bool:
+	for instance: RealmInstance in server.realms.values():
+		if instance.record.has("dungeon") and instance.record.get("origin", "") == realm_id:
+			return true
+	return false
 
 
 ## Only reached from NetServer's --test action; normal damage/phase handling stays intact.

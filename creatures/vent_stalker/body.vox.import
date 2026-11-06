@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://sdurcdeni34b"
+path="res://.godot/imported/body.vox-63193636646dd38fe9a22291e40f3f12.tscn"
+
+[deps]
+
+source_file="res://creatures/vent_stalker/body.vox"
+dest_files=["res://.godot/imported/body.vox-63193636646dd38fe9a22291e40f3f12.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

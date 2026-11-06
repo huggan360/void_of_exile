@@ -1,174 +1,401 @@
 {
   "voxel_size": 0.035,
   "parts": {
-    "knee_r": {
+    "cape_-2": {
       "frame_min": [
-        -16,
-        -48,
-        -32
+        -8,
+        -152,
+        0
       ],
       "frame_size": [
         32,
-        56,
-        48
-      ]
-    },
-    "knee_l": {
-      "frame_min": [
-        -16,
-        -48,
-        -32
-      ],
-      "frame_size": [
-        32,
-        56,
-        48
-      ]
-    },
-    "arm_l": {
-      "frame_min": [
-        -24,
-        -56,
-        -24
-      ],
-      "frame_size": [
-        48,
-        72,
-        48
-      ]
-    },
-    "leg_r": {
-      "frame_min": [
-        -16,
-        -40,
-        -24
-      ],
-      "frame_size": [
-        32,
-        48,
-        40
-      ]
-    },
-    "arm_r": {
-      "frame_min": [
-        -32,
-        -80,
-        -32
-      ],
-      "frame_size": [
-        64,
         152,
-        56
-      ]
-    },
-    "leg_l": {
-      "frame_min": [
-        -16,
-        -40,
-        -24
-      ],
-      "frame_size": [
-        32,
-        48,
-        40
+        32
       ]
     },
     "body": {
       "frame_min": [
-        -32,
+        -40,
         96,
-        -32
+        -40
       ],
       "frame_size": [
-        64,
-        160,
+        96,
+        112,
+        80
+      ],
+      "glow": true
+    },
+    "cape_4": {
+      "frame_min": [
+        -8,
+        -96,
+        0
+      ],
+      "frame_size": [
+        32,
+        96,
+        32
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        -24,
+        -96,
+        -40
+      ],
+      "frame_size": [
+        96,
+        152,
         64
       ],
       "glow": true
+    },
+    "cape_-4": {
+      "frame_min": [
+        -8,
+        -112,
+        0
+      ],
+      "frame_size": [
+        32,
+        112,
+        32
+      ]
+    },
+    "tabard_-1": {
+      "frame_min": [
+        -16,
+        -88,
+        -24
+      ],
+      "frame_size": [
+        32,
+        88,
+        24
+      ]
+    },
+    "tabard_1": {
+      "frame_min": [
+        -16,
+        -80,
+        -24
+      ],
+      "frame_size": [
+        32,
+        80,
+        24
+      ]
+    },
+    "jaw": {
+      "frame_min": [
+        -16,
+        -16,
+        -32
+      ],
+      "frame_size": [
+        32,
+        16,
+        24
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -32,
+        -16,
+        -56
+      ],
+      "frame_size": [
+        72,
+        80,
+        88
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -32,
+        -88,
+        -40
+      ],
+      "frame_size": [
+        64,
+        128,
+        64
+      ],
+      "glow": true
+    },
+    "leg_r": {
+      "frame_min": [
+        -16,
+        -56,
+        -32
+      ],
+      "frame_size": [
+        40,
+        72,
+        48
+      ]
+    },
+    "cape_2": {
+      "frame_min": [
+        -8,
+        -128,
+        0
+      ],
+      "frame_size": [
+        32,
+        128,
+        32
+      ]
+    },
+    "leg_l": {
+      "frame_min": [
+        -24,
+        -56,
+        -32
+      ],
+      "frame_size": [
+        40,
+        72,
+        48
+      ]
+    },
+    "knee_l": {
+      "frame_min": [
+        -16,
+        -64,
+        -32
+      ],
+      "frame_size": [
+        32,
+        72,
+        48
+      ]
+    },
+    "knee_r": {
+      "frame_min": [
+        -16,
+        -64,
+        -32
+      ],
+      "frame_size": [
+        32,
+        72,
+        48
+      ]
+    },
+    "cape_0": {
+      "frame_min": [
+        -8,
+        -136,
+        0
+      ],
+      "frame_size": [
+        32,
+        136,
+        32
+      ]
     }
   },
   "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        192,
+        0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        0,
+        -16
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
     "arm_l": {
       "part": "arm_l",
       "pivot": [
         -48,
-        168,
+        176,
         0
       ],
       "role": "arm",
       "phase": 1,
-      "yaw": 0
-    },
-    "leg_l": {
-      "part": "leg_l",
-      "pivot": [
-        -16,
-        96,
-        0
-      ],
-      "role": "leg",
-      "phase": -1,
-      "yaw": 0
-    },
-    "knee_l": {
-      "part": "knee_l",
-      "pivot": [
-        0,
-        -40,
-        0
-      ],
-      "role": "knee",
-      "phase": -1,
       "yaw": 0,
-      "parent_limb": "leg_l"
+      "throws": false
     },
     "arm_r": {
       "part": "arm_r",
       "pivot": [
         48,
-        168,
+        176,
         0
       ],
       "role": "arm",
       "phase": -1,
-      "yaw": 0
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l": {
+      "part": "leg_l",
+      "pivot": [
+        -16,
+        104,
+        0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "knee_l": {
+      "part": "knee_l",
+      "pivot": [
+        -8,
+        -40,
+        -8
+      ],
+      "role": "knee",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "leg_l"
     },
     "leg_r": {
       "part": "leg_r",
       "pivot": [
         16,
-        96,
+        104,
         0
       ],
       "role": "leg",
-      "phase": 1,
-      "yaw": 0
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
     },
     "knee_r": {
       "part": "knee_r",
       "pivot": [
-        0,
+        8,
         -40,
-        0
+        -8
       ],
       "role": "knee",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "leg_r"
+    },
+    "cape_-4": {
+      "part": "cape_-4",
+      "pivot": [
+        -32,
+        184,
+        24
+      ],
+      "role": "cape",
+      "phase": -1.0,
+      "yaw": 0,
+      "throws": false
+    },
+    "cape_-2": {
+      "part": "cape_-2",
+      "pivot": [
+        -16,
+        184,
+        24
+      ],
+      "role": "cape",
+      "phase": -0.5,
+      "yaw": 0,
+      "throws": false
+    },
+    "cape_0": {
+      "part": "cape_0",
+      "pivot": [
+        0,
+        184,
+        24
+      ],
+      "role": "cape",
+      "phase": 0.3,
+      "yaw": 0,
+      "throws": false
+    },
+    "cape_2": {
+      "part": "cape_2",
+      "pivot": [
+        16,
+        184,
+        24
+      ],
+      "role": "cape",
+      "phase": 0.5,
+      "yaw": 0,
+      "throws": false
+    },
+    "cape_4": {
+      "part": "cape_4",
+      "pivot": [
+        32,
+        184,
+        24
+      ],
+      "role": "cape",
+      "phase": 1.0,
+      "yaw": 0,
+      "throws": false
+    },
+    "tabard_-1": {
+      "part": "tabard_-1",
+      "pivot": [
+        -24,
+        112,
+        -16
+      ],
+      "role": "cloth",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "tabard_1": {
+      "part": "tabard_1",
+      "pivot": [
+        24,
+        112,
+        -16
+      ],
+      "role": "cloth",
       "phase": 1,
       "yaw": 0,
-      "parent_limb": "leg_r"
+      "throws": false
     }
   },
   "variants": {},
   "hand": [
-    56,
-    112,
+    40,
+    -56,
     -24
   ],
   "hover": 0,
-  "bob": 0,
+  "bob": 0.0,
   "waddle": 0,
   "flap_rate": 1.4,
   "pixel_art": true,
   "material_jitter": 0.0,
-  "glow_strength": 1.1,
-  "animation_style": "knight"
+  "glow_strength": 1.25,
+  "animation_style": "death_knight",
+  "hand_limb": "arm_r"
 }

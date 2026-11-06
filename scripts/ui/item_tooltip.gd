@@ -14,11 +14,11 @@ func _ready() -> void:
 	_text.bbcode_enabled = true
 	_text.fit_content = true
 	_text.scroll_active = false
-	_text.custom_minimum_size = Vector2(300, 0)
+	_text.custom_minimum_size = Vector2(360, 0)
 	_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_text.add_theme_font_size_override("normal_font_size", UIStyle.SIZE_NORMAL)
 	_text.add_theme_font_size_override("italics_font_size", UIStyle.SIZE_SMALL)
-	_text.add_theme_font_size_override("bold_font_size", UIStyle.SIZE_LARGE)
+	_text.add_theme_font_size_override("bold_font_size", UIStyle.SIZE_NORMAL)
 	_text.add_theme_constant_override("line_separation", 4)
 	add_child(_text)
 	hide()
@@ -28,79 +28,77 @@ func show_item(item: Item) -> void:
 	if item == null:
 		hide()
 		return
-	var good := UIStyle.GOOD.to_html(false)
-	var bad := UIStyle.HP_LIGHT.to_html(false)
+	add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.grade_color(item)))
 	var lines := PackedStringArray()
-	lines.append("[b][color=#%s]%s[/color][/b]" % [UIStyle.grade_color(item).to_html(false), item.item_name])
-	if item.is_consumable():
-		lines.append("[color=#%s]%s  ·  [/color][color=#%s]Consumable[/color]" % [
-				UIStyle.TEXT_DIM.to_html(false), item.kind, UIStyle.ACCENT.to_html(false)])
-	else:
-		lines.append("[color=#%s]%s  ·  %s[/color]" % [UIStyle.TEXT_DIM.to_html(false), item.kind, item.grade_name()])
-	var class_id := stats.class_id if stats else "archer"
-	if not item.is_consumable() and not item.usable_by(class_id):
-		lines.append("[color=#%s]Cannot be equipped by %s[/color]" % [bad, PlayerClasses.display_name(class_id)])
+	lines.append("[font_size=24][b]%s[/b][/font_size]" % TextMarkup.color(item.item_name, UIStyle.grade_color(item)))
+	lines.append(TextMarkup.color(item.grade_name(), UIStyle.DIVINE_COLOR if item.is_divine() else UIStyle.TEXT_DIM)
+		+ TextMarkup.color("  -  " + item.kind, UIStyle.TEXT_DIM))
+	var numbers := PackedStringArray()
 	if item.is_weapon():
-		lines.append("[b]Primary attack[/b] · Left click")
-		lines.append("Base damage  [b]%d–%d[/b]" % [item.damage_min, item.damage_max])
-		lines.append("Projectiles: %d" % item.shots)
+		numbers.append(TextMarkup.key_value("Damage", "%d–%d" % [item.damage_min, item.damage_max], UIStyle.DAMAGE))
+		var shares := PackedStringArray()
 		for i in item.shots:
-			lines.append("Projectile %d: %s%%" % [i + 1, String.num(item.shot_share(i) * 100.0, 1)])
-		if item.shots > 1: lines.append("[font_size=16]Listed left to right; shares use base damage.[/font_size]")
-		if item.kind == "Wand" and item.shots == 2: lines.append("Mirrored waves, traveling in the aimed direction")
-		if item.kind == "Trident": lines.append("Tridents stick into walls and terrain")
-		lines.append_array(_effect_lines(item.primary_effects))
-		if item.fire_rate != 1.0: lines.append("Rate of fire  %d%%" % int(item.fire_rate * 100))
-		lines.append("[b]Secondary attack[/b] · Hold right click")
-		if item.charge.is_empty():
-			lines.append("No charged ability")
-		else:
-			var charge: Dictionary = item.charge
+			shares.append("%s%%" % String.num(item.shot_share(i) * 100.0, 1))
+		numbers.append(TextMarkup.key_value("Shots", "%d - %s" % [item.shots, " / ".join(shares)], UIStyle.PROJECTILE))
+		numbers.append(TextMarkup.key_value("Fire rate", "%s%% base" % String.num(item.fire_rate * 100.0, 0), UIStyle.PROJECTILE))
+		numbers.append(TextMarkup.key_value("Range / speed", "%s m / %s m/s" % [
+			String.num(item.projectile_range(), 1),
+			String.num(float(item.projectile.get("speed", 24.0)), 1)], UIStyle.PROJECTILE))
+		numbers.append(TextMarkup.key_value("Piercing", "Yes" if item.projectile.get("pierce", false) else "No", UIStyle.PROJECTILE))
+		if item.windup > 0.0:
+			numbers.append(TextMarkup.key_value("Windup", "%.2f s" % item.windup, UIStyle.PROJECTILE))
+		if not item.charge.is_empty():
+			var charge := item.charge
+			numbers.append(TextMarkup.key_value("Charged shot", "%s - ×%.1f damage" % [
+				str(charge.get("name", str(charge.get("style", "power")).capitalize())), float(charge.get("mult", 2.0))], UIStyle.PROJECTILE))
+			numbers.append(TextMarkup.key_value("Hold right click", "1 s to full charge", UIStyle.PROJECTILE))
 			var style := str(charge.get("style", "power"))
-			lines.append(str(charge.get("name", style.capitalize())))
-			lines.append("Charge 1s · 100%% charge: ×%.1f damage" % float(charge.get("mult", 2.0)))
-			if style == "arcane":
-				lines.append("8° growing magic shot with spiraling particles")
-				lines.append("Projectiles: 1 · 100% base damage before charge")
-			elif style in ["stream", "burst"]:
-				var count := int(charge.get("count", 6))
-				lines.append("%d %s · %.1f%% base damage each before charge" % [count,
-					"voxel stream pulses" if style == "stream" else "rapid shots", 100.0 / count])
-			else:
-				var count: int = int(charge.get("count", 7)) if style == "volley" else 2 if style == "helix" else 1 if style in ["inferno", "singularity"] else item.shots
-				lines.append("Projectiles: %d" % count)
-				for i in count:
-					lines.append("Projectile %d: %s%% before charge" % [i + 1, String.num(item.shot_share(i, count) * 100.0, 1)])
-			lines.append_array(_effect_lines(item.secondary_effects))
+			var count := int(charge.get("count", 7 if style == "volley" else 6)) if style in ["volley", "stream", "burst", "serpent_fan"] else 2 if style == "helix" else 1 if style in ["arcane", "inferno", "singularity"] else item.shots
+			numbers.append(TextMarkup.key_value("Charged shots", "%d%s" % [count, " - equal shares" if style in ["stream", "burst", "helix", "serpent_fan"] else ""], UIStyle.PROJECTILE))
 	if not item.ring.is_empty():
-		lines.append("[b]Spell attack[/b] · Double-tap Space")
-		var multiplier := stats.spell_multiplier(item) if stats else 1.0
-		var peak := roundi(item.ring.damage * multiplier)
-		lines.append("Warp ring  [b]%d–%d damage per pulse[/b]" % [roundi(peak * MagicRing.MIN_DAMAGE_SHARE), peak])
-		lines.append("%d MP · %d m · %d pulse(s) · %.1f s cooldown" % [item.ring.cost, item.ring.range,
-			item.ring.get("pulses", 1), item.ring.get("cooldown", 0.6)])
-		lines.append("Damage scales with Magic; range falloff and enemy defence apply")
-		lines.append_array(_effect_lines(item.secondary_effects))
-	for stat in item.bonuses:
-		var v: int = item.bonuses[stat]
-		lines.append("[color=#%s]%+d %s[/color]" % [good if v >= 0 else bad, v, PlayerStats.STAT_NAMES.get(stat, stat)])
-	for line in item.abilities:
-		lines.append("[color=#%s]· %s[/color]" % [UIStyle.ACCENT.to_html(false), line])
-	if item.lore != "":
-		lines.append("[i][color=#%s]%s[/color][/i]" % [Color(0.75, 0.7, 0.9).to_html(false), item.lore])
-	_text.clear()
-	for i in lines.size():
-		if i > 0: _text.append_text("\n")
-		var line := lines[i]
-		if line.begins_with("@effect|"):
-			var fields := line.split("|")
-			var effect := {id=fields[1], amount=float(fields[3])}
-			var badge := BuffArt.badge(effect)
-			if badge: _text.add_image(badge, 20, 20)
-			var title: String = {"static":"Frozen", "speed":"Slowed"}.get(fields[1], StatusEffects.NAMES.get(fields[1], fields[1]))
-			_text.append_text(" %s %.1fs" % [title, float(fields[2])])
-		else:
-			_text.append_text(line)
+		var peak := roundi(item.ring.damage * (stats.spell_multiplier(item) if stats else 1.0))
+		numbers.append(TextMarkup.key_value("Warp ring", "%d–%d damage / pulse" % [roundi(peak * MagicRing.MIN_DAMAGE_SHARE), peak]))
+		numbers.append(TextMarkup.key_value("Cost / range", "%d MP / %s m" % [item.ring.cost, item.ring.range], UIStyle.MP))
+		numbers.append(TextMarkup.key_value("Pulses / cooldown", "%d / %.1f s" % [item.ring.get("pulses", 1), item.ring.get("cooldown", 0.6)], UIStyle.PROJECTILE))
+	var bonuses := PackedStringArray()
+	for stat: String in item.bonuses:
+		bonuses.append("[b]%s[/b]" % UIStyle.stat_text(stat, int(item.bonuses[stat])))
+	for start in range(0, bonuses.size(), 3):
+		numbers.append("  -  ".join(bonuses.slice(start, start + 3)))
+	var use := item.consumable
+	for stat: String in ["hp", "mp"]:
+		if use.has(stat):
+			numbers.append(TextMarkup.key_value("Restore", "+%d %s" % [use[stat], UIStyle.stat_name(stat)], UIStyle.stat_color(stat)))
+	if use.has("stat"):
+		numbers.append("[b]Permanent[/b]  " + UIStyle.stat_text(str(use.stat), int(use.amount)))
+	if use.has("backpack"):
+		numbers.append(TextMarkup.key_value("Capacity", "+2 backpack rows", UIStyle.GOOD))
+	lines.append_array(numbers)
+	var abilities := PackedStringArray()
+	abilities.append_array(_effect_lines(item.primary_effects, "On hit"))
+	abilities.append_array(_effect_lines(item.secondary_effects, "Charged" if item.is_weapon() else "Warp ring"))
+	if not item.ring.is_empty():
+		abilities.append("- Double-tap Space: cast ring; scales with MAG")
+	for ability: String in item.abilities:
+		if ability.begins_with("Hold right click:") or ability.begins_with("Double-tap Space:"):
+			continue
+		if item.is_consumable() and (ability.begins_with("Restores ") or ability.begins_with("+") or "backpack rows" in ability):
+			continue
+		var short := ability.replace("Double-click or quickslot (F / G) to drink", "Use: double-click or quickslot").replace("Double-click to strap it on: ", "Use: ").replace(" for good, on this character", " permanently")
+		abilities.append("- " + TextMarkup.escape(short))
+	if item.soulbound():
+		abilities.append("[b]%s[/b]" % TextMarkup.color("Soulbound", UIStyle.SOULBOUND))
+	if stats and not item.is_consumable() and not item.usable_by(stats.class_id):
+		abilities.append(TextMarkup.color("Cannot equip - " + PlayerClasses.display_name(stats.class_id), UIStyle.BAD))
+	if not abilities.is_empty():
+		lines.append("")
+		lines.append_array(abilities)
+	if item.lore != "" and numbers.size() + abilities.size() <= 12:
+		var lore := item.lore.replace("\n", " ")
+		if lore.length() > 110:
+			lore = lore.left(107).rsplit(" ", true, 1)[0] + "…"
+		lines.append("\n[i]%s[/i]" % TextMarkup.color(lore, UIStyle.TEXT_DIM))
+	_text.text = "\n".join(lines)
 	reset_size()
 	show()
 
@@ -117,11 +115,12 @@ func _process(_delta: float) -> void:
 	global_position = pos
 
 
-func _effect_lines(effects: Array[Dictionary]) -> PackedStringArray:
+func _effect_lines(effects: Array[Dictionary], source: String) -> PackedStringArray:
 	var lines := PackedStringArray()
 	for effect in effects:
-		lines.append("@effect|%s|%s|%s" % [StatusEffects.canonical(str(effect.id)),
-			effect.get("duration", 0), effect.get("amount", 1)])
+		var id := StatusEffects.canonical(str(effect.id))
+		var title: String = {"static": "Frozen", "speed": "Slowed"}.get(id, StatusEffects.NAMES.get(id, id))
+		lines.append("- " + TextMarkup.key_value(source, "%s - %.1f s" % [title, float(effect.get("duration", 0))], UIStyle.EFFECT))
 	if effects.any(func(e: Dictionary) -> bool: return StatusEffects.canonical(str(e.id)) in ["static", "quiet"]):
-		lines.append("[font_size=14]Boss control: up to 0.8s, with a 4s recovery.[/font_size]")
+		lines.append(TextMarkup.color("  Boss control: ≤0.8 s; 4 s recovery", UIStyle.TEXT_DIM))
 	return lines

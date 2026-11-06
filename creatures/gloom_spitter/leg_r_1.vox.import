@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dn5cktgg2jjso"
+path="res://.godot/imported/leg_r_1.vox-6922fbcf7f1ee06e57829d1021a27bd6.tscn"
+
+[deps]
+
+source_file="res://creatures/gloom_spitter/leg_r_1.vox"
+dest_files=["res://.godot/imported/leg_r_1.vox-6922fbcf7f1ee06e57829d1021a27bd6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

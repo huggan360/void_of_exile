@@ -92,6 +92,12 @@ func _nearest_distance(pos: Vector3) -> float:
 
 
 func _process(delta: float) -> void:
+	if not FrameTrace.enabled: _profile_process(delta); return
+	var started := Time.get_ticks_usec()
+	_profile_process(delta)
+	FrameTrace.record("enemies/enemy_director",started)
+
+func _profile_process(delta: float) -> void:
 	if remote or players.all(func(p: Variant) -> bool: return not is_instance_valid(p) or p.frozen):
 		return
 	_timer -= delta
@@ -106,7 +112,7 @@ func _process(delta: float) -> void:
 		var memory: Dictionary = _memory.get(id, {})
 		if memory.get("back_at", 0) == -1 or now < memory.get("back_at", 0):
 			continue  # wiped out (for now, or for good)
-		var reach: float = Enemies.pack(site.pack).activate_radius
+		var reach: float = _site_definition(site).activate_radius
 		if _nearest_distance(site.pos) < reach:
 			_wake(site, memory.get("survivors", null))
 	for id in _awake.keys():
@@ -116,10 +122,15 @@ func _process(delta: float) -> void:
 			_sleep(pack)
 
 
+func _site_definition(site: Dictionary) -> Dictionary:
+	var formation: Dictionary = site.get("formation", {})
+	return Enemies.pack(site.pack) if formation.is_empty() else formation
+
+
 ## Spawns a pack: rolls its members from the site's seed (or brings back the
 ## survivors from last time).
 func _wake(site: Dictionary, survivors: Variant) -> void:
-	var def := Enemies.pack(site.pack)
+	var def := _site_definition(site)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = site.seed
 	var ids: Array = []
@@ -133,7 +144,7 @@ func _wake(site: Dictionary, survivors: Variant) -> void:
 				ids.append(m.enemy)
 		if def.has("leader") and ids.size() >= def.leader.min_members:
 			ids.push_front(def.leader.enemy)
-	if not banned.is_empty() and ids.any(func(id: String) -> bool: return id in banned):
+	if not str(site.id).begins_with("quest_") and not banned.is_empty() and ids.any(func(id: String) -> bool: return id in banned):
 		ids = ids.filter(func(id: String) -> bool: return not id in banned)
 		if ids.is_empty():  # not cleared: they may come back once allowed
 			_memory[site.id] = {survivors = null, back_at = Time.get_ticks_msec() + 15000}
@@ -143,7 +154,7 @@ func _wake(site: Dictionary, survivors: Variant) -> void:
 		return
 	var pack := EnemyPack.new()
 	pack.site = site
-	pack.respawn_time = -1.0 if _memory.get(site.id,{}).get("finite",false) else float(def.get("respawn_time",120.0))
+	pack.respawn_time = -1.0 if str(site.id).begins_with("quest_") or _memory.get(site.id,{}).get("finite",false) else float(def.get("respawn_time",120.0))
 	for id: String in ids:
 		if Enemies.get_def(id).is_god or Enemies.get_def(id) is BossDef:
 			pack.respawn_time = -1.0
@@ -275,7 +286,9 @@ func find_spawn_position(origin: Vector3, enemy_def: EnemyDef, reserved: Array =
 		for i in (1 if ring == 0.0 else 16):
 			var angle := TAU * i / 16.0
 			var candidate := origin + Vector3(cos(angle), 0, sin(angle)) * ring
-			candidate.y = world.ground_height(candidate.x, candidate.z)
+			candidate.y = world.enemy_floor(candidate) if world.has_method("enemy_floor") else world.ground_height(candidate.x, candidate.z)
+			if campaign_site and Vector2(candidate.x - home.x, candidate.z - home.z).length() > 20.0:
+				continue
 			if world is IslandWorld and (world as IslandWorld).generator._near_town(Vector2(candidate.x,candidate.z)):
 				continue
 			if world.biome_at(candidate).id != biome_id or not world.enemy_spawn_clear(candidate, radius, height):

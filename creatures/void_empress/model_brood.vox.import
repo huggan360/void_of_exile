@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dht25uh7h3a0l"
+path="res://.godot/imported/model_brood.vox-456df03e0c269ba225746f17bc873ad3.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/model_brood.vox"
+dest_files=["res://.godot/imported/model_brood.vox-456df03e0c269ba225746f17bc873ad3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

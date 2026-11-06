@@ -195,7 +195,8 @@ func _disc_wheel() -> void:
 		hazards.lane(global_position + dir * 3.5, dir, 5.0, 1.0, 0.75, 0.0, Vector2i.ZERO, 0.0, WARN)
 	after(0.75, func() -> void:
 		var attack := Boss.shot("disc", GOLD, Vector2i(85, 100), DISC_SPEED, 0.45, TAU * DISC_SPEED / DISC_TURN * 0.92,
-				{size = 1.6, turn = turn, pierce_players = true, pierce_shields = true, armor_piercing = true})
+				{size = 1.6, turn = turn, pierce_players = true, pierce_shields = true, armor_piercing = true,
+					effects = [{id = "dexterity", amount = -10, duration = 2.0}], effect_source = "Scarab Regent heavy disc"})
 		for k in 8:
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, spin + k * TAU / 8.0), attack))
 

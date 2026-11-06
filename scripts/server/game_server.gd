@@ -48,11 +48,10 @@ var HP_REGEN := 1.5  # per second, once you haven't been hurt for a while
 var HP_REGEN_DELAY := 4.0
 var MP_REGEN := 7.0
 var MP_REGEN_DELAY := 0.8
-var SHIELD_DRAIN := 16.0  # magic per second while the shield is up
+var SHIELD_DRAIN := 16.0  # MP per second while the shield is up
 var SHIELD_MIN_MP := 5.0  # needed to raise it
-var SHIELD_DAMAGE_TAKEN := 0.4  # share of a normal hit that still gets through the shield
 var RING_COOLDOWN := 0.6
-const BAG_REACH := 1.5  # how far from a bag you can still use it (a little slack for lag)
+const BAG_REACH := 2.0  # includes room for a 20 Hz position update to trail the bag UI
 var BAG_LIFETIME := 90.0
 var PERSONAL_BAG_LIFETIME := 180.0
 var XP_PER_ORB := 3
@@ -78,6 +77,7 @@ var _orbs := {}
 ## realm id -> func(origin: Vector3, taken: Array) -> Vector3: where a bag fits
 ## (the server's view of that world's ground, walls and obstacles).
 var _spot_finders := {}
+var _environments := {}  # realm id -> weak GameWorld reference
 var _rng := RandomNumberGenerator.new()
 
 
@@ -94,7 +94,8 @@ func _physics_process(delta: float) -> void:
 		for p: Dictionary in _players.values():
 			(p.stats as PlayerStats).buffs.tick()
 		return  # vitals, bag and orb lifetimes are the server's
-	for id in _players:
+	for id in _players.keys():
+		if not _players.has(id): continue
 		_tick_vitals(_players[id], delta)
 	var now := _now()
 	for bag_id in _bags.keys():
@@ -128,6 +129,27 @@ func add_player(stats: PlayerStats) -> int:
 
 
 var _intro_locks := {}
+var _interaction_locks := {}
+
+## Short renewable protection leases cover local and party interactions.
+func set_interaction_protection(player_id: int, active: bool) -> void:
+	var stats := character(player_id)
+	if stats == null: return
+	if Net.is_client() and is_instance_valid(Net.client): Net.client.send_action("interaction", [active])
+	if not active:
+		_interaction_locks.erase(player_id)
+		stats.buffs.remove("invincible", "interaction")
+		stats.buffs.remove("immune", "interaction")
+		return
+	if stats.hp <= 0: return
+	_players[player_id].shield = false
+	_interaction_locks[player_id] = {realm = player_realm(player_id), pos = player_position(player_id), until = _now() + 2500}
+	stats.buffs.add("invincible", 2.5, 1, "interaction")
+	stats.buffs.add("immune", 2.5, 1, "interaction")
+
+func interacting(player_id: int) -> bool:
+	var entry: Dictionary = _interaction_locks.get(player_id, {})
+	return not entry.is_empty() and entry.realm == player_realm(player_id) and _now() < int(entry.until)
 
 ## One authoritative safety window for every player admitted to a boss intro.
 func begin_boss_intro(encounter: int, realm: String, ids: Array, duration: float) -> Array:
@@ -157,6 +179,7 @@ func cancel_boss_intro(encounter: int) -> void:
 
 
 func remove_player(player_id: int) -> void:
+	_interaction_locks.erase(player_id)
 	_intro_locks.erase(player_id)
 	_players.erase(player_id)
 
@@ -167,6 +190,9 @@ func revive(player_id: int) -> void:
 		var p: Dictionary = _players[player_id]
 		p.shield = false
 		(p.stats as PlayerStats).buffs.clear()
+		p.stats.hp = p.stats.max_hp
+		p.stats.mp = p.stats.max_mp
+		p.stats.changed.emit()
 		p.since_hurt = 99.0
 		p.since_magic = 99.0
 		p.ring_ready = 0
@@ -201,9 +227,22 @@ func give_demo_kit(stats: PlayerStats) -> void:
 func character(player_id: int) -> PlayerStats:
 	return _players[player_id].stats if _players.has(player_id) else null
 
+func set_environment(world: GameWorld) -> void:
+	_environments[world.realm_id] = weakref(world)
+
+func environment(realm_id: String) -> GameWorld:
+	var reference: WeakRef = _environments.get(realm_id)
+	return reference.get_ref() as GameWorld if reference != null else null
+
+func last_damage_source(player_id: int) -> String:
+	return str(_players.get(player_id,{}).get("damage_source",""))
+
 
 ## Where a player is (clients send this as they move).
 func report_position(player_id: int, realm_id: String, pos: Vector3) -> void:
+	var interaction: Dictionary = _interaction_locks.get(player_id, {})
+	if not interaction.is_empty() and interaction.realm != realm_id:
+		set_interaction_protection(player_id, false)
 	if Net.is_client():
 		Net.client.send_position(pos)
 	if _players.has(player_id):
@@ -214,25 +253,30 @@ func report_position(player_id: int, realm_id: String, pos: Vector3) -> void:
 ## A player goes to another place. Returns that realm's record ({} for the
 ## Tavern).
 func enter_realm(player_id: int, realm_id: String) -> Dictionary:
+	set_interaction_protection(player_id, false)
 	_intro_locks.erase(player_id)
 	grant_arrival_protection(player_id)
 	if _players.has(player_id):
 		_players[player_id].realm = realm_id
-	return {} if realm_id == "hall" or Dungeons.is_dungeon(realm_id) else WorldServer.get_or_create_realm(realm_id)
+	if SpaceWorld.is_space(realm_id): return {id = realm_id, seed = 0, destroyed = [], space = true}
+	return {} if realm_id == "hall" or Dungeons.is_dungeon(realm_id) or ChambersWorld.is_chambers(realm_id) \
+			else WorldServer.get_or_create_realm(realm_id)
 
 
 ## A hit on a player (detected by their client). shielded: their warp shield
-## was up, which soaks most of a normal hit. Returns {landed, soaked}.
-func hit_player(player_id: int, amount: float, armor_piercing := false, shielded := false) -> Dictionary:
+## was up. Shield reduction applies to raw damage, then Defence mitigates
+## the remainder. Returns {landed, soaked}, with soaked before Defence.
+func hit_player(player_id: int, amount: float, armor_piercing := false, shielded := false, cause := "") -> Dictionary:
 	var p: Dictionary = _players.get(player_id, {})
 	if p.is_empty():
 		return {landed = 0.0, soaked = 0.0}
 	var stats: PlayerStats = p.stats
 	if debug_godmode or intro_protected(player_id) or stats.buffs.has_effect("invincible"):
 		amount = 0.0
-	var landed := stats.mitigate(amount, armor_piercing) if amount > 0.0 else 0.0
-	var soaked := landed * (1.0 - SHIELD_DAMAGE_TAKEN) if shielded and p.shield else 0.0
-	landed -= soaked
+	var after_shield := amount * stats.shield_damage_multiplier() if shielded and p.shield else amount
+	var soaked := amount-after_shield
+	var landed := stats.mitigate(after_shield, armor_piercing) if after_shield>0.0 else 0.0
+	if landed>0.0: p.damage_source = cause
 	stats.hp = maxf(0.0, stats.hp - landed)
 	p.since_hurt = 0.0
 	stats.damaged.emit(int(round(landed)))
@@ -292,7 +336,19 @@ func report_hit_landed(player_id: int) -> void:
 ## some gear heals while it's up).
 func _tick_vitals(p: Dictionary, delta: float) -> void:
 	var stats: PlayerStats = p.stats
+	if stats.hp<=0.0: return
+	p.environment_timer = float(p.get("environment_timer",0.0))-delta
+	if p.environment_timer<=0.0:
+		p.environment_timer = 0.15
+		var world := environment(str(p.realm))
+		if is_instance_valid(world): world.update_burning_contact(stats.buffs,p.pos)
+	var burn := stats.buffs.burning_damage(delta)
 	stats.buffs.tick()
+	if burn>0:
+		var before := stats.hp
+		var result := hit_player(stats.player_id,burn,true,false,"Burning")
+		# Offline death resets this same stats object; stop processing the old life.
+		if float(result.landed)>=before: return
 	p.since_hurt += delta
 	if p.since_hurt > HP_REGEN_DELAY or (stats.buffs.has_effect("regeneration") and stats.buffs.multiplier("regeneration")>=1.0):
 		stats.hp = minf(stats.max_hp, stats.hp + HP_REGEN * stats.buffs.multiplier("regeneration") * delta)
@@ -373,14 +429,19 @@ func request_use(player_id: int, place: Dictionary) -> bool:
 	return stats.use(place)
 
 
-## The steward of a realm town makes it the character's home.
+## A steward changes the account's realm spawn town (persisted by NetServer).
 func request_set_home(player_id: int, village: String) -> void:
 	if Net.is_client():
 		Net.client.send_action("home", [village])
 	var stats := character(player_id)
 	if stats and village.length() < 40:
-		stats.home = village
-		stats.changed.emit()
+		if not Net.is_online():
+			for entry: Dictionary in _players.values():
+				entry.stats.home = village
+				entry.stats.changed.emit()
+		else:
+			stats.home = village
+			stats.changed.emit()
 
 
 ## Throws an item out of the inventory: into the bag you're standing on if
@@ -467,16 +528,36 @@ func spawn_bag(realm_id: String, items: Array, origin: Vector3, viewer := PUBLIC
 	var finder: Callable = _spot_finders.get(realm_id, Callable())
 	var pos: Vector3 = finder.call(origin, taken) if finder.is_valid() else origin
 	var contents := items.duplicate()
-	contents.resize(LootBag.SLOTS)
+	contents.resize(maxi(LootBag.SLOTS, ceili(float(contents.size()) / LootBag.SLOTS) * LootBag.SLOTS))
 	var t := bag_type if bag_type != "" else LootBag.type_for(items)
 	var record := {
 		id = _new_id(), realm = realm_id, type = t, viewer = viewer, items = contents, pos = pos, opened = false,
 		# Story chests wait until they're emptied.
-		expires = 1 << 62 if t == "story" else _now() + int((PERSONAL_BAG_LIFETIME if LootBag.is_personal(t) else BAG_LIFETIME) * 1000.0),
+		expires = 1 << 62 if t == "story" else _now() + int((PERSONAL_BAG_LIFETIME if viewer != PUBLIC else BAG_LIFETIME) * 1000.0),
 	}
 	_bags[record.id] = record
 	bag_added.emit(record)
 	return record.id
+
+
+## A bag at an exact spot that never expires (a Chambers vault chest).
+## extra: more fields for the record (yaw, label, vault_of...).
+func spawn_fixed_bag(realm_id: String, items: Array, pos: Vector3, viewer: int, bag_type: String, extra := {}) -> int:
+	if Net.is_client():
+		return 0
+	var contents := items.duplicate()
+	contents.resize(LootBag.SLOTS)
+	var record := {id = _new_id(), realm = realm_id, type = bag_type, viewer = viewer, items = contents, pos = pos,
+		opened = false, expires = 1 << 62}
+	record.merge(extra)
+	_bags[record.id] = record
+	bag_added.emit(record)
+	return record.id
+
+
+func remove_bag(bag_id: int) -> void:
+	if _bags.has(bag_id):
+		_remove_bag(bag_id)
 
 
 func _remove_bag(bag_id: int) -> void:
@@ -518,7 +599,7 @@ func enemy_killed(realm_id: String, def: EnemyDef, pos: Vector3, damage_by: Dict
 		if stats:
 			modifiers[pid] = {chance=stats.buffs.probability("loot_chance"),tier=stats.buffs.probability("loot_tier")}
 	for drop in Loot.roll(def, damage_by, _rng, biome_stat, max_hp, modifiers):
-		spawn_bag(realm_id, drop.items, pos, drop.viewer)
+		spawn_bag(realm_id, drop.items, pos, drop.viewer, str(drop.get("type", "")))
 	if def is BossDef:
 		for id in _players:
 			var p: Dictionary = _players[id]
@@ -631,6 +712,9 @@ func apply_buff(player_id: int, effect: String, duration: Variant, amount: Varia
 	if Net.is_client(): return false
 	var stats := character(player_id)
 	if stats == null or stats.hp<=0.0 or intro_protected(player_id): return false
+	if StatusEffects.canonical(effect) == "burning":
+		var world := environment(player_realm(player_id))
+		if is_instance_valid(world) and world.is_water(_players[player_id].pos): return false
 	return stats.buffs.add(effect,duration,amount,source)
 
 func remove_buff(player_id: int, effect: String, source := "") -> void:

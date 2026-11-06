@@ -10,6 +10,7 @@ const PX := PixelArt.SCALE
 const SECTION_W := 6  # art pixels per section (inside the outline)
 const GAP := 1
 const VALUE_BOX := 30  # art pixels for the "87/100" box at the end
+const RAIL_PAD := 1  # art pixels of stone rail around the sockets
 
 var color := UIStyle.HP
 var light := UIStyle.HP_LIGHT
@@ -25,6 +26,8 @@ var _ghost := 100.0
 var _shine := -1.0
 var _shine_timer := 0.0
 var _label := Label.new()
+var _value_pill := PanelContainer.new()
+var _rail: StyleBoxTexture
 
 
 func _init(p_color: Color, p_light: Color, p_section_h := 6) -> void:
@@ -47,12 +50,39 @@ func _resize() -> void:
 
 
 func _ready() -> void:
-	_label.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
-	_label.offset_left = -VALUE_BOX * PX
+	_value_pill.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_value_pill.offset_top = -(section_h + 2 + RAIL_PAD * 2) * PX * 0.5
+	_value_pill.offset_bottom = (section_h + 2 + RAIL_PAD * 2) * PX * 0.5
+	_value_pill.offset_left = -VALUE_BOX * PX
+	_value_pill.add_theme_stylebox_override("panel", _pill_style())
+	_value_pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_value_pill)
+	_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	UIStyle.text(_label, UIStyle.SIZE_NORMAL)
-	add_child(_label)
+	UIStyle.text(_label, UIStyle.SIZE_SMALL, UIStyle.TEXT)
+	_label.add_theme_font_override("font", UIStyle.bold())
+	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_value_pill.add_child(_label)
+
+
+func _pill_style() -> StyleBoxTexture:
+	var style: StyleBoxTexture = UIStyle.panel_outlined(color).duplicate()
+	style.texture_margin_left = 4
+	style.texture_margin_right = 4
+	style.texture_margin_top = 4
+	style.texture_margin_bottom = 4
+	style.set_content_margin_all(2)
+	return style
+
+
+## The stone rail with a border thin enough for the short bar.
+func _rail_style() -> StyleBoxTexture:
+	if _rail == null:
+		_rail = UIStyle.panel_outlined(color).duplicate()
+		_rail.set_texture_margin_all(PX * 2)
+		_rail.set_content_margin_all(0)
+	return _rail
 
 
 func set_values(p_value: float, p_max: float) -> void:
@@ -87,6 +117,10 @@ func _draw() -> void:
 		PixelArt.draw_rows(self, Vector2(0, floor(iy) * PX), icon_rows, icon_palette)
 		x0 = icon_rows[0].length() + 2
 		y0 = int(floor((size.y / PX - section_h) * 0.5))
+	# A quiet blue-stone rail keeps the small segments legible over any scene.
+	var pad := 1 + RAIL_PAD
+	draw_style_box(_rail_style(), Rect2(Vector2(x0 - pad, y0 - pad) * PX,
+		Vector2(sections * (SECTION_W + GAP) - GAP + pad * 2, section_h + pad * 2) * PX))
 	var per := max_value / sections if sections > 0 else 1.0
 	for i in sections:
 		var x := x0 + i * (SECTION_W + GAP)
@@ -94,8 +128,8 @@ func _draw() -> void:
 		var ghost := clampf((_ghost - i * per) / per, 0.0, 1.0)
 		# Outline, then the empty socket.
 		_px(x - 1, y0 - 1, SECTION_W + 2, section_h + 2, Color(0.02, 0.02, 0.05, 0.9))
-		_px(x, y0, SECTION_W, section_h, Color(0.1, 0.1, 0.17, 0.85))
-		_px(x, y0 + section_h - 1, SECTION_W, 1, Color(0.18, 0.18, 0.28, 0.85))
+		_px(x, y0, SECTION_W, section_h, Color(0.035, 0.055, 0.085, 1.0))
+		_px(x, y0 + section_h - 1, SECTION_W, 1, Color(0.13, 0.18, 0.25, 1.0))
 		if ghost > fill:
 			_px(x, y0, ceilf(SECTION_W * ghost), section_h, Color(1, 1, 1, 0.55))
 		if fill <= 0.0:
@@ -108,5 +142,3 @@ func _draw() -> void:
 		_px(x, y0, w, 1, light)  # bright top edge
 		_px(x, y0 + 1, mini(int(w), 2), 1, light.lerp(Color.WHITE, 0.5))  # glint
 		_px(x, y0 + section_h - 1, w, 1, color.darkened(0.35))  # shaded bottom
-	# Value box at the end.
-	draw_style_box(UIStyle.slot(), Rect2(Vector2(size.x - VALUE_BOX * PX, 0), Vector2(VALUE_BOX * PX, size.y)))

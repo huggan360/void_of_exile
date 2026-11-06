@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bylo6rk2jcmb8"
+path="res://.godot/imported/tail_1.vox-eaa9d282554dd401534c47c4dd80faa6.tscn"
+
+[deps]
+
+source_file="res://creatures/gloom_spitter/tail_1.vox"
+dest_files=["res://.godot/imported/tail_1.vox-eaa9d282554dd401534c47c4dd80faa6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -72,7 +72,7 @@ func _ready() -> void:
 	set_process(false)
 
 
-## Sets this obstacle on fire (purely visual; it can still be shot apart).
+## Sets this obstacle on fire; nearby ground flames can ignite passing actors.
 func ignite(height := -1.0, fire_size := 1.0) -> void:
 	var fire := VoxelFire.new(fire_size)
 	fire.position.y = prefab.height * 0.55 if height < 0.0 else height

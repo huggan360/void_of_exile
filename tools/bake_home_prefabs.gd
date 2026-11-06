@@ -11,6 +11,9 @@ func _bake() -> void:
 		folders.append("res://props/houses/" + name)
 	for name in ["market", "bench", "well"]:
 		folders.append("res://props/town/" + name)
+	var selected := OS.get_cmdline_user_args()
+	if not selected.is_empty():
+		folders = folders.filter(func(folder: String) -> bool: return folder.get_file() in selected)
 	for folder: String in folders:
 		var node := Node3D.new()
 		node.name = folder.get_file().to_pascal_case()
@@ -33,13 +36,27 @@ func _bake() -> void:
 			node.add_child(part)
 			part.owner = node
 		var size := Vector3(8.5, 9, 9)
+		var info: Dictionary = {}
 		if folder.contains("/home/"):
-			var info: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(folder + "/building.json"))
+			info = JSON.parse_string(FileAccess.get_file_as_string(folder + "/building.json"))
 			var s: Array = info.solid_size
 			size = Vector3(s[0], s[1], s[2])
 		elif folder.contains("/town/"):
 			size = Vector3(3.5, 3.8, 2.8) if folder.ends_with("market") else Vector3(2.8, 4, 2.8) if folder.ends_with("well") else Vector3(2.7, 1.7, 1.3)
-		_add_box(node, size, Vector3(0, size.y / 2, 0))
+		if info.has("colliders"):
+			for entry: Dictionary in info.colliders:
+				var s: Array = entry.size
+				var at: Array = entry.offset
+				_add_box(node, Vector3(s[0], s[1], s[2]), Vector3(at[0], at[1], at[2]))
+		else:
+			_add_box(node, size, Vector3(0, size.y / 2, 0))
+		for marker_name: String in info.get("markers", {}):
+			var at: Array = info.markers[marker_name]
+			var marker := Marker3D.new()
+			marker.name = marker_name
+			marker.position = Vector3(at[0], at[1], at[2])
+			node.add_child(marker)
+			marker.owner = node
 		if folder.ends_with("smithy"):
 			_add_box(node, Vector3(1.7, 7, 2.3), Vector3(2.2, 3.5, -6.6))
 			_add_box(node, Vector3(2.5, 1.3, 1.7), Vector3(-1.8, .65, -6.5))

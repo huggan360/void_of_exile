@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bef47al38bt44"
+path="res://.godot/imported/carapace_kindled_glow.vox-5312a404278a41b5183ff9bf0b144d8d.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_vizier/carapace_kindled_glow.vox"
+dest_files=["res://.godot/imported/carapace_kindled_glow.vox-5312a404278a41b5183ff9bf0b144d8d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

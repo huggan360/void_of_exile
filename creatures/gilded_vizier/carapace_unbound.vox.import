@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://unbg61bc4vr2"
+path="res://.godot/imported/carapace_unbound.vox-cc7636ae4d83ab249c7445716a754226.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_vizier/carapace_unbound.vox"
+dest_files=["res://.godot/imported/carapace_unbound.vox-cc7636ae4d83ab249c7445716a754226.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

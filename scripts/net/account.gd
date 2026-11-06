@@ -10,6 +10,9 @@ extends Node
 
 signal changed
 signal friends_changed
+## Dots (the account currency) changed: the new total and how many just
+## came in (0 = only a refresh), and from where ("forge", "campaign", ...).
+signal dots_changed(total: int, gained: int, source: String)
 ## A request failed or was refused (message for the player).
 signal problem(message: String)
 
@@ -21,6 +24,11 @@ var profile := ConfigFile.new()
 ## /me: {account, progress, characters, max_characters, rewards, max_level, classes}
 var data := {}
 var friend_list: Array = []
+var friend_requests: Array = []
+var party_invites: Array = []
+var social_error := ""
+var _social_timer := 0.0
+var _social_fetching := false
 var busy := false
 
 
@@ -29,6 +37,13 @@ func _ready() -> void:
 	profile.load(PROFILE)
 	api.base_url = url()
 	api.token = token()
+
+
+func _process(delta: float) -> void:
+	_social_timer -= delta
+	if _social_timer <= 0.0 and is_logged_in() and not _social_fetching:
+		_social_timer = 4.0
+		friends(true)
 
 
 func url() -> String:
@@ -113,7 +128,13 @@ func refresh() -> bool:
 		if r.status != 401:
 			problem.emit(r.error)
 		return false
-	data = r.data
+	var refreshed: Dictionary = r.data
+	var fetched_progress: Dictionary = refreshed.get("progress", {})
+	var total_xp := maxi(int(progress().get("xp", 0)), int(fetched_progress.get("xp", 0)))
+	var current_progress := AccountLevels.progress(total_xp)
+	current_progress.slots = fetched_progress.get("slots", 2)
+	refreshed.progress = current_progress
+	data = refreshed
 	changed.emit()
 	return true
 
@@ -205,57 +226,99 @@ func delete_dead(id: int) -> bool:
 	return r.ok
 
 
-## One-way friends, online first. An empty list also means the request failed.
-func friends() -> Array:
+## Accepted friends, pending requests and party invitations, also in Singleplayer.
+func friends(quiet := false) -> Array:
+	if _social_fetching or not is_logged_in():
+		return friend_list
+	_social_fetching = true
 	var session := token()
+	var service := url()
 	var r := await api.call_api("GET", "/friends")
-	if not r.ok:
-		problem.emit(r.error)
+	_social_fetching = false
+	if token() != session or url() != service:
 		return []
+	if not r.ok:
+		if social_error != str(r.error):
+			social_error = str(r.error)
+			friends_changed.emit()
+		if not quiet:
+			problem.emit(r.error)
+		return friend_list
 	var entries: Array = r.data.get("friends", [])
-	if token() == session:
-		_set_friends(entries)
-	return entries
+	var requests: Array = r.data.get("requests", [])
+	var invitations: Array = r.data.get("party_invites", [])
+	var different := friend_list != entries or friend_requests != requests or party_invites != invitations or social_error != ""
+	friend_list = entries
+	friend_requests = requests
+	party_invites = invitations
+	social_error = ""
+	if different:
+		friends_changed.emit()
+	return friend_list
 
 
 func add_friend(user: String) -> Dictionary:
-	var session := token()
-	var r := await api.call_api("POST", "/friends/add", {username = user.strip_edges()})
-	if not r.ok:
-		problem.emit(r.error)
-		return {}
-	var entry: Dictionary = r.data.get("friend", {})
-	if token() == session:
-		var entries := friend_list.duplicate()
-		for i in range(entries.size() - 1, -1, -1):
-			if str(entries[i].username).nocasecmp_to(str(entry.username)) == 0:
-				entries.remove_at(i)
-		entries.append(entry)
-		entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-			if bool(a.online) != bool(b.online):
-				return bool(a.online)
-			return str(a.username).nocasecmp_to(str(b.username)) < 0)
-		_set_friends(entries)
-	return entry
+	var r := await _social_action("/friends/add", {username = user.strip_edges()})
+	return r.data.get("friend", {}) if r.ok else {}
+
+
+func respond_friend(user: String, accept: bool) -> void:
+	await _social_action("/friends/respond", {username = user, accept = accept})
 
 
 func remove_friend(user: String) -> bool:
+	var r := await _social_action("/friends/remove", {username = user.strip_edges()})
+	return r.ok
+
+
+func join_friend(user: String) -> Dictionary:
+	var r := await _social_action("/friends/join", {username = user})
+	return r.data if r.ok else {}
+
+
+func respond_party(id: int, accept: bool) -> Dictionary:
+	var r := await _social_action("/party/respond", {id = id, accept = accept})
+	return r.data if r.ok else {}
+
+
+func _social_action(path: String, body: Dictionary) -> Dictionary:
 	var session := token()
-	var r := await api.call_api("POST", "/friends/remove", {username = user.strip_edges()})
+	var service := url()
+	var r := await api.call_api("POST", path, body)
+	if token() != session or url() != service:
+		return {ok = false, data = {}, error = "Account changed."}
 	if not r.ok:
 		problem.emit(r.error)
-		return false
-	if token() == session:
-		var entries := friend_list.duplicate()
-		for i in range(entries.size() - 1, -1, -1):
-			if str(entries[i].username).nocasecmp_to(user.strip_edges()) == 0:
-				entries.remove_at(i)
-		_set_friends(entries)
-	return true
+	else:
+		_social_timer = 0.0
+		await friends(true)
+	if token() != session or url() != service:
+		return {ok = false, data = {}, error = "Account changed."}
+	return r
+
+
+## The previous game server must finish saving before a social transfer claims again.
+func wait_for_release(character_id_value: int, session: String) -> bool:
+	var service := url()
+	var until := Time.get_ticks_msec() + 15000
+	while Time.get_ticks_msec() < until and token() == session and url() == service:
+		var r := await api.call_api("GET", "/me")
+		if token() != session or url() != service:
+			return false
+		if r.ok:
+			for entry: Dictionary in r.data.get("characters", []):
+				if int(entry.id) == character_id_value and not entry.get("online", false):
+					return true
+		await get_tree().create_timer(0.5).timeout
+	return false
 
 
 func search_players(query: String) -> Array:
+	var session := token()
+	var service := url()
 	var r := await api.call_api("GET", "/players/search?q=" + query.strip_edges().uri_encode())
+	if token() != session or url() != service:
+		return []
 	if not r.ok:
 		problem.emit(r.error)
 		return []
@@ -270,9 +333,12 @@ func is_friend(user: String) -> bool:
 
 
 func _set_friends(entries: Array) -> void:
-	if friend_list != entries:
-		friend_list = entries
-		friends_changed.emit()
+	friend_list = entries
+	friend_requests = []
+	party_invites = []
+	social_error = ""
+	_social_timer = 0.0
+	friends_changed.emit()
 
 
 ## A key for running your own Singleplayer server ("" if refused).
@@ -288,13 +354,31 @@ func singleplayer_key() -> String:
 func set_total_xp(total: int) -> void:
 	if data.is_empty():
 		return
-	var p := AccountLevels.progress(total)
+	var p := AccountLevels.progress(maxi(total, int(progress().get("xp", 0))))
 	p.slots = progress().get("slots", 2)
 	var before := int(progress().get("level", 1))
 	data.progress = p
 	changed.emit()
 	if p.level > before:
 		refresh()  # new rewards (slots) come from the service
+
+
+func dots() -> int:
+	return int(data.get("account", {}).get("dots", 0))
+
+
+func is_developer() -> bool:
+	return bool(data.get("account", {}).get("developer", false))
+
+
+## Live updates while playing (the server sends the account's Dots).
+func set_dots(total: int, gained := 0, source := "") -> void:
+	if data.is_empty():
+		return
+	if not data.has("account"):
+		data.account = {}
+	data.account.dots = total
+	dots_changed.emit(total, gained, source)
 
 
 func _save() -> void:

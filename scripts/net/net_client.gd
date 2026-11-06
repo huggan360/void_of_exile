@@ -31,6 +31,9 @@ signal social_event(ev: Array)
 const CONNECT_TIMEOUT := 8.0
 const SEND_RATE := 20.0
 const KEEP_SNAPSHOTS := 8
+const PLAYER_PREDICTION_LIMIT := 0.10
+const PLAYER_MAX_PREDICT_SPEED := 20.0
+const PLAYER_TELEPORT_DISTANCE := 6.0
 
 var address := ""
 var port := Net.DEFAULT_PORT
@@ -200,6 +203,9 @@ func clear_world() -> void:
 func render_time() -> float:
 	return Net.now() + _offset - Net.INTERP_DELAY
 
+func server_time() -> float:
+	return Net.now()+_offset
+
 
 func _process(delta: float) -> void:
 	if not connected:
@@ -267,6 +273,8 @@ func _sync_clock(t: float) -> void:
 
 
 static func _push(buffer: Array, entry: Array) -> void:
+	# Ignore duplicate/late unreliable packets instead of reversing time.
+	if not buffer.is_empty() and float(entry[0]) <= float(buffer[-1][0]): return
 	buffer.append(entry)
 	if buffer.size() > KEEP_SNAPSHOTS:
 		buffer.pop_front()
@@ -308,13 +316,43 @@ func enemy_node(net_id: int) -> Enemy:
 
 ## [position, facing, speed share, flags] of another player now, or [].
 func player_state(player_id: int) -> Array:
-	var pair := _sample(_player_snaps.get(player_id, []))
-	if pair.is_empty():
-		return []
-	var a: PackedFloat32Array = pair[0]
-	var b: PackedFloat32Array = pair[1]
-	var k: float = pair[2]
-	return [Vector3(a[1], a[2], a[3]).lerp(Vector3(b[1], b[2], b[3]), k), lerp_angle(a[4], b[4], k), b[5], int(b[6])]
+	return _sample_player(_player_snaps.get(player_id, []), render_time())
+
+
+static func _sample_player(buffer: Array, rt: float) -> Array:
+	if buffer.is_empty(): return []
+	var latest: PackedFloat32Array = buffer[-1][1]
+	var pos := Vector3(latest[1], latest[2], latest[3])
+	var facing := float(latest[4])
+	var speed := float(latest[5])
+	if rt < float(buffer[-1][0]):
+		var first: PackedFloat32Array = buffer[0][1]
+		pos = Vector3(first[1], first[2], first[3])
+		facing = first[4]
+		for i in range(1, buffer.size()):
+			if rt > float(buffer[i][0]): continue
+			var a: PackedFloat32Array = buffer[i - 1][1]
+			var b: PackedFloat32Array = buffer[i][1]
+			var start := Vector3(a[1], a[2], a[3])
+			var end := Vector3(b[1], b[2], b[3])
+			var k := clampf((rt - float(buffer[i - 1][0])) / maxf(0.0001, float(buffer[i][0]) - float(buffer[i - 1][0])), 0.0, 1.0)
+			# Teleports must never interpolate through the intervening world.
+			pos = start.lerp(end, k) if start.distance_to(end) < PLAYER_TELEPORT_DISTANCE else start
+			facing = lerp_angle(a[4], b[4], k)
+			return [pos, facing, lerpf(a[5], b[5], k), int(a[6])]
+	elif buffer.size() >= 2:
+		var previous: PackedFloat32Array = buffer[-2][1]
+		var dt := float(buffer[-1][0]) - float(buffer[-2][0])
+		var displacement := pos - Vector3(previous[1], previous[2], previous[3])
+		var age := maxf(0.0, rt - float(buffer[-1][0]))
+		if dt > 0.001 and dt <= 0.25 and displacement.length() < PLAYER_TELEPORT_DISTANCE and speed > 0.01 and (int(latest[6]) & 2) == 0:
+			# Ease velocity to zero, then hold. Even a long outage adds at most
+			# half the horizon times the capped speed, never unlimited drift.
+			var t := minf(age, PLAYER_PREDICTION_LIMIT)
+			var travel_time := t - t * t / (2.0 * PLAYER_PREDICTION_LIMIT)
+			pos += (displacement / dt).limit_length(PLAYER_MAX_PREDICT_SPEED) * travel_time
+	if rt - float(buffer[-1][0]) >= PLAYER_PREDICTION_LIMIT: speed = 0.0
+	return [pos, facing, speed, int(latest[6])]
 
 
 ## The two snapshots around our render time and how far between them.
@@ -338,6 +376,12 @@ func _sample(buffer: Array) -> Array:
 
 func _apply(ev: Array) -> void:
 	match str(ev[1]):
+		"theory":
+			if world is SpatialWorld: world.handle_event(ev[2])
+		"sfx":
+			if is_instance_valid(world) and ev.size()>=5: GameAudio.play(str(ev[2]),ev[3],ev[4])
+		"boss_defeated":
+			if is_instance_valid(world): GameAudio.boss_defeated(str(ev[2]), world.realm_id)
 		"dng+":
 			if is_instance_valid(world): DungeonPortal.place(world, ev[2])
 		"dng-":
@@ -386,7 +430,7 @@ func _apply(ev: Array) -> void:
 			if is_instance_valid(world):
 				Boss.flash_light(world, ev[2], ev[3], ev[4], ev[5], ev[6])
 		"grave":
-			if world is IslandWorld:
+			if is_instance_valid(world):
 				var at: Vector3 = ev[2]
 				at.y = world.ground_height(at.x, at.z)
 				Gravestone.place(world, at, str(ev[3]), bool(ev[4]))
@@ -427,7 +471,11 @@ func _apply(ev: Array) -> void:
 				stats.consumed.emit(Items.make(str(ev[2])))
 		"acct": account_xp.emit(int(ev[2]))
 		"switched":
-			if stats: stats.buffs.clear()
+			# Predictions and vitals belonged to the previous character. Ordinary
+			# gear updates preserve them, but this is a new character's state.
+			_pending.clear()
+			if stats:
+				stats.load_data(ev[5])
 			character_id = int(ev[2])
 			account_xp.emit(int(ev[4]))
 			switched.emit(character_id, str(ev[3]))
@@ -513,6 +561,7 @@ func _remote_shot(ev: Array) -> void:
 		return
 	var mods: Dictionary = ev[7]
 	mods.visual = true
+	GameAudio.weapon_shot(_weapon(str(ev[5])),ev[3],true)
 	var r: RemotePlayer = _remote.get(int(ev[2]))
 	if is_instance_valid(r):
 		mods.exclude = r.get_rid()
@@ -524,6 +573,7 @@ func _remote_ring(ev: Array) -> void:
 	if not is_instance_valid(world) or not Items.exists(str(ev[3])):
 		return
 	var spell := _weapon(str(ev[3]))
+	GameAudio.play("magic_ring",ev[4],{ally=true})
 	for i in spell.ring.get("pulses", 1):
 		var ring := MagicRing.cast(world, ev[4], spell, i * 0.18, float(ev[5]))
 		ring.visual_only = true
@@ -542,7 +592,7 @@ func send_position(pos: Vector3) -> void:
 		return
 	_send_timer = 1.0 / SEND_RATE
 	var flags := (1 if player.shield.active else 0) | (2 if player.frozen else 0)
-	var speed := Vector2(player.velocity.x, player.velocity.z).length() / maxf(0.1, Player.BASE_SPEED * stats.move_speed_multiplier())
+	var speed := (player.velocity.slide(player.up_direction).length() if world is SpatialWorld else Vector2(player.velocity.x,player.velocity.z).length()) / maxf(0.1, Player.BASE_SPEED * stats.move_speed_multiplier())
 	Net.s_move.rpc_id(1, pos, player.facing, speed, flags)
 
 

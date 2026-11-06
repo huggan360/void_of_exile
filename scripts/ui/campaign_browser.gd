@@ -19,7 +19,7 @@ func _init(p_social: SocialClient) -> void:
 
 func _ready() -> void:
 	custom_minimum_size = SIZE
-	add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
+	add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
 	add_child(column)
@@ -62,11 +62,11 @@ func _status(id: String) -> Array:
 		return ["Your party is playing this tale", UIStyle.GOOD, true]
 	if not Campaigns.unlocked(id, {runs = _runs}):
 		if def.get("coming_soon", false):
-			return ["Locked  ·  coming soon", UIStyle.TEXT_DIM, false]
-		return ["Locked  ·  finish %s first" % Campaigns.get_def(str(def.requires)).get("title", "another tale"), UIStyle.TEXT_DIM, false]
+			return ["Locked  -  coming soon", UIStyle.TEXT_DIM, false]
+		return ["Locked  -  finish %s first" % Campaigns.get_def(str(def.requires)).get("title", "another tale"), UIStyle.TEXT_DIM, false]
 	match str(run.get("status", "")):
 		"paused", "active":
-			return ["Half told  ·  step %d of %d" % [int(run.step) + 1, def.steps.size()], UIStyle.ACCENT, true]
+			return ["Half told  -  step %d of %d" % [int(run.step) + 1, def.steps.size()], UIStyle.ACCENT, true]
 		"done":
 			return ["Completed", UIStyle.GOLD, true]
 	return ["A new tale", UIStyle.TEXT, true]
@@ -104,12 +104,13 @@ func _list() -> void:
 		text.alignment = BoxContainer.ALIGNMENT_CENTER
 		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		text.add_child(UIStyle.label(str(def.title), UIStyle.SIZE_LARGE, UIStyle.GOLD if status[2] else UIStyle.TEXT_DIM))
-		text.add_child(UIStyle.label("%s  ·  level %d" % [status[0], int(def.get("level", 1))], UIStyle.SIZE_SMALL, status[1]))
+		text.add_child(UIStyle.label("%s  -  level %d" % [status[0], int(def.get("level", 1))], UIStyle.SIZE_SMALL, status[1]))
 		inside.add_child(text)
 		var stars := StarRow.new(2.5)
 		var best := int(_runs.get(id, {}).get("stars_best", 0))
-		stars.set_stars(range(5).map(func(i: int) -> bool: return i < best))
+		stars.set_stars(range(def.get("stars",[]).size()).map(func(i: int) -> bool: return i < best))
 		stars.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		stars.visible=not def.get("stars",[]).is_empty()
 		inside.add_child(stars)
 		for node: Control in [text, stars]:
 			for child in node.get_children():
@@ -133,7 +134,7 @@ func _page(id: String) -> void:
 		stars.set_stars(range(5).map(func(i: int) -> bool: return i < best))
 		_body.add_child(stars)
 		for star: Dictionary in defs:
-			_body.add_child(UIStyle.label("·  " + str(star.text), UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM))
+			_body.add_child(UIStyle.label("-  " + str(star.text), UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM))
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_END
 	row.add_theme_constant_override("separation", 8)

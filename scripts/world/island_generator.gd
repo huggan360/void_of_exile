@@ -806,12 +806,12 @@ func _hash(x: int, z: int, salt: int) -> float:
 
 ## Works before streamed terrain colliders are ready. Reject structure interiors,
 ## wall/ceiling segments and terrain penetrating the body's footprint.
-func enemy_spawn_clear(pos: Vector3, radius: float, height: float) -> bool:
+func enemy_spawn_clear(pos: Vector3, radius: float, height: float, allow_towns := false) -> bool:
 	var reach := radius + 0.12
 	for z in range(floori(pos.z - reach), floori(pos.z + reach) + 1):
 		for x in range(floori(pos.x - reach), floori(pos.x + reach) + 1):
 			var feature := feature_at(x, z)
-			if feature != null and feature.is_structure() and feature.type != "stronghold":
+			if feature != null and feature.is_structure() and feature.type != "stronghold" and not (allow_towns and feature is VillageFeature):
 				return false
 			var detail := _detail(x, z)
 			if detail[0] + 1 > pos.y + 0.15 or Blocks.is_hazard(detail[2]):

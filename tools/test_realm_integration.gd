@@ -55,12 +55,14 @@ func _test_items() -> void:
 		if not item.is_consumable() and not item.is_key():
 			if item.is_divine():
 				divine += 1
-			else:
+			elif item.id.begins_with("G"):
 				regular += 1
 			if item.slot == "bonus" and not item.is_divine():
 				bonuses += 1
 	expect(regular == 85 and bonuses == 40, "Every regular source item is registered")
-	expect(divine == 31, "The six boss sets (31 divine items) are enabled, nothing else")
+	var expected_divine := 0
+	for ids: Array in Items.DIVINE_SETS.values(): expected_divine += ids.size()
+	expect(divine == expected_divine, "Every assigned Divine set is enabled, including the Spirit wand")
 	for id in Items.GATE_KEYS: expect(seen.has(id), "Fortress key is registered: " + id)
 	var stats := PlayerStats.new()
 	for kind in ["wand", "trident", "robe"]:

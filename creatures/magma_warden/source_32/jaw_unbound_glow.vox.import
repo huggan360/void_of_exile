@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dpsjnvnn66r7q"
+path="res://.godot/imported/jaw_unbound_glow.vox-977ea579ff8b0f83ed04ae66810e3bc9.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/source_32/jaw_unbound_glow.vox"
+dest_files=["res://.godot/imported/jaw_unbound_glow.vox-977ea579ff8b0f83ed04ae66810e3bc9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

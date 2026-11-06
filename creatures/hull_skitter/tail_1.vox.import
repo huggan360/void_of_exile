@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cvc6beeid0myx"
+path="res://.godot/imported/tail_1.vox-a957492b87b6524b8cda54bb72eb1f28.tscn"
+
+[deps]
+
+source_file="res://creatures/hull_skitter/tail_1.vox"
+dest_files=["res://.godot/imported/tail_1.vox-a957492b87b6524b8cda54bb72eb1f28.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

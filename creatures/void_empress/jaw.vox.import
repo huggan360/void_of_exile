@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c17ay3dl3nj1y"
+path="res://.godot/imported/jaw.vox-453484f2cf54ceb84aa2c4e806cc0624.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/jaw.vox"
+dest_files=["res://.godot/imported/jaw.vox-453484f2cf54ceb84aa2c4e806cc0624.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

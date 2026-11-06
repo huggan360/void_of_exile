@@ -171,6 +171,81 @@ const PACKS := {
 }
 
 
+## Gods without an assigned Divine relic: rewards and endurance scale with encounter difficulty.
+## Applied once after all templates are built; server_config mirrors these defaults.
+const GOD_BALANCE := {
+	spirit_brown = {hp = 1500, potion = 0.122, damage = 0.881, g4 = 0.071, g5 = 0.00053},
+	spirit_blue = {hp = 1900, potion = 0.156, damage = 0.898, g4 = 0.092, g5 = 0.00094},
+	blue_genie = {hp = 2100, potion = 0.167, damage = 0.903, g4 = 0.099, g5 = 0.00108},
+	frost_moth = {hp = 1600, potion = 0.127, damage = 0.883, g4 = 0.074, g5 = 0.00058},
+	ruin_watcher = {hp = 1900, potion = 0.149, damage = 0.894, g4 = 0.088, g5 = 0.00086},
+	basalt_bulwark = {hp = 2200, potion = 0.178, damage = 0.909, g4 = 0.106, g5 = 0.00122},
+	furnace_maw = {hp = 2500, potion = 0.2, damage = 0.92, g4 = 0.12, g5 = 0.0015},
+	cinder_oracle = {hp = 2000, potion = 0.162, damage = 0.901, g4 = 0.096, g5 = 0.00103},
+	rime_stag = {hp = 1800, potion = 0.14, damage = 0.89, g4 = 0.083, g5 = 0.00075},
+	glacier_hermit = {hp = 2100, potion = 0.164, damage = 0.902, g4 = 0.098, g5 = 0.00106},
+	hail_harrier = {hp = 1600, potion = 0.131, damage = 0.886, g4 = 0.077, g5 = 0.00064},
+	slag_seraph = {hp = 1800, potion = 0.142, damage = 0.891, g4 = 0.084, g5 = 0.00078},
+	obsidian_ram = {hp = 2100, potion = 0.171, damage = 0.906, g4 = 0.102, g5 = 0.00114},
+	ember_lich = {hp = 1700, potion = 0.136, damage = 0.888, g4 = 0.08, g5 = 0.00069},
+	aurora_sentinel = {hp = 1800, potion = 0.147, damage = 0.893, g4 = 0.087, g5 = 0.00083},
+	hoarfrost_owl = {hp = 1600, potion = 0.124, damage = 0.882, g4 = 0.073, g5 = 0.00056},
+	icebound_colossus = {hp = 2200, potion = 0.176, damage = 0.908, g4 = 0.105, g5 = 0.00119},
+	prism_ray = {hp = 1500, potion = 0.122, damage = 0.881, g4 = 0.071, g5 = 0.00053},
+	runic_archivist = {hp = 1800, potion = 0.14, damage = 0.89, g4 = 0.083, g5 = 0.00075},
+	azure_medusa = {hp = 1700, potion = 0.133, damage = 0.887, g4 = 0.078, g5 = 0.00067},
+	sun_jackal = {hp = 1500, potion = 0.12, damage = 0.88, g4 = 0.07, g5 = 0.0005},
+	dune_monolith = {hp = 1900, potion = 0.156, damage = 0.898, g4 = 0.092, g5 = 0.00094},
+	glass_scorpion = {hp = 1700, potion = 0.138, damage = 0.889, g4 = 0.081, g5 = 0.00072},
+	umbral_reaper = {hp = 1900, potion = 0.149, damage = 0.894, g4 = 0.088, g5 = 0.00086},
+	amethyst_widow = {hp = 1800, potion = 0.142, damage = 0.891, g4 = 0.084, g5 = 0.00078},
+	nightbell_idol = {hp = 1900, potion = 0.153, damage = 0.897, g4 = 0.091, g5 = 0.00092},
+	spire_keeper = {hp = 2500, potion = 0.2, damage = 0.92, g4 = 0.12, g5 = 0.0015},
+}
+
+static func _balance_gods() -> void:
+	for id: String in GOD_BALANCE:
+		var def: EnemyDef = _defs[id]
+		var profile: Dictionary = GOD_BALANCE[id]
+		def.hp = int(profile.hp)
+		def.attacks = _scale_god_damage(def.attacks, float(profile.damage))
+		for entry: Dictionary in def.loot:
+			if entry.get("biome_stat", false) or str(entry.get("item", "")).begins_with("elixir_of_"):
+				entry.chance = float(profile.potion)
+			elif entry.get("pool", {}).get("tier", 0) == 4: entry.chance = float(profile.g4)
+			elif entry.get("pool", {}).get("tier", 0) == 5: entry.chance = float(profile.g5)
+
+	# Apply to every regular god, including expansion gods and nested bursts.
+	# Bosses have separate health and damage budgets.
+	for def: EnemyDef in _defs.values():
+		if def.is_god and not def is BossDef:
+			def.hp = mini(1600, maxi(1, roundi(def.hp * 0.65)))
+			def.attacks = scale_attack_damage(def.attacks, 1.0, 80)
+
+
+static func _scale_god_damage(value: Variant, multiplier: float) -> Variant:
+	return scale_attack_damage(value, multiplier)
+
+
+## Preserve shot ranges while scaling all nested ripple/terminal damage too.
+static func scale_attack_damage(value: Variant, multiplier: float, maximum := INF) -> Variant:
+	if value is Array:
+		var out: Array = value.duplicate(true)
+		for index in out.size(): out[index] = scale_attack_damage(out[index], multiplier, maximum)
+		return out
+	if value is Dictionary:
+		var out: Dictionary = value.duplicate(true)
+		var scale := multiplier
+		var peak := maxf(float(out.get("damage_min", 0)), float(out.get("damage_max", 0)))
+		if peak > 0.0: scale = minf(scale, maximum / peak)
+		for key in out:
+			if key in ["damage_min", "damage_max"]: out[key] = roundi(float(out[key]) * scale)
+			elif out[key] is Dictionary or out[key] is Array:
+				out[key] = scale_attack_damage(out[key], multiplier, maximum)
+		return out
+	return value
+
+
 ## Every stat elixir at `chance` each (gods and bosses).
 static func _stat_elixirs(chance: float) -> Array:
 	return STAT_ELIXIR_IDS.map(func(id: String) -> Dictionary: return {item = id, chance = chance})
@@ -319,7 +394,9 @@ static func _build() -> void:
 	RealmEnemyExpansion.build(_defs, _god_loot(), _medium_loot())
 	CourtEnemies.build(_defs)
 	BlueDungeonEnemies.build(_defs)
+	TheoryEnemies.build(_defs)
 	_defs["sun_jackal"].portal_drop = {dungeon = "sunken_court", chance = 0.15}
+	_balance_gods()
 	_defs["furnace_maw"].portal_drop = {dungeon = "cinder_depths", chance = 0.15}
 
 
@@ -397,7 +474,7 @@ static func _build_spirits() -> void:
 		spirit.is_god = true
 		spirit.enemy_name = names[c]
 		spirit.model = "spirit_" + c
-		spirit.body_height = 2.2
+		spirit.body_height = 2.6
 		spirit.hit_radius = 0.6
 		spirit.hp = st[0]
 		spirit.defense = st[1]
@@ -414,14 +491,17 @@ static func _build_spirits() -> void:
 			pattern = "cross", spread_deg = 9.0, cooldown = 1.25, windup = 0.4,
 		}])
 		spirit.loot.assign(_god_loot())
+		if c == "purple":
+			spirit.loot.append({item = "D_wand_thewandofthespitit", chance = 0.03})
 		_defs[spirit.id] = spirit
 
 		# Its genies: small, quick, and they do hurt.
 		var genie := EnemyDef.new()
 		genie.id = "genie_" + c
-		genie.enemy_name = "Genie"
+		genie.enemy_name = c.capitalize() + " Coilguard"
 		genie.model = "genie_" + c
-		genie.body_height = 1.6
+		genie.model_scale = 0.70
+		genie.body_height = 2.6
 		genie.hit_radius = 0.45
 		genie.hp = 500
 		genie.defense = 4
@@ -441,9 +521,10 @@ static func _build_spirits() -> void:
 	# Harmless stars that circle a spirit: easy elixirs.
 	var star := EnemyDef.new()
 	star.id = "star"
-	star.enemy_name = "Star"
-	star.model = "star"
-	star.body_height = 1.4
+	star.enemy_name = "Spirit Spark"
+	star.model = "spirit_spark"
+	star.model_scale = 0.38
+	star.body_height = 2.6
 	star.hit_radius = 0.4
 	star.hp = 40
 	star.xp = 4
@@ -910,6 +991,7 @@ static func _build_god_batch_02() -> void:
 	e.id = "rime_skitter"
 	e.enemy_name = "Rime Skitter"
 	e.model = e.id
+	e.model_scale = 1.4  # big enough to stand in the path of shots
 	e.hp = 220
 	e.defense = 3
 	e.xp = 25

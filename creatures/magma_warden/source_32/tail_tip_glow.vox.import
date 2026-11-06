@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b2dlekixnq4la"
+path="res://.godot/imported/tail_tip_glow.vox-43d3a8c50bab17dbf37e177578388632.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/source_32/tail_tip_glow.vox"
+dest_files=["res://.godot/imported/tail_tip_glow.vox-43d3a8c50bab17dbf37e177578388632.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

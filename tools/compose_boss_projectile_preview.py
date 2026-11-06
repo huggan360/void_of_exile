@@ -11,13 +11,13 @@ def font(size,bold=False):return ImageFont.truetype(BOLD if bold else FONT,size)
 GROUPS=[
  ('BLUE DRAGON','Bluelay','#43c2e8',[('blue_orb','Azure fire orb',True),('blue_bolt','Forked azure bolt',False)]),
  ('RIMEHEART PRISM','Fosen','#65d6df',[('ice_bolt','Faceted ice shard',True),('ice_orb','Crystal comet',True)]),
- ('VHAROK','Lava · The Cinder Tyrant','#ed7847',[('fire_orb','Horned ember orb',True),('fire_cleave','Wide flame shard',True),('fire_bolt','Forked ember dart',False)]),
+ ('VHAROK','Lava - The Cinder Tyrant','#ed7847',[('fire_orb','Horned ember orb',True),('fire_cleave','Wide flame shard',True),('fire_bolt','Forked ember dart',False)]),
  ('SCARAB REGENT','Desert','#deb25a',[('gold_bolt','Winged gold needle',True),('gold_disc','Returning sun disc',True),('gold_orb','Solar orb',False)]),
  ('HOLLOW CROWN','Deep Dark','#b874d2',[('void_bolt','Twisted shadow bolt',True),('void_orb','Void eye orb',True)]),
 ]
 sheet=Image.new('RGB',(3300,1560),'#0d131e');draw=ImageDraw.Draw(sheet)
 draw.text((36,25),'VOIDREALM  /  BOSS PROJECTILES',font=font(43,True),fill='#ecf1f6')
-draw.text((36,85),'All 12 authored models · Actual voxel geometry and glow · Grouped by boss',font=font(25),fill='#97aabd')
+draw.text((36,85),'All 12 authored models - Actual voxel geometry and glow - Grouped by boss',font=font(25),fill='#97aabd')
 for col,(boss,biome,color,shots) in enumerate(GROUPS):
  x=28+col*650
  draw.rounded_rectangle((x,145,x+638,1460),radius=18,fill='#17202d',outline='#293648',width=2)

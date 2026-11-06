@@ -67,6 +67,7 @@ const BLUE_DIVINE_IDS := ["D_cloak_theblue", "D_spell_oftheblue", "D_robe_oftheb
 ## "croucefix of satan" -> D_bonus_crucifix_ofsatan, "flame of the divine" ->
 ## D_bonus_flame_ofthedivine (see tools/import_textures.py).
 const DIVINE_SETS := {
+	Spirit = ["D_wand_thewandofthespitit"],
 	Iron = ["D_bow_ofiron", "D_wand_ofiron", "D_trident_ofiron", "D_cloak_ofiron", "D_robe_ofiron", "D_spell_ofiron", "D_bonus_crucifix_ofiron"],
 	Storm = ["D_bonus_crucifix_ofstorm", "D_bonus_crystal_ofstorm", "D_bonus_eye_ofstorm", "D_bonus_flame_ofstorm", "D_bonus_talisman_ofstorm", "D_bow_ofstorm", "D_cloak_ofstorm", "D_robe_ofstorm", "D_spell_ofstorm", "D_trident_ofstorm", "D_wand_ofstorm"],
 	Silver = ["D_cloak_silvershield", "D_wand_thewandofsteel", "D_bonus_crucifix_ofthalao"],
@@ -82,8 +83,9 @@ const DIVINE_SETS := {
 	Void = ["D_bow_Darkmatter", "D_cloak_thevoid", "D_robe_ofthegalaxy", "D_trident_ofthevoid",
 		"D_wand_thewandofdarkness"],
 }
-## Which boss drops which set. No other enemy ever drops divine items.
+## Encounters assigned a Divine set; unassigned enemies cannot drop Divine items.
 const BOSS_DIVINE_SET := {
+	spirit_purple = "Spirit",
 	hollow_king = "Iron",
 	abyssal_siren = "Storm", drowned_cantor = "Storm",
 	gilded_vizier = "Silver", magma_warden = "Dragon_Fire", pyre_ent = "Dragon_Fire",
@@ -159,13 +161,13 @@ static func from_pool(pool: Dictionary, rng: RandomNumberGenerator) -> Item:
 
 
 ## Stat elixirs: one for every stat. Drinking one raises that stat for good
-## on this character (+1, or +5 for health and magic points). Gods and
+## on this character (+2 speed/dexterity, +4 attack/defence/magic, +20 health/magic points). Gods and
 ## bosses drop them, in blue bags. [name, amount, liquid color]
 const STAT_ELIXIRS := {
-	attack = ["Attack", 1, Color("#e04848")], defense = ["Defence", 1, Color("#3c3c4a")],
-	speed = ["Speed", 1, Color("#48c8e0")], dexterity = ["Dexterity", 1, Color("#e08a30")],
-	magic = ["Magic", 1, Color("#a050e8")], hp = ["Health", 5, Color("#ff5070")],
-	mp = ["Magic Points", 5, Color("#ffd040")],
+	attack = ["Attack", 1, Color("#e04848")], defense = ["Defence", 4, Color("#3c3c4a")],
+	speed = ["Speed", 2, Color("#48c8e0")], dexterity = ["Dexterity", 2, Color("#e08a30")],
+	magic = ["Magic", 4, Color("#a050e8")], hp = ["Health", 20, Color("#ff5070")],
+	mp = ["Magic Points", 20, Color("#ffd040")],
 }
 
 
@@ -217,16 +219,19 @@ static func gate_key(id: String) -> Item:
 
 ## Campaign story items. [name, kind, lore, readable text ("" = not readable)]
 const STORY_ITEMS := {
+	story_starcoil = ["Starcoil", "Rocket part", "A copper winding that folds a spark of starlight into lift. Bring it to Orin at Starfall Launchworks.", ""],
+	story_spellsteel_nozzle = ["Spellsteel Nozzle", "Rocket part", "A rune-lined engine throat, cast to survive impossible heat. Orin needs this for his magic ship.", ""],
+	story_aether_heart = ["Aether Heart", "Rocket part", "A small prism holding a calm blue star. The last piece of Orin's rocket.", ""],
 	story_throne_key = ["Throne Key", "Story item", "Cold iron, entrusted to the last sworn champion. The teeth fit a crown that no living king should wear.", ""],
 	story_moon_lily = ["Moon-Lily", "Story item", "Gerald's last living moon-lily. It glows faintly in the dark.", ""],
-	story_clue = ["Torn Map", "Story item · map pieces", "Pieces of an old map, marked with a crown.", "map"],
+	story_clue = ["Torn Map", "Story item - map pieces", "Pieces of an old map, marked with a crown.", "map"],
 	story_necklace = ["Maribel's Necklace", "Story item", "Old silver and a cloudy stone, engraved with a tiny crown.", ""],
 	story_heart_of_stone = ["Heart of Stone", "Story item", "The Hollow King's heart. It is still warm, and it still beats, slowly.", ""],
 	story_tide_pearl = ["Siren's Pearl", "Story item", "Hold it to your ear: a whole choir, singing under the sea.", ""],
-	story_candle = ["Wick's Candle", "Story item · readable", "A stub of black wax that never lights.",
+	story_candle = ["Wick's Candle", "Story item - readable", "A stub of black wax that never lights.",
 		"Scratched into the wax, in a shaking hand:|[i]Don't turn around. Don't answer. Don't read the map in the dark.[/i]"],
 	story_sun_seal = ["Sun Seal", "Story item", "Gold, stamped with the Scarab Regent's sign. It hums in the heat.", ""],
-	story_ice_card = ["Rime Card", "Story item · readable", "A card of frost that never melts.",
+	story_ice_card = ["Rime Card", "Story item - readable", "A card of frost that never melts.",
 		"Where the frost sleeps, the [b]Crown of the Rime[/b] keeps watch.|A hidden entity waits in its stronghold, guarding a piece of what was torn.|Only the key of the peaks will open its gates."],
 }
 ## What each map piece says, in order (the Torn Map shows the ones you hold).
@@ -356,10 +361,9 @@ static func spell(tier: int) -> Item:
 	i.warp = 0.035 + tier * 0.007
 	if tier >= 2:
 		i.effects.shield_drain = 1.0 - (tier - 1) * 0.05
-		i.abilities.append("Shield costs %d%% less magic" % [(tier - 1) * 5])
+		i.abilities.append("Shield costs %d%% less MP" % [(tier - 1) * 5])
 	if tier >= 3:
-		i.effects.shield_absorb = 1.0 + (tier - 2) * 0.1
-		i.abilities.append("Shield absorbs %d%% more" % [(tier - 2) * 10])
+		i.bonuses.magic = roundi(float(i.bonuses.magic)*(1.0+(tier-2)*0.1))
 	if tier >= 4:
 		i.ring = {damage = 220 + (tier - 4) * 140, range = 6.0 + (tier - 4) * 2.0, speed = 11.0, cost = 35 + (tier - 4) * 10, cooldown = 1.0 + (tier - 4) * 0.1}
 		i.abilities.append("Double-tap Space: cast a warp ring")
@@ -501,14 +505,14 @@ static func divine() -> Array[Item]:
 			"Every pocket jingles. None of them are empty, ever.", {defense = 10, dexterity = 8, attack = 4},
 			["Your arrows trail gold"], {trail = "gold"}, Color("#f0b030"), 0.5))
 	out.append(_divine("D_cloak_silvershield", "Silver Shield Cloak", "armor", "Cloak",
-			"Heavy as a promise. Nothing gets through that hasn't asked first.", {defense = 24, speed = -3},
-			["Shield absorbs 30% more"], {shield_absorb = 1.3}, Color("#e0e4ec"), 0.4))
+			"Heavy as a promise. Nothing gets through that hasn't asked first.", {defense = 24, speed = -3, magic = 12},
+			[], {}, Color("#e0e4ec"), 0.4))
 	out.append(_divine("D_cloak_theblue", "Cloak of the Blue", "armor", "Cloak",
 			"The color of deep water, and just as patient.", {defense = 12, magic = 6, mp = 40},
 			["Magic recovers 50% faster"], {mp_regen = 1.5}, Color("#56d8e8"), 0.5))
 	out.append(_divine("D_cloak_thevoid", "Cloak of the Void", "armor", "Cloak",
 			"There is nothing inside it. That's what makes it so warm.", {defense = 14, speed = 5},
-			["Shield costs 30% less magic"], {shield_drain = 0.7}, Color("#5a1a8a"), 0.6))
+			["Shield costs 30% less MP"], {shield_drain = 0.7}, Color("#5a1a8a"), 0.6))
 	out.append(_divine("D_cloak_unlimitedmadness", "Cloak of Unlimited Madness", "armor", "Cloak",
 			"Every color at once, all the time. You get used to it. Mostly.",
 			{defense = 10, speed = 3, attack = 3, dexterity = 3, magic = 3},
@@ -516,9 +520,9 @@ static func divine() -> Array[Item]:
 
 	# --- Spells -----------------------------------------------------------------
 	out.append(_divine("D_spell_oftheblue", "Spell of the Blue", "spell", "Spell",
-			"The deep sea, folded small enough to carry. It wants to unfold.", {magic = 20, mp = 100},
-			["Shield absorbs 60% more, costs 30% less", "Warp ring rolls out three times"],
-			{shield_absorb = 1.6, shield_drain = 0.7}, Color("#6cfce8"), 0.7))
+			"The deep sea, folded small enough to carry. It wants to unfold.", {magic = 32, mp = 100},
+			["Shield costs 30% less MP", "Warp ring rolls out three times"],
+			{shield_drain = 0.7}, Color("#6cfce8"), 0.7))
 	out[-1].shield_tint = Color("#4fafab")
 	out[-1].shield_arcs = Color("#6cfce8")
 	out[-1].shield_rainbow = 0.15
@@ -526,9 +530,9 @@ static func divine() -> Array[Item]:
 	out[-1].ring = {damage = 280, range = 12.0, speed = 14.0, cost = 55, cooldown = 1.5, pulses = 3}
 
 	out.append(_divine("D_spell_ofthedivine", "Spell of the Divine", "spell", "Spell",
-			"A halo that fell off something holy. It hasn't noticed yet.", {magic = 22, mp = 100},
+			"A halo that fell off something holy. It hasn't noticed yet.", {magic = 31, mp = 100},
 			["Shield heals you 3 HP per second", "Warp ring heals you 20 HP"],
-			{shield_heal = 3.0, shield_absorb = 1.4}, Color("#ffde46"), 0.8))
+			{shield_heal = 3.0}, Color("#ffde46"), 0.8))
 	out[-1].shield_tint = Color("#ffde46")
 	out[-1].shield_arcs = Color("#fc6ce2")
 	out[-1].shield_rainbow = 0.4
@@ -555,6 +559,7 @@ static func divine() -> Array[Item]:
 	_court_sets(out)
 	_storm_set(out)
 	_iron_set(out)
+	_spirit_set(out)
 
 	for item in out:
 		if item.is_weapon(): _weapon_attacks(item)
@@ -594,9 +599,9 @@ static func _frost_set(out: Array[Item]) -> void:
 	out[-1].damage_max = 180
 	out[-1].projectile = {style = "bolt", color = ice, speed = 25.0, range = 17.0}
 	out.append(_divine("D_spell_offrost", "Spell of Frost", "spell", "Spell",
-			"A six-sided silence. The air around it rings faintly.", {magic = 18, mp = 90, dexterity = 4},
-			["Shield absorbs 50% more, costs 20% less", "Warp ring rolls out twice"],
-			{shield_absorb = 1.5, shield_drain = 0.8}, ice, 0.6))
+			"A six-sided silence. The air around it rings faintly.", {magic = 27, mp = 90, dexterity = 4},
+			["Shield costs 20% less MP", "Warp ring rolls out twice"],
+			{shield_drain = 0.8}, ice, 0.6))
 	out[-1].shield_tint = Color("#9fe9f2")
 	out[-1].shield_arcs = ice
 	out[-1].shield_rainbow = 0.1
@@ -667,6 +672,18 @@ static func _void_set(out: Array[Item]) -> void:
 	out[-1].damage_min = 130
 	out[-1].damage_max = 160
 	out[-1].projectile = {style = "bolt", color = Color("#b040e0"), speed = 23.0, range = 20.0}
+
+
+## Preserve the source texture's legacy spelling as its stable runtime id.
+static func _spirit_set(out: Array[Item]) -> void:
+	var wand := _divine("D_wand_thewandofthespitit", "Wand of the Spirit", "weapon", "Wand",
+		"The god's last breath coils around your wrist. Release it, and the fangs remember.",
+		{speed = 5, dexterity = 5}, ["Twin Spirit Fangs", "Charged: Dreadcoil Trinity"], {})
+	wand.damage_min = 125
+	wand.damage_max = 155
+	wand.projectile = {style = "serpent", color = Color("f01cde"), color2 = Color("ececec"), speed = 23.0, range = 20.0}
+	wand.drop_bag = "white"
+	out.append(wand)
 
 
 static func _divine(id: String, item_name: String, slot: String, kind: String, lore: String,
@@ -812,6 +829,15 @@ static func _weapon_attacks(item: Item) -> void:
 					item.charge.count = 12
 					item.projectile.wave_amp = 0.2
 					item.projectile.wave_freq = 10.0
+	if item.id == "D_wand_thewandofthespitit":
+		item.projectile.style = "serpent"
+		item.projectile.color2 = Color("ececec")
+		item.projectile.size = 1.0
+		item.projectile.wave_amp = 0.48
+		item.projectile.wave_freq = 11.0
+		item.shots = 2
+		item.spread_deg = 0.0
+		item.charge = {style = "serpent_fan", name = "Dreadcoil Trinity", count = 3, spread = 12.0, mult = 2.8}
 	if item.id.ends_with("_ofiron"):
 		item.projectile.style = "arrow" if item.kind == "Bow" else "trident" if item.kind == "Trident" else "orb"
 		item.projectile.color = Color("aab4c9")
@@ -827,7 +853,10 @@ static func _weapon_attacks(item: Item) -> void:
 	elif item.shots == 3: item.projectile_shares = [0.4, 0.7, 0.4]
 	else: item.projectile_shares = [1.0]
 	if divine:
-		if "frost" in item.id:
+		if item.id == "D_wand_thewandofthespitit":
+			item.primary_effects = [{id = "speed", amount = -2, duration = 1.2}]
+			item.secondary_effects = [{id = "armour_broken", duration = 3.5}]
+		elif "frost" in item.id:
 			item.primary_effects = [{id="static", duration=0.6}]
 			item.secondary_effects = [{id="static", duration=4.4}]
 		elif "satan" in item.id:
@@ -877,8 +906,8 @@ static func _storm_set(out: Array[Item]) -> void:
 		if spec[2] == "Bow":
 			out[-1].charge = {style = "volley", name = "Storm Chorus", count = 7, spread = 7.0, mult = 1.8}
 	out.append(_divine("D_spell_ofstorm", "Spell of Storm", "spell", "Spell",
-		"The tide keeps time to a distant tower.", {magic = 19, mp = 95, dexterity = 4},
-		["Shield absorbs 50% more", "Warp ring rolls out twice"], {shield_absorb = 1.5}, storm, 0.6))
+		"The tide keeps time to a distant tower.", {magic = 29, mp = 95, dexterity = 4},
+		["Warp ring rolls out twice"], {}, storm, 0.6))
 	out[-1].shield_tint = Color("477ab7")
 	out[-1].shield_arcs = Color("bcefff")
 	out[-1].warp = 0.08
@@ -912,7 +941,7 @@ static func _iron_set(out: Array[Item]) -> void:
 	out.append(_divine("D_robe_ofiron", "Vestment of the Iron Oath", "armor", "Robe",
 		"A king's funeral shroud, threaded with iron.", {defense = 18, magic = 20, mp = 80}, ["Magic recovers 20% faster"], {mp_regen = 1.2}))
 	out.append(_divine("D_spell_ofiron", "Spell of the Iron Oath", "spell", "Spell",
-		"The crown breaks. The oath remains.", {defense = 8, magic = 14, mp = 65}, ["Iron ward"], {shield_absorb = 1.2}))
+		"The crown breaks. The oath remains.", {defense = 8, magic = 17, mp = 65}, ["Iron ward"], {}))
 	out[-1].shield_tint = Color("9ea9c1")
 	out[-1].shield_arcs = Color("f4eaff")
 	out.append(_divine("D_bonus_crucifix_ofiron", "Seal of the Last King", "bonus", "Crucifix",

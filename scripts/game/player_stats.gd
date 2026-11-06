@@ -9,12 +9,12 @@ extends RefCounted
 ## change it, after checking the request.
 ##
 ## What the stats do:
-##   speed      +1% movement speed per point
-##   dexterity  +1.5% shots per second per point (negative slows you down)
-##   attack     +2% weapon damage per point
+##   speed      +1.5% movement speed per point
+##   dexterity  +2% shots per second per point (negative slows you down)
+##   attack     +1.4% weapon damage per point
 ##   defense    subtracted from each normal hit (at least 15% still gets through);
 ##              armor-piercing hits ignore it
-##   magic      how much damage the warp shield can soak up (3 per point)
+##   magic      shield reduction on a shared diminishing-returns curve, plus spell damage
 ## Gear can also raise max health ("hp") and max magic points ("mp").
 
 signal changed
@@ -27,16 +27,19 @@ signal xp_gained(amount: int)
 const STATS := ["speed", "attack", "dexterity", "defense", "magic"]
 const STAT_NAMES := {speed = "Speed", attack = "Attack", dexterity = "Dexterity",
 		defense = "Defence", magic = "Magic", hp = "Health", mp = "Magic points"}
-const BASE := {speed = 8, attack = 8, dexterity = 12, defense = 12, magic = 10}
+const BASE := {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0}
 const BASE_HP := 100
-## Levels 2-25 also raise max health by 10, 20 or 30.
-const HP_GROWTH_LEVELS := 25
 const BASE_MP := 100
-## Stats only grow up to this level; levelling continues after it.
-const STAT_GROWTH_LEVELS := 50
-## Typical growth per level (1-3); some levels give one more (see _gain).
-const GROWTH := {speed = 1, attack = 2, dexterity = 1, defense = 1, magic = 2}
+const MAX_LEVEL := 50
+const STAT_GROWTH_LEVELS := MAX_LEVEL
 const MIN_DAMAGE_TAKEN := 0.15
+const SPEED_PER_POINT := 0.015
+const DEXTERITY_PER_POINT := 0.02
+const ATTACK_PER_POINT := 0.014
+## One exponential curve for every class: 20 MAG = 35%, 70 ~= 80%, 110 = 93%.
+const SHIELD_MAGIC_LINEAR := 0.020953380151240326
+const SHIELD_MAGIC_QUADRATIC := 0.000029288282669119175
+const MIN_SHIELDED_DAMAGE_SHARE := 0.000001
 const GEAR_SLOTS := ["weapon", "armor", "spell", "bonus"]
 const BACKPACK_SIZE := 16  # two rows to start with
 const BACKPACK_UPGRADE := 16  # two more rows from a Backpack item
@@ -88,36 +91,89 @@ func _buffs_changed() -> void:
 	changed.emit()
 
 
+## Shared by the HUD and XP ring; mirrored in character_total_xp in the account service.
+## Quick to level 8, then a cubic ramp: ~70k XP in all to reach 26, ~2.3M to 50.
+const LATE_XP := 3
+static func xp_for_level(at_level: int) -> int:
+	var late := maxi(0, at_level - 8)
+	return 40 + at_level * 20 + LATE_XP * late * late * late
+
+
 func xp_to_next() -> int:
-	return 40 + level * 20
+	return xp_for_level(level)
 
 
 func add_xp(amount: int) -> void:
+	if amount <= 0:
+		return
 	xp += amount
-	if amount > 0:
-		xp_gained.emit(amount)
-	while xp >= xp_to_next():
+	xp_gained.emit(amount)
+	while level < MAX_LEVEL and xp >= xp_to_next():
 		xp -= xp_to_next()
 		level += 1
 		var gains := {}
-		if level <= STAT_GROWTH_LEVELS:
-			for stat in STATS:
-				gains[stat] = _gain(stat, level)
-				base[stat] += gains[stat]
-		if level <= HP_GROWTH_LEVELS:
-			gains.hp = [10, 20, 30][(level * 7) % 3]
-			base_hp += gains.hp
-			hp += gains.hp
+		for stat in STAT_NAMES:
+			var gain := _raise(stat, _gain(stat))
+			if gain > 0:
+				gains[stat] = gain
 		leveled_up.emit(level, gains)
 	changed.emit()
 
 
-## 1, 2 or 3 points: the stat's usual amount, sometimes one more or less
-## depending on the level (fixed, so every Archer grows the same way).
-func _gain(stat: String, at_level: int) -> int:
-	var roll := (at_level * 7 + STATS.find(stat) * 5) % 6
-	var bonus := 1 if roll == 0 else (-1 if roll == 5 else 0)
-	return clampi(PlayerClasses.get_def(class_id).growth[stat] + bonus, 1, 3)
+## Developer command: apply the same class-specific random growth as earned
+## levels, without awarding account XP. Repeating it never rerolls past levels.
+## Lowering a testing level keeps permanent stats (including potion gains).
+func developer_set_level(target: int) -> void:
+	target = clampi(target, 1, MAX_LEVEL)
+	var previous := level
+	var gains := {}
+	while level < target:
+		level += 1
+		for stat in STAT_NAMES:
+			var gain := _raise(stat, _gain(stat))
+			if gain > 0: gains[stat] = int(gains.get(stat, 0)) + gain
+	level = target
+	xp = 0
+	hp = max_hp
+	mp = max_mp
+	if target > previous: leveled_up.emit(level, gains)
+	changed.emit()
+
+
+## Fully trained permanent stats, excluding equipment and temporary buffs.
+func developer_max_stats() -> void:
+	for stat in STAT_NAMES: _raise(stat, stat_max(stat) - stat_base(stat))
+	hp = max_hp
+	mp = max_mp
+	changed.emit()
+
+
+## Called only by the authoritative XP path; clients load the resulting stats.
+func _gain(stat: String) -> int:
+	return PlayerClasses.growth_roll(class_id, stat)
+
+
+## Permanent caps exclude equipment and temporary effects.
+func stat_max(stat: String) -> int:
+	return int(PlayerClasses.get_def(class_id).maximum.get(stat, 0))
+
+
+func stat_base(stat: String) -> int:
+	return base_hp if stat == "hp" else (base_mp if stat == "mp" else int(base.get(stat, 0)))
+
+
+## Shared panel value: permanent progress, equipment bonus and effective buffed total.
+func stat_display(stat: String) -> String:
+	var value := "%d / %d" % [stat_base(stat), stat_max(stat)]
+	if stat_base(stat) >= stat_max(stat):
+		value = "[color=#ffd56b]%s[/color]" % value
+	var bonus := gear_bonus(stat)
+	if bonus != 0:
+		value += " (%+d gear)" % bonus
+	var effective := max_hp if stat == "hp" else (max_mp if stat == "mp" else total(stat))
+	if effective != stat_base(stat) + bonus:
+		value += " [%d effective]" % effective
+	return value
 
 
 func gear_bonus(stat: String) -> int:
@@ -134,8 +190,8 @@ func total(stat: String) -> int:
 	return maxi(0,raw + roundi(buffs.additive(stat,raw)))
 
 
-## A special effect from equipped gear. Multipliers (mp_regen, shield_drain,
-## shield_absorb) multiply together; amounts (lifesteal, shield_heal) add up.
+## A special effect from equipped gear. Multipliers (mp_regen, shield_drain)
+## multiply together; amounts (lifesteal, shield_heal) add up.
 func effect(name: String, default: Variant = 0.0) -> Variant:
 	var result: Variant = default
 	for item: Item in gear.values():
@@ -143,7 +199,7 @@ func effect(name: String, default: Variant = 0.0) -> Variant:
 			var v: Variant = item.effects[name]
 			if v is String:
 				return v
-			if name in ["mp_regen", "shield_drain", "shield_absorb"]:
+			if name in ["mp_regen", "shield_drain"]:
 				result = (result if result != 0.0 else 1.0) * v
 			else:
 				result += v
@@ -214,7 +270,17 @@ func can_move(from: Dictionary, to: Dictionary) -> bool:
 		return false
 	if _stacks(moving, item_at(to)):
 		return true
-	return fits(moving, to) and fits(item_at(to), from)
+	return fits(moving, to) and (fits(item_at(to), from) or _displace_slot(from, to) >= 0)
+
+
+## Taking from a bag onto a taken slot whose item may not go in that bag
+## (an elixir, a soulbound item in a public chest): the displaced item goes
+## to a free backpack slot instead. -1 = no such way.
+func _displace_slot(from: Dictionary, to: Dictionary) -> int:
+	if from.kind != "bag" or to.kind == "bag" or item_at(to) == null:
+		return -1
+	var free := backpack.find(null)
+	return free if fits(item_at(to), {kind = "pack", key = free}) else -1
 
 
 func move(from: Dictionary, to: Dictionary) -> void:
@@ -228,6 +294,10 @@ func move(from: Dictionary, to: Dictionary) -> void:
 		moving.count -= take
 		if moving.count <= 0:
 			_put(from, null)
+	elif not fits(there, from):
+		backpack[_displace_slot(from, to)] = there
+		_put(from, null)
+		_put(to, moving)
 	else:
 		_put(from, there)
 		_put(to, moving)
@@ -275,12 +345,19 @@ func _add(item: Item) -> bool:
 	return true
 
 
-## Moves a bag's item into the backpack (double-click). False if it's full.
+## Moves a bag's item into the backpack (double-click): consumables top up
+## quickslot and backpack stacks first, then take a free slot. With no room
+## left, a consumable is drunk right away instead. False if nothing happened.
 func loot(place: Dictionary) -> bool:
 	var item := item_at(place)
-	if item == null or not _add(item):
-		changed.emit()  # a stack may still have been topped up
+	if item == null:
 		return false
+	var before := item.count
+	if not _add(item):
+		if item.is_consumable() and use(place):
+			return true
+		changed.emit()  # a stack may still have been topped up
+		return item.count < before
 	_put(place, null)
 	changed.emit()
 	return true
@@ -297,17 +374,20 @@ func take(place: Dictionary) -> Item:
 	return item
 
 
-## A stat elixir: the stat goes up for good.
-func _raise(stat: String, amount: int) -> void:
+## Raises a permanent stat up to its cap; returns the actual gain.
+func _raise(stat: String, amount: int) -> int:
+	var gain := clampi(amount, 0, maxi(0, stat_max(stat) - stat_base(stat)))
 	match stat:
 		"hp":
-			base_hp += amount
-			hp += amount
+			base_hp += gain
+			hp += gain
 		"mp":
-			base_mp += amount
-			mp += amount
+			base_mp += gain
+			mp += gain
 		_:
-			base[stat] += amount
+			if base.has(stat):
+				base[stat] += gain
+	return gain
 
 
 ## The extra backpack rows.
@@ -364,7 +444,8 @@ func use(place: Dictionary) -> bool:
 			return false  # one is all you can carry
 		add_backpack()
 	elif item.consumable.has("stat"):
-		_raise(item.consumable.stat, item.consumable.amount)
+		if _raise(item.consumable.stat, item.consumable.amount) == 0:
+			return false
 	elif item.consumable.has("hp") and hp >= max_hp and not item.consumable.has("mp"):
 		return false  # already full: don't waste it
 	if item.consumable.has("mp") and mp >= max_mp and not item.consumable.has("hp"):
@@ -382,7 +463,15 @@ func use(place: Dictionary) -> bool:
 # --- What stats do ----------------------------------------------------------------
 
 func move_speed_multiplier() -> float:
-	return maxf(0.5, 1.0 + total("speed") * 0.01)
+	return maxf(0.5, 1.0 + total("speed") * SPEED_PER_POINT)
+
+
+func dexterity_multiplier() -> float:
+	return maxf(0.25, 1.0 + total("dexterity") * DEXTERITY_PER_POINT)
+
+
+func weapon_damage_multiplier() -> float:
+	return 1.0 + total("attack") * ATTACK_PER_POINT
 
 
 ## Shots per second relative to the weapon's base rate (dexterity and the
@@ -390,7 +479,7 @@ func move_speed_multiplier() -> float:
 func shots_per_second_multiplier() -> float:
 	var weapon: Item = gear.weapon
 	var rate := weapon.fire_rate if weapon else 1.0
-	return maxf(0.25, 1.0 + total("dexterity") * 0.015) * rate
+	return dexterity_multiplier() * rate
 
 
 ## One projectile's damage from the equipped weapon, including attack.
@@ -398,7 +487,7 @@ func roll_damage() -> int:
 	var weapon: Item = gear.weapon
 	if weapon == null:
 		return 0
-	return int(round(randi_range(weapon.damage_min, weapon.damage_max) * (1.0 + total("attack") * 0.02)))
+	return int(round(randi_range(weapon.damage_min, weapon.damage_max) * weapon_damage_multiplier()))
 
 
 ## How much of a hit actually lands, before any shield.
@@ -408,8 +497,15 @@ func mitigate(amount: float, armor_piercing := false) -> float:
 	return maxf(amount * MIN_DAMAGE_TAKEN, amount - total("defense"))
 
 
-func shield_capacity() -> float:
-	return maxf(0.0, total("magic") * 3.0) * effect("shield_absorb", 1.0)
+## Remaining fraction of a regular hit, before Defence. Even extremely high
+## MAG leaves a positive fraction; equipment contributes through visible MAG.
+func shield_damage_multiplier() -> float:
+	var magic := float(maxi(0,total("magic")))
+	return maxf(MIN_SHIELDED_DAMAGE_SHARE,exp(-SHIELD_MAGIC_LINEAR*magic-SHIELD_MAGIC_QUADRATIC*magic*magic))
+
+
+func shield_reduction() -> float:
+	return 1.0-shield_damage_multiplier()
 
 
 ## Spell damage grows with Magic, independently of bow Attack. When hovering
@@ -439,6 +535,16 @@ func to_data() -> Dictionary:
 
 ## Replaces the character with saved data (a new character if it's empty).
 func load_data(data: Dictionary) -> void:
+	# A network inventory/stat update must never publish reset's level 1 / 0 XP
+	# state. Observers receive exactly one complete replacement.
+	var blocked := is_blocking_signals()
+	set_block_signals(true)
+	_load_data(data)
+	set_block_signals(blocked)
+	changed.emit()
+
+
+func _load_data(data: Dictionary) -> void:
 	reset()
 	if data.is_empty():
 		return
@@ -450,9 +556,9 @@ func load_data(data: Dictionary) -> void:
 	xp = int(data.get("xp", 0))
 	home = str(data.get("home", ""))
 	for stat in STATS:
-		base[stat] = int(data.get("base", {}).get(stat, base[stat]))
-	base_hp = int(data.get("base_hp", base_hp))
-	base_mp = int(data.get("base_mp", base_mp))
+		base[stat] = clampi(int(data.get("base", {}).get(stat, base[stat])), 0, stat_max(stat))
+	base_hp = clampi(int(data.get("base_hp", base_hp)), 1, stat_max("hp"))
+	base_mp = clampi(int(data.get("base_mp", base_mp)), 0, stat_max("mp"))
 	has_backpack = bool(data.get("has_backpack", false))
 	backpack.resize(BACKPACK_SIZE + (BACKPACK_UPGRADE if has_backpack else 0))
 	backpack.fill(null)
@@ -468,6 +574,25 @@ func load_data(data: Dictionary) -> void:
 	hp = clampf(float(data.get("hp", max_hp)), 1.0, max_hp)
 	mp = clampf(float(data.get("mp", max_mp)), 0.0, max_mp)
 	changed.emit()
+
+
+## Campaign inventory is owned by its book, never by an unrelated character.
+## Include keys only at explicit campaign boundaries; ordinary realm keys remain valid.
+func purge_story_items(include_keys := false) -> Array[Item]:
+	var removed: Array[Item] = []
+	for inventory: Array in [backpack, quick]:
+		for i in inventory.size():
+			var item: Item = inventory[i]
+			if item and (item.is_story() or include_keys and item.is_key()):
+				removed.append(item)
+				inventory[i] = null
+	for slot: String in gear:
+		var item: Item = gear[slot]
+		if item and (item.is_story() or include_keys and item.is_key()):
+			removed.append(item)
+			gear[slot] = null
+	if not removed.is_empty(): changed.emit()
+	return removed
 
 
 ## A brand new character of its class: level 1, starting gear, nothing carried.

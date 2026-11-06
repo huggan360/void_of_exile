@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://nd8s5b5joh1p"
+path="res://.godot/imported/jaw_kindled_glow.vox-495e7a2f4842b886be825de9204e6db5.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_vizier/jaw_kindled_glow.vox"
+dest_files=["res://.godot/imported/jaw_kindled_glow.vox-495e7a2f4842b886be825de9204e6db5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

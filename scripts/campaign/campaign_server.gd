@@ -23,16 +23,21 @@ const VOTE_TIME := 30.0
 const WORLD_KEYS := ["destroyed", "cleared_packs", "pack_survivors", "opened_gates", "fog", "forced_open"]
 const HELD_BACK := ["goblin", "goblin_master"]  # until The Lily Thief is told
 
+var astral := AstralCampaign.new()
+var reach := ReachCampaign.new()
 var server: NetServer
 var _books := {}  # account id -> book
 var _saving := {}  # one in-flight book save per account
 var _dirty := {}  # account id -> true
 var _save_timer := SAVE_INTERVAL
 var _gather_timer := 1.0
+var _actors := {}  # realm id -> {npc id: authoritative actor}
 var _scenes := {}  # party id -> the shared conversation or vote playing (never saved)
 
 
 func _ready() -> void:
+	astral.campaigns = self
+	reach.campaigns = self
 	GameServer.bag_changed.connect(_on_bag)
 	GameServer.bag_removed.connect(_on_bag)
 
@@ -41,6 +46,7 @@ func _process(delta: float) -> void:
 	for party: Dictionary in server.social.parties.values():
 		var run := _run_of(party)
 		if not run.is_empty() and run.status == "active":
+			astral.update_flight(party,run)
 			run.elapsed = float(run.elapsed) + delta
 			_dirty[party.campaign.account] = true
 			var scene: Dictionary = _scenes.get(party.id, {})
@@ -51,6 +57,10 @@ func _process(delta: float) -> void:
 		_gather_timer = 1.0
 		for party: Dictionary in server.social.parties.values():
 			_gather(party)
+			_ensure_chest(party)
+			_check_home_step(party)
+			astral.tick(party,_run_of(party))
+			reach.tick(party,_run_of(party))
 	_save_timer -= delta
 	if _save_timer <= 0.0:
 		_save_timer = SAVE_INTERVAL
@@ -120,19 +130,123 @@ func summary(party: Dictionary) -> Dictionary:
 		step = int(run.step), count = int(run.count), needed = _needed(_step(run)), side_step = int(run.side_step),
 		side_done = bool(run.side_done), done_objects = run.done_objects, elapsed = float(run.elapsed),
 		deaths = int(run.deaths), realm = party.campaign.realm, tavern = party.campaign.tavern, status = run.status,
-		revealed = run.get("revealed", [])}
+		revealed = run.get("revealed", []), npcs = _sync_npcs(party, run),
+		objective = _objective_location(party, run, _step(run)),
+		side_objective = _objective_location(party, run, Campaigns.step_def(run.id, int(run.side_step), true)),
+		links = _world_links(party, run), chest = int(run.get("chest", 0)),
+		home_progress = _home_progress(party, _step(run)), astral = astral.summary(party,run)}
+
+
+## Actual instance destinations, including the intermediate dungeon of an encore.
+func _objective_location(party: Dictionary, run: Dictionary, step: Dictionary) -> Dictionary:
+	if step.is_empty(): return {}
+	if astral.matches(run): return astral.objective(party,run,step)
+	if reach.matches(run): return reach.objective(party,run,step)
+	var where := str(party.campaign.realm)
+	if step.world == "hall": where = "hall"
+	if step.world == "castle": where = str(party.campaign.get("castle", ""))
+	if step.kind == "chest":
+		var bag := GameServer.bag(int(run.get("chest", 0)))
+		return {world = bag.realm, pos = bag.pos} if not bag.is_empty() else _site_objective(_chest_site(party, run, step))
+	if step.kind == "kill" and step.has("pack") and server.realms.has(where):
+		return {world = where, pos = Campaigns.encounter_position(step.at, server.realms[where].world)}
+	if step.kind == "dungeon":
+		var portal: Dictionary = server.dungeons.portals.get(str(run.get("encore_portal", run.get("portal", ""))), {})
+		if not portal.is_empty():
+			where = str(portal.instance) if server.realms.has(str(portal.instance)) else str(portal.realm)
+			if where == portal.realm: return {world = where, pos = portal.pos}
+		elif server.realms.has(str(run.get("encore", run.get("dungeon", "")))):
+			where = str(run.get("encore", run.get("dungeon", "")))
+		var realm: RealmInstance = server.realms.get(where)
+		if realm and realm.world is DungeonWorld: return {world = where, pos = realm.world.layout.boss}
+	return {world = where}
+
+
+func _site_objective(site: Dictionary) -> Dictionary:
+	return {} if site.is_empty() else {world = site.realm, pos = site.pos}
+
+
+func _world_links(party: Dictionary, run: Dictionary) -> Array:
+	var out := []
+	var places := [party.campaign.realm, run.get("dungeon", ""), run.get("encore", "")]
+	for portal: Dictionary in server.dungeons.portals.values():
+		if portal.realm in places and not portal.exit and server.realms.has(str(portal.instance)):
+			out.append({from = portal.realm, to = portal.instance, pos = portal.pos})
+	for id: String in places:
+		var realm: RealmInstance = server.realms.get(id)
+		if realm and realm.record.has("dungeon"):
+			out.append({from = id, to = realm.record.get("origin", "hall"), pos = realm.world.spawn_point + Vector3(0, 0, 4)})
+	return out
+
+
+## Story actors are stationary server entities; clients only mirror this roster.
+func _sync_npcs(party: Dictionary, run: Dictionary) -> Dictionary:
+	var realm_id := str(party.campaign.realm)
+	var realm: RealmInstance = server.realms.get(realm_id)
+	if realm == null:
+		_actors.erase(realm_id)
+		return {}
+	var actors: Dictionary = _actors.get(realm_id, {})
+	_actors[realm_id] = actors
+	var roster := {}
+	for id: String in Campaigns.NPCS:
+		var info: Dictionary = Campaigns.NPCS[id]
+		if info.world != "campaign" or info.get("campaign", run.id) != run.id:
+			continue
+		if info.has("from") and int(run.step) < Campaigns.step_index(run.id, info.from) and not id in run.get("revealed", []):
+			continue
+		var actor: Node3D = actors.get(id)
+		if not is_instance_valid(actor):
+			var at := Campaigns.resolve(info.at, realm.world)
+			if at == Vector3.INF:
+				continue
+			actor = Node3D.new()
+			actor.name = "Story_" + id
+			realm.world.add_child(actor)
+			actor.global_position = at
+			var toward: Vector3 = realm.world.spawn_point - at
+			var island := realm.world as IslandWorld
+			if island:
+				var town: VillageFeature = island._village_plans.get(str(info.at.get("village", info.at.get("cabin", ""))))
+				if town:
+					toward = Vector3(town.center.x + 0.5, at.y, town.center.y + 0.5) - at
+			actor.rotation.y = atan2(-toward.x, -toward.z)
+			actors[id] = actor
+		roster[id] = {pos = actor.global_position, yaw = actor.rotation.y, model = info.get("model", "npc_gardener")}
+	for id: String in actors.keys():
+		if not roster.has(id):
+			if is_instance_valid(actors[id]): actors[id].queue_free()
+			actors.erase(id)
+	return roster
 
 
 static func _needed(step: Dictionary) -> int:
 	match str(step.get("kind", "")):
 		"interact": return step.objects.size()
-		"kill": return int(step.count)
+		"kill", "astral_parts": return int(step.count)
+		"astral_route": return int(step.get("count",1))
+		"reach_kill": return int(step.count)
+		"reach_search", "reach_repair": return step.objects.size()
 	return 1
 
 
 func _fresh_run(id: String) -> Dictionary:
 	return {id = id, attempt = "%d_%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec()], status = "active", step = 0, count = 0, done_objects = [], side_step = 0, side_done = false,
-		elapsed = 0.0, deaths = 0, wipes = 0, stars_best = 0, revealed = []}
+		elapsed = 0.0, deaths = 0, wipes = 0, stars_best = 0, revealed = [], revision = int(Campaigns.get_def(id).get("revision", 1))}
+
+
+## Preserve saved progress when authored steps are inserted in the first tale.
+func _migrate_run(run: Dictionary) -> void:
+	var revision := int(Campaigns.get_def(run.id).get("revision", 1))
+	if int(run.get("revision", 1)) >= revision: return
+	if run.id == "lily_thief":
+		var old := ["gerald", "gate", "bloom", "bloom_chest", "lily", "ask", "maribel", "thief", "cave", "necklace", "vote", "forge", "lie", "give", "farewell"]
+		var index := int(run.get("step", 0))
+		if index >= 0 and index < old.size(): run.step = Campaigns.step_index(run.id, old[index])
+		if run.has("pending_talk"): run.pending_talk.step = run.step
+	if _step(run).get("kind", "") == "kill" and _step(run).has("pack"): run.count = 0
+	run.attempt = str(run.get("attempt", "legacy")) + "_r%d" % revision
+	run.revision = revision
 
 
 # --- What players ask ---------------------------------------------------------------------
@@ -156,6 +270,13 @@ func on_action(p: Dictionary, args: Array) -> void:
 				_pause(party, "%s paused the campaign. Its progress is saved: resume it at the Chronicler." % p.name)
 			else:
 				_abandon(party, "%s abandoned the campaign." % p.name)
+		"sync_chest":
+			_ensure_chest(party)
+			var run := _run_of(party)
+			if astral.matches(run): astral._ensure_parts(party,run)
+			var chest := GameServer.bag(int(run.get("chest", 0)))
+			if not chest.is_empty() and chest.realm == p.realm and _step(run).get("kind", "") in ["chest","astral_parts"]:
+				server._to_peer(p.peer_id, ["bag+", server._bag_wire(chest)])
 		"quest":
 			if args.size() > 1: quest(p, str(args[1]))
 		"scene_next":
@@ -165,7 +286,7 @@ func on_action(p: Dictionary, args: Array) -> void:
 				if scene.page >= scene.pages.size():
 					_scene_done(party)
 				else:
-					_to_party(party, ["camp_scene_page", scene.page])
+					_scene_event(party, ["camp_scene_page", scene.page])
 		"vote":
 			var scene: Dictionary = _scenes.get(party.id, {})
 			if args.size() > 1 and scene.get("kind", "") == "vote" and str(args[1]) in scene.options:
@@ -198,6 +319,18 @@ func start(p: Dictionary, id: String, restart := false) -> void:
 		run = _fresh_run(id)
 		run.stars_best = best
 		b.runs[id] = run
+	_migrate_run(run)
+	if astral.matches(run):
+		astral.data(run).boarded = []
+		astral.data(run).erase("flight")
+		if not fresh and astral.data(run).installed.size()==3:
+			if _step(run).world=="dungeon": astral.data(run).resume_step=int(run.step)
+			run.step=Campaigns.step_index(id,"relaunch")
+			run.count=0
+	for field in ["chest", "chest_taken", "portal", "encore_portal", "dungeon", "encore"]:
+		run.erase(field)
+	if not fresh and _step(run).get("kind", "") == "chest" and _step(run).world == "dungeon":
+		run.last_death = {realm = Campaigns.realm_id(p.account_id, id), pos = run.get("dungeon_origin", [])}
 	run.status = "active"
 	b.active = id
 	party.campaign = {account = p.account_id, id = id, realm = Campaigns.realm_id(p.account_id, id),
@@ -215,6 +348,8 @@ func start(p: Dictionary, id: String, restart := false) -> void:
 			server.social.send_to(pid, party.campaign.tavern)
 			if fresh and def.has("intro"):
 				server.social.send(pid, ["camp_intro", def.intro])
+		elif _step(run).get("world", "") == SpaceWorld.REALM:
+			server.social.system(pid, "The tale begins at the [place]Nexus[/place] in the Astral Reach. Take Orin's rocket from the Tavern lookout.")
 		else:
 			server.social.system(pid, "The [place]Chronicle Gate[/place] south of the fountain is open to your party.")
 
@@ -233,14 +368,21 @@ func _abandon(party: Dictionary, reason: String) -> void:
 	var run := _run_of(party)
 	if run.is_empty():
 		return
-	book(party.campaign.account).runs[run.id] = {id = run.id, status = "abandoned", step = 0, stars_best = run.get("stars_best", 0)}
+	var owner: int=party.campaign.account
+	var abandoned := {id = run.id, status = "abandoned", step = 0, stars_best = run.get("stars_best", 0)}
+	# Retain the original instance IDs until every member has been evacuated.
 	_end(party, reason)
+	book(owner).runs[run.id] = abandoned
+	_touch(owner)
+	flush()
 
 
 ## Leaves the campaign's world: everyone home, the world saved and closed.
 func _end(party: Dictionary, reason: String) -> void:
 	_keep_world(party)
 	var run := _run_of(party)
+	astral.ending(party,run)
+	if reach.matches(run): reach.step_ended(party)
 	var places := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
 	_scenes.erase(party.id)
 	_to_party(party, ["camp_scene_end"])
@@ -250,12 +392,15 @@ func _end(party: Dictionary, reason: String) -> void:
 	flush()
 	party.campaign = {}
 	for pid: int in party.members:
+		var stats := GameServer.character(pid)
+		if stats: stats.purge_story_items(true)
 		if server.social.record(pid).get("realm", "") in places:
 			server.social.send_to(pid, "hall")
 		if reason != "":
 			server.social.system(pid, reason)
 	_close_realm(places[0])
 	_close_realm(places[2])
+	if astral.matches(run) and str(run.get("dungeon",""))!="": _close_realm(str(run.dungeon))
 	server.social.broadcast(party)
 
 
@@ -270,6 +415,9 @@ func party_disbanded(party: Dictionary) -> void:
 
 
 func left_party(p: Dictionary, party: Dictionary) -> void:
+	_keep_player_items(party, p)
+	var stats := GameServer.character(p.player_id)
+	if stats: stats.purge_story_items(not party.campaign.is_empty())
 	member_left(party, p.player_id)
 	server.social.send(p.player_id, ["camp_scene_end"])
 	server.dungeons.grants.erase(p.player_id)
@@ -287,12 +435,13 @@ func joined_party(p: Dictionary, party: Dictionary) -> void:
 
 # --- The campaign's worlds ------------------------------------------------------------------
 
-## The private Tavern is only home while the story's current step happens in
-## the Tavern; otherwise everyone shares the public one.
+## The private Tavern is home for the party throughout an active campaign.
+## Returning from account Chambers uses "hall", which on the server resolves
+## to this Tavern even when the story objective is in another realm.
 func home_for(p: Dictionary) -> String:
 	var party := server.social.party_for(p.player_id)
 	var run := _run_of(party)
-	if run.is_empty() or run.status != "active" or _step(run).get("world", "") != "hall":
+	if run.is_empty() or run.status != "active":
 		return ""
 	return str(party.campaign.tavern)
 
@@ -311,14 +460,14 @@ func may_enter(p: Dictionary, place: String) -> bool:
 	var party := server.social.party_for(p.player_id)
 	var run := _run_of(party)
 	if Campaigns.is_tavern(place):
-		return place == home_for(p) and place != ""
+		return not run.is_empty() and run.status == "active" and place == party.campaign.tavern
 	return not run.is_empty() and run.status == "active" and place in [party.campaign.realm, party.campaign.tavern,
 			party.campaign.get("castle", "")]
 
 
 func tavern_record(p: Dictionary, place: String) -> Dictionary:
 	var party := server.social.party_for(p.player_id)
-	return {id = place, hall = true, name = "Hearthhaven · %s" % Campaigns.get_def(party.campaign.id).get("title", "")}
+	return {id = place, hall = true, name = "Hearthhaven - %s" % Campaigns.get_def(party.campaign.id).get("title", "")}
 
 
 ## Opens (or finds) a party's campaign world, as it was left.
@@ -331,6 +480,7 @@ func open_realm(party: Dictionary) -> RealmInstance:
 		var record := WorldServer.get_or_create_realm(realm_id)
 		var owner := book(party.campaign.account)
 		record.merge(owner.worlds.get(Campaigns.world_key(party.campaign.id), {}).duplicate(true), true)
+		if party.campaign.id == AstralCampaign.ID: record.astral_station = true
 		record.name = Campaigns.PACKS.get(Campaigns.world_key(party.campaign.id), Campaigns.get_def(party.campaign.id)).title
 		realm = server.open_realm_record(realm_id, record)
 		# Goblins only come to this world once The Lily Thief is told.
@@ -354,6 +504,7 @@ func _keep_world(party: Dictionary) -> void:
 	if party.is_empty() or party.campaign.is_empty():
 		return
 	_keep_items(party)
+	astral.keep(party,_run_of(party))
 	var realm: RealmInstance = server.realms.get(party.campaign.realm)
 	if realm == null:
 		return
@@ -367,6 +518,7 @@ func _keep_world(party: Dictionary) -> void:
 
 
 func _close_realm(realm_id: String) -> void:
+	_actors.erase(realm_id)
 	server.close_realm(realm_id)
 	server.social.forget_fog(realm_id)
 
@@ -377,22 +529,25 @@ func on_entered(p: Dictionary) -> void:
 	var party := server.social.party_for(p.player_id)
 	var run := _run_of(party)
 	if run.is_empty() or run.status != "active":
+		var stats := GameServer.character(p.player_id)
+		if stats: stats.purge_story_items()
 		return
+	astral.entered(party,run,p)
 	var step := _step(run)
 	if step.get("kind", "") == "dungeon" and Dungeons.is_dungeon(p.realm) and server.realms.has(p.realm):
-		var origin: Vector3 = server.realms[p.realm].record.get("origin_pos", Vector3.INF)
-		if origin != Vector3.INF: run.dungeon_origin = [origin.x, origin.y, origin.z]
-		# The first dungeon, or its encore.
-		if server.realms[p.realm].record.dungeon == step.get("encore", ""):
-			run.encore = p.realm
-		else:
-			run.dungeon = p.realm
+		var encore: bool = server.realms[p.realm].record.dungeon == step.get("encore", "")
+		var portal: Dictionary = server.dungeons.portals.get(str(run.get("encore_portal" if encore else "portal", "")), {})
+		if portal.get("instance", "") == p.realm:
+			var origin: Vector3 = server.realms[p.realm].record.get("origin_pos", Vector3.INF)
+			if not encore and origin != Vector3.INF: run.dungeon_origin = [origin.x, origin.y, origin.z]
+			run["encore" if encore else "dungeon"] = p.realm
 	if step.get("world", "") == "castle" and step.get("kind", "") == "enter" and p.realm == party.campaign.get("castle", ""):
 		_advance(party, p)
 		return
+	_activate(party)
+	server.social.broadcast(party)
 	if p.realm != party.campaign.realm:
 		return
-	_activate(party)
 	match str(step.get("kind", "")):
 		"enter": _advance(party, p)
 		"vote":
@@ -404,22 +559,30 @@ func on_entered(p: Dictionary) -> void:
 ## chest, its portal.
 func _activate(party: Dictionary) -> void:
 	var run := _run_of(party)
-	var realm: RealmInstance = server.realms.get(party.campaign.realm) if not run.is_empty() else null
-	if realm == null or run.status != "active":
+	if run.is_empty() or run.status != "active":
 		return
+	_sync_npcs(party, run)
+	if astral.matches(run) and _step(run).kind=="astral_parts": astral._ensure_parts(party,run)
 	var step := _step(run)
+	if step.get("kind", "") == "chest":
+		_ensure_chest(party)
+		return
+	var realm: RealmInstance = server.realms.get(party.campaign.realm)
+	if realm == null:
+		return
+	var callback := _quest_enemy_died.bind(realm.realm_id)
+	if not realm.world.enemy_director.enemy_killed.is_connected(callback):
+		realm.world.enemy_director.enemy_killed.connect(callback)
 	match str(step.get("kind", "")):
 		"kill":
 			if step.has("pack"):
-				var at := Campaigns.resolve(step.at, realm.world)
+				var at := Campaigns.encounter_position(step.at, realm.world)
 				if at != Vector3.INF:
 					realm.world.enemy_director.add_quest_site({id = "quest_%s_%s_%s" % [run.id, run.get("attempt", "legacy"), step.id], pack = step.pack,
-						pos = at, seed = hash(step.id)})
-		"chest":
-			if int(run.get("chest", 0)) == 0 or GameServer.bag(int(run.chest)).is_empty() and not run.get("chest_taken", false):
-				_spawn_chest(party, run, step, realm)
+						pos = at, seed = hash(step.id), formation = step.get("formation", {})})
 		"dungeon":
-			if str(run.get("portal", "")) == "" or not server.dungeons.portals.has(str(run.portal)):
+			var existing: Dictionary = server.dungeons.portals.get(str(run.get("portal", "")), {})
+			if existing.get("realm", "") != party.campaign.realm or existing.get("dungeon", "") != step.dungeon:
 				var death: Dictionary = run.get("last_death", {})
 				var pos := _v(death.get("pos", [])) if str(step.get("at", "death")) == "death" and death.has("pos") \
 						else Campaigns.resolve(step.get("at", {}), realm.world)
@@ -429,33 +592,75 @@ func _activate(party: Dictionary) -> void:
 				run.portal = portal.get("id", "")
 
 
-func _spawn_chest(party: Dictionary, run: Dictionary, step: Dictionary, realm: RealmInstance) -> void:
-	var where: String = party.campaign.realm
+## Resolve the owning instance before spawning, even while the realm is unloaded.
+func _chest_site(party: Dictionary, run: Dictionary, step: Dictionary) -> Dictionary:
+	var where := str(party.campaign.realm)
 	var pos := Vector3.INF
 	if step.at is String and step.at == "death":
 		var death: Dictionary = run.get("last_death", {})
 		where = str(death.get("realm", where))
 		pos = _v(death.get("pos", []))
-	else:
-		pos = Campaigns.resolve(step.at, realm.world)
-	if not server.realms.has(where):
-		where = party.campaign.realm
+	elif server.realms.has(where):
+		pos = Campaigns.resolve(step.at, server.realms[where].world)
+	if step.world == "castle":
+		where = str(party.campaign.get("castle", ""))
+	if not server.realms.has(where) or Dungeons.is_dungeon(where) and not _dungeon_belongs(where, str(party.campaign.realm)):
+		# A closed dungeon cannot hold loot. Recover it at its realm entrance.
+		where = str(party.campaign.realm)
 		pos = _v(run.get("dungeon_origin", []))
-		if pos == Vector3.INF: pos = realm.world.spawn_point
-	if pos == Vector3.INF:
+	if not server.realms.has(where):
+		return {}
+	var world: GameWorld = server.realms[where].world
+	if pos == Vector3.INF: pos = world.spawn_point
+	pos = Campaigns.open_spot(pos, world)
+	return {} if pos == Vector3.INF else {realm = where, pos = pos}
+
+
+func _dungeon_belongs(id: String, realm_id: String) -> bool:
+	for hop in 8:
+		var instance: RealmInstance = server.realms.get(id)
+		if instance == null: return false
+		id = str(instance.record.get("origin", ""))
+		if id == realm_id: return true
+	return false
+
+
+## Retry while a member is in the owning world; missing bags never complete a step.
+func _ensure_chest(party: Dictionary) -> void:
+	var run := _run_of(party)
+	if run.is_empty() or run.status != "active" or _step(run).get("kind", "") != "chest":
 		return
-	pos = Campaigns.open_spot(pos, server.realms[where].world)
-	if pos == Vector3.INF: return
+	var step := _step(run)
+	var site := _chest_site(party, run, step)
+	if site.is_empty(): return
+	var record := GameServer.bag(int(run.get("chest", 0)))
+	if not record.is_empty() and record.realm == site.realm and record.items.any(func(item: Variant) -> bool: return item != null and item.id == step.until):
+		return
+	if not party.members.any(func(pid: int) -> bool: return server.social.record(pid).get("realm", "") == site.realm):
+		return
+	if not record.is_empty() and record.realm == site.realm:
+		_on_bag(int(record.id))
+		return
+	_spawn_chest(party, run, step, server.realms[site.realm])
+	server.social.broadcast(party)
+
+
+func _spawn_chest(party: Dictionary, run: Dictionary, step: Dictionary, realm: RealmInstance) -> void:
+	var site := _chest_site(party, run, step)
+	if site.is_empty(): return
 	var items := []
 	for id: String in step.items:
 		items.append(Items.make(id))
-	run.chest = GameServer.spawn_bag(where, items, pos, GameServer.PUBLIC, "story")
 	run.chest_taken = false
+	run.chest = GameServer.spawn_bag(site.realm, items, site.pos, GameServer.PUBLIC, "story")
+	var chest := GameServer.bag(int(run.chest))
+	# Bag spacing may adjust the point. Keep the actual location for routing.
+	run.chest_site = {realm = site.realm, pos = [chest.pos.x, chest.pos.y, chest.pos.z]}
+	_touch(party.campaign.account)
 	if step.has("guards"):
 		for k in int(step.guards.count):
 			var a := TAU * k / float(step.guards.count)
-			var at := pos + Vector3(cos(a), 0, sin(a)) * (12.0 + k * 5.0)
-			at = Campaigns.open_spot(at, realm.world)
+			var at := Campaigns.open_spot(site.pos + Vector3(cos(a), 0, sin(a)) * (12.0 + k * 5.0), realm.world)
 			if at == Vector3.INF: continue
 			realm.world.enemy_director.add_quest_site({id = "quest_%s_%s_%s_%d" % [run.id, run.get("attempt", "legacy"), step.id, k], pack = step.guards.pack,
 				pos = at, seed = hash(step.id) + k})
@@ -468,26 +673,32 @@ func _on_bag(bag_id: int, _items: Variant = null) -> void:
 		if run.is_empty() or int(run.get("chest", 0)) != bag_id or run.get("chest_taken", false):
 			continue
 		var step := _step(run)
+		if step.get("kind", "") == "astral_parts" and run.status == "active":
+			_keep_items(party)
+			server.social.broadcast(party)
+			continue
+		if step.get("kind", "") != "chest" or run.status != "active": continue
 		var record := GameServer.bag(bag_id)
-		var left: bool = not record.is_empty() and record.items.any(func(i: Variant) -> bool: return i != null and i.id == step.get("until", ""))
-		if not left:
+		if not record.is_empty() and not record.items.any(func(item: Variant) -> bool: return item != null and item.id == step.until):
 			run.chest_taken = true
 			_advance(party, {})
 
 
 ## Any enemy died somewhere (from GameServer): kills count, deaths are remembered.
-func enemy_died(realm_id: String, def: EnemyDef, pos: Vector3) -> void:
+func enemy_died(realm_id: String, def: EnemyDef, pos: Vector3, site_id := "") -> void:
 	for party: Dictionary in server.social.parties.values():
 		var run := _run_of(party)
 		if run.is_empty() or run.status != "active" or realm_id not in [party.campaign.realm, run.get("dungeon", ""),
 				run.get("encore", ""), party.campaign.get("castle", "")]:
 			continue
 		var step := _step(run)
-		# "any": whatever falls near the step's spot counts (a mixed ambush).
-		var near := false
-		if step.get("any", false) and realm_id == party.campaign.realm and server.realms.has(realm_id):
-			near = _flat(Campaigns.resolve(step.at, server.realms[realm_id].world), pos) < 40.0
-		if step.get("kind", "") == "kill" and (def.id in step.enemies or near):
+		if step.get("kind", "") != "kill": continue
+		if step.has("pack"):
+			var expected := "quest_%s_%s_%s" % [run.id, run.get("attempt", "legacy"), step.id]
+			if site_id != expected: continue
+		elif site_id != "":
+			continue
+		if def.id in step.enemies or step.get("any", false):
 			run.last_death = {realm = realm_id, pos = [pos.x, pos.y, pos.z]}
 			run.count = int(run.count) + 1
 			_touch(party.campaign.account)
@@ -495,6 +706,14 @@ func enemy_died(realm_id: String, def: EnemyDef, pos: Vector3) -> void:
 				_advance(party, {})
 			else:
 				server.social.broadcast(party)
+
+
+## Count the actual quest pack, including members chased beyond the marked clearing.
+func _quest_enemy_died(actor: Enemy, realm_id: String) -> void:
+	if actor.is_minion or actor.pack == null: return
+	var site_id := str(actor.pack.site.get("id", ""))
+	if site_id.begins_with("quest_"):
+		enemy_died(realm_id, actor.def, actor.global_position, site_id)
 
 
 ## Is this dungeon part of a campaign's chain (its follow-up is the story's)?
@@ -522,10 +741,6 @@ func dungeon_cleared(realm_id: String, pos: Vector3) -> void:
 			continue
 		if realm_id == run.get("encore" if step.has("encore") else "dungeon", ""):
 			run.last_death = {realm = realm_id, pos = [pos.x, pos.y, pos.z]}
-			for id: String in [str(run.get("portal", "")), str(run.get("encore_portal", ""))]:
-				server.dungeons.despawn(id)
-			run.erase("portal")
-			run.erase("encore_portal")
 			_advance(party, {})
 
 
@@ -569,18 +784,41 @@ func on_death(player_id: int) -> void:
 
 
 func on_left(p: Dictionary) -> void:
+	var stats := GameServer.character(p.player_id)
+	if stats: stats.purge_story_items()
 	for party: Dictionary in server.social.parties.values():
 		_keep_world(party)
 	if _dirty.has(p.account_id):
 		flush()
 
 
-## A player signed a steward's book (set_home steps).
+## Home is account-wide, but each account in the party must choose it.
+func _home_progress(party: Dictionary, step: Dictionary) -> Dictionary:
+	if step.get("kind", "") != "set_home": return {}
+	var ready: Array[int] = []
+	var pending: Array[int] = []
+	for pid: int in party.members:
+		var stats := GameServer.character(pid)
+		if stats and stats.home == str(step.village): ready.append(pid)
+		else: pending.append(pid)
+	return {village = str(step.village), ready = ready, pending = pending, total = party.members.size()}
+
+
+func _check_home_step(party: Dictionary) -> void:
+	var run := _run_of(party)
+	if run.is_empty() or run.status != "active": return
+	var progress := _home_progress(party, _step(run))
+	if not progress.is_empty() and int(progress.total) > 0 and progress.pending.is_empty():
+		_advance(party, {})
+
+
+## A confirmed steward choice has been committed by the account service.
 func home_set(p: Dictionary, village: String) -> void:
 	var party := server.social.party_for(p.player_id)
 	var run := _run_of(party)
-	if not run.is_empty() and run.status == "active" and _step(run).get("kind", "") == "set_home" and _step(run).village == village:
-		_advance(party, p)
+	if run.is_empty() or run.status != "active" or _step(run).get("kind", "") != "set_home" or _step(run).village != village: return
+	_check_home_step(party)
+	server.social.broadcast(party)
 
 
 # --- Quests -------------------------------------------------------------------------------
@@ -592,6 +830,8 @@ func quest(p: Dictionary, objective: String) -> void:
 	var run := _run_of(party)
 	if run.is_empty() or run.status != "active" or _scenes.has(party.id):
 		return
+	if astral.action(party,run,p,objective): return
+	if reach.action(party,run,p,objective): return
 	if _try(party, run, p, _step(run), objective, false):
 		return
 	if not run.side_done:
@@ -599,15 +839,19 @@ func quest(p: Dictionary, objective: String) -> void:
 
 
 func _try(party: Dictionary, run: Dictionary, p: Dictionary, step: Dictionary, objective: String, side: bool) -> bool:
-	if step.is_empty() or p.realm != (party.campaign.tavern if step.world == "hall" else party.campaign.realm):
+	if step.is_empty(): return false
+	if step.world == "hall":
+		if not Campaigns.is_tavern(p.realm): return false
+	elif p.realm != party.campaign.realm:
 		return false
 	var world: GameWorld = _world_of(p.realm)
 	match str(step.kind):
 		"talk", "hand_over":
 			if objective != "npc:" + str(step.npc):
 				return false
-			var at := Campaigns.npc_position(step.npc, p.realm, world)
-			if at != Vector3.INF and _flat(at, p.pos) > REACH:
+			var roster := _sync_npcs(party, run)
+			var at := Campaigns.npc_position(step.npc, p.realm, world) if step.world == "hall" else (roster.get(step.npc, {}).get("pos", Vector3.INF) as Vector3)
+			if at == Vector3.INF or _flat(at, p.pos) > REACH:
 				return false
 			if step.kind == "hand_over":
 				var place: Dictionary = GameServer.character(p.player_id).find_item(step.item)
@@ -616,13 +860,9 @@ func _try(party: Dictionary, run: Dictionary, p: Dictionary, step: Dictionary, o
 					return true  # they don't carry it: the npc only sighs (shown on their screen)
 				if not place.is_empty():
 					GameServer.character(p.player_id).take(place)
-				if step.get("shared", false):
-					run.pending_talk = {step = run.step}
-					_keep_items(party)
-			if step.get("shared", false):
-				_start_scene(party, p, step, at)
-			else:
-				_advance(party, p, side)
+				run.pending_talk = {step = run.step}
+				_keep_items(party)
+			_start_scene(party, p, step, at, side)
 			return true
 		"ask_around":
 			if not objective.begins_with("ask:") or objective in run.get("asked", []):
@@ -630,7 +870,12 @@ func _try(party: Dictionary, run: Dictionary, p: Dictionary, step: Dictionary, o
 			if not run.has("asked"):
 				run.asked = []
 			run.asked.append(objective)
-			var knows := randf() < float(step.chance)
+			# Somebody always knows: the third villager asked at the latest
+			# (a small town can't run out of people to ask).
+			var knows: bool = randf() < float(step.chance) or run.asked.size() >= mini(3, ceili(1.0 / maxf(float(step.chance), 0.01)))
+			var answer := str(step.yes if knows else step.no)
+			var speaker := objective.trim_prefix("ask:").get_slice("@", 0)
+			_start_scene(party, p, {say = answer, speaker = speaker, advance = false}, p.pos)
 			_to_party(party, ["camp_answer", objective.trim_prefix("ask:"), step.yes if knows else step.no,
 					not knows and step.get("flee", false)])
 			if knows:
@@ -680,16 +925,18 @@ func _advance(party: Dictionary, p: Dictionary, side := false) -> void:
 	else:
 		run.count = 0
 		run.erase("chest")
+		run.erase("chest_taken")
+		run.erase("chest_site")
+		if step.get("kind", "") == "chest" and step.world == "dungeon":
+			for field in ["portal", "encore_portal"]:
+				server.dungeons.despawn(str(run.get(field, "")))
+				run.erase(field)
 		run.step = Campaigns.step_index(run.id, step.next) if step.has("next") else int(run.step) + 1
 		if step.has("cutscene"):
 			_to_party(party, ["camp_intro", Campaigns.CUTSCENES[step.cutscene]])
 		if step.get("final", false) or run.step >= def.steps.size() or run.step < 0:
 			_finish(party)
 			return
-		if _step(run).get("world", "") != "hall":
-			for pid: int in party.members:
-				if server.social.record(pid).get("realm", "") == party.campaign.tavern:
-					server.social.send_to(pid, "hall")
 		var next := Campaigns.objective_text(_step(run), 0)
 		for pid: int in party.members:
 			server.social.system(pid, "Quest updated: %s" % next)
@@ -722,20 +969,32 @@ func _reward(party: Dictionary, step: Dictionary) -> void:
 # --- Shared conversations and the vote ---------------------------------------------------
 
 ## Everyone is pulled in and watches the same conversation; only `p` turns the pages.
-func _start_scene(party: Dictionary, p: Dictionary, step: Dictionary, at: Vector3) -> void:
+func _start_scene(party: Dictionary, p: Dictionary, step: Dictionary, at: Vector3, side := false) -> void:
 	var run := _run_of(party)
 	var npc: Dictionary = Campaigns.NPCS.get(step.get("npc", ""), {})
 	_scenes[party.id] = {kind = "talk", driver = p.player_id, page = 0, pages = TextMarkup.pages(str(step.get("say", ""))),
-		title = npc.get("name", ""), focus = at if at != Vector3.INF else p.pos}
-	_pull_party(party, p.realm, p.pos, p.player_id)
-	_to_party(party, ["camp_scene", _scenes[party.id]])
+		side = side, shared = true, advance = step.get("advance", true), world = p.realm,
+		title = npc.get("name", step.get("speaker", "")), focus = at if at != Vector3.INF else p.pos}
+	if step.get("shared", false): _pull_party(party, p.realm, p.pos, p.player_id)
+	_scene_event(party, ["camp_scene", _scenes[party.id]])
 
 
 func _scene_done(party: Dictionary) -> void:
+	var side := bool(_scenes.get(party.id, {}).get("side", false))
+	var advance := bool(_scenes.get(party.id, {}).get("advance", true))
+	_scene_event(party, ["camp_scene_end"])
 	_scenes.erase(party.id)
 	_run_of(party).erase("pending_talk")
-	_to_party(party, ["camp_scene_end"])
-	_advance(party, {})
+	if advance:
+		_advance(party, {}, side)
+
+
+func _scene_event(party: Dictionary, event: Array) -> void:
+	var scene: Dictionary = _scenes.get(party.id, {})
+	if scene.get("shared", true):
+		_to_party(party, event)
+	elif scene.has("driver"):
+		server.social.send(int(scene.driver), event)
 
 
 func _start_vote(party: Dictionary, carrier: Dictionary, step: Dictionary) -> void:
@@ -786,7 +1045,7 @@ func _gather(party: Dictionary) -> void:
 	var realm: RealmInstance = server.realms.get(party.campaign.realm)
 	if realm == null:
 		return
-	var at := Campaigns.resolve(step.at if step.has("at") else Campaigns.NPCS[step.npc].at, realm.world)
+	var at := Campaigns.encounter_position(step.at, realm.world) if step.has("pack") else Campaigns.resolve(step.at if step.has("at") else Campaigns.NPCS[step.npc].at, realm.world)
 	for pid: int in party.members:
 		var o := server.social.record(pid)
 		if not o.is_empty() and o.realm == party.campaign.realm and _flat(o.pos, at) < float(step.get("gather_range", GATHER_RANGE)):
@@ -806,14 +1065,14 @@ static func _v(a: Variant) -> Vector3:
 
 
 static func _carries(p: Dictionary, item_id: String) -> bool:
-	var stats := GameServer.character(p.player_id)
+	var stats := GameServer.character(int(p.get("player_id", 0)))
 	return stats != null and not stats.find_item(item_id).is_empty()
 
 
 # --- The end ----------------------------------------------------------------------------
 
 ## Every member gets the completion and a copy of the world; story items
-## (all but the map pieces) are gone; the world stays open for the party.
+## are returned to the book; map fragments carry into the next tale of the pack.
 func _finish(party: Dictionary) -> void:
 	var run := _run_of(party)
 	var def := Campaigns.get_def(run.id)
@@ -843,18 +1102,32 @@ func _finish(party: Dictionary) -> void:
 			theirs.runs[run.id] = {id = run.id, status = "done", step = 0, stars_best = maxi(int(mine.get("stars_best", 0)), earned)}
 			theirs.worlds[Campaigns.world_key(run.id)] = world.duplicate(true)
 			_touch(p.account_id)
+		# The first time an account finishes a campaign, it earns Dots.
+		var theirs_book := book(p.account_id)
+		var paid: Array = theirs_book.get("dots_paid", [])
+		if not run.id in paid:
+			theirs_book.dots_paid = paid + [run.id]
+			_touch(p.account_id)
+			server.economy.award(p, Dots.CAMPAIGN_FIRST, "campaign")
 		if stats:
 			stats.add_xp(int(def.get("xp", 500)))
-			for i in stats.backpack.size():
-				var item: Item = stats.backpack[i]
-				if item and (item.is_story() and item.id != "story_clue" or item.is_key()):
-					stats.take({kind = "pack", key = i})
+			var carry := []
+			if not def.get("pack_end", false):
+				for item in stats.backpack:
+					if item and item.id == "story_clue": carry.append({id = item.id, count = item.count})
+			var theirs := book(p.account_id)
+			if not theirs.has("story_carry"): theirs.story_carry = {}
+			theirs.story_carry[Campaigns.world_key(run.id)] = carry
+			_touch(p.account_id)
+			stats.purge_story_items(true)
 		var result := {id = run.id, title = def.title, stars = stars, elapsed = run.elapsed, xp = int(def.get("xp", 500))}
 		if def.get("pack_end", false):
 			_pack_done(pid, p, stats, def, result)
 		else:
 			server.social.send(pid, ["camp_done", result])
 			server.social.system(pid, "[b]%s[/b] complete! %d of 5 stars." % [def.title, earned])
+	run.erase("items")
+	run.erase("item_pending")
 	book(party.campaign.account).active = ""
 	_touch(party.campaign.account)
 	flush()
@@ -886,7 +1159,8 @@ func _pack_done(pid: int, p: Dictionary, stats: PlayerStats, def: Dictionary, re
 		if stats:
 			stats.add_xp(15000)
 			if item: stats.give([item])
-		bonus = {title = pack.get("title", ""), xp = 15000, item = item.item_name if item else ""}
+		server.economy.award(p, Dots.PACK_FIRST, "pack")
+		bonus = {title = pack.get("title", ""), xp = 15000, item = item.item_name if item else "", dots = Dots.PACK_FIRST}
 	get_tree().create_timer(36.0).timeout.connect(func() -> void:
 		server.social.send(pid, ["camp_done", result])
 		if not bonus.is_empty():
@@ -907,6 +1181,9 @@ func member_left(party: Dictionary, player_id: int) -> void:
 	var scene: Dictionary = _scenes.get(party.id, {})
 	if scene.is_empty():
 		return
+	if not scene.get("shared", true) and scene.get("driver", 0) == player_id:
+		_scenes.erase(party.id)
+		return
 	if scene.get("driver", 0) == player_id and not party.members.is_empty():
 		scene.driver = party.leader
 	if scene.kind == "vote":
@@ -914,42 +1191,71 @@ func member_left(party: Dictionary, player_id: int) -> void:
 		if scene.votes.size() >= party.members.size():
 			_count_votes(party)
 			return
-	_to_party(party, ["camp_scene", scene])
+	_scene_event(party, ["camp_scene", scene])
 
 
 ## Story inventory belongs to the run too, including in test mode where characters aren't saved.
 func _keep_items(party: Dictionary) -> void:
-	var run := _run_of(party)
-	if run.is_empty() or run.status != "active":
-		return
-	if not run.has("items"):
-		run.items = {}
+	if party.is_empty(): return
 	for pid: int in party.members:
-		var p := server.social.record(pid)
-		var stats := GameServer.character(pid)
-		if p.is_empty() or stats == null:
-			continue
-		var items := []
-		for item in stats.backpack:
-			if item and (item.is_story() or item.is_key()):
-				items.append({id = item.id, count = item.count})
-		run.items[str(p.account_id)] = items
+		_keep_player_items(party, server.social.record(pid))
+
+
+func _keep_player_items(party: Dictionary, p: Dictionary) -> void:
+	var run := _run_of(party)
+	if p.is_empty() or run.is_empty() or not run.status in ["active", "paused"]: return
+	var stats := GameServer.character(p.player_id)
+	if stats == null: return
+	if not run.has("items"): run.items = {}
+	var pending := []
+	for data: Dictionary in run.get("item_pending", {}).get(str(p.account_id), []):
+		var item := Items.make(str(data.id))
+		if item == null or not (item.is_story() or item.is_key()): continue
+		item.count = clampi(int(data.get("count", 1)), 1, item.stack_max)
+		if stats.give([item]) == 0: pending.append({id = item.id, count = item.count})
+	if not run.has("item_pending"): run.item_pending = {}
+	run.item_pending[str(p.account_id)] = pending
+	var items := []
+	for item in stats.backpack:
+		if item and (item.is_story() or item.is_key()): items.append({id = item.id, count = item.count})
+	items.append_array(pending)
+	run.items[str(p.account_id)] = items
 	_touch(party.campaign.account)
 
 
+## Migrate old character-carried quest progress before removing those items.
+func migrate_story_inventory(p: Dictionary, items: Array) -> void:
+	if items.is_empty(): return
+	var b := book(p.account_id)
+	var active: Dictionary = b.runs.get(str(b.get("active", "")), {})
+	var account := str(p.account_id)
+	if not active.is_empty() and active.get("status", "") in ["active", "paused"]:
+		if not active.has("items"): active.items = {}
+		if not active.items.has(account): active.items[account] = items.duplicate(true)
+	else:
+		var maps := items.filter(func(item: Dictionary) -> bool: return item.id == "story_clue")
+		if not maps.is_empty():
+			if not b.has("story_carry"): b.story_carry = {}
+			if not b.story_carry.has("hidden_power"): b.story_carry.hidden_power = maps
+	_touch(p.account_id)
+
+
 func _restore_items(p: Dictionary, run: Dictionary) -> void:
-	if p.is_empty() or run.is_empty() or not run.has("items"):
-		return
+	if p.is_empty(): return
 	var stats := GameServer.character(p.player_id)
-	if stats == null or not run.items.has(str(p.account_id)):
-		return
-	for i in stats.backpack.size():
-		var item: Item = stats.backpack[i]
-		if item and (item.is_story() or item.is_key()):
-			stats.take({kind = "pack", key = i})
-	var items := []
-	for data: Dictionary in run.items[str(p.account_id)]:
+	if stats == null: return
+	stats.purge_story_items(not run.is_empty())
+	if run.is_empty() or run.get("status", "") != "active": return
+	var saved: Array
+	if run.get("items", {}).has(str(p.account_id)):
+		saved = run.items[str(p.account_id)]
+	else:
+		saved = book(p.account_id).get("story_carry", {}).get(Campaigns.world_key(run.id), []) if Campaigns.get_def(run.id).get("requires", "") != "" else []
+	var pending := []
+	for data: Dictionary in saved:
 		var item := Items.make(str(data.id))
-		item.count = int(data.count)
-		items.append(item)
-	stats.give(items)
+		if item == null or not (item.is_story() or item.is_key()): continue
+		item.count = clampi(int(data.get("count", 1)), 1, item.stack_max)
+		if stats.give([item]) == 0: pending.append({id = item.id, count = item.count})
+	if not run.has("item_pending"): run.item_pending = {}
+	run.item_pending[str(p.account_id)] = pending

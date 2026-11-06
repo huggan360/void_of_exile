@@ -26,7 +26,7 @@ const DIVINE := 0
 ## Lines describing special abilities, shown in the tooltip.
 @export var abilities: PackedStringArray = []
 ## Special effects the player picks up while this is equipped, e.g.
-## {lifesteal = 1, mp_regen = 1.5, shield_drain = 0.7, shield_absorb = 1.3,
+## {lifesteal = 1, mp_regen = 1.5, shield_drain = 0.7,
 ##  shield_heal = 3.0, trail = "embers"}.
 @export var effects := {}
 ## Consumables: what using one does, e.g. {hp = 100}, {mp = 100} or
@@ -55,11 +55,17 @@ var count := 1
 ## How the projectile looks and flies: style ("arrow", "bolt", "orb"),
 ## color, color2, glow, trail, speed, range, size, wave_amp, wave_freq, pierce.
 @export var projectile := {}
+
+## Shared by local shots, remote allies and the item tooltip. Enemy attacks
+## have their own definitions and do not use this multiplier.
+const PLAYER_PROJECTILE_RANGE_MULTIPLIER := 0.6
+
 ## Seconds the archer draws the string before each shot (slow, heavy bows).
 @export var windup := 0.0
 ## Right-click charged shot (G3+ and Divine bows). Empty = none.
 ## {style, mult, ...}: "power" (one big fast shot), "volley" (count, spread),
-## "helix" (two big weaving shots), "burst" (count, interval),
+## "helix" (two big weaving shots), "serpent_fan" (piercing fan: count, spread),
+## "burst" (count, interval),
 ## "singularity" (piercing arrow that collapses into a warp ring),
 ## "inferno" (fire bolt that bursts into flames on impact).
 @export var charge := {}
@@ -79,8 +85,17 @@ var count := 1
 @export var aura_power := 0.0
 
 var _icon: Texture2D
+var _icon_variant := -1
 var _silhouette: Texture2D
+var _outline: Texture2D
 var _glow: Texture2D
+const OUTLINE_CORE_SIZE := 40.0
+const OUTLINE_SAMPLES := 3
+static var _outline_cache := {}  # source texture -> shared smooth mask across inventory snapshots
+
+
+func projectile_range() -> float:
+	return float(projectile.get("range", 22.0)) * PLAYER_PROJECTILE_RANGE_MULTIPLIER
 
 
 func shot_share(index: int, count := -1) -> float:
@@ -93,7 +108,7 @@ func shot_share(index: int, count := -1) -> float:
 
 
 func attack_effects(secondary := false) -> Array[Dictionary]:
-	return secondary_effects if secondary else primary_effects
+	return Burning.with_effect(secondary_effects if secondary else primary_effects, Burning.weapon_duration(self,secondary))
 
 const ICON_SIZE := 8
 
@@ -165,8 +180,15 @@ func grade_name() -> String:
 
 ## The item's 8 x 8 pixel art.
 func icon() -> Texture2D:
-	if id == "story_clue":  # the stack shows how many map pieces are fitted together
-		return load("res://items/textures/story_clue_%d.png" % clampi(count, 1, 6))
+	if id == "story_clue":  # retain the texture used by CanvasItem draw commands
+		var variant := clampi(count, 1, 6)
+		if _icon == null or _icon_variant != variant:
+			_icon = load("res://items/textures/story_clue_%d.png" % variant)
+			_icon_variant = variant
+			_silhouette = null
+			_outline = null
+			_glow = null
+		return _icon
 	if _icon == null:
 		_icon = load("res://items/textures/%s.png" % id)
 	return _icon
@@ -176,8 +198,9 @@ func icon() -> Texture2D:
 ## direction behind the icon, giving a hairline outline (a fraction of an
 ## art pixel).
 func silhouette() -> Texture2D:
+	var source := icon()  # may invalidate the shape when map pieces change
 	if _silhouette == null:
-		var img: Image = icon().get_image()
+		var img: Image = source.get_image().duplicate()
 		img.convert(Image.FORMAT_RGBA8)
 		for y in img.get_height():
 			for x in img.get_width():
@@ -186,10 +209,33 @@ func silhouette() -> Texture2D:
 		_silhouette = ImageTexture.create_from_image(img)
 	return _silhouette
 
+## A three-times oversampled one-pixel outline for a 40-pixel icon. Native
+## image blits build the dilation; mipmaps keep it stable when the UI shrinks.
+## Draw behind a nearest-filtered icon so smoothing never blurs the item art.
+func outline_mask() -> Texture2D:
+	var source := icon()
+	if _outline_cache.has(source):
+		_outline = _outline_cache[source]
+		return _outline
+	if _outline == null:
+		var core := int(OUTLINE_CORE_SIZE)*OUTLINE_SAMPLES
+		var src: Image = silhouette().get_image().duplicate()
+		src.resize(core,core,Image.INTERPOLATE_NEAREST)
+		var image := Image.create_empty(core+OUTLINE_SAMPLES*2,core+OUTLINE_SAMPLES*2,false,Image.FORMAT_RGBA8)
+		for dy in range(-OUTLINE_SAMPLES,OUTLINE_SAMPLES+1):
+			for dx in range(-OUTLINE_SAMPLES,OUTLINE_SAMPLES+1):
+				if dx*dx+dy*dy>OUTLINE_SAMPLES*OUTLINE_SAMPLES: continue
+				image.blend_rect(src,Rect2i(0,0,core,core),Vector2i(OUTLINE_SAMPLES+dx,OUTLINE_SAMPLES+dy))
+		image.generate_mipmaps()
+		_outline = ImageTexture.create_from_image(image)
+		_outline_cache[source] = _outline
+	return _outline
+
 
 ## A soft silhouette one art pixel bigger all round (10 x 10), drawn tinted
 ## and shimmering behind Divine items.
 func glow_mask() -> Texture2D:
+	icon()  # keep masks in step with a changing map-shard stack
 	if _glow == null:
 		var src: Image = silhouette().get_image()
 		var img := Image.create_empty(ICON_SIZE + 2, ICON_SIZE + 2, false, Image.FORMAT_RGBA8)

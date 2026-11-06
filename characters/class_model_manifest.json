@@ -1,12 +1,23 @@
 [
   {
+	"id": "archer",
+	"name": "Archer",
+	"folder": "characters/archer",
+	"status": "playable",
+	"scene": "characters/archer/model.tscn",
+	"voxel_size": 0.1125,
+	"held_in": "right_hand",
+	"rig_version": 2
+  },
+  {
 	"id": "wizard",
 	"name": "Wizard",
 	"folder": "characters/wizard",
 	"status": "playable",
 	"scene": "characters/wizard/model.tscn",
 	"voxel_size": 0.1125,
-	"held_in": "right_hand"
+	"held_in": "right_hand",
+	"rig_version": 2
   },
   {
 	"id": "priest",
@@ -15,7 +26,8 @@
 	"status": "playable",
 	"scene": "characters/priest/model.tscn",
 	"voxel_size": 0.1125,
-	"held_in": "right_hand"
+	"held_in": "right_hand",
+	"rig_version": 2
   },
   {
 	"id": "alchemist",
@@ -24,7 +36,8 @@
 	"status": "playable",
 	"scene": "characters/alchemist/model.tscn",
 	"voxel_size": 0.1125,
-	"held_in": "right_hand"
+	"held_in": "right_hand",
+	"rig_version": 2
   },
   {
 	"id": "merrow",
@@ -33,6 +46,7 @@
 	"status": "playable",
 	"scene": "characters/merrow/model.tscn",
 	"voxel_size": 0.1125,
-	"held_in": "right_hand"
+	"held_in": "right_hand",
+	"rig_version": 2
   }
 ]

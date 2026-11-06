@@ -8,15 +8,10 @@ class_name Loot
 ##                                                 any graded item that fits
 ## with chance 1.0 meaning a guaranteed drop.
 ##
-## Public loot (items that go in gray or green bags) is rolled once and
-## dropped for everyone. Personal loot (blue bags and up, soulbound) is rolled
-## separately for every player who dealt at least loot_threshold of the
-## enemy's health; each gets their own bag only they can see. With more than
-## one such player, the one who dealt the most damage rolls at full chance
-## and the others at a little less (OTHERS_CHANCE).
-##
-## Elixirs always come in their own gray bag; items go in a separate bag of
-## their color, so one kill can leave a gray bag and a green bag.
+## Bosses and gods roll all rewards privately for each eligible contributor.
+## Ordinary public rolls remain shared unless merged into their top contributor's
+## private chest. One ordinary chest per recipient uses its best item's tier;
+## HP/MP elixirs are discarded above gray. Story chests always stay separate.
 
 const OTHERS_CHANCE := 0.9
 
@@ -49,7 +44,7 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 		var sample := _make(entry, rng, biome_stat)
 		if sample == null or not _allowed(def, sample):
 			continue
-		if not sample.soulbound():
+		if not sample.soulbound() and not def.is_god and not def is BossDef:
 			if rng.randf() < minf(1.0,float(entry.chance)*(1.0+float(public_mod.get("chance",0.0)))):
 				var upgraded := upgrade(sample,float(public_mod.get("tier",0.0)),rng)
 				if upgraded.soulbound():
@@ -76,6 +71,14 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 						if rng.randf() < luck: count += 1
 				for potion in count:
 					personal[p].append(Items.stat_elixir(str(def.dungeon_potions[rng.randi_range(0, def.dungeon_potions.size() - 1)])))
+	# Story items never compete with ordinary loot for a chest or tier.
+	var story := public.filter(func(item: Item) -> bool: return item.is_story())
+	public = public.filter(func(item: Item) -> bool: return not item.is_story())
+	_pack(bags, story, GameServer.PUBLIC)
+	if not personal.is_empty() and not public.is_empty():
+		if not personal.has(public_owner): personal[public_owner] = []
+		personal[public_owner].append_array(public)
+		public.clear()
 	_pack(bags, public, GameServer.PUBLIC)
 	for p in personal:
 		_pack(bags, personal[p], p)
@@ -102,17 +105,16 @@ static func _allowed(def: EnemyDef, item: Item) -> bool:
 	return item.tier <= cap
 
 
-## Each bag color is separate: stat potions stay blue even alongside rare red gear.
+## One ordinary chest plus an optional story chest, without truncating loot.
 static func _pack(bags: Array[Dictionary], items: Array, viewer: int) -> void:
-	var groups := {}
-	for item: Item in items:
-		var color := item.bag_type()
-		if not groups.has(color):
-			groups[color] = []
-		groups[color].append(item)
-	for group: Array in groups.values():
-		for start in range(0, group.size(), LootBag.SLOTS):
-			bags.append({items = group.slice(start, start + LootBag.SLOTS), viewer = viewer})
+	var story: Array = items.filter(func(item: Item) -> bool: return item != null and item.is_story())
+	var ordinary: Array = items.filter(func(item: Item) -> bool: return item != null and not item.is_story())
+	if not story.is_empty(): bags.append({items = story, viewer = viewer, type = "story"})
+	if ordinary.is_empty(): return
+	var tier := LootBag.type_for(ordinary)
+	if tier != "gray":
+		ordinary = ordinary.filter(func(item: Item) -> bool: return not item.is_elixir())
+	if not ordinary.is_empty(): bags.append({items = ordinary, viewer = viewer, type = tier})
 
 
 ## Upgrade only already-dropped graded gear, by exactly one step. Never divine or consumables.

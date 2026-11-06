@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://lm5x24y0ra5o"
+path="res://.godot/imported/head_unmade.vox-19611436597e96c2be8ef3cca23b8add.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/head_unmade.vox"
+dest_files=["res://.godot/imported/head_unmade.vox-19611436597e96c2be8ef3cca23b8add.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

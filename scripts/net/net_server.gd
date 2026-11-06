@@ -31,6 +31,7 @@ var social := SocialServer.new()
 var dungeons := DungeonServer.new()
 ## Campaigns and their quests.
 var campaigns := CampaignServer.new()
+var economy := EconomyServer.new()
 var peer := ENetMultiplayerPeer.new()
 ## peer id -> player record (see on_hello)
 var peers := {}
@@ -87,6 +88,8 @@ func start(p_config: ServerConfig) -> Error:
 	campaigns.server = self
 	add_child(social)
 	add_child(campaigns)
+	economy.server = self
+	add_child(economy)
 	print("[server] %s listening on UDP %d (status %d), account service %s" % [
 			config.value("server", "name"), port, port + Net.STATUS_PORT_OFFSET, api.base_url])
 	if api.server_key == "":
@@ -180,6 +183,8 @@ func on_hello(peer_id: int, protocol: int, token: String, character_id: int, acc
 	if not peers.has(peer_id):
 		GameServer.remove_player(player_id)
 		return
+	campaigns.migrate_story_inventory(p, p.get("story_migration", []))
+	p.erase("story_migration")
 	p.joined = true
 	by_player[player_id] = peer_id
 	stats.changed.connect(_on_stats_changed.bind(peer_id))
@@ -196,7 +201,7 @@ func on_hello(peer_id: int, protocol: int, token: String, character_id: int, acc
 		server_name = config.value("server", "name"), motd = config.value("server", "motd"),
 		player_collision = config.value("gameplay", "player_collision", false),
 		tick_rate = config.value("network", "tick_rate", 20), account_xp = p.acct_xp,
-		singleplayer = config.singleplayer,
+		singleplayer = config.singleplayer, dots = p.dots, developer = p.developer,
 	})
 	print("[server] %s joined with character #%d (%d online)" % [p.name, character_id, player_count()])
 
@@ -207,7 +212,28 @@ func _new_record(peer_id: int, character_id: int, account_name: String) -> Dicti
 		joined = false, dead = false, realm = "", pos = Vector3.ZERO, facing = 0.0, speed = 0.0, flags = 0,
 		moved_at = 0.0, grace = 0.0, known = {}, known_players = {}, sent_attacks = {}, ack = 0,
 		dirty = false, rtt = 0.0, gear_key = "", acct_xp = 0, acct_pending = 0, switching = false,
+		dots = 0, developer = false, vault = {}, saving = false,
 	}
+
+
+## Commit before advancing a steward quest; every later character claim
+## receives this account home, including newly created characters.
+func _set_account_home(p: Dictionary, village: String) -> void:
+	var realm: RealmInstance = realms.get(str(p.realm))
+	if realm == null or not realm.world is IslandWorld or village.length() >= 40: return
+	var town: VillageFeature = realm.world._village_plans.get(village)
+	if town == null or Vector2(p.pos.x, p.pos.z).distance_to(Vector2(town.center)) > town.radius + 12.0: return
+	var character_id := int(p.character_id)
+	var result := await api.call_api("POST", "/server/home", {character_id = character_id, home = village})
+	if not result.ok:
+		social.system(p.player_id, "Could not save your account's spawn town. Please try again.")
+		_send_character(int(by_player.get(p.player_id, 0)))
+		return
+	for other: Dictionary in peers.values():
+		if other.get("joined", false) and int(other.get("account_id", 0)) == int(p.account_id):
+			GameServer.request_set_home(int(other.player_id), village)
+			other.dirty = true
+	if int(p.character_id) == character_id: campaigns.home_set(p, village)
 
 
 ## Puts a claimed character (the account service's answer) into `stats`: its
@@ -218,11 +244,21 @@ func _take_character(p: Dictionary, stats: PlayerStats, claim: Dictionary) -> vo
 	p.dirty = data.is_empty()
 	if data.is_empty():
 		data = config.new_character(str(claim.character.get("class", "archer")), claim.account.get("rewards", [])).to_data()
+	if claim.account.get("home") != null:
+		if str(data.get("home", "")) != str(claim.account.home): p.dirty = true
+		data = data.duplicate(true)
+		data.home = str(claim.account.home)
 	stats.load_data(data)
+	var removed := stats.purge_story_items()
+	if not removed.is_empty():
+		p.dirty = true
+		if int(p.get("account_id", 0)) == 0:
+			p.story_migration = removed.map(func(item: Item) -> Dictionary: return {id = item.id, count = item.count})
 	if config.test_mode:
 		GameServer.give_demo_kit(stats)
 	p.acct_xp = int(claim.account.get("progress", {}).get("xp", 0))
 	p.acct_pending = 0
+	economy.take_account(p, claim.account)
 
 
 ## The player picks another character (in the Tavern, or after dying): the
@@ -231,12 +267,13 @@ func _switch_character(peer_id: int, p: Dictionary, token: String, character_id:
 	if p.switching or character_id == p.character_id and not p.dead:
 		return
 	if not p.dead and not Campaigns.is_tavern(p.realm):
-		_to_peer(peer_id, ["switch_fail", "You can only change characters in the Tavern."])
+		Net.c_events.rpc_id(peer_id, [[Net.now(), "switch_fail", "You can only change characters in the Tavern."]])
 		return
 	for other: Dictionary in peers.values():
 		if other != p and other.character_id == character_id and other.joined:
-			_to_peer(peer_id, ["switch_fail", "That character is already playing here."])
+			Net.c_events.rpc_id(peer_id, [[Net.now(), "switch_fail", "That character is already playing here."]])
 			return
+	campaigns._keep_items(social.party_for(p.player_id))
 	p.switching = true
 	var old_id: int = p.character_id
 	if not p.dead:
@@ -251,15 +288,16 @@ func _switch_character(peer_id: int, p: Dictionary, token: String, character_id:
 	if not r.ok:
 		if not p.dead:  # keep playing the old one
 			api.call_api("POST", "/server/claim", {token = token, character_id = old_id})
-		_to_peer(peer_id, ["switch_fail", r.error])
+		Net.c_events.rpc_id(peer_id, [[Net.now(), "switch_fail", r.error]])
 		return
 	var stats := GameServer.character(p.player_id)
 	p.character_id = character_id
 	p.dead = false
 	_take_character(p, stats, r.data)
 	GameServer.revive(p.player_id)
+	campaigns._restore_items(p, campaigns._run_of(social.party_for(p.player_id)))
 	_send_character(peer_id)
-	_to_peer(peer_id, ["switched", character_id, stats.class_id, p.acct_xp])  # (after dying they ask to enter the Tavern)
+	_to_peer(peer_id, ["switched", character_id, stats.class_id, p.acct_xp, stats.to_data()])  # (after dying they ask to enter the Tavern)
 	print("[server] %s switched to character #%d (%s)" % [p.name, character_id, stats.class_id])
 
 
@@ -302,7 +340,7 @@ func _grave(p: Dictionary, stats: PlayerStats) -> Array:
 		return []
 	var pos: Vector3 = p.pos
 	pos.y = realm.world.ground_height(pos.x, pos.z)
-	var title := "%s  ·  %s, level %d" % [p.name, PlayerClasses.display_name(stats.class_id), stats.level]
+	var title := "%s  -  %s, level %d" % [p.name, PlayerClasses.display_name(stats.class_id), stats.level]
 	realm.graves.append({pos = pos, title = title})
 	Gravestone.place(realm.world, pos, title, false)
 	for obstacle_id: String in realm.world.obstacles_near(pos, Gravestone.CLEAR_RADIUS):
@@ -339,8 +377,10 @@ func on_enter(peer_id: int, destination: String) -> void:
 		return
 	var record := {id = "hall"}
 	var realm: RealmInstance = null
-	# While your party plays a campaign, home is its own Tavern.
-	if destination == "hall" and campaigns.home_for(p) != "":
+	var dungeon_return := Dungeons.is_dungeon(p.realm) and str(dungeons.grants.get(p.player_id, "")) == destination
+	var arrival: Dictionary = p.get("dungeon_arrival", {}) if dungeon_return else {}
+	# A dungeon return preserves the actual source Tavern as well.
+	if not dungeon_return and destination == "hall" and campaigns.home_for(p) != "":
 		destination = campaigns.home_for(p)
 	if destination == "campaign":  # the Chronicle Gate: your party's campaign realm
 		var found := campaigns.realm_for(p)
@@ -348,7 +388,15 @@ func on_enter(peer_id: int, destination: String) -> void:
 			Net.c_entered.rpc_id(peer_id, {error = found[1]})
 			return
 		destination = found[0]
-	if Campaigns.is_tavern(destination) and destination != "hall":
+	if ChambersWorld.is_chambers(destination):
+		if p.account_id == 0:
+			Net.c_entered.rpc_id(peer_id, {error = "The Chambers need an account."})
+			return
+		record = await economy.enter(p)
+		if record.has("error") or not peers.has(peer_id) or p.dead:
+			Net.c_entered.rpc_id(peer_id, record if record.has("error") else {error = "You can't go there right now."})
+			return
+	elif Campaigns.is_tavern(destination) and destination != "hall":
 		if not campaigns.may_enter(p, destination):
 			Net.c_entered.rpc_id(peer_id, {error = "That Tavern belongs to another party's tale."})
 			return
@@ -368,6 +416,12 @@ func on_enter(peer_id: int, destination: String) -> void:
 			Net.c_entered.rpc_id(peer_id, {error = "That tale is no longer active."})
 			return
 		realm = campaigns.open_castle(party)
+	elif SpaceWorld.is_space(destination):
+		if not _astral_unlocked(p):
+			Net.c_entered.rpc_id(peer_id, {error = "The Astral Reach opens once the Theory of Everything is told."})
+			return
+		realm = realms.get(destination)
+		if realm == null: realm = open_realm_record(destination, {id = destination, seed = 0, destroyed = [], space = true, name = "The Astral Reach"})
 	elif Dungeons.is_dungeon(destination):
 		if not dungeons.may_enter(p, destination):
 			Net.c_entered.rpc_id(peer_id, {error = "Enter through a living dungeon portal."})
@@ -384,15 +438,26 @@ func on_enter(peer_id: int, destination: String) -> void:
 	_leave_realm(p)
 	if realm:
 		record = {id = realm.realm_id, seed = realm.record.seed, destroyed = realm.record.destroyed.duplicate(),
-			name = realm.record.get("name", ""), layout_version = realm.record.get("layout_version", 1)}
+			name = realm.record.get("name", ""), layout_version = realm.record.get("layout_version", 1),
+			cleared_packs = realm.record.get("cleared_packs", []).duplicate()}
+		if realm.record.get("astral_station",false): record.astral_station=true
 		if realm.record.get("castle", false):
 			record.castle = true
 		if realm.record.has("dungeon"):
 			record.dungeon = realm.record.dungeon
 			record.origin = realm.record.origin
+			if realm.world is TheoryWorld: record.theory_state = realm.world.state_wire()
+		elif realm.world is SpaceWorld:
+			record.space = true
+			record.space_state = realm.world.state_wire()
+			record.intro = _astral_first_visit(p)
 		else:
 			record.stronghold_gates = realm.world.gates.states()
 		realm.add_player(p.player_id, peer_id)
+	if arrival.get("realm", "") == destination and (arrival.get("pos", Vector3.INF) as Vector3).is_finite():
+		record.arrival_pos = arrival.pos
+		p.pos = arrival.pos
+		if realm and realm.proxies.has(p.player_id): realm.proxies[p.player_id].global_position = arrival.pos
 	p.realm = record.id
 	p.known.clear()
 	p.known_players.clear()
@@ -402,13 +467,19 @@ func on_enter(peer_id: int, destination: String) -> void:
 	p.grace = SNAP_BACK_GRACE * 8.0
 	p.moved_at = 0.0
 	GameServer.enter_realm(p.player_id, record.id)
+	if record.get("chambers", false):
+		economy.spawn_chests(p)
+	if Campaigns.is_tavern(str(record.get("id", destination))) or record.get("id", destination) == "hall":
+		record.astral_unlocked = _astral_unlocked(p)
 	Net.c_entered.rpc_id(peer_id, record)
 	for bag_record in GameServer.bags_in(record.id, p.player_id):
 		_to_peer(peer_id, ["bag+", _bag_wire(bag_record)])
 	if realm:
 		for g: Dictionary in realm.graves:
 			_to_peer(peer_id, ["grave", g.pos, g.title, false])
-	social.system(p.player_id, ("Welcome to [place]Hearthhaven[/place], %s." % p.name if record.id == "hall" else
+	if record.get("chambers", false):
+		social.system(p.player_id, "Your Chambers: %d chests, shared by every character of your account." % record.chests)
+	else: social.system(p.player_id, ("Welcome to [place]Hearthhaven[/place], %s." % p.name if record.id == "hall" else
 			"Back in [place]Hearthhaven[/place]. Your party's tale goes on.") if realm == null else
 			"Welcome to %s. %s" % [realm.record.get("name", "the realm"), "Your party's story continues here."
 			if Campaigns.is_campaign_realm(realm.realm_id) else str(config.value("server", "motd", ""))])
@@ -418,10 +489,34 @@ func on_enter(peer_id: int, destination: String) -> void:
 
 
 func _leave_realm(p: Dictionary) -> void:
+	if ChambersWorld.is_chambers(p.realm):
+		economy.leave(p)
 	var realm: RealmInstance = realms.get(p.realm)
+	if realm and realm.world is SpaceWorld:
+		realm.world.player_left(p.player_id)
 	if realm:
 		realm.remove_player(p.player_id)
 	p.realm = ""
+
+
+## The Reach opens after the Theory of Everything: for its tellers, and for a
+## party standing in a Theory instance whose Empress has fallen.
+func _astral_unlocked(p: Dictionary) -> bool:
+	if config.test_mode: return true
+	var here: RealmInstance = realms.get(p.realm)
+	if here and here.world is TheoryWorld and here.world.boss_defeated: return true
+	if int(p.get("account_id", 0)) == 0 or not is_instance_valid(campaigns): return false
+	return str(campaigns.book(p.account_id).get("runs", {}).get("theory_of_everything", {}).get("status", "")) == "done"
+
+
+## True once per account: the Nexus tour plays on the first arrival.
+func _astral_first_visit(p: Dictionary) -> bool:
+	if int(p.get("account_id", 0)) == 0 or not is_instance_valid(campaigns): return true
+	var book: Dictionary = campaigns.book(p.account_id)
+	if book.get("astral_intro", false): return false
+	book.astral_intro = true
+	campaigns._touch(p.account_id)
+	return true
 
 
 ## A realm with room for one more (the asked-for one if it has room).
@@ -473,7 +568,7 @@ func _unload_empty_realms(_delta: float) -> void:
 	var after := float(config.value("realms", "unload_after_empty", 120.0))
 	for id in realms.keys():
 		var realm: RealmInstance = realms[id]
-		if realm.proxies.is_empty() and realm.empty_for > after:
+		if realm.proxies.is_empty() and realm.empty_for > after and not dungeons.keeps_origin_open(id):
 			realms.erase(id)
 			realm.queue_free()
 			print("[server] closed %s (empty)" % id)
@@ -488,12 +583,25 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 	var t := Net.now()
 	var stats := GameServer.character(p.player_id)
 	if GameServer.intro_locked(p.player_id) or (stats and stats.buffs.has_effect("static")):
-		if Vector2(pos.x-p.pos.x,pos.z-p.pos.z).length()>.15: Net.c_correct.rpc_id(peer_id,p.pos)
-		pos.x = p.pos.x
-		pos.z = p.pos.z
+		if pos.distance_to(p.pos)>.15: Net.c_correct.rpc_id(peer_id,p.pos)
+		pos = p.pos
 		speed = 0.0
 		if GameServer.intro_locked(p.player_id): flags = flags & ~1
 	var active_realm: RealmInstance = realms.get(p.realm)
+	var recovering := false
+	if active_realm and active_realm.world is SpatialWorld:
+		if not pos.is_finite(): return
+		var barrier: Dictionary = active_realm.world.barrier_between(p.pos,pos)
+		if not barrier.is_empty():
+			p.pos = barrier.point
+			p.grace = SNAP_BACK_GRACE
+			if active_realm.proxies.has(p.player_id): active_realm.proxies[p.player_id].global_position = p.pos
+			Net.c_correct.rpc_id(peer_id,p.pos)
+			return
+		recovering = active_realm.world.legal_recovery(p.pos,pos)
+		if not active_realm.world.is_walkable(pos):
+			Net.c_correct.rpc_id(peer_id,active_realm.world.recovery_point(p.pos))
+			return
 	if active_realm and active_realm.world is IslandWorld and active_realm.world.gates.blocks_segment(p.pos,pos):
 		Net.c_correct.rpc_id(peer_id,p.pos)
 		p.moved_at = t
@@ -501,10 +609,10 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 	if p.moved_at > 0.0 and p.grace <= 0.0 and not config.test_mode:
 		# Believable? Walking speed (test servers allow debug teleports) (with slack for knockback and lag), not a teleport.
 		var dt := maxf(0.05, t - p.moved_at)
-		var flat := Vector2(pos.x - p.pos.x, pos.z - p.pos.z).length()
+		var flat := pos.distance_to(p.pos) if active_realm and active_realm.world is SpatialWorld else Vector2(pos.x-p.pos.x,pos.z-p.pos.z).length()
 		var limit := Player.BASE_SPEED * stats.move_speed_multiplier() * float(config.value("network", "max_speed_tolerance", 1.6)) \
 				+ Player.KNOCKBACK_MAX
-		if flat > limit * dt + 0.75:
+		if flat > limit * dt + 0.75 and not recovering:
 			Net.c_correct.rpc_id(peer_id, p.pos)
 			p.grace = SNAP_BACK_GRACE
 			p.moved_at = t
@@ -545,10 +653,16 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 	if p.dead or p.switching:
 		return
 	var pid: int = p.player_id
+	if GameServer.interacting(pid) and kind in ["hit", "ring", "shield", "obstacle", "obstacle_hit"]: return
 	if GameServer.intro_locked(pid) and kind in ["hit","ring","shield","obstacle","obstacle_hit"]: return
 	match kind:
+		"interaction":
+			if args.size() == 1 and args[0] is bool: GameServer.set_interaction_protection(pid, args[0])
 		"dungeon":
 			if args.size() == 1: dungeons.interact(p, str(args[0]))
+		"theory":
+			var instance: RealmInstance = realms.get(p.realm)
+			if instance!=null and instance.world is SpatialWorld: instance.world.server_action(p,args)
 		"camp_test":
 			if config.test_mode:
 				CampaignQA.handle(self, p, args)
@@ -566,7 +680,7 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 		"hurt":  # [seq, amount, armor_piercing, shielded, by]: an enemy hit them on their screen
 			p.ack = maxi(p.ack, int(args[0]))
 			p.last_hit_by = str(args[4])
-			GameServer.hit_player(pid, clampf(float(args[1]), 0.0, 5000.0), bool(args[2]), bool(args[3]))
+			GameServer.hit_player(pid, clampf(float(args[1]), 0.0, 5000.0), bool(args[2]), bool(args[3]),p.last_hit_by)
 		"ring":  # [seq]
 			p.ack = maxi(p.ack, int(args[0]))
 			var stats := GameServer.character(pid)
@@ -574,6 +688,10 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 				_to_realm(p.realm, p.pos, ["ring", pid, stats.gear.spell.id, p.pos, stats.spell_multiplier(stats.gear.spell)], 0, peer_id)
 		"shield":
 			GameServer.set_shield(pid, bool(args[0]))
+		"shield_contact":
+			if GameServer.shield_up(pid):
+				_to_realm(p.realm, p.pos, ["sfx", "magic_shield_hit", p.pos + Vector3.UP * .9,
+					{source_id = pid, cooldown = .08}], 0, peer_id)
 		"open_chest":
 			if args.size() == 1: GameServer.request_open_chest(pid, int(args[0]))
 		"arrived":
@@ -593,6 +711,9 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 			_send_character(peer_id)  # even a refused request gets the true state back
 		"xp":
 			GameServer.collect_xp(pid, int(args[0]))
+		"forge":  # [place, item id]: dismantle it at the forge for Dots
+			if args.size() == 2:
+				economy.dismantle(p, args[0], str(args[1]))
 		"gate":  # [fortress center]: use the key they carry on its sealed gates
 			if args.size() == 1: _use_gate_key(peer_id, p, args[0])
 		"castle":  # [op...]: the Hollow Castle's doors and encounter (CastleWorld)
@@ -601,10 +722,8 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 				realm.world.encounter.on_action(p, args)
 		"tp":  # [name]: go to another player
 			if args.size() == 1: social.teleport(p, str(args[0]))
-		"home":  # [village]: a steward signed them into the town book
-			if p.realm != "" and p.realm != "hall":
-				GameServer.request_set_home(pid, str(args[0]))
-				campaigns.home_set(p, str(args[0]))
+		"home":  # [village]: a steward changes the account's realm spawn town
+			if args.size() == 1: _set_account_home(p, str(args[0]))
 		"obstacle":  # [obstacle id, position]
 			_obstacle_broken(p, str(args[0]), args[1] if args[1] is Vector3 else p.pos)
 		"obstacle_hit":  # [obstacle id, damage, position]: others see the chips fly and keep count
@@ -618,7 +737,7 @@ func on_shot(peer_id: int, origin: Vector3, direction: Vector3, weapon_id: Strin
 	if p.is_empty() or not p.joined or p.dead or p.switching or p.realm == "" or not Items.exists(weapon_id):
 		return
 	var stats := GameServer.character(p.player_id)
-	if stats == null or GameServer.intro_locked(p.player_id) or stats.buffs.has_effect("quiet"): return
+	if stats == null or GameServer.intro_locked(p.player_id) or GameServer.interacting(p.player_id) or stats.buffs.has_effect("quiet"): return
 	var clean := {}
 	for key in ["speed", "size", "range", "spiral", "pierce", "wave_amp", "burst", "secondary", "style", "cone_deg"]:
 		if mods.has(key):
@@ -639,7 +758,7 @@ func _player_hit_enemy(p: Dictionary, net_id: int, damage: int, direction: Vecto
 	if Vector2(enemy.global_position.x - p.pos.x, enemy.global_position.z - p.pos.z).length() > MAX_HIT_RANGE:
 		return
 	var stats := GameServer.character(p.player_id)
-	if stats == null or GameServer.intro_locked(p.player_id) or stats.buffs.has_effect("quiet"): return
+	if stats == null or GameServer.intro_locked(p.player_id) or GameServer.interacting(p.player_id) or stats.buffs.has_effect("quiet"): return
 	if damage <= 0 or damage > _max_hit(stats):
 		return
 	var realm: RealmInstance = realms.get(p.realm)
@@ -665,7 +784,7 @@ func _max_hit(stats: PlayerStats) -> int:
 	var weapon: Item = stats.gear.weapon
 	if weapon:
 		var mult: float = weapon.charge.get("mult", 1.0) if not weapon.charge.is_empty() else 1.0
-		best = weapon.damage_max * (1.0 + stats.total("attack") * 0.02) * maxf(1.0, mult)
+		best = weapon.damage_max * stats.weapon_damage_multiplier() * maxf(1.0, mult)
 		best = maxf(best, weapon.charge.get("ring_damage", 0))
 	var spell: Item = stats.gear.spell
 	if spell and not spell.ring.is_empty():
@@ -701,11 +820,14 @@ func _on_player_died(player_id: int, lost: int) -> void:
 	p.dead = true
 	var stats := GameServer.character(player_id)
 	var killed_by: String = p.get("last_hit_by", "")
+	if GameServer.last_damage_source(player_id)!="": killed_by = GameServer.last_damage_source(player_id)
 	var realm_id: String = p.realm
 	var grave := _grave(p, stats)
 	_leave_realm(p)
 	if not grave.is_empty():
-		_to_peer(peer_id, grave)  # they're out of the realm now, but see their own stone rise
+		# Dead peers do not tick: send their effect directly, before saving the death.
+		grave.push_front(Net.now())
+		Net.c_events.rpc_id(peer_id, [grave])
 	print("[server] %s's character #%d died (level %d, killed by %s)" % [p.name, p.character_id, stats.level, killed_by])
 	var data := stats.to_data()
 	var r := await api.call_api("POST", "/server/die", {character_id = p.character_id, data = data,
@@ -732,19 +854,48 @@ func _save(peer_id: int) -> void:
 
 
 func _save_record(p: Dictionary) -> void:
+	await save_record(p)
+
+
+## Saves a character, one save at a time per player (so an older save can
+## never land after a newer one). With a changed vault, the vault goes with
+## it; `extra` {kind = "dismantle", item_id, count} pays Dots with it.
+## Returns the account service's answer ({ok = false} when nothing was sent).
+func save_record(p: Dictionary, extra := {}) -> Dictionary:
 	var stats := GameServer.character(p.player_id)
 	if stats == null or config.test_mode:
-		return
+		return {ok = false, error = "test mode"}
+	while p.get("saving", false):
+		await get_tree().process_frame
+	if p.dead:
+		return {ok = false, error = "dead"}
+	p.saving = true
 	p.dirty = false
-	var sent_xp: int = p.acct_pending
-	var r := await api.call_api("POST", "/server/save", {character_id = p.character_id, data = stats.to_data(),
-			account_xp = sent_xp})
+	var r: Dictionary
+	var vault: Variant = economy.pending_vault(p)
+	var vault_revision := int(p.vault.get("revision", 0)) if vault != null else -1
+	if extra.get("kind", "") == "dismantle":
+		r = await api.call_api("POST", "/server/dismantle", {character_id = p.character_id, data = stats.to_data(),
+				item_id = extra.item_id, count = extra.count})
+	elif vault != null:
+		r = await api.call_api("POST", "/server/vault/save", {character_id = p.character_id, data = stats.to_data(),
+				items = vault})
+		if r.ok and int(p.vault.get("revision", 0)) == vault_revision:
+			p.vault.dirty = false
+	else:
+		var sent_xp: int = p.acct_pending
+		r = await api.call_api("POST", "/server/save", {character_id = p.character_id, data = stats.to_data(),
+				account_xp = sent_xp})
+		if r.ok:
+			p.acct_pending = maxi(0, p.acct_pending - sent_xp)
+			print("[server] saved #%d (level %d, +%d account xp)" % [p.character_id, stats.level, sent_xp])
+	p.saving = false
 	if not r.ok:
 		p.dirty = true
 		push_warning("Couldn't save #%d: %s" % [p.character_id, r.error])
-	else:
-		p.acct_pending = maxi(0, p.acct_pending - sent_xp)
-		print("[server] saved #%d (level %d, +%d account xp)" % [p.character_id, stats.level, sent_xp])
+	elif vault != null and extra.is_empty():
+		print("[server] saved #%d with %s's Chambers" % [p.character_id, p.name])
+	return r
 
 
 func _on_stats_changed(peer_id: int) -> void:
@@ -888,8 +1039,12 @@ func _share_id(list: Array) -> int:
 # --- Bags and XP ------------------------------------------------------------------
 
 func _bag_wire(record: Dictionary) -> Dictionary:
-	return {id = record.id, realm = record.realm, type = record.type, viewer = record.viewer,
+	var wire := {id = record.id, realm = record.realm, type = record.type, viewer = record.viewer,
 		items = Net.encode_items(record.items), pos = record.pos, opened = record.get("opened", false)}
+	for key in ["yaw", "label"]:
+		if record.has(key):
+			wire[key] = record[key]
+	return wire
 
 
 func _on_bag_added(record: Dictionary) -> void:

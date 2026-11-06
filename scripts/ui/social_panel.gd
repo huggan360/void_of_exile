@@ -3,18 +3,20 @@ extends PanelContainer
 ## Friends and party, over the chat (bottom left), opened with its two
 ## buttons.
 ##   Friends: find players by name and add them; who's online and on which
-##            server; whisper, invite to the party, go to them (same server),
+##            server; whisper, invite to the party, join them across public servers,
 ##            remove.
 ##   Party:   invitations to accept, the members (the leader wears a crown),
 ##            invite by name, leave, kick (leader), and the campaign you play.
 
-const WIDTH := 440.0
+const WIDTH := 500.0
+const MIN_BODY := 440.0
 
 var social: SocialClient
 var chat: ChatPanel
 var tab := ""
 var _title := Label.new()
 var _body := VBoxContainer.new()
+var _scroll := ScrollContainer.new()
 var _search := LineEdit.new()
 var _results: Array = []
 var _searching := false
@@ -34,11 +36,21 @@ func _ready() -> void:
 	var close := _button("×", func() -> void: show_tab(""))
 	head.add_child(close)
 	_body.add_theme_constant_override("separation", 6)
-	column.add_child(_body)
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.custom_maximum_size.y = get_viewport_rect().size.y * 0.65
+	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.custom_minimum_size.y = MIN_BODY
+	_scroll.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_scroll.add_child(_body)
+	column.add_child(_scroll)
 	_search.placeholder_text = "Find a player by name"
+	_search.max_length = 24
 	_search.add_theme_font_override("font", UIStyle.font())
 	_search.add_theme_font_size_override("font_size", UIStyle.SIZE_SMALL)
-	_search.text_submitted.connect(func(_t: String) -> void: _do_search())
+	_search.text_submitted.connect(func(_t: String) -> void:
+		if tab == "party": _invite_name()
+		else: _do_search())
 	_search.focus_entered.connect(func() -> void: chat.player.typing = true)
 	_search.focus_exited.connect(func() -> void: chat.player.typing = false)
 	social.party_changed.connect(_rebuild)
@@ -49,8 +61,8 @@ func _ready() -> void:
 func show_tab(which: String) -> void:
 	tab = "" if which == tab else which
 	visible = tab != ""
-	if tab == "friends":
-		Account.friends()  # fresh online states
+	if tab != "":
+		Account.friends()
 	_rebuild()
 
 
@@ -60,54 +72,77 @@ func _rebuild() -> void:
 	if _search.get_parent():
 		_search.get_parent().remove_child(_search)
 	for child in _body.get_children():
-		child.queue_free()
+		child.free()
+	if Account.social_error != "":
+		_body.add_child(UIStyle.label("Social service unavailable - retrying. " + Account.social_error,
+				UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM))
 	if tab == "friends":
 		_title.text = "Friends"
 		_friends()
 	else:
 		_title.text = "Party"
 		_party()
+	_fit_body.call_deferred()
+
+
+func _fit_body() -> void:
+	_scroll.custom_minimum_size.y = clampf(_body.get_combined_minimum_size().y, minf(MIN_BODY, get_viewport_rect().size.y * 0.55), get_viewport_rect().size.y * 0.65)
+	reset_size()
 
 
 # --- Friends --------------------------------------------------------------------------
 
 func _friends() -> void:
+	_search.placeholder_text = "Find a player by name"
 	var row := HBoxContainer.new()
 	_search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_search)
 	row.add_child(_button("Search", _do_search))
 	_body.add_child(row)
 	for r: Dictionary in _results:
-		var line := _row(str(r.username), "online · " + str(r.server) if r.online else "offline", r.online)
-		if not r.get("friend", false) and not Account.is_friend(str(r.username)):
-			line.add_child(_button("Add", func() -> void:
+		var line := _row(str(r.username), "online - " + str(r.server) if r.online else "offline", r.online)
+		var pending := Account.friend_requests.any(func(request: Dictionary) -> bool: return str(request.username).nocasecmp_to(str(r.username)) == 0)
+		if not pending and not r.get("friend", false) and not Account.is_friend(str(r.username)):
+			line.add_child(_button("Request", func() -> void:
 				await Account.add_friend(str(r.username))
 				_results.erase(r)
 				_rebuild()))
 		_body.add_child(line)
 	if not _results.is_empty():
 		_body.add_child(HSeparator.new())
+	for request: Dictionary in Account.friend_requests:
+		var request_name := str(request.username)
+		var outgoing := bool(request.outgoing)
+		var line := _row(request_name, "Friend request sent" if outgoing else "Wants to be your friend", false)
+		if not outgoing:
+			line.add_child(_button("Accept", func() -> void: Account.respond_friend(request_name, true)))
+			line.add_child(_button("Decline", func() -> void: Account.respond_friend(request_name, false)))
+		else:
+			line.add_child(_button("Cancel", func() -> void: Account.remove_friend(request_name)))
+		_body.add_child(line)
 	if Account.friend_list.is_empty():
-		_body.add_child(UIStyle.label("No friends yet. Search for a name above.", UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM))
-	var here := str(Net.client.info.get("server_name", "")) if Net.is_client() else ""
+		var empty := UIStyle.label("No friends yet - add one by name.", UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM)
+		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_body.add_child(empty)
 	for f: Dictionary in Account.friend_list:
 		var player_name := str(f.username)
 		var status := "offline"
 		if f.online:
-			status = str(f.server) + ("  ·  %s %d" % [PlayerClasses.display_name(str(f.get("class", "archer"))), int(f.get("level", 0))]
+			status = str(f.server) + ("  -  %s %d" % [PlayerClasses.display_name(str(f.get("class", "archer"))), int(f.get("level", 0))]
 					if str(f.get("class", "")) != "" else "")
 		var line := _row(player_name, status, f.online)
-		if f.online:
+		if f.online and f.get("same_server", false):
 			line.add_child(_button("Tell", func() -> void: chat.open("/t %s " % player_name)))
-			if f.server == here:
-				line.add_child(_button("Invite", func() -> void: social.party_op("invite", player_name)))
-				line.add_child(_button("Go", func() -> void: social.teleport(player_name)))
+		if social.is_leader():
+			line.add_child(_button("Invite", func() -> void: social.party_op("invite", player_name)))
+		if f.online and str(f.server) != "Singleplayer" and (f.get("joinable", false) or f.get("same_server", false)):
+			line.add_child(_button("Join", func() -> void: social.join_friend(player_name)))
 		line.add_child(_button("×", func() -> void: Account.remove_friend(player_name)))
 		_body.add_child(line)
 
 
 func _do_search() -> void:
-	if _searching or _search.text.strip_edges().length() < 2:
+	if _searching or _search.text.strip_edges().is_empty():
 		return
 	_searching = true
 	_results = await Account.search_players(_search.text.strip_edges())
@@ -118,12 +153,20 @@ func _do_search() -> void:
 # --- Party --------------------------------------------------------------------------
 
 func _party() -> void:
+	for invitation: Dictionary in Account.party_invites:
+		var accepted := bool(invitation.get("accepted", false))
+		var line := _row(str(invitation.username), "Joining party..." if accepted else "Invites you to their party", true)
+		line.add_child(_button("Retry" if accepted else "Accept", func() -> void: social.respond_invite(int(invitation.id), true)))
+		line.add_child(_button("Decline", func() -> void: social.respond_invite(int(invitation.id), false)))
+		_body.add_child(line)
+	if Account.party_invites.is_empty() and social.invites.is_empty():
+		_body.add_child(UIStyle.label("No pending party invitations.", UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM))
 	for leader: String in social.invites:
 		var line := _row(leader, "invites you to their party", true)
 		line.add_child(_button("Join", func() -> void: social.party_op("accept", leader)))
 		line.add_child(_button("No", func() -> void:
 			social.invites.erase(leader)
-			social.party_op("decline")
+			social.party_op("decline", leader)
 			_rebuild()))
 		_body.add_child(line)
 	var party := social.party
@@ -134,7 +177,7 @@ func _party() -> void:
 		var leading := social.is_leader()
 		for m: Dictionary in party.members:
 			var player_name := str(m.name)
-			var info := "%s %d  ·  %s" % [PlayerClasses.display_name(str(m.class_id)) if str(m.class_id) != "" else "", int(m.level),
+			var info := "%s %d  -  %s" % [PlayerClasses.display_name(str(m.class_id)) if str(m.class_id) != "" else "", int(m.level),
 					"fallen" if m.dead else str(m.place)]
 			var line := _row(player_name + ("  (leader)" if m.leader else ""), info, true, player_name)
 			if player_name.to_lower() != social.my_name.to_lower():
@@ -155,13 +198,16 @@ func _party() -> void:
 	_search.placeholder_text = "Invite a player by name"
 	_search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_search)
-	row.add_child(_button("Invite", func() -> void:
-		if _search.text.strip_edges() != "":
-			social.party_op("invite", _search.text.strip_edges())
-			_search.text = ""))
+	row.add_child(_button("Invite", _invite_name))
 	_body.add_child(row)
 	if not party.is_empty():
 		_body.add_child(_button("Leave party" if not social.is_leader() else "Break up the party", func() -> void: social.party_op("leave")))
+
+
+func _invite_name() -> void:
+	if _search.text.strip_edges() != "":
+		social.party_op("invite", _search.text.strip_edges())
+		_search.text = ""
 
 
 # --- Pieces ---------------------------------------------------------------------------

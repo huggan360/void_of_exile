@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b86jyk4jialu8"
+path="res://.godot/imported/body_brood_glow.vox-c83c2b5e646ecd78b0f0e88ff884d9a7.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/body_brood_glow.vox"
+dest_files=["res://.godot/imported/body_brood_glow.vox-c83c2b5e646ecd78b0f0e88ff884d9a7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

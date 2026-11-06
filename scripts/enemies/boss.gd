@@ -167,6 +167,7 @@ func _start_intro() -> void:
 	intro_duration = maxf(8.0,boss_def.intro_time)
 	_intro_left = intro_duration
 	intro_serial += 1
+	if model.uses_articulated_intro(): model.boss_pose("awaken",intro_duration)
 	var ids: Array = []
 	var island := director.world as IslandWorld
 	if island: _gate_center = island.gates.center_for(encounter_center)
@@ -312,6 +313,10 @@ func _hatch() -> void:
 ## The unfolding (k: 0..1 through the intro). Curled small and low at first,
 ## it rises and spreads, beats its wings and settles. Bosses can add to it.
 func _hatch_update(k: float) -> void:
+	if model.uses_articulated_intro():
+		model.scale = Vector3.ONE * def.model_scale
+		model.set_glow(maxf(0.0,1.2-k*1.6))
+		return
 	var rise := clampf(k / 0.75, 0.0, 1.0)
 	var e := 1.0 - pow(1.0 - rise, 3.0)
 	model.scale = Vector3(lerpf(0.55, 1.0, e), lerpf(0.35, 1.0, e), lerpf(0.55, 1.0, e)) * def.model_scale
@@ -599,7 +604,7 @@ func bar_status() -> String:
 	if status_text != "":
 		return status_text
 	if shielded or immune:
-		return "INVULNERABLE  ·  defeat its guards"
+		return "INVULNERABLE  -  defeat its guards"
 	return ""
 
 
@@ -631,9 +636,11 @@ func shoot(origin: Vector3, dir: Vector3, attack: Dictionary) -> void:
 
 
 ## `count` shots spread `step_deg` apart around `dir`.
-func fire_fan(origin: Vector3, dir: Vector3, count: int, step_deg: float, attack: Dictionary) -> void:
+## An optional distinct centre shot replaces one bullet in an odd fan.
+func fire_fan(origin: Vector3, dir: Vector3, count: int, step_deg: float, attack: Dictionary, center_attack: Dictionary = {}) -> void:
 	for k in count:
-		shoot(origin, dir.rotated(Vector3.UP, deg_to_rad((k - (count - 1) * 0.5) * step_deg)), attack)
+		var bullet := center_attack if k*2 == count-1 and not center_attack.is_empty() else attack
+		shoot(origin, dir.rotated(Vector3.UP, deg_to_rad((k - (count - 1) * 0.5) * step_deg)), bullet)
 
 
 ## A ring of `count` directions, leaving out the opposite safe sectors
@@ -691,6 +698,7 @@ func start_charge(dir: Vector3, distance: float, speed: float, damage: Vector2i,
 		damage = Vector2i(roundi(damage.x * mult), roundi(damage.y * mult))
 	dir.y = 0.0
 	dir = dir.normalized()
+	GameAudio.emit_from("boss_impact", self, {source_id = encounter_id, cooldown = 0.25, max_distance = 64.0})
 	_charge = {dir = dir, left = distance, damage = damage, hits = [], done = on_done, stuck = 0.0}
 	behavior = "scripted"
 	move_speed = speed
@@ -731,6 +739,7 @@ func _update_charge(before: Vector3, delta: float) -> void:
 ## Boss-specific contact damage and shove; called once per player per charge.
 func _charge_contact(player, _contact: Vector3) -> void:
 	player.take_damage(float(randi_range(_charge.damage.x,_charge.damage.y)),false,false)
+	GameAudio.emit_from("boss_impact", self, {source_id = encounter_id, cooldown = 0.25, max_distance = 64.0})
 	var side: Vector3 = (player.global_position-global_position).normalized()
 	player.knockback((side+_charge.dir*0.5).normalized()*4.0)
 
@@ -750,6 +759,7 @@ func in_arena(pos: Vector3, radius: float) -> Vector3:
 
 ## A quick flare of its glow (a windup's tell).
 func pulse_glow(strength: float, time: float) -> void:
+	GameAudio.emit_from("boss_riser", self, {source_id = encounter_id, cooldown = 1.0, max_distance = 64.0, align_end=time, priority=2, volume_db=-5})
 	var tw := create_tween()
 	tw.tween_method(model.set_glow, 0.0, strength, time * 0.7)
 	tw.tween_method(model.set_glow, strength, 0.0, time * 0.3 + 0.2)
@@ -805,6 +815,8 @@ func take_hit(_hit_position: Vector3, direction: Vector3, damage := 10, source: 
 			return
 	sync_protection()
 	if buffs.has_effect("invincible"):
+		if shielded:
+			GameAudio.emit_from("magic_shield_hit", self, {cooldown = .1})
 		_on_blocked()
 		FloatingText.spawn(director, global_position + Vector3.UP * (height() + 0.3), "Immune", Color(0.6, 0.8, 1.0))
 		return
@@ -821,6 +833,8 @@ func take_hit(_hit_position: Vector3, direction: Vector3, damage := 10, source: 
 	_damage_by[by] = _damage_by.get(by, 0) + dealt  # only health actually lost counts
 	_last_by = by
 	hp -= dealt
+	GameAudio.emit_from("boss_dragon_hurt" if def.id == "blue_dragon" else "boss_hurt",
+			self, {source_id = encounter_id, cooldown = 1.8, max_distance = 64.0})
 	FloatingText.spawn(director, global_position + Vector3.UP * (height() + 0.3), "-%d" % dealt, FloatingText.ENEMY_DAMAGE)
 	model.hit_voxels(_hit_position,direction)
 	if hp <= 1:
@@ -925,6 +939,8 @@ func _reset_hook() -> void:
 ## Down to its last point: every damage source it owns stops first, then it
 ## stands still and starts to glow.
 func _start_dying() -> void:
+	GameAudio.emit_from(GameAudio.rumble_event(boss_def.death_time),self,{duration=boss_def.death_time,fixed_pitch=true,priority=3,max_distance=80,volume_db=-5})
+	GameAudio.emit_from("boss_die",self,{priority=3,max_distance=80,volume_db=-4,cooldown=2})
 	_release_encounter()
 	if Net.is_server():
 		Net.server.social.announce(director.realm_id, "%s has fallen!" % def.enemy_name)
@@ -977,6 +993,8 @@ func _burst() -> void:
 	if state == State.DEAD:
 		return
 	state = State.DEAD
+	GameAudio.boss_defeated(def.id, director.realm_id)
+	GameAudio.emit_from("boss_impact", self, {source_id = encounter_id, cooldown = 0.2, max_distance = 80.0, priority=3})
 	var pts := model.voxel_points(BURST_VOXELS)
 	Debris.burst_points(director, pts[0], pts[1], model.voxel_size() * 2.5, BURST_VOXELS,
 			global_position + Vector3.UP * height() * 0.4, global_position.y, 1.6)

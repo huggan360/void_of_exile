@@ -14,6 +14,7 @@ signal chosen(choice: String)
 var record: Dictionary
 var _tooltip := ItemTooltip.new()
 var _stats := PlayerStats.new()
+var _closing := false
 
 
 ## record: a dead character from the account service ({id, class, level,
@@ -55,7 +56,7 @@ func _init(p_record: Dictionary, can_delete := true, continue_text := "Close", j
 	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(who)
 	who.add_child(UIStyle.label("FALLEN", 16, UIStyle.HP_LIGHT))
-	who.add_child(UIStyle.heading("%s  #%d" % [PlayerClasses.display_name(_stats.class_id), int(record.get("id", record.get("character_id", 0)))], 38, PlayerClasses.get_def(_stats.class_id).color))
+	who.add_child(UIStyle.heading(PlayerClasses.display_name(_stats.class_id), 38, PlayerClasses.get_def(_stats.class_id).color))
 	who.add_child(UIStyle.label("Level %d" % int(record.get("level", _stats.level)), 24, UIStyle.TEXT))
 	var killer := str(record.get("killed_by", ""))
 	var place := str(record.get("realm", "")).replace("realm_", "Realm ").replace("hall", "the Tavern")
@@ -68,7 +69,7 @@ func _init(p_record: Dictionary, can_delete := true, continue_text := "Close", j
 		var parts := ""
 		if record.has("items_xp"):
 			parts = "   (items carried %d  +  25%% of its XP %d)" % [int(record.items_xp), int(record.share_xp)]
-		who.add_child(UIStyle.label("+%d account XP%s" % [bonus, parts], 18, UIStyle.GOLD))
+		who.add_child(UIStyle.label("+%d account XP%s" % [bonus, parts], 18, UIStyle.XP))
 
 	# Stats at death.
 	col.add_child(UIStyle.heading("Stats", 22))
@@ -126,16 +127,22 @@ func _ready() -> void:
 
 
 func close() -> void:
+	if _closing:
+		return
+	_closing = true
 	var tw := create_tween()
 	tw.tween_property(self, "modulate:a", 0.0, 0.15)
 	await tw.finished
+	hide()
 	closed.emit()
 	queue_free()
 
 
 func _choose(choice: String) -> void:
+	if _closing:
+		return
+	await close()
 	chosen.emit(choice)
-	close()
 
 
 func _delete() -> void:
@@ -148,7 +155,7 @@ func _delete() -> void:
 func _stat(caption: String, value: int) -> Control:
 	var box := VBoxContainer.new()
 	box.add_child(UIStyle.label(caption, 14, UIStyle.TEXT_DIM))
-	box.add_child(UIStyle.heading(str(value), 26, UIStyle.TEXT))
+	box.add_child(UIStyle.heading(str(value), 26, UIStyle.HP_LIGHT if caption == "Max HP" else UIStyle.MP if caption == "Max MP" else UIStyle.STAT))
 	return box
 
 

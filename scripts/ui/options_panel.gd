@@ -3,6 +3,7 @@ extends Control
 ## Settings tabs, guarded video preview and a key/mouse capture modal.
 signal back_requested
 var tabs := TabContainer.new()
+var _tab_buttons: Array[Button] = []
 var _panel := PanelContainer.new()
 var _mode := OptionButton.new()
 var _resolution := OptionButton.new()
@@ -12,6 +13,7 @@ var _resizable := CheckButton.new()
 var _fps := OptionButton.new()
 var _gui := OptionButton.new()
 var _show_fps := CheckButton.new()
+var _camera_angle := OptionButton.new()
 var _resolution_label: Label
 var _apply: Button
 var _draft := {}
@@ -26,6 +28,19 @@ var _capture_action := ""
 var _pending_binding := {}
 var _deadline := 0
 var _status: Label
+var _preset := OptionButton.new()
+var _graphics_options := {}  # feature id -> OptionButton
+var _audio_output := OptionButton.new()
+var _audio_dynamic := OptionButton.new()
+var _audio_width := HSlider.new()
+var _audio_master := HSlider.new()
+var _audio_music := HSlider.new()
+var _audio_sfx := HSlider.new()
+var _audio_ambience := HSlider.new()
+var _audio_ally_volume := HSlider.new()
+var _audio_ally := CheckButton.new()
+var _audio_ui := CheckButton.new()
+var _audio_status: Label
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -33,7 +48,7 @@ func _ready() -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
-	_panel.add_theme_stylebox_override("panel",UIStyle.panel_outlined(UIStyle.GOLD))
+	_panel.add_theme_stylebox_override("panel",UIStyle.ornament_panel())
 	center.add_child(_panel)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation",14)
@@ -52,6 +67,22 @@ func _ready() -> void:
 	tabs.add_theme_stylebox_override("panel",UIStyle.panel())
 	tabs.add_theme_stylebox_override("tab_selected",UIStyle.panel_outlined(UIStyle.GOLD))
 	tabs.add_theme_color_override("font_selected_color",UIStyle.GOLD)
+	var navigation := HBoxContainer.new()
+	navigation.add_theme_constant_override("separation", 6)
+	column.add_child(navigation)
+	tabs.tabs_visible = false
+	var group := ButtonGroup.new()
+	for caption in ["General", "Audio", "Video", "Graphics", "Controls"]:
+		var button := UIStyle.button(caption)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.toggle_mode = true
+		button.button_group = group
+		button.size_flags_stretch_ratio = 1.0
+		button.pressed.connect(_select_tab.bind(_tab_buttons.size()))
+		navigation.add_child(button)
+		_tab_buttons.append(button)
+	tabs.tab_changed.connect(func(index: int) -> void:
+		for i in _tab_buttons.size(): _tab_buttons[i].set_pressed_no_signal(i == index))
 	column.add_child(tabs)
 	for name_value in ["General","Audio","Video","Graphics","Controls"]:
 		var page := MarginContainer.new()
@@ -59,6 +90,8 @@ func _ready() -> void:
 		for edge in ["left","top","right","bottom"]: page.add_theme_constant_override("margin_"+edge,12)
 		tabs.add_child(page)
 	_build_video(tabs.get_child(2))
+	_build_audio(tabs.get_child(1))
+	_build_graphics(tabs.get_child(3))
 	_build_controls(tabs.get_child(4))
 	tabs.current_tab = 2
 	var footer := HBoxContainer.new()
@@ -79,6 +112,9 @@ func _ready() -> void:
 	tabs.tab_changed.connect(func(_tab: int) -> void: _update_footer())
 	resized.connect(_fit_panel)
 	AppSettings.bindings_changed.connect(_refresh_bindings)
+	AppSettings.graphics_changed.connect(_refresh_graphics)
+	AppSettings.audio_changed.connect(_refresh_audio)
+	GameAudio.test_step.connect(func(_label: String) -> void: _refresh_audio_status())
 	_fit_panel()
 	hide()
 
@@ -118,16 +154,19 @@ func _build_video(page: Control) -> void:
 	var count := DisplayServer.get_screen_count() if AppSettings.desktop_available() else 1
 	for i in maxi(1,count):
 		var dimensions := DisplayServer.screen_get_size(i) if AppSettings.desktop_available() else AppSettings.reference_size
-		_screen.add_item("Display %d · %d × %d" % [i+1,dimensions.x,dimensions.y],i)
+		_screen.add_item("Display %d - %d × %d" % [i+1,dimensions.x,dimensions.y],i)
 	_screen.disabled = count<=1
 	_row(column,"Display",_screen)
 	_row(column,"V-Sync",_vsync)
 	for value in [0,30,60,120,144,165,240]: _fps.add_item("Unlimited" if value==0 else "%d FPS" % value,value)
 	_row(column,"Frame rate limit",_fps)
 	_gui.add_item("Small",0)
-	_gui.add_item("Medium · default",1)
+	_gui.add_item("Medium - default",1)
 	_gui.add_item("Large",2)
 	_row(column,"GUI scale",_gui)
+	_camera_angle.add_item("Standard - 55 degrees", 0)
+	_camera_angle.add_item("Overhead - 72 degrees", 1)
+	_row(column,"Camera angle",_camera_angle)
 	_row(column,"Resizable window",_resizable)
 	_row(column,"Show FPS",_show_fps)
 	var note := UIStyle.label("Fullscreen resolution changes the game image; the interface stays sharp.\nGUI scale follows the window size. Medium matches the original fullscreen interface.",16,UIStyle.TEXT_DIM)
@@ -153,15 +192,118 @@ func _build_video(page: Control) -> void:
 		if not _refreshing: _draft.max_fps = _fps.get_item_id(index); _update_footer())
 	_gui.item_selected.connect(func(index: int) -> void:
 		if not _refreshing: _draft.gui_scale = ["small","medium","large"][index]; _update_footer())
+	_camera_angle.item_selected.connect(func(index: int) -> void:
+		if not _refreshing: _draft.camera_angle = ["standard", "overhead"][index]; _update_footer())
 	_resizable.toggled.connect(func(value: bool) -> void:
 		if not _refreshing: _draft.resizable = value; _update_footer())
 	_show_fps.toggled.connect(func(value: bool) -> void:
 		if not _refreshing: _draft.show_fps = value; _update_footer())
 
+func _build_audio(page: Control) -> void:
+	var column := _scroll_page(page)
+	column.add_child(UIStyle.heading("Output",20))
+	for item in [["Headphones", "headphones"], ["Speakers", "speakers"], ["Surround", "surround"]]:
+		_audio_output.add_item(item[0])
+		_audio_output.set_item_metadata(_audio_output.item_count-1,item[1])
+	_row(column,"Listening setup",_audio_output)
+	_audio_width.min_value = 0
+	_audio_width.max_value = 1
+	_audio_width.step = .01
+	_audio_width.tooltip_text = "Sound effects in headphones: 0% is mono, 35% is the narrow default, 100% is full width. Music and ambience keep their original width."
+	var width_row := HBoxContainer.new()
+	_audio_width.custom_minimum_size.x = 250
+	_audio_width.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	width_row.add_child(_audio_width)
+	var width_value := UIStyle.label("%d%%" % roundi(float(AppSettings.audio.stereo_width)*100),16,UIStyle.TEXT_DIM)
+	width_value.custom_minimum_size.x = 55
+	width_row.add_child(width_value)
+	_row(column,"SFX headphone width",width_row)
+	_audio_width.value_changed.connect(func(value: float) -> void:
+		width_value.text = "%d%%" % roundi(value*100)
+		_commit_audio("stereo_width",value))
+	AppSettings.audio_changed.connect(func() -> void: width_value.text = "%d%%" % roundi(float(AppSettings.audio.stereo_width)*100))
+	var output_row := HBoxContainer.new()
+	output_row.add_theme_constant_override("separation",12)
+	var test := UIStyle.button("Test spatial direction")
+	test.pressed.connect(func() -> void: GameAudio.test_output(); _refresh_audio_status())
+	output_row.add_child(test)
+	_audio_status = UIStyle.label("",15,UIStyle.TEXT_DIM)
+	_audio_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_audio_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_audio_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	output_row.add_child(_audio_status)
+	column.add_child(output_row)
+	var note := UIStyle.label("For surround sound, enable 5.1 speakers in your operating system first. Headphones use a binaural direction test.",15,UIStyle.TEXT_DIM)
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(note)
+	column.add_child(UIStyle.heading("Levels",20))
+	for slider in [_audio_master,_audio_music,_audio_sfx,_audio_ambience,_audio_ally_volume]:
+		slider.min_value = 0
+		slider.max_value = 1
+		slider.step = .01
+		slider.custom_minimum_size.x = 320
+	_row(column,"Master volume",_audio_master)
+	_row(column,"Music",_audio_music)
+	_row(column,"Sound effects",_audio_sfx)
+	_row(column,"Ambience",_audio_ambience)
+	column.add_child(UIStyle.heading("Other sounds",20))
+	_row(column,"Ally sounds",_audio_ally)
+	_row(column,"Ally volume",_audio_ally_volume)
+	_row(column,"Interface sounds",_audio_ui)
+	column.add_child(UIStyle.heading("Dynamic range",20))
+	for item in [["Balanced", "balanced"], ["Night", "night"], ["Wide", "wide"]]:
+		_audio_dynamic.add_item(item[0])
+		_audio_dynamic.set_item_metadata(_audio_dynamic.item_count-1,item[1])
+	_row(column,"Range",_audio_dynamic)
+	var range_note := UIStyle.label("Night keeps quiet sounds easier to hear at lower volumes. Wide preserves more contrast between quiet and loud sounds.",15,UIStyle.TEXT_DIM)
+	range_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(range_note)
+	_audio_output.item_selected.connect(func(_index: int) -> void: _commit_audio("output_mode",_audio_output.get_item_metadata(_audio_output.selected)))
+	_audio_dynamic.item_selected.connect(func(_index: int) -> void: _commit_audio("dynamic_range",_audio_dynamic.get_item_metadata(_audio_dynamic.selected)))
+	_audio_master.value_changed.connect(func(value: float) -> void: _commit_audio("master",value))
+	_audio_music.value_changed.connect(func(value: float) -> void: _commit_audio("music",value))
+	_audio_sfx.value_changed.connect(func(value: float) -> void: _commit_audio("sfx",value))
+	_audio_ambience.value_changed.connect(func(value: float) -> void: _commit_audio("ambience",value))
+	_audio_ally_volume.value_changed.connect(func(value: float) -> void: _commit_audio("ally_volume",value))
+	_audio_ally.toggled.connect(func(value: bool) -> void: _commit_audio("ally_sounds",value))
+	_audio_ui.toggled.connect(func(value: bool) -> void: _commit_audio("ui_sounds",value))
+	_refresh_audio()
+
+func _commit_audio(key: String, value: Variant) -> void:
+	if _refreshing: return
+	var updated: Dictionary = AppSettings.audio.duplicate(true)
+	updated[key] = value
+	AppSettings.set_audio(updated)
+	_refresh_audio_status()
+
+func _refresh_audio() -> void:
+	if not is_instance_valid(_audio_status): return
+	_refreshing = true
+	var values: Dictionary = AppSettings.audio
+	for index in _audio_output.item_count:
+		if _audio_output.get_item_metadata(index)==values.output_mode: _audio_output.select(index)
+	for index in _audio_dynamic.item_count:
+		if _audio_dynamic.get_item_metadata(index)==values.dynamic_range: _audio_dynamic.select(index)
+	_audio_width.set_value_no_signal(values.stereo_width)
+	_audio_master.set_value_no_signal(values.master)
+	_audio_music.set_value_no_signal(values.music)
+	_audio_sfx.set_value_no_signal(values.sfx)
+	_audio_ambience.set_value_no_signal(values.ambience)
+	_audio_ally_volume.set_value_no_signal(values.ally_volume)
+	_audio_ally.set_pressed_no_signal(values.ally_sounds)
+	_audio_ui.set_pressed_no_signal(values.ui_sounds)
+	_refreshing = false
+	_refresh_audio_status()
+
+func _refresh_audio_status() -> void:
+	if is_instance_valid(_audio_status): _audio_status.text = GameAudio.output_description()
+
 func open_page() -> void:
 	_draft = AppSettings.video.duplicate(true)
 	_refresh_video()
+	_refresh_audio()
 	_refresh_bindings()
+	_refresh_graphics()
 	show()
 	_fit_panel()
 
@@ -178,7 +320,7 @@ func _refresh_video() -> void:
 	if native not in choices: choices.append(native)
 	if selected not in choices: choices.append(selected)
 	for resolution: Vector2i in choices:
-		var label := "Desktop · %d × %d" % [native.x,native.y] if resolution==Vector2i.ZERO else "%d × %d" % [resolution.x,resolution.y]
+		var label := "Desktop - %d × %d" % [native.x,native.y] if resolution==Vector2i.ZERO else "%d × %d" % [resolution.x,resolution.y]
 		_resolution.add_item(label)
 		_resolution.set_item_metadata(_resolution.item_count-1,resolution)
 		if selected==resolution: _resolution.select(_resolution.item_count-1)
@@ -192,6 +334,7 @@ func _refresh_video() -> void:
 		fps_index = _fps.item_count-1
 	_fps.select(fps_index)
 	_gui.select(["small","medium","large"].find(_draft.gui_scale))
+	_camera_angle.select(1 if _draft.camera_angle == "overhead" else 0)
 	_refreshing = false
 	_update_footer()
 
@@ -199,7 +342,55 @@ func _update_footer() -> void:
 	if not is_instance_valid(_apply): return
 	_apply.visible = tabs.current_tab==2
 	_apply.disabled = _draft==AppSettings.video
-	_status.text = "Apply to preview changes" if tabs.current_tab==2 and _draft!=AppSettings.video else "Changes saved automatically" if tabs.current_tab==4 else ""
+	_status.text = "Apply to preview changes" if tabs.current_tab==2 and _draft!=AppSettings.video else "Changes saved automatically" if tabs.current_tab in [1,3,4] else ""
+
+func _build_graphics(page: Control) -> void:
+	var column := _scroll_page(page)
+	for preset in ["Low","Medium","High - original","Custom"]: _preset.add_item(preset)
+	_preset.set_item_disabled(3,true)
+	_row(column,"Quality preset",_preset)
+	var adapter := "%s (%s)" % [RenderingServer.get_video_adapter_name(),RenderingServer.get_video_adapter_vendor()] if AppSettings.desktop_available() else "-"
+	var note := UIStyle.label("Low and Medium are made for weaker PCs and laptops; High is the full look. Every feature below can be tuned on its own. Graphics card: "+adapter,16,UIStyle.TEXT_DIM)
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(note)
+	_preset.item_selected.connect(func(index: int) -> void:
+		if not _refreshing and index<3: AppSettings.set_graphics(GraphicsSettings.defaults(GraphicsSettings.PRESETS[index])))
+	for f: Array in GraphicsSettings.FEATURES:
+		var id: String = f[0]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation",16)
+		var text := VBoxContainer.new()
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		text.add_theme_constant_override("separation",0)
+		text.add_child(UIStyle.label(f[1]))
+		var hint := UIStyle.label(f[3],14,UIStyle.TEXT_DIM)
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.add_child(hint)
+		row.add_child(text)
+		var option := OptionButton.new()
+		for choice: Array in f[2]: option.add_item(str(choice[1]))
+		option.custom_minimum_size.x = 320
+		option.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		option.item_selected.connect(func(index: int) -> void:
+			if _refreshing: return
+			var values := AppSettings.graphics.duplicate()
+			values[id] = f[2][index][0]
+			AppSettings.set_graphics(values))
+		row.add_child(option)
+		column.add_child(row)
+		_graphics_options[id] = option
+	var reset := UIStyle.button("Use the suggested preset for this PC")
+	reset.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	reset.pressed.connect(func() -> void: AppSettings.set_graphics(GraphicsSettings.defaults(GraphicsSettings.suggested_preset())))
+	column.add_child(reset)
+
+func _refresh_graphics() -> void:
+	_refreshing = true
+	var values := AppSettings.graphics
+	_preset.select(maxi(0,(GraphicsSettings.PRESETS+["custom"]).find(values.preset)))
+	for id: String in _graphics_options:
+		_graphics_options[id].select(maxi(0,GraphicsSettings.choices(id).find(values[id])))
+	_refreshing = false
 
 func _build_controls(page: Control) -> void:
 	var column := _scroll_page(page)
@@ -363,7 +554,7 @@ func _input(event: InputEvent) -> void:
 		if escape:
 			cancel_modal()
 			get_viewport().set_input_as_handled()
-		elif event is InputEventKey and event.keycode in [KEY_TAB,KEY_LEFT,KEY_RIGHT,KEY_UP,KEY_DOWN]:
+		elif event is InputEventKey and event.keycode in [KEY_LEFT,KEY_RIGHT,KEY_UP,KEY_DOWN]:
 			var current := get_viewport().gui_get_focus_owner()
 			var index := _modal_buttons.get_children().find(current)
 			_modal_buttons.get_child(posmod(index+(-1 if event.shift_pressed or event.keycode in [KEY_LEFT,KEY_UP] else 1),_modal_buttons.get_child_count())).grab_focus()
@@ -371,3 +562,7 @@ func _input(event: InputEvent) -> void:
 	elif escape or event.is_action_pressed("menu"):
 		_back()
 		get_viewport().set_input_as_handled()
+
+
+func _select_tab(index: int) -> void:
+	tabs.current_tab = index

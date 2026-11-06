@@ -11,6 +11,7 @@ func _run() -> void:
 	GameServer.set_physics_process(false)
 	var pid := GameServer.join(false)
 	var stats := GameServer.character(pid)
+	stats.base.speed = 10  # Signed modifiers need a positive baseline; classes now start at zero.
 	var speed := stats.total("speed")
 	check(GameServer.apply_buff(pid,"speed","3s",1,"test"),"Server grants timed stats")
 	check(stats.total("speed")==speed+1,"Positive stat affects actual movement calculation")

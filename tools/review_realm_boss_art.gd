@@ -36,7 +36,7 @@ func _ready() -> void:
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	_camera.current = true
 	if _args.has("reference"):
-		_add_model("blue_dragon", Vector3.ZERO, "Blue Dragon · existing reference")
+		_add_model("blue_dragon", Vector3.ZERO, "Blue Dragon - existing reference")
 		_set_view(Vector3(0,3,0), 22)
 	elif _args.has("model"):
 		var id: String = str(_args.model)
@@ -51,7 +51,7 @@ func _ready() -> void:
 		_set_view(Vector3(0,4,0), 34)
 	else:
 		for i in IDS.size():
-			_add_model(ART + IDS[i], Vector3((1.5-i)*13,0,0), ["Fosen · Rimeheart Prism", "Lava · Vharok", "Desert · Scarab Regent", "Dark · Hollow Crown"][i])
+			_add_model(ART + IDS[i], Vector3((1.5-i)*13,0,0), ["Fosen - Rimeheart Prism", "Lava - Vharok", "Desert - Scarab Regent", "Dark - Hollow Crown"][i])
 		_set_view(Vector3(0,4,0), 31)
 		_camera.position = _focus + Vector3(0,8,-30)
 		_camera.look_at(_focus)
@@ -92,7 +92,7 @@ func _add_model(id: String, at: Vector3, title: String) -> CreatureModel:
 	return model
 
 func _crystal_diorama() -> void:
-	var base := _add_model(ART + "rimeheart_prism", Vector3.ZERO, "Conduit form · six healing pylons")
+	var base := _add_model(ART + "rimeheart_prism", Vector3.ZERO, "Conduit form - six healing pylons")
 	base.set_variant("conduit")
 	for i in 6:
 		var a := float(i)*TAU/6.0
@@ -103,8 +103,8 @@ func _crystal_diorama() -> void:
 		_beam(at+Vector3.UP*2.72, Vector3(0,5.05,0))
 	for i in 4:
 		_add_model(ART + "rimeheart_shardling", Vector3(-6+i*4,0,-9), "")
-	_add_model(ART + "rimeheart_prism", Vector3(14,0,0), "I · Sealed")
-	_spinning = _add_model(ART + "rimeheart_prism", Vector3(-14,0,0), "III · Tempest / fast rotation")
+	_add_model(ART + "rimeheart_prism", Vector3(14,0,0), "I - Sealed")
+	_spinning = _add_model(ART + "rimeheart_prism", Vector3(-14,0,0), "III - Tempest / fast rotation")
 	_spinning.set_variant("tempest")
 
 func _beam(a: Vector3, b: Vector3) -> void:

@@ -1,0 +1,9 @@
+# Godot editor cache and generated files
+.godot/
+# Local tooling leftovers
+__pycache__/
+*.pyc
+perf_logs/
+.aws/
+.codex/
+.agents/

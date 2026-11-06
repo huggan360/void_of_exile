@@ -27,4 +27,4 @@ Vharok now has separate thigh and shin bones. Sprinting uses alternating long hi
 
 ## Large shard penetration
 
-The full-size flame cleaves pierce players and shields and ignore armor. They continue flying after contact; the shield still flashes, scatters impact voxels and absorbs its normal share of the hit. Each player takes damage once per cleave attack, shared across its two large shards. Terrain and structures still stop them. Small ring shards retain their existing hit behavior.
+The full-size flame cleaves pierce players and shields and ignore armor. They continue flying after contact; the shield still flashes, scatters impact voxels and applies its MAG-based reduction. Armour piercing skips Defence after that reduction. Each player takes damage once per cleave attack, shared across its two large shards. Terrain and structures still stop them. Small ring shards retain their existing hit behavior.

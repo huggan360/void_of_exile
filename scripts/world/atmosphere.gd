@@ -34,6 +34,7 @@ var fog_of_war: FogOfWar
 var fog_of_war_hidden := false
 
 var _current := BiomeDef.new()
+var _settled := false
 var _target: BiomeDef
 var _sky_mat := ProceduralSkyMaterial.new()
 var _neutral := Biomes.neutral()
@@ -54,11 +55,8 @@ func _ready() -> void:
 	env.adjustment_enabled = true
 	env.adjustment_saturation = 1.18
 	env.adjustment_contrast = 1.06
-	env.sdfgi_enabled = true
-	env.sdfgi_use_occlusion = true
-	env.ssao_enabled = true
-	env.ssil_enabled = true
-	env.glow_enabled = true
+	# SDFGI, SSAO, SSIL, glow and shadows follow the quality settings
+	# (_apply_graphics).
 	env.glow_intensity = 0.8
 	env.glow_bloom = 0.05
 	env.fog_enabled = true
@@ -67,10 +65,17 @@ func _ready() -> void:
 	env.volumetric_fog_gi_inject = 0.5
 	env.volumetric_fog_length = 80.0
 
-	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 80.0
 	add_child(sun)
 	_setup_particles()
+	AppSettings.graphics_changed.connect(_apply_graphics)
+	_apply_graphics()
+
+
+## The player's quality settings (GraphicsSettings): which effects run.
+func _apply_graphics() -> void:
+	GraphicsSettings.apply_atmosphere(env, sun, AppSettings.graphics)
+	if _target:
+		_apply()
 
 
 ## How strong the character's torch should be right now (blended).
@@ -87,19 +92,30 @@ func snap_to(biome: BiomeDef) -> void:
 
 func blend_to(biome: BiomeDef, delta: float) -> void:
 	if biome != _target:
+		_settled = false
 		_set_palette(biome)
 	_target = biome
+	if fog_of_war: fog_of_war.visible = _target.fog_of_war_enabled and not fog_of_war_hidden
+	if _settled: return
 	_blend(1.0 - exp(-BLEND_SPEED * delta * 3.0))
 
 
 func _blend(t: float) -> void:
+	var remaining := 0.0
 	for prop in FLOATS:
-		_current.set(prop, lerpf(_current.get(prop), _goal(prop), t))
+		var goal: float = _goal(prop)
+		_current.set(prop, lerpf(_current.get(prop), goal, t))
+		remaining = maxf(remaining,absf(float(_current.get(prop))-goal))
 	for prop in COLORS:
-		_current.set(prop, (_current.get(prop) as Color).lerp(_goal(prop), t))
+		var goal: Color = _goal(prop)
+		_current.set(prop, (_current.get(prop) as Color).lerp(goal, t))
+		var difference: Color = _current.get(prop)-goal
+		remaining = maxf(remaining,maxf(absf(difference.r),maxf(absf(difference.g),absf(difference.b))))
 	for prop in VECTORS:
 		_current.set(prop, (_current.get(prop) as Vector3).lerp(_target.get(prop), t))
+		remaining = maxf(remaining,(_current.get(prop) as Vector3).distance_to(_target.get(prop)))
 	_apply()
+	_settled = remaining<.0001
 
 
 ## Where a setting is heading: the biome's look, or for screen-wide settings
@@ -112,7 +128,12 @@ func _goal(prop: String) -> Variant:
 	k = 1.0 - (1.0 - k) * (1.0 - _target.mood)
 	if own is Color:
 		return (_neutral.get(prop) as Color).lerp(own, k)
-	return lerpf(_neutral.get(prop), own, k)
+	var value := lerpf(_neutral.get(prop), own, k)
+	# Keep realm colors readable at the farther camera distance. Indoor
+	# atmospheres (including the Tavern) and fog of war retain their style.
+	if prop in ["fog_density", "volumetric_fog_density"]:
+		value *= 0.5
+	return value
 
 
 func _apply() -> void:
@@ -121,10 +142,11 @@ func _apply() -> void:
 	_sky_mat.sky_horizon_color = c.sky_horizon_color
 	_sky_mat.ground_horizon_color = c.sky_horizon_color
 	_sky_mat.ground_bottom_color = c.fog_color.darkened(0.5)
-	env.ambient_light_energy = c.ambient_energy
+	var graphics := AppSettings.graphics
+	env.ambient_light_energy = c.ambient_energy * GraphicsSettings.ambient_factor(graphics)
 	env.fog_light_color = c.fog_color
 	env.fog_density = c.fog_density
-	env.volumetric_fog_enabled = c.volumetric_fog_density > 0.001
+	env.volumetric_fog_enabled = c.volumetric_fog_density > 0.001 and GraphicsSettings.volumetric_fog_allowed(graphics)
 	env.volumetric_fog_density = c.volumetric_fog_density
 	env.volumetric_fog_albedo = c.fog_color.lightened(0.4)
 	sun.light_color = c.sun_color
@@ -135,7 +157,8 @@ func _apply() -> void:
 	pm.direction = c.particle_velocity.normalized()
 	pm.initial_velocity_min = c.particle_velocity.length() * 0.6
 	pm.initial_velocity_max = c.particle_velocity.length() * 1.2
-	particles.amount_ratio = c.particle_color.a
+	particles.amount_ratio = c.particle_color.a * GraphicsSettings.particle_ratio(graphics)
+	particles.emitting = particles.amount_ratio > 0.0
 	pm.color = Color(c.particle_color, 1.0)
 	pm.hue_variation_min = -c.particle_hue_variation
 	pm.hue_variation_max = c.particle_hue_variation

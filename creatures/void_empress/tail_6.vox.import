@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://djv6bv7p0iq4y"
+path="res://.godot/imported/tail_6.vox-5c87b4a83ab074d221c6a40c995d8448.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/tail_6.vox"
+dest_files=["res://.godot/imported/tail_6.vox-5c87b4a83ab074d221c6a40c995d8448.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

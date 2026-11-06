@@ -28,5 +28,7 @@ func _draw() -> void:
 	var font := UIStyle.bold()
 	var fs := int(r * (0.62 if text.length() < 3 else 0.48))
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	draw_string_outline(font, c + Vector2(-w * 0.5, fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 6, UIStyle.OUTLINE)
-	draw_string(font, c + Vector2(-w * 0.5, fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIStyle.TEXT)
+	# Bree Serif digits stand ~0.655em tall: half of that under the middle is the baseline.
+	var baseline := fs * 0.33
+	draw_string_outline(font, c + Vector2(-w * 0.5, baseline), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 6, UIStyle.OUTLINE)
+	draw_string(font, c + Vector2(-w * 0.5, baseline), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIStyle.TEXT)

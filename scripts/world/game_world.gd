@@ -16,6 +16,20 @@ var spawn_point := Vector3.ZERO
 ## Distance from the center to the edge of the playable area, in blocks
 ## (sizes the fog-of-war map).
 var half_extent := 64
+var _water_surface := -INF
+var _contact_fires := {}  # 8 m buckets of weak references, never character flames
+var _load_steps: Array[Callable] = []
+
+func queue_load_step(step: Callable) -> void:
+	_load_steps.append(step)
+
+func is_presentation_ready() -> bool:
+	return _load_steps.is_empty()
+
+func _process(_delta: float) -> void:
+	var deadline := Time.get_ticks_usec()+2000
+	while not _load_steps.is_empty() and Time.get_ticks_usec()<deadline:
+		_load_steps.pop_front().call()
 
 
 ## The biome at a world position (drives atmosphere and fog of war).
@@ -36,6 +50,36 @@ func is_road(_pos: Vector3) -> bool:
 ## Whether standing here hurts (lava pits).
 func is_hazard(_pos: Vector3) -> bool:
 	return false
+
+func is_water(pos: Vector3) -> bool:
+	return is_finite(_water_surface) and pos.y<=_water_surface+0.1
+
+func register_contact_fire(fire: VoxelFire) -> void:
+	var cell := Vector2i(floori(fire.global_position.x/8.0),floori(fire.global_position.z/8.0))
+	if not _contact_fires.has(cell): _contact_fires[cell] = []
+	_contact_fires[cell].append(weakref(fire))
+
+## Physical ground fires only. Visual flames attached to a burning actor never
+## enter this registry, so they cannot re-ignite themselves or spread by touch.
+func touches_fire(pos: Vector3) -> bool:
+	if is_hazard(pos) and absf(pos.y-ground_height(pos.x,pos.z))<0.8: return true
+	var cell := Vector2i(floori(pos.x/8.0),floori(pos.z/8.0))
+	for z in range(-1,2):
+		for x in range(-1,2):
+			var bucket: Array = _contact_fires.get(cell+Vector2i(x,z),[])
+			for index in range(bucket.size()-1,-1,-1):
+				var fire: VoxelFire = bucket[index].get_ref()
+				if not is_instance_valid(fire):
+					bucket.remove_at(index)
+					continue
+				var offset := pos-fire.global_position
+				if absf(offset.y)>maxf(1.1,fire.size*0.8): continue
+				if Vector2(offset.x,offset.z).length()<=0.35+fire.size*0.5: return true
+	return false
+
+func update_burning_contact(effects: StatusEffects, pos: Vector3) -> void:
+	if is_water(pos): effects.remove("burning")
+	elif not effects.burning_immune and touches_fire(pos): effects.add("burning",Burning.CONTACT_DURATION,1,"Firepit")
 
 
 ## Height of the ground surface (where feet stand) at x/z. Arrows fly at a
@@ -96,6 +140,7 @@ func _add_terrain(generator: VoxelGenerator, bounds: AABB) -> void:
 
 
 func _add_water(surface_y: float, extent: float) -> void:
+	_water_surface = surface_y
 	var plane := PlaneMesh.new()
 	plane.size = Vector2.ONE * extent * 2.0
 	plane.subdivide_width = 0

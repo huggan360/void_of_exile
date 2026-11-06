@@ -20,6 +20,7 @@ var _label: Label3D
 var _look := PlayerStats.new()
 var _gear := ""
 var _speed := 0.0
+var _have_position := false
 
 
 func _ready() -> void:
@@ -78,8 +79,16 @@ func _process(delta: float) -> void:
 	var s: Array = Net.client.player_state(player_id) if Net.client else []
 	if s.is_empty():
 		return
-	global_position = s[0]
-	model.rotation.y = s[1]
+	var target: Vector3 = s[0]
+	global_basis = Net.client.world.surface_frame(target).basis if Net.client and Net.client.world is SpatialWorld else Basis.IDENTITY
+	if not _have_position or global_position.distance_to(target) >= NetClient.PLAYER_TELEPORT_DISTANCE:
+		global_position = target
+		model.rotation.y = s[1]
+		_have_position = true
+	else:
+		var blend := 1.0 - exp(-25.0 * delta)
+		global_position = global_position.lerp(target, blend)
+		model.rotation.y = lerp_angle(model.rotation.y, float(s[1]), blend)
 	_speed = lerpf(_speed, float(s[2]), minf(1.0, delta * 10.0))
 	model.animate(0.0 if buffs.has_effect("static") else _speed, delta)
 	shield.active = (int(s[3]) & 1) != 0

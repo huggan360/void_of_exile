@@ -10,13 +10,13 @@ def font(size,bold=False):return ImageFont.truetype(BOLD if bold else FONT,size)
 entries=[
  ('blue_dragon','BLUE DRAGON','Bluelay','#43c2e8',[('enraged','Enraged')]),
  ('rimeheart_prism','RIMEHEART PRISM','Fosen','#65d6df',[('conduit','Conduit'),('tempest','Tempest')]),
- ('vharok_cinder_tyrant','VHAROK','Lava · The Cinder Tyrant','#ed7847',[('infernal','Infernal'),('heart_unbound','Heart Unbound')]),
+ ('vharok_cinder_tyrant','VHAROK','Lava - The Cinder Tyrant','#ed7847',[('infernal','Infernal'),('heart_unbound','Heart Unbound')]),
  ('aureate_scarab_regent','SCARAB REGENT','Desert','#deb25a',[('sunwings','Sunwings'),('sunheart','Sunheart')]),
  ('hollow_crown','HOLLOW CROWN','Deep Dark','#b874d2',[('fractured_court','Fractured Court'),('unbound','Unbound')]),
 ]
 sheet=Image.new('RGB',(3300,1460),'#0d131e');draw=ImageDraw.Draw(sheet)
 draw.text((36,24),'VOIDREALM  /  BOSS ART',font=font(43,True),fill='#ecf1f6')
-draw.text((36,81),'Live voxel models  ·  32-cell silhouettes enlarged to 256  ·  Default forms and phase transformations',font=font(24),fill='#97aabd')
+draw.text((36,81),'Live voxel models  -  32-cell silhouettes enlarged to 256  -  Default forms and phase transformations',font=font(24),fill='#97aabd')
 for i,(key,title,biome,color,forms) in enumerate(entries):
  x=28+i*650
  draw.rounded_rectangle((x,139,x+638,1409),radius=18,fill='#17202d',outline='#293648',width=2)
@@ -33,7 +33,7 @@ for i,(key,title,biome,color,forms) in enumerate(entries):
   sheet.paste(image,(offset,1007))
   box=draw.textbbox((0,0),label,font=font(21,True));width=box[2]-box[0]
   draw.text((offset+(300-width)/2,1352),label,font=font(21,True),fill=color)
-draw.text((36,1429),'Rendered from the current game assets · 1 November 2026',font=font(17),fill='#8195aa')
+draw.text((36,1429),'Rendered from the current game assets - 1 November 2026',font=font(17),fill='#8195aa')
 output=Path('/home/hugo/Desktop/Voidrealm Boss Preview.png')
 sheet.save(output)
 sheet.save(ROOT/'docs/realm_expansion/pixel_boss_preview.png')

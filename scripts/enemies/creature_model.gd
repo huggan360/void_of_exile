@@ -13,6 +13,11 @@ extends Node3D
 ## glow material, and bosses can switch to another look (set_variant) and
 ## light up (set_glow).
 ##
+## Long tails (role "tail_chain", one limb per segment, each parented to the
+## previous) are simulated: every segment springs toward a travelling wave,
+## keeps some of its heading when the body turns so the tail drags and whips
+## round, curls up over the back while winding up and lashes when it fires.
+##
 ## Voxel lists (for death bursts and shedding) are only built when needed;
 ## big creatures (bosses) burst from points on their surface instead.
 
@@ -44,6 +49,8 @@ var creature := ""
 var _rig: Node3D
 var _limbs := {}  # "arm_l" -> pivot Node3D
 var _moves: Array[Dictionary] = []  # {node, role, phase, axis, amount, yaw, throws}
+var _chain: Array[Dictionary] = []  # tail_chain segments, root first: {node, t, yaw, pitch, yaw_v, pitch_v}
+var _chain_heading := NAN
 var _hand_limb: Node3D
 var _waddle := 1.0
 var _time := 0.0
@@ -115,6 +122,10 @@ func _ready() -> void:
 		_limbs[limb] = pivot
 		_moves.append(_move_for(limb, spec, pivot))
 	_hand_limb = _limbs.get(rig.get("hand_limb", ""))
+	var segments := _moves.filter(func(m: Dictionary) -> bool: return m.role == "tail_chain")
+	segments.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.segment < b.segment)
+	for m in segments:
+		_chain.append({node = m.node, t = float(m.segment) / maxf(1.0, m.segments - 1.0), yaw = 0.0, pitch = 0.0, yaw_v = 0.0, pitch_v = 0.0})
 
 
 ## How a limb moves; older rigs (goblins) get theirs from the limb name.
@@ -125,8 +136,10 @@ static func _move_for(limb: String, spec: Dictionary, pivot: Node3D) -> Dictiona
 	pivot.rotation.y = yaw
 	return {
 		node = pivot, role = role, phase = spec.get("phase", -1.0 if right else 1.0),
+		origin = pivot.position,
 		axis = spec.get("axis", "x"), amount = spec.get("amount", 1.0), yaw = yaw,
 		throws = spec.get("throws", role == "arm" and right),
+		segment = int(spec.get("segment", 0)), segments = int(spec.get("segments", 1)),
 	}
 
 
@@ -175,6 +188,29 @@ func animate(move_ratio: float, delta: float) -> void:
 	elif _pose_style=="dragon": _animate_dragon(delta,w)
 	elif _pose_style=="wraith": _animate_wraith(delta)
 	elif _pose_style=="prism": _animate_prism(delta)
+	elif _pose_style=="serpent": _animate_serpent(w)
+	elif _pose_style in ["cantor", "vizier", "warden", "death_knight", "xeno_queen"]: _animate_dungeon_boss(delta,w)
+	if not _chain.is_empty(): _animate_tail_chain(delta, w)
+
+
+## Floating coils stay compact; the neck leads a delayed head sway and bite.
+## Uses the existing replicated windup/strike state, including remote mirrors.
+func _animate_serpent(moving: float) -> void:
+	var coil := clampf(1.0 - _windup / maxf(0.001, _windup_total), 0.0, 1.0) if _windup > 0.0 else 0.0
+	var bite := sin((1.0 - _strike / STRIKE_TIME) * PI) if _strike > 0.0 else 0.0
+	_rig.scale = Vector3.ONE
+	_rig.rotation.x = sin(_time * 1.7 + _phase) * 0.025 - moving * 0.055
+	_rig.rotation.z = sin(_time * 1.6 + _phase) * 0.045
+	_rig.position.y += coil * 0.07 - bite * 0.08
+	for m in _moves:
+		var node: Node3D = m.node
+		match m.role:
+			"serpent_neck":
+				node.rotation = Vector3(coil * 0.18 - bite * 0.26, sin(_time * 2.0 + _phase) * 0.08, sin(_time * 1.7 + _phase) * 0.07)
+			"serpent_head":
+				node.rotation = Vector3(-coil * 0.10 + bite * 0.16, -sin(_time * 2.0 + _phase - 0.55) * 0.10, -sin(_time * 1.7 + _phase - 0.4) * 0.06)
+			"serpent_jaw":
+				node.rotation.x = -0.06 - coil * 0.32 - bite * 0.20 - (sin(_time * 2.4) + 1.0) * 0.025
 
 
 ## Replicated attack poses for the heavy, planted Cinder Tyrant rig.
@@ -183,6 +219,10 @@ func boss_pose(pose: String, duration: float) -> void:
 	_boss_pose_name = pose
 	_boss_pose_duration = maxf(0.01,duration)
 	_boss_pose_left = _boss_pose_duration
+
+
+func uses_articulated_intro() -> bool:
+	return _pose_style in ["cantor", "vizier", "warden", "death_knight"]
 
 
 func _animate_tyrant(delta: float, moving: float) -> void:
@@ -461,6 +501,164 @@ func _animate_dragon(delta: float, _moving: float) -> void:
 
 ## The Hollow Crown: a floating monarch whose arms conduct its spells and
 ## whose halo turns faster as it channels.
+## Dungeon sculpts have real backs, weapon grips, jaws and nested appendages.
+## All action poses come from the existing replicated boss_pose stream; the
+## low amplitude secondary motion follows the joints, never scales the voxels.
+func _animate_dungeon_boss(delta: float, moving: float) -> void:
+	var st := _pose_state(delta)
+	var pose: String = st[0]
+	var progress: float = st[1]
+	var gather: float = st[2]
+	var release: float = st[3]
+	var knight := _pose_style == "death_knight"
+	var furnace := _pose_style == "warden"
+	if knight and pose == "idle":
+		if _windup > 0.0: pose = "cleave_windup"
+		elif _strike > 0.0: pose = "cleave_release"
+	var left := Vector3(0.15,0.0,-0.12)
+	var right := Vector3(0.1,0.0,0.08)
+	var lean := Vector3(-0.025 if not knight else 0.025,0.0,0.0)
+	var jaw := 0.04
+	var flare := 0.0
+	var sink := 0.0
+	var sitting := 0.0
+	var head_bow := 0.0
+	var drive := moving
+	match pose:
+		"awaken":
+			var unfold := smoothstep(0.1,0.75,progress)
+			var cry := sin(smoothstep(0.2,0.95,progress)*PI)
+			sink = (1.0-unfold)*(0.9 if knight else 0.65)
+			left = Vector3(0.15+cry*1.3,0.0,-0.12-cry*0.25)
+			right = Vector3(0.1+cry*0.4,0.0,0.08+cry*0.15)
+			lean.x = (1.0-unfold)*0.16-cry*0.08
+			head_bow = (1.0-unfold)*0.4-cry*0.15
+			jaw = cry*0.4
+			flare = cry*0.35
+			sitting = 1.0-unfold if knight else 0.0
+		"sit":
+			sitting = 1.0
+			sink = 0.9
+			lean.x = 0.0
+			left.x = 0.6
+			right.x = 0.35
+			head_bow = 0.16
+		"rise":
+			var down := 1.0-smoothstep(0.0,0.9,progress)
+			sitting = down if knight else 0.0
+			sink = down*0.9
+			left.x = 0.6*down
+			right.x = 0.35*down
+			flare = sin(progress*PI)*0.25
+			head_bow = 0.16*down
+		"cast":
+			left = Vector3(1.05*gather,-0.18,-0.3)
+			right = Vector3(0.4*gather,-0.12,0.18)
+			lean.x = -0.08*gather
+			jaw = 0.22*gather
+			flare = 0.2*gather
+		"summon":
+			left = Vector3(1.65*gather,-0.1,-0.45*gather)
+			right = Vector3(0.65*gather,0.15,0.36*gather)
+			lean.x = -0.13*gather
+			jaw = 0.36*gather
+			flare = 0.4*gather
+		"channel":
+			left = Vector3(0.5,-0.15,-0.65*gather)
+			right = Vector3(0.22,0.1,0.35*gather)
+			jaw = (0.32+sin(_time*5.0)*0.08)*gather
+			flare = 0.3*gather
+			head_bow = -0.14
+		"slam_windup":
+			left = Vector3(1.8*gather,0.0,-0.3)
+			right = Vector3(-0.65*gather,-0.2,0.28)
+			lean.x = -0.16*gather
+			flare = 0.35*gather
+			head_bow = -0.18*gather
+		"slam_release":
+			left = Vector3(0.8*release,0.0,-0.15)
+			right = Vector3(0.85*release,0.1,0.13)
+			lean.x = 0.18*release
+			jaw = 0.4*release
+			head_bow = 0.2*release
+		"cleave_windup":
+			right = Vector3(-0.75*gather,-0.6*gather,0.18)
+			left.x = 0.45
+			lean = Vector3(-0.04,-0.15*gather,0.0)
+			flare = 0.28*gather
+		"cleave_release":
+			right = Vector3(1.25*release,0.5*release,0.12)
+			lean = Vector3(0.12*release,0.16*release,0.0)
+			left.x = 0.35
+			flare = 0.45*release
+		"charge_windup":
+			lean.x = 0.16*gather
+			left.x = -0.4*gather
+			right.x = -0.35*gather
+			sink = 0.16*gather
+			flare = 0.3*gather
+		"charge":
+			drive = 1.0
+			lean.x = 0.2
+			left.x = -0.4
+			right.x = -0.25
+			flare = 0.5
+			jaw = 0.3
+		"charge_recover":
+			lean.x = 0.13*release
+			sink = 0.18*release
+			flare = 0.15
+		"kneel", "defeated", "stagger", "death":
+			sink = 1.0
+			left = Vector3(0.25,0.0,-0.08)
+			right = Vector3(0.5,0.0,0.08)
+			lean.x = 0.24
+			head_bow = 0.4
+			jaw = 0.2
+			drive = 0.0
+	var targets := {}
+	var gait := _time*11.0 if pose == "charge" else _phase
+	for m in _moves:
+		var node: Node3D = m.node
+		var rest := Vector3(0.0,m.yaw,0.0)
+		if m.role == "tail_chain": continue
+		match m.role:
+			"arm":
+				rest = left if m.phase>0.0 else right
+				if pose == "idle": rest.x -= sin(gait)*m.phase*drive*0.18
+			"head":
+				rest = Vector3(head_bow,sin(_time*0.7)*0.035*(1.0-sink),0.0)
+			"jaw": rest.x = -jaw
+			"hood": rest = Vector3(-flare*0.1,sin(_time*0.65)*0.045,0.0)
+			"carapace": rest.x = -flare*0.15+sin(_time*1.4)*0.012
+			"leg":
+				rest.x = sin(gait)*m.phase*drive*(0.36 if furnace else 0.3)
+				rest.x = lerpf(rest.x,0.7 if m.phase>0.0 else -0.65,sink*(1.0-sitting))
+				# +X raises a downward thigh toward -Z, the model's front.
+				rest.x = lerpf(rest.x,1.15,sitting)
+			"knee":
+				rest.x = -maxf(0.0,sin(gait+0.6)*m.phase)*drive*0.5
+				rest.x = lerpf(rest.x,-0.8 if m.phase>0.0 else 1.1,sink*(1.0-sitting))
+				rest.x = lerpf(rest.x,-1.15,sitting)
+			"tail", "tail_tip":
+				var tip: bool = m.role == "tail_tip"
+				var weight := 0.55 if furnace else 1.0
+				rest.y += sin(_time*1.15+(1.1 if tip else 0.0)+m.phase)*0.1*weight*(1.0-sink)
+				rest.x = sin(_time*1.05+(1.5 if tip else 0.0))*0.04+flare*0.12
+			"cape":
+				rest.x = 0.08+sin(_time*1.6+m.phase)*0.035+drive*0.2+flare*0.5
+				rest.z = -m.phase*(0.04+flare*0.25)
+				rest.x *= 1.0-sitting*0.8
+				# Fold the cloak forward of the backrest instead of through it.
+				rest.x += sitting*0.25
+				node.position = node.position.lerp(m.origin+Vector3(0,0,-0.3*sitting),1.0-exp(-delta*6.0))
+			"cloth":
+				rest = Vector3(sin(_time*1.3+m.phase)*0.045+drive*0.12+flare*0.2,0.0,-m.phase*0.04)
+				rest.x = lerpf(rest.x,1.15,sitting)
+		targets[node] = rest
+	_settle(delta,pose.ends_with("release"),lean,sink,1.2 if knight else 0.8,targets)
+
+
 func _animate_wraith(delta: float) -> void:
 	var st := _pose_state(delta)
 	var pose: String = st[0]
@@ -562,6 +760,46 @@ func _animate_prism(delta: float) -> void:
 
 
 ## Sways gently, leans back while winding up, then whips forward and eases back.
+## Root segments are stiff and follow quickly; the tip is loose and lags,
+## which gives the whip. Angles are local to the parent segment.
+func _animate_tail_chain(delta: float, moving: float) -> void:
+	var dt := minf(delta, 1.0 / 30.0)
+	var forward := global_basis.z
+	var heading := atan2(forward.x, forward.z)
+	var turned := 0.0 if is_nan(_chain_heading) else wrapf(heading - _chain_heading, -PI, PI)
+	_chain_heading = heading
+	var limp := _boss_pose_name in ["death", "defeated", "kneel", "stagger"] and _boss_pose_left > 0.0
+	var coil := 0.0  # 0 rest, 1 raised over the back
+	if _windup > 0.0 and _windup_total > 0.0: coil = smoothstep(0.0, 1.0, 1.0 - _windup / _windup_total)
+	var lash := 0.0
+	if _strike > 0.0: lash = sin((1.0 - _strike / STRIKE_TIME) * PI)
+	var rate := lerpf(1.5, 4.2, moving)
+	var sway := lerpf(0.16, 0.09, moving) * (1.0 - coil * 0.6)
+	# Rotation of the parent this frame, in the world: a segment keeps most of
+	# its old heading, then its spring pulls it back in line.
+	var carried := turned
+	for s in _chain:
+		var t: float = s.t
+		var before: float = s.yaw
+		s.yaw -= carried * lerpf(0.55, 0.85, t)
+		var wave := sin(_time * rate - t * 4.2 + _phase) * sway * (0.35 + t)
+		var yaw_target := 0.0 if limp else wave + lash * sin(_time * 9.0) * 0.25 * t
+		# Rest: droops from the body and curls back up toward the tip.
+		var pitch_target := lerpf(0.32, -0.16, t) - moving * 0.12
+		pitch_target = lerpf(pitch_target, lerpf(-0.75, -0.32, t), coil)
+		pitch_target = lerpf(pitch_target, lerpf(-0.2, 0.55, t), lash)
+		if limp: pitch_target = 0.18
+		var stiff := lerpf(90.0, 30.0, t)
+		var damp := lerpf(14.0, 4.5, t)
+		s.yaw_v += ((yaw_target - s.yaw) * stiff - s.yaw_v * damp) * dt
+		s.pitch_v += ((pitch_target - s.pitch) * stiff - s.pitch_v * damp) * dt
+		s.yaw = clampf(s.yaw + s.yaw_v * dt, -0.95, 0.95)
+		s.pitch = clampf(s.pitch + s.pitch_v * dt, -1.1, 1.0)
+		carried += s.yaw - before
+		var node: Node3D = s.node
+		node.rotation = Vector3(s.pitch, s.yaw, 0.0)
+
+
 func _tail_angle() -> float:
 	var sway := sin(_time * 1.7) * deg_to_rad(4.0)
 	if _strike > 0.0:
@@ -956,8 +1194,11 @@ static func _vec(a: Array) -> Vector3:
 
 ## Loads (once) a creature's rig and the meshes of its parts (variant parts
 ## load when first shown). Call during loading screens to avoid hitches.
-static func preload_creature(p_creature: String) -> void:
-	_load(p_creature)
+static func preload_creature(p_creature: String, include_variants := false) -> void:
+	var data := _load(p_creature)
+	if include_variants:
+		for variant in data.rig.get("variants",{}).values():
+			for part in variant.values(): _ensure_part(data,str(part))
 
 
 static func _load(p_creature: String) -> Dictionary:

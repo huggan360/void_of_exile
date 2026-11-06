@@ -31,7 +31,7 @@ extends Node
 
 enum Mode { OFFLINE, CLIENT, SERVER }
 
-const PROTOCOL := 3
+const PROTOCOL := 4
 const VERSION := "0.9.1"
 const DEFAULT_PORT := 24565
 ## UDP status queries (server list pings) go to the game port + this.
@@ -241,3 +241,10 @@ func c_social(ev: Array) -> void:
 func c_ping(t: float, rtt: float) -> void:
 	if client:
 		client.on_ping(t, rtt)
+
+## Small independent cloth/rope snapshots must never hold up reliable combat.
+@rpc("authority", "call_remote", "unreliable", 3)
+func c_theory_detail(realm: String, stamp: float, id: int, points: PackedByteArray) -> void:
+	if client and client.world is TheoryWorld and client.world.realm_id==realm:
+		var place := client.world as TheoryWorld
+		if is_instance_valid(place.soft_details): place.soft_details.receive(id,stamp,points)

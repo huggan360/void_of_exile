@@ -1,7 +1,7 @@
 shader_type canvas_item;
 // Jump to lightspeed, drawn over the whole screen: the view zooms in toward
 // the middle and smears outward along the rays from the center, stars stretch
-// into streaks, and it all flares toward white as `strength` goes 0 -> 1.
+// into streaks, then the scene darkens into the loading field as strength rises.
 // Run strength 1 -> 0 to come back out of hyperspace.
 
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
@@ -14,16 +14,19 @@ float hash(float n) {
 
 void fragment() {
 	vec2 aspect = vec2(SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x, 1.0);
-	vec2 d = SCREEN_UV - 0.5;
+	vec2 grid_uv = (floor(FRAGCOORD.xy / 5.0) * 5.0 + 2.5) * SCREEN_PIXEL_SIZE;
+	vec2 d = mix(SCREEN_UV, grid_uv, strength) - 0.5;
 	float s = strength * strength;
 
 	// Zoom in, and smear each pixel along its ray from the center.
-	float zoom = 1.0 - 0.45 * s;
+	float radius = length(d*aspect);
+	float edge_pull = smoothstep(0.1,0.65,radius);
+	float zoom = 1.0 - 0.42 * s;
 	vec3 acc = vec3(0.0);
 	for (int i = 0; i < 20; i++) {
 		float t = float(i) / 19.0;
-		vec2 uv = 0.5 + d * zoom * (1.0 - t * 0.55 * s);
-		acc += textureLod(screen_tex, uv, s * 3.5).rgb;
+		vec2 uv = 0.5 + d * zoom * (1.0 - t * 0.78 * s * edge_pull);
+		acc += textureLod(screen_tex, uv, s * 1.5 * edge_pull).rgb;
 	}
 	vec3 col = acc / 20.0;
 
@@ -40,9 +43,9 @@ void fragment() {
 	line *= smoothstep(0.3, 0.9, edge);
 	vec3 streak = mix(streak_color, vec3(1.0), hash(bin + 3.3)) * line * smoothstep(0.0, 0.25, strength) * 1.6;
 
-	// Purple tint, then a white flare at full speed.
+	// Keep the original motion, finishing on near-black rather than a white flare.
 	col = mix(col, col * vec3(0.8, 0.7, 1.15), s);
 	col += streak;
-	col = mix(col, vec3(0.95, 0.92, 1.0), smoothstep(0.75, 1.0, strength) * 0.85);
+	col = mix(col, vec3(0.003, 0.006, 0.016), smoothstep(0.72, 1.0, strength));
 	COLOR = vec4(col, 1.0);
 }

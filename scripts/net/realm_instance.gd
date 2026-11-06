@@ -35,10 +35,14 @@ func _ready() -> void:
 		world.realm_id = realm_id
 		world.display_name = record.get("name", "The Hollow Castle")
 	else:
-		world = DungeonWorld.new(record) if record.has("dungeon") else IslandWorld.new(record)
+		world = Dungeons.create_world(record) if record.has("dungeon") else SpaceWorld.new(record) if record.get("space", false) else IslandWorld.new(record)
 	world.server_build = true
 	world.set_meta(&"net_realm", realm_id)
 	add_child(world)
+	if world is SpatialWorld:
+		world.world_event.connect(func(event: Array) -> void:
+			if Net.server!=null: Net.server._to_realm(realm_id,Vector3.INF,["theory",event]))
+	GameServer.set_environment(world)
 	bullets.name = "EnemyBullets"
 	world.add_child(bullets)
 	world.enemy_director.setup(null, bullets, world.cleared_packs(), world.pack_survivors())

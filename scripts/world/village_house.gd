@@ -11,14 +11,17 @@ func setup(record: Dictionary) -> VillageHouse:
 	scale = Vector3.ONE * float(record.get("scale", 1.0))
 	return self
 
-func _ready() -> void:
-	var folder: String = spec.asset
+static func warm_asset(folder: String) -> void:
 	if not _cache.has(folder):
 		var rig: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(folder + "/rig.json"))
 		var meshes: Array = []
 		for suffix in ["", "_glow"]:
 			meshes.append(VoxModel.load_mesh(folder + "/body" + suffix + ".vox") if FileAccess.file_exists(folder + "/body" + suffix + ".vox") else null)
 		_cache[folder] = {rig = rig, meshes = meshes}
+
+func _ready() -> void:
+	var folder: String = spec.asset
+	warm_asset(folder)
 	var data: Dictionary = _cache[folder]
 	var frame: Array = data.rig.parts.body.frame_min
 	var voxel_size: float = data.rig.voxel_size

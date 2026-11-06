@@ -3,7 +3,9 @@ extends Node3D
 var world: CastleWorld
 var player := Player.new()
 var bullets := EnemyBullets.new()
+var gui := CanvasLayer.new()
 func _ready() -> void:
+	add_child(gui)
 	# Exercise the exact server world factory, in an isolated physics viewport.
 	var realm := RealmInstance.new({id = "cst_factory_check", castle = true, name = "Factory Check"})
 	add_child(realm)
@@ -21,6 +23,7 @@ func _ready() -> void:
 	player.stats = GameServer.character(player.player_id)
 	GameServer.enter_realm(player.player_id, world.realm_id)
 	add_child(player)
+	add_child(player.aim_marker)
 	player.set_physics_process(false)
 	player.frozen = false
 	player.position = Vector3(0, 0, 7)
@@ -47,10 +50,15 @@ func _ready() -> void:
 	peer.pos = Vector3(0, 0, -25)
 	world.encounter.on_action(peer, ["door"])
 	assert(world.encounter.stage == 4)
+	assert(not gui.visible, "Throne boss intro hides the game GUI")
+	assert(player.stats.buffs.has_effect("invincible") and GameServer.interacting(player.player_id), "Door interaction keeps the player protected through its cinematic")
+	assert(world.encounter._cut_audio.get("event", "") == "boss_intro", "Throne reveal plays the cinematic impact")
 	assert(player.stats.find_item("story_throne_key").is_empty())
 	world.castle_event([0.0, "castle", "state", 4])
 	await get_tree().create_timer(9.5).timeout
 	assert(world.encounter.stage == 5)
+	assert(gui.visible, "Throne intro restores the GUI when it ends")
+	assert(not GameServer.interacting(player.player_id), "Door cinematic releases its interaction protection")
 	assert(is_instance_valid(world.encounter.king))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 2701

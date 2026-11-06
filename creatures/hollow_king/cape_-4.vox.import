@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://nd6mcn8vs1fp"
+path="res://.godot/imported/cape_-4.vox-0ed5f28874d4f924f06c3598cf869437.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_king/cape_-4.vox"
+dest_files=["res://.godot/imported/cape_-4.vox-0ed5f28874d4f924f06c3598cf869437.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

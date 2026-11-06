@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cec0cmh0udn5f"
+path="res://.godot/imported/carapace_unbound_glow.vox-767f5fdd4277f317d2635e73371dfe48.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/source_32/carapace_unbound_glow.vox"
+dest_files=["res://.godot/imported/carapace_unbound_glow.vox-767f5fdd4277f317d2635e73371dfe48.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -5,6 +5,7 @@ var _ui_root: Control
 func make_ui_root() -> Control:
 	_ui_root = Control.new()
 	_ui_root.name = "ResponsiveUI"
+	_ui_root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_ui_root)
 	AppSettings.gui_changed.connect(_resize_ui)

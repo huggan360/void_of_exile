@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c67tu5bydfrie"
+path="res://.godot/imported/chest_arm_l.vox-ef162278b7f809ce3682047c98ff5e6a.tscn"
+
+[deps]
+
+source_file="res://creatures/void_empress/source_32/chest_arm_l.vox"
+dest_files=["res://.godot/imported/chest_arm_l.vox-ef162278b7f809ce3682047c98ff5e6a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

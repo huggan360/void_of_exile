@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://du1wpe8m5gjpu"
+path="res://.godot/imported/neck_glow.vox-0703e09115da6a6737b9c78371a886f5.tscn"
+
+[deps]
+
+source_file="res://creatures/spirit_blue/neck_glow.vox"
+dest_files=["res://.godot/imported/neck_glow.vox-0703e09115da6a6737b9c78371a886f5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

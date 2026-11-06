@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dwwj7qfww14xu"
+path="res://.godot/imported/jaw_kindled.vox-8dcb71e599b1b6e1ed13c1bcf6e2e9dc.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_vizier/jaw_kindled.vox"
+dest_files=["res://.godot/imported/jaw_kindled.vox-8dcb71e599b1b6e1ed13c1bcf6e2e9dc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

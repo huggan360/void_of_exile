@@ -135,6 +135,13 @@ func setup(p_def: EnemyDef, p_pack: EnemyPack, p_director: EnemyDirector) -> Ene
 
 
 func _ready() -> void:
+	buffs.burning_immune = self is Boss or def is BossDef
+	if not Net.is_server():
+		var burning := BurningVisuals.new()
+		burning.effects = buffs
+		burning.character_height = height()
+		burning.show_icon = true
+		add_child(burning)
 	add_to_group("realm_creatures")
 	if Net.is_server():
 		net_id = Net.server.register_enemy(self)
@@ -149,7 +156,8 @@ func _ready() -> void:
 	var shape := CollisionShape3D.new()
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = def.hit_radius * def.model_scale
-	capsule.height = maxf(capsule.radius * 2.0, height())
+	# Never shorter than the height shots fly at, or they sail over small creatures.
+	capsule.height = maxf(maxf(capsule.radius * 2.0, height()), Player.SHOT_HEIGHT + 0.35)
 	shape.shape = capsule
 	shape.position.y = capsule.height * 0.5
 	add_child(shape)
@@ -250,6 +258,7 @@ func target() -> Node3D:
 
 
 func _physics_process(delta: float) -> void:
+	if not mirror and _tick_burning(delta): return
 	buffs.tick()
 	if mirror:
 		mirror_update(delta)
@@ -656,6 +665,8 @@ func take_hit(_hit_position: Vector3, direction: Vector3, damage := 10, source: 
 	var by := hitter_id(source)
 	_damage_by[by] = _damage_by.get(by, 0) + mini(dealt, hp)
 	hp -= dealt
+	if hp > 0:
+		GameAudio.emit_from("enemy_hurt", self, {source_id = get_instance_id(), cooldown = 0.12, max_distance = 40.0})
 	FloatingText.spawn(director, global_position + Vector3.UP * (height() + 0.3), "-%d" % dealt, FloatingText.ENEMY_DAMAGE)
 	model.flinch()
 	velocity += direction * 2.0  # a small knock
@@ -681,14 +692,38 @@ func receive_weapon_hit(at: Vector3, direction: Vector3, damage: int, item: Item
 	if hp >= before or state in [State.DEAD, State.DYING, State.INTRO]: return
 	for effect: Dictionary in item.attack_effects(secondary):
 		var duration := float(effect.get("duration", 0.0))
+		if StatusEffects.canonical(str(effect.id)) == "burning" and director.world.is_water(global_position): continue
 		# Bosses can be controlled briefly, with a recovery window between freezes.
 		if self is Boss and StatusEffects.canonical(str(effect.id)) in ["static", "quiet"]:
 			if Net.now() < _control_ready: continue
 			duration = minf(duration, 0.8)
 			_control_ready = Net.now() + duration + 4.0
-		buffs.add(str(effect.id), duration, effect.get("amount", 1), item.id)
+		if buffs.add(str(effect.id), duration, effect.get("amount", 1), item.id) and StatusEffects.canonical(str(effect.id)) == "burning":
+			_burn_by = hitter_id(source)
 
 var _control_ready := 0.0
+var _burn_by := 0
+var _environment_timer := 0.0
+
+## Fire ignores defence. Only authority ticks it; bosses never enter this path.
+## Preserve the igniting player's kill credit when the last tick kills.
+func _tick_burning(delta: float) -> bool:
+	if buffs.burning_immune or state in [State.DEAD,State.SPAWNING,State.BURIED]: return false
+	_environment_timer -= delta
+	if _environment_timer<=0.0:
+		_environment_timer = 0.15
+		if is_instance_valid(director) and is_instance_valid(director.world):
+			director.world.update_burning_contact(buffs,global_position)
+	var damage := buffs.burning_damage(delta)
+	if damage<=0 or buffs.has_effect("invincible"): return false
+	_damage_by[_burn_by] = _damage_by.get(_burn_by,0)+mini(damage,hp)
+	hp = maxi(0,hp-damage)
+	FloatingText.spawn(director,global_position+Vector3.UP*(height()+0.3),"-%d" % damage,Color("ff9b45"))
+	if pack != null: pack.alert()
+	if hp<=0:
+		_die()
+		return true
+	return false
 
 
 ## Who landed a hit: the player who sent it (online), else the local one.
@@ -708,6 +743,7 @@ func _shed_voxels() -> void:
 
 func _die() -> void:
 	state = State.DEAD
+	GameAudio.emit_from(GameAudio.enemy_death_event(def), self, {cooldown = 0.08, max_distance = 52.0})
 	var pts := model.voxel_points()
 	Debris.burst_points(director, pts[0], pts[1], model.voxel_size(), 400,
 			global_position + Vector3.UP * height() * 0.4, global_position.y)

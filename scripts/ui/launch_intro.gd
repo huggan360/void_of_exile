@@ -1,9 +1,14 @@
 extends CanvasLayer
 ## A short branding reveal over the already prepared start screen.
+signal finished
 
 var _root := Control.new()
 var _background := TextureRect.new()
 var _logo_group := Control.new()
+var _world_ready := false
+
+func release_to_menu() -> void:
+	_world_ready = true
 
 
 func _ready() -> void:
@@ -47,7 +52,7 @@ func _ready() -> void:
 			logo.position.y += 7.0
 
 
-func play() -> void:
+func play(wait_for_world := false) -> void:
 	# Preferences are applied by AppSettings before Main starts. Give the
 	# desktop time to finish the fullscreen switch before starting the clock.
 	await get_tree().process_frame
@@ -59,8 +64,13 @@ func play() -> void:
 	tween.tween_property(_background, "modulate:a", 1.0, 1.2)
 	tween.tween_property(_logo_group, "modulate:a", 1.0, 1.0)
 	tween.tween_interval(1.6)
-	tween.tween_property(_root, "modulate:a", 0.0, 1.2)
 	await tween.finished
+	# World preparation runs under the branding, with no portal arrival on boot.
+	while wait_for_world and not _world_ready: await get_tree().process_frame
+	var reveal := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	reveal.tween_property(_root,"modulate:a",0.0,1.2)
+	await reveal.finished
+	finished.emit()
 	queue_free()
 
 

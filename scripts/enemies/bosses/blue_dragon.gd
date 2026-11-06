@@ -125,8 +125,11 @@ func _comet_wheel() -> void:
 	for ring in 3:
 		after(0.5 + ring * 0.3, func() -> void:
 			for k in 10:
+				var comet := _flame(1.8, 4.5, Vector2i(60, 75))
+				comet.effects = [{id = "defense", amount = -8, duration = 2.0}]
+				comet.effect_source = "Blue Dragon heavy comet"
 				shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, start + k * TAU / 10.0 + ring * deg_to_rad(12.0)),
-						_flame(1.8, 4.5, Vector2i(60, 75))))
+						comet))
 
 
 ## Two breaths start 60 degrees to either side and close in on the target.

@@ -54,10 +54,30 @@ func _ready() -> void:
 		title.font_size = 30
 		title.pixel_size = 0.004
 		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		title.fixed_size = true
 		title.position.y = QuestMarker.model_top(self) + 0.35
 		add_child(title)
-	_yaw = float(spec.get("yaw", 0.0))
+	_yaw = _open_yaw(float(spec.get("yaw", 0.0)))
+	spec.yaw = _yaw
 	model.rotation.y = _yaw
+
+## Keep authored street/door facing unless it points straight into an obstacle.
+func _open_yaw(preferred: float) -> float:
+	if navigation == null or spec.get("story", false):
+		return preferred
+	for turn: float in [0.0, PI / 4, -PI / 4, PI / 2, -PI / 2, PI * 0.75, -PI * 0.75, PI]:
+		var yaw := preferred + turn
+		var forward := Vector2(-sin(yaw), -cos(yaw))
+		var clear := true
+		for distance: float in [0.75, 1.5]:
+			var point := Vector2(position.x, position.z) + forward * distance
+			var cell := Vector2i((point - navigation.origin).floor())
+			if not navigation.grid.is_in_boundsv(cell) or navigation.grid.is_point_solid(cell):
+				clear = false
+		if clear:
+			return yaw
+	return preferred
+
 
 ## Runs off, frightened (a question they didn't want to hear), for a few seconds.
 func flee_from(from: Vector3) -> void:
@@ -75,18 +95,22 @@ func listen_to(who: Node3D) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# Story actors stand on the resolved terrain even while colliders stream out.
-	if spec.get("story", false):
+	if spec.get("story", false) and not spec.get("mirror", false):
 		position.y = spec.ground.call(position.x, position.z)
-		velocity = Vector3.ZERO
-		model.animate(0.0, delta)
-		return
 	if is_instance_valid(_listening):
 		var to := _listening.global_position - global_position
-		_yaw = lerp_angle(_yaw, atan2(-to.x, -to.z), minf(1.0, delta * 6.0))
+		if Vector2(to.x, to.z).length_squared() > 0.01:
+			_yaw = lerp_angle(_yaw, atan2(-to.x, -to.z), minf(1.0, delta * 6.0))
 		model.rotation.y = _yaw
 		model.animate(0.0, delta)
 		velocity = Vector3.ZERO
+		return
+	# Story mirrors keep their authoritative position, but turn locally to talk.
+	if spec.get("story", false):
+		_yaw = lerp_angle(_yaw, float(spec.get("yaw", 0.0)), minf(1.0, delta * 6.0))
+		model.rotation.y = _yaw
+		velocity = Vector3.ZERO
+		model.animate(0.0, delta)
 		return
 	_scan -= delta
 	_repath -= delta
@@ -120,7 +144,7 @@ func _physics_process(delta: float) -> void:
 				if global_position.distance_to(spec.pos) > 0.5:
 					_path = navigation.path(global_position, spec.pos)
 				else:
-					_yaw = float(spec.get("yaw", 0))
+					_yaw = lerp_angle(_yaw, float(spec.get("yaw", 0)), minf(1.0, delta * 6.0))
 			else:
 				_path = navigation.path(global_position, navigation.random_goal(_rng, _rng.randf() < 0.3))
 		if not _path.is_empty() and _wait <= 0:

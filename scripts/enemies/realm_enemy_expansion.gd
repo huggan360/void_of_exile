@@ -53,6 +53,7 @@ static func build(out: Dictionary, god_loot: Array, lesser_loot: Array) -> void:
 			range=14.0, size=.85, radius=.17, spread_deg=18.0, arc_deg=65.0, interval=.28,
 			cooldown=spec.cooldown, windup=.85 if spec.pattern=="ring" else .7, root=true, recover=.55,
 			from_hand=true, magic=spec.get("magic",false)}
+		if spec.biome == Biomes.DOOM: attack.element = "fire"
 		if spec.style != "fireball": attack.voxel_model = e.model+"/projectile"
 		else:
 			attack.light_energy = .55

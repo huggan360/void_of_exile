@@ -63,7 +63,7 @@ func _process(delta: float) -> void:
 	player.camera.global_position = Vector3(0, 54, -18)
 	player.camera.look_at(Vector3(0, 2, -55))
 	if not is_instance_valid(boss):
-		_label.text = "The Hollow King defeated · R replay · Escape close"
+		_label.text = "The Hollow King defeated - R replay - Escape close"
 		return
 	var a := _clock * 0.19
 	player.global_position = Vector3(sin(a) * 12, 0, -53 + cos(a) * 12)
@@ -80,7 +80,7 @@ func _process(delta: float) -> void:
 		for role in boss._support.keys():
 			for helper: Enemy in boss.support(role).duplicate():
 				helper.take_hit(helper.global_position + Vector3.UP, Vector3.ZERO, ceili(helper.max_hp / (5.0 if _fast else 30.0)) + helper.defense, player)
-	_label.text = "The Hollow King · phase %d/4 · %d HP\nP pause · D auto damage %s · R replay · Escape close" % [boss.phase + 1, boss.hp, "ON" if _auto else "OFF"]
+	_label.text = "The Hollow King - phase %d/4 - %d HP\nP pause - D auto damage %s - R replay - Escape close" % [boss.phase + 1, boss.hp, "ON" if _auto else "OFF"]
 
 func _screenshot(index: int) -> void:
 	await get_tree().create_timer(2.0).timeout

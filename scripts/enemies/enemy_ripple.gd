@@ -28,10 +28,15 @@ var _torus := TorusMesh.new()
 
 ## ripple: {radius, speed, damage_min, damage_max, knockback (multiplier,
 ## default 1)}. pos is on the ground.
-static func spawn(parent: Node, pos: Vector3, ripple: Dictionary, color: Color, players: Array, skip: Array) -> void:
+static func spawn(parent: Node, pos: Vector3, ripple: Dictionary, color: Color, players: Array, skip: Array, audible := true) -> void:
 	if Net.is_server():
 		Net.server.fx(parent, pos, ["rp", pos, Net.server.scaled_damage(parent, ripple), color])
 		return
+	# All expanding enemy rings share this path, including direct boss casts
+	# and replicated rp events. Sound the release once where the ring starts.
+	if audible:
+		GameAudio.play("magic_ring", pos + Vector3.UP * HEIGHT, {
+			source_id = parent.get_instance_id(), cooldown = 0.1, max_distance = 64.0, priority = 2})
 	var r := EnemyRipple.new()
 	r._players = players
 	r._skip = skip.duplicate()

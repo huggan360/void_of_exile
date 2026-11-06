@@ -25,6 +25,7 @@ var director: EnemyDirector
 var _hazards: Array[Dictionary] = []
 var _last_hit := {}  # group -> {player: seconds}
 var _next_group := 0
+var _alarm_cycle := -1
 ## The boss these belong to (its net id names them online).
 var boss: Node
 var _net_depth := 0  # >0 while one public call builds through another
@@ -198,6 +199,12 @@ func _follow(h: Dictionary) -> void:
 
 func _warn_look(h: Dictionary, k: float, now: float) -> void:
 	var pulse := 0.5 + 0.5 * sin(now * 14.0)
+	# The same clock drives the red floor flash and its audible pulse on each client.
+	if not Net.is_server() and h.opts.get("warning_fill",false) and pulse>.9 and is_instance_valid(boss) and boss.def.id=="hollow_king":
+		var cycle := int(floor((now*14.0+PI*.5)/TAU))
+		if cycle!=_alarm_cycle:
+			_alarm_cycle = cycle
+			GameAudio.play("warning_pulse",boss.global_position,{source_id=boss.get_instance_id(),cooldown=.3,max_distance=90,priority=3,volume_db=-4})
 	match h.kind:
 		"circle":
 			h.fill.scale = Vector3(k, 1.0, k)
@@ -277,6 +284,9 @@ func _hurt(p: Node3D, h: Dictionary, now: float, tick: float) -> void:
 	_last_hit[h.group][p] = now
 	var mult := 1.0
 	if not Net.is_client() and director.world is DungeonWorld: mult = float(director.world.definition.enemy_damage_multiplier)
+	# Actual fire pools/eruptions ignite; their zero-damage floor warnings do not.
+	if not Net.is_client() and h.damage.y>0 and is_instance_valid(boss) and boss.def.id in ["vharok", "magma_warden", "pyre_ent", "blue_dragon"]:
+		GameServer.apply_buff(p.player_id,"burning",Burning.CONTACT_DURATION,1,boss.def.enemy_name)
 	p.take_damage(float(randi_range(h.damage.x, h.damage.y)) * mult, false, h.opts.get("magic", false))
 
 

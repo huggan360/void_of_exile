@@ -39,7 +39,8 @@ func _run() -> void:
 	await get_tree().process_frame
 	check(options.size.is_equal_approx(menus._ui_root.size),"Options fills its responsive parent canvas")
 	check(options.tabs.get_tab_count()==5,"Five requested options tabs exist")
-	for i in [0,1,3]: check(options.tabs.get_child(i).get_child_count()==0,"General, Audio and Graphics remain empty")
+	for i in [0,1]: check(options.tabs.get_child(i).get_child_count()==0,"General and Audio remain empty")
+	check(options._graphics_options.size()==GraphicsSettings.FEATURES.size(),"Graphics exposes every quality feature")
 	check(options._binding_buttons.size()==ControlBindings.ACTIONS.size(),"Mapper exposes every actual game action")
 	check(not menus.is_game_menu_open(),"Opening title Options preserves start-menu context")
 	menus.back_from_options()

@@ -133,16 +133,19 @@ func _travel_checks() -> void:
 	player.pos = Vector3(100, 1, 100)
 	server.dungeons.interact(player, portal.id)
 	assert(server.dungeons.grants.is_empty())
-	player.pos = Vector3.ZERO
+	player.pos = Vector3(1.25, 1, 2)
 	portal.expires = Net.now() - 1.0
 	server.dungeons.interact(player, portal.id)
 	assert(server.dungeons.grants.is_empty())
 	portal.expires = Net.now() + 30.0
+	server.peers[12].pos = Vector3(-1, 1, 1)
 	server.dungeons.interact(player, portal.id)
 	var first: String = portal.instance
 	assert(server.dungeons.grants.get(1) == first and server.dungeons.grants.get(2) == first)
 	assert(not server.dungeons.grants.has(3))
 	assert(server.realms[first].record.origin == "realm_1")
+	assert(player.dungeon_returns[first].pos == Vector3(1.25, 1, 2))
+	assert(server.peers[12].dungeon_returns[first].pos == Vector3(-1, 1, 1))
 	server.dungeons.interact(server.peers[12], portal.id)
 	assert(portal.instance == first and server.realms.size() == 2)
 	var other := server.dungeons.spawn("realm_1", Vector3.ZERO, "goblins_cave")
@@ -153,6 +156,11 @@ func _travel_checks() -> void:
 	player.pos = server.realms[first].world.spawn_point + Vector3(0, 0, 4)
 	server.dungeons.interact(player, "spawn_exit")
 	assert(server.dungeons.grants[1] == "realm_1")
+	assert(server.social.sent.back()[1] == ["goto", "realm_1", Vector3(1.25, 1, 2)])
+	server.config = ServerConfig.new()
+	origin.empty_for = 10000
+	server._unload_empty_realms(0)
+	assert(server.realms.has("realm_1"), "Origin remains available beyond its empty-realm timeout")
 	# Completion removes only the entrance linked to this instance, even early.
 	server.dungeons.grants.clear()
 	server._pending.clear()
@@ -193,6 +201,26 @@ func _travel_checks() -> void:
 	assert(not server.dungeons.portals.has(other.id))
 	assert(server._pending["realm_1"].any(func(entry: Dictionary) -> bool: return entry.ev[1] == "dng-" and entry.ev[2] == other.id and entry.pos == Vector3.INF and entry.only == 0))
 	assert(server.dungeons.portals.values().any(func(entry: Dictionary) -> bool: return entry.realm == first and entry.exit and entry.expires < 0.0))
+	var boss_exit: Dictionary = server.dungeons.portals.values().filter(func(entry: Dictionary) -> bool: return entry.realm == first and entry.exit)[0]
+	var second: Dictionary = server.peers[12]
+	second.realm = first
+	second.pos = boss_exit.pos
+	server.dungeons.interact(second, boss_exit.id)
+	assert(server.social.sent.back()[1] == ["goto", "realm_1", Vector3(-1, 1, 1)], "Boss exit restores each party member's exact entry point")
+	var nested := server.dungeons.spawn(first, player.pos, "goblins_cave")
+	var nested_entry: Vector3 = player.pos
+	server.dungeons.interact(player, nested.id)
+	var nested_id := str(nested.instance)
+	assert(server.realms[nested_id].record.origin == first)
+	server.realms[first].empty_for = 10000
+	server._unload_empty_realms(0)
+	assert(server.realms.has(first) and server.realms.has("realm_1"), "Nested dungeons preserve the entire return chain")
+	player.realm = nested_id
+	player.pos = server.realms[nested_id].world.spawn_point + Vector3(0,0,4)
+	server.dungeons.interact(player, "spawn_exit")
+	assert(server.social.sent.back()[1] == ["goto", first, nested_entry])
+	player.realm = first
+	player.pos = server.realms[first].world.spawn_point + Vector3(0,0,4)
 	server.dungeons.grants.clear()
 	server.dungeons.interact(server.peers[12], other.id)
 	assert(server.dungeons.grants.is_empty())

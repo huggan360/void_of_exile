@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dm4383khg6acd"
+path="res://.godot/imported/forearm.vox-8ffd388f79d49508ac10696770760977.tscn"
+
+[deps]
+
+source_file="res://characters/wizard/forearm.vox"
+dest_files=["res://.godot/imported/forearm.vox-8ffd388f79d49508ac10696770760977.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

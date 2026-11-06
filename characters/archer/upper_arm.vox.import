@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cf1n5yryr6omg"
+path="res://.godot/imported/upper_arm.vox-5a0c46a8c4e97c75245f2c0f1212f941.tscn"
+
+[deps]
+
+source_file="res://characters/archer/upper_arm.vox"
+dest_files=["res://.godot/imported/upper_arm.vox-5a0c46a8c4e97c75245f2c0f1212f941.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

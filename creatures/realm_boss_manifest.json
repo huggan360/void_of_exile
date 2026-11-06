@@ -917,12 +917,21 @@
     "voxel_size": 0.035,
     "parts": [
       "body",
+      "head",
+      "jaw",
       "arm_l",
+      "arm_r",
       "leg_l",
       "knee_l",
-      "arm_r",
       "leg_r",
-      "knee_r"
+      "knee_r",
+      "cape_-4",
+      "cape_-2",
+      "cape_0",
+      "cape_2",
+      "cape_4",
+      "tabard_-1",
+      "tabard_1"
     ],
     "variants": [],
     "poses": {
@@ -938,7 +947,7 @@
           256,
           256
         ],
-        "voxels": 118048
+        "voxels": 226479
       }
     },
     "design_grid": [
@@ -1019,6 +1028,255 @@
           256
         ],
         "voxels": 113834
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "drowned_cantor",
+    "display_name": "Drowned Cantor",
+    "biome": "Bluelay",
+    "folder": "creatures/drowned_cantor",
+    "status": "live",
+    "voxel_size": 0.029,
+    "parts": [
+      "body",
+      "robe_-1",
+      "robe_1",
+      "head",
+      "jaw",
+      "arm_l",
+      "arm_r",
+      "tail_-1",
+      "tail_tip_-1",
+      "tail_1",
+      "tail_tip_1",
+      "body_resonant",
+      "head_resonant",
+      "jaw_resonant",
+      "body_unbound",
+      "head_unbound",
+      "jaw_unbound"
+    ],
+    "variants": [
+      "resonant",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 215021
+      },
+      "resonant": {
+        "file": "model_resonant.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 215021
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 215021
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "gilded_vizier",
+    "display_name": "Gilded Vizier",
+    "biome": "Desert",
+    "folder": "creatures/gilded_vizier",
+    "status": "live",
+    "voxel_size": 0.026,
+    "parts": [
+      "body",
+      "carapace",
+      "head",
+      "jaw",
+      "arm_l",
+      "arm_r",
+      "tail",
+      "tail_tip",
+      "body_kindled",
+      "head_kindled",
+      "jaw_kindled",
+      "carapace_kindled",
+      "body_unbound",
+      "head_unbound",
+      "jaw_unbound",
+      "carapace_unbound"
+    ],
+    "variants": [
+      "kindled",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 213366
+      },
+      "kindled": {
+        "file": "model_kindled.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 213366
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 213366
+      }
+    },
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "magma_warden",
+    "display_name": "Magma Warden",
+    "biome": "Lava",
+    "folder": "creatures/magma_warden",
+    "status": "live",
+    "voxel_size": 0.029,
+    "parts": [
+      "body",
+      "carapace",
+      "head",
+      "jaw",
+      "leg_front-1",
+      "knee_front-1",
+      "leg_back-1",
+      "knee_back-1",
+      "leg_front1",
+      "knee_front1",
+      "leg_back1",
+      "knee_back1",
+      "arm_l",
+      "arm_r",
+      "tail",
+      "tail_tip",
+      "body_kindled",
+      "head_kindled",
+      "jaw_kindled",
+      "carapace_kindled",
+      "body_unbound",
+      "head_unbound",
+      "jaw_unbound",
+      "carapace_unbound"
+    ],
+    "variants": [
+      "kindled",
+      "unbound"
+    ],
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 323973
+      },
+      "kindled": {
+        "file": "model_kindled.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 323973
+      },
+      "unbound": {
+        "file": "model_unbound.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 323973
       }
     },
     "design_grid": [

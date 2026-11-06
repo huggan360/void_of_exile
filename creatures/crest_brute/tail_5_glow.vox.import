@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chbpmef1wggqq"
+path="res://.godot/imported/tail_5_glow.vox-bacdc1d15bbd8361cbb796c9fb6c1e16.tscn"
+
+[deps]
+
+source_file="res://creatures/crest_brute/tail_5_glow.vox"
+dest_files=["res://.godot/imported/tail_5_glow.vox-bacdc1d15bbd8361cbb796c9fb6c1e16.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

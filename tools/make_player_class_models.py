@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Art only: four player-sized VOX rigs. Does not register playable classes.
+"""Source art for the five playable player rigs. Does not register classes.
 Uses the Archer's exact voxel size, shoulder/hip positions and face proportions.
 """
-import json, struct
+import json, math, struct
+import make_hero
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'characters'
@@ -123,9 +124,14 @@ def merrow():
  return v,staff,{}
 
 
-def arm(name):
- v={};box(v,(-1,-3,-1),(1,0,1),'cloth');box(v,(-1,-4,-1),(1,-3,1),'gold' if name in ['priest','merrow'] else 'accent');box(v,(-1,-5,-1),(1,-4,1),'skin')
- return v
+def arm_parts(name):
+ upper={};forearm={};hand={}
+ box(upper,(-1,-2,-1),(1,0,1),'hood' if name=='archer' else 'cloth')
+ box(forearm,(-1,-2,-1),(1,0,1),'tunic_dark' if name=='archer' else 'cloth')
+ box(forearm,(-1,-2,-1),(1,-1,1),'tunic_dark' if name=='archer' else ('gold' if name in ['priest','merrow'] else 'accent'))
+ # The central column is empty: the shaft and skin never share a voxel.
+ box(hand,(-1,-1,-1),(2,0,2),'skin');hand.pop((0,-1,0))
+ return {'upper_arm':upper,'forearm':forearm,'hand':hand}
 
 def leg(name):
  v={};box(v,(-1,-2,-1),(2,0,2),'shade');box(v,(-1,-4,-1),(2,-2,2),'boot');box(v,(-1,-4,-2),(2,-3,-1),'boot')
@@ -146,38 +152,57 @@ def write_vox(path,v,palette,lo,size):
  path.write_bytes(b'VOX '+struct.pack('<I',150)+b'MAIN'+struct.pack('<II',0,len(children))+children)
 
 
-def save(name,builder):
- spec=SPECS[name];palette=dict(COMMON);palette.update({k:v for k,v in spec.items() if k!='title'})
- body,staff,accessories=builder()
- parts={'body':body,'arm_l':arm(name),'arm_r':arm(name),'leg':leg(name),'staff':staff}
+def save(name,builder=None):
+ archer=name=='archer'
+ if archer:
+  title='Archer';palette=make_hero.PALETTE
+  body=make_hero.body();accessories={}
+  parts={'body':body,'leg':make_hero.leg(),'bow_frame':{p:c for p,c in make_hero.bow().items() if c!='string'}}
+ else:
+  spec=SPECS[name];title=spec['title'];palette=dict(COMMON);palette.update({k:v for k,v in spec.items() if k!='title'})
+  body,staff,accessories=builder()
+  parts={'body':body,'leg':leg(name),'staff':staff}
+ parts.update(arm_parts(name))
  for label,info in accessories.items():parts[label]=info['voxels']
  folder=OUT/name;folder.mkdir(parents=True,exist_ok=True)
- rig={'status':'art_only_not_registered','voxel_size':UNIT,'facing':'-Z','right_hand':'+X','body_height_voxels':16,'reference':'characters/archer','parts':{},'limbs':{
-  'arm_l':{'part':'arm_l','pivot':[-4,9,0]},'arm_r':{'part':'arm_r','pivot':[4,9,0]},
-  'leg_l':{'part':'leg','pivot':[-2,4,0]},'leg_r':{'part':'leg','pivot':[1,4,0]}},
-  'attachments':{'staff':{'part':'staff','parent':'arm_r','pivot':[0,-4,-1],'label':'Right-hand Staff' if name!='merrow' else 'Right-hand Trident'}}}
- for label,info in accessories.items():rig['attachments'][label]={'part':label,'parent':info['parent'],'pivot':info['pivot'],'label':info['label']}
+ limbs={}
+ for side,x in [('l',-4),('r',4)]:
+  limbs['arm_'+side]={'part':'upper_arm','pivot':[x,9,-1 if archer else 0],'mesh_scale':[1,1.25,1]}
+  limbs['forearm_'+side]={'part':'forearm','parent':'arm_'+side,'pivot':[0,-2.5,0],'mesh_scale':[.9,1.25,.8]}
+  limbs['hand_'+side]={'part':'hand','name':'LeftHand' if side=='l' else 'RightHand','parent':'forearm_'+side,'pivot':[0,-3,0],
+   'mesh_scale':[1,1,.55 if archer and side=='l' else 1],
+   'mesh_offset':[-.5,.5,-.575 if archer and side=='l' else -1.5]}
+ limbs.update({'leg_l':{'part':'leg','pivot':[-2,4,0]},'leg_r':{'part':'leg','pivot':[1,4,0]}})
+ weapon='bow_frame' if archer else 'staff'
+ attachments={weapon:{'part':weapon,'name':'Bow' if archer else 'Staff','parent':'hand_r','pivot':[0,0,-1],
+  'mesh_scale':[.9,1,.8 if archer else .9],'mesh_offset':[-.45,-.5 if archer else 0,-.4 if archer else -.45]}}
+ for label,info in accessories.items():
+  attachments[label]={'part':label,'parent':'hand_l','pivot':[-.5,0,-4.5],'label':info['label']}
+ rig={'status':'playable','voxel_size':UNIT,'facing':'-Z','right_hand':'+X','body_height_voxels':16,
+  'upper_arm_length':2.5,'forearm_length':3.0,'grip':[0,0,-1],'reference':'characters/archer',
+  'parts':{},'limbs':limbs,'attachments':attachments}
  for label,v in parts.items():
-  lo,size=((-8,0,-8),(16,21,16)) if label=='body' else bounds(v)
+  lo,size=((-8,0,-8),(16,16 if archer else 21,16)) if label=='body' else bounds(v)
   rig['parts'][label]={'frame_min':list(lo),'frame_size':list(size)}
+  # Preserve the Archer's existing body/legs, including their palette variation.
+  if archer and label in ['body','leg']:continue
   for suffix,voxels in [('',{p:c for p,c in v.items() if c!='glow'}),('_glow',{p:c for p,c in v.items() if c=='glow'})]:
    if voxels:write_vox(folder/(label+suffix+'.vox'),voxels,palette,lo,size)
    if suffix and voxels:rig['parts'][label]['glow']=True
- # A single assembled source makes each character immediately viewable in Goxel.
- full=dict(body)
- for key,specification in rig['limbs'].items():
-  pivot=specification['pivot']
-  for p,c in parts[specification['part']].items():full[tuple(p[i]+pivot[i] for i in range(3))]=c
- for attachment in rig['attachments'].values():
-  base=rig['limbs'][attachment['parent']]['pivot'];pivot=[base[i]+attachment['pivot'][i] for i in range(3)]
-  for p,c in parts[attachment['part']].items():full[tuple(p[i]+pivot[i] for i in range(3))]=c
+ # A coarse assembled source for voxel editors; the scene retains fractional rig pivots.
+ full=dict(body);origins={}
+ for key,info in list(limbs.items())+list(attachments.items()):
+  base=origins.get(info.get('parent'),[0,0,0]);origin=[base[i]+info['pivot'][i] for i in range(3)];origins[key]=origin
+  scale=info.get('mesh_scale',[1,1,1]);offset=info.get('mesh_offset',[0,0,0])
+  for p,c in parts[info['part']].items():
+   full[tuple(math.floor(origin[i]+offset[i]+(p[i]+.5)*scale[i]) for i in range(3))]=c
  lo,size=bounds(full);write_vox(folder/'model.vox',full,palette,lo,size)
  (folder/'rig.json').write_text(json.dumps(rig,indent=2)+'\n')
  (folder/'palette.json').write_text(json.dumps(palette,indent=2)+'\n')
- (folder/'README.md').write_text(f'# {SPECS[name]["title"]} — model only\n\nOpen `model.tscn` in Godot or `model.vox` in Goxel. Parts are split for later animation, with the Archer\'s shoulder/hip pivots and {UNIT} m voxels. Body/face proportions match the 16-voxel Archer; hats, fins and held items may extend beyond that envelope. Facing -Z, the right hand is on +X. Staff/trident attaches beneath `ArmR/RightHand`; left-hand props are separate attachments. `rig.json` describes all source frames and pivots. No player script, class catalog, stats, UI, equipment or spawn registration uses this model.\n')
- return {'id':name,'name':SPECS[name]['title'],'folder':'characters/'+name,'status':'art_only_not_registered','scene':'characters/'+name+'/model.tscn','voxel_size':UNIT,'held_in':'right_hand'}
+ (folder/'README.md').write_text(f'# {title}\n\nPlayable {UNIT} m voxel rig, facing -Z with +X right. Open `model.tscn` for the articulated model; `model.vox` is a coarse, unposed voxel-editor reference. `ArmL`/`ArmR` contain separate `ForearmL`/`ForearmR` elbow pivots and wrist sockets (`LeftHand`/`RightHand`). The weapon lives below `Rig/ArmR/ForearmR/RightHand`; the fist has a shaft hole. See `../README.md` for axes, animation and regeneration. `rig.json` records frames, hierarchy, mesh offsets and scales.\n')
+ return {'id':name,'name':title,'folder':'characters/'+name,'status':'playable','scene':'characters/'+name+'/model.tscn','voxel_size':UNIT,'held_in':'right_hand','rig_version':2}
 
 if __name__=='__main__':
- models=[save(n,fn) for n,fn in [('wizard',wizard),('priest',priest),('alchemist',alchemist),('merrow',merrow)]]
+ models=[save('archer')]+[save(n,fn) for n,fn in [('wizard',wizard),('priest',priest),('alchemist',alchemist),('merrow',merrow)]]
  (OUT/'class_model_manifest.json').write_text(json.dumps(models,indent=2)+'\n')
- print('Created model-only characters: Wizard, Priest, Alchemist, Merrow')
+ print('Created articulated player rigs: Archer, Wizard, Priest, Alchemist, Merrow')

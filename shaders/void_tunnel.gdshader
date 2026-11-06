@@ -1,13 +1,10 @@
 shader_type canvas_item;
-// The loading screen: a dark tunnel of chunky voxel pixels spiralling in
-// toward the middle, mostly purple and white with the odd strange color.
-// Cells are laid out in log-polar space, so they stay square and get
-// smaller toward the far end of the tunnel; each one is drawn as a small
-// pixel-snapped block with a gap around it.
+// The original log-polar pixel vortex, with a darker field, chunkier blocks,
+// a slower turn and a cyan, violet and gold palette.
 
-uniform float pixel_size = 5.0;  // screen pixels per art pixel
-uniform float speed = 1.0;
-uniform float rays = 72.0;  // cells around the tunnel
+uniform float pixel_size = 6.0;  // hard-edged screen pixels per voxel
+uniform float speed = 0.72;
+uniform float rays = 68.0;  // cells around the tunnel
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -20,26 +17,28 @@ void fragment() {
 	float r = length(d) + 0.0001;
 	float a = atan(d.y, d.x) / 6.2831853;
 
-	// Square cells: one turn of angle is as long as `rays` steps of log radius.
-	float t = TIME * speed;
-	float depth = -log(r) * rays / 6.2831853 + t * 9.0;  // slides inward
-	float spin = a * rays + depth * 0.35 + t * 1.5;  // and twists into a spiral
+	// Keep the old inward-flowing tunnel, but step it at eight frames per second.
+	float t = floor(TIME * 8.0) / 8.0 * speed;
+	float depth = -log(r) * rays / 6.2831853 + t * 7.0;
+	float spin = a * rays + depth * 0.24 + t * 0.78;
 	vec2 cell = floor(vec2(spin, depth));
 	vec2 inside = fract(vec2(spin, depth));
-	float block = step(0.22, inside.x) * step(inside.x, 0.78) * step(0.22, inside.y) * step(inside.y, 0.78);
+	float block = step(0.16, inside.x) * step(inside.x, 0.84)
+		* step(0.16, inside.y) * step(inside.y, 0.84);
 	float h = hash(cell);
 	float pick = hash(cell + 17.3);
-	float on = step(0.78, h) * block;
+	float on = step(0.66, h) * block;
 
-	vec3 voxel = vec3(0.56, 0.3, 1.0);  // purple
-	if (pick > 0.55) voxel = vec3(0.92, 0.9, 1.0);  // white
-	if (pick > 0.86) voxel = vec3(0.35, 0.9, 1.0);  // odd ones: cyan,
-	if (pick > 0.92) voxel = vec3(1.0, 0.4, 0.75);  // pink,
-	if (pick > 0.97) voxel = vec3(1.0, 0.85, 0.3);  // gold
-	float twinkle = 0.65 + 0.35 * sin(t * 6.0 + h * 40.0);
+	vec3 voxel = vec3(0.42, 0.13, 0.98);  // violet
+	if (pick > 0.45) voxel = vec3(0.04, 0.68, 1.0);  // bright cyan
+	if (pick > 0.78) voxel = vec3(0.11, 0.3, 0.92);  // deep blue
+	if (pick > 0.955) voxel = vec3(1.0, 0.67, 0.18);  // gold sparks
 
-	// A clear dark core for the loader, brightening outward.
-	float fade = smoothstep(0.13, 0.32, r) * (0.55 + 0.45 * smoothstep(0.3, 0.8, r));
-	vec3 bg = vec3(0.025, 0.015, 0.06) + vec3(0.14, 0.06, 0.3) * exp(-pow((r - 0.2) * 7.0, 2.0)) * 0.45;
-	COLOR = vec4(bg + voxel * on * fade * twinkle, 1.0);
+	// Discrete depth bands keep the center dark without a soft gradient.
+	float band = floor(clamp(r * 9.0, 0.0, 7.0));
+	float depth_color = 0.42 + 0.58 * band / 7.0;
+	float tunnel = step(0.12, r) * step(r, 0.88);
+	float flicker = mix(0.78, 1.0, step(0.5, fract(t * 1.6 + h * 3.0)));
+	vec3 bg = vec3(0.003, 0.006, 0.016);
+	COLOR = vec4(bg + voxel * on * tunnel * depth_color * flicker, 1.0);
 }

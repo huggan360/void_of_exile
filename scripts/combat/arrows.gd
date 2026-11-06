@@ -20,7 +20,7 @@ extends Node3D
 
 signal hit(target: Node, damage: int, weapon: Item)
 ## A shot with a `burst` mod stopped (hit something or ran out of range).
-signal ended(position: Vector3, burst: String, weapon: Item)
+signal ended(position: Vector3, burst: String, weapon: Item, hit_object: bool)
 
 const SPIRAL_RADIUS := 0.28
 const SPIRAL_SPIN := 70.0  # radians per second (about one turn per 2-3 m of flight)
@@ -37,6 +37,9 @@ var _shots: Array[Dictionary] = []
 ## Fires one projectile. `phase` sets which way a weaving shot starts.
 func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase := 0.0,
 		trail_override := "", mods := {}) -> void:
+	if not origin.is_finite() or not direction.is_finite() or direction.is_zero_approx():
+		return
+	direction = direction.normalized()
 	var p: Dictionary = weapon.projectile.duplicate()
 	if mods.has("style"): p.style = mods.style
 	var node := Node3D.new()
@@ -51,7 +54,8 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 		node.add_child(mi)
 	node.scale = Vector3.ONE * p.get("size", 1.0) * mods.get("size", 1.0)
 	add_child(node)
-	node.global_transform = Transform3D(Basis.looking_at(direction), origin).scaled_local(node.scale)
+	node.global_transform = Transform3D(_flight_basis(direction), origin).scaled_local(node.scale)
+	if p.get("glow",false): GameAudio.projectile_flight(node,bool(mods.get("visual",false)))
 	if p.get("trail", false) or trail_override != "":
 		node.add_child(_make_trail(weapon, trail_override))
 	var spinner: Node3D = null
@@ -61,8 +65,8 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 	var speed: float = p.get("speed", 24.0) * mods.get("speed", 1.0)
 	_shots.append({
 		node = node, origin = origin, direction = direction, speed = speed,
-		travelled = 0.0, range = p.get("range", 22.0) * mods.get("range", 1.0), stuck = false, life = 0.0,
-		damage = damage, weapon = weapon, phase = phase, hit = {},
+		travelled = 0.0, range = weapon.projectile_range() * mods.get("range", 1.0), stuck = false, life = 0.0,
+		damage = damage, weapon = weapon, phase = phase, hit = {}, hit_object = false,
 		wave_amp = mods.get("wave_amp", p.get("wave_amp", 0.0)), wave_freq = p.get("wave_freq", 0.0),
 		pierce = mods.get("pierce", p.get("pierce", false)), magic = p.get("style", "arrow") not in ["arrow", "trident"],
 		secondary = mods.get("secondary", false), cone_deg = mods.get("cone_deg", 0.0),
@@ -98,45 +102,62 @@ func _physics_process(delta: float) -> void:
 		var query := PhysicsRayQueryParameters3D.create(from, to)
 		query.exclude = exclude if not s.exclude.is_valid() else exclude + [s.exclude]
 		var result := space.intersect_ray(query)
-		while not result.is_empty() and result.collider.has_method("take_hit") and s.pierce and not s.visual:
+		while not result.is_empty() and result.collider.has_method("take_hit") and not result.collider is TheorySurface and s.pierce and not s.visual:
 			# Piercing: hit it, remember it, and keep going.
 			var id: int = result.collider.get_instance_id()
 			if not s.hit.has(id):
 				s.hit[id] = true
 				_deal_hit(s, result.collider, result.position)
+				GameAudio.projectile_hit(s.weapon, result.position, true, bool(s.visual))
 				hit.emit(result.collider, s.damage, s.weapon)
 			query.exclude = query.exclude + [result.rid]
 			result = space.intersect_ray(query)
+		s.hit_object = not result.is_empty()
 		if result.is_empty():
 			if cone_radius > 0.0: _cone_hits(s, from, to, cone_radius)
-			s.node.global_transform = Transform3D(Basis.looking_at(to - from), to).scaled_local(s.node.scale)
+			# Zero-delta frames and position rounding in distant realms can leave
+			# a shot in the same place. Keep its last heading until it moves.
+			var movement := to - from
+			if not movement.is_zero_approx():
+				s.node.global_transform = Transform3D(_flight_basis(movement), to).scaled_local(s.node.scale)
+			else:
+				s.node.global_position = to
 		elif result.collider.has_method("take_hit"):
 			s.node.global_position = result.position
 			if not s.visual:
 				_deal_hit(s, result.collider, result.position)
 				hit.emit(result.collider, s.damage, s.weapon)
+			GameAudio.projectile_hit(s.weapon, result.position, true, bool(s.visual))
 			s.travelled = s.range  # done
 		elif s.magic:
 			s.node.global_position = result.position
+			GameAudio.projectile_hit(s.weapon, result.position, false, bool(s.visual))
 			s.travelled = s.range  # magic shots fizzle on walls
 		else:
 			s.node.global_position = result.position
+			GameAudio.projectile_hit(s.weapon, result.position, false, bool(s.visual))
 			s.stuck = true
 			s.life = STUCK_TIME
 		if s.travelled >= s.range and not s.stuck:
 			s.life = 0.0
 			s.stuck = true
 		if s.stuck and not s.done:
+			GameAudio.stop(s.node.get_meta("flight_audio",{}),.06)
 			s.done = true
 			if s.magic: _splash(s)
 			if s.burst != "" and not s.visual:
-				ended.emit(s.node.global_position, s.burst, s.weapon)
+				ended.emit(s.node.global_position, s.burst, s.weapon, s.hit_object)
 				s.life = 0.0  # bursting shots don't stay stuck in the wall
 
 	for i in range(_shots.size() - 1, -1, -1):
 		if _shots[i].stuck and _shots[i].life <= 0.0:
 			_shots[i].node.queue_free()
 			_shots.remove_at(i)
+
+
+func _flight_basis(direction: Vector3) -> Basis:
+	var up := Vector3.FORWARD if absf(direction.normalized().dot(Vector3.UP)) > 0.999 else Vector3.UP
+	return Basis.looking_at(direction, up)
 
 
 func _deal_hit(s: Dictionary, target: Node, at: Vector3) -> void:
@@ -174,10 +195,13 @@ func _cone_hits(s: Dictionary, from: Vector3, to: Vector3, radius: float) -> voi
 		if not get_world_3d().direct_space_state.intersect_ray(wall).is_empty(): continue
 		s.hit[id] = true
 		_deal_hit(s, target, target_pos)
+		GameAudio.projectile_hit(s.weapon,target_pos,true,false)
 		hit.emit(target, s.damage, s.weapon)
 
 
 func _splash(s: Dictionary) -> void:
+	if s.hit_object:
+		GameAudio.play("magic_explosion", s.node.global_position, {source_id = get_instance_id(), cooldown = 0.1})
 	var points := PackedVector3Array()
 	var colors := PackedColorArray()
 	var tint: Color = s.weapon.projectile.get("color", Color.WHITE)
@@ -235,6 +259,17 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 			_box(lit, Vector3(0, 0, -0.2), Vector3(0.14, 0.14, 0.3), c1)
 			_box(lit, Vector3(0, 0, 0.12), Vector3(0.1, 0.1, 0.3), c2)
 			_box(lit, Vector3(0, 0, 0.38), Vector3(0.06, 0.06, 0.2), c2.darkened(0.2))
+		"serpent":
+			# Tapered S-shaped body, horned skull, ivory fangs and magenta spine.
+			for i in 10:
+				var t := i / 9.0
+				var at := Vector3(sin(t * TAU) * 0.13, 0, -0.27 + t * 0.95)
+				_box(lit, at, Vector3(0.16 - t * 0.12, 0.13 - t * 0.09, 0.14), c1.lerp(c2, t * 0.40))
+			_box(lit, Vector3(0, 0, -0.34), Vector3(0.25, 0.16, 0.23), c1)
+			for side in [-1.0, 1.0]:
+				_box(lit, Vector3(side * 0.09, 0.09, -0.26), Vector3(0.055, 0.11, 0.08), c2)
+				_box(lit, Vector3(side * 0.07, -0.075, -0.44), Vector3(0.035, 0.09, 0.07), c2)
+				_box(lit, Vector3(side * 0.085, 0.02, -0.44), Vector3(0.035, 0.04, 0.025), Color.WHITE)
 		"orb":
 			for x: int in [-1, 0, 1]:
 				for y: int in [-1, 0, 1]:

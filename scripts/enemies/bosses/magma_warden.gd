@@ -47,7 +47,12 @@ func _cinders() -> void:
 	var direction := aim_dir()
 	for volley in 3:
 		after(0.9 + volley * 0.25, func() -> void:
-			fire_fan(shot_origin(), direction, 5, 17.0, _ember(7.0)))
+			var slag := {}
+			if volley == 2:
+				slag = _ember(6.0)
+				slag.merge({color = HOT, size = 1.3, radius = 0.27,
+					effects = [{id = "defense", amount = -8, duration = 2.0}], effect_source = "Magma Warden molten slag"}, true)
+			fire_fan(shot_origin(), direction, 5, 17.0, _ember(7.0), slag))
 
 func _guards() -> void:
 	model.boss_pose("summon", 2.4)
@@ -71,3 +76,9 @@ func _breach() -> void:
 
 func _reset_hook() -> void:
 	model.boss_pose("idle", 0.1)
+
+func _death_started() -> void:
+	model.boss_pose("death", boss_def.death_time + 1.0)
+
+func _dying_update(_k: float) -> void:
+	model.scale = Vector3.ONE * def.model_scale

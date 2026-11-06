@@ -1,22 +1,82 @@
 {
- "voxel_size": 0.075,
+ "voxel_size": 0.0625,
  "parts": {
   "body": {
    "frame_min": [
-    -9,
-    2,
-    -6
+    -11,
+    1,
+    -10
    ],
+   "solid": false,
+   "glow": true
+  },
+  "neck": {
+   "frame_min": [
+    -7,
+    -5,
+    -5
+   ],
+   "solid": false,
+   "glow": true
+  },
+  "head": {
+   "frame_min": [
+    -7,
+    -4,
+    -8
+   ],
+   "solid": false,
+   "glow": true
+  },
+  "jaw": {
+   "frame_min": [
+    -4,
+    -2,
+    -5
+   ],
+   "solid": false,
    "glow": true
   }
  },
- "limbs": {},
+ "limbs": {
+  "neck": {
+   "part": "neck",
+   "pivot": [
+    0,
+    13.6,
+    0
+   ],
+   "role": "serpent_neck"
+  },
+  "head": {
+   "part": "head",
+   "pivot": [
+    0,
+    13.6,
+    -0.64
+   ],
+   "parent_limb": "neck",
+   "role": "serpent_head"
+  },
+  "jaw": {
+   "part": "jaw",
+   "pivot": [
+    0,
+    -1.6,
+    -2.4
+   ],
+   "parent_limb": "head",
+   "role": "serpent_jaw"
+  }
+ },
  "hand": [
   0,
-  16,
-  -6
+  0,
+  -8
  ],
+ "hand_limb": "head",
  "waddle": 0.0,
- "hover": 0.35,
- "bob": 0.12
+ "hover": 0.32,
+ "bob": 0.065,
+ "animation_style": "serpent"
 }

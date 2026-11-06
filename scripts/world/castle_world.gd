@@ -20,6 +20,12 @@ func _init() -> void:
 	display_name = "The Hollow Castle"
 	half_extent = 192
 
+func prepare_load() -> void:
+	# The fog heightmap needs the detached scene's walk surfaces before ready.
+	for node in $Architecture.get_children():
+		if node is Brush and node.walk_surface and node.mesh is BoxMesh:
+			_surfaces.append({bounds=node.transform*AABB(-node.mesh.size/2.0,node.mesh.size),checker=node.checker,block=node.block})
+
 ## A private atmosphere resource: never mutate the shared Tavern biome.
 func biome_at(_pos: Vector3) -> BiomeDef:
 	if _biome == null:
@@ -45,6 +51,8 @@ static func stage() -> Node3D:
 	return instance
 
 func _ready() -> void:
+	_surfaces.clear()
+	_solids.clear()
 	# Campaign cinematics instantiate this scene at their documented stage offset.
 	if global_position.y < -200.0: cinematic_stage = true
 	var bake := Bake.new()

@@ -37,7 +37,7 @@ control attacks automatically; choose the attacks by setting the metadata above.
 | attack | signed points | Weapon damage | green / red |
 | dexterity | signed points | Shot rate | green / red |
 | defense (or defence) | signed points | Normal-hit mitigation | green / red |
-| magic | signed points | Spell damage and shield capacity | green / red |
+| magic | signed points | Spell damage and MAG-based shield protection | green / red |
 | hp (or health) | signed points | Maximum health | green / red |
 | mp (or magic_points) | signed points | Maximum magic points | green / red |
 | regeneration (or regen) | multiplier, 2.3 = 230% | Health regeneration; beneficial regeneration bypasses hurt delay | green if >=1, red otherwise |

@@ -20,6 +20,7 @@ enum {
 	RUNE_BLUE, RUNE_FROST, RUNE_SAND, RUNE_DARK, RUNE_FIRE,
 	CAVE_MOSS, CAVE_CRACKED, CAVE_DIRT, CAVE_GRAVEL,
 	CASTLE_STONE, CASTLE_MARBLE, CASTLE_LIGHT,
+	CARPET_RED, CARPET_GOLD, OAK_PLANKS,
 	COUNT,
 }
 
@@ -28,6 +29,9 @@ enum Style { SPECKLE, GRASS, SAND, COBBLE, CRACKED, SNOW, LAVA, TILES, BRICK, MO
 
 ## block id: [style, [color a, b, c, d, e], emission, roughness]
 const TEXTURES := {
+	CARPET_RED: [Style.SPECKLE, [Color("#8e1f24"), Color("#7d1a20"), Color("#a3282c"), Color("#b8343a"), Color("#6d161c")], 0.0, 0.95],
+	CARPET_GOLD: [Style.TILES, [Color("#c99a3c"), Color("#b5862f"), Color("#6e4f1e"), Color("#e8c26a"), Color("#bf9036")], 0.0, 0.8],
+	OAK_PLANKS: [Style.BRICK, [Color("#8a5f3a"), Color("#7a5232"), Color("#4a3220"), Color("#b0804e"), Color("#946640")], 0.0, 0.85],
 	CASTLE_STONE: [Style.BRICK, [Color("24262b"), Color("1b1d22"), Color("0b0d12"), Color("393b41"), Color("202229")], 0.0, 0.72],
 	CASTLE_MARBLE: [Style.TILES, [Color("c9cbc8"), Color("bfc2c0"), Color("91979b"), Color("e2e1d9"), Color("c7c9c5")], 0.0, 0.48],
 	CASTLE_LIGHT: [Style.CRYSTAL, [Color("dadfe2"), Color("ffffff"), Color("ffffff"), Color.BLACK, Color.BLACK], 2.0, 0.3],

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://csf5xppi8jaiw"
+path="res://.godot/imported/arm_l.vox-aa5a242e0ee86d1fba91e7b2f264374f.tscn"
+
+[deps]
+
+source_file="res://creatures/vent_stalker/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-aa5a242e0ee86d1fba91e7b2f264374f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

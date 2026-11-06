@@ -13,10 +13,12 @@ var _clock := 0.0
 var _ice_blend := 0.0
 var _quiet_blend := 0.0
 var _spark_material := StandardMaterial3D.new()
+var _burning := BurningVisuals.new()
 
 func _ready() -> void:
 	nameplate.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	nameplate.position.y = 2.55
+	nameplate.fixed_size = true
+	nameplate.position.y = 2.25
 	nameplate.font = UIStyle.bold()
 	nameplate.font_size = 36
 	nameplate.pixel_size = .005
@@ -26,6 +28,7 @@ func _ready() -> void:
 	add_child(_ice)
 	add_child(_quiet)
 	add_child(_sparks)
+	add_child(_burning)
 	var ice_mat := _material(Color(.38,.79,1,.72),true)
 	var frost_mat := _material(Color(.76,.95,1,.9),true)
 	for layer in 4:
@@ -58,7 +61,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	nameplate.text = player_name
 	if effects == null: return
-	effects.tick()
+	# Authority resolves periodic damage before retiring expired effects.
+	if Net.is_client(): effects.tick()
+	_burning.effects = effects
 	_clock += delta
 	_ice_blend = move_toward(_ice_blend,1.0 if effects.has_effect("static") else 0.0,delta*5.0)
 	_quiet_blend = move_toward(_quiet_blend,1.0 if effects.has_effect("quiet") else 0.0,delta*6.0)

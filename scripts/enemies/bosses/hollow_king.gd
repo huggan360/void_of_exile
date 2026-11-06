@@ -66,9 +66,11 @@ func _combat(delta: float) -> void:
 			else:
 				_wall_volley()
 	if _returning:
-		var throne := CastleWorld.THRONE_SEAT
+		var throne: Vector3 = director.world.to_global(CastleWorld.THRONE_SEAT)
 		steer_to(throne, 6.0)
 		if Vector2(global_position.x - throne.x, global_position.z - throne.z).length() < 0.35:
+			global_position = throne
+			velocity = Vector3.ZERO
 			_returning = false
 			_court = true
 			behavior = "stationary"
@@ -78,7 +80,7 @@ func _combat(delta: float) -> void:
 			model.rotation.y = PI
 			model.boss_pose("sit", 120.0)
 			if _barrage:
-				status_text = "Iron Barrage · rear half first, then the doorway half"
+				status_text = "Iron Barrage - rear half first, then the doorway half"
 				after(0.8, _barrage_warning)
 				return
 			status_text = "Defeat the king's sworn guardians"
@@ -118,6 +120,8 @@ func _sword() -> void:
 		shard.half_extents = Vector3(2.8, 0.24, 0.7)
 		shard.radius = 2.8
 		shard.size = 1.0
+		shard.effects = [{id = "attack", amount = -8, duration = 2.5}]
+		shard.effect_source = "Hollow King dread cleave"
 		shoot(origin, direction, shard)
 		behavior = "chase"
 		face_override = Vector3.ZERO)
@@ -131,6 +135,7 @@ func _magic() -> void:
 
 func _ring() -> void:
 	_ring_angle += 0.43
+	GameAudio.emit_from("boss_riser", self, {source_id = encounter_id, cooldown = 0.5, max_distance = 64.0, align_end=.8})
 	mark_ring_gaps(_ring_angle, 36.0, 0.8, MAGIC)
 	after(0.8, func() -> void:
 		fire_ring(shot_origin(), 28 if phase == 3 else 22,
@@ -145,6 +150,9 @@ func _death_started() -> void:
 	_court = false
 	face_override = Vector3.ZERO
 	model.boss_pose("kneel", boss_def.death_time + 1.0)
+
+func _dying_update(_k: float) -> void:
+	model.scale = Vector3.ONE * def.model_scale
 
 func _reset_hook() -> void:
 	_court = false
@@ -221,7 +229,7 @@ func _begin_barrage() -> void:
 	_barrage_step = 0
 	_returning = true
 	immune = true
-	status_text = "Iron Barrage · rear half first, then the doorway half"
+	status_text = "Iron Barrage - rear half first, then the doorway half"
 	_scheduled.clear()
 	_charge = {}
 	face_override = Vector3.ZERO
@@ -239,7 +247,7 @@ func _barrage_warning() -> void:
 	var safe_width := 24.5 if _barrage_step < 2 else 49.0 / float(_barrage_step + 1)
 	var warn := maxf(0.65, 2.0 - _barrage_step * 0.16)
 	var speed := 32.0 + _barrage_step * 3.0
-	status_text = "Iron Barrage · find the shrinking safe floor"
+	status_text = "Iron Barrage - find the shrinking safe floor"
 	_sweep(safe_width, _barrage_step % 2 == 0, warn, speed)
 	_barrage_step += 1
 	var drain := 0.44 + 47.0 / speed + 0.18
@@ -257,6 +265,8 @@ func _sweep(safe_width: float, from_left: bool, warn: float, speed: float) -> vo
 	var back := -78.0 if from_left else -78.0 + safe_width
 	var front := -29.0 - safe_width if from_left else -29.0
 	var drain := 0.44 + 47.0 / speed + 0.18
+	# The warning_fill lanes below are the flashing red telegraph visible in phase 3.
+	# Emit once here when that visual warning starts; subsequent lanes are one attack.
 	_floor_warning(back, front, warn, drain, WARNING)
 	var lanes: Array[float] = []
 	var count := ceili((front - back - 1.4) / 0.95) + 1

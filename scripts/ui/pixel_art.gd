@@ -63,7 +63,7 @@ static func frame_image(fill: Color, outline: Color, light: Color, shade: Color,
 	return img
 
 
-## A 12 x 12 art-pixel button like a keycap: a flat face with a one-pixel
+## A 12 x 12 art-pixel button: textured slate with a warm metallic trim,
 ## highlight, sitting on a darker lip that gives it depth. Pressed, the face
 ## drops onto the lip.
 static func button_image(face: Color, lip: Color, outline: Color, highlight: Color, pressed := false) -> Image:
@@ -98,6 +98,8 @@ static func box(img: Image, content_margin := 10.0) -> StyleBoxTexture:
 	s.texture_margin_top = m
 	s.texture_margin_right = m
 	s.texture_margin_bottom = m
+	s.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
+	s.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
 	s.set_content_margin_all(content_margin)
 	return s
 
@@ -111,20 +113,13 @@ static func draw_rows(ci: CanvasItem, origin: Vector2, rows: PackedStringArray, 
 				ci.draw_rect(Rect2(origin + Vector2(x, y) * scale, Vector2.ONE * scale), palette[rows[y][x]])
 
 
-## Tiny pixel text (digits, G, L, V, +, N, D, F, x) with a one-pixel drop shadow.
+## Small smooth text for icon badges, counts and compass labels.
 static func draw_tiny(ci: CanvasItem, origin: Vector2, text: String, color: Color, scale := 2) -> void:
-	for pass_i in 2:
-		var c := Color(0, 0, 0, 0.75) if pass_i == 0 else color
-		var o := origin + (Vector2.ONE * scale if pass_i == 0 else Vector2.ZERO)
-		var x := 0
-		for ch in text:
-			var glyph: Array = TINY.get(ch, [])
-			for gy in glyph.size():
-				for gx in 3:
-					if glyph[gy][gx] == "1":
-						ci.draw_rect(Rect2(o + Vector2(x + gx, gy) * scale, Vector2.ONE * scale), c)
-			x += 4
+	var font := UIStyle.bold()
+	var at := origin + Vector2(0, 5 * scale)
+	ci.draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7 * scale, 2, Color(0, 0, 0, 0.85))
+	ci.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7 * scale, color)
 
 
 static func tiny_width(text: String, scale := 2) -> float:
-	return (text.length() * 4 - 1) * scale
+	return UIStyle.bold().get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7 * scale).x

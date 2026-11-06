@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://fcxw6unwaqd3"
+path="res://.godot/imported/tail_4_glow.vox-b5e476a002ece3d0232a2962b3216177.tscn"
+
+[deps]
+
+source_file="res://creatures/hull_skitter/tail_4_glow.vox"
+dest_files=["res://.godot/imported/tail_4_glow.vox-b5e476a002ece3d0232a2962b3216177.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

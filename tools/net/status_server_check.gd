@@ -10,6 +10,7 @@ class Fixture:
 	func on_hello(peer_id: int, protocol: int, _token: String, character_id: int, account_name: String) -> void:
 		if protocol!=Net.PROTOCOL: return
 		var stats := PlayerStats.new()
+		stats.gear.spell = Items.make("G4_spell")
 		var pid := GameServer.add_player(stats)
 		var p := _new_record(peer_id,character_id,account_name)
 		p.player_id = pid
@@ -78,6 +79,17 @@ func _run() -> void:
 	if not await wait_for(func(): return FileAccess.file_exists(DIR+"expired1") and FileAccess.file_exists(DIR+"expired2")): return
 	for p: Dictionary in Net.server.peers.values():
 		check(not GameServer.character(p.player_id).buffs.has_effect("static"),"Server expires control effects")
+	if not await wait_for(func(): return FileAccess.file_exists(DIR+"protected1") and FileAccess.file_exists(DIR+"protected2")): return
+	for p: Dictionary in Net.server.peers.values():
+		check(GameServer.interacting(p.player_id),"Interaction protection reaches the authoritative server")
+		var hp := GameServer.character(p.player_id).hp
+		GameServer.hit_player(p.player_id, 5000, true)
+		check(GameServer.character(p.player_id).hp == hp,"Server rejects lethal damage during interaction")
+	mark("protection_checked")
+	if not await wait_for(func(): return FileAccess.file_exists(DIR+"unprotected1") and FileAccess.file_exists(DIR+"unprotected2")): return
+	for p: Dictionary in Net.server.peers.values(): check(not GameServer.interacting(p.player_id),"Closing interaction clears server protection")
+	mark("shield_test")
+	if not await wait_for(func(): return FileAccess.file_exists(DIR+"shield_heard2")): return
 	mark("done")
 	await get_tree().create_timer(.3).timeout
 	print("STATUS NETWORK SERVER: %d checks, %d failures" % [checks,failures])

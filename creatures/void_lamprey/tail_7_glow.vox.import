@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dsfkw1lvcfckd"
+path="res://.godot/imported/tail_7_glow.vox-e72e3d47365193f9fe3c6d1ed5b34d3d.tscn"
+
+[deps]
+
+source_file="res://creatures/void_lamprey/tail_7_glow.vox"
+dest_files=["res://.godot/imported/tail_7_glow.vox-e72e3d47365193f9fe3c6d1ed5b34d3d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

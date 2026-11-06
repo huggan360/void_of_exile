@@ -54,7 +54,8 @@ func strength_toward(pos: Vector3) -> float:
 
 
 func _segment_at(pos: Vector3) -> int:
-	var a := atan2(pos.z - global_position.z, pos.x - global_position.x)
+	var local := global_basis.inverse()*(pos-global_position)
+	var a := atan2(local.z,local.x)
 	return posmod(int(floor(a / TAU * SEGMENTS)), SEGMENTS)
 
 
@@ -107,6 +108,7 @@ func _clash_with(other: WarpWave) -> void:
 	if contacts > 0 and _spark_timer <= 0.0:
 		_spark_timer = SPARK_EVERY
 		contact /= contacts
+		GameAudio.play("magic_shield_hit", contact, {source_id = get_instance_id(), cooldown = 0.1})
 		_spark(contact + Vector3.UP * 0.9, color.lerp(other.color, 0.5))
 		CameraShake.shake_at(contact, CLASH_SHAKE, 8.0)
 

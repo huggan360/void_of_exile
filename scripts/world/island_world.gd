@@ -18,7 +18,9 @@ const BURNING_CHANCE := 0.3
 const DECOR_DRAW_DISTANCE := 60.0
 const CHUNK := 32
 const LOAD_RADIUS := 4  # chunks around the player that are kept built (~128 m)
-const CHUNKS_PER_FRAME := 2  # spread building out so walking never hitches
+const STREAM_BUDGET_USEC := 1000
+const UNLOADS_PER_FRAME := 1
+const BUILD_TILE := 4
 
 var gates := StrongholdGates.new()
 var generator: IslandGenerator
@@ -34,30 +36,41 @@ var _npcs_by_chunk := {}
 var service_sites: Array[Dictionary] = []
 var _lamps_by_chunk := {}  # Vector2i -> Array[Dictionary]
 var _town_trees_by_chunk := {}  # Vector2i -> Array[Dictionary] (with the town's biome)
+var _retired: Array[Node3D] = []
 var _chunks := {}  # Vector2i -> Node3D holding that chunk's content
 var _queue: Array[Vector2i] = []
+var _build_steps: Array[Callable] = []
+var _building_root: Node3D
+var _server_centers: Array[Vector2i] = []
+var _server_want := {}
 var _center_chunk := Vector2i(1 << 30, 0)
 ## Wakes enemy packs as the player comes near.
 var enemy_director := EnemyDirector.new()
 ## Dedicated server: build only what matters for the simulation.
 var server_build := false
+var astral_site := Vector3.INF
+var astral_station: AstralStation
 var _obstacles := {}  # obstacle id -> Obstacle (built ones)
 
 
-func _init(record: Dictionary) -> void:
+func _init(record: Dictionary, prepared_layout := {}) -> void:
 	_record = record
 	realm_id = record.id
 	display_name = record.get("name", "Realm %s" % str(record.id).trim_prefix("realm_"))
 	for id in record.destroyed:
 		_destroyed[id] = true
 	# Every realm is the static island laid out in res://realm/realm_layout.tscn.
-	generator = IslandGenerator.new(record.seed, RealmLayout.data())
+	generator = IslandGenerator.new(record.seed,prepared_layout if not prepared_layout.is_empty() else RealmLayout.data())
+	if record.get("astral_station",false): astral_site = AstralStation.plan(generator)
 	half_extent = int(IslandGenerator.RADIUS) + 48
 	var spawn := generator.find_spawn()
 	spawn_point = spawn[0]
 	var inland: Vector2 = spawn[1]
 	_portal_pos = generator.surface(Vector2(spawn_point.x, spawn_point.z) + inland * 7.0)
 	_keep_clear = [spawn_point, _portal_pos]
+	if astral_site.is_finite():
+		for z in range(-24,33,8):
+			for x in range(-28,29,8): _keep_clear.append(astral_site+Vector3(x,0,z))
 	for village in generator.villages:
 		_village_plans[village.display_name] = village
 		for building: Dictionary in village.houses + village.props:
@@ -70,6 +83,7 @@ func _init(record: Dictionary) -> void:
 			if not _town_trees_by_chunk.has(tree_chunk):
 				_town_trees_by_chunk[tree_chunk] = []
 			_town_trees_by_chunk[tree_chunk].append(tree.merged({biome = village.biome_id}))
+		_place_townsfolk(village)
 		service_sites.append_array(village.service_sites)
 		for service in village.service_sites:
 			var chunk := _chunk_of(service.door)
@@ -90,13 +104,67 @@ func _init(record: Dictionary) -> void:
 		_lamps_by_chunk[c].append(site)
 
 
+## Clients and the server resolve identical stations before chunk indexing.
+func _place_townsfolk(village: VillageFeature) -> void:
+	var navigation := TownNavigation.new(village, self)
+	_town_navigation[village.display_name] = navigation
+	var plaza := navigation._node(Vector3(village.center.x + 0.5, 0, village.center.y + 0.5))
+	var taken: Array[Vector3] = []
+	for resident in village.residents:
+		var desired: Vector3 = resident.pos
+		var best := Vector3.INF
+		var score := INF
+		for z in navigation.side:
+			for x in navigation.side:
+				var cell := Vector2i(x, z)
+				if navigation.grid.is_point_solid(cell):
+					continue
+				var point := navigation.grid.get_point_position(cell)
+				if not village.is_street(floori(point.x), floori(point.y)):
+					continue
+				var at := Vector3(point.x, ground_height(point.x, point.y), point.y)
+				var distance := at.distance_squared_to(desired)
+				if distance >= score or taken.any(func(other: Vector3) -> bool: return at.distance_squared_to(other) < 2.25):
+					continue
+				if navigation.grid.get_id_path(plaza, cell).is_empty():
+					continue
+				best = at
+				score = distance
+		assert(best != Vector3.INF, "No reachable town station in " + village.display_name)
+		resident.pos = best
+		if resident.role == "steward" or not resident.stationary:
+			var toward := Vector3(village.center.x + 0.5, best.y, village.center.y + 0.5) - best
+			resident.yaw = atan2(-toward.x, -toward.z)
+		taken.append(best)
+	for service in village.service_sites:
+		service.door = service.npc.pos
+
+
+func _warm_stream_assets() -> void:
+	# VOX parsing and meshing belong to world loading, not a walk into town.
+	for buildings in _buildings_by_chunk.values():
+		for building in buildings: VillageHouse.warm_asset(str(building.asset))
+	for id in range(2,Biomes.COUNT):
+		var biome := Biomes.get_biome(id)
+		for prefab in biome.obstacles: ObstacleLibrary.get_prefab(str(prefab)).meshes_for(biome)
+		if not server_build:
+			for prefab in biome.decor: ObstacleLibrary.get_prefab(str(prefab)).meshes_for(biome)
+	if not server_build:
+		VoxelFire.warm(1.0)
+		VoxelFire.warm(1.4)
+
 func _ready() -> void:
+	if not get_meta("assets_prepared",false): _warm_stream_assets()
 	var r := half_extent
 	_add_terrain(generator, AABB(Vector3(-r, -8, -r), Vector3(r * 2, IslandGenerator.MAX_HEIGHT + 16, r * 2)))
 	if not server_build:
 		_add_water(IslandGenerator.SEA_LEVEL + 0.6, r + 300.0)
 	_add_portal(_portal_pos, spawn_point - _portal_pos, "hall",
 			Color(1.0, 0.6, 0.2), Color(1.0, 0.9, 0.5))
+	if astral_site.is_finite():
+		astral_station = AstralStation.new()
+		astral_station.world = self
+		add_child(astral_station)
 	add_child(gates)
 	var opened: Array = _record.get("opened_gates",[]).map(func(c: Array) -> Vector2i: return Vector2i(int(c[0]),int(c[1])))
 	# Fortresses a campaign opened for good stay open.
@@ -122,11 +190,6 @@ func update_streaming(pos: Vector3, build_all_now := false) -> void:
 	var center := _chunk_of(pos)
 	if center != _center_chunk:
 		_center_chunk = center
-		for c in _chunks.keys():
-			if maxi(absi(c.x - center.x), absi(c.y - center.y)) > LOAD_RADIUS + 1:
-				_chunks[c].queue_free()
-				_chunks.erase(c)
-				enemy_director.remove_chunk(c)
 		_queue.clear()
 		for dz in range(-LOAD_RADIUS, LOAD_RADIUS + 1):
 			for dx in range(-LOAD_RADIUS, LOAD_RADIUS + 1):
@@ -136,34 +199,103 @@ func update_streaming(pos: Vector3, build_all_now := false) -> void:
 		# Nearest chunks first.
 		_queue.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
 			return (a - center).length_squared() < (b - center).length_squared())
+	var keep := {}
+	for c: Vector2i in _chunks:
+		if maxi(absi(c.x - center.x), absi(c.y - center.y)) <= LOAD_RADIUS + 1:
+			keep[c] = true
+	_prune_chunks(keep, build_all_now)
 	_build_queued(build_all_now)
 
 
 ## Server: keeps chunks built around every player (and frees the rest).
 func update_streaming_multi(positions: Array, build_all_now := false) -> void:
-	var want := {}
+	var centers: Array[Vector2i] = []
 	for pos: Vector3 in positions:
 		var center := _chunk_of(pos)
+		if not centers.has(center): centers.append(center)
+	centers.sort()
+	if centers == _server_centers:
+		_prune_chunks(_server_want, build_all_now)
+		_build_queued(build_all_now)
+		return
+	_server_centers = centers
+	var want := {}
+	var priority := {}
+	for center: Vector2i in centers:
 		for dz in range(-LOAD_RADIUS, LOAD_RADIUS + 1):
 			for dx in range(-LOAD_RADIUS, LOAD_RADIUS + 1):
-				want[center + Vector2i(dx, dz)] = true
-	for c in _chunks.keys():
-		if not want.has(c):
-			_chunks[c].queue_free()
-			_chunks.erase(c)
-			enemy_director.remove_chunk(c)
+				var c := center + Vector2i(dx, dz)
+				want[c] = true
+				priority[c] = mini(int(priority.get(c, 1 << 30)), dx * dx + dz * dz)
+	_server_want = want
+	_prune_chunks(want, build_all_now)
 	_queue.clear()
 	for c: Vector2i in want:
 		if not _chunks.has(c):
 			_queue.append(c)
+	_queue.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return priority[a] < priority[b])
 	_build_queued(build_all_now)
 
 
+func _retire_step() -> void:
+	var started := Time.get_ticks_usec() if FrameTrace.enabled else 0
+	var deadline := Time.get_ticks_usec()+600
+	var count := 0
+	while not _retired.is_empty() and count<8:
+		var root := _retired[0]
+		if root.get_child_count()==0:
+			root.queue_free()
+			_retired.pop_front()
+		else:
+			var child := root.get_child(root.get_child_count()-1)
+			root.remove_child(child)
+			child.queue_free()
+		count += 1
+		if Time.get_ticks_usec()>=deadline: break
+	if FrameTrace.enabled: FrameTrace.record("stream/retire",started)
+
+func _prune_chunks(keep: Dictionary, all_now: bool) -> void:
+	_retire_step()
+	var removed := 0
+	for c: Vector2i in _chunks.keys():
+		if keep.has(c): continue
+		var root: Node3D = _chunks[c]
+		if root == _building_root:
+			_build_steps.clear()
+			_building_root = null
+		# Remove collision and processing immediately; destruction is deferred.
+		var unload_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
+		if all_now or server_build:
+			remove_child(root)
+			root.queue_free()
+		else:
+			# Disable the subtree (including collision), then release small
+			# batches instead of freeing hundreds of render/physics RIDs at once.
+			root.hide()
+			root.process_mode = Node.PROCESS_MODE_DISABLED
+			_retired.append(root)
+		_chunks.erase(c)
+		if FrameTrace.enabled: FrameTrace.record("stream/unload",unload_started)
+		enemy_director.remove_chunk(c)
+		removed += 1
+		if not all_now and removed >= UNLOADS_PER_FRAME: break
+
+
 func _build_queued(build_all_now: bool) -> void:
-	var budget := _queue.size() if build_all_now else CHUNKS_PER_FRAME
-	while budget > 0 and not _queue.is_empty():
-		_build_chunk(_queue.pop_front())
-		budget -= 1
+	var deadline := Time.get_ticks_usec() + (3000 if get_meta("asynchronous_load",false) else STREAM_BUDGET_USEC)
+	while not _queue.is_empty() or not _build_steps.is_empty():
+		if _build_steps.is_empty():
+			_start_chunk(_queue.pop_front())
+		if not _build_steps.is_empty():
+			var step: Callable = _build_steps.pop_front()
+			var started := Time.get_ticks_usec() if FrameTrace.enabled else 0
+			step.call()
+			if FrameTrace.enabled: FrameTrace.record("stream/"+str(step.get_method()),started)
+		if not build_all_now and Time.get_ticks_usec() >= deadline: break
+
+func is_presentation_ready() -> bool:
+	return super.is_presentation_ready() and _queue.is_empty() and _build_steps.is_empty()
+
 
 
 ## A conversation with a townsperson. The steward also offers to make the
@@ -180,14 +312,17 @@ func _talk_target(resident: Dictionary) -> InteractionTarget:
 	target.reach = 3.0
 	if role == "steward":
 		target.description = "The steward keeps the town book of %s." % village
-		target.action_text = "Make %s my home" % village
+		target.action_text = "Talk"
+		target.confirm_text = "Yes"
+		target.cancel_text = "No"
 		target.activated.connect(func(player: Node3D) -> void:
 			var stats := GameServer.character(player.player_id)
+			var welcome := "Welcome to %s. I keep this town's book of residents." % village
 			if stats and stats.home == village:
-				target.response = "%s is already your home. You'll always find a bed here." % village
-			else:
-				GameServer.request_set_home(player.player_id, village)
-				target.response = "Signed and sealed: %s is your home now. You'll arrive here whenever you enter the realm." % village)
+				welcome = "Your characters already call %s home. You're always welcome here." % village
+			target.response = welcome + "|Would you like to make %s the realm spawn town for all your characters?" % village)
+		target.confirmed.connect(func(player: Node3D) -> void:
+			GameServer.request_set_home(player.player_id, village))
 	else:
 		target.description = "Say hello?"
 		target.action_text = "Talk"
@@ -227,8 +362,17 @@ func is_walkable(pos: Vector3) -> bool:
 func is_hazard(pos: Vector3) -> bool:
 	return Blocks.is_hazard(generator.surface_block(floori(pos.x), floori(pos.z)))
 
+func is_water(pos: Vector3) -> bool:
+	# Also available on the headless server, where the water mesh is omitted.
+	return pos.y<=IslandGenerator.SEA_LEVEL+0.7 and not is_hazard(pos)
+
+
+func astral_anchor(key: String) -> Vector3:
+	return astral_site+AstralStation.OFFSETS.get(key,Vector3.ZERO) if astral_site.is_finite() else Vector3.INF
+
 
 func ground_height(x: float, z: float) -> float:
+	if astral_site.is_finite() and AstralStation.contains(astral_site,Vector3(x,0,z)): return astral_site.y
 	return generator.column(floori(x), floori(z)).x + 1.0
 
 
@@ -282,42 +426,72 @@ func _chunk_of(pos: Vector3) -> Vector2i:
 
 
 func _build_chunk(c: Vector2i) -> void:
+	while not _build_steps.is_empty(): _build_steps.pop_front().call()
+	if _chunks.has(c): return
+	_start_chunk(c)
+	while not _build_steps.is_empty(): _build_steps.pop_front().call()
+
+
+func _start_chunk(c: Vector2i) -> void:
 	var root := Node3D.new()
 	root.name = "Chunk_%d_%d" % [c.x, c.y]
 	add_child(root)
 	_chunks[c] = root
+	_building_root = root
 	var area := Rect2i(c * CHUNK, Vector2i(CHUNK, CHUNK))
-	_build_obstacles(root, area)
-	_build_lamps(root, c)
-	if server_build:
-		for building: Dictionary in _buildings_by_chunk.get(c, []):
-			root.add_child(VillageHouse.new().setup(building))
-		enemy_director.add_sites(c, generator.pack_sites(area, _keep_clear))
-		return
-	_build_decor(root, area)
+	for z in range(0, CHUNK, BUILD_TILE):
+		for x in range(0, CHUNK, BUILD_TILE):
+			_build_steps.append(_build_obstacles.bind(root, Rect2i(area.position + Vector2i(x, z), Vector2i(BUILD_TILE, BUILD_TILE))))
+	_build_steps.append(_build_lamps.bind(root, c))
 	for building: Dictionary in _buildings_by_chunk.get(c, []):
-		root.add_child(VillageHouse.new().setup(building))
-	for tree: Dictionary in _town_trees_by_chunk.get(c, []):
-		var biome := Biomes.get_biome(Biomes.BEACH if tree.prefab == "palm" else tree.biome)
-		var planted := Obstacle.new().setup("", ObstacleLibrary.get_prefab(tree.prefab), biome, true)
-		planted.position = tree.pos
-		planted.rotation.y = tree.yaw
-		root.add_child(planted)
-	for service: Dictionary in _services_by_chunk.get(c, []):
-		var sign := Label3D.new()
-		sign.text = {smith = "Forge", magician = "Arcane Lodge", inn = "Lodge", herbalist = "Herbs"}.get(service.role, "Home")
-		sign.position = service.door + Vector3.UP * 2.5
-		sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		sign.font_size = 36
-		sign.pixel_size = 0.005
-		root.add_child(sign)
-	for resident: Dictionary in _npcs_by_chunk.get(c, []):
-		if not _town_navigation.has(resident.village):
-			_town_navigation[resident.village] = TownNavigation.new(_village_plans[resident.village], self)
-		var npc := TownNPC.new().setup(resident, _town_navigation[resident.village])
-		root.add_child(npc)
-		npc.add_child(_talk_target(resident))
+		_build_steps.append(_build_house.bind(root, building))
+	if not server_build:
+		var decor_groups := {}
+		for z in range(0, CHUNK, BUILD_TILE):
+			for x in range(0, CHUNK, BUILD_TILE):
+				_build_steps.append(_gather_decor.bind(decor_groups, Rect2i(area.position + Vector2i(x, z), Vector2i(BUILD_TILE, BUILD_TILE))))
+		_build_steps.append(_finish_decor.bind(root, decor_groups))
+		for tree: Dictionary in _town_trees_by_chunk.get(c, []):
+			_build_steps.append(_build_town_tree.bind(root, tree))
+		for service: Dictionary in _services_by_chunk.get(c, []):
+			_build_steps.append(_build_service.bind(root, service))
+		for resident: Dictionary in _npcs_by_chunk.get(c, []):
+			_build_steps.append(_build_resident.bind(root, resident))
+	_build_steps.append(_build_pack_sites.bind(c, area))
+
+
+func _build_house(root: Node3D, building: Dictionary) -> void:
+	root.add_child(VillageHouse.new().setup(building))
+
+
+func _build_pack_sites(c: Vector2i, area: Rect2i) -> void:
 	enemy_director.add_sites(c, generator.pack_sites(area, _keep_clear))
+
+
+func _build_town_tree(root: Node3D, tree: Dictionary) -> void:
+	var biome := Biomes.get_biome(Biomes.BEACH if tree.prefab == "palm" else tree.biome)
+	var planted := Obstacle.new().setup("", ObstacleLibrary.get_prefab(tree.prefab), biome, true)
+	planted.position = tree.pos
+	planted.rotation.y = tree.yaw
+	root.add_child(planted)
+
+
+func _build_service(root: Node3D, service: Dictionary) -> void:
+	var sign := Label3D.new()
+	sign.text = {smith = "Forge", magician = "Arcane Lodge", inn = "Lodge", herbalist = "Herbs"}.get(service.role, "Home")
+	sign.position = service.door + Vector3.UP * 2.5
+	sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sign.font_size = 36
+	sign.pixel_size = 0.005
+	root.add_child(sign)
+
+
+func _build_resident(root: Node3D, resident: Dictionary) -> void:
+	if not _town_navigation.has(resident.village):
+		_town_navigation[resident.village] = TownNavigation.new(_village_plans[resident.village], self)
+	var npc := TownNPC.new().setup(resident, _town_navigation[resident.village])
+	root.add_child(npc)
+	npc.add_child(_talk_target(resident))
 
 
 func _build_obstacles(root: Node3D, area: Rect2i) -> void:
@@ -341,6 +515,7 @@ func _build_obstacles(root: Node3D, area: Rect2i) -> void:
 
 
 func _build_lamps(root: Node3D, c: Vector2i) -> void:
+	if _lamps_by_chunk.get(c, []).is_empty(): return
 	var prefab := ObstacleLibrary.get_prefab("lamppost")
 	for site in _lamps_by_chunk.get(c, []):
 		var biome := biome_at(site.pos)
@@ -354,28 +529,40 @@ func _build_lamps(root: Node3D, c: Vector2i) -> void:
 
 ## Grass tufts, flowers, pebbles...: one MultiMesh per prefab and biome color
 ## set in the chunk. No collision; they're just decoration.
-func _build_decor(root: Node3D, area: Rect2i) -> void:
-	var groups := generator.decor_sites(area)
+func _gather_decor(groups: Dictionary, area: Rect2i) -> void:
+	var tile := generator.decor_sites(area)
+	for key: String in tile:
+		if not groups.has(key): groups[key] = []
+		for transform: Transform3D in tile[key]:
+			if astral_site.is_finite() and AstralStation.contains(astral_site,transform.origin,0.5): continue
+			groups[key].append(transform)
+
+
+func _finish_decor(root: Node3D, groups: Dictionary) -> void:
 	for key: String in groups:
-		var parts := key.split("/")
-		var prefab := ObstacleLibrary.get_prefab(parts[0])
-		var meshes := prefab.meshes_for(Biomes.get_biome(int(parts[1])))
-		var local := Transform3D(Basis.from_scale(Vector3.ONE * prefab.voxel_size), prefab.mesh_offset())
-		for i in 2:
-			if meshes[i] == null:
-				continue
-			var mm := MultiMesh.new()
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = meshes[i]
-			mm.instance_count = groups[key].size()
-			for j in mm.instance_count:
-				mm.set_instance_transform(j, groups[key][j] * local)
-			var mmi := MultiMeshInstance3D.new()
-			mmi.multimesh = mm
-			mmi.material_override = VoxModel.glow_material() if i == 1 else VoxModel.material()
-			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			mmi.visibility_range_end = DECOR_DRAW_DISTANCE
-			root.add_child(mmi)
+		_build_steps.append(_build_decor_group.bind(root, key, groups[key]))
+
+
+func _build_decor_group(root: Node3D, key: String, transforms: Array) -> void:
+	var parts := key.split("/")
+	var prefab := ObstacleLibrary.get_prefab(parts[0])
+	var meshes := prefab.meshes_for(Biomes.get_biome(int(parts[1])))
+	var local := Transform3D(Basis.from_scale(Vector3.ONE * prefab.voxel_size), prefab.mesh_offset())
+	for i in 2:
+		if meshes[i] == null:
+			continue
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = meshes[i]
+		mm.instance_count = transforms.size()
+		for j in mm.instance_count:
+			mm.set_instance_transform(j, transforms[j] * local)
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.material_override = VoxModel.glow_material() if i == 1 else VoxModel.material()
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.visibility_range_end = DECOR_DRAW_DISTANCE
+		root.add_child(mmi)
 
 
 ## Breakable obstacles (ids) within `radius` of `pos` (a gravestone landing).

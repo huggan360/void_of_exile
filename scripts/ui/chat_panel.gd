@@ -59,7 +59,7 @@ func _ready() -> void:
 	holder.add_child(_log)
 	_input.custom_minimum_size = Vector2(LOG_SIZE.x, 30)
 	_input.max_length = SocialServer.CHAT_MAX
-	_input.placeholder_text = "Say something  ·  /t name  ·  /p party  ·  /help"
+	_input.placeholder_text = "Say something  -  /t name  -  /p party  -  /help"
 	_input.add_theme_font_override("font", UIStyle.font())
 	_input.add_theme_font_size_override("font_size", UIStyle.SIZE_SMALL)
 	_input.text_submitted.connect(_submit)
@@ -80,8 +80,15 @@ func _ready() -> void:
 	social.line_added.connect(_on_line)
 	social.party_changed.connect(_redraw)
 	social.invited.connect(func(_l: String) -> void: _party.text = "Party  (!)")
-	social.party_changed.connect(func() -> void: _party.text = "Party  (!)" if not social.invites.is_empty() else "Party")
+	social.party_changed.connect(_social_badges)
+	Account.friends_changed.connect(_social_badges)
+	_social_badges()
 	_redraw()
+
+
+func _social_badges() -> void:
+	_party.text = "Party  (!)" if not social.invites.is_empty() or not Account.party_invites.is_empty() else "Party"
+	_friends.text = "Friends  (!)" if Account.friend_requests.any(func(r: Dictionary) -> bool: return not bool(r.outgoing)) else "Friends"
 
 
 func is_open() -> bool:
@@ -166,7 +173,7 @@ func _format(line: Dictionary) -> String:
 		"say":
 			return "%s: %s" % [_name(line.from), text]
 		"tell":
-			var mine: bool = str(line.from).to_lower() == social.my_name.to_lower()
+			var mine: bool = int(line.from_id) == player.player_id
 			return "[color=#7ee08a]%s %s: %s[/color]" % ["To" if mine else "From", _name(line.to if mine else line.from), text]
 		"party":
 			return "[color=#c58bff][Party] %s: %s[/color]" % [_name(line.from), text]

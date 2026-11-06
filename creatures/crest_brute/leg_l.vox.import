@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bs6gqi3xinpuw"
+path="res://.godot/imported/leg_l.vox-3ef172ede94210c4f5b691c34ec039ca.tscn"
+
+[deps]
+
+source_file="res://creatures/crest_brute/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-3ef172ede94210c4f5b691c34ec039ca.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

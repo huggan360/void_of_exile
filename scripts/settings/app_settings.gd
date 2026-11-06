@@ -3,10 +3,16 @@ extends Node
 signal gui_changed
 signal bindings_changed
 signal video_changed
+signal graphics_changed
+signal audio_changed
 const PATH := "user://settings.cfg"
 const GUI_FACTORS := {small=.85,medium=1.0,large=1.2}
 var reference_size := Vector2i(1920,1080)
 var video: Dictionary
+## Graphics quality (see GraphicsSettings), applied and saved at once.
+var graphics: Dictionary
+## Audio mix and output preferences, applied and saved at once.
+var audio: Dictionary
 var bindings := {}
 var preview_active := false
 var _previous_video := {}
@@ -19,13 +25,14 @@ func _ready() -> void:
 	load_preferences()
 	install_bindings()
 	_apply_video()
+	_apply_graphics()
 	get_window().size_changed.connect(_on_window_resize)
 
 func desktop_available() -> bool:
 	return DisplayServer.get_name()!="headless"
 
 func defaults() -> Dictionary:
-	return {mode="windowed",window_size=Vector2i(1600,900),fullscreen_resolution=Vector2i.ZERO,screen=0,vsync=true,max_fps=0,gui_scale="medium",resizable=true,show_fps=false}
+	return {mode="windowed",window_size=Vector2i(1600,900),fullscreen_resolution=Vector2i.ZERO,screen=0,vsync=true,max_fps=0,gui_scale="medium",resizable=true,show_fps=false,camera_angle="standard"}
 
 func sanitize(value: Dictionary) -> Dictionary:
 	var result := defaults()
@@ -33,6 +40,7 @@ func sanitize(value: Dictionary) -> Dictionary:
 		if value.has(key) and typeof(value[key])==typeof(result[key]): result[key] = value[key]
 	if result.mode not in ["windowed","fullscreen"]: result.mode = "windowed"
 	if not GUI_FACTORS.has(result.gui_scale): result.gui_scale = "medium"
+	if result.camera_angle not in ["standard", "overhead"]: result.camera_angle = "standard"
 	result.window_size = Vector2i(clampi(result.window_size.x,640,7680),clampi(result.window_size.y,360,4320))
 	if result.fullscreen_resolution!=Vector2i.ZERO:
 		result.fullscreen_resolution = Vector2i(clampi(result.fullscreen_resolution.x,640,7680),clampi(result.fullscreen_resolution.y,360,4320))
@@ -46,6 +54,14 @@ func load_preferences() -> void:
 	var saved := {}
 	for key in defaults(): saved[key] = config.get_value("video",key,defaults()[key]) if exists else defaults()[key]
 	video = sanitize(saved)
+	if exists and config.has_section("graphics"):
+		var values := {}
+		for key in config.get_section_keys("graphics"): values[key] = config.get_value("graphics",key)
+		graphics = GraphicsSettings.sanitize(values)
+	else: graphics = GraphicsSettings.defaults(GraphicsSettings.suggested_preset())
+	var saved_audio := {}
+	for key in audio_defaults(): saved_audio[key] = config.get_value("audio",key,audio_defaults()[key]) if exists else audio_defaults()[key]
+	audio = sanitize_audio(saved_audio)
 	var reference: Variant = config.get_value("interface","reference_size",reference_size)
 	if reference is Vector2i and reference.x>=640 and reference.y>=360: reference_size = reference
 	bindings.clear()
@@ -62,6 +78,8 @@ func save_preferences() -> Error:
 	# During a display preview only the confirmed video state may reach disk.
 	var stored: Dictionary = _previous_video if preview_active else video
 	for key in stored: config.set_value("video",key,stored[key])
+	for key in graphics: config.set_value("graphics",key,graphics[key])
+	for key in audio: config.set_value("audio",key,audio[key])
 	config.set_value("interface","reference_size",reference_size)
 	for action in bindings: config.set_value("controls",action,bindings[action])
 	return config.save(PATH)
@@ -120,9 +138,40 @@ func _apply_render_scale() -> void:
 		var pixels := Vector2(get_window().size)
 		var target := Vector2(video.fullscreen_resolution)
 		ratio = minf(target.x/maxf(1,pixels.x),target.y/maxf(1,pixels.y))
-	get_window().scaling_3d_scale = clampf(ratio,.25,2.0)
+	GraphicsSettings.apply_viewport(get_window(),graphics,ratio)
+
+func set_graphics(value: Dictionary) -> void:
+	graphics = GraphicsSettings.sanitize(value)
+	_apply_graphics()
+	save_preferences()
+
+func audio_defaults() -> Dictionary:
+	return {output_mode="headphones",stereo_width=.35,master=.85,music=.55,sfx=.8,ambience=.5,ally_sounds=true,ally_volume=.35,ui_sounds=true,dynamic_range="balanced"}
+
+func sanitize_audio(value: Dictionary) -> Dictionary:
+	var result := audio_defaults()
+	for key in result:
+		if value.has(key) and typeof(value[key])==typeof(result[key]): result[key] = value[key]
+	if result.output_mode not in ["headphones","speakers","surround"]: result.output_mode = "headphones"
+	if result.dynamic_range not in ["balanced","night","wide"]: result.dynamic_range = "balanced"
+	for key in ["master","music","sfx","ambience","ally_volume","stereo_width"]: result[key] = clampf(float(result[key]),0.0,1.0)
+	return result
+
+func set_audio(value: Dictionary) -> void:
+	audio = sanitize_audio(value)
+	save_preferences()
+	audio_changed.emit()
+
+func _apply_graphics() -> void:
+	_apply_render_scale()
+	graphics_changed.emit()
 
 func install_bindings() -> void:
+	# Tab belongs to the held inventory action, including Shift+Tab.
+	for action in ["ui_focus_next", "ui_focus_prev"]:
+		for event in InputMap.action_get_events(action):
+			if event is InputEventKey and (event.keycode == KEY_TAB or event.physical_keycode == KEY_TAB):
+				InputMap.action_erase_event(action, event)
 	for entry: Dictionary in ControlBindings.ACTIONS:
 		var action: String = entry.id
 		if not InputMap.has_action(action): InputMap.add_action(action)

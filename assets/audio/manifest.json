@@ -1,0 +1,1646 @@
+{
+  "schema_version": 1,
+  "source_root": "/home/hugo/Downloads/sound",
+  "processing": {
+    "source_immutable": true,
+    "sample_rate_hz": 48000,
+    "sfx": "mono PCM; peak adjusted to -2 dBFS, 35 Hz high-pass / 19 kHz low-pass, 8 ms fade-in and 12 ms fade-out",
+    "ambience_music": "music: stereo Vorbis quality 4; ambience/shield loops: predecoded PCM to avoid decoder contention; source dynamics retained",
+    "leading_silence": "SFX only: detected at -45 dB for at least 30 ms, retaining 10 ms before the detected end; durations recorded per source",
+    "shield_cleanup": "shield.wav gets a stronger 180 Hz high-pass before the root runtime 280 Hz shield-only filter",
+    "loop_source": "Ambience and shield use an 80 ms equal-power tail/head overlap with seam rotation; music remains full length; loop hint set for runtime",
+    "generated": "offline synthesized utility effects; see generated event names",
+    "minion_voices": "Mono 48 kHz PCM; Rubber Band quality mode at 1.5x tempo and 1.3x pitch; float intermediate, peak normalized to -3 dBFS after processing; 8/25 ms fades; sources unchanged",
+    "boss_death_rumbles": {
+      "method": "Start through the strongest 40 ms RMS peak; Rubber Band tempo fit with pitch=1; no runtime seeking or repitching",
+      "durations_s": [
+        2.0,
+        3.0,
+        5.0
+      ],
+      "variants": [
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_1.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_1_2000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 5.36,
+          "duration_s": 2.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_2.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_2_2000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 7.56,
+          "duration_s": 2.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_3.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_3_2000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 6.0,
+          "duration_s": 2.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_4.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_4_2000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 5.92,
+          "duration_s": 2.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_5.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_5_2000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 8.32,
+          "duration_s": 2.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_1.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_1_3000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 5.36,
+          "duration_s": 3.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_2.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_2_3000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 7.56,
+          "duration_s": 3.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_3.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_3_3000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 6.0,
+          "duration_s": 3.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_4.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_4_3000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 5.92,
+          "duration_s": 3.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_5.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_5_3000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 8.32,
+          "duration_s": 3.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_1.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_1_5000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 5.36,
+          "duration_s": 5.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_2.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_2_5000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 7.56,
+          "duration_s": 5.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_3.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_3_5000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 6.0,
+          "duration_s": 5.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_4.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_4_5000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 5.92,
+          "duration_s": 5.0,
+          "pitch": 1.0
+        },
+        {
+          "source": "assets/audio/sfx/boss_kill_rumble_riser_5.wav",
+          "output": "assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_5_5000ms.wav",
+          "start_s": 0,
+          "peak_end_s": 8.32,
+          "duration_s": 5.0,
+          "pitch": 1.0
+        }
+      ]
+    },
+    "battle_music": "Stereo Vorbis quality 5, 48 kHz. Quiet sections below -48 dB for 0.5s are removed with 20 ms protection; internal edits crossfade over 40 ms. A 350 ms tail/head overlap is baked at the end, and loop_offset skips the overlapped opening on later passes. First playback starts at the original opening. Paired stems share peak adjustment with headroom; pitch and tempo are unchanged."
+  },
+  "events": {
+    "projectile.arrow": {
+      "paths": [
+        "res://assets/audio/sfx/bow.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.06,
+      "positional": true,
+      "loop": false
+    },
+    "projectile.fireball": {
+      "paths": [
+        "res://assets/audio/sfx/fireball.wav"
+      ],
+      "gain_db": -3,
+      "pitch_variance": 0.05,
+      "positional": true,
+      "loop": false
+    },
+    "projectile.enemy_wind": {
+      "paths": [
+        "res://assets/audio/sfx/enemy_wind_shot.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.04,
+      "positional": true,
+      "loop": false
+    },
+    "projectile.wand": {
+      "paths": [
+        "res://assets/audio/sfx/wand.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.07,
+      "positional": true,
+      "loop": false
+    },
+    "projectile.impact": {
+      "paths": [
+        "res://assets/audio/sfx/arrow_projectile_hit_wall_or_object.wav",
+        "res://assets/audio/sfx/trident_projectile_hit_wall_or_object.wav",
+        "res://assets/audio/sfx/wand_projectile_hit_wall_or_object.wav"
+      ],
+      "gain_db": -3,
+      "pitch_variance": 0.07,
+      "positional": true,
+      "loop": false
+    },
+    "combat.hit": {
+      "paths": [
+        "res://assets/audio/sfx/hurt_1.wav",
+        "res://assets/audio/sfx/hurt_2.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.05,
+      "positional": true,
+      "loop": false
+    },
+    "combat.enemy_death": {
+      "paths": [
+        "res://assets/audio/sfx/enemiy_die_sound_1.wav"
+      ],
+      "gain_db": -3,
+      "pitch_variance": 0.025,
+      "positional": true,
+      "loop": false
+    },
+    "combat.magic_hit": {
+      "paths": [
+        "res://assets/audio/sfx/magichitenemy.wav"
+      ],
+      "gain_db": -3,
+      "pitch_variance": 0.05,
+      "positional": true,
+      "loop": false
+    },
+    "combat.boss_hurt": {
+      "paths": [
+        "res://assets/audio/sfx/boss_dragon_hurt_sound.wav",
+        "res://assets/audio/sfx/boss_hurt_screem_short_1.wav",
+        "res://assets/audio/sfx/boss_hurt_screem_short_2.wav",
+        "res://assets/audio/sfx/boss_hurt_screem_short_3.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.03,
+      "positional": true,
+      "loop": false
+    },
+    "combat.boss_death": {
+      "paths": [
+        "res://assets/audio/sfx/boss_hurt_screem_long.wav",
+        "res://assets/audio/sfx/boss_hurt_screem_long_2.wav",
+        "res://assets/audio/sfx/boss_hurt_screem_long_3.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0.02,
+      "positional": true,
+      "loop": false
+    },
+    "combat.boss_impact": {
+      "paths": [
+        "res://assets/audio/sfx/heavy_boss_impact.wav",
+        "res://assets/audio/sfx/cinematic_horror_impact_1.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": false
+    },
+    "combat.boss_rumble": {
+      "paths": [
+        "res://assets/audio/sfx/boss_kill_rumble_riser_1.wav",
+        "res://assets/audio/sfx/boss_kill_rumble_riser_2.wav",
+        "res://assets/audio/sfx/boss_kill_rumble_riser_3.wav",
+        "res://assets/audio/sfx/boss_kill_rumble_riser_4.wav",
+        "res://assets/audio/sfx/boss_kill_rumble_riser_5.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": false
+    },
+    "magic.shield_hit": {
+      "paths": [
+        "res://assets/audio/sfx/hit_shield.wav",
+        "res://assets/audio/sfx/magic_hit_shield1.wav",
+        "res://assets/audio/sfx/magic_hit_shield_2.wav"
+      ],
+      "gain_db": -3,
+      "pitch_variance": 0.04,
+      "positional": true,
+      "loop": false
+    },
+    "magic.shield_loop": {
+      "paths": [
+        "res://assets/audio/sfx/shield.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": true
+    },
+    "magic.shield_cast": {
+      "paths": [
+        "res://assets/audio/sfx/shield_up.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0.02,
+      "positional": true,
+      "loop": false
+    },
+    "magic.ring": {
+      "paths": [
+        "res://assets/audio/sfx/magic_ring.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.03,
+      "positional": true,
+      "loop": false
+    },
+    "magic.explosion": {
+      "paths": [
+        "res://assets/audio/sfx/magic_projectioes_boom.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.03,
+      "positional": true,
+      "loop": false
+    },
+    "player.heal": {
+      "paths": [
+        "res://assets/audio/sfx/heal.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.03,
+      "positional": false,
+      "loop": false
+    },
+    "item.potion": {
+      "paths": [
+        "res://assets/audio/sfx/potion.wav"
+      ],
+      "gain_db": -4,
+      "pitch_variance": 0.04,
+      "positional": false,
+      "loop": false
+    },
+    "item.equip": {
+      "paths": [
+        "res://assets/audio/sfx/equip_item.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0.04,
+      "positional": false,
+      "loop": false
+    },
+    "item.forge": {
+      "paths": [
+        "res://assets/audio/sfx/forge.wav",
+        "res://assets/audio/sfx/forge_dismantle.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0.04,
+      "positional": false,
+      "loop": false
+    },
+    "progression.dot_gain": {
+      "paths": [
+        "res://assets/audio/sfx/dot_gain_shouldbeloopedforeachdot.wav"
+      ],
+      "gain_db": -6,
+      "pitch_variance": 0.04,
+      "positional": false,
+      "loop": false
+    },
+    "notification.party_invite": {
+      "paths": [
+        "res://assets/audio/sfx/notification_party_invite.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0.02,
+      "positional": false,
+      "loop": false
+    },
+    "notification.campaign_complete": {
+      "paths": [
+        "res://assets/audio/sfx/campaign_complete.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0.02,
+      "positional": false,
+      "loop": false
+    },
+    "ambience.cinematic": {
+      "paths": [
+        "res://assets/audio/ambience/ambiance_loop_cinematic.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true
+    },
+    "ambience.fire_dungeon": {
+      "paths": [
+        "res://assets/audio/ambience/ambiance_loop_for_fire_dungeons.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true
+    },
+    "ambience.tavern": {
+      "paths": [
+        "res://assets/audio/ambience/ambiance_loop_in_tavern.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true
+    },
+    "ambience.desert": {
+      "paths": [
+        "res://assets/audio/ambience/ambience_loop_dessert.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true
+    },
+    "ambience.fire_close": {
+      "paths": [
+        "res://assets/audio/ambience/ambience_loop_fire_close_proximity.wav"
+      ],
+      "gain_db": -9,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": true
+    },
+    "ambience.wind": {
+      "paths": [
+        "res://assets/audio/ambience/ambience_loop_wind.wav"
+      ],
+      "gain_db": -9,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true
+    },
+    "music.tavern": {
+      "paths": [
+        "res://assets/audio/music/music_1_tavern.ogg"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true
+    },
+    "music.japanese": {
+      "paths": [
+        "res://assets/audio/music/music_2_japanese.ogg"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true
+    },
+    "ui.click": {
+      "paths": [
+        "res://assets/audio/sfx/ui_click.wav"
+      ],
+      "gain_db": -6,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "ui.hover": {
+      "paths": [
+        "res://assets/audio/sfx/ui_hover.wav"
+      ],
+      "gain_db": -6,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "ui.warning_pulse": {
+      "paths": [
+        "res://assets/audio/sfx/ui_warning_pulse.wav"
+      ],
+      "gain_db": -6,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "boss.charge": {
+      "paths": [
+        "res://assets/audio/sfx/boss_charge.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": false
+    },
+    "boss.riser": {
+      "paths": [
+        "res://assets/audio/sfx/boss_riser.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": false
+    },
+    "voice.minion.angry": {
+      "paths": [
+        "res://assets/audio/voices/minion_angry.wav",
+        "res://assets/audio/voices/minion_angry2.wav",
+        "res://assets/audio/voices/minion_angry3.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.cheering": {
+      "paths": [
+        "res://assets/audio/voices/minion_chearing.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.curious": {
+      "paths": [
+        "res://assets/audio/voices/minion_curious.wav",
+        "res://assets/audio/voices/minion_curious2.wav",
+        "res://assets/audio/voices/minion_curious3.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.excited": {
+      "paths": [
+        "res://assets/audio/voices/minion_exited1.wav",
+        "res://assets/audio/voices/minion_exited2.wav",
+        "res://assets/audio/voices/minion_exited3.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.gasp": {
+      "paths": [
+        "res://assets/audio/voices/minion_gasps.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.laugh": {
+      "paths": [
+        "res://assets/audio/voices/minion_laughtojoke.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.joking": {
+      "paths": [
+        "res://assets/audio/voices/minion_really_joking.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.sad": {
+      "paths": [
+        "res://assets/audio/voices/minion_sad.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.scream": {
+      "paths": [
+        "res://assets/audio/voices/minion_screems.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "voice.minion.surprised": {
+      "paths": [
+        "res://assets/audio/voices/minion_surprised.wav"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "combat.boss_rumble_2000ms": {
+      "paths": [
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_1_2000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_2_2000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_3_2000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_4_2000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_5_2000ms.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": false
+    },
+    "combat.boss_rumble_3000ms": {
+      "paths": [
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_1_3000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_2_3000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_3_3000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_4_3000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_5_3000ms.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": false
+    },
+    "combat.boss_rumble_5000ms": {
+      "paths": [
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_1_5000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_2_5000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_3_5000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_4_5000ms.wav",
+        "res://assets/audio/sfx/death_rumbles/boss_kill_rumble_riser_5_5000ms.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0,
+      "positional": true,
+      "loop": false
+    },
+    "combat.small_enemy_death": {
+      "paths": [
+        "res://assets/audio/sfx/smalle_enemy_die.wav"
+      ],
+      "gain_db": -3,
+      "pitch_variance": 0.025,
+      "positional": true,
+      "loop": false
+    },
+    "player.death": {
+      "paths": [
+        "res://assets/audio/sfx/death.wav"
+      ],
+      "gain_db": -5,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": false
+    },
+    "combat.enemy_hurt": {
+      "paths": [
+        "res://assets/audio/sfx/enemy_hurt1.wav",
+        "res://assets/audio/sfx/enemy_hurt2.wav",
+        "res://assets/audio/sfx/enemy_hurt3.wav",
+        "res://assets/audio/sfx/enemy_hurt4.wav"
+      ],
+      "gain_db": -7,
+      "pitch_variance": 0.025,
+      "positional": true,
+      "loop": false
+    },
+    "music.battle1.layer1": {
+      "paths": [
+        "res://assets/audio/music/battle1_layer1.ogg"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true,
+      "loop_offset": 0.35
+    },
+    "music.battle1.layer2": {
+      "paths": [
+        "res://assets/audio/music/battle1_layer2.ogg"
+      ],
+      "gain_db": -10,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true,
+      "loop_offset": 0.35
+    },
+    "music.battle2.layer1": {
+      "paths": [
+        "res://assets/audio/music/battle2_layer1.ogg"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true,
+      "loop_offset": 0.35
+    },
+    "music.battle2.layer2": {
+      "paths": [
+        "res://assets/audio/music/battle2_layer2.ogg"
+      ],
+      "gain_db": -10,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true,
+      "loop_offset": 0.35
+    },
+    "music.battle3.layer1": {
+      "paths": [
+        "res://assets/audio/music/battle3_layer1.ogg"
+      ],
+      "gain_db": -8,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true,
+      "loop_offset": 0.35
+    },
+    "music.battle3.layer2": {
+      "paths": [
+        "res://assets/audio/music/battle3_layer2.ogg"
+      ],
+      "gain_db": -10,
+      "pitch_variance": 0,
+      "positional": false,
+      "loop": true,
+      "loop_offset": 0.35
+    }
+  },
+  "process_stats": [
+    {
+      "source": "sfx/bow.wav",
+      "output": "assets/audio/sfx/bow.wav",
+      "input_duration_s": 1.0,
+      "leading_trim_s": 0.041,
+      "output_duration_s": 0.959,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 3.2,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/fireball.wav",
+      "output": "assets/audio/sfx/fireball.wav",
+      "input_duration_s": 1.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.0,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.2,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/enemy_wind_shot.wav",
+      "output": "assets/audio/sfx/enemy_wind_shot.wav",
+      "input_duration_s": 1.5,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.5,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/wand.wav",
+      "output": "assets/audio/sfx/wand.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.607,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 9.7,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/arrow_projectile_hit_wall_or_object.wav",
+      "output": "assets/audio/sfx/arrow_projectile_hit_wall_or_object.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.607,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 2.5,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/trident_projectile_hit_wall_or_object.wav",
+      "output": "assets/audio/sfx/trident_projectile_hit_wall_or_object.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.607,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.1,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/wand_projectile_hit_wall_or_object.wav",
+      "output": "assets/audio/sfx/wand_projectile_hit_wall_or_object.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.607,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 8.7,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/hurt_1.wav",
+      "output": "assets/audio/sfx/hurt_1.wav",
+      "input_duration_s": 1.0,
+      "leading_trim_s": 0.027,
+      "output_duration_s": 0.973,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 5.2,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/hurt_2.wav",
+      "output": "assets/audio/sfx/hurt_2.wav",
+      "input_duration_s": 1.0,
+      "leading_trim_s": 0.126,
+      "output_duration_s": 0.874,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 2.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/enemiy_die_sound_1.wav",
+      "output": "assets/audio/sfx/enemiy_die_sound_1.wav",
+      "input_duration_s": 1.08,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.08,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/smalle_enemy_die.wav",
+      "output": "assets/audio/sfx/smalle_enemy_die.wav",
+      "input_duration_s": 1.48,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.48,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 4.5,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/magichitenemy.wav",
+      "output": "assets/audio/sfx/magichitenemy.wav",
+      "input_duration_s": 1.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.0,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_dragon_hurt_sound.wav",
+      "output": "assets/audio/sfx/boss_dragon_hurt_sound.wav",
+      "input_duration_s": 1.48,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.48,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_hurt_screem_short_1.wav",
+      "output": "assets/audio/sfx/boss_hurt_screem_short_1.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.022,
+      "output_duration_s": 0.585,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_hurt_screem_short_2.wav",
+      "output": "assets/audio/sfx/boss_hurt_screem_short_2.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.607,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 4.7,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_hurt_screem_short_3.wav",
+      "output": "assets/audio/sfx/boss_hurt_screem_short_3.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.607,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 5.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_hurt_screem_long.wav",
+      "output": "assets/audio/sfx/boss_hurt_screem_long.wav",
+      "input_duration_s": 0.886,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.886,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 2.5,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_hurt_screem_long_2.wav",
+      "output": "assets/audio/sfx/boss_hurt_screem_long_2.wav",
+      "input_duration_s": 0.886,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.886,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -0.9,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_hurt_screem_long_3.wav",
+      "output": "assets/audio/sfx/boss_hurt_screem_long_3.wav",
+      "input_duration_s": 0.886,
+      "leading_trim_s": 0.057,
+      "output_duration_s": 0.83,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 4.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/heavy_boss_impact.wav",
+      "output": "assets/audio/sfx/heavy_boss_impact.wav",
+      "input_duration_s": 7.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 7.0,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/Cinematic_horror_impact_1.wav",
+      "output": "assets/audio/sfx/cinematic_horror_impact_1.wav",
+      "input_duration_s": 20.88,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 20.88,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_kill_rumble_riser_1.wav",
+      "output": "assets/audio/sfx/boss_kill_rumble_riser_1.wav",
+      "input_duration_s": 15.16,
+      "leading_trim_s": 0.602,
+      "output_duration_s": 14.558,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -0.5,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_kill_rumble_riser_2.wav",
+      "output": "assets/audio/sfx/boss_kill_rumble_riser_2.wav",
+      "input_duration_s": 15.16,
+      "leading_trim_s": 0.275,
+      "output_duration_s": 14.885,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.2,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_kill_rumble_riser_3.wav",
+      "output": "assets/audio/sfx/boss_kill_rumble_riser_3.wav",
+      "input_duration_s": 15.16,
+      "leading_trim_s": 0.243,
+      "output_duration_s": 14.917,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_kill_rumble_riser_4.wav",
+      "output": "assets/audio/sfx/boss_kill_rumble_riser_4.wav",
+      "input_duration_s": 15.16,
+      "leading_trim_s": 0.443,
+      "output_duration_s": 14.717,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/boss_kill_rumble_riser_5.wav",
+      "output": "assets/audio/sfx/boss_kill_rumble_riser_5.wav",
+      "input_duration_s": 15.16,
+      "leading_trim_s": 0.051,
+      "output_duration_s": 15.109,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.1,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/hit_shield.wav",
+      "output": "assets/audio/sfx/hit_shield.wav",
+      "input_duration_s": 0.607,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.607,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 9.2,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/magic_hit_shield1.wav",
+      "output": "assets/audio/sfx/magic_hit_shield1.wav",
+      "input_duration_s": 1.28,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.28,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/magic_hit_shield_2.wav",
+      "output": "assets/audio/sfx/magic_hit_shield_2.wav",
+      "input_duration_s": 1.28,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.28,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 3.7,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/shield.wav",
+      "output": "assets/audio/sfx/shield.wav",
+      "input_duration_s": 3.68,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 3.6,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 15.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/shield up.wav",
+      "output": "assets/audio/sfx/shield_up.wav",
+      "input_duration_s": 6.48,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 6.48,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": 1.1,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/magic_ring.wav",
+      "output": "assets/audio/sfx/magic_ring.wav",
+      "input_duration_s": 2.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 2.0,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -0.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/magic_projectioes_boom.wav",
+      "output": "assets/audio/sfx/magic_projectioes_boom.wav",
+      "input_duration_s": 4.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 4.0,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/heal.wav",
+      "output": "assets/audio/sfx/heal.wav",
+      "input_duration_s": 0.88,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.88,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": 2.1,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/potion.wav",
+      "output": "assets/audio/sfx/potion.wav",
+      "input_duration_s": 1.68,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.68,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": 6.2,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/equip_item.wav",
+      "output": "assets/audio/sfx/equip_item.wav",
+      "input_duration_s": 1.0,
+      "leading_trim_s": 0.021,
+      "output_duration_s": 0.979,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -1.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/forge.wav",
+      "output": "assets/audio/sfx/forge.wav",
+      "input_duration_s": 2.48,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 2.48,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": 6.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/forge_dismantle.wav",
+      "output": "assets/audio/sfx/forge_dismantle.wav",
+      "input_duration_s": 0.886,
+      "leading_trim_s": 0.037,
+      "output_duration_s": 0.849,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -0.6,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/dot_gain_shouldbeloopedforeachdot.wav",
+      "output": "assets/audio/sfx/dot_gain_shouldbeloopedforeachdot.wav",
+      "input_duration_s": 0.886,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.24,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -0.7,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/notification_party_invite.wav",
+      "output": "assets/audio/sfx/notification_party_invite.wav",
+      "input_duration_s": 2.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 2.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/campaign complete.wav",
+      "output": "assets/audio/sfx/campaign_complete.wav",
+      "input_duration_s": 3.76,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 3.76,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "ambiance/ambiance_loop_cinematic.wav",
+      "output": "assets/audio/ambience/ambiance_loop_cinematic.wav",
+      "input_duration_s": 30.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 29.92,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": 4.4,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "ambiance/ambiance_loop_for_fire_dungeons.wav",
+      "output": "assets/audio/ambience/ambiance_loop_for_fire_dungeons.wav",
+      "input_duration_s": 30.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 29.92,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -1.6,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "ambiance/ambiance_loop_in_tavern.wav",
+      "output": "assets/audio/ambience/ambiance_loop_in_tavern.wav",
+      "input_duration_s": 30.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 29.92,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": 29.3,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "ambiance/ambience_loop_dessert.wav",
+      "output": "assets/audio/ambience/ambience_loop_dessert.wav",
+      "input_duration_s": 30.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 29.92,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": 4.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "ambiance/ambience_loop_fire_close_proximity.wav",
+      "output": "assets/audio/ambience/ambience_loop_fire_close_proximity.wav",
+      "input_duration_s": 30.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 29.92,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.4,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "ambiance/ambience_loop_wind.wav",
+      "output": "assets/audio/ambience/ambience_loop_wind.wav",
+      "input_duration_s": 6.48,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 6.4,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": 18.9,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "music/Music_1_tavern.wav",
+      "output": "assets/audio/music/music_1_tavern.ogg",
+      "input_duration_s": 412.336,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 412.336,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -2.0,
+      "codec": "vorbis"
+    },
+    {
+      "source": "music/Music_2_japanese.wav",
+      "output": "assets/audio/music/music_2_japanese.ogg",
+      "input_duration_s": 425.227,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 425.227,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -0.5,
+      "codec": "vorbis"
+    },
+    {
+      "source": "minions/minion_angry.mp3",
+      "output": "assets/audio/voices/minion_angry.wav",
+      "input_duration_s": 2.72,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.813,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 0.3,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_angry2.mp3",
+      "output": "assets/audio/voices/minion_angry2.wav",
+      "input_duration_s": 3.36,
+      "leading_trim_s": 0.075,
+      "output_duration_s": 2.19,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 2.0,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_angry3.mp3",
+      "output": "assets/audio/voices/minion_angry3.wav",
+      "input_duration_s": 3.92,
+      "leading_trim_s": 0.032,
+      "output_duration_s": 2.592,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 1.0,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_chearing.mp3",
+      "output": "assets/audio/voices/minion_chearing.wav",
+      "input_duration_s": 4.56,
+      "leading_trim_s": 0.136,
+      "output_duration_s": 2.95,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 0.2,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_curious.mp3",
+      "output": "assets/audio/voices/minion_curious.wav",
+      "input_duration_s": 2.88,
+      "leading_trim_s": 0.044,
+      "output_duration_s": 1.891,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 5.8,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_curious2.mp3",
+      "output": "assets/audio/voices/minion_curious2.wav",
+      "input_duration_s": 3.2,
+      "leading_trim_s": 0.055,
+      "output_duration_s": 2.097,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 3.0,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_curious3.mp3",
+      "output": "assets/audio/voices/minion_curious3.wav",
+      "input_duration_s": 3.2,
+      "leading_trim_s": 0.094,
+      "output_duration_s": 2.07,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 3.2,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_exited1.mp3",
+      "output": "assets/audio/voices/minion_exited1.wav",
+      "input_duration_s": 2.4,
+      "leading_trim_s": 0.028,
+      "output_duration_s": 1.581,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 2.5,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_exited2.mp3",
+      "output": "assets/audio/voices/minion_exited2.wav",
+      "input_duration_s": 2.88,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 1.92,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 1.4,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_exited3.mp3",
+      "output": "assets/audio/voices/minion_exited3.wav",
+      "input_duration_s": 2.48,
+      "leading_trim_s": 0.043,
+      "output_duration_s": 1.625,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 1.5,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_gasps.mp3",
+      "output": "assets/audio/voices/minion_gasps.wav",
+      "input_duration_s": 4.48,
+      "leading_trim_s": 0.035,
+      "output_duration_s": 2.963,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": -1.7,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_laughtojoke.mp3",
+      "output": "assets/audio/voices/minion_laughtojoke.wav",
+      "input_duration_s": 3.44,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 2.293,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": -0.5,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_really_joking.mp3",
+      "output": "assets/audio/voices/minion_really_joking.wav",
+      "input_duration_s": 2.8,
+      "leading_trim_s": 0.038,
+      "output_duration_s": 1.841,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 0.5,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_sad.mp3",
+      "output": "assets/audio/voices/minion_sad.wav",
+      "input_duration_s": 4.64,
+      "leading_trim_s": 0.109,
+      "output_duration_s": 3.021,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 8.8,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_screems.mp3",
+      "output": "assets/audio/voices/minion_screems.wav",
+      "input_duration_s": 4.16,
+      "leading_trim_s": 0.05,
+      "output_duration_s": 2.74,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": -0.9,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "minions/minion_surprised.mp3",
+      "output": "assets/audio/voices/minion_surprised.wav",
+      "input_duration_s": 2.96,
+      "leading_trim_s": 0.032,
+      "output_duration_s": 1.952,
+      "input_channels": 1,
+      "output_channels": 1,
+      "gain_applied_db": 1.4,
+      "codec": "pcm_s16le",
+      "tempo": 1.5,
+      "pitch": 1.3
+    },
+    {
+      "source": "sfx/death",
+      "output": "assets/audio/sfx/death.wav",
+      "input_duration_s": 12.0,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 12.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "gain_applied_db": -1.9,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/enemy_hurt1.mp3",
+      "output": "assets/audio/sfx/enemy_hurt1.wav",
+      "input_duration_s": 0.6,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.6,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -2.0,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/enemy_hurt2.mp3",
+      "output": "assets/audio/sfx/enemy_hurt2.wav",
+      "input_duration_s": 0.6,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.6,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.8,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/enemy_hurt3.mp3",
+      "output": "assets/audio/sfx/enemy_hurt3.wav",
+      "input_duration_s": 0.6,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.6,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.9,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "sfx/enemy_hurt4.mp3",
+      "output": "assets/audio/sfx/enemy_hurt4.wav",
+      "input_duration_s": 0.6,
+      "leading_trim_s": 0.0,
+      "output_duration_s": 0.6,
+      "input_channels": 2,
+      "output_channels": 1,
+      "gain_applied_db": -1.4,
+      "codec": "pcm_s16le"
+    },
+    {
+      "source": "music/battle1_layer1.wav",
+      "output": "assets/audio/music/battle1_layer1.ogg",
+      "input_duration_s": 149.703,
+      "output_duration_s": 129.509,
+      "kept_sections_s": [
+        [
+          0.0,
+          129.508687
+        ]
+      ],
+      "silence_removed_s": 20.194,
+      "loop_crossfade_s": 0.35,
+      "loop_offset_s": 0.35,
+      "gain_applied_db": -3.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "codec": "vorbis",
+      "pitch": 1.0
+    },
+    {
+      "source": "music/battle1_layer2.wav",
+      "output": "assets/audio/music/battle1_layer2.ogg",
+      "input_duration_s": 123.117,
+      "output_duration_s": 97.294,
+      "kept_sections_s": [
+        [
+          0.0,
+          97.293958
+        ]
+      ],
+      "silence_removed_s": 25.823,
+      "loop_crossfade_s": 0.35,
+      "loop_offset_s": 0.35,
+      "gain_applied_db": -3.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "codec": "vorbis",
+      "pitch": 1.0
+    },
+    {
+      "source": "music/battle2_layer1.wav",
+      "output": "assets/audio/music/battle2_layer1.ogg",
+      "input_duration_s": 219.297,
+      "output_duration_s": 199.078,
+      "kept_sections_s": [
+        [
+          0.0,
+          199.078042
+        ]
+      ],
+      "silence_removed_s": 20.219,
+      "loop_crossfade_s": 0.35,
+      "loop_offset_s": 0.35,
+      "gain_applied_db": -3.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "codec": "vorbis",
+      "pitch": 1.0
+    },
+    {
+      "source": "music/battle2_layer2.wav",
+      "output": "assets/audio/music/battle2_layer2.ogg",
+      "input_duration_s": 150.039,
+      "output_duration_s": 145.886,
+      "kept_sections_s": [
+        [
+          0.0,
+          145.886375
+        ]
+      ],
+      "silence_removed_s": 4.153,
+      "loop_crossfade_s": 0.35,
+      "loop_offset_s": 0.35,
+      "gain_applied_db": -3.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "codec": "vorbis",
+      "pitch": 1.0
+    },
+    {
+      "source": "music/battle3_layer1.wav",
+      "output": "assets/audio/music/battle3_layer1.ogg",
+      "input_duration_s": 189.881,
+      "output_duration_s": 180.154,
+      "kept_sections_s": [
+        [
+          0.0,
+          180.153604
+        ]
+      ],
+      "silence_removed_s": 9.727,
+      "loop_crossfade_s": 0.35,
+      "loop_offset_s": 0.35,
+      "gain_applied_db": -3.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "codec": "vorbis",
+      "pitch": 1.0
+    },
+    {
+      "source": "music/battle3_layer2.wav",
+      "output": "assets/audio/music/battle3_layer2.ogg",
+      "input_duration_s": 179.045,
+      "output_duration_s": 141.518,
+      "kept_sections_s": [
+        [
+          0.0,
+          141.51825
+        ]
+      ],
+      "silence_removed_s": 37.527,
+      "loop_crossfade_s": 0.35,
+      "loop_offset_s": 0.35,
+      "gain_applied_db": -3.0,
+      "input_channels": 2,
+      "output_channels": 2,
+      "codec": "vorbis",
+      "pitch": 1.0
+    }
+  ]
+}

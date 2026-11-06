@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b78okgnj465em"
+path="res://.godot/imported/arm_l_glow.vox-1d56433f8542dd21d3a9f1f4440cfb58.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_king/source_32/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-1d56433f8542dd21d3a9f1f4440cfb58.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

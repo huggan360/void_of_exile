@@ -6,7 +6,7 @@ server to server:
 
   accounts          who can log in (PBKDF2 password hashes)
   sessions          login tokens handed to the game client
-  friends           one-way follows between accounts (up to 200 each)
+  friends           accepted friendships (up to 200 each), with requests
   characters        every LIVING character, linked to its account; its full
                     state (stats, gear, backpack, quickslots) is a JSON blob
   dead_characters   characters move here, unchanged, the moment they die
@@ -97,6 +97,18 @@ REWARDS = {
     45: {"type": "start_tier", "slot": "bonus", "tier": 2, "text": "Start with a Grade 2 talisman"},
     50: {"type": "slot", "text": "+1 character slot"},
 }
+# Chambers (the account vault): every account starts with BASE_CHESTS chests
+# of VAULT_SLOTS slots; these levels add one more each.
+BASE_CHESTS = 4
+VAULT_SLOTS = 8
+MAX_CHESTS = 120
+for _level in (4, 6, 9, 13, 17, 22, 27, 33, 38, 44, 48, 55, 60, 70, 80, 90, 100):
+    REWARDS[_level] = {"type": "chest", "text": "+1 chest in your Chambers"}
+# Dots a dismantled item gives at the forge, by grade (index = tier), Divine.
+DISMANTLE_DOTS = (0, 10, 25, 45, 75, 120, 250, 450, 650)
+DISMANTLE_DIVINE = 1200
+# Most Dots one award (a campaign, a pack) may hand out.
+MAX_DOTS_AWARD = 5000
 
 
 def xp_to_next(level):
@@ -111,12 +123,34 @@ def account_progress(xp, base_slots):
         left -= xp_to_next(level)
         level += 1
     slots = base_slots + sum(1 for l, r in REWARDS.items() if r["type"] == "slot" and l <= level)
-    return {"xp": int(xp), "level": level, "into": left, "needed": xp_to_next(level), "slots": slots}
+    chests = BASE_CHESTS + sum(1 for l, r in REWARDS.items() if r["type"] == "chest" and l <= level)
+    return {"xp": int(xp), "level": level, "into": left, "needed": xp_to_next(level), "slots": slots,
+            "chests": chests}
+
+
+def dismantle_value(item_id, count):
+    """Dots an item gives when dismantled at the forge (0 = it can't be)."""
+    count = max(1, int(count))
+    if item_id.startswith("D_"):
+        return DISMANTLE_DIVINE * count
+    if len(item_id) > 2 and item_id[0] == "G" and item_id[1].isdigit():
+        return DISMANTLE_DOTS[max(1, min(8, int(item_id[1])))] * count
+    if item_id.startswith("elixir_of_"):
+        return 40 * count
+    if item_id == "backpack":
+        return 20 * count
+    return 0
+
+
+def valid_item(item):
+    return item is None or (isinstance(item, dict) and isinstance(item.get("id"), str) and 0 < len(item["id"]) <= 64
+                            and isinstance(item.get("count", 1), int) and 0 < item.get("count", 1) <= 999)
 
 
 def character_total_xp(level, xp):
-    """All XP a character earned (its own curve: 40 + 20 * level per level)."""
-    return sum(40 + 20 * l for l in range(1, int(level))) + int(xp)
+    """Character curve; keep in sync with PlayerStats.xp_for_level."""
+    return sum(40 + 20 * l + 3 * max(0, l - 8) ** 3
+               for l in range(1, int(level))) + int(xp)
 
 
 def item_value(item_id, count):
@@ -167,6 +201,32 @@ CREATE TABLE IF NOT EXISTS friends (
     friend_id INTEGER NOT NULL,
     created REAL NOT NULL,
     PRIMARY KEY (account_id, friend_id)
+);
+CREATE TABLE IF NOT EXISTS friend_requests (
+    sender INTEGER NOT NULL REFERENCES accounts(id),
+    recipient INTEGER NOT NULL REFERENCES accounts(id),
+    created REAL NOT NULL,
+    PRIMARY KEY (sender, recipient)
+);
+CREATE TABLE IF NOT EXISTS party_invites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender INTEGER NOT NULL REFERENCES accounts(id),
+    recipient INTEGER NOT NULL REFERENCES accounts(id),
+    character_id INTEGER NOT NULL,
+    server TEXT NOT NULL,
+    expires REAL NOT NULL,
+    accepted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (sender, recipient)
+);
+CREATE INDEX IF NOT EXISTS friend_requests_recipient ON friend_requests(recipient);
+CREATE INDEX IF NOT EXISTS party_invites_recipient ON party_invites(recipient);
+CREATE INDEX IF NOT EXISTS party_invites_expires ON party_invites(expires);
+CREATE TABLE IF NOT EXISTS social_limits (
+    account_id INTEGER NOT NULL,
+    action TEXT NOT NULL,
+    started REAL NOT NULL,
+    count INTEGER NOT NULL,
+    PRIMARY KEY (account_id, action)
 );
 CREATE TABLE IF NOT EXISTS characters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -220,6 +280,12 @@ CREATE TABLE IF NOT EXISTS sp_keys (
     account_id INTEGER NOT NULL REFERENCES accounts(id),
     expires REAL NOT NULL
 );
+CREATE TABLE IF NOT EXISTS vaults (
+    account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
+    items TEXT NOT NULL DEFAULT '[]',
+    bonus_chests INTEGER NOT NULL DEFAULT 0,
+    updated REAL NOT NULL
+);
 CREATE INDEX IF NOT EXISTS characters_account ON characters(account_id);
 CREATE INDEX IF NOT EXISTS dead_account ON dead_characters(account_id);
 """
@@ -243,11 +309,17 @@ class Store:
         db = self.db()
         db.executescript(SCHEMA)
         for table, column, decl in (("accounts", "xp", "INTEGER NOT NULL DEFAULT 0"),
+                                    ("accounts", "dots", "INTEGER NOT NULL DEFAULT 0"),
+                                    ("accounts", "developer", "INTEGER NOT NULL DEFAULT 0"),
+                                    ("accounts", "home", "TEXT DEFAULT NULL"),
                                     ("dead_characters", "account_xp", "INTEGER NOT NULL DEFAULT 0")):
             if column not in [r[1] for r in db.execute("PRAGMA table_info(%s)" % table)]:
                 db.execute("ALTER TABLE %s ADD COLUMN %s %s" % (table, column, decl))
         if db.execute("SELECT seq FROM sqlite_sequence WHERE name='characters'").fetchone() is None:
             db.execute("INSERT INTO sqlite_sequence(name, seq) VALUES ('characters', ?)", (FIRST_CHARACTER_ID - 1,))
+        # Existing follows become accepted, reciprocal friendships.
+        db.execute("INSERT OR IGNORE INTO friends(account_id, friend_id, created)"
+                   " SELECT friend_id, account_id, created FROM friends")
         db.commit()
 
     def db(self):
@@ -345,76 +417,217 @@ class Store:
 
     # --- friends --------------------------------------------------------------------
 
-    def player_summary(self, account, now):
+    def social_limit(self, account_id, action="write", limit=20):
+        now = time.time()
         row = self.db().execute(
-            "SELECT c.class, c.level, c.lease_server, s.name FROM characters c"
-            " LEFT JOIN servers s ON s.key_label=c.lease_server"
-            " WHERE c.account_id=? AND c.lease_until > ? ORDER BY c.lease_until DESC, c.id LIMIT 1",
-            (account["id"], now)).fetchone()
-        server = ""
+            "INSERT INTO social_limits VALUES (?,?,?,1) ON CONFLICT(account_id, action) DO UPDATE SET"
+            " started=CASE WHEN started < ? THEN excluded.started ELSE started END,"
+            " count=CASE WHEN started < ? THEN 1 ELSE count+1 END RETURNING count",
+            (account_id, action, now, now - 60, now - 60)).fetchone()
+        if row[0] > limit:
+            raise ApiError(429, "Too many social requests. Try again shortly.")
+
+    def social_account(self, username):
+        if not 1 <= len(username.strip()) <= 24:
+            raise ApiError(400, "Enter a player name (1-24 characters).")
+        row = self.db().execute("SELECT id, username FROM accounts WHERE username=?", (username.strip(),)).fetchone()
+        if row is None:
+            raise ApiError(404, "No such account.")
+        return row
+
+    def active_character(self, account_id):
+        return self.db().execute(
+            "SELECT * FROM characters WHERE account_id=? AND lease_until>? AND lease_server IS NOT NULL"
+            " ORDER BY lease_until DESC LIMIT 1", (account_id, time.time())).fetchone()
+
+    def player_summary(self, account, now):
+        row = self.active_character(account["id"])
+        out = {"username": account["username"], "online": row is not None, "server": "",
+               "class": row["class"] if row else "", "level": row["level"] if row else 0, "joinable": False}
         if row is not None:
-            label = row["lease_server"] or ""
-            server = "Singleplayer" if label.startswith("Singleplayer (") else (row["name"] or label)
-        return {"username": account["username"], "online": row is not None, "server": server,
-                "class": row["class"] if row else "", "level": row["level"] if row else 0}
+            label = row["lease_server"]
+            private = label.startswith(("Singleplayer (", "sp_"))
+            server = self.db().execute("SELECT * FROM servers WHERE key_label=?", (label,)).fetchone()
+            out["server"] = "Singleplayer" if private else (server["name"] if server else "Unavailable server")
+            # Friends may follow you to any running dedicated server ("public" only
+            # decides who sees it in the server list); Singleplayer stays private.
+            if not private and server and server["last_seen"] > now - 30:
+                out.update(joinable=True, address=server["public_ip"], port=server["port"])
+        return out
 
     def friend_summary(self, account_id, friend, now):
-        out = self.player_summary(friend, now)
-        out["mutual"] = self.db().execute(
-            "SELECT 1 FROM friends WHERE account_id=? AND friend_id=?", (friend["id"], account_id)).fetchone() is not None
-        return out
+        mine = self.active_character(account_id)
+        theirs = self.active_character(friend["id"])
+        same = bool(mine and theirs and mine["lease_server"] == theirs["lease_server"])
+        return dict(self.player_summary(friend, now), mutual=True, same_server=same)
 
     def friends(self, account_id):
         rows = self.db().execute(
             "SELECT a.id, a.username FROM friends f JOIN accounts a ON a.id=f.friend_id WHERE f.account_id=?",
             (account_id,)).fetchall()
-        now = time.time()
-        out = [self.friend_summary(account_id, r, now) for r in rows]
+        out = [self.friend_summary(account_id, r, time.time()) for r in rows]
         return sorted(out, key=lambda r: (not r["online"], r["username"].casefold()))
 
+    def social_state(self, account_id):
+        self.social_limit(account_id, "poll", 60)
+        requests = self.db().execute(
+            "SELECT a.username, r.sender=? AS outgoing FROM friend_requests r JOIN accounts a"
+            " ON a.id=CASE WHEN r.sender=? THEN r.recipient ELSE r.sender END"
+            " WHERE r.sender=? OR r.recipient=? ORDER BY r.created LIMIT 400",
+            (account_id, account_id, account_id, account_id)).fetchall()
+        invites = self.db().execute(
+            "SELECT i.id, a.username, i.accepted FROM party_invites i JOIN accounts a ON a.id=i.sender"
+            " WHERE i.recipient=? AND i.expires>? ORDER BY i.id LIMIT 24", (account_id, time.time())).fetchall()
+        return {"friends": self.friends(account_id), "requests": [dict(r) for r in requests],
+                "party_invites": [dict(r) for r in invites]}
+
     def add_friend(self, account_id, username):
+        self.social_limit(account_id)
+        friend = self.social_account(username)
+        if friend["id"] == account_id:
+            raise ApiError(400, "You can't add yourself.")
         db = self.db()
         db.execute("BEGIN IMMEDIATE")
         try:
-            friend = db.execute("SELECT id, username FROM accounts WHERE username=?", (username.strip(),)).fetchone()
-            if friend is None:
-                raise ApiError(404, "No such account.")
-            if friend["id"] == account_id:
-                raise ApiError(400, "You can't add yourself.")
-            if db.execute("SELECT 1 FROM friends WHERE account_id=? AND friend_id=?",
-                          (account_id, friend["id"])).fetchone():
+            if db.execute("SELECT 1 FROM friends WHERE account_id=? AND friend_id=?", (account_id, friend["id"])).fetchone():
                 raise ApiError(400, "That player is already a friend.")
-            if db.execute("SELECT COUNT(*) FROM friends WHERE account_id=?", (account_id,)).fetchone()[0] >= 200:
-                raise ApiError(400, "You can have at most 200 friends.")
-            db.execute("INSERT INTO friends(account_id, friend_id, created) VALUES (?,?,?)",
-                       (account_id, friend["id"], time.time()))
+            for aid in (account_id, friend["id"]):
+                if db.execute("SELECT COUNT(*) FROM friends WHERE account_id=?", (aid,)).fetchone()[0] >= 200:
+                    raise ApiError(400, "Friend list is full (200).")
+                if db.execute("SELECT COUNT(*) FROM friend_requests WHERE sender=? OR recipient=?", (aid, aid)).fetchone()[0] >= 200:
+                    raise ApiError(400, "Too many pending friend requests (200).")
+            db.execute("INSERT OR IGNORE INTO friend_requests VALUES (?,?,?)", (account_id, friend["id"], time.time()))
             db.execute("COMMIT")
         except Exception:
             db.execute("ROLLBACK")
             raise
-        return self.friend_summary(account_id, friend, time.time())
+        return dict(self.player_summary(friend, time.time()), pending=True)
+
+    def respond_friend(self, account_id, username, accept):
+        self.social_limit(account_id)
+        other = self.social_account(username)["id"]
+        db = self.db()
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            if not db.execute("SELECT 1 FROM friend_requests WHERE sender=? AND recipient=?", (other, account_id)).fetchone():
+                raise ApiError(404, "No such friend request.")
+            if accept:
+                for aid in (account_id, other):
+                    if db.execute("SELECT COUNT(*) FROM friends WHERE account_id=?", (aid,)).fetchone()[0] >= 200:
+                        raise ApiError(400, "Friend list is full (200).")
+                db.executemany("INSERT OR IGNORE INTO friends VALUES (?,?,?)",
+                               [(account_id, other, time.time()), (other, account_id, time.time())])
+            db.execute("DELETE FROM friend_requests WHERE (sender=? AND recipient=?) OR (sender=? AND recipient=?)",
+                       (other, account_id, account_id, other))
+            db.execute("COMMIT")
+        except Exception:
+            db.execute("ROLLBACK")
+            raise
 
     def remove_friend(self, account_id, username):
-        self.db().execute("DELETE FROM friends WHERE account_id=? AND friend_id IN"
-                          " (SELECT id FROM accounts WHERE username=?)", (account_id, username.strip()))
+        self.social_limit(account_id)
+        other = self.social_account(username)["id"]
+        db = self.db()
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            db.execute("DELETE FROM friends WHERE (account_id=? AND friend_id=?) OR (account_id=? AND friend_id=?)",
+                       (account_id, other, other, account_id))
+            db.execute("DELETE FROM friend_requests WHERE (sender=? AND recipient=?) OR (sender=? AND recipient=?)",
+                       (account_id, other, other, account_id))
+            db.execute("DELETE FROM party_invites WHERE (sender=? AND recipient=?) OR (sender=? AND recipient=?)",
+                       (account_id, other, other, account_id))
+            db.execute("COMMIT")
+        except Exception:
+            db.execute("ROLLBACK")
+            raise
 
     def search_players(self, account_id, query):
+        self.social_limit(account_id, "search", 30)
         query = query.strip()
-        if len(query) < 2:
-            raise ApiError(400, "Search needs at least 2 characters.")
-        # Escape LIKE wildcards so underscores in usernames stay literal.
+        if not 1 <= len(query) <= 24:
+            raise ApiError(400, "Search needs 1-24 characters.")
         prefix = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         rows = self.db().execute(
             "SELECT a.id, a.username, EXISTS(SELECT 1 FROM friends f WHERE f.account_id=? AND f.friend_id=a.id) AS friend"
             " FROM accounts a WHERE a.id != ? AND a.username LIKE ? ESCAPE '\\' ORDER BY a.username LIMIT 20",
             (account_id, account_id, prefix)).fetchall()
-        now = time.time()
-        out = []
-        for row in rows:
-            player = self.player_summary(row, now)
-            out.append({"username": player["username"], "online": player["online"], "server": player["server"],
-                        "friend": bool(row["friend"])})
+        return [dict(self.player_summary(r, time.time()), friend=bool(r["friend"])) for r in rows]
+
+    def join_friend(self, account_id, username):
+        self.social_limit(account_id)
+        other = self.social_account(username)
+        if not self.db().execute("SELECT 1 FROM friends WHERE account_id=? AND friend_id=?", (account_id, other["id"])).fetchone():
+            raise ApiError(403, "You can only join accepted friends.")
+        out = self.friend_summary(account_id, other, time.time())
+        if not out["joinable"] and not out["same_server"]:
+            raise ApiError(409, "That player isn't on a joinable public server.")
         return out
+
+    def invite_party(self, account_id, username, server=None):
+        self.social_limit(account_id)
+        other = self.social_account(username)
+        db = self.db()
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            if not db.execute("SELECT 1 FROM friends WHERE account_id=? AND friend_id=?", (account_id, other["id"])).fetchone():
+                raise ApiError(403, "Cross-server invites need an accepted friendship.")
+            sender = db.execute("SELECT id, username FROM accounts WHERE id=?", (account_id,)).fetchone()
+            char = self.active_character(account_id)
+            summary = self.player_summary(sender, time.time())
+            if not char or (server is not None and char["lease_server"] != server) or not summary["joinable"]:
+                raise ApiError(409, "Join a public server to invite a friend. Singleplayer is private.")
+            db.execute("DELETE FROM party_invites WHERE expires<?", (time.time(),))
+            if db.execute("SELECT COUNT(*) FROM party_invites WHERE sender=?", (account_id,)).fetchone()[0] >= 12 or db.execute(
+                    "SELECT COUNT(*) FROM party_invites WHERE recipient=?", (other["id"],)).fetchone()[0] >= 24:
+                raise ApiError(400, "Too many pending party invites.")
+            db.execute("INSERT INTO party_invites(sender, recipient, character_id, server, expires) VALUES (?,?,?,?,?)"
+                       " ON CONFLICT(sender, recipient) DO UPDATE SET character_id=excluded.character_id,"
+                       " server=excluded.server, expires=excluded.expires, accepted=0",
+                       (account_id, other["id"], char["id"], char["lease_server"], time.time() + 180))
+            db.execute("COMMIT")
+        except Exception:
+            db.execute("ROLLBACK")
+            raise
+
+    def respond_party(self, account_id, invite_id, accept):
+        self.social_limit(account_id)
+        db = self.db()
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            row = db.execute("SELECT * FROM party_invites WHERE id=? AND recipient=? AND expires>?",
+                             (invite_id, account_id, time.time())).fetchone()
+            if row is None:
+                raise ApiError(404, "That party invitation expired.")
+            out = {}
+            if not accept:
+                db.execute("DELETE FROM party_invites WHERE id=?", (invite_id,))
+            else:
+                char = self.active_character(row["sender"])
+                sender = db.execute("SELECT id, username FROM accounts WHERE id=?", (row["sender"],)).fetchone()
+                out = self.player_summary(sender, time.time())
+                if not char or char["id"] != row["character_id"] or char["lease_server"] != row["server"] or not out["joinable"]:
+                    raise ApiError(409, "The inviter has left that server.")
+                mine = self.active_character(account_id)
+                out["same_server"] = bool(mine and mine["lease_server"] == row["server"])
+                # Accepting one invitation replaces other accepted arrivals.
+                db.execute("UPDATE party_invites SET accepted=0 WHERE recipient=?", (account_id,))
+                db.execute("UPDATE party_invites SET accepted=1 WHERE id=?", (invite_id,))
+            db.execute("COMMIT")
+        except Exception:
+            db.execute("ROLLBACK")
+            raise
+        return out
+
+    def party_arrivals(self, server, done=None, account_id=None):
+        if done is not None:
+            self.db().execute("DELETE FROM party_invites WHERE id=? AND server=? AND accepted=1", (done, server))
+            return []
+        return [dict(r) for r in self.db().execute(
+            "SELECT i.id, i.sender, i.recipient, i.character_id FROM party_invites i"
+            " JOIN characters c ON c.account_id=i.recipient AND c.lease_server=i.server AND c.lease_until>?"
+            " JOIN characters l ON l.id=i.character_id AND l.lease_server=i.server AND l.lease_until>?"
+            " WHERE i.server=? AND i.accepted=1 AND i.expires>? AND i.recipient=? LIMIT 24",
+            (time.time(), time.time(), server, time.time(), account_id))]
 
     # --- characters -----------------------------------------------------------------
 
@@ -425,6 +638,7 @@ class Store:
         data = json.loads(row["data"] or "{}")
         gear = data.get("gear", {}) if isinstance(data, dict) else {}
         out["gear"] = {k: (v or {}).get("id") for k, v in gear.items()}
+        out["stats"] = {k: data[k] for k in ("base", "base_hp", "base_mp") if k in data} if isinstance(data, dict) else {}
         if dead:
             out.update(died=row["died"], killed_by=row["killed_by"], realm=row["realm"], server=row["server"],
                        account_xp=row["account_xp"], data=data)
@@ -512,6 +726,10 @@ class Store:
                 (account["id"], now, server)).fetchone()
             if busy is not None:
                 raise ApiError(409, "This account is already playing on %s." % busy["lease_server"])
+            # Adopt the first played character's legacy town once, then share it.
+            legacy = json.loads(row["data"] or "{}")
+            db.execute("UPDATE accounts SET home=COALESCE(home, ?) WHERE id=?",
+                       (str(legacy.get("home", "")), account["id"]))
             db.execute("UPDATE characters SET lease_server=?, lease_until=?, last_server=? WHERE id=?",
                        (server, now + lease_seconds, server, character_id))
             db.execute("COMMIT")
@@ -520,15 +738,35 @@ class Store:
             raise
         progress = self.progress(account["id"], base_slots)
         rewards = [dict(r, level=l) for l, r in sorted(REWARDS.items()) if l <= progress["level"]]
-        return {"account": {"id": account["id"], "username": account["username"], "progress": progress,
-                            "rewards": rewards},
+        extra = self.account_extra(account["id"], base_slots)
+        return {"account": dict(extra, id=account["id"], username=account["username"], progress=progress,
+                                rewards=rewards),
                 "character": {"id": row["id"], "class": row["class"], "data": json.loads(row["data"] or "{}")}}
 
     def _check_lease(self, row, server):
         if row["lease_server"] != server:
             raise ApiError(409, "Character %d is not loaded on this server." % row["id"])
 
-    def save(self, character_id, server, data, lease_seconds, account_xp=0, only_account=None):
+    def set_home(self, character_id, server, village, only_account=None):
+        if not isinstance(village, str) or len(village) >= 40:
+            raise ApiError(400, "Invalid spawn town.")
+        db = self.db()
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self._character(character_id)
+            self._check_lease(row, server)
+            if only_account is not None and row["account_id"] != only_account:
+                raise ApiError(403, "Not this account's character.")
+            db.execute("UPDATE accounts SET home=? WHERE id=?", (village, row["account_id"]))
+            db.execute("COMMIT")
+        except Exception:
+            db.execute("ROLLBACK")
+            raise
+        return {"home": village}
+
+    def save(self, character_id, server, data, lease_seconds, account_xp=0, only_account=None, then=None):
+        """Saves a character. `then(account_id)` runs in the same transaction
+        (a vault or Dots change that must land together with this data)."""
         db = self.db()
         db.execute("BEGIN IMMEDIATE")
         try:
@@ -538,14 +776,110 @@ class Store:
                 raise ApiError(403, "Not this account's character.")
             self.add_account_xp(row["account_id"], account_xp)
             now = time.time()
-            db.execute("UPDATE characters SET data=?, level=?, xp=?, updated=?, lease_until=? WHERE id=?",
-                       (json.dumps(data), int(data.get("level", 1)), int(data.get("xp", 0)), now,
-                        now + lease_seconds, character_id))
-            self._write_items(character_id, data)
+            if data is not None:
+                db.execute("UPDATE characters SET data=?, level=?, xp=?, updated=?, lease_until=? WHERE id=?",
+                           (json.dumps(data), int(data.get("level", 1)), int(data.get("xp", 0)), now,
+                            now + lease_seconds, character_id))
+                self._write_items(character_id, data)
+            result = then(row["account_id"]) if then else None
             db.execute("COMMIT")
         except Exception:
             db.execute("ROLLBACK")
             raise
+        return result
+
+    # --- Chambers (vault), Dots, developers ------------------------------------------
+
+    def account_extra(self, account_id, base_slots):
+        row = self.db().execute("SELECT dots, developer, home FROM accounts WHERE id=?", (account_id,)).fetchone()
+        return {"dots": row["dots"] if row else 0, "developer": bool(row["developer"]) if row else False,
+                "chests": self.chest_count(account_id, base_slots), "home": row["home"] if row else None}
+
+    def chest_count(self, account_id, base_slots):
+        row = self.db().execute("SELECT bonus_chests FROM vaults WHERE account_id=?", (account_id,)).fetchone()
+        bonus = row["bonus_chests"] if row else 0
+        return min(MAX_CHESTS, self.progress(account_id, base_slots)["chests"] + bonus)
+
+    def vault(self, account_id, base_slots):
+        row = self.db().execute("SELECT items FROM vaults WHERE account_id=?", (account_id,)).fetchone()
+        items = json.loads(row["items"]) if row else []
+        chests = self.chest_count(account_id, base_slots)
+        # Never lose items: a vault holding more than its chests (fewer bonus
+        # chests than before) keeps every item; the game shows enough chests.
+        used = max([i + 1 for i, item in enumerate(items) if item] or [0])
+        chests = max(chests, -(-used // VAULT_SLOTS))
+        items = (items + [None] * (chests * VAULT_SLOTS))[:chests * VAULT_SLOTS]
+        return {"chests": chests, "slots": VAULT_SLOTS, "items": items}
+
+    def _write_vault(self, account_id, items):
+        self.db().execute(
+            "INSERT INTO vaults(account_id, items, updated) VALUES (?,?,?)"
+            " ON CONFLICT(account_id) DO UPDATE SET items=excluded.items, updated=excluded.updated",
+            (account_id, json.dumps(items, separators=(",", ":")), time.time()))
+
+    def save_vault(self, character_id, server, data, items, lease_seconds, base_slots, only_account=None):
+        """A character's data and the account vault, saved together (an item
+        moved between them is never in both, nor lost)."""
+        if not isinstance(items, list) or not all(valid_item(i) for i in items):
+            raise ApiError(400, "items must be a list of {id, count} or null.")
+
+        def write(account_id):
+            if len(items) > self.vault(account_id, base_slots)["chests"] * VAULT_SLOTS:
+                raise ApiError(409, "More items than the Chambers have room for.")
+            self._write_vault(account_id, items)
+        self.save(character_id, server, data, lease_seconds, 0, only_account, write)
+
+    def add_dots(self, account_id, amount):
+        self.db().execute("UPDATE accounts SET dots = MAX(0, dots + ?) WHERE id=?", (int(amount), account_id))
+        return self.db().execute("SELECT dots FROM accounts WHERE id=?", (account_id,)).fetchone()["dots"]
+
+    def dismantle(self, character_id, server, data, item_id, count, lease_seconds, only_account=None):
+        """The character (saved without the item) gets its Dots, in one go."""
+        gained = dismantle_value(str(item_id), count)
+        if gained <= 0:
+            raise ApiError(400, "That can't be dismantled.")
+        dots = self.save(character_id, server, data, lease_seconds, 0, only_account,
+                         lambda account_id: self.add_dots(account_id, gained))
+        return {"dots": dots, "gained": gained}
+
+    def award_dots(self, character_id, server, amount, lease_seconds, only_account=None):
+        amount = max(0, min(MAX_DOTS_AWARD, int(amount)))
+        dots = self.save(character_id, server, None, lease_seconds, 0, only_account,
+                         lambda account_id: self.add_dots(account_id, amount))
+        return {"dots": dots, "gained": amount}
+
+    def _account_id(self, username):
+        row = self.db().execute("SELECT id FROM accounts WHERE username=?", (username,)).fetchone()
+        if row is None:
+            raise ApiError(404, "No such account.")
+        return row["id"]
+
+    def set_developer(self, username, on):
+        self.db().execute("UPDATE accounts SET developer=? WHERE id=?", (1 if on else 0, self._account_id(username)))
+
+    def grant_chests(self, username, count):
+        account_id = self._account_id(username)
+        self.db().execute(
+            "INSERT INTO vaults(account_id, items, bonus_chests, updated) VALUES (?, '[]', ?, ?)"
+            " ON CONFLICT(account_id) DO UPDATE SET bonus_chests = MAX(0, bonus_chests + excluded.bonus_chests)",
+            (account_id, int(count), time.time()))
+
+    def fill_vault(self, username, ids, base_slots):
+        """Development: puts one of each id in the account's Chambers (after
+        what's there), adding bonus chests as needed. Only while the account
+        is offline, so no game server holds an older copy."""
+        account_id = self._account_id(username)
+        if self.db().execute("SELECT 1 FROM characters WHERE account_id=? AND lease_until > ?",
+                             (account_id, time.time())).fetchone():
+            raise ApiError(409, "That account is playing right now; fill its Chambers while it's offline.")
+        vault = self.vault(account_id, base_slots)
+        items = [i for i in vault["items"] if i]
+        items += [{"id": str(i), "count": 1} for i in ids]
+        need = -(-len(items) // VAULT_SLOTS)
+        if need > vault["chests"]:
+            self.grant_chests(username, need - vault["chests"])
+        self._write_vault(account_id, items)
+        return len(items), max(need, vault["chests"])
 
     def release(self, character_id, server):
         self.db().execute("UPDATE characters SET lease_server=NULL, lease_until=0 WHERE id=? AND lease_server=?",
@@ -690,7 +1024,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def account_payload(self, row):
         progress = self.store.progress(row["id"], self.config["base_slots"])
-        return {"account": {"id": row["id"], "username": row["username"]}, "progress": progress,
+        extra = self.store.account_extra(row["id"], self.config["base_slots"])
+        return {"account": dict(extra, id=row["id"], username=row["username"]), "progress": progress,
                 "characters": self.store.characters(row["id"]), "max_characters": progress["slots"],
                 "classes": list(CLASSES),
                 "rewards": [dict(r, level=l) for l, r in sorted(REWARDS.items())], "max_level": MAX_ACCOUNT_LEVEL}
@@ -721,6 +1056,8 @@ class Handler(BaseHTTPRequestHandler):
                 raise ApiError(404, "No such endpoint.")
             # Leave room for the JSON envelope around a full campaign book.
             max_length = MAX_CAMPAIGN_BYTES + 64 * 1024 if path == "/server/campaigns/save" else 512 * 1024
+            if path.startswith(("/friends", "/party", "/server/party")):
+                max_length = 4096
             body = self.body(max_length) if method == "POST" else {k: v[-1] for k, v in parse_qs(url.query).items()}
             self.reply(200, handler(self, body) or {"ok": True})
         except ApiError as e:
@@ -757,7 +1094,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def api_friends(self, _body):
         row = self.store.account_for_token(self.token())
-        return {"friends": self.store.friends(row["id"])}
+        return self.store.social_state(row["id"])
 
     def api_add_friend(self, body):
         row = self.store.account_for_token(self.token())
@@ -767,6 +1104,47 @@ class Handler(BaseHTTPRequestHandler):
         row = self.store.account_for_token(self.token())
         self.store.remove_friend(row["id"], str(body.get("username", "")))
         return {"ok": True}
+
+    def api_respond_friend(self, body):
+        row = self.store.account_for_token(self.token())
+        if type(body.get("accept")) is not bool:
+            raise ApiError(400, "accept must be a boolean.")
+        self.store.respond_friend(row["id"], str(body.get("username", "")), body["accept"])
+        return {"ok": True}
+
+    def api_join_friend(self, body):
+        row = self.store.account_for_token(self.token())
+        return self.store.join_friend(row["id"], str(body.get("username", "")))
+
+    def api_invite_party(self, body):
+        row = self.store.account_for_token(self.token())
+        self.store.invite_party(row["id"], str(body.get("username", "")))
+        return {"ok": True}
+
+    def api_respond_party(self, body):
+        row = self.store.account_for_token(self.token())
+        if type(body.get("accept")) is not bool or type(body.get("id")) is not int:
+            raise ApiError(400, "id must be an integer and accept a boolean.")
+        return self.store.respond_party(row["id"], body["id"], body["accept"])
+
+    def api_server_invite_party(self, body):
+        label = self.server_label()
+        aid = body.get("account_id")
+        self.store._campaign_account(aid, self.only_account)
+        self.store.invite_party(aid, str(body.get("username", "")), label)
+        return {"ok": True}
+
+    def api_party_arrivals(self, body):
+        label = self.server_label()
+        if self.only_account is not None:
+            raise ApiError(403, "Singleplayer is private.")
+        done = body.get("done")
+        if done is not None and type(done) is not int:
+            raise ApiError(400, "done must be an integer.")
+        aid = body.get("account_id")
+        if done is None:
+            self.store._campaign_account(aid, self.only_account)
+        return {"arrivals": self.store.party_arrivals(label, done, aid)}
 
     def api_search_players(self, body):
         row = self.store.account_for_token(self.token())
@@ -819,6 +1197,11 @@ class Handler(BaseHTTPRequestHandler):
         return self.store.claim(str(body.get("token", "")), int(body.get("character_id", 0)), label,
                                 self.config["lease_seconds"], self.config["base_slots"], self.only_account)
 
+    def api_home(self, body):
+        label = self.server_label()
+        return self.store.set_home(int(body.get("character_id", 0)), label,
+                                   body.get("home", ""), self.only_account)
+
     def api_save(self, body):
         label = self.server_label()
         data = body.get("data")
@@ -835,6 +1218,35 @@ class Handler(BaseHTTPRequestHandler):
         self.server_label()
         self.store.save_campaign(body.get("account_id"), body.get("book"), self.only_account)
         return {"ok": True}
+
+    def api_load_vault(self, body):
+        label = self.server_label()
+        row = self.store._character(int(body.get("character_id", 0)))
+        self.store._check_lease(row, label)
+        if self.only_account is not None and row["account_id"] != self.only_account:
+            raise ApiError(403, "Not this account's character.")
+        return self.store.vault(row["account_id"], self.config["base_slots"])
+
+    def api_save_vault(self, body):
+        label = self.server_label()
+        data = body.get("data")
+        if not isinstance(data, dict):
+            raise ApiError(400, "data must be an object.")
+        self.store.save_vault(int(body.get("character_id", 0)), label, data, body.get("items"),
+                              self.config["lease_seconds"], self.config["base_slots"], self.only_account)
+
+    def api_dismantle(self, body):
+        label = self.server_label()
+        data = body.get("data")
+        if not isinstance(data, dict):
+            raise ApiError(400, "data must be an object.")
+        return self.store.dismantle(int(body.get("character_id", 0)), label, data, str(body.get("item_id", "")),
+                                    int(body.get("count", 1)), self.config["lease_seconds"], self.only_account)
+
+    def api_award_dots(self, body):
+        label = self.server_label()
+        return self.store.award_dots(int(body.get("character_id", 0)), label, int(body.get("amount", 0)),
+                                     self.config["lease_seconds"], self.only_account)
 
     def api_release(self, body):
         self.store.release(int(body.get("character_id", 0)), self.server_label())
@@ -859,6 +1271,12 @@ ROUTES = {
     ("POST", "/friends/add"): Handler.api_add_friend,
     ("POST", "/friends/remove"): Handler.api_remove_friend,
     ("GET", "/players/search"): Handler.api_search_players,
+    ("POST", "/friends/respond"): Handler.api_respond_friend,
+    ("POST", "/friends/join"): Handler.api_join_friend,
+    ("POST", "/party/invite"): Handler.api_invite_party,
+    ("POST", "/party/respond"): Handler.api_respond_party,
+    ("POST", "/server/party/invite"): Handler.api_server_invite_party,
+    ("POST", "/server/party/arrivals"): Handler.api_party_arrivals,
     ("POST", "/characters"): Handler.api_create_character,
     ("GET", "/graveyard"): Handler.api_graveyard,
     ("POST", "/characters/delete"): Handler.api_delete_character,
@@ -868,9 +1286,14 @@ ROUTES = {
     ("POST", "/server/heartbeat"): Handler.api_heartbeat,
     ("POST", "/server/claim"): Handler.api_claim,
     ("POST", "/server/save"): Handler.api_save,
+    ("POST", "/server/home"): Handler.api_home,
     ("POST", "/server/campaigns/load"): Handler.api_load_campaign,
     ("POST", "/server/campaigns/save"): Handler.api_save_campaign,
     ("POST", "/server/release"): Handler.api_release,
+    ("POST", "/server/vault/load"): Handler.api_load_vault,
+    ("POST", "/server/vault/save"): Handler.api_save_vault,
+    ("POST", "/server/dismantle"): Handler.api_dismantle,
+    ("POST", "/server/dots/award"): Handler.api_award_dots,
     ("POST", "/server/die"): Handler.api_die,
 }
 
@@ -909,6 +1332,18 @@ def main():
     p = sub.add_parser("new-server-key")
     p.add_argument("label")
     sub.add_parser("list")
+    p = sub.add_parser("set-developer", help="developer accounts may use /give, /lvl and /max on game servers")
+    p.add_argument("username")
+    p.add_argument("on", nargs="?", default="1", choices=("0", "1"))
+    p = sub.add_parser("grant-chests", help="extra Chambers chests (negative takes them back)")
+    p.add_argument("username")
+    p.add_argument("count", type=int)
+    p = sub.add_parser("fill-vault", help="put one of each item id (a file, one per line) in the Chambers")
+    p.add_argument("username")
+    p.add_argument("ids_file")
+    p = sub.add_parser("give-dots")
+    p.add_argument("username")
+    p.add_argument("amount", type=int)
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -931,6 +1366,20 @@ def main():
         config["server_keys"][key] = args.label
         save_config(args.config, config)
         print(key)
+    elif args.cmd == "set-developer":
+        store.set_developer(args.username, args.on == "1")
+        print("%s is %sa developer" % (args.username, "" if args.on == "1" else "no longer "))
+    elif args.cmd == "grant-chests":
+        store.grant_chests(args.username, args.count)
+        print("%s now has %d chests" % (args.username, store.chest_count(store._account_id(args.username),
+                                                                           config["base_slots"])))
+    elif args.cmd == "fill-vault":
+        with open(args.ids_file) as f:
+            ids = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        count, chests = store.fill_vault(args.username, ids, config["base_slots"])
+        print("%s's Chambers: %d items in %d chests" % (args.username, count, chests))
+    elif args.cmd == "give-dots":
+        print("%s has %d Dots" % (args.username, store.add_dots(store._account_id(args.username), args.amount)))
     elif args.cmd == "list":
         db = store.db()
         for a in db.execute("SELECT id, username FROM accounts").fetchall():

@@ -61,7 +61,7 @@ func _ready() -> void:
 ## center, in blocks. biome_at: func(pos) -> BiomeDef, to color the fog by
 ## region (without it the fog takes one color, see set_style).
 ## height_at: func(x, z) -> ground height, so the fog follows the terrain.
-func setup(half_extent: int, biome_at := Callable(), height_at := Callable()) -> void:
+func setup(half_extent: int, biome_at := Callable(), height_at := Callable(), prepared := {}) -> void:
 	_size = half_extent * 2
 	_origin = Vector2(-half_extent, -half_extent)
 	_image = Image.create_empty(_size, _size, false, Image.FORMAT_L8)
@@ -75,10 +75,20 @@ func setup(half_extent: int, biome_at := Callable(), height_at := Callable()) ->
 	_material.set_shader_parameter("map_size", float(_size))
 	_material.set_shader_parameter("use_region_map", biome_at.is_valid())
 	if biome_at.is_valid():
-		_material.set_shader_parameter("region_map", _region_map(biome_at))
+		_material.set_shader_parameter("region_map",ImageTexture.create_from_image(prepared.region) if prepared.has("region") else _region_map(biome_at))
 	_material.set_shader_parameter("use_height_map", height_at.is_valid())
 	if height_at.is_valid():
-		_material.set_shader_parameter("height_map", _height_map(height_at))
+		_material.set_shader_parameter("height_map",ImageTexture.create_from_image(prepared.height) if prepared.has("height") else _height_map(height_at))
+
+## CPU images only, safe for the single world-preparation worker. Texture
+## publication stays in setup() on the main thread.
+static func prepare_maps(half_extent: int, biome_at: Callable, height_at: Callable) -> Dictionary:
+	var size := half_extent*2
+	var origin := Vector2(-half_extent,-half_extent)
+	var result := {}
+	if biome_at.is_valid(): result.region = _region_image(size,origin,biome_at)
+	if height_at.is_valid(): result.height = _height_image(size,origin,height_at)
+	return result
 
 
 ## Stronghold discovery reveals the whole fortress, including apron and gates.
@@ -102,24 +112,30 @@ func _reveal_strongholds(pos: Vector3) -> void:
 
 ## Ground height (meters) every HEIGHT_CELL blocks, as a float texture.
 func _height_map(height_at: Callable) -> ImageTexture:
-	var cells := ceili(float(_size) / HEIGHT_CELL)
+	return ImageTexture.create_from_image(_height_image(_size,_origin,height_at))
+
+static func _height_image(size: int, origin: Vector2, height_at: Callable) -> Image:
+	var cells := ceili(float(size) / HEIGHT_CELL)
 	var img := Image.create_empty(cells, cells, false, Image.FORMAT_RF)
 	for y in cells:
 		for x in cells:
-			img.set_pixel(x, y, Color(height_at.call(_origin.x + (x + 0.5) * HEIGHT_CELL, _origin.y + (y + 0.5) * HEIGHT_CELL), 0, 0))
-	return ImageTexture.create_from_image(img)
+			img.set_pixel(x, y, Color(height_at.call(origin.x + (x + 0.5) * HEIGHT_CELL, origin.y + (y + 0.5) * HEIGHT_CELL), 0, 0))
+	return img
 
 
 ## Each biome's fog color (rgb) and opacity (a), REGION_CELL blocks a texel.
 func _region_map(biome_at: Callable) -> ImageTexture:
-	var cells := ceili(float(_size) / REGION_CELL)
+	return ImageTexture.create_from_image(_region_image(_size,_origin,biome_at))
+
+static func _region_image(size: int, origin: Vector2, biome_at: Callable) -> Image:
+	var cells := ceili(float(size) / REGION_CELL)
 	var img := Image.create_empty(cells, cells, false, Image.FORMAT_RGBA8)
 	for y in cells:
 		for x in cells:
-			var pos := Vector3(_origin.x + (x + 0.5) * REGION_CELL, 0.0, _origin.y + (y + 0.5) * REGION_CELL)
+			var pos := Vector3(origin.x + (x + 0.5) * REGION_CELL, 0.0, origin.y + (y + 0.5) * REGION_CELL)
 			var biome: BiomeDef = biome_at.call(pos)
 			img.set_pixel(x, y, Color(biome.fog_of_war_color, biome.fog_of_war_opacity))
-	return ImageTexture.create_from_image(img)
+	return img
 
 
 ## The explored map (white = explored), e.g. for the minimap.

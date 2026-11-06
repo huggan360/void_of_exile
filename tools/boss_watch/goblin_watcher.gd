@@ -60,9 +60,9 @@ func _process(delta: float) -> void:
 		if auto_damage and pulse <= 0.0 and boss.state == Enemy.State.ACTIVE:
 			pulse = 0.5
 			boss.take_hit(boss.global_position + Vector3.UP, Vector3.ZERO, ceili(boss.max_hp / 180.0) + boss.defense, game.player)
-		_label.text = "Goblin King · Phase %d · %ds\nP: pause · D: auto damage %s · R: replay · Esc: close" % [boss.phase + 1, int(clock), "ON" if auto_damage else "OFF"]
+		_label.text = "Goblin King - Phase %d - %ds\nP: pause - D: auto damage %s - R: replay - Esc: close" % [boss.phase + 1, int(clock), "ON" if auto_damage else "OFF"]
 	else:
-		_label.text = "Goblin King defeated · R: replay · Esc: close"
+		_label.text = "Goblin King defeated - R: replay - Esc: close"
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo: return

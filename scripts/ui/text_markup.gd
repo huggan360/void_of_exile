@@ -14,6 +14,19 @@ const _TAGS := {
 }
 
 
+## Escape literal data before placing it inside UI BBCode.
+static func escape(text: String) -> String:
+	return text.replace("[", "[lb]")
+
+
+static func color(text: String, tint: Color) -> String:
+	return "[color=#%s]%s[/color]" % [tint.to_html(false), escape(text)]
+
+
+static func key_value(key: String, value: String, tint := UIStyle.TEXT) -> String:
+	return "[b]%s[/b]  %s" % [escape(key), color(value, tint)]
+
+
 ## BBCode for a RichTextLabel.
 static func to_bbcode(text: String) -> String:
 	var keep := {}
@@ -62,3 +75,22 @@ static func _sentences(text: String) -> Array[String]:
 	if start < text.length() and text.substr(start).strip_edges() != "":
 		out.append(text.substr(start).strip_edges())
 	return out
+
+
+## Reveal complete words, preserving BBCode and layout throughout the speech.
+static func reveal_words(label: RichTextLabel) -> Tween:
+	label.visible_characters = 0
+	var words := label.get_parsed_text().split(" ", false)
+	var tween := label.create_tween()
+	var count := 0
+	for word: String in words:
+		count += word.length() + (1 if count > 0 else 0)
+		tween.tween_property(label, "visible_characters", count, 0.0)
+		var pause := 0.16
+		if word.ends_with(".") or word.ends_with("!") or word.ends_with("?"):
+			pause = 0.34
+		elif word.ends_with(","):
+			pause = 0.23
+		tween.tween_interval(pause)
+	tween.tween_property(label, "visible_characters", -1, 0.0)
+	return tween

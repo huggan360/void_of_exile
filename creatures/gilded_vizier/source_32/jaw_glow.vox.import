@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cevs5i0di6px6"
+path="res://.godot/imported/jaw_glow.vox-01d4f7fee80005aa5ccd215230366e72.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_vizier/source_32/jaw_glow.vox"
+dest_files=["res://.godot/imported/jaw_glow.vox-01d4f7fee80005aa5ccd215230366e72.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dagxkv2dl84qg"
+path="res://.godot/imported/leg_front1_glow.vox-06006a24c3a1108b2e4cbc8b4cf3aabd.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/source_32/leg_front1_glow.vox"
+dest_files=["res://.godot/imported/leg_front1_glow.vox-06006a24c3a1108b2e4cbc8b4cf3aabd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -50,6 +50,7 @@ var players: Array[Player] = []
 static var _cleave_collision := {}
 
 var _shots: Array[Dictionary] = []
+var _pixel_trail_looks := {}
 var _meshes := {}  # "style/color" -> Mesh
 var _halo_mesh: SphereMesh
 var _halo_materials := {}  # color -> ShaderMaterial
@@ -61,9 +62,18 @@ var _fire_looks := {}  # "color/size" -> {core, trail, burst: ParticleProcessMat
 ## that fired it (their source is null).
 func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node = null, shot_y := NAN, skip: Array = [],
 		owner := 0, boss_id := "") -> void:
+	attack = Burning.projectile(attack,(source as Enemy).def.id if source is Enemy else boss_id)
+	if source is Enemy and not attack.has("bowl") and (source as Enemy).director.world.has_method("shot_bowl"):
+		var bowl: Array = (source as Enemy).director.world.shot_bowl(origin)
+		if not bowl.is_empty():
+			attack = attack.duplicate()
+			attack.bowl = bowl
 	if Net.is_server():
 		Net.server.enemy_shot(self, origin, direction, attack, source, shot_y)
 		return
+	var audio_owner := owner if owner != 0 else _owner_id(source)
+	var shot_event := "fireball" if attack.get("style", "") == "fireball" else "magic_explosion" if attack.get("magic", false) else "enemy_shot"
+	GameAudio.play(shot_event, origin, {source_id = audio_owner, cooldown = 0.16, max_distance = 48.0})
 	if source is Enemy and (source as Enemy).def is BossDef:
 		attack = _boss_attack(attack,(source as Enemy).def.id)
 	elif boss_id != "":
@@ -73,6 +83,7 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	mi.global_position = origin
+	if attack.get("magic",false) or attack.get("style","")=="fireball": GameAudio.projectile_flight(mi)
 	mi.look_at(origin + direction, Vector3.FORWARD if absf(direction.y) > 0.99 else Vector3.UP)
 	var magic: bool = attack.get("magic", false)
 	if magic:
@@ -88,7 +99,7 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 		trail = flames[1]
 		mi.add_child(trail)
 	# A bounded set of real moving lights makes patrol fire illuminate the floor.
-	if float(attack.get("light_energy",0))>0 and get_tree().get_nodes_in_group("enemy_projectile_lights").size()<12:
+	if float(attack.get("light_energy",0))>0 and get_tree().get_nodes_in_group("enemy_projectile_lights").size()<GraphicsSettings.projectile_lights(AppSettings.graphics):
 		var light := OmniLight3D.new()
 		light.name = "ProjectileLight"
 		light.add_to_group("enemy_projectile_lights")
@@ -114,7 +125,7 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 		collision_boxes = attack.get("collision_boxes",[]),
 		trail = trail, attack = attack, owner = owner if owner != 0 else _owner_id(source), origin = origin,
 		returns = attack.get("returns", 0.0), turn = attack.get("turn", 0.0), returned = false, hit_at = {}, contract = -1.0,
-		blocked = false, clashed_waves = [],
+		blocked = false, hit_object = false, clashed_waves = [],
 	})
 
 
@@ -158,30 +169,33 @@ static func _boss_attack(original: Dictionary, boss_id: String) -> Dictionary:
 
 
 func _pixel_trail(attack: Dictionary) -> GPUParticles3D:
-	var process := ParticleProcessMaterial.new()
-	process.direction = Vector3.UP
-	process.spread = 35
-	process.initial_velocity_min = .1
-	process.initial_velocity_max = .4
-	process.gravity = Vector3(0,.5,0)
-	process.color = attack.get("color",Color(.3,.6,1))
-	process.scale_min = .5
-	process.scale_max = 1.0
-	var shrink := Curve.new()
-	shrink.add_point(Vector2(0,1))
-	shrink.add_point(Vector2(1,0))
-	var texture := CurveTexture.new()
-	texture.curve = shrink
-	process.scale_curve = texture
-	var cube := BoxMesh.new()
-	cube.size = Vector3.ONE*.055*minf(float(attack.get("size",1.0)),1.5)
-	var material := ShaderMaterial.new()
-	material.shader = preload("res://shaders/fire_voxel.gdshader")
-	material.set_shader_parameter("brightness",.9)
-	cube.material = material
+	var key := str(attack.get("color",Color(.3,.6,1)))+":"+str(minf(float(attack.get("size",1)),1.5))
+	if not _pixel_trail_looks.has(key):
+		var process := ParticleProcessMaterial.new()
+		process.direction = Vector3.UP
+		process.spread = 35
+		process.initial_velocity_min = .1
+		process.initial_velocity_max = .4
+		process.gravity = Vector3(0,.5,0)
+		process.color = attack.get("color",Color(.3,.6,1))
+		process.scale_min = .5
+		process.scale_max = 1.0
+		var shrink := Curve.new()
+		shrink.add_point(Vector2(0,1))
+		shrink.add_point(Vector2(1,0))
+		var texture := CurveTexture.new()
+		texture.curve = shrink
+		process.scale_curve = texture
+		var cube := BoxMesh.new()
+		cube.size = Vector3.ONE*.055*minf(float(attack.get("size",1.0)),1.5)
+		var material := ShaderMaterial.new()
+		material.shader = preload("res://shaders/fire_voxel.gdshader")
+		material.set_shader_parameter("brightness",.9)
+		cube.material = material
+		_pixel_trail_looks[key] = {process=process,mesh=cube}
 	var particles := GPUParticles3D.new()
-	particles.process_material = process
-	particles.draw_pass_1 = cube
+	particles.process_material = _pixel_trail_looks[key].process
+	particles.draw_pass_1 = _pixel_trail_looks[key].mesh
 	particles.amount = 12
 	particles.lifetime = .3
 	particles.local_coords = false
@@ -307,6 +321,7 @@ func _physics_process(delta: float) -> void:
 			s.node.scale = Vector3.ONE * maxf(0.2, 1.0 - s.contract / delay * 0.8)
 			continue
 		var from: Vector3 = s.pos
+		s.hit_object = false
 		if s.turn != 0.0:
 			s.dir = s.dir.rotated(Vector3.UP, s.turn * delta)
 		var step: float = s.speed * delta
@@ -315,6 +330,7 @@ func _physics_process(delta: float) -> void:
 		var drop := maxf(0.0, 1.0 - s.travelled / SETTLE_DISTANCE)
 		if not s.attack.get("falling", false):
 			to.y = s.shot_y + (s.start_y - s.shot_y) * drop * drop
+			if s.attack.has("bowl"): to.y += _bowl_floor(s.attack.bowl, to) - _bowl_floor(s.attack.bowl, s.origin)
 		var query := PhysicsRayQueryParameters3D.create(from, to, Player.TERRAIN_LAYER | Player.OBSTACLE_LAYER)
 		query.exclude = excluded
 		var wall: Dictionary = space.intersect_ray(query) if s.collision_boxes.is_empty() else {}
@@ -323,9 +339,12 @@ func _physics_process(delta: float) -> void:
 			if fraction<1:
 				to = from.lerp(to,fraction)
 				s.travelled = s.range
+				s.hit_object = true
 		if not wall.is_empty():
+			s.hit_object = true
 			if from.distance_squared_to(wall.position)<from.distance_squared_to(to): to = wall.position
 			s.travelled = s.range
+			GameAudio.play("magic_impact" if s.magic else "enemy_shot", to, {source_id = s.owner, cooldown = 0.12, max_distance = 48.0})
 		# A player's expanding magic can tear apart enemy magic before it arrives.
 		if s.magic and _interfere(s,from,to):
 			s.blocked = true
@@ -358,7 +377,9 @@ func _physics_process(delta: float) -> void:
 						p.receive_attack_effects(s.attack)
 					s.hit.append(p)
 					s.hit_at[p] = now
-					if not s.pierce: s.travelled = s.range
+					if not s.pierce:
+						s.travelled = s.range
+						s.hit_object = true
 
 		s.pos = to
 		s.node.global_position = to
@@ -387,7 +408,8 @@ func _physics_process(delta: float) -> void:
 			continue
 		if s.travelled >= s.range:
 			if not s.blocked and not s.ripple.is_empty():
-				EnemyRipple.spawn(self, s.pos - Vector3.UP * Player.SHOT_HEIGHT, s.ripple, s.color, players, s.hit)
+				if s.hit_object: GameAudio.play("magic_explosion", s.pos, {source_id = s.owner, cooldown = 0.12})
+				EnemyRipple.spawn(self, s.pos - Vector3.UP * Player.SHOT_HEIGHT, s.ripple, s.color, players, s.hit, s.hit_object)
 			if s.trail:
 				_burn_out(s)
 			s.node.queue_free()
@@ -450,6 +472,7 @@ func _interfere(s: Dictionary, from: Vector3, to: Vector3) -> bool:
 		if wave._material: wave._material.set_shader_parameter("arc_strength",wave.segments)
 		_scatter_projectile(s,closest,from.y-Player.SHOT_HEIGHT)
 		wave._spark(closest,s.color.lerp(wave.color,.5))
+		GameAudio.play("magic_shield_hit", closest, {source_id = wave.get_instance_id(), cooldown = 0.1})
 		if even or power>=damage: return true
 		s.damage = maxf(1.0,damage-power)
 	return false
@@ -478,6 +501,7 @@ func _scatter_projectile(s: Dictionary, at: Vector3, floor_y: float) -> void:
 ## skip anyone the orb itself already hit.
 func _release(s: Dictionary) -> void:
 	var terminal: Dictionary = s.attack.terminal
+	if s.hit_object: GameAudio.play("magic_explosion", s.pos, {source_id = s.owner, cooldown = 0.12})
 	var count: int = terminal.get("count", 8)
 	var spin := randf() * TAU
 	for k in count:
@@ -714,3 +738,8 @@ func _voxel_projectile(attack: Dictionary) -> Mesh:
 	mesh.surface_set_material(0, material)
 	_meshes[key] = mesh
 	return mesh
+
+
+## Height of a curved arena floor ([centre x, centre z, factor]) under `at`.
+static func _bowl_floor(bowl: Array, at: Vector3) -> float:
+	return Vector2(at.x - float(bowl[0]), at.z - float(bowl[1])).length_squared() * float(bowl[2])

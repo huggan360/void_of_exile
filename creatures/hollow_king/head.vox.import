@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bdlu0v37u7spq"
+path="res://.godot/imported/head.vox-855267e40d7f34e4016dae44546a62aa.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_king/head.vox"
+dest_files=["res://.godot/imported/head.vox-855267e40d7f34e4016dae44546a62aa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

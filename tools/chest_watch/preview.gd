@@ -104,7 +104,7 @@ func _process(delta: float) -> void:
 	for i in _chests.size():
 		if _clock >= 1.8 + i * 0.45: _chests[i].open_chest()
 	if _automatic and _clock >= _cycle: _reset()
-	_status.text = ("Dark dungeon" if _dark else "Daylight") + (" · New chests every 12 seconds" if _automatic else " · Auto loop paused")
+	_status.text = ("Dark dungeon" if _dark else "Daylight") + (" - New chests every 12 seconds" if _automatic else " - Auto loop paused")
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

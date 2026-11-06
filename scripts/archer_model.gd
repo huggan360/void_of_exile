@@ -1,78 +1,59 @@
 class_name ArcherModel
 extends Node3D
-## The Archer, assembled from .vox parts with pivots at the shoulders and hips
-## so the limbs can swing. 16 voxels tall = 1.8 m. Faces -Z.
-## The player owns this node's transform (facing, step smoothing); the walk
-## animation only moves the inner rig.
+## The Archer's two-bone arms, bow grip and moving string. Faces -Z.
+## The player owns facing and step smoothing; animation only moves the inner rig.
 
+const ArmRig = preload("res://scripts/player_arm_rig.gd")
 const VOXEL_SIZE := 1.8 / 16.0
-const PART_DIR := "res://characters/archer/"
-
-# Min corner of each part's frame in its own voxel coords (see tools/make_hero.py).
-const BODY_MIN := Vector3(-8, 0, -8)
-const ARM_MIN := Vector3(-1, -5, -1)
-const LEG_MIN := Vector3(-1, -4, -2)
-const BOW_MIN := Vector3(0, -6, 0)
-
-# Where the limbs attach, in body voxel coords.
-const LEFT_SHOULDER := Vector3(-4, 9, 0)
-const RIGHT_SHOULDER := Vector3(4, 9, 0)
-const LEFT_HIP := Vector3(-2, 4, 0)
-const RIGHT_HIP := Vector3(1, 4, 0)
-const HAND := Vector3(0, -4.5, 0)
-
-## The bow arm is held forward at this angle so the bow sits in front, clear of the ground.
-const BOW_ARM_RAISE := deg_to_rad(60.0)
-
-# Walk cycle: a short, bouncy waddle.
-const STRIDE_SPEED := 13.0  # radians of walk phase per second at full speed
+const STRIDE_SPEED := 13.0
 const STRIDE_ANGLE := deg_to_rad(40.0)
-const ARM_SWING := 0.9  # free arm swing relative to the legs
-const BOW_ARM_SWING := deg_to_rad(8.0)
-const BOUNCE_HEIGHT := 0.09  # meters, one hop per step
-const WADDLE_ROLL := deg_to_rad(7.0)  # rock side to side onto the stance leg
-const SWAY_PITCH := deg_to_rad(4.0)  # rock back and forth with each step
+const ARM_SWING := 0.9
+const BOUNCE_HEIGHT := 0.09
+const WADDLE_ROLL := deg_to_rad(7.0)
+const SWAY_PITCH := deg_to_rad(4.0)
 const LEAN_FORWARD := deg_to_rad(6.0)
 const BREATH_SPEED := 2.2
 const BREATH_HEIGHT := 0.012
-# Shooting: the free arm snaps back as if drawing the string, then returns.
 const SHOT_TIME := 0.25
-const SHOT_DRAW := deg_to_rad(-80.0)
+const BOW_REST := Vector3(5.5, 6.5, -2.2) * VOXEL_SIZE
+const BOW_EXTENDED := Vector3(0.4, 8.0, -4.0) * VOXEL_SIZE
+const DRAW_GRIP := Vector3(0, 0, -0.3) * VOXEL_SIZE
+const STRING_Z := 1.6 * VOXEL_SIZE
+const STRING_DRAW := 0.5 * VOXEL_SIZE
 
+var class_id := "archer"
+## 0..1: string draw during windup/charge. At 1 the bow trembles a little.
+var hold := 0.0
 var _rig: Node3D
 var _left_arm: Node3D
 var _right_arm: Node3D
+var _left_hand: Node3D
+var _right_hand: Node3D
 var _left_leg: Node3D
 var _right_leg: Node3D
+var _bow: Node3D
+var _string_top: MeshInstance3D
+var _string_bottom: MeshInstance3D
 var _phase := 0.0
 var _walk_blend := 0.0
 var _time := 0.0
 var _shot := 0.0
-## 0..1: how far the string is held drawn (windup and charged shots). At
-## 1 the bow trembles a little.
-var hold := 0.0
 
 
 func _ready() -> void:
-	var arm_mesh := VoxModel.load_mesh(PART_DIR + "arm.vox")
-	var leg_mesh := VoxModel.load_mesh(PART_DIR + "leg.vox")
-
-	# Rig pivot sits at the hips so rocking and leaning look natural.
-	_rig = _add_pivot(self, Vector3.ZERO)
-	_add_part(_rig, VoxModel.load_mesh(PART_DIR + "body.vox"), BODY_MIN)
-	_left_arm = _add_pivot(_rig, LEFT_SHOULDER)
-	_right_arm = _add_pivot(_rig, RIGHT_SHOULDER)
-	_left_leg = _add_pivot(_rig, LEFT_HIP)
-	_right_leg = _add_pivot(_rig, RIGHT_HIP)
-	_add_part(_left_arm, arm_mesh, ARM_MIN)
-	_add_part(_right_arm, arm_mesh, ARM_MIN)
-	_add_part(_left_leg, leg_mesh, LEG_MIN)
-	_add_part(_right_leg, leg_mesh, LEG_MIN)
-
-	_left_arm.rotation.x = BOW_ARM_RAISE
-	var bow := _add_pivot(_left_arm, HAND)
-	bow.rotation.x = -BOW_ARM_RAISE  # keep the bow upright
-	_add_part(bow, VoxModel.load_mesh(PART_DIR + "bow.vox"), BOW_MIN + Vector3(-0.5, 0, 0))
+	var art := (load("res://characters/archer/model.tscn") as PackedScene).instantiate()
+	add_child(art)
+	_rig = art.get_node("Rig")
+	_left_arm = _rig.get_node("ArmL")
+	_right_arm = _rig.get_node("ArmR")
+	_left_hand = _left_arm.get_node("ForearmL/LeftHand")
+	_right_hand = _right_arm.get_node("ForearmR/RightHand")
+	_left_leg = _rig.get_node("LegL")
+	_right_leg = _rig.get_node("LegR")
+	_bow = _right_hand.get_node("Bow")
+	_string_top = _bow.get_node("StringTop")
+	_string_bottom = _bow.get_node("StringBottom")
+	_pose(0.0, 0.0)
 
 
 ## move_ratio: 0 = standing, 1 = full speed.
@@ -82,19 +63,14 @@ func animate(move_ratio: float, delta: float) -> void:
 	_phase = fmod(_phase + delta * STRIDE_SPEED * move_ratio, TAU)
 	var w := _walk_blend
 	var stride := sin(_phase)
-
 	_left_leg.rotation.x = stride * STRIDE_ANGLE * w
 	_right_leg.rotation.x = -stride * STRIDE_ANGLE * w
 	_shot = maxf(0.0, _shot - delta)
-	var draw := sin(_shot / SHOT_TIME * PI)  # 0 -> 1 -> 0 over the shot
-	draw = maxf(draw, hold)
-	_right_arm.rotation.x = lerpf(stride * STRIDE_ANGLE * ARM_SWING * w, SHOT_DRAW, draw)
-	var tremble := sin(_time * 55.0) * deg_to_rad(2.0) if hold >= 1.0 else 0.0
-	_left_arm.rotation.x = BOW_ARM_RAISE + hold * deg_to_rad(20.0) - stride * BOW_ARM_SWING * w * (1.0 - hold) + tremble
+	var shot := _shot / SHOT_TIME
+	var drawn := clampf(hold, 0.0, 1.0)
+	_pose(maxf(drawn, smoothstep(0.0, 0.7, shot)), maxf(drawn, clampf((shot - 0.75) * 4.0, 0.0, 1.0)))
 
-	# Hop once per step (twice per cycle), rock toward the planted foot,
-	# sway back and forth, and lean into the walk.
-	var bounce := absf(sin(_phase)) * BOUNCE_HEIGHT * w
+	var bounce := absf(stride) * BOUNCE_HEIGHT * w
 	var breath := sin(_time * BREATH_SPEED) * BREATH_HEIGHT * (1.0 - w)
 	_rig.position.y = bounce + breath
 	_rig.rotation.z = stride * WADDLE_ROLL * w
@@ -103,19 +79,35 @@ func animate(move_ratio: float, delta: float) -> void:
 
 func play_shot() -> void:
 	_shot = SHOT_TIME
+	if _rig:
+		_pose(1.0, 1.0)
 
 
-func _add_pivot(parent: Node3D, voxel_pos: Vector3) -> Node3D:
-	var pivot := Node3D.new()
-	pivot.position = voxel_pos * VOXEL_SIZE
-	parent.add_child(pivot)
-	return pivot
+func _pose(extension: float, draw: float) -> void:
+	var stride := sin(_phase) * _walk_blend
+	var target := BOW_REST.lerp(BOW_EXTENDED, extension)
+	# Clear the face before bringing the bow across from the side.
+	target.z = lerpf(BOW_REST.z, BOW_EXTENDED.z, smoothstep(0.0, 0.4, extension))
+	target.x = lerpf(BOW_REST.x, BOW_EXTENDED.x, smoothstep(0.4, 1.0, extension))
+	target.z += stride * 0.25 * VOXEL_SIZE * (1.0 - extension)
+	if hold >= 1.0:
+		target.y += sin(_time * 55.0) * 0.04 * VOXEL_SIZE
+	ArmRig.reach(_right_arm, target, Vector3(1, -1, 0))
+
+	var nock := Vector3(0, 0, STRING_Z + draw * STRING_DRAW)
+	var string_target := _rig.to_local(_bow.to_global(nock)) - DRAW_GRIP
+	ArmRig.pose(_left_arm, -stride * STRIDE_ANGLE * ARM_SWING, deg_to_rad(15.0 + absf(stride) * 12.0), 0.0, deg_to_rad(-10.0))
+	var free_hand := _rig.to_local(_left_hand.global_position)
+	var draw_target := free_hand.lerp(string_target, extension)
+	var clearance := smoothstep(0.0, 0.25, extension) * (1.0 - smoothstep(0.75, 1.0, extension))
+	draw_target.z = minf(draw_target.z, lerpf(free_hand.z, -3.8 * VOXEL_SIZE, clearance))
+	ArmRig.reach(_left_arm, draw_target, Vector3(-0.2, -0.5, -1))
+	_string_segment(_string_top, Vector3(0, 6 * VOXEL_SIZE, STRING_Z), nock)
+	_string_segment(_string_bottom, nock, Vector3(0, -6 * VOXEL_SIZE, STRING_Z))
 
 
-func _add_part(parent: Node3D, mesh: Mesh, min_corner: Vector3) -> void:
-	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
-	mi.material_override = VoxModel.material()
-	mi.position = min_corner * VOXEL_SIZE
-	mi.scale = Vector3.ONE * VOXEL_SIZE
-	parent.add_child(mi)
+func _string_segment(segment: MeshInstance3D, start: Vector3, end: Vector3) -> void:
+	var offset := end - start
+	segment.position = (start + end) * 0.5
+	segment.basis = Basis(Quaternion(Vector3.UP, offset.normalized()))
+	segment.scale.y = offset.length()

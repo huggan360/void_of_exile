@@ -56,7 +56,7 @@ func _process(delta: float) -> void:
 	_camera()
 	if get_tree().paused: return
 	if finished or not is_instance_valid(boss):
-		if finished: _status.text = "Fight complete — R to replay · Escape to close"
+		if finished: _status.text = "Fight complete — R to replay - Escape to close"
 		return
 	clock += delta
 	if boss.state==Enemy.State.ACTIVE:
@@ -73,7 +73,7 @@ func _process(delta: float) -> void:
 		_damage_encounter()
 	var stage := "Shell / hatching" if boss.phase<0 else "Phase %d" % (boss.phase+1)
 	if boss.phase!=_last_phase: _last_phase = boss.phase
-	_status.text = "%s  ·  %s  ·  %ds\nP: pause   D: auto damage %s   R: replay   Esc: close" % [boss.def.enemy_name,stage,int(clock),"ON" if auto_damage else "OFF"]
+	_status.text = "%s  -  %s  -  %ds\nP: pause   D: auto damage %s   R: replay   Esc: close" % [boss.def.enemy_name,stage,int(clock),"ON" if auto_damage else "OFF"]
 
 func _damage_encounter() -> void:
 	if not is_instance_valid(boss): return

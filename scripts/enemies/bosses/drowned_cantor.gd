@@ -53,7 +53,13 @@ func _refrain() -> void:
 	var direction := aim_dir()
 	for beat in 3:
 		after(0.9 + beat * 0.35, func() -> void:
-			fire_fan(shot_origin(), direction, 5 if phase < 2 else 7, 14.0, _note(7.0)))
+			var final_note := {}
+			# Only the large centre note of the final refrain silences.
+			if beat == 2:
+				final_note = _note(6.0)
+				final_note.merge({color = BELL, size = 1.25, radius = 0.25,
+					effects = [{id = "quiet", duration = 1.75}], effect_source = "Drowned Cantor refrain"}, true)
+			fire_fan(shot_origin(), direction, 5 if phase < 2 else 7, 14.0, _note(7.0), final_note))
 
 func _choir() -> void:
 	model.boss_pose("summon", 2.8)
@@ -67,3 +73,9 @@ func _choir() -> void:
 func _reset_hook() -> void:
 	_chant = 0.0
 	model.boss_pose("idle", 0.1)
+
+func _death_started() -> void:
+	model.boss_pose("death", boss_def.death_time + 1.0)
+
+func _dying_update(_k: float) -> void:
+	model.scale = Vector3.ONE * def.model_scale

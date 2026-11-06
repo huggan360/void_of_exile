@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c37hle52jw01f"
+path="res://.godot/imported/tabard_1.vox-b42ea9f5930982e27deacbd0af7f4884.tscn"
+
+[deps]
+
+source_file="res://creatures/hollow_king/tabard_1.vox"
+dest_files=["res://.godot/imported/tabard_1.vox-b42ea9f5930982e27deacbd0af7f4884.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

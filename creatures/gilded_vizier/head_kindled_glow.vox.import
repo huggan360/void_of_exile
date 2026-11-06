@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bmgcymd3fk8eq"
+path="res://.godot/imported/head_kindled_glow.vox-089acefbc10f7c8585a7dcba2b0a0e88.tscn"
+
+[deps]
+
+source_file="res://creatures/gilded_vizier/head_kindled_glow.vox"
+dest_files=["res://.godot/imported/head_kindled_glow.vox-089acefbc10f7c8585a7dcba2b0a0e88.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c2ly07isskwdo"
+path="res://.godot/imported/carapace_kindled.vox-a2d18382f6603c0a623877fd9eae6e3e.tscn"
+
+[deps]
+
+source_file="res://creatures/magma_warden/carapace_kindled.vox"
+dest_files=["res://.godot/imported/carapace_kindled.vox-a2d18382f6603c0a623877fd9eae6e3e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

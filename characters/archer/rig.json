@@ -1,0 +1,223 @@
+{
+  "status": "playable",
+  "voxel_size": 0.1125,
+  "facing": "-Z",
+  "right_hand": "+X",
+  "body_height_voxels": 16,
+  "upper_arm_length": 2.5,
+  "forearm_length": 3.0,
+  "grip": [
+    0,
+    0,
+    -1
+  ],
+  "reference": "characters/archer",
+  "parts": {
+    "body": {
+      "frame_min": [
+        -8,
+        0,
+        -8
+      ],
+      "frame_size": [
+        16,
+        16,
+        16
+      ]
+    },
+    "leg": {
+      "frame_min": [
+        -1,
+        -4,
+        -2
+      ],
+      "frame_size": [
+        3,
+        4,
+        4
+      ]
+    },
+    "bow_frame": {
+      "frame_min": [
+        0,
+        -6,
+        0
+      ],
+      "frame_size": [
+        1,
+        13,
+        3
+      ]
+    },
+    "upper_arm": {
+      "frame_min": [
+        -1,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        2,
+        2,
+        2
+      ]
+    },
+    "forearm": {
+      "frame_min": [
+        -1,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        2,
+        2,
+        2
+      ]
+    },
+    "hand": {
+      "frame_min": [
+        -1,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        3,
+        1,
+        3
+      ]
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "upper_arm",
+      "pivot": [
+        -4,
+        9,
+        -1
+      ],
+      "mesh_scale": [
+        1,
+        1.25,
+        1
+      ]
+    },
+    "forearm_l": {
+      "part": "forearm",
+      "parent": "arm_l",
+      "pivot": [
+        0,
+        -2.5,
+        0
+      ],
+      "mesh_scale": [
+        0.9,
+        1.25,
+        0.8
+      ]
+    },
+    "hand_l": {
+      "part": "hand",
+      "name": "LeftHand",
+      "parent": "forearm_l",
+      "pivot": [
+        0,
+        -3,
+        0
+      ],
+      "mesh_scale": [
+        1,
+        1,
+        0.55
+      ],
+      "mesh_offset": [
+        -0.5,
+        0.5,
+        -0.575
+      ]
+    },
+    "arm_r": {
+      "part": "upper_arm",
+      "pivot": [
+        4,
+        9,
+        -1
+      ],
+      "mesh_scale": [
+        1,
+        1.25,
+        1
+      ]
+    },
+    "forearm_r": {
+      "part": "forearm",
+      "parent": "arm_r",
+      "pivot": [
+        0,
+        -2.5,
+        0
+      ],
+      "mesh_scale": [
+        0.9,
+        1.25,
+        0.8
+      ]
+    },
+    "hand_r": {
+      "part": "hand",
+      "name": "RightHand",
+      "parent": "forearm_r",
+      "pivot": [
+        0,
+        -3,
+        0
+      ],
+      "mesh_scale": [
+        1,
+        1,
+        1
+      ],
+      "mesh_offset": [
+        -0.5,
+        0.5,
+        -1.5
+      ]
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -2,
+        4,
+        0
+      ]
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        1,
+        4,
+        0
+      ]
+    }
+  },
+  "attachments": {
+    "bow_frame": {
+      "part": "bow_frame",
+      "name": "Bow",
+      "parent": "hand_r",
+      "pivot": [
+        0,
+        0,
+        -1
+      ],
+      "mesh_scale": [
+        0.9,
+        1,
+        0.8
+      ],
+      "mesh_offset": [
+        -0.45,
+        -0.5,
+        -0.4
+      ]
+    }
+  }
+}

@@ -1,104 +1,149 @@
 [gd_scene format=3]
 
-[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_tmv8v"]
-[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/body.res" id="2_xb6ic"]
-[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/arm_l.res" id="3_sjuww"]
-[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/book.res" id="4_nm5um"]
-[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/arm_r.res" id="5_7splr"]
-[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/staff.res" id="6_lr50y"]
-[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/staff_glow.res" id="7_xu03w"]
-[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/leg.res" id="8_htqu0"]
+[ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_xb6ic"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/body.res" id="2_sjuww"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/upper_arm.res" id="3_nm5um"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/forearm.res" id="4_7splr"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/hand.res" id="5_lr50y"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/book.res" id="6_xu03w"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/staff.res" id="7_htqu0"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/staff_glow.res" id="8_xn3cc"]
+[ext_resource type="ArrayMesh" path="res://characters/priest/meshes/leg.res" id="9_r2krq"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_nhhdp"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_if6xd"]
 render_priority = 0
-shader = ExtResource("1_tmv8v")
+shader = ExtResource("1_xb6ic")
 shader_parameter/jitter = 0.07
 shader_parameter/glow_strength = 0.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_xn3cc"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_j1a51"]
 render_priority = 0
-shader = ExtResource("1_tmv8v")
+shader = ExtResource("1_xb6ic")
 shader_parameter/jitter = 0.07
 shader_parameter/glow_strength = 0.8
 
-[node name="Priest" type="Node3D" unique_id=1933888628]
-metadata/status = "art_only_not_registered"
+[node name="Priest" type="Node3D" unique_id=1518941174]
+metadata/status = "playable"
 metadata/voxel_source = "res://characters/priest/model.vox"
 metadata/reference = "Archer proportions, +X right hand, -Z forward"
 
-[node name="Rig" type="Node3D" parent="." unique_id=893373181]
+[node name="Rig" type="Node3D" parent="." unique_id=150163994]
 
-[node name="Body" type="Node3D" parent="Rig" unique_id=25951215]
+[node name="Body" type="Node3D" parent="Rig" unique_id=1488334282]
 transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.9, 0, -0.9)
 
-[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/Body" unique_id=60824011]
-material_override = SubResource("ShaderMaterial_nhhdp")
-mesh = ExtResource("2_xb6ic")
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/Body" unique_id=1949890512]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("2_sjuww")
 
-[node name="ArmL" type="Node3D" parent="Rig" unique_id=1920201731]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.45, 1.0124999, 0)
+[node name="ArmL" type="Node3D" parent="Rig" unique_id=447093381]
+transform = Transform3D(0.9848077, 0.17364818, 0, -0.17364818, 0.9848077, 0, 0, 0, 1, -0.45, 1.0124999, 0)
 metadata/voxel_pivot = [-4.0, 9.0, 0.0]
 
-[node name="ArmL" type="Node3D" parent="Rig/ArmL" unique_id=282172203]
-transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.1125, -0.5625, -0.1125)
+[node name="UpperArm" type="Node3D" parent="Rig/ArmL" unique_id=671800336]
+transform = Transform3D(0.1125, 0, 0, 0, 0.140625, 0, 0, 0, 0.1125, -0.1125, -0.28125, -0.1125)
 
-[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmL/ArmL" unique_id=1726753043]
-material_override = SubResource("ShaderMaterial_nhhdp")
-mesh = ExtResource("3_sjuww")
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmL/UpperArm" unique_id=1649692401]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("3_nm5um")
 
-[node name="LeftHandBook" type="Node3D" parent="Rig/ArmL" unique_id=1754174254]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, -0.225)
+[node name="ForearmL" type="Node3D" parent="Rig/ArmL" unique_id=771030590]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, -0.25881904, 0, 0.25881904, 0.9659258, 0, -0.28125, 0)
+metadata/voxel_pivot = [0.0, -2.5, 0.0]
 
-[node name="Book" type="Node3D" parent="Rig/ArmL/LeftHandBook" unique_id=529961030]
+[node name="Forearm" type="Node3D" parent="Rig/ArmL/ForearmL" unique_id=935423659]
+transform = Transform3D(0.10124999, 0, 0, 0, 0.140625, 0, 0, 0, 0.089999996, -0.10124999, -0.28125, -0.089999996)
+
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmL/ForearmL/Forearm" unique_id=948556653]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("4_7splr")
+
+[node name="LeftHand" type="Node3D" parent="Rig/ArmL/ForearmL" unique_id=1969961928]
+transform = Transform3D(0.9848078, -0.17364818, 0, 0.16773127, 0.9512513, 0.25881907, -0.04494346, -0.254887, 0.9659259, 0, -0.33749998, 0)
+metadata/voxel_pivot = [0.0, -3.0, 0.0]
+
+[node name="Hand" type="Node3D" parent="Rig/ArmL/ForearmL/LeftHand" unique_id=2001730019]
+transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.16874999, -0.05625, -0.28125)
+
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmL/ForearmL/LeftHand/Hand" unique_id=1791598313]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("5_lr50y")
+
+[node name="Book" type="Node3D" parent="Rig/ArmL/ForearmL/LeftHand" unique_id=1837572193]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05625, 0, -0.50624996)
+
+[node name="Book" type="Node3D" parent="Rig/ArmL/ForearmL/LeftHand/Book" unique_id=557560233]
 transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.1125, -0.1125, -0.225)
 
-[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmL/LeftHandBook/Book" unique_id=119498354]
-material_override = SubResource("ShaderMaterial_nhhdp")
-mesh = ExtResource("4_nm5um")
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmL/ForearmL/LeftHand/Book/Book" unique_id=1230818006]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("6_xu03w")
 
-[node name="ArmR" type="Node3D" parent="Rig" unique_id=864926374]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 1.0124999, 0)
+[node name="ArmR" type="Node3D" parent="Rig" unique_id=149482101]
+transform = Transform3D(1, 0, 0, 0, 0.8480481, -0.52991927, 0, 0.52991927, 0.8480481, 0.45, 1.0124999, 0)
 metadata/voxel_pivot = [4.0, 9.0, 0.0]
 
-[node name="ArmR" type="Node3D" parent="Rig/ArmR" unique_id=1637026563]
-transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.1125, -0.5625, -0.1125)
+[node name="UpperArm" type="Node3D" parent="Rig/ArmR" unique_id=1499523808]
+transform = Transform3D(0.1125, 0, 0, 0, 0.140625, 0, 0, 0, 0.1125, -0.1125, -0.28125, -0.1125)
 
-[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmR/ArmR" unique_id=690375432]
-material_override = SubResource("ShaderMaterial_nhhdp")
-mesh = ExtResource("5_7splr")
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmR/UpperArm" unique_id=1027633793]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("3_nm5um")
 
-[node name="RightHand" type="Node3D" parent="Rig/ArmR" unique_id=1912542608]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.45, -0.1125)
+[node name="ForearmR" type="Node3D" parent="Rig/ArmR" unique_id=601066887]
+transform = Transform3D(1, 0, 0, 0, 0.57357645, -0.81915206, 0, 0.81915206, 0.57357645, 0, -0.28125, 0)
+metadata/voxel_pivot = [0.0, -2.5, 0.0]
 
-[node name="Staff" type="Node3D" parent="Rig/ArmR/RightHand" unique_id=348782953]
-transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.225, -0.33749998, -0.1125)
+[node name="Forearm" type="Node3D" parent="Rig/ArmR/ForearmR" unique_id=341703227]
+transform = Transform3D(0.10124999, 0, 0, 0, 0.140625, 0, 0, 0, 0.089999996, -0.10124999, -0.28125, -0.089999996)
 
-[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmR/RightHand/Staff" unique_id=1539489336]
-material_override = SubResource("ShaderMaterial_nhhdp")
-mesh = ExtResource("6_lr50y")
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmR/ForearmR/Forearm" unique_id=413665043]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("4_7splr")
 
-[node name="MagicAccent" type="MeshInstance3D" parent="Rig/ArmR/RightHand/Staff" unique_id=1119026904]
-material_override = SubResource("ShaderMaterial_xn3cc")
-mesh = ExtResource("7_xu03w")
+[node name="RightHand" type="Node3D" parent="Rig/ArmR/ForearmR" unique_id=1325318023]
+transform = Transform3D(1, 0, 0, 0, 0.05233597, 0.99862945, 0, -0.99862945, 0.05233597, 0, -0.33749998, 0)
+metadata/voxel_pivot = [0.0, -3.0, 0.0]
 
-[node name="LegL" type="Node3D" parent="Rig" unique_id=656876510]
+[node name="Hand" type="Node3D" parent="Rig/ArmR/ForearmR/RightHand" unique_id=1652809379]
+transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.16874999, -0.05625, -0.28125)
+
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmR/ForearmR/RightHand/Hand" unique_id=700915710]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("5_lr50y")
+
+[node name="Staff" type="Node3D" parent="Rig/ArmR/ForearmR/RightHand" unique_id=334385330]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1125)
+
+[node name="Staff" type="Node3D" parent="Rig/ArmR/ForearmR/RightHand/Staff" unique_id=561399094]
+transform = Transform3D(0.10124999, 0, 0, 0, 0.1125, 0, 0, 0, 0.10124999, -0.25312498, -0.33749998, -0.15187499)
+
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/ArmR/ForearmR/RightHand/Staff/Staff" unique_id=1061837033]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("7_htqu0")
+
+[node name="MagicAccent" type="MeshInstance3D" parent="Rig/ArmR/ForearmR/RightHand/Staff/Staff" unique_id=1521635210]
+material_override = SubResource("ShaderMaterial_j1a51")
+mesh = ExtResource("8_xn3cc")
+
+[node name="LegL" type="Node3D" parent="Rig" unique_id=1697659467]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.225, 0.45, 0)
 metadata/voxel_pivot = [-2.0, 4.0, 0.0]
 
-[node name="Leg" type="Node3D" parent="Rig/LegL" unique_id=103996443]
+[node name="Leg" type="Node3D" parent="Rig/LegL" unique_id=872507942]
 transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.1125, -0.45, -0.225)
 
-[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/LegL/Leg" unique_id=1151358144]
-material_override = SubResource("ShaderMaterial_nhhdp")
-mesh = ExtResource("8_htqu0")
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/LegL/Leg" unique_id=877401119]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("9_r2krq")
 
-[node name="LegR" type="Node3D" parent="Rig" unique_id=675781347]
+[node name="LegR" type="Node3D" parent="Rig" unique_id=1852076942]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1125, 0.45, 0)
 metadata/voxel_pivot = [1.0, 4.0, 0.0]
 
-[node name="Leg" type="Node3D" parent="Rig/LegR" unique_id=407947745]
+[node name="Leg" type="Node3D" parent="Rig/LegR" unique_id=1750326444]
 transform = Transform3D(0.1125, 0, 0, 0, 0.1125, 0, 0, 0, 0.1125, -0.1125, -0.45, -0.225)
 
-[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/LegR/Leg" unique_id=1609639997]
-material_override = SubResource("ShaderMaterial_nhhdp")
-mesh = ExtResource("8_htqu0")
+[node name="ClothAndEquipment" type="MeshInstance3D" parent="Rig/LegR/Leg" unique_id=1698637670]
+material_override = SubResource("ShaderMaterial_if6xd")
+mesh = ExtResource("9_r2krq")

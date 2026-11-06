@@ -13,7 +13,7 @@ extends Node
 ##
 ## Commands typed in chat: /t or /tell <name> <text>, /p <text> (party),
 ## /invite <name>, /accept, /decline, /leave, /kick <name>, /lead <name>,
-## /tp <name>, /who, /help.
+## /tp <name>, /who, /help. Developers also have /give, /lvl and /max.
 ## Parties live on this server; a departing leader hands the lead to the next member.
 
 const MAX_PARTY := 6
@@ -35,6 +35,8 @@ var _fog := {}  # fog key -> {cells: {int: true}, realm, dirty}
 var _fog_timer := 0.0
 var _fog_save_timer := 0.0
 var _state_timer := 0.0
+var _arrivals_busy := {}
+var _arrivals_at := {}
 
 
 func _process(delta: float) -> void:
@@ -121,19 +123,93 @@ func _command(p: Dictionary, text: String) -> void:
 				system(p.player_id, "Write /p and your message to talk to your party.")
 			else:
 				party_chat(p, (arg + " " + rest).strip_edges())
+		"/arrived": _accept_arrival(p)
 		"/invite": invite(p, arg)
 		"/accept": accept(p, arg)
-		"/decline": decline(p)
+		"/decline": decline(p, arg)
 		"/leave": leave(p)
 		"/kick": kick(p, arg)
 		"/lead": promote(p, arg)
 		"/tp", "/teleport": teleport(p, arg)
+		"/give": server.economy.give(p, (arg + " " + rest).strip_edges())
+		"/lvl": _level(p, (arg + " " + rest).strip_edges())
+		"/max": _max_stats(p, (arg + " " + rest).strip_edges())
+		"/theory":
+			if not p.get("developer",false):
+				system(p.player_id,"Only developers can open this entrance.")
+			elif not server.realms.has(p.realm) or Dungeons.is_dungeon(p.realm):
+				system(p.player_id,"Enter a realm, then use /theory to open the entrance.")
+			else:
+				var entrance := server.dungeons.spawn(p.realm,p.pos+Vector3(2,0,0),"theory_of_everything",false,true)
+				system(p.player_id,"Theory of Everything entrance opened nearby." if not entrance.is_empty() else "Move to open ground and try /theory again.")
 		"/who":
 			var here := server.peers.values().filter(func(o: Dictionary) -> bool: return o.joined and o.realm == p.realm)
 			system(p.player_id, "%d here (%s), %d on this server." % [here.size(),
 					", ".join(here.map(func(o: Dictionary) -> String: return str(o.name)).slice(0, 12)), server.player_count()])
-		"/help", "/?": system(p.player_id, HELP)
+		"/help", "/?": system(p.player_id, HELP + (". Developer: /lvl [level], /lvl <player> [level], /max [player], /give <player> <item> [count], /theory" if p.get("developer", false) else ""))
 		_: system(p.player_id, "Unknown command %s. %s" % [word, HELP])
+
+
+## Server-authenticated developer flag, as with /give. Defaults to max level.
+func _level(p: Dictionary, args: String) -> void:
+	if not p.get("developer", false):
+		system(p.player_id, "Only developers can use /lvl.")
+		return
+	var parts := args.split(" ", false)
+	var target := p
+	var desired := PlayerStats.MAX_LEVEL
+	if parts.size() > 2:
+		system(p.player_id, "Write /lvl [1-50] or /lvl <player> [1-50]. No level means 50.")
+		return
+	if not parts.is_empty():
+		if parts[0].is_valid_int():
+			if parts.size() > 1:
+				system(p.player_id, "Write /lvl [1-50] or /lvl <player> [1-50].")
+				return
+			desired = int(parts[0])
+		else:
+			target = find(parts[0])
+			if target.is_empty():
+				system(p.player_id, "%s isn't on this server." % parts[0])
+				return
+			if parts.size() > 1:
+				if not parts[1].is_valid_int():
+					system(p.player_id, "The level must be a whole number from 1 to 50.")
+					return
+				desired = int(parts[1])
+	if desired < 1 or desired > PlayerStats.MAX_LEVEL:
+		system(p.player_id, "The level must be from 1 to 50.")
+		return
+	var stats := GameServer.character(target.player_id)
+	if stats == null or target.get("dead", false) or target.get("switching", false):
+		system(p.player_id, "That player needs a living, active character.")
+		return
+	stats.developer_set_level(desired)
+	target.dirty = true
+	system(p.player_id, "%s is now level %d." % [target.name, desired])
+	if target != p: system(target.player_id, "A developer set your character to level %d." % desired)
+
+
+func _max_stats(p: Dictionary, args: String) -> void:
+	if not p.get("developer", false):
+		system(p.player_id, "Only developers can use /max.")
+		return
+	var parts := args.split(" ", false)
+	if parts.size() > 1:
+		system(p.player_id, "Write /max or /max <player>.")
+		return
+	var target := p if parts.is_empty() else find(parts[0])
+	if target.is_empty():
+		system(p.player_id, "%s isn't on this server." % args)
+		return
+	var stats := GameServer.character(target.player_id)
+	if stats == null or target.get("dead", false) or target.get("switching", false):
+		system(p.player_id, "That player needs a living, active character.")
+		return
+	stats.developer_max_stats()
+	target.dirty = true
+	system(p.player_id, "All of %s's permanent stats are now maxed." % target.name)
+	if target != p: system(target.player_id, "A developer maxed your permanent stats.")
 
 
 func _tell(p: Dictionary, to_name: String, text: String) -> void:
@@ -184,30 +260,78 @@ func ensure_party(p: Dictionary) -> Dictionary:
 
 
 func invite(p: Dictionary, to_name: String) -> void:
-	var o := find(to_name)
-	if o.is_empty():
-		system(p.player_id, "%s isn't on this server." % to_name if to_name != "" else "Write /invite <name>.")
-		return
-	if o == p:
-		return
 	var party := party_for(p.player_id)
 	if not party.is_empty() and party.leader != p.player_id:
 		system(p.player_id, "Only the party leader can invite.")
+		return
+	if not party.is_empty() and party.members.size() >= MAX_PARTY:
+		system(p.player_id, "Your party is full (%d)." % MAX_PARTY)
+		return
+	var o := find(to_name)
+	if o.is_empty():
+		var r := await server.api.call_api("POST", "/server/party/invite", {account_id = p.account_id, username = to_name})
+		if record(p.player_id) != p:
+			return
+		if r.ok:
+			ensure_party(p)
+			system(p.player_id, "You invited %s. The invitation lasts 3 minutes." % to_name)
+		else:
+			system(p.player_id, str(r.error))
+		return
+	if o == p:
 		return
 	if not party.is_empty() and o.player_id in party.members:
 		system(p.player_id, "%s is already in your party." % o.name)
 		return
 	party = ensure_party(p)
-	if party.members.size() >= MAX_PARTY:
-		system(p.player_id, "Your party is full (%d)." % MAX_PARTY)
-		return
 	party.invites[o.player_id] = Net.now() + INVITE_TIME
 	send(o.player_id, ["invite", party.id, p.name])
 	system(o.player_id, "%s invited you to their party. Type /accept, or open Party." % p.name)
 	system(p.player_id, "You invited %s." % o.name)
 
 
-func accept(p: Dictionary, leader_name := "") -> void:
+## Redeem account-service invitations only after this client's Tavern is ready.
+func _accept_arrival(p: Dictionary) -> void:
+	if p.dead or p.switching or p.get("awaiting_arrival", false) or p.realm == "" or server.config.singleplayer or _arrivals_busy.has(p.account_id):
+		return
+	if Net.now() - float(_arrivals_at.get(p.account_id, -10.0)) < 2.0:
+		return
+	_arrivals_at[p.account_id] = Net.now()
+	_arrivals_busy[p.account_id] = true
+	var r := await server.api.call_api("POST", "/server/party/arrivals", {account_id = p.account_id})
+	if not r.ok or record(p.player_id) != p or p.dead or p.switching or p.get("awaiting_arrival", false):
+		_arrivals_busy.erase(p.account_id)
+		return
+	for arrival: Dictionary in r.data.get("arrivals", []):
+		if int(arrival.recipient) != int(p.account_id):
+			continue
+		var leader := {}
+		for other: Dictionary in server.peers.values():
+			if other.joined and not other.dead and not other.switching and int(other.account_id) == int(arrival.sender) and int(other.character_id) == int(arrival.character_id):
+				leader = other
+				break
+		if leader.is_empty():
+			system(p.player_id, "The inviter has left. You arrived in the Tavern.")
+		elif leader.get("awaiting_arrival", false):
+			continue
+		else:
+			var chosen := party_for(leader.player_id)
+			if not chosen.is_empty() and chosen.leader != leader.player_id:
+				system(p.player_id, "The inviter no longer leads that party.")
+			elif not chosen.is_empty() and chosen.members.size() >= MAX_PARTY and not p.player_id in chosen.members:
+				system(p.player_id, "That party is full. You arrived in the Tavern.")
+			else:
+				chosen = ensure_party(leader)
+				if not p.player_id in chosen.members:
+					chosen.invites[p.player_id] = Net.now() + INVITE_TIME
+					accept(p, str(leader.name), false)
+				if not teleport(p, str(leader.name)) and p.realm != "hall":
+					send_to(p.player_id, "hall")
+		await server.api.call_api("POST", "/server/party/arrivals", {done = int(arrival.id)})
+	_arrivals_busy.erase(p.account_id)
+
+
+func accept(p: Dictionary, leader_name := "", go_home := true) -> void:
 	var chosen := {}
 	for party: Dictionary in parties.values():
 		if float(party.invites.get(p.player_id, 0.0)) < Net.now():
@@ -230,11 +354,16 @@ func accept(p: Dictionary, leader_name := "") -> void:
 	for pid: int in chosen.members:
 		system(pid, "%s joined the party." % p.name)
 	broadcast(chosen)
-	server.campaigns.joined_party(p, chosen)
+	if go_home:
+		server.campaigns.joined_party(p, chosen)
+	else:
+		server.campaigns._restore_items(p, server.campaigns._run_of(chosen))
 
 
-func decline(p: Dictionary) -> void:
+func decline(p: Dictionary, leader_name := "") -> void:
 	for party: Dictionary in parties.values():
+		if leader_name != "" and str(record(party.leader).get("name", "")).nocasecmp_to(leader_name) != 0:
+			continue
 		if party.invites.has(p.player_id):
 			party.invites.erase(p.player_id)
 			system(party.leader, "%s declined your invitation." % p.name)
@@ -313,6 +442,7 @@ func _remove(party: Dictionary, player_id: int) -> void:
 ## leader's, and keeps being saved to their book).
 func on_left(p: Dictionary) -> void:
 	_sent_at.erase(p.player_id)
+	_arrivals_at.erase(p.account_id)
 	var party := party_for(p.player_id)
 	if party.is_empty():
 		return
@@ -375,18 +505,25 @@ func _place_name(realm_id: String) -> String:
 
 ## To another player: the Tavern and public realms are open to anyone, a
 ## campaign realm only to its party.
-func teleport(p: Dictionary, to_name: String) -> void:
+func teleport(p: Dictionary, to_name: String) -> bool:
 	var o := find(to_name)
 	if o.is_empty():
 		system(p.player_id, "%s isn't on this server." % to_name if to_name != "" else "Write /tp <name>.")
 	elif o == p or o.realm == "" or o.dead:
 		system(p.player_id, "You can't go to %s right now." % o.name)
-	elif Campaigns.is_campaign_realm(o.realm) and party_of.get(o.player_id, -1) != party_of.get(p.player_id, -2):
+	elif ChambersWorld.is_chambers(o.realm):
+		system(p.player_id, "%s is in their Chambers." % o.name)
+	elif p.realm != o.realm and o.realm != "hall" and (Campaigns.is_campaign_realm(o.realm) or Campaigns.is_tavern(o.realm) or Campaigns.is_castle(o.realm)) and not server.campaigns.may_enter(p, o.realm):
 		system(p.player_id, "%s is in a private campaign." % o.name)
-	elif p.dead:
-		return
-	else:
-		send(p.player_id, ["goto", o.realm, o.pos])
+	elif p.realm != o.realm and Dungeons.is_dungeon(o.realm) and (str(server.dungeons.grants.get(p.player_id, "")) != o.realm or not server.realms.has(o.realm)):
+		system(p.player_id, "%s is in a dungeon you can't enter yet." % o.name)
+	elif not p.dead:
+		if p.realm == o.realm:
+			warp(p.player_id, o.realm, o.pos)
+		else:
+			send(p.player_id, ["goto", o.realm, o.pos])
+		return true
+	return false
 
 
 ## Sends a player somewhere (their game travels there).

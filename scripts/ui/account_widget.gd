@@ -49,7 +49,7 @@ func _ready() -> void:
 func _refresh() -> void:
 	if Account.is_logged_in():
 		_name.text = Account.username()
-		_sub.text = "Account level %d  ·  switch account" % int(Account.progress().level)
+		_sub.text = "Account level %d  -  switch account" % int(Account.progress().level)
 		_diamond.level = int(Account.progress().level)
 		_diamond.show()
 	else:

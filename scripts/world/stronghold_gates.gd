@@ -170,6 +170,7 @@ func _unsealed(center: Vector2i) -> void:
 	camera.global_transform = previous.global_transform if previous else player.camera.global_transform
 	camera.make_current()
 	player.cinematic_locked = true
+	player.begin_interaction(get_instance_id())
 	player._cancel_weapon_actions()
 	# Film the gate the player stood at (main or back), from outside the walls.
 	var back: bool = entry.root.to_local(player.global_position).z>0.0
@@ -219,7 +220,9 @@ func _end_shot() -> void:
 	if _shot.is_empty(): return
 	var player: Player = _shot.player if is_instance_valid(_shot.player) else null
 	var camera: Camera3D = _shot.camera if is_instance_valid(_shot.camera) else null
-	if is_instance_valid(player): player.cinematic_locked = false
+	if is_instance_valid(player):
+		player.cinematic_locked = false
+		player.end_interaction(get_instance_id())
 	if is_instance_valid(camera) and camera.current:
 		if is_instance_valid(_shot.previous): (_shot.previous as Camera3D).make_current()
 		elif is_instance_valid(player): player.camera.make_current()

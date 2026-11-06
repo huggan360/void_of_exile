@@ -8,6 +8,7 @@ static var _badges := {}
 static func texture(file: String) -> Texture2D:
 	if not _textures.has(file):
 		var path := "res://buffs/"+file+".png"
+		if not ResourceLoader.exists(path): path = "res://buffs/"+file+".svg"
 		_textures[file] = load(path) if ResourceLoader.exists(path) else null
 	return _textures[file]
 

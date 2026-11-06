@@ -18,6 +18,10 @@ boot_splash/show_image=false
 config/icon="res://assets/branding/icon.png"
 config/windows_native_icon="res://assets/branding/icon.ico"
 
+[audio]
+
+driver/output_latency=60
+
 [autoload]
 
 Net="*res://scripts/net/net.gd"
@@ -25,6 +29,8 @@ Account="*res://scripts/net/account.gd"
 WorldServer="*res://scripts/server/world_server.gd"
 GameServer="*res://scripts/server/game_server.gd"
 AppSettings="*res://scripts/settings/app_settings.gd"
+GameAudio="*res://scripts/audio/game_audio.gd"
+PerfLog="*res://scripts/perf_log.gd"
 
 [display]
 
@@ -39,3 +45,8 @@ enabled=PackedStringArray("res://addons/voxel_export/plugin.cfg")
 
 anti_aliasing/quality/msaa_3d=2
 limits/global_shader_variables/buffer_size=262144
+
+[voxel]
+
+threads/count/margin_below_max=2
+threads/main/time_budget_ms=2

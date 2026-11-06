@@ -89,6 +89,7 @@ static func plan(at: Vector2i, biome: int, seed_value: int, height: int, is_capi
 	var streets := f._lay_streets(rng)
 	f._place_houses(streets, rng)
 	f._furnish(streets, rng)
+	f._settle_residents()
 	return f
 
 
@@ -325,14 +326,46 @@ func _furnish(streets: Array[Dictionary], rng: RandomNumberGenerator) -> void:
 		var start := c + Vector2.from_angle(i * TAU / 10.0 + 0.3) * (plaza_radius + 1.0)
 		residents.append(_npc(role, start, rng.randi(), false))
 	# The steward keeps the town book at the town hall table on the plaza:
-	# talk to them to make this town your home (where you arrive in a realm).
+	# talk to them to make this town the account home (where all its characters arrive in a realm).
 	var hall_angle := _free_angle(rng, 0.45)
 	var steward := _npc("steward", c + Vector2.from_angle(hall_angle) * (plaza_radius - 1.4), rng.randi(), true)
 	steward.model = "npc_traveler"
-	steward.title = "Steward  ·  Town Hall"
+	steward.title = "Steward  -  Town Hall"
 	var inward := -Vector2.from_angle(hall_angle)
 	steward.yaw = atan2(-inward.x, -inward.y)
 	residents.append(steward)
+
+
+## Resolve stations after all furniture and trees have claimed their footprints.
+func _settle_residents() -> void:
+	var taken: Array[Vector2] = []
+	for resident in residents:
+		var desired := Vector2(resident.pos.x, resident.pos.z)
+		var best := desired
+		var score := INF
+		for cell: Vector2i in _surface:
+			var at := Vector2(cell) + Vector2.ONE * 0.5
+			var distance := at.distance_squared_to(desired)
+			if distance >= score:
+				continue
+			var clear := true
+			for footprint in _rect_cells(at, Vector2.ONE * 0.8, 0.0):
+				if _occupied_at(footprint) == 2:
+					clear = false
+			for other in taken:
+				if at.distance_squared_to(other) < 2.25:
+					clear = false
+			if clear:
+				best = at
+				score = distance
+		assert(is_finite(score), "No open station in " + display_name)
+		resident.pos = Vector3(best.x, base_height + 1, best.y)
+		if not resident.has("yaw") or resident.role == "steward":
+			var toward := Vector2(center) + Vector2.ONE * 0.5 - best
+			resident.yaw = atan2(-toward.x, -toward.y)
+		taken.append(best)
+	for service in service_sites:
+		service.door = service.npc.pos
 
 
 func _free_angle(rng: RandomNumberGenerator, gap: float) -> float:
