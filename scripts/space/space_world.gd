@@ -41,15 +41,15 @@ var _npcs_built := false
 var _warm := 0
 var _rescues := {}  # player id -> when Orin's skiff arrives (ticks msec)
 var _repairs := {}  # "ship:part" -> {pid, t, ship, part}
-var _sips := {}  # player id -> drinks so far (each a separate drunk source)
 
+## The shared Space ("astral") or a private realm's own ("astral_<campaign realm>").
 static func is_space(id: String) -> bool:
-	return id==REALM
+	return id==REALM or id.begins_with(REALM+"_")
 
 func _init(data: Dictionary) -> void:
 	record = data
 	realm_id = str(data.get("id", REALM))
-	display_name = "The Astral Reach"
+	display_name = "Space"
 	half_extent = 64
 	spawn_point = Vector3(0, 0.1, 18)
 	set_meta("full_3d", true)
@@ -72,6 +72,9 @@ func _init(data: Dictionary) -> void:
 		biome.torch_energy = 0.0
 		_biomes[spec[0]] = biome
 	_asteroids = SpaceLayout.asteroids()
+
+func game_root() -> Node:
+	return get_parent()
 
 func _ready() -> void:
 	enemy_director.world = self
@@ -301,6 +304,9 @@ func _party_id(player_id: int) -> int:
 	return int(Net.server.social.party_for(player_id).get("id", 0))
 
 func _may_board(ship: SpaceShip, player_id: int) -> bool:
+	if Net.is_server():
+		var p := Net.server.social.record(player_id)
+		if not p.is_empty() and ship.account_id>0 and int(p.get("account_id", 0))==ship.account_id: return true
 	return ship.owner==player_id or (ship.party!=0 and ship.party==_party_id(player_id))
 
 func ship_of(player_id: int) -> SpaceShip:
@@ -327,40 +333,9 @@ func server_action(p: Dictionary, args: Array) -> void:
 				elif before!="": teleport(p, CityLayout.any_seat(before).stand, "city_stand")
 			if message!="": _tell(p, message)
 			_broadcast_city()
-		"spawn", "buy_ship":  # [planet id] at a town's shipwright, or none at the Nexus table
-			var town := str(args[1]) if args.size()>1 else ""
-			if town=="" and zone_at(pos)!="station": return
-			if town!="" and pos.distance_to(trader_position(town, "wright"))>TRADER_REACH: return
-			for ship: SpaceShip in ships.values():
-				if ship.owner==pid:
-					_tell(p, "You already have %s. One ship per captain." % ship.name)
-					return
-			# A ship you own (bought, not lost) comes back free; Captain Isolde lends
-			# one to crews on a Reach tale; otherwise it costs Dots.
-			var owned := not _fleet(p).is_empty()
-			var loan := owned or _on_reach_tale(pid)
-			if not loan and not _pay(p, SHIP_PRICE):
-				_tell(p, "A new ship costs %d Dots. Sell items at a smith or the Tavern forge." % SHIP_PRICE)
-				return
-			var ship := _launch_ship(pid, str(p.get("name", "Captain")))
-			if ship and owned:
-				ship.name = str(_fleet(p).get("name", ship.name))
-				ship.set_meta("account", int(p.get("account_id", 0)))
-			if ship and not loan: _remember(p, ship)
-			if ship==null:
-				if not loan: _refund(p, SHIP_PRICE)
-				_tell(p, "Every ship room is taken. Try again soon.")
-				return
-			if town!="":
-				var planet := SpaceLayout.planet(town)
-				var dock := SpaceLayout.town_frame(planet, "dock")
-				ship.mode = "landed"
-				ship.planet = town
-				ship.xform = Transform3D(dock.basis, (planet.center as Vector3)+dock.origin+dock.basis.y*SpaceShip.LANDED_HEIGHT)
-				_broadcast_ship(ship)
-				_tell(p, "%s waits on the shipyard pad. Walk up the ramp to board.%s" % [ship.name, "" if owned or not loan else " (On loan for your tale.)"])
-			else:
-				_tell(p, "%s waits at berth %d. Board it from the command table.%s" % [ship.name, ship.berth+1, "" if owned or not loan else " (On loan for your tale.)"])
+		"spawn", "buy_ship":
+			if Net.is_server(): Net.server.fleet.on_action(p, ["list"])
+			else: _tell(p, "Fleet management needs an account connection.")
 		"board":
 			var ship: SpaceShip = ships.get(int(args[1]) if args.size()>1 else 0)
 			if ship==null or not _may_board(ship, pid):
@@ -395,6 +370,18 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship!=null:
 				_stand(ship, pid)
 				_broadcast_ship(ship)
+		"takeoff":
+			var ship := ship_of(pid)
+			if ship==null or ship.pilot()!=pid or not ship.mode in ["landed", "berth"] or ship.broken: return
+			ship.mode = "flying"
+			ship.planet = ""
+			ship.land_armed = false
+			ship.velocity = ship.xform.basis.y*30.0
+			ship.speed = 0.0
+			_broadcast_ship(ship)
+			var launch_event: Array = ["launch_shake", ship.id]
+			handle_event(launch_event)
+			world_event.emit(launch_event)
 		"pilot":
 			var ship := ship_of(pid)
 			if ship==null or ship.pilot()!=pid or args.size()<2 or not args[1] is Array or not (args[1] as Array).size() in [5, 6]: return
@@ -417,14 +404,38 @@ func server_action(p: Dictionary, args: Array) -> void:
 				return
 			ship.dock(ship.berth)
 			_broadcast_ship(ship)
+		"descend":  # the pilot takes the ship down to the Surface
+			var ship := ship_of(pid)
+			if ship==null or ship.pilot()!=pid or ship.mode!="flying": return
+			if not SpaceLayout.can_descend(ship.xform.origin):
+				_tell(p, "Fly lower, down toward the Surface, to descend.")
+				return
+			if Net.is_server() and not Net.server.fleet.reserve_landing(self, ship):
+				_tell(p, "The Surface launch pad is occupied. Wait until it is clear.")
+				return
+			var crew := _aboard(ship)
+			if Net.is_server():
+				Net.server.surface_port.prepare_transfer(self, ship, surface_realm(), "descend", crew)
+			ship.mode = "descending"
+			ship.speed = 0.0
+			ship.velocity = Vector3.ZERO
+			_broadcast_ship(ship)
+			var event: Array = ["descend", ship.id, surface_realm(), crew]
+			handle_event(event)
+			world_event.emit(event)
+			# The ship goes with them; it comes back up when they launch again.
+			get_tree().create_timer(12.0).timeout.connect(func() -> void:
+				if ships.has(ship.id) and ship.mode=="descending": _retire(ship))
 		"aim":
 			var ship := ship_of(pid)
 			if ship==null or args.size()<2 or not args[1] is Vector3: return
+			if not (args[1] as Vector3).is_finite() or (args[1] as Vector3).length_squared()<0.001: return
 			var seat := ship.seat_of(pid)
 			if seat.begins_with("turret"): ship.aims[seat] = (args[1] as Vector3).normalized()
 		"fire":
 			var ship := ship_of(pid)
 			if ship==null or args.size()<2 or not args[1] is Vector3: return
+			if not (args[1] as Vector3).is_finite() or (args[1] as Vector3).length_squared()<0.001: return
 			var seat := ship.seat_of(pid)
 			if not seat.begins_with("turret") or Time.get_ticks_msec()<int(ship.cooldowns.get(seat, 0)): return
 			# Damaged cannons fire slowly; broken ones jam.
@@ -435,7 +446,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			ship.cooldowns[seat] = Time.get_ticks_msec()+int(180.0*(1.0+2.0*(1.0-ship.part("cannons"))))
 			var dir := (args[1] as Vector3).normalized()
 			ship.aims[seat] = dir
-			foes.fire_bolt(ship, turret_muzzle(ship, seat), dir)
+			foes.fire_bolt(ship, turret_muzzle(ship, seat), dir, pid)
 		"repair":  # [part] inside, or [ship id, part] outside
 			var ship: SpaceShip = (ships.get(int(args[1])) if args.size()>2 else ship_in_slot(SpaceLayout.pocket_at(pos)))
 			var id := str(args[-1])
@@ -457,9 +468,8 @@ func server_action(p: Dictionary, args: Array) -> void:
 				_tell(p, "Your glass is empty. The tap is at the galley.")
 				return
 			ship.glasses[i] = maxf(0.0, float(ship.glasses[i])-0.34)
-			_sips[pid] = int(_sips.get(pid, 0))+1
 			var stats := GameServer.character(pid)
-			if stats: stats.buffs.add("drunk", 150.0, 1, "sip_%d" % (int(_sips[pid]) % 8))
+			if stats and float(ship.glasses[i])<=0.01: stats.buffs.drink_beer()
 			_broadcast_ship(ship)
 		"pour":
 			var ship := ship_in_slot(SpaceLayout.pocket_at(pos))
@@ -627,6 +637,93 @@ func _stand(ship: SpaceShip, pid: int) -> void:
 	ship.crew.erase(seat)
 	if seat=="pilot": ship.input = [0.0, 0.0, 0.0, 0.0, false, false]
 
+# --- To and from the Surface ---------------------------------------------------------------
+
+## Up from the Surface (PortServer): the captain's battleship rises at
+## SpaceLayout.ASCENT with the captain at the helm; crew arrive in its room.
+## Returns where the player arrives (or INF).
+func arrive_from_surface(p: Dictionary, captain: int, owned: bool) -> Vector3:
+	var pid := int(p.player_id)
+	var ship := _ship_of_owner(captain)
+	if ship==null:
+		if pid!=captain: return Vector3.INF
+		ship = _launch_ship(captain, str(p.get("name", "Captain")))
+		if ship==null: return Vector3.INF
+		if owned:
+			ship.name = str(_fleet(p).get("name", ship.name))
+			ship.set_meta("account", int(p.get("account_id", 0)))
+	if pid==captain:
+		var toward := Vector3(SpaceLayout.NEXUS.x-SpaceLayout.ASCENT.x, 0, SpaceLayout.NEXUS.z-SpaceLayout.ASCENT.z).normalized()
+		ship.xform = Transform3D(Basis.looking_at(toward, Vector3.UP), SpaceLayout.ASCENT)
+		ship.mode = "flying"
+		ship.planet = ""
+		ship.speed = 40.0
+		ship.velocity = toward*40.0
+		for seat: String in ship.crew.keys():
+			if int(ship.crew[seat])==pid: ship.crew.erase(seat)
+		ship.crew["pilot"] = pid
+		_broadcast_ship(ship)
+		return seat_spec(ship.slot, "pilot").get("pos", pocket_point(ship.slot, interior_anchors.get("spawn", Vector3(0, 0.1, 14))))
+	return pocket_point(ship.slot, interior_anchors.get("spawn", Vector3(0, 0.1, 14)))
+
+## Back from the Tavern to where they were. Their ship comes back too if it
+## was lost while they were away (the Reach unloaded, the server restarted).
+func arrive_back(p: Dictionary, travel: Dictionary, owned: bool) -> Vector3:
+	var pid := int(p.player_id)
+	var saved: Array = travel.get("pos", [])
+	var at := Vector3(float(saved[0]), float(saved[1]), float(saved[2])) if saved.size()==3 else spawn_point
+	var snap: Dictionary = travel.get("ship", {})
+	var saved_fleet := int(snap.get("fleet_id", 0))
+	var ship: SpaceShip
+	if saved_fleet>0:
+		for candidate: SpaceShip in ships.values():
+			if candidate.fleet_id==saved_fleet: ship = candidate
+	else: ship = _ship_of_owner(pid)
+	var saved_slot := SpaceLayout.pocket_at(at)
+	if bool(travel.get("aboard", false)) or saved_slot>=0:
+		if ship:
+			# Interior slots can change when a ship is restored. Keep the exact
+			# position within the room rather than resetting to its entrance.
+			if saved_slot>=0: return pocket_point(ship.slot, at-SpaceLayout.pocket_origin(saved_slot))
+			return pocket_point(ship.slot, interior_anchors.get("spawn", Vector3(0, 0.1, 14)))
+		var crew_ship := ship_in_slot(saved_slot) if saved_slot>=0 else null
+		if crew_ship!=null and _may_board(crew_ship, pid): return at
+		return spawn_point
+	return at if zone_at(at)!="void" or ship!=null else spawn_point
+
+## The player's own ship, for the way back ({} when they have none here).
+func ship_snapshot(pid: int) -> Dictionary:
+	var p := _record(pid)
+	var ship := ship_in_slot(SpaceLayout.pocket_at(p.get("pos", Vector3.INF)))
+	if ship==null: ship = _ship_of_owner(pid)
+	if ship==null: return {}
+	var b := ship.xform.basis
+	var o := ship.xform.origin
+	return {fleet_id = ship.fleet_id, name = ship.name, mode = ship.mode, planet = ship.planet,
+		xform = [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z, o.x, o.y, o.z]}
+
+func _ship_of_owner(pid: int) -> SpaceShip:
+	for ship: SpaceShip in ships.values():
+		if ship.owner==pid: return ship
+	return null
+
+## Where a descending ship's crew lands: this Space's Surface.
+func surface_realm() -> String:
+	return PortServer.surface_for(realm_id)
+
+## Everyone in a ship's room (the crew, seated or standing).
+func _aboard(ship: SpaceShip) -> Array:
+	var out: Array = []
+	if Net.is_server():
+		var realm: RealmInstance = Net.server.realms.get(realm_id)
+		if realm:
+			for pid: int in realm.proxies:
+				var p: Dictionary = Net.server.social.record(pid)
+				if not p.is_empty() and SpaceLayout.pocket_at(p.pos)==ship.slot: out.append(pid)
+	elif is_instance_valid(local_player) and SpaceLayout.pocket_at(local_player.global_position)==ship.slot:
+		out.append(local_player.player_id)
+	return out
+
 func _launch_ship(pid: int, captain: String) -> SpaceShip:
 	var used_slots: Array = ships.values().map(func(s: SpaceShip) -> int: return s.slot)
 	var used_berths: Array = ships.values().filter(func(s: SpaceShip) -> bool: return s.mode=="berth").map(func(s: SpaceShip) -> int: return s.berth)
@@ -720,21 +817,9 @@ func _physics_process(delta: float) -> void:
 		_warm += 1
 	for ship: SpaceShip in ships.values().duplicate():
 		ship.city_pad_taken = _city_pad_taken.bind(ship.id)
+		if ship.mode=="descending": ship.xform.origin += Vector3.DOWN*600.0*delta
 		var damage := ship.step(delta, _asteroids)
 		if damage>0: hurt_ship(ship, damage)
-		# Too close to the sun: the hull scorches, faster the closer.
-		var heat := 1.0-(ship.xform.origin.distance_to(SpaceLayout.SUN_CENTER)-SpaceLayout.SUN_RADIUS)/SpaceLayout.SUN_BURN
-		if heat>0.0 and ships.has(ship.id):
-			ship.set_meta("scorch", float(ship.get_meta("scorch", 0.0))+heat*heat*240.0*delta)
-			if float(ship.get_meta("scorch"))>=1.0:
-				var burn := int(ship.get_meta("scorch"))
-				ship.set_meta("scorch", float(ship.get_meta("scorch"))-burn)
-				if randf()<0.02: _tell_crew(ship, "The sun is scorching the hull! Turn away!")
-				hurt_ship(ship, burn)
-	# Ships nobody owns any more (owner left the server) are scuttled.
-	if Net.is_server():
-		for ship: SpaceShip in ships.values().duplicate():
-			if Net.server.social.record(ship.owner).is_empty(): _scuttle(ship, "")
 	_snapshot_timer -= delta
 	if _snapshot_timer<=0.0 and not ships.is_empty():
 		_snapshot_timer = SNAPSHOT_INTERVAL
@@ -744,7 +829,7 @@ func _physics_process(delta: float) -> void:
 
 ## A hit: the hull loses `damage` and the part nearest `at` (world) takes its share.
 func hurt_ship(ship: SpaceShip, damage: int, at := Vector3.INF) -> void:
-	if not ships.has(ship.id): return
+	if not ships.has(ship.id) or ship.mode=="storing": return
 	ship.hp = maxi(0, ship.hp-damage)
 	var id: String = SpaceShip.part_at(ship.xform.affine_inverse()*at) if at.is_finite() else SpaceShip.PARTS.keys()[randi() % SpaceShip.PARTS.size()]
 	var before := float(ship.parts.get(id, 100.0))
@@ -753,10 +838,18 @@ func hurt_ship(ship: SpaceShip, damage: int, at := Vector3.INF) -> void:
 		_tell_crew(ship, "The %s %s damaged! Mend %s %s." % [str(SpaceShip.PARTS[id].name).to_lower(), "are" if id in ["engines", "cannons"] else "is",
 			"them" if id in ["engines", "cannons"] else "it", "inside the ship" if SpaceShip.PARTS[id].inside else "from outside (airlock) or on the ground"])
 	if ship.hp<=0:
-		_forget(ship)
+		if Net.is_server() and ship.fleet_id>0: Net.server.fleet.destroyed(ship)
+		else: _forget(ship)
 		_scuttle(ship, "%s breaks apart around you! Your jetpacks keep you floating." % ship.name)
 
 ## The ship is lost: its crew wakes at the Nexus.
+## A ship that went down to the Surface leaves Space quietly (no wreck).
+func _retire(ship: SpaceShip) -> void:
+	ships.erase(ship.id)
+	var event: Array = ["ship-", ship.id, ship.xform.origin, "", true]
+	handle_event(event)
+	world_event.emit(event)
+
 func _scuttle(ship: SpaceShip, message: String) -> void:
 	ships.erase(ship.id)
 	var event: Array = ["ship-", ship.id, ship.xform.origin, message]
@@ -823,12 +916,26 @@ func handle_event(event: Array) -> void:
 			var id := int(event[1])
 			if Net.is_client(): ships.erase(id)
 			if ship_views.has(id):
-				ship_views[id].explode()
+				if event.size()>4 and bool(event[4]): ship_views[id].queue_free()  # gone to the Surface
+				else: ship_views[id].explode()
 				ship_views.erase(id)
 			if str(event[3])!="" and is_instance_valid(local_player) and local_player.spatial_controller is SpaceTraversal:
 				(local_player.spatial_controller as SpaceTraversal).notice(str(event[3]))
-		"bolt", "foes", "foe-", "hit":
+		"bolt", "bolt_path", "bolt_end", "foes", "foe-", "hit":
 			foes.handle_event(event)
+		"launch_shake":
+			if is_instance_valid(local_player) and SpaceLayout.pocket_at(local_player.global_position)>=0:
+				var aboard := ship_in_slot(SpaceLayout.pocket_at(local_player.global_position))
+				if aboard and aboard.id==int(event[1]) and local_player.spatial_controller is SpaceTraversal:
+					(local_player.spatial_controller as SpaceTraversal).launch_shake()
+		"ship_travel":
+			if is_instance_valid(local_player) and local_player.player_id in event[3]:
+				var game := game_root()
+				game.set_port_arrival(str(event[2]))
+				game.travel(str(event[1]))
+		"descend":  # [ship id, surface realm, crew]: those aboard go down with her
+			if is_instance_valid(local_player) and int(local_player.player_id) in (event[3] as Array) and local_player.spatial_controller is SpaceTraversal:
+				(local_player.spatial_controller as SpaceTraversal).descend(int(event[1]), str(event[2]))
 		"marks":
 			marks[int(event[1])] = event[2]
 			if not (server_build or Net.is_server()): _show_marks()
@@ -1025,3 +1132,69 @@ func rocket_node() -> SmallRocket:
 func _exit_tree() -> void:
 	for key: String in Enemies.pack_overrides.keys():
 		if key.begins_with(realm_id+"_"): Enemies.pack_overrides.erase(key)
+
+## Import once per shared flight, preserving the complete hull and crew state.
+func accept_transfer(transfer: Dictionary, mode: String) -> SpaceShip:
+	var key := str(get_instance_id())
+	if transfer.imported.has(key): return ships.get(int(transfer.imported[key]))
+	var data: Array = transfer.wire.duplicate(true)
+	var used: Array = ships.values().map(func(vessel: SpaceShip) -> int: return vessel.slot)
+	var slot := -1
+	for candidate in SpaceLayout.POCKET_SLOTS:
+		if not candidate in used:
+			slot = candidate
+			break
+	if slot<0: return null
+	var ship := SpaceShip.new()
+	ship.id = _next_ship
+	_next_ship += 1
+	ship.slot = slot
+	ships[ship.id] = ship
+	_ensure_interior(slot)
+	data[0] = ship.id
+	data[1] = ship.slot
+	SpaceShip.from_wire(data, ship)
+	ship.smoking = transfer.get("smoking", {}).duplicate()
+	ship.cooldowns = transfer.get("cooldowns", {}).duplicate()
+	ship.set_meta("account", int(transfer.get("account", 0)))
+	ship.mode = mode
+	ship.input = [0.0, 0.0, 0.0, 0.0, false, false]
+	ship.input_age = 0.0
+	ship.velocity = Vector3.ZERO
+	ship.speed = 0.0
+	ship.pulse = false
+	ship.planet = "surface" if self is SurfaceShipWorld else ""
+	ship.xform = (self as SurfaceShipWorld).pad_pose() if self is SurfaceShipWorld else Transform3D(Basis.IDENTITY, SpaceLayout.ASCENT)
+	transfer.imported[key] = ship.id
+	if Net.is_server() and ship.fleet_id>0: Net.server.fleet.adopt(self, ship)
+	_broadcast_ship(ship)
+	return ship
+
+## Instantiate an already claimed account-server ship. Claims and payments
+## happen in FleetServer before any hull is made visible on the pad.
+func create_fleet_ship(p: Dictionary, deployment: Dictionary, context: Dictionary) -> SpaceShip:
+	var used: Array = ships.values().map(func(s: SpaceShip) -> int: return s.slot)
+	var slot := -1
+	for candidate in SpaceLayout.POCKET_SLOTS:
+		if not candidate in used:
+			slot = candidate
+			break
+	if slot<0: return null
+	var ship := SpaceShip.new()
+	ship.id = _next_ship
+	_next_ship += 1
+	ship.slot = slot
+	ship.fleet_id = int(deployment.id)
+	ship.account_id = int(deployment.account_id)
+	ship.set_meta("account", ship.account_id)
+	ship.owner = int(p.player_id)
+	ship.party = _party_id(ship.owner)
+	ship.name = "%s #%d" % [str(deployment.name), ship.fleet_id]
+	ship.apply_fleet_state(deployment.get("state", {}))
+	ship.xform = context.pose
+	ship.mode = "berth" if context.has("berth") else "landed"
+	ship.berth = int(context.get("berth", 0))
+	ship.planet = str(context.planet)
+	ships[ship.id] = ship
+	_ensure_interior(ship.slot)
+	return ship

@@ -24,6 +24,9 @@ const BUILD_TILE := 4
 
 var gates := StrongholdGates.new()
 var generator: IslandGenerator
+## The Skyward Launch Pad (clients), if this island has one.
+var surface_ships: SurfaceShipWorld
+var launchpad: SurfaceLaunchpad
 var _record: Dictionary
 var _destroyed := {}  # obstacle id -> true
 var _portal_pos := Vector3.ZERO
@@ -56,7 +59,8 @@ var _obstacles := {}  # obstacle id -> Obstacle (built ones)
 func _init(record: Dictionary, prepared_layout := {}) -> void:
 	_record = record
 	realm_id = record.id
-	display_name = record.get("name", "Realm %s" % str(record.id).trim_prefix("realm_"))
+	var number := str(record.id).trim_prefix("realm_")
+	display_name = record.get("name", "The Surface" if number == "1" or not number.is_valid_int() else "The Surface %s" % number)
 	for id in record.destroyed:
 		_destroyed[id] = true
 	# Every realm is the static island laid out in res://realm/realm_layout.tscn.
@@ -183,10 +187,38 @@ func _ready() -> void:
 		for spot in f.light_spots:
 			var ground := ground_height(spot.x, spot.z)
 			_add_light(Vector3(spot.x, ground + spot.y, spot.z), f.light_color, 2.0, 8.0)
+	var pad := launchpad_center()
+	if pad.is_finite():
+		surface_ships = SurfaceShipWorld.new(self)
+		add_child(surface_ships)
+		if _record.has("surface_ship_state"): surface_ships.apply_state(_record.surface_ship_state)
+	if pad.is_finite() and not server_build:
+		launchpad = SurfaceLaunchpad.new()
+		launchpad.name = "SkywardLaunchPad"
+		launchpad.position = pad
+		add_child(launchpad)
+		launchpad.build(self)
+
+
+## The Skyward Launch Pad's centre on its paving (the "launchpad" landmark),
+## or INF when this island has none.
+func launchpad_center() -> Vector3:
+	for f in generator.features:
+		if f.type == "launchpad":
+			var x := f.center.x + 0.5
+			var z := f.center.y + 0.5
+			return Vector3(x, ground_height(x, z), z)
+	return Vector3.INF
+
+## Where someone coming down from Space stands on the pad.
+func launchpad_arrival() -> Vector3:
+	var pad := launchpad_center()
+	return pad + SurfaceLaunchpad.ARRIVAL if pad.is_finite() else Vector3.INF
 
 
 ## Builds chunks near `pos` and frees far ones. Call every frame.
 func update_streaming(pos: Vector3, build_all_now := false) -> void:
+	if SpaceLayout.pocket_at(pos)>=0: pos = launchpad_center()
 	var center := _chunk_of(pos)
 	if center != _center_chunk:
 		_center_chunk = center
@@ -211,6 +243,7 @@ func update_streaming(pos: Vector3, build_all_now := false) -> void:
 func update_streaming_multi(positions: Array, build_all_now := false) -> void:
 	var centers: Array[Vector2i] = []
 	for pos: Vector3 in positions:
+		if SpaceLayout.pocket_at(pos)>=0: pos = launchpad_center()
 		var center := _chunk_of(pos)
 		if not centers.has(center): centers.append(center)
 	centers.sort()
@@ -350,19 +383,23 @@ func is_road(pos: Vector3) -> bool:
 
 
 func biome_at(pos: Vector3) -> BiomeDef:
+	if SpaceLayout.pocket_at(pos)>=0 and is_instance_valid(surface_ships): return surface_ships.biome_at(pos)
 	return Biomes.get_biome(generator.column(floori(pos.x), floori(pos.z)).y)
 
 
 func is_walkable(pos: Vector3) -> bool:
+	if SpaceLayout.pocket_at(pos)>=0 and is_instance_valid(surface_ships): return surface_ships.ship_in_slot(SpaceLayout.pocket_at(pos))!=null
 	# Shallow water (one block under the surface) is fine; deeper is not.
 	# Lava pits can be walked into, but they burn (see is_hazard).
 	return generator.column(floori(pos.x), floori(pos.z)).x >= IslandGenerator.SEA_LEVEL - 1
 
 
 func is_hazard(pos: Vector3) -> bool:
+	if SpaceLayout.pocket_at(pos)>=0: return false
 	return Blocks.is_hazard(generator.surface_block(floori(pos.x), floori(pos.z)))
 
 func is_water(pos: Vector3) -> bool:
+	if SpaceLayout.pocket_at(pos)>=0: return false
 	# Also available on the headless server, where the water mesh is omitted.
 	return pos.y<=IslandGenerator.SEA_LEVEL+0.7 and not is_hazard(pos)
 

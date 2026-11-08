@@ -378,6 +378,7 @@ func _apply(ev: Array) -> void:
 	match str(ev[1]):
 		"theory":
 			if world is SpatialWorld: world.handle_event(ev[2])
+			elif world is IslandWorld and is_instance_valid(world.surface_ships): world.surface_ships.handle_event(ev[2])
 		"sfx":
 			if is_instance_valid(world) and ev.size()>=5: GameAudio.play(str(ev[2]),ev[3],ev[4])
 		"boss_defeated":

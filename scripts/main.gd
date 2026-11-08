@@ -147,6 +147,8 @@ func _ready() -> void:
 	social.goto.connect(func(place: String, at: Vector3) -> void:
 		if not _dead: travel.call_deferred(place, at))
 	social.warp.connect(_warp)
+	social.space_unlocked.connect(func() -> void:
+		hud.toasts.push("The way to Space is open! Find the Skyward Launch Pad south of Hearthwick.", UIStyle.GOLD, 10.0))
 	social.join_requested.connect(join_friend)
 	add_child(transition)
 	add_child(_world_loader)
@@ -171,7 +173,7 @@ func _ready() -> void:
 	if _args.has("play-space"):
 		_prepare_manual_archer()
 		_load_world(SpaceWorld.REALM, {id = SpaceWorld.REALM, seed = 0, destroyed = [], space = true, intro = _args.has("intro")})
-		hud.toasts.push("The Astral Reach (offline preview). Command table: launch a ship.", UIStyle.GOOD, 7.0)
+		hud.toasts.push("Space (offline preview). Command table: launch a ship.", UIStyle.GOOD, 7.0)
 		return
 	if _args.has("watch-dungeon"):
 		GameServer.debug_godmode = true
@@ -328,15 +330,56 @@ static func place_name(destination: String) -> String:
 	if ChambersWorld.is_chambers(destination):
 		return "Chambers"
 	if SpaceWorld.is_space(destination):
-		return "The Astral Reach"
+		return "Space"
 	if destination == "castle" or Campaigns.is_castle(destination):
 		return "The Hollow Castle"
-	return "Campaign" if destination == "campaign" or Campaigns.is_campaign_realm(destination) else "Realm"
+	return "Campaign" if destination == "campaign" or Campaigns.is_campaign_realm(destination) else "The Surface"
 
 
 ## Goes to another place: a jump to lightspeed into the loading screen, the
 ## new place loads, and we drop out of hyperspace into it (at `at`, when
 ## set: a teleport to another player).
+## A ship boarding or exit is under way behind a black screen: fade back up
+## once we have moved (or after a moment, if the move was refused).
+var _ship_move_until := 0
+var _ship_moved := false
+var _was_aboard := false
+
+func expect_ship_move() -> void:
+	_ship_move_until = Time.get_ticks_msec()+2500
+	_ship_moved = false
+
+func _update_ship_fade() -> void:
+	var aboard := SpaceLayout.pocket_at(player.global_position)>=0
+	if aboard!=_was_aboard:
+		_ship_moved = true
+		# The ground may still be building where we arrived: give it time.
+		if _ship_move_until!=0: _ship_move_until = maxi(_ship_move_until, Time.get_ticks_msec()+4000)
+	_was_aboard = aboard
+	if _ship_move_until==0 or not transition.is_black(): return
+	if (_ship_moved and not player.frozen) or Time.get_ticks_msec()>_ship_move_until:
+		_ship_move_until = 0
+		transition.fade_from_black(0.45)
+
+## Set by the launch pad or a descending ship just before travelling: which
+## arrival this is ("launch" up to Space, "descend" down to the pad).
+var _port_arrival := ""
+var _ship_travel := false
+var _ship_view_state := {}
+var _offline_ship_transfer := {}
+
+func set_port_arrival(kind: String) -> void:
+	_port_arrival = kind
+	if player.spatial_controller is SpaceTraversal:
+		var view := player.spatial_controller as SpaceTraversal
+		_ship_view_state = {yaw = player.camera_yaw, pitch = view.look_pitch, mode = view.camera_mode, cockpit = view._cockpit}
+	if not Net.is_client():
+		var source: SpaceWorld = world if world is SpaceWorld else world.surface_ships if world is IslandWorld else null
+		var vessel := source.ship_in_slot(SpaceLayout.pocket_at(player.global_position)) if source else null
+		if vessel:
+			_offline_ship_transfer = {wire = vessel.wire().duplicate(true), smoking = vessel.smoking.duplicate(),
+				imported = {}, passengers = {player.player_id: player.global_position-SpaceLayout.pocket_origin(vessel.slot)}}
+
 func travel(destination: String, at := Vector3.INF) -> void:
 	if _traveling or _dead:
 		return
@@ -344,6 +387,7 @@ func travel(destination: String, at := Vector3.INF) -> void:
 		hud.toasts.push("The Chambers open when you play online or in Singleplayer.", UIStyle.HP_LIGHT, 3.0)
 		return
 	_traveling = true
+	_ship_travel = _port_arrival in ["launch", "descend"]
 	boss_introduction.cancel()
 	if world is CastleWorld and is_instance_valid(world.encounter): world.encounter._restore_camera()
 	player.input_locked = true
@@ -351,31 +395,57 @@ func travel(destination: String, at := Vector3.INF) -> void:
 	hud.visible = false
 	var original_client := Net.client
 	var original_generation := _world_generation
-	if not _args.has("qa-quick"): await transition.jump_in(place_name(destination))
+	if _ship_travel: await transition.fade_in(place_name(destination))
+	elif not _args.has("qa-quick"): await transition.jump_in(place_name(destination))
 	if original_client!=Net.client or original_generation!=_world_generation: return
 	var record := {}
 	if Net.is_client():
 		record = await Net.client.enter(destination)
 		if record.has("error"):
 			hud.visible = true
-			if not _args.has("qa-quick"): await transition.jump_out()
+			if _ship_travel: await transition.reveal()
+			elif not _args.has("qa-quick"): await transition.jump_out()
 			player.input_locked = false
 			hud.toasts.push(record.error, UIStyle.HP_LIGHT, 3.0)
 			_traveling = false
+			_ship_travel = false
+			_port_arrival = ""
 			boss_introduction.clear_world()
 			return
 	if not await _load_world_async(destination,record):
 		_preparing_world = false
 		if is_instance_valid(world): world.process_mode = Node.PROCESS_MODE_INHERIT
 		hud.visible = true
-		if not _args.has("qa-quick"): await transition.jump_out()
+		if _ship_travel: await transition.reveal()
+		elif not _args.has("qa-quick"): await transition.jump_out()
 		player.input_locked = _dead
 		_traveling = false
+		_ship_travel = false
+		_port_arrival = ""
 		return
+	var port := str(record.get("port", _port_arrival))
+	_port_arrival = ""
+	if not Net.is_client() and not _offline_ship_transfer.is_empty():
+		var target: SpaceWorld = world if world is SpaceWorld else world.surface_ships if world is IslandWorld else null
+		if target:
+			var vessel := target.accept_transfer(_offline_ship_transfer, "surface_landing" if target is SurfaceShipWorld else "flying")
+			if vessel: record.arrival_pos = target.pocket_point(vessel.slot, _offline_ship_transfer.passengers[player.player_id])
+		_offline_ship_transfer = {}
 	if record.has("arrival_pos"): at = record.arrival_pos
-	if at != Vector3.INF and world.is_walkable(at):
+	if world is IslandWorld and SpaceLayout.pocket_at(at)>=0 and is_instance_valid(world.surface_ships):
+		player.set_spatial_world(world.surface_ships)
+	if at != Vector3.INF and (world.is_walkable(at) or (world is IslandWorld and SpaceLayout.pocket_at(at)>=0)):
 		_place_player(at if record.has("arrival_pos") else Vector3(at.x, world.ground_height(at.x, at.z), at.z))
+	if _ship_travel and player.spatial_controller is SpaceTraversal:
+		var view := player.spatial_controller as SpaceTraversal
+		player.camera_yaw = float(_ship_view_state.get("yaw", player.camera_yaw))
+		view.look_pitch = float(_ship_view_state.get("pitch", view.look_pitch))
+		view.camera_mode = int(_ship_view_state.get("mode", view.camera_mode))
+		view._cockpit = bool(_ship_view_state.get("cockpit", true))
+	if port=="descend" and world is IslandWorld and is_instance_valid(world.surface_ships):
+		world.surface_ships.begin_arrival(player.player_id)
 	await _arrive()
+
 
 
 ## Waits until the new place is ready around the player (as short as
@@ -385,8 +455,12 @@ func _arrive(animate := true) -> void:
 	while player.frozen or (is_instance_valid(world) and not world.is_presentation_ready()):
 		await get_tree().process_frame
 	await get_tree().create_timer(0.15).timeout  # a moment for the first frames to settle
-	transition.set_progress(1.0)
-	if animate and not _args.has("qa-quick"): await transition.jump_out()
+	# Portal capture is part of loading too; finish the bar only after it is ready.
+	transition.set_progress(0.95)
+	if _ship_travel:
+		await transition.reveal()
+		_ship_travel = false
+	elif animate and not _args.has("qa-quick"): await transition.jump_out()
 	hud.visible = true
 	_async_world_build = false
 	if is_instance_valid(world): world.set_meta("asynchronous_load",false)
@@ -476,7 +550,9 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 		island.enemy_director.setup(player, enemy_bullets, island.cleared_packs(), island.pack_survivors())
 	if world is DungeonWorld or world is TheoryWorld or world is SpaceWorld:
 		world.enemy_director.setup(player, enemy_bullets, [], {})
-	if world is HallWorld: (world as HallWorld).set_astral_unlocked(bool(record.get("astral_unlocked", false)))
+	if world is IslandWorld and is_instance_valid((world as IslandWorld).launchpad):
+		# Offline previews: open, and the shipwright's battleship is free.
+		(world as IslandWorld).launchpad.set_state(bool(record.get("astral_unlocked", not Net.is_client())), bool(record.get("ship_owned", false)))
 	if Net.is_client():
 		Net.client.attach_world(world, enemy_bullets, arrows, player)
 
@@ -949,17 +1025,32 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(world) or _preparing_world:
 		if is_instance_valid(world): GameAudio.set_context(player,world)
 		return
+	if is_instance_valid(player.terrain_viewer): player.terrain_viewer.position = Vector3.ZERO
 	var profile_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	_name_timer -= delta
 	if _name_timer <= 0.0:
 		_name_timer = 0.5
 		_color_names()
 	boss_introduction.update(player,world,delta,not _traveling and not _dead and not _args.has("watch-boss"))
+	_update_ship_fade()
 	if not _traveling:
 		GameServer.report_position(player.player_id, world.realm_id, player.global_position)
 	if menus.is_open() and not menus.is_game_menu_open():
 		player.camera_yaw += delta * 0.08  # the start screen's world turns slowly
 	if world is IslandWorld:
+		var dock := (world as IslandWorld).surface_ships
+		if is_instance_valid(dock):
+			dock.local_player = player
+			var aboard := SpaceLayout.pocket_at(player.global_position)>=0
+			if aboard and is_instance_valid(player.terrain_viewer): player.terrain_viewer.global_position = world.launchpad_center()
+			if aboard and not is_instance_valid(player.spatial_controller): player.set_spatial_world(dock)
+			elif not aboard and is_instance_valid(player.spatial_controller):
+				player.set_spatial_world(world)
+				player.global_basis = Basis.IDENTITY
+				# Off the ship: stand still until the ground there is built again.
+				_place_player(player.global_position)
+				player.model.visible = true
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		(world as IslandWorld).update_streaming(player.global_position)
 	GameAudio.set_context(player,world)
 	var biome := world.biome_at(player.global_position)
@@ -985,7 +1076,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Escape: straight back to the Tavern from anywhere in a realm.
 		if not _traveling and not _dead and not menus.is_open() and not Campaigns.is_tavern(world.realm_id) and not player.frozen:
 			get_viewport().set_input_as_handled()
-			# In the Astral Reach there is no quick way home: R only calls a rescue when adrift.
+			# In Space too: R goes home (the realm gate brings you back to the same spot).
 			if world is SpaceWorld and player.spatial_controller is SpaceTraversal: (player.spatial_controller as SpaceTraversal).recall()
 			else: travel("hall")
 		return
@@ -1224,7 +1315,7 @@ func _take_screenshot() -> void:
 		await get_tree().create_timer(float(_args.get("wait", 6.0))).timeout
 	elif _args.has("loading"):
 		await get_tree().create_timer(2.5).timeout
-		transition.fade_in("Realm")
+		transition.fade_in("The Surface")
 		await get_tree().create_timer(1.5).timeout
 	elif _args.has("travel"):
 		await get_tree().create_timer(2.5).timeout
@@ -1235,7 +1326,7 @@ func _take_screenshot() -> void:
 		await get_tree().create_timer(0.5).timeout
 	elif _args.has("jump"):
 		await get_tree().create_timer(3.0).timeout
-		transition.jump_in("Realm")
+		transition.jump_in("The Surface")
 		await get_tree().create_timer(float(_args.jump)).timeout
 	elif _args.has("jump-out"):
 		await get_tree().create_timer(2.5).timeout
@@ -1502,6 +1593,8 @@ func _debug_online() -> void:
 	print("[test] in %s at %s, level %d, hp %d/%d" % [world.display_name, player.global_position, stats.level, stats.hp, stats.max_hp])
 	print("[test] account level %d (%d xp), playing #%d %s, slots %d/%d" % [Account.progress().level, Account.progress().xp,
 			Account.character_id(), stats.class_id, Account.characters().size(), Account.slots()])
+	if _args.has("play"):
+		return  # Interactive launch: stay in the game instead of taking a test screenshot and quitting.
 	if _args.has("campaign-test") or _args.has("boss-sync-test") or _args.has("party-test"):
 		var qa := OnlineQA.new()
 		qa.main = self

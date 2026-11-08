@@ -98,4 +98,15 @@ func _process(delta: float) -> void:
 			global_transform = Transform3D(spec.basis, spec.pos)
 			model.rotation.y = float(spec.yaw)
 			CityState.seated_pose(model)
+	if Net.client and is_instance_valid(Net.client.world):
+		var place := Net.client.world
+		var fleet: SpaceWorld = place if place is SpaceWorld else place.surface_ships if place is IslandWorld else null
+		var vessel := fleet.ship_of(player_id) if fleet else null
+		if vessel:
+			var seat := vessel.seat_of(player_id)
+			var spec := fleet.seat_spec(vessel.slot, seat)
+			if not spec.is_empty():
+				global_position = spec.pos
+				model.rotation.y = float(spec.get("yaw", 0.0))
+				CityState.seated_pose(model)
 	shield.active = (int(s[3]) & 1) != 0

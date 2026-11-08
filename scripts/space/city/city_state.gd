@@ -72,7 +72,7 @@ func handle(pid: int, pos: Vector3, args: Array) -> String:
 			var stats := GameServer.character(pid)
 			if stats:
 				if CityLayout.any_seat(id).drink=="coffee": stats.buffs.add("speed", 90.0, 4, "city_coffee")
-				else: stats.buffs.add("drunk", 150.0, 1, "city_sip_%d" % (Time.get_ticks_msec() % 8))
+				elif float(cups[id])<0.05: stats.buffs.drink_beer()
 		"order":
 			var id := seat_of(pid)
 			if id=="" or orders.has(id): return ""

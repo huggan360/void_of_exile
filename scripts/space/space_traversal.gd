@@ -38,7 +38,7 @@ var _mouse := Vector2.ZERO  # pilot: accumulated stick from the mouse
 var _turret_yaw := 0.0
 var _turret_pitch := 0.15
 var _chase := Transform3D.IDENTITY
-var _cockpit := false
+var _cockpit := true
 var _rocket_flight := false
 var _pulse := false
 ## Out on a spacewalk (jetpack in open space), and the line clipped to a ship.
@@ -73,7 +73,7 @@ func setup(actor: Player, place: SpaceWorld) -> SpaceTraversal:
 	_checkpoint = actor.global_position
 	_old_far = actor.camera.far
 	_old_mouse = Input.mouse_mode
-	camera_mode = int(AppSettings.video.get("space_camera", CameraMode.ANGLED))
+	camera_mode = CameraMode.FIRST_PERSON if place is SurfaceShipWorld else int(AppSettings.video.get("space_camera", CameraMode.ANGLED))
 	return self
 
 func _ready() -> void:
@@ -192,7 +192,7 @@ func _process(delta: float) -> void:
 ## Aboard, the bars are the ship's hull and boost; on a spacewalk, your
 ## health and the jetpack.
 func _update_bars(zone: String) -> void:
-	var game := world.get_parent()
+	var game := world.game_root()
 	var hud: Variant = game.get("hud") if game else null
 	if hud==null: return
 	var aboard: SpaceShip = _ship if _ship else world.ship_in_slot(SpaceLayout.pocket_at(player.global_position)) if zone=="ship" else null
@@ -231,13 +231,15 @@ func _update_hint() -> void:
 	match seat:
 		"pilot":
 			lines.append("W/S thrust - A/D turn - mouse steers - Q/E roll - Shift boost - C pulse drive - V first person")
-			if _ship.mode in ["berth", "landed"]: lines.append("Press W to take off")
+			if _ship.mode in ["berth", "landed"]: lines.append("Space: launch when everyone is aboard")
 			var land := _ship.landable()
 			if not land.is_empty(): lines.append("X: land on %s" % land.name)
+			elif _ship.mode=="flying" and SpaceLayout.can_descend(_ship.xform.origin): lines.append("X: descend to the Surface")
+			elif _ship.mode=="flying" and _ship.xform.origin.y<SpaceLayout.DESCEND_HEIGHT+4000.0: lines.append("Fly lower to descend to the Surface")
 			elif _ship.mode=="flying" and _ship.xform.origin.distance_to(SpaceLayout.NEXUS)<SpaceWorld.DOCK_RANGE: lines.append("X: dock at the Nexus")
 			if _pulse and not SpaceShip.pulse_clear(_ship.xform.origin): lines.append("The pulse drive is quiet this close to worlds, rocks or the Nexus")
 		"turret_top", "turret_left", "turret_right":
-			lines.append("Mouse aims - left mouse fires")
+			lines.append("Mouse aims - left mouse fires - targets %d/3" % (_crosshair as SpaceCrosshair).locks.size())
 		"map":
 			lines.append("The star map is open")
 		"chair_0", "chair_1", "chair_2", "chair_3":
@@ -265,10 +267,12 @@ func _notice_edge() -> void:
 	if _notice_time>1.0 and _notice.text.begins_with("The edge"): return
 	notice("The edge of the Reach. The ship's charm turns her back toward the Nexus.")
 
-## R in the Reach: a rescue call when stranded, otherwise a reminder.
+## R in Space: home to the Tavern like anywhere else. The realm gate brings
+## you back to this very spot (and your ship with you).
 func recall() -> void:
-	if world.stranded(player.player_id, player.global_position): world.request(["rescue"])
-	else: notice("There is no quick way home out here. Fly your ship back to the Nexus.")
+	if cinematic: return
+	var game := world.game_root()
+	if game and game.has_method("travel"): game.travel("hall")
 
 func notice(text: String) -> void:
 	_notice.text = text
@@ -357,6 +361,10 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if seat=="pilot":
+		if event is InputEventKey and event.physical_keycode==KEY_SPACE:
+			world.request(["takeoff"])
+			get_viewport().set_input_as_handled()
+			return
 		if event is InputEventKey and (event as InputEventKey).physical_keycode==KEY_C:
 			_pulse = not _pulse
 			notice("Pulse drive engaged. Hold W." if _pulse else "Pulse drive off.")
@@ -365,7 +373,8 @@ func _input(event: InputEvent) -> void:
 			_cockpit = not _cockpit
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("interact"):
-			world.request(["land"] if not _ship.landable().is_empty() else ["dock"])
+			if SpaceLayout.can_descend(_ship.xform.origin) and _ship.mode=="flying": world.request(["descend"])
+			else: world.request(["land"] if not _ship.landable().is_empty() else ["dock"])
 			get_viewport().set_input_as_handled()
 		elif event is InputEventMouseButton and (event as InputEventMouseButton).button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			_cockpit = (event as InputEventMouseButton).button_index==MOUSE_BUTTON_WHEEL_UP
@@ -385,7 +394,7 @@ func free_look() -> bool:
 	return camera_mode!=CameraMode.ANGLED or world.first_person_at(player.global_position)
 
 func _interaction_near() -> bool:
-	var game := world.get_parent()
+	var game := world.game_root()
 	var hud: Variant = game.get("hud") if game else null
 	return hud!=null and hud.interaction.target!=null
 
@@ -418,6 +427,8 @@ func _seated(delta: float) -> void:
 		player.velocity = Vector3.ZERO
 		player.model.rotation.y = float(spec.get("yaw", 0.0))
 	player._cancel_weapon_actions()
+	player.model.animate(0.0, delta)
+	CityState.seated_pose(player.model)
 	match seat:
 		"pilot":
 			_input_timer -= delta
@@ -433,6 +444,7 @@ func _seated(delta: float) -> void:
 			_aim_timer -= delta
 			if _aim_timer<=0.0:
 				_aim_timer = AIM_RATE
+				_update_target_locks(dir)
 				world.request(["aim", dir])
 			_fire_timer -= delta
 			if Input.is_action_pressed("shoot") and _fire_timer<=0.0 and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
@@ -441,6 +453,29 @@ func _seated(delta: float) -> void:
 				GameAudio.play("enemy_shot", player.camera.global_position)
 		"map":
 			map.visible = true
+
+func _update_target_locks(aim: Vector3) -> void:
+	var sight := _crosshair as SpaceCrosshair
+	var points: Array[Vector2] = []
+	var ids: Array[String] = []
+	if _ship==null:
+		sight.set_locks(points, ids)
+		return
+	var origin := world.turret_muzzle(_ship, seat)
+	var targets := TurretTargeting.select(world, origin, aim)
+	var to_local := sight.get_global_transform_with_canvas().affine_inverse()
+	for target: Dictionary in targets:
+		if not player.camera.is_position_behind(target.pos):
+			points.append(to_local*player.camera.unproject_position(target.pos))
+			if str(target.kind)=="flag":
+				var flag := (target.flag as WeakRef).get_ref() as TargetFlag
+				ids.append("flag:%d" % flag.get_instance_id())
+			else: ids.append("brood:%d" % int(target.id))
+	var eye := player.camera.global_position
+	var center := to_local*player.camera.unproject_position(eye+aim*100.0)
+	var edge := to_local*player.camera.unproject_position(eye+aim*100.0+player.camera.global_basis.x*tan(TurretTargeting.CONE)*100.0)
+	sight.lock_radius = center.distance_to(edge)
+	sight.set_locks(points, ids)
 
 func _turret_direction() -> Vector3:
 	var view: SpaceShipView = world.ship_views.get(_ship.id)
@@ -626,6 +661,17 @@ func _draw_rope(from: Vector3, to: Vector3) -> void:
 		_rope_mesh.surface_add_vertex(from.lerp(to, t)+sag*sin(t*PI))
 	_rope_mesh.surface_end()
 
+var _launch_shake_until := 0
+
+func launch_shake() -> void:
+	_launch_shake_until = Time.get_ticks_msec()+5000
+
+func _shake_camera() -> void:
+	var remaining := clampf(float(_launch_shake_until-Time.get_ticks_msec())/5000.0, 0.0, 1.0)
+	if remaining<=0.0: return
+	var t := Time.get_ticks_msec()*0.001
+	player.camera.position += Vector3(sin(t*51.0), cos(t*63.0), 0.0)*0.045*remaining
+
 func update_camera(delta: float) -> void:
 	var in_chair := seat.begins_with("chair") or city_seat!=""
 	var want_fp := (seat=="" or in_chair) and (camera_mode==CameraMode.FIRST_PERSON or world.first_person_at(player.global_position))
@@ -644,6 +690,7 @@ func update_camera(delta: float) -> void:
 	if cinematic: return
 	if seat!="" and not in_chair and _ship!=null and world.ship_views.has(_ship.id):
 		_seat_camera(delta)
+		_shake_camera()
 		return
 	var up := player.global_basis.y
 	var orbit := player.global_basis*Basis(Vector3.UP, player.camera_yaw)
@@ -660,6 +707,7 @@ func update_camera(delta: float) -> void:
 			player.model.visible = alive and at.distance_to(head)>0.65
 		player.camera.global_transform = Transform3D(view, at)
 		player.camera.fov = 78.0 if want_fp else 72.0
+		_shake_camera()
 		return
 	var target := player.global_position+up
 	var pitch := Player.OVERHEAD_PITCH if AppSettings.video.get("camera_angle", "standard")=="overhead" else Player.CAMERA_PITCH
@@ -681,9 +729,10 @@ func _seat_camera(delta: float) -> void:
 	var want: Transform3D
 	match seat:
 		"pilot":
-			if _cockpit:
+			if _cockpit or world is SurfaceShipWorld:
 				# First person at the helm in the room: the bridge window is a live view.
 				var helm := world.seat_spec(_ship.slot, "pilot")
+				if helm.is_empty(): return  # Seat anchors may still be loading after a world handoff.
 				player.camera.global_transform = Transform3D(Basis.IDENTITY, (helm.pos as Vector3)+Vector3.UP*1.45)
 				player.camera.fov = 78.0
 				player.model.visible = false
@@ -780,11 +829,52 @@ func aim_ray() -> Array:
 # --- Cinematics -------------------------------------------------------------------------
 
 ## Orin's rocket home: the camera watches the launch, then the usual travel.
+## The ship dives for the Surface (SpaceWorld "descend"): a stand-in hull
+## takes the plunge while the shared ship state travels through the loading screen.
+func descend(_ship_id: int, surface: String) -> void:
+	if cinematic: return
+	cinematic = true
+	player.cinematic_locked = true
+	# Keep each occupant's interior view as the actual hull boosts down.
+	# The windows follow its replicated pose; no cut to an outside camera.
+	await get_tree().create_timer(3.0).timeout
+	if not is_instance_valid(world): return
+	cinematic = false
+	player.cinematic_locked = false
+	var game := world.game_root()
+	game.set_port_arrival("descend")
+	game.travel(surface)
+
+## Up from the Surface: watch the ship climb out of the air, then take the helm.
+func rise() -> void:
+	var ship := world.ship_of(player.player_id)
+	var view: Node3D = world.ship_views.get(ship.id) if ship else null
+	if not is_instance_valid(view): return
+	cinematic = true
+	player.cinematic_locked = true
+	_hide_hud(true)
+	var hull := ShipHull.new()
+	world.add_child(hull)
+	hull.build(ship.tint)
+	hull.global_transform = view.global_transform
+	hull.set_engine(1.8)
+	view.visible = false
+	var shots := SpaceCinematic.new()
+	add_child(shots)
+	await shots.space_rise(player.camera, hull, "Space")
+	shots.queue_free()
+	hull.queue_free()
+	if is_instance_valid(view): view.visible = true
+	cinematic = false
+	player.cinematic_locked = false
+	_hide_hud(false)
+	notice("Fly to the Nexus above, or anywhere you like. Low over the Surface, X takes you back down.")
+
 func fly_rocket_home() -> void:
 	if cinematic or _rocket_flight: return
 	_rocket_flight = true
 	var rocket := world.rocket_node()
-	var game := world.get_parent()
+	var game := world.game_root()
 	if rocket==null or game==null or not game.has_method("travel"):
 		if game and game.has_method("travel"): game.travel("hall")
 		return
@@ -820,7 +910,7 @@ func play_intro() -> void:
 	player.cinematic_locked = false
 
 func _hide_hud(hidden: bool) -> void:
-	var game := world.get_parent()
+	var game := world.game_root()
 	var hud: Variant = game.get("hud") if game else null
 	if hud is CanvasLayer: (hud as CanvasLayer).visible = not hidden
 	_overlay.visible = not hidden

@@ -74,3 +74,58 @@ func nexus_intro(camera: Camera3D, world: SpaceWorld) -> void:
 	await _shot(camera, centre+Vector3(0, 40, -80), centre+Vector3(0, 60, -140), func() -> Vector3: return far, 4.0,
 		"Planets wait in the Haven. Beyond the Shardfield lies the Gloam. M opens the star map.")
 	_caption.text = ""
+
+## The battleship rises off its Surface pad, tips its nose up and races into
+## the sky (the portal zoom follows, see SurfaceLaunchpad).
+func battleship_launch(camera: Camera3D, ship: ShipHull, _caption_text: String) -> void:
+	var fixed := camera.global_transform
+	var base := ship.global_position
+	var t := 0.0
+	while t<5.0:
+		t += get_process_delta_time()
+		ship.global_position = base+Vector3.UP*maxf(0.0, t-1.0)*maxf(0.0, t-1.0)*20.0
+		camera.global_transform = fixed
+		await get_tree().process_frame
+
+## The battleship comes down out of the sky and settles on `rest` (world space).
+func battleship_landing(camera: Camera3D, ship: ShipHull, rest: Vector3, _caption_text: String) -> void:
+	var fixed := camera.global_transform
+	var t := 0.0
+	while t<4.2:
+		t += get_process_delta_time()
+		ship.global_position = rest+Vector3.UP*160.0*pow(1.0-clampf(t/4.2, 0.0, 1.0), 3.0)
+		camera.global_transform = fixed
+		await get_tree().process_frame
+
+## In Space: the ship noses down and dives toward the Surface far below.
+func space_dive(camera: Camera3D, ship: Node3D, caption: String) -> void:
+	var start := ship.global_transform
+	var back := start.basis.z.normalized()
+	var t := 0.0
+	while t<3.0:
+		var dt := get_process_delta_time()
+		t += dt
+		var forward := Vector3.DOWN.lerp(-back, 0.35).normalized()
+		var up := Vector3.FORWARD if absf(forward.dot(Vector3.UP)) > 0.95 else Vector3.UP
+		var dive := Basis.looking_at(forward, up)
+		ship.global_transform = Transform3D(start.basis.slerp(dive, minf(1.0, t*0.8)), start.origin+Vector3.DOWN*(t*t*40.0))
+		var eye := ship.global_position+Vector3.UP*30.0+back*55.0
+		camera.global_transform = Transform3D(Basis.IDENTITY, eye).looking_at(ship.global_position, Vector3.UP if absf(back.y)<0.9 else Vector3.FORWARD)
+		camera.fov = lerpf(camera.fov, 95.0, dt*0.8)
+		_caption.text = caption
+		await get_tree().process_frame
+
+## In Space: the ship climbs up out of the Surface's air.
+func space_rise(camera: Camera3D, ship: Node3D, caption: String) -> void:
+	var end := ship.global_transform
+	var back := end.basis.z.normalized()
+	var t := 0.0
+	while t<2.6:
+		t += get_process_delta_time()
+		var k := 1.0-pow(1.0-clampf(t/2.6, 0.0, 1.0), 3.0)
+		ship.global_transform = Transform3D(end.basis, end.origin+Vector3.DOWN*(1.0-k)*420.0)
+		var eye := end.origin+back*70.0+Vector3.UP*24.0
+		camera.global_transform = Transform3D(Basis.IDENTITY, eye).looking_at(ship.global_position, Vector3.UP)
+		_caption.text = caption
+		await get_tree().process_frame
+	ship.global_transform = end

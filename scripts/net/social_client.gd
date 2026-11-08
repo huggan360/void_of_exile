@@ -5,6 +5,8 @@ extends Node
 ## that go back. The chat window, the friends and party panel, the quest
 ## banner and CampaignClient all read from here.
 
+## The Theory of Everything is told: the Surface launch pad opens.
+signal space_unlocked
 signal line_added(line: Dictionary)
 signal join_requested(target: Dictionary)
 signal party_changed
@@ -147,6 +149,12 @@ func _on_event(ev: Array) -> void:
 			if int(ev[2])>0 and str(ev[3])=="forge": GameAudio.play("forge_dismantle")
 			Account.set_dots(int(ev[1]), int(ev[2]), str(ev[3]))
 		"camp_pack_done": pack_done.emit(ev[1])
+		"space_unlocked":  # the Theory of Everything is told: Space is open
+			get_tree().call_group("surface_ports", "set_state", true, false)
+			space_unlocked.emit()
+		"port":  # the Skyward Launch Pad's answers (SurfaceLaunchpad)
+			get_tree().call_group("surface_ports", "on_port_event", ev)
+		"fleet": get_tree().call_group("fleet_panels", "receive", ev[1])
 		"shops":
 			if ev[1] is Dictionary: Shops.set_state(ev[1])
 		"warp": warp.emit(ev[1])

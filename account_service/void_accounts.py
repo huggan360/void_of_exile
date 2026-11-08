@@ -424,6 +424,25 @@ CREATE TABLE IF NOT EXISTS shop_sales (
 );
 CREATE INDEX IF NOT EXISTS characters_account ON characters(account_id);
 CREATE INDEX IF NOT EXISTS dead_account ON dead_characters(account_id);
+CREATE TABLE IF NOT EXISTS fleet_ships (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL REFERENCES accounts(id),
+    name TEXT NOT NULL,
+    status TEXT NOT NULL CHECK(status IN ('stored','deployed','destroyed')),
+    state TEXT NOT NULL DEFAULT '{}',
+    purchase_key TEXT NOT NULL,
+    server TEXT,
+    token TEXT,
+    lease_until REAL NOT NULL DEFAULT 0,
+    location TEXT NOT NULL DEFAULT '',
+    updated REAL NOT NULL,
+    UNIQUE(account_id,purchase_key)
+);
+CREATE INDEX IF NOT EXISTS fleet_account ON fleet_ships(account_id);
+CREATE TABLE IF NOT EXISTS fleet_migrations (
+    account_id INTEGER PRIMARY KEY REFERENCES accounts(id)
+);
+
 """
 # Characters start with an id far from 1 so they never look like slot numbers.
 FIRST_CHARACTER_ID = 1000
@@ -925,6 +944,105 @@ class Store:
         return result
 
     # --- Chambers (vault), Dots, developers ------------------------------------------
+
+    # --- Account-wide ship fleet -------------------------------------------------------
+
+    def _fleet_migrate(self, account_id):
+        db = self.db()
+        if db.execute("SELECT 1 FROM fleet_migrations WHERE account_id=?", (account_id,)).fetchone():
+            return
+        legacy = self.load_campaign(account_id).get("reach_ship", {})
+        if legacy:
+            db.execute("INSERT INTO fleet_ships(account_id,name,status,state,purchase_key,updated) VALUES (?,?, 'stored','{}',?,?)",
+                       (account_id, str(legacy.get("name", "Battleship"))[:80], "legacy", time.time()))
+        db.execute("INSERT INTO fleet_migrations(account_id) VALUES (?)", (account_id,))
+
+    @staticmethod
+    def _fleet_state(value):
+        if not isinstance(value, dict):
+            raise ApiError(400, "Ship state must be an object.")
+        try:
+            raw = json.dumps(value, allow_nan=False, separators=(",", ":"))
+        except (ValueError, TypeError):
+            raise ApiError(400, "Ship state contains invalid values.")
+        if len(raw.encode()) > 32768:
+            raise ApiError(400, "Ship state too large.")
+        if "hp" in value and (type(value["hp"]) not in (int, float) or not 0 <= value["hp"] <= 3200):
+            raise ApiError(400, "Invalid ship hull strength.")
+        return raw
+
+    def _fleet_payload(self, account_id):
+        rows = self.db().execute("SELECT id,name,status,location,state FROM fleet_ships WHERE account_id=? ORDER BY id", (account_id,))
+        ships = [dict(id=r["id"], name=r["name"], status=r["status"], location=r["location"] or "", state=json.loads(r["state"])) for r in rows]
+        dots = self.db().execute("SELECT dots FROM accounts WHERE id=?", (account_id,)).fetchone()["dots"]
+        return {"ships": ships, "dots": dots, "price": 500}
+
+    def fleet_action(self, server, operation, character_id=0, ship_id=0, request_id="", location="", state=None, token="", only_account=None, lease_seconds=90):
+        """Payments, deployment claims and recalls are serialized by SQLite.
+        A deployment token survives owner disconnects and world transfers; it
+        cannot be used by another game server or after a newer claim exists.
+        """
+        db = self.db()
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            now = time.time()
+            if operation in ("list", "buy", "deploy"):
+                character = self._character(int(character_id))
+                self._check_lease(character, server)
+                if float(character["lease_until"] or 0) <= now:
+                    raise ApiError(409, "Character lease expired.")
+                account_id = character["account_id"]
+                self._campaign_account(account_id, only_account)
+                self._fleet_migrate(account_id)
+                # Recover unacknowledged deployments after the old server's lease
+                # expires. A live server must stop using a ship before this point.
+                db.execute("UPDATE fleet_ships SET status='stored',server=NULL,token=NULL,lease_until=0,location='' WHERE account_id=? AND status='deployed' AND lease_until<=?", (account_id, now))
+            else:
+                row = db.execute("SELECT * FROM fleet_ships WHERE id=?", (int(ship_id),)).fetchone()
+                if row is None:
+                    raise ApiError(404, "No such ship.")
+                account_id = row["account_id"]
+                self._campaign_account(account_id, only_account)
+                if operation in ("store", "destroy") and row["status"] == ("stored" if operation == "store" else "destroyed") and row["server"] == server and token and hmac.compare_digest(row["token"] or "", token):
+                    result = self._fleet_payload(account_id)
+                    result["lease_seconds"] = lease_seconds
+                    db.execute("COMMIT")
+                    return result
+                if row["status"] != "deployed" or row["server"] != server or not token or not hmac.compare_digest(row["token"] or "", token) or row["lease_until"] <= now:
+                    raise ApiError(409, "This server no longer holds that ship.")
+            deployed = None
+            if operation == "buy":
+                if not isinstance(request_id, str) or not 1 <= len(request_id) <= 128:
+                    raise ApiError(400, "A purchase request id is required.")
+                existing = db.execute("SELECT id FROM fleet_ships WHERE account_id=? AND purchase_key=?", (account_id, request_id)).fetchone()
+                if existing is None:
+                    if self._fleet_payload(account_id)["dots"] < 500:
+                        raise ApiError(402, "Not enough Dots. A battleship costs 500 Dots.")
+                    self.add_dots(account_id, -500)
+                    db.execute("INSERT INTO fleet_ships(account_id,name,status,state,purchase_key,updated) VALUES (?, 'Battleship','stored','{}',?,?)", (account_id, request_id, now))
+            elif operation == "deploy":
+                row = db.execute("SELECT * FROM fleet_ships WHERE id=? AND account_id=?", (int(ship_id), account_id)).fetchone()
+                if row is None or row["status"] != "stored":
+                    raise ApiError(409, "That ship is already in use or was destroyed.")
+                claim = secrets.token_urlsafe(32)
+                db.execute("UPDATE fleet_ships SET status='deployed',server=?,token=?,lease_until=?,location=?,updated=? WHERE id=?", (server, claim, now+lease_seconds, str(location)[:100], now, row["id"]))
+                deployed = {"id": row["id"], "name": row["name"], "state": json.loads(row["state"]), "account_id": account_id, "token": claim, "lease_seconds": lease_seconds}
+            elif operation in ("heartbeat", "store", "destroy"):
+                raw = self._fleet_state(state or {})
+                dead = operation == "destroy" or (state is not None and state.get("hp", 1) <= 0)
+                status = "destroyed" if dead else "stored" if operation == "store" else "deployed"
+                active = status == "deployed"
+                db.execute("UPDATE fleet_ships SET status=?,state=?,server=?,token=?,lease_until=?,location=?,updated=? WHERE id=?", (status, raw, server, token, now+lease_seconds if active else 0, str(location)[:100] if active else "", now, int(ship_id)))
+            elif operation != "list":
+                raise ApiError(400, "Unknown fleet operation.")
+            result = self._fleet_payload(account_id)
+            if deployed: result["deployment"] = deployed
+            result["lease_seconds"] = lease_seconds
+            db.execute("COMMIT")
+            return result
+        except Exception:
+            db.execute("ROLLBACK")
+            raise
 
     def account_extra(self, account_id, base_slots):
         row = self.db().execute("SELECT dots, developer, home FROM accounts WHERE id=?", (account_id,)).fetchone()
@@ -1453,6 +1571,14 @@ class Handler(BaseHTTPRequestHandler):
         return self.store.award_dots(int(body.get("character_id", 0)), label, int(body.get("amount", 0)),
                                      self.config["lease_seconds"], self.only_account)
 
+    def api_fleet(self, body):
+        label = self.server_label()
+        return self.store.fleet_action(label, str(body.get("operation", "list")),
+            character_id=int(body.get("character_id", 0)), ship_id=int(body.get("ship_id", 0)),
+            request_id=body.get("request_id", ""), location=body.get("location", ""),
+            state=body.get("state"), token=str(body.get("token", "")),
+            only_account=self.only_account, lease_seconds=self.config["lease_seconds"])
+
     def api_release(self, body):
         self.store.release(int(body.get("character_id", 0)), self.server_label())
 
@@ -1500,6 +1626,7 @@ ROUTES = {
     ("POST", "/server/dismantle"): Handler.api_dismantle,
     ("POST", "/server/shops"): Handler.api_shops,
     ("POST", "/server/shop/buy"): Handler.api_buy,
+    ("POST", "/server/fleet"): Handler.api_fleet,
     ("POST", "/server/dots/award"): Handler.api_award_dots,
     ("POST", "/server/die"): Handler.api_die,
 }

@@ -12,6 +12,7 @@ extends RefCounted
 ## type: [display name, radius in blocks, light color (black = no lights)]
 const TYPES := {
 	woodland_lake = ["Willowmere Lake", 24, Color.BLACK],
+	launchpad = ["Skyward Launch Pad", 22, Color(0.55, 0.8, 1.0)],
 	lava_scar = ["Lava Scar", 0, Color(1.0, 0.4, 0.1)],
 	ravine = ["Frozen Ravine", 0, Color.BLACK],
 	glow_pool = ["Glow Pool", 7, Color(0.3, 0.85, 1.0)],
@@ -130,6 +131,26 @@ func shape(x: int, z: int, col: Array) -> bool:
 	var square := maxi(dx, dz)
 	var h := base_height
 	match type:
+		"launchpad":
+			# A paved landing circle on level ground, a rune ring where the ship
+			# sets down, a low wall with a gap toward the city (north), and the
+			# meadow eased back up to its own height around it.
+			var blend := 10.0
+			if d > radius + blend:
+				return false
+			if d > radius:
+				col[0] = roundi(lerpf(h, float(col[0]), smoothstep(0.0, 1.0, (d - radius) / blend)))
+				return true
+			col[0] = h
+			col[1] = Blocks.PAVING
+			col[2] = Blocks.STONE
+			var north := p.y < c.y and absf(p.x - c.x) < 4.0
+			if d > radius - 1.4 and not north:
+				col.append_array([h + 1, h + 2, Blocks.RUIN_BRICK])
+			elif absf(d - 14.0) < 0.6 or absf(d - 6.0) < 0.5:
+				col[1] = Blocks.RUNE_BLUE
+			elif d < 14.0 and (absf(p.x - c.x) < 0.6 or absf(p.y - c.y) < 0.6):
+				col[1] = Blocks.OAK_PLANKS
 		"woodland_lake":
 			var edge := radius * (0.88 + sin(atan2(p.y - c.y, p.x - c.x) * 3 + _seed) * 0.08)
 			if d > radius:
@@ -342,6 +363,10 @@ func _place_lights() -> void:
 	if light_color == Color.BLACK:
 		return
 	match type:
+		"launchpad":
+			for k in 6:
+				var a: float = k * TAU / 6.0 + 0.5
+				light_spots.append(Vector3(center.x + 0.5 + cos(a) * 18.0, 4.0, center.y + 0.5 + sin(a) * 18.0))
 		"lava_scar":
 			for i in range(2, _path.size() - 2, 5):
 				light_spots.append(Vector3(_path[i].x, 1.0, _path[i].y))

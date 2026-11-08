@@ -40,6 +40,8 @@ const REPAIR_TIME := 4.0
 const BOOST_DRAIN := 24.0
 const BOOST_REGEN := 13.0
 
+var fleet_id := 0  # Persistent account-server identity; id below is local replication only.
+var account_id := 0
 var id := 0
 var slot := 0
 var name := ""
@@ -126,6 +128,8 @@ func step(delta: float, asteroids: Array) -> int:
 	input_age += delta
 	if input_age>0.6: input = [0.0, 0.0, 0.0, 0.0, false, false]  # a pilot that went quiet
 	match mode:
+		"descending":  # going down to the Surface (SpaceWorld retires it)
+			return 0
 		"landing":
 			landing.t = minf(1.0, float(landing.t)+delta/LAND_TIME)
 			var k := smoothstep(0.0, 1.0, float(landing.t))
@@ -139,14 +143,7 @@ func step(delta: float, asteroids: Array) -> int:
 				planet = str(landing.planet)
 				landing = {}
 			return 0
-		"berth", "landed":
-			if pilot()!=0 and float(input[0])>0.3 and not broken:
-				mode = "flying"
-				planet = ""
-				land_armed = false
-				# Lift clear of the pad or berth before turning loose.
-				velocity = xform.basis.y*30.0
-				speed = 0.0
+		"berth", "landed", "ascending", "transit", "surface_landing", "storing":
 			return 0
 	# Close over a planet: land on the nearest clear ground by itself.
 	for p: Dictionary in SpaceLayout.PLANETS:
@@ -201,11 +198,10 @@ func step(delta: float, asteroids: Array) -> int:
 		var n := (next-SpaceLayout.NEXUS).normalized()
 		next = SpaceLayout.NEXUS+n*(SpaceLayout.STATION_RADIUS+RADIUS+10.0)
 		velocity = velocity.slide(n)
-	# Nobody flies into the sun.
-	var sun := next-SpaceLayout.SUN_CENTER
-	if sun.length()<SpaceLayout.SUN_RADIUS+RADIUS*4.0:
-		next = SpaceLayout.SUN_CENTER+sun.normalized()*(SpaceLayout.SUN_RADIUS+RADIUS*4.0)
-		velocity = velocity.slide(sun.normalized())
+	# The Surface's sky is the floor of Space.
+	if next.y<SpaceLayout.SURFACE_FLOOR:
+		next.y = SpaceLayout.SURFACE_FLOOR
+		velocity.y = maxf(0.0, velocity.y)
 	# The Nexus stands on a floating rock cone.
 	var cone := NexusStation.rock_radius_at(next.y)+RADIUS
 	var flat := Vector2(next.x, next.z)
@@ -250,7 +246,6 @@ static func part_at(local: Vector3) -> String:
 ## Shardfield and the edge of the Reach.
 static func pulse_clear(at: Vector3) -> bool:
 	if at.distance_to(SpaceLayout.NEXUS)<PULSE_CLEARANCE: return false
-	if at.distance_to(SpaceLayout.SUN_CENTER)<SpaceLayout.SUN_RADIUS+SpaceLayout.SUN_BURN+PULSE_CLEARANCE: return false
 	if at.length()>SpaceLayout.WORLD_RADIUS-SpaceLayout.BOUNDARY_WARN: return false
 	if absf(at.z-SpaceLayout.SHARDFIELD.center.z)<SpaceLayout.SHARDFIELD.extents.z+600.0 and absf(at.x)<SpaceLayout.SHARDFIELD.extents.x+600.0: return false
 	for p: Dictionary in SpaceLayout.PLANETS:
@@ -260,7 +255,7 @@ static func pulse_clear(at: Vector3) -> bool:
 ## Compact snapshot for clients.
 func wire() -> Array:
 	return [id, slot, name, owner, party, tint.to_html(false), xform, speed, mode, planet, hp, crew.duplicate(), aims.duplicate(), broken, repairs.duplicate(true), pulse, turned_back,
-		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys()]
+		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys(), fleet_id, account_id]
 
 static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 	var s := into if into!=null else SpaceShip.new()
@@ -287,4 +282,20 @@ static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 		s.glasses = data[19]
 		s.smoking = {}
 		for pid: int in data[20]: s.smoking[pid] = 1.0
+	if data.size()>22:
+		s.fleet_id = int(data[21])
+		s.account_id = int(data[22])
 	return s
+
+func fleet_state() -> Dictionary:
+	return {hp = hp, parts = parts.duplicate(), boost = boost, glasses = glasses.duplicate(), tint = tint.to_html(false), broken = broken}
+
+func apply_fleet_state(data: Dictionary) -> void:
+	hp = clampi(int(data.get("hp", MAX_HP)), 1, MAX_HP)
+	for key: String in PARTS:
+		parts[key] = clampf(float(data.get("parts", {}).get(key, 100.0)), 0.0, 100.0)
+	boost = clampf(float(data.get("boost", 100.0)), 0.0, 100.0)
+	var drinks: Array = data.get("glasses", [1.0, 1.0, 1.0, 1.0])
+	for i in 4: glasses[i] = clampf(float(drinks[i]) if i<drinks.size() else 1.0, 0.0, 1.0)
+	tint = Color(str(data.get("tint", "ff9a6a")))
+	broken = bool(data.get("broken", false))

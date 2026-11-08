@@ -19,18 +19,25 @@ const SHARDFIELD_START := 16200.0
 const GLOAM_START := 21000.0
 const SHARDFIELD := {center = Vector3(0, 0, 18600), extents = Vector3(20000, 2600, 2000), seed = 6271}
 ## Walkable ship interiors: one room per ship slot, deck at the slot's y.
-const POCKET_ORIGIN := Vector3(0, -60000, 0)
+const POCKET_ORIGIN := Vector3(0, -14100, 0)
 const POCKET_SPACING := 220.0
 const POCKET_SLOTS := 24
 ## The playable sphere. Inside BOUNDARY_WARN of its edge ships are steered
 ## back toward the Nexus; the red barrier is drawn on the sphere itself.
 const WORLD_RADIUS := 42000.0
-## The Reach's burning sun, out toward the light (SpaceBackdrop.SUN_DIR).
-const SUN_CENTER := Vector3(-16900, 11500, -29800)
-const SUN_RADIUS := 3000.0
-## Ships closer than this to the sun's surface start to burn.
-const SUN_BURN := 1600.0
 const BOUNDARY_WARN := 2500.0
+## The Surface (the realm) lies under all of Space: a world so large it reads
+## as a flat blue-green floor far below (SpaceBackdrop draws it). Ships can't
+## sink below SURFACE_FLOOR; under DESCEND_HEIGHT a pilot may take them down.
+## The sun is only light in the sky now (SpaceBackdrop.SUN_DIR), far away.
+const SURFACE_Y := -14000.0
+const SURFACE_FLOOR := SURFACE_Y+700.0
+const DESCEND_HEIGHT := SURFACE_Y+3000.0
+## Where ships launched from the Surface rise into Space, facing the Nexus.
+const ASCENT := Vector3(0, -9000, 1600)
+
+static func can_descend(at: Vector3) -> bool:
+	return at.y<DESCEND_HEIGHT
 
 ## Planets. `pad` is the unit direction (from the centre) of the landing pad;
 ## ships land there and the crew steps out onto it. `palette` drives the art

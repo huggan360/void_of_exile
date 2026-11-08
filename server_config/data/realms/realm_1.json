@@ -114,6 +114,21 @@
 	},
 	"name": "Realm 1",
 	"pack_survivors": {
+		"feature_34_64": [
+			"spirit_blue",
+			"star",
+			"star",
+			"star",
+			"star",
+			"star",
+			"star",
+			"star",
+			"star",
+			"star",
+			"star",
+			"genie_blue",
+			"genie_blue"
+		],
 		"pack_3_-5": [
 			"ember_lich"
 		],

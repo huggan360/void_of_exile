@@ -32,6 +32,9 @@ var dungeons := DungeonServer.new()
 ## Campaigns and their quests.
 var campaigns := CampaignServer.new()
 var economy := EconomyServer.new()
+## The Skyward Launch Pad and the way between the Surface and Space.
+var surface_port := PortServer.new()
+var fleet := FleetServer.new()
 var peer := ENetMultiplayerPeer.new()
 ## peer id -> player record (see on_hello)
 var peers := {}
@@ -90,6 +93,10 @@ func start(p_config: ServerConfig) -> Error:
 	add_child(campaigns)
 	economy.server = self
 	add_child(economy)
+	fleet.server = self
+	add_child(fleet)
+	surface_port.server = self
+	add_child(surface_port)
 	print("[server] %s listening on UDP %d (status %d), account service %s" % [
 			config.value("server", "name"), port, port + Net.STATUS_PORT_OFFSET, api.base_url])
 	if api.server_key == "":
@@ -362,6 +369,7 @@ func _grave(p: Dictionary, stats: PlayerStats) -> Array:
 
 ## Saves and lets go of everyone (the server is stopping).
 func save_all() -> void:
+	await fleet.save_all()
 	for party: Dictionary in social.parties.values(): campaigns._keep_world(party)
 	await campaigns.flush()
 	for p: Dictionary in peers.values():
@@ -389,6 +397,8 @@ func on_enter(peer_id: int, destination: String) -> void:
 			Net.c_entered.rpc_id(peer_id, {error = found[1]})
 			return
 		destination = found[0]
+	# Resolve the Chronicle Gate first so a private Space can be resumed too.
+	destination = surface_port.redirect(p, destination)
 	if ChambersWorld.is_chambers(destination):
 		if p.account_id == 0:
 			Net.c_entered.rpc_id(peer_id, {error = "The Chambers need an account."})
@@ -419,10 +429,14 @@ func on_enter(peer_id: int, destination: String) -> void:
 		realm = campaigns.open_castle(party)
 	elif SpaceWorld.is_space(destination):
 		if not _astral_unlocked(p):
-			Net.c_entered.rpc_id(peer_id, {error = "The Astral Reach opens once the Theory of Everything is told."})
+			Net.c_entered.rpc_id(peer_id, {error = "Space opens once the Theory of Everything is told."})
+			return
+		# A private realm's Space belongs to that campaign's party.
+		if destination != SpaceWorld.REALM and not campaigns.may_enter(p, PortServer.surface_for(destination)):
+			Net.c_entered.rpc_id(peer_id, {error = "That Space belongs to another party's tale."})
 			return
 		realm = realms.get(destination)
-		if realm == null: realm = open_realm_record(destination, {id = destination, seed = 0, destroyed = [], space = true, name = "The Astral Reach"})
+		if realm == null: realm = open_realm_record(destination, {id = destination, seed = 0, destroyed = [], space = true, name = "Space"})
 	elif Dungeons.is_dungeon(destination):
 		if not dungeons.may_enter(p, destination):
 			Net.c_entered.rpc_id(peer_id, {error = "Enter through a living dungeon portal."})
@@ -455,6 +469,10 @@ func on_enter(peer_id: int, destination: String) -> void:
 		else:
 			record.stronghold_gates = realm.world.gates.states()
 		realm.add_player(p.player_id, peer_id)
+	surface_port.arrive(p, realm, record)
+	if record.has("arrival_pos") and (record.arrival_pos as Vector3).is_finite():
+		p.pos = record.arrival_pos
+		if realm and realm.proxies.has(p.player_id): realm.proxies[p.player_id].global_position = record.arrival_pos
 	if arrival.get("realm", "") == destination and (arrival.get("pos", Vector3.INF) as Vector3).is_finite():
 		record.arrival_pos = arrival.pos
 		p.pos = arrival.pos
@@ -482,7 +500,7 @@ func on_enter(peer_id: int, destination: String) -> void:
 		social.system(p.player_id, "Your Chambers: %d chests, shared by every character of your account." % record.chests)
 	else: social.system(p.player_id, ("Welcome to [place]Hearthhaven[/place], %s." % p.name if record.id == "hall" else
 			"Back in [place]Hearthhaven[/place]. Your party's tale goes on.") if realm == null else
-			"Welcome to %s. %s" % [realm.record.get("name", "the realm"), "Your party's story continues here."
+			"Welcome to %s. %s" % [realm.record.get("name", "the Surface"), "Your party's story continues here."
 			if Campaigns.is_campaign_realm(realm.realm_id) else str(config.value("server", "motd", ""))])
 	dungeons.entered(p)
 	social.send_fog(p)
@@ -493,8 +511,11 @@ func _leave_realm(p: Dictionary) -> void:
 	if ChambersWorld.is_chambers(p.realm):
 		economy.leave(p)
 	var realm: RealmInstance = realms.get(p.realm)
+	surface_port.leaving(p, realm)
 	if realm and realm.world is SpaceWorld:
 		realm.world.player_left(p.player_id)
+	elif realm and realm.world is IslandWorld and is_instance_valid(realm.world.surface_ships):
+		realm.world.surface_ships.player_left(p.player_id)
 	if realm:
 		realm.remove_player(p.player_id)
 	p.realm = ""
@@ -595,27 +616,30 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 			pos = CityLayout.any_seat(seat).pos
 			speed = 0.0
 	var recovering := false
-	if active_realm and active_realm.world is SpatialWorld:
+	var spatial: SpatialWorld = active_realm.world if active_realm and active_realm.world is SpatialWorld else null
+	if active_realm and active_realm.world is IslandWorld and SpaceLayout.pocket_at(p.pos)>=0:
+		spatial = active_realm.world.surface_ships
+	if spatial:
 		if not pos.is_finite(): return
-		var barrier: Dictionary = active_realm.world.barrier_between(p.pos,pos)
+		var barrier: Dictionary = spatial.barrier_between(p.pos,pos)
 		if not barrier.is_empty():
 			p.pos = barrier.point
 			p.grace = SNAP_BACK_GRACE
 			if active_realm.proxies.has(p.player_id): active_realm.proxies[p.player_id].global_position = p.pos
 			Net.c_correct.rpc_id(peer_id,p.pos)
 			return
-		recovering = active_realm.world.legal_recovery(p.pos,pos)
-		if not active_realm.world.is_walkable(pos):
-			Net.c_correct.rpc_id(peer_id,active_realm.world.recovery_point(p.pos))
+		recovering = spatial.legal_recovery(p.pos,pos)
+		if not spatial.is_walkable(pos):
+			Net.c_correct.rpc_id(peer_id,spatial.recovery_point(p.pos))
 			return
-	if active_realm and active_realm.world is IslandWorld and active_realm.world.gates.blocks_segment(p.pos,pos):
+	if active_realm and active_realm.world is IslandWorld and spatial==null and active_realm.world.gates.blocks_segment(p.pos,pos):
 		Net.c_correct.rpc_id(peer_id,p.pos)
 		p.moved_at = t
 		return
 	if p.moved_at > 0.0 and p.grace <= 0.0 and not config.test_mode:
 		# Believable? Walking speed (test servers allow debug teleports) (with slack for knockback and lag), not a teleport.
 		var dt := maxf(0.05, t - p.moved_at)
-		var flat := pos.distance_to(p.pos) if active_realm and active_realm.world is SpatialWorld else Vector2(pos.x-p.pos.x,pos.z-p.pos.z).length()
+		var flat := pos.distance_to(p.pos) if spatial!=null else Vector2(pos.x-p.pos.x,pos.z-p.pos.z).length()
 		var limit := Player.BASE_SPEED * stats.move_speed_multiplier() * float(config.value("network", "max_speed_tolerance", 1.6)) \
 				+ Player.KNOCKBACK_MAX
 		if flat > limit * dt + 0.75 and not recovering:
@@ -719,6 +743,10 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 			GameServer.collect_xp(pid, int(args[0]))
 		"shop":  # [shop id, item id, price seen]: buy it for Dots
 			if args.size() == 3: economy.buy(p, str(args[0]), str(args[1]), int(args[2]))
+		"fleet":
+			fleet.on_action(p, args)
+		"port":  # ["buy"] / ["launch"] at the Skyward Launch Pad
+			surface_port.on_action(p, args)
 		"forge":  # [place, item id]: dismantle it at the forge for Dots
 			if args.size() == 2:
 				economy.dismantle(p, args[0], str(args[1]))
@@ -1116,6 +1144,13 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 	var interest := float(config.value("network", "interest_radius", 72.0))
 	var event_radius := float(config.value("network", "event_radius", 85.0))
 	var realm: RealmInstance = realms.get(p.realm)
+	# Ship rooms use remote coordinates. Gunners also need the enemies,
+	# players and effects around their real hull on the ground.
+	var outside := here
+	if realm and SpaceLayout.pocket_at(here)>=0:
+		var fleet: SpaceWorld = realm.world if realm.world is SpaceWorld else realm.world.surface_ships if realm.world is IslandWorld else null
+		var vessel := fleet.ship_in_slot(SpaceLayout.pocket_at(here)) if fleet else null
+		if vessel and vessel.mode=="landed": outside = vessel.xform.origin
 	# Enemies coming into view and leaving it.
 	var snap := PackedFloat32Array()
 	var bosses: Array = []
@@ -1125,7 +1160,7 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 			var e: Enemy = realm.enemies[id]
 			if not is_instance_valid(e) or not e.is_inside_tree():
 				continue
-			var flat := Vector2(e.global_position.x - here.x, e.global_position.z - here.z).length()
+			var flat := minf(Vector2(e.global_position.x - here.x, e.global_position.z - here.z).length(), Vector2(e.global_position.x - outside.x, e.global_position.z - outside.z).length())
 			if flat > interest and not (e is Boss and flat < (e as Boss).boss_def.bar_radius + 10.0):
 				continue
 			seen[id] = true
@@ -1152,7 +1187,7 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 		var o: Dictionary = peers[other_id]
 		if other_id == peer_id or not o.joined or o.dead or o.realm != p.realm or p.realm == "":
 			continue
-		if Vector2(o.pos.x - here.x, o.pos.z - here.z).length() > interest:
+		if minf(Vector2(o.pos.x - here.x, o.pos.z - here.z).length(), Vector2(o.pos.x - outside.x, o.pos.z - outside.z).length()) > interest:
 			continue
 		seen_players[o.player_id] = true
 		var gear := _gear_key(o.player_id)
@@ -1184,7 +1219,7 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 				continue
 			if entry.enemy != 0 and not p.known.has(entry.enemy):
 				continue
-			if entry.pos != Vector3.INF and Vector2(entry.pos.x - here.x, entry.pos.z - here.z).length() > event_radius:
+			if entry.pos != Vector3.INF and minf(Vector2(entry.pos.x - here.x, entry.pos.z - here.z).length(), Vector2(entry.pos.x - outside.x, entry.pos.z - outside.z).length()) > event_radius:
 				continue
 			var ev: Array = entry.ev
 			if ev[1] == "b" and not p.sent_attacks.has(ev[4]):

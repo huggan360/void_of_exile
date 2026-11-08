@@ -9,6 +9,9 @@ var _warp_material := ShaderMaterial.new()
 var _loading := PortalLoadingScreen.new()
 var _fracture := PortalFracture.new()
 var _busy := false
+## Plain black for small moves (getting in and out of a ship).
+var _black := ColorRect.new()
+var _black_tween: Tween
 
 func _ready() -> void:
 	layer = 90
@@ -22,6 +25,32 @@ func _ready() -> void:
 	root.add_child(_warp)
 	root.add_child(_loading)
 	_loading.hide()
+	_black.color = Color.BLACK
+	_black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_black.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_black.modulate.a = 0.0
+	_black.hide()
+	root.add_child(_black)
+
+## Fades the screen to black over `time` (awaitable).
+func fade_to_black(time := 0.25) -> void:
+	if is_instance_valid(_black_tween): _black_tween.kill()
+	_black.show()
+	_black_tween = create_tween()
+	_black_tween.tween_property(_black, "modulate:a", 1.0, time*(1.0-_black.modulate.a))
+	await _black_tween.finished
+
+## Fades back up from black over `time`.
+func fade_from_black(time := 0.45) -> void:
+	if not _black.visible: return
+	if is_instance_valid(_black_tween): _black_tween.kill()
+	_black_tween = create_tween()
+	_black_tween.tween_property(_black, "modulate:a", 0.0, time)
+	_black_tween.tween_callback(_black.hide)
+	await _black_tween.finished
+
+func is_black() -> bool:
+	return _black.visible and _black.modulate.a>0.5
 
 func is_loading() -> bool:
 	return _loading.visible
@@ -68,8 +97,9 @@ func fade_in(place_name: String) -> void:
 func jump_out() -> void:
 	if _busy: return
 	_busy = true
-	_loading.set_progress(1.0)
+	_loading.set_progress(0.97)
 	await _fracture.capture(get_viewport().get_camera_3d(),true)
+	_loading.set_progress(1.0)
 	_warp.show()
 	_set_strength(0.25)
 	var tween := create_tween()
@@ -88,3 +118,11 @@ func _arrival(value: float) -> void:
 
 func _set_strength(value: float) -> void:
 	_warp_material.set_shader_parameter("strength",value)
+
+## Ordinary travel loading: portals alone use the voxel fracture effect.
+func reveal() -> void:
+	_loading.set_progress(1.0)
+	var tween := create_tween()
+	tween.tween_property(_loading, "modulate:a", 0.0, FADE_TIME)
+	await tween.finished
+	_loading.hide()

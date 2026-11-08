@@ -3,6 +3,32 @@ extends Control
 ## Crosshairs: a dot on foot in first person, a flight reticle for the
 ## pilot and a ringed gunsight for turret gunners.
 var mode := ""
+var locks: Array[Vector2] = []
+var lock_radius := 0.0
+var lock_ids: Array[String] = []
+var _appeared := {}
+const LOCK_TWIST_TIME := 0.28
+
+func set_locks(points: Array[Vector2], ids: Array[String]) -> void:
+	locks = points
+	lock_ids = ids
+	var keep := {}
+	for id in ids:
+		keep[id] = _appeared.get(id, Time.get_ticks_msec())
+	_appeared = keep
+	queue_redraw()
+
+func _process(_delta: float) -> void:
+	if mode!="turret":
+		if not locks.is_empty():
+			locks.clear()
+			lock_ids.clear()
+			_appeared.clear()
+		return
+	for started in _appeared.values():
+		if float(Time.get_ticks_msec()-int(started))/1000.0<LOCK_TWIST_TIME:
+			queue_redraw()
+			break
 
 func _draw() -> void:
 	var c := size*0.5
@@ -25,3 +51,14 @@ func _draw() -> void:
 				var d := Vector2.from_angle(a*PI*0.5)
 				draw_line(c+d*8.0, c+d*16.0, ink, 2.0)
 			draw_circle(c, 2.0, Color(1, 0.4, 0.8))
+			if lock_radius>0.0: draw_arc(c, lock_radius, 0, TAU, 64, Color(0.55, 0.9, 1.0, 0.25), 1.0)
+			for i in locks.size():
+				var point := locks[i]
+				var age := float(Time.get_ticks_msec()-int(_appeared.get(lock_ids[i], Time.get_ticks_msec())))/1000.0
+				var t := clampf(age/LOCK_TWIST_TIME, 0.0, 1.0)
+				var angle := (1.0-pow(1.0-t, 3.0))*PI*0.25
+				var square := PackedVector2Array()
+				for corner in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1), Vector2(-1, -1)]:
+					square.append(point+(corner*12.0).rotated(angle))
+				draw_polyline(square, Color(0.12, 0.0, 0.0, 0.8), 4.0, true)
+				draw_polyline(square, Color(1.0, 0.16, 0.12, 0.95), 2.0, true)

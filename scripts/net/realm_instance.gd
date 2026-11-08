@@ -42,6 +42,9 @@ func _ready() -> void:
 	if world is SpatialWorld:
 		world.world_event.connect(func(event: Array) -> void:
 			if Net.server!=null: Net.server._to_realm(realm_id,Vector3.INF,["theory",event]))
+	if world is IslandWorld and is_instance_valid(world.surface_ships):
+		world.surface_ships.world_event.connect(func(event: Array) -> void:
+			if Net.server!=null: Net.server._to_realm(realm_id,Vector3.INF,["theory",event]))
 	GameServer.set_environment(world)
 	bullets.name = "EnemyBullets"
 	world.add_child(bullets)

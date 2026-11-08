@@ -10,7 +10,9 @@ var hull: ShipHull
 var _samples: Array = []  # [time, Transform3D, speed]
 var _label: Label3D
 var _ramp: SpaceInteraction
+var _recall: FleetRecallTarget
 var _ship: SpaceShip
+var arrival_started := -1
 var _damage: ShipDamage
 
 func setup(ship: SpaceShip) -> void:
@@ -32,6 +34,10 @@ func setup(ship: SpaceShip) -> void:
 	_ramp.kind = "outside"
 	_ramp.ship_id = ship.id
 	add_child(_ramp)
+	_recall = FleetRecallTarget.new()
+	_recall.world = world
+	_recall.ship_id = ship.id
+	add_child(_recall)
 	# Outside: the airlock's outer door and the parts mended on the hull.
 	var lock := SpaceInteraction.new()
 	lock.world = world
@@ -62,6 +68,7 @@ func push(ship: SpaceShip) -> void:
 	_ramp.enabled = ship.mode=="landed"
 	var hatch: Transform3D = hull.anchors.get("hatch", Transform3D(Basis.IDENTITY, Vector3(9, -3, 4)))
 	_ramp.position = hatch.origin
+	_recall.position = hatch.origin+Vector3(0, 0.8, 2.0)
 
 ## The interpolated pose `DELAY` seconds ago.
 func pose() -> Transform3D:
@@ -80,8 +87,12 @@ func pose() -> Transform3D:
 func _process(_delta: float) -> void:
 	if _ship==null: return
 	global_transform = pose()
+	if arrival_started>=0:
+		var t := clampf(float(Time.get_ticks_msec()-arrival_started)/4200.0, 0.0, 1.0)
+		global_position += Vector3.UP*160.0*pow(1.0-t, 3.0)
+		if t>=1.0: arrival_started = -1
 	var speed := float(_samples[-1][2]) if not _samples.is_empty() else 0.0
-	hull.set_engine(2.0 if speed>SpaceShip.MAX_SPEED+5.0 else clampf(speed/SpaceShip.MAX_SPEED, 0.15, 1.0) if _ship.mode=="flying" else 0.1)
+	hull.set_engine(2.0 if _ship.mode in ["ascending", "descending"] or arrival_started>=0 or speed>SpaceShip.MAX_SPEED+5.0 else clampf(speed/SpaceShip.MAX_SPEED, 0.15, 1.0) if _ship.mode=="flying" else 0.1)
 	_label.visible = _ship.mode!="flying" or not _crew_is_local()
 	_damage.show_parts(_ship.parts)
 	for seat: String in ["turret_top", "turret_left", "turret_right"]:

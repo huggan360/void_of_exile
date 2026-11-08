@@ -17,7 +17,7 @@ func _get_used_channels_mask() -> int:
 
 
 func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> void:
-	if lod != 0 or origin.y > FLOOR + 2:
+	if lod != 0 or origin.y > FLOOR + 2 or origin.y + out_buffer.get_size().y <= 0:
 		return
 	var size := out_buffer.get_size()
 	for lz in size.z:
@@ -29,9 +29,10 @@ func _generate_column(buf: VoxelBuffer, origin: Vector3i, lx: int, lz: int) -> v
 	var x := origin.x + lx
 	var z := origin.z + lz
 	var h := terrain.top_y(x, z)
+	if h <= HomeTerrain.VOID: return  # sky
 	var surface := terrain.block(x, z)
 	var under := Blocks.SAND if surface in [Blocks.SAND, Blocks.SEAFLOOR] else Blocks.DIRT
-	_fill(buf, origin, lx, lz, -1000, h - 2, Blocks.STONE)
+	_fill(buf, origin, lx, lz, 0, h - 2, Blocks.STONE)
 	_fill(buf, origin, lx, lz, h - 2, h, under)
 	_fill(buf, origin, lx, lz, h, h + 1, surface)
 	var i := terrain.index(x, z)

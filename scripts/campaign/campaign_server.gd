@@ -349,7 +349,7 @@ func start(p: Dictionary, id: String, restart := false) -> void:
 			if fresh and def.has("intro"):
 				server.social.send(pid, ["camp_intro", def.intro])
 		elif _step(run).get("world", "") == SpaceWorld.REALM:
-			server.social.system(pid, "The tale begins at the [place]Nexus[/place] in the Astral Reach. Take Orin's rocket from the Tavern lookout.")
+			server.social.system(pid, "The tale begins at the [place]Nexus[/place] in Space. Launch a battleship from the Skyward Launch Pad south of Hearthwick.")
 		else:
 			server.social.system(pid, "The [place]Chronicle Gate[/place] south of the fountain is open to your party.")
 
@@ -1121,6 +1121,10 @@ func _finish(party: Dictionary) -> void:
 			_touch(p.account_id)
 			stats.purge_story_items(true)
 		var result := {id = run.id, title = def.title, stars = stars, elapsed = run.elapsed, xp = int(def.get("xp", 500))}
+		if run.id == "theory_of_everything":
+			# The Theory opens the sky: the Surface's launch pad answers now.
+			server.social.send(pid, ["space_unlocked"])
+			server.social.system(pid, "[b]The way to Space is open![/b] A battleship waits at the [place]Skyward Launch Pad[/place] south of Hearthwick: buy her for %d Dots and launch." % SpaceWorld.SHIP_PRICE)
 		if def.get("pack_end", false):
 			_pack_done(pid, p, stats, def, result)
 		else:

@@ -8,8 +8,17 @@ uniform vec3 deep_color : source_color = vec3(0.04, 0.2, 0.36);
 uniform float clarity = 2.5;  // meters of water before it looks deep
 uniform float foam_width = 0.3;
 uniform sampler2D depth_texture : hint_depth_texture, filter_linear;
+// Optional: water only where the mask is lit (the Tavern's lagoon in the sky).
+uniform bool use_mask = false;
+uniform sampler2D island_mask : filter_linear;
+uniform vec4 mask_rect = vec4(-136.0, -136.0, 273.0, 273.0);  // world x, z, width, depth
 
 void fragment() {
+	if (use_mask) {
+		vec3 here = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		vec2 uv = (here.xz - mask_rect.xy) / mask_rect.zw;
+		if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0 || texture(island_mask, uv).r < 0.5) discard;
+	}
 	float depth = texture(depth_texture, SCREEN_UV).x;
 	vec4 behind = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
 	behind.xyz /= behind.w;

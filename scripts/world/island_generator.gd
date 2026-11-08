@@ -857,7 +857,18 @@ func _plan_from_layout(layout: Dictionary) -> void:
 	_plan_features()
 	var road_rng := RandomNumberGenerator.new()
 	road_rng.seed = realm_seed * 31 + 7
-	for r: Dictionary in layout.get("roads", []):
+	var roads: Array = layout.get("roads", []).duplicate()
+	# The launch pad's lane: from the capital's southern edge to the gap in its wall.
+	for l: Dictionary in layout.get("landmarks", []):
+		if str(l.type) != "launchpad": continue
+		var pad := Vector2(l.at)
+		var capital := Vector2.ZERO
+		for v: Dictionary in layout.get("villages", []):
+			if v.get("capital", false): capital = Vector2(v.at)
+		var toward := (pad - capital).normalized()
+		roads.append({points = PackedVector2Array([capital + toward * (VillageFeature.CAPITAL_RADIUS - 3.0),
+			pad - toward * (RealmFeature.TYPES.launchpad[1] + 2.0)]), width = BRANCH_ROAD_WIDTH})
+	for r: Dictionary in roads:
 		var points: PackedVector2Array = r.points
 		if points.size() >= 2:
 			_store_road(_resample(points, ROAD_POINT_SPACING), road_rng, float(r.get("width", BRANCH_ROAD_WIDTH)))

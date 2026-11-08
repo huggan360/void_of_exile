@@ -47,7 +47,9 @@ func capture(camera: Camera3D, assembling: bool) -> bool:
 	var pending: Array[Node] = [get_tree().current_scene]
 	var deadline := Time.get_ticks_usec()+1800
 	while not pending.is_empty():
-		var node: Node = pending.pop_back()
+		var next: Variant = pending.pop_back()
+		if not is_instance_valid(next): continue  # freed while we walked the tree
+		var node: Node = next
 		if node==self or node is CanvasLayer or node is SubViewport or node.get_meta("portal_ignore",false): continue
 		if node is GameWorld or node is Player:
 			_paused.append({node=node,mode=node.process_mode})

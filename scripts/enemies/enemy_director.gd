@@ -74,23 +74,31 @@ func target_for(pos: Vector3) -> Node3D:
 	var best: Node3D = null
 	var best_d := INF
 	for p in players:
-		if not is_instance_valid(p) or p.frozen:
+		if not is_instance_valid(p) or p.frozen or SpaceLayout.pocket_at(p.global_position)>=0:
 			continue
 		var d: float = Vector2(p.global_position.x - pos.x, p.global_position.z - pos.z).length_squared()
 		if d < best_d:
 			best = p
 			best_d = d
-	if best == null and not players.is_empty() and is_instance_valid(players[0]):
+	if best == null and not players.is_empty() and is_instance_valid(players[0]) and SpaceLayout.pocket_at(players[0].global_position)<0:
 		return players[0]
 	return best
 
 
 ## Flat distance from `pos` to the nearest active player.
 func _nearest_distance(pos: Vector3) -> float:
-	var p := target_for(pos)
-	if p == null or p.frozen:
-		return INF
-	return Vector2(p.global_position.x - pos.x, p.global_position.z - pos.z).length()
+	var nearest := INF
+	for p in players:
+		if not is_instance_valid(p) or p.frozen: continue
+		var at: Vector3 = p.global_position
+		var slot := SpaceLayout.pocket_at(at)
+		if slot>=0:
+			var fleet: SpaceWorld = world if world is SpaceWorld else world.surface_ships if world is IslandWorld else null
+			var ship := fleet.ship_in_slot(slot) if fleet else null
+			if ship==null or ship.mode!="landed": continue
+			at = ship.xform.origin
+		nearest = minf(nearest, Vector2(at.x-pos.x, at.z-pos.z).length())
+	return nearest
 
 
 func _process(delta: float) -> void:

@@ -12,6 +12,12 @@ const FLOOR := 9  # top block of the town plateau (you stand at FLOOR + 1)
 const BEACH := 8  # top block of beaches and pier decks
 const SEAFLOOR := 4
 const PIER_POST := 2
+## The Tavern floats in the sky: the lagoon reaches RIM blocks past the coast,
+## then a shallow cloud rim (gaps where water spills over) and beyond it sky.
+const RIM := 12.0
+const VOID := -1000
+## Waterfalls: angles (radians, from +x toward +z) and half widths of the gaps.
+const FALLS := [[0.35, 0.09], [1.6, 0.07], [2.55, 0.1], [3.7, 0.08], [4.6, 0.06], [5.5, 0.09]]
 
 var height := PackedByteArray()  # top block y per column
 var top := PackedByteArray()  # top block id per column
@@ -75,8 +81,15 @@ func build(coast: PackedVector2Array, roads: Array[Dictionary], plazas: Array[Di
 			var d := _shore[i]
 			var wx := x - EXTENT
 			var wz := z - EXTENT
-			if d <= 0.0:
-				# Shallows, then shelving sea floor.
+			if d < -RIM - 1.5:
+				height[i] = 0  # open sky (top AIR marks it; heights are bytes)
+				top[i] = Blocks.AIR
+			elif d < -RIM + 0.5:
+				# The lip round the lagoon, open where a waterfall pours over.
+				height[i] = 6 if is_fall(wx, wz) else BEACH
+				top[i] = Blocks.SEAFLOOR if is_fall(wx, wz) else Blocks.SNOW
+			elif d <= 0.0:
+				# Shallows, then a lagoon floor.
 				height[i] = 7 if d > -1.5 else 6 if d > -4.0 else 5 if d > -9.0 else SEAFLOOR
 				top[i] = Blocks.SAND if d > -4.0 else Blocks.SEAFLOOR
 			elif d < 2.5:
@@ -98,10 +111,18 @@ func index(x: int, z: int) -> int:
 	return (z + EXTENT) * SIDE + x + EXTENT
 
 
-## Top block y of a column (open sea floor outside the baked area).
+## Top block y of a column (VOID: open sky, past the rim or the baked area).
 func top_y(x: int, z: int) -> int:
 	var i := index(x, z)
-	return SEAFLOOR if i < 0 else height[i]
+	return VOID if i < 0 or top[i] == Blocks.AIR else height[i]
+
+
+## A waterfall gap in the lip at this column.
+static func is_fall(x: int, z: int) -> bool:
+	var a := fposmod(atan2(float(z), float(x)), TAU)
+	for fall: Array in FALLS:
+		if absf(angle_difference(a, float(fall[0]))) < float(fall[1]): return true
+	return false
 
 
 func block(x: int, z: int) -> int:
@@ -124,7 +145,7 @@ func is_land(x: int, z: int) -> bool:
 func stand_height(x: int, z: int) -> float:
 	var i := index(x, z)
 	if i < 0:
-		return SEAFLOOR + 1.0
+		return SEAFLOOR + 1.0  # never walked on (is_land is false out there)
 	return BEACH + 1.0 if deck[i] > 0 else height[i] + 1.0
 
 

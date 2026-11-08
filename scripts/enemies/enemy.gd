@@ -143,6 +143,10 @@ func _ready() -> void:
 		burning.show_icon = true
 		add_child(burning)
 	add_to_group("realm_creatures")
+	var target_flag := TargetFlag.new()
+	target_flag.name = "TurretTarget"
+	target_flag.position = Vector3.UP*height()*0.5
+	add_child(target_flag)
 	if Net.is_server():
 		net_id = Net.server.register_enemy(self)
 	collision_layer = Player.ENEMY_LAYER

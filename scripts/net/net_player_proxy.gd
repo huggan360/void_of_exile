@@ -11,13 +11,14 @@ var peer_id := 0
 ## True until the client says its ground has loaded.
 var frozen := true
 var shield_up := false
+var _terrain_viewer: VoxelViewer
 
 
 func _ready() -> void:
-	var viewer := VoxelViewer.new()
-	viewer.view_distance = 96
-	viewer.requires_visuals = false
-	add_child(viewer)
+	_terrain_viewer = VoxelViewer.new()
+	_terrain_viewer.view_distance = 96
+	_terrain_viewer.requires_visuals = false
+	add_child(_terrain_viewer)
 
 
 func take_damage(amount: float, armor_piercing := false, magic := false) -> void:
@@ -26,3 +27,12 @@ func take_damage(amount: float, armor_piercing := false, magic := false) -> void
 
 func knockback(push: Vector3) -> void:
 	Net.server.melee_hit(self, 0.0, false, false, push)
+
+## Occupants are in a remote room; keep the Surface terrain at their hull
+## loaded for authoritative cannon collision and the boarding hatch.
+func _physics_process(_delta: float) -> void:
+	var island := get_parent() as IslandWorld
+	if island and SpaceLayout.pocket_at(global_position)>=0:
+		_terrain_viewer.global_position = island.launchpad_center()
+	else:
+		_terrain_viewer.position = Vector3.ZERO

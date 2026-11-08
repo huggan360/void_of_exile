@@ -44,8 +44,8 @@ func _ready() -> void:
 			description = "Back inside the ship."
 			action_text = "Go in"
 		"wright":
-			action_text = "Buy a ship (%d Dots)" % SpaceWorld.SHIP_PRICE
-			response = "Fitting her out on the shipyard pad..."
+			action_text = "Ships"
+			response = "Need a ship, captain?"
 		"tap":
 			title = "Beer tap"
 			description = "Nexus amber, brewed in the station's own cellar."
@@ -76,23 +76,15 @@ func refresh(actor: Node3D) -> void:
 		var ship := _repair_ship(actor)
 		description = "%s: %d%%. Mending it restores some of the hull." % [title, roundi(ship.part(part)*100.0)] if ship else ""
 		return
-	if kind!="table": return
-	var mine := _ships_for(actor)
-	extra_text = ""
-	if mine.is_empty():
-		action_text = "Launch a ship (%d Dots)" % SpaceWorld.SHIP_PRICE
-		response = "A new battleship is fitted at a free berth. Your party can board it with you. Free while your party is on a Reach tale."
-	else:
-		var ship: SpaceShip = mine[0]
-		action_text = "Board %s" % ship.name
-		response = "Boarding %s..." % ship.name
-		if not world.ships.values().any(func(s: SpaceShip) -> bool: return s.owner==(actor as Player).player_id):
-			extra_text = "Launch your own"
+	if kind=="table":
+		action_text = "Manage fleet"
+		response = "Choose a ship from your fleet."
+		extra_text = ""
 
 func _ships_for(actor: Node3D) -> Array:
 	var pid := (actor as Player).player_id
 	var party := 0
-	var game := world.get_parent()
+	var game := world.game_root()
 	if game!=null and game.get("social") is SocialClient: party = int((game.get("social") as SocialClient).party.get("id", 0))
 	return world.ships.values().filter(func(s: SpaceShip) -> bool:
 		return s.owner==pid or (party!=0 and s.party==party))
@@ -101,11 +93,9 @@ func activate(actor: Node3D) -> bool:
 	if not available(actor): return false
 	match kind:
 		"table":
-			var mine := _ships_for(actor)
-			if mine.is_empty(): world.request(["spawn"])
-			else: world.request(["board", (mine[0] as SpaceShip).id])
+			get_tree().call_group("fleet_panels", "open_for", self)
 		"board":
-			var game := world.get_parent()
+			var game := world.game_root()
 			if game!=null and game.get("campaign") is CampaignClient: (game.get("campaign") as CampaignClient).open_book()
 		"rocket":
 			if (actor as Player).spatial_controller is SpaceTraversal:
@@ -113,9 +103,9 @@ func activate(actor: Node3D) -> bool:
 		"seat":
 			world.request(["sit", seat])
 		"hatch":
-			world.request(["hatch"])
+			_through_black(["hatch"])
 		"outside":
-			world.request(["board", ship_id])
+			_through_black(["board", ship_id])
 		"mark":
 			if Net.is_client(): Net.client.send_action("camp", ["quest", "obj:"+mark_id])
 		"repair":
@@ -123,13 +113,14 @@ func activate(actor: Node3D) -> bool:
 		"repair_out":
 			world.request(["repair", ship_id, part])
 		"airlock", "airlock_out":
-			world.request(["airlock"])
+			_through_black(["airlock"])
 		"tap":
 			world.request(["pour"])
 		"wright":
-			world.request(["buy_ship", part])
+			response = "Need a ship, captain?"
+			get_tree().call_group("fleet_panels", "open_for", self)
 	activated.emit(actor)
-	return kind in ["table", "board"]
+	return kind in ["table", "board", "wright"]
 
 func _repair_ship(actor: Node3D) -> SpaceShip:
 	if kind=="repair_out": return world.ships.get(ship_id)
@@ -137,3 +128,13 @@ func _repair_ship(actor: Node3D) -> SpaceShip:
 
 func extra(_actor: Node3D) -> void:
 	if kind=="table": world.request(["spawn"])
+
+## Getting in or out of a ship: the screen fades to black, the move happens,
+## and the game fades back up once we stand in the new place (main.gd).
+func _through_black(args: Array) -> void:
+	var game := world.game_root()
+	var transition: Variant = game.get("transition") if game else null
+	if transition is Transition:
+		await (transition as Transition).fade_to_black(0.25)
+		if game.has_method("expect_ship_move"): game.expect_ship_move()
+	if is_instance_valid(world): world.request(args)

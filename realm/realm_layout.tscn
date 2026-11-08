@@ -370,6 +370,11 @@ outline_size = 60
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -104, 0, 14)
 script = ExtResource("4_t5oh5")
 
+[node name="LaunchPad" type="Marker3D" parent="Landmarks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 82)
+script = ExtResource("4_t5oh5")
+feature_type = "launchpad"
+
 [node name="Roads" type="Node3D" parent="." unique_id=1415776535]
 
 [node name="Road1" type="Path3D" parent="Roads" unique_id=869908327]

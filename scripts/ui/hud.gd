@@ -57,6 +57,7 @@ var _bag_panel: BagPanel
 var forge: ForgePanel
 ## A shopkeeper's wares, on the right while you talk to them.
 var shop: ShopPanel
+var fleet: FleetPanel
 var _center := CenterContainer.new()
 var _stack := VBoxContainer.new()  # backpack, and the loot bag under it
 var _quick: Array[ItemSlot] = []
@@ -276,6 +277,9 @@ func _ready() -> void:
 	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(right)
 	right.add_child(shop)
+	fleet = FleetPanel.new()
+	fleet.interaction = interaction
+	right.add_child(fleet)
 
 	# Top center: the account's XP bar, level and reward drawer.
 	account_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)

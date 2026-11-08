@@ -16,12 +16,12 @@ func _run() -> void:
 	check(GameServer.apply_buff(pid,"speed","3s",1,"test"),"Server grants timed stats")
 	check(stats.total("speed")==speed+1,"Positive stat affects actual movement calculation")
 	GameServer.apply_buff(pid,"speed",10,-3,"enemy")
-	check(stats.total("speed")==speed-2,"Independent signed buffs stack")
+	check(stats.total("speed")==speed-3,"Longer effect replaces the type across sources")
 	GameServer.apply_buff(pid,"speed",20,5,"test")
-	check(stats.buffs.active().size()==2 and stats.total("speed")==speed+2,"Same source refreshes without duplicate stacking")
-	stats.buffs.entries["speed:enemy"].expires = Net.now()-1
+	check(stats.buffs.active().size()==1 and stats.total("speed")==speed+5,"One effect per type")
+	stats.buffs.entries["speed"].expires = Net.now()-1
 	stats.buffs.tick()
-	check(stats.total("speed")==speed+5,"Expiry restores underlying values")
+	check(stats.total("speed")==speed,"Expiry restores underlying values")
 	stats.buffs.clear()
 	for stat in PlayerStats.STATS:
 		var base := stats.total(stat)
@@ -38,7 +38,7 @@ func _run() -> void:
 	check(stats.total("defense")==raw_def and armored>raw_def,"Armour Broken removes gear defence, keeps base defence")
 	GameServer.apply_buff(pid,"defense",3,4)
 	check(stats.total("defense")==raw_def+4,"Armour Broken preserves direct defence buffs")
-	check(StatusEffects.banner(stats.buffs.entries["armour_broken:default"])=="purple","Armour break is purple")
+	check(StatusEffects.banner(stats.buffs.entries["armour_broken"])=="purple","Armour break is purple")
 	stats.buffs.clear()
 	var base_hp := stats.max_hp
 	GameServer.apply_buff(pid,"health",10,40)
@@ -54,10 +54,10 @@ func _run() -> void:
 	GameServer._players[pid].since_hurt = 0
 	GameServer._tick_vitals(GameServer._players[pid],1.0)
 	check(is_equal_approx(stats.hp,13.45),"2.3 regeneration gives 230% base healing even in combat")
-	check(StatusEffects.banner(stats.buffs.entries["regeneration:default"])=="green","Beneficial regeneration is green")
+	check(StatusEffects.banner(stats.buffs.entries["regeneration"])=="green","Beneficial regeneration is green")
 	stats.buffs.clear()
 	GameServer.apply_buff(pid,"regeneration",10,.5)
-	check(StatusEffects.banner(stats.buffs.entries["regeneration:default"])=="red","Reduced regeneration is red")
+	check(StatusEffects.banner(stats.buffs.entries["regeneration"])=="red","Reduced regeneration is red")
 	check(not GameServer.apply_buff(pid,"speed","bad",1),"Malformed duration rejected")
 	check(not GameServer.apply_buff(pid,"speed",0,1),"Zero duration rejected")
 	check(not GameServer.apply_buff(pid,"speed",3,"banana"),"Malformed magnitude rejected")

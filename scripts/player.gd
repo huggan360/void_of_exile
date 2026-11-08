@@ -82,6 +82,7 @@ var camera_distance := ZOOM_DEFAULT
 var torch_strength := 0.0
 var status_visuals := PlayerStatusVisuals.new()
 var facing := PI  # model yaw; PI = facing the camera
+var terrain_viewer: VoxelViewer
 var terrain: VoxelTerrain
 var frozen := true
 ## Returns whether a position may be walked onto (e.g. not deep water).
@@ -196,9 +197,9 @@ func _ready() -> void:
 	model = PlayerClasses.make_model(class_id)
 	add_child(model)
 
-	var viewer := VoxelViewer.new()
-	viewer.view_distance = 128
-	add_child(viewer)
+	terrain_viewer = VoxelViewer.new()
+	terrain_viewer.view_distance = 128
+	add_child(terrain_viewer)
 
 	camera = Camera3D.new()
 	camera.fov = CAMERA_FOV

@@ -52,6 +52,11 @@ var player_id := 0
 var class_id := "archer"
 ## The realm town it calls home (it arrives there), "" = the capital.
 var home := ""
+## Where the character was between the Surface and Space (the server keeps it):
+## {last: "surface"/"space", space: realm id, pos: [x, y, z], ship: {xform, mode, planet} when aboard}.
+## The Tavern's realm gate returns to the same spot in Space; on the Surface you
+## arrive in your hometown.
+var travel := {}
 ## func(bag id) -> the bag's record ({} if gone), for bag places.
 var bag_lookup := Callable()
 var level := 1
@@ -527,7 +532,7 @@ func to_data() -> Dictionary:
 	for slot in gear:
 		gear_data[slot] = _item_data(gear[slot])
 	return {
-		version = 1, class_id = class_id, home = home, level = level, xp = xp, hp = hp, mp = mp,
+		version = 1, class_id = class_id, home = home, travel = travel.duplicate(true), level = level, xp = xp, hp = hp, mp = mp,
 		base = base.duplicate(), base_hp = base_hp, base_mp = base_mp, has_backpack = has_backpack,
 		gear = gear_data, backpack = backpack.map(_item_data), quick = quick.map(_item_data),
 	}
@@ -555,6 +560,7 @@ func _load_data(data: Dictionary) -> void:
 	level = int(data.get("level", 1))
 	xp = int(data.get("xp", 0))
 	home = str(data.get("home", ""))
+	travel = (data.get("travel", {}) as Dictionary).duplicate(true) if data.get("travel", {}) is Dictionary else {}
 	for stat in STATS:
 		base[stat] = clampi(int(data.get("base", {}).get(stat, base[stat])), 0, stat_max(stat))
 	base_hp = clampi(int(data.get("base_hp", base_hp)), 1, stat_max("hp"))
@@ -598,6 +604,7 @@ func purge_story_items(include_keys := false) -> Array[Item]:
 ## A brand new character of its class: level 1, starting gear, nothing carried.
 func reset() -> void:
 	buffs.clear()
+	travel = {}
 	var def := PlayerClasses.get_def(class_id)
 	level = 1
 	xp = 0

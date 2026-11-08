@@ -15,15 +15,6 @@ var _map_fountain := Vector2.ZERO
 var campaign_tavern := false
 ## The Chronicle Gate south of the fountain: lit only while your party plays a campaign.
 var campaign_portal: Portal
-## Orin's little rocket to the Nexus, locked until the Theory of Everything is told.
-var launchpad: TavernLaunchpad
-var _launch_target: InteractionTarget
-var _astral_unlocked := false
-## Orin's launch deck: on the garden avenue between the fountain and the chapel,
-## where the middle cross path leaves exactly room between the flower beds. Its
-## gate faces the fountain.
-const LAUNCHPAD_AT := Vector3(0, 10, 52)
-const LAUNCHPAD_YAW := PI
 ## The chapel market (ShopKeeper): red and white stalls either side of the chapel
 ## yard, facing it, and two keepers by the chapel door. [shop, x, z].
 const MARKET_STALLS := [["priest", -11.5, 74.5], ["wizard", -17.0, 74.5], ["bowyer", 11.5, 74.5], ["alchemist", 17.0, 74.5]]
@@ -53,8 +44,10 @@ func is_water(pos: Vector3) -> bool:
 func _ready() -> void:
 	if home_terrain==null: home_terrain = HomeTerrain.from_scene(self)
 	var e := HomeTerrain.EXTENT
-	_add_terrain(HallGenerator.new(home_terrain), AABB(Vector3(-e, -8, -e), Vector3(e * 2 + 1, 48, e * 2 + 1)))
+	# Only the playable plateau and shallow lagoon need terrain.
+	_add_terrain(HallGenerator.new(home_terrain), AABB(Vector3(-e, 0, -e), Vector3(e * 2 + 1, 40, e * 2 + 1)))
 	if not has_node("CoastWater"): _add_water(IslandGenerator.SEA_LEVEL + 0.6, 400.0)
+	_heaven()
 	if has_node("Spawn"): spawn_point = $Spawn.position
 	var gate_position: Vector3 = $RealmGate.position if has_node("RealmGate") else Vector3(0, 10, -60)
 	var gate_facing: Vector3 = -$RealmGate.basis.z if has_node("RealmGate") else Vector3.BACK
@@ -77,7 +70,6 @@ func _ready() -> void:
 		sign.pixel_size = 0.01
 		sign.position = Vector3(0, 4.6, 0)
 		gate.add_child(sign)
-	_build_launchpad()
 	_build_market()
 	if navigation==null: _prepare_navigation()
 	if has_node("Residents"):
@@ -237,6 +229,108 @@ func ground_height(x: float, z: float) -> float:
 
 
 ## Stalls from the village market prefab, a shopkeeper behind each counter.
+# --- Heaven: the Tavern floats on clouds -----------------------------------------------------
+
+## Water stays in the lagoon, with short spills into a shallow voxel cloud rim.
+const CLOUD_FLOOR := 4.0
+
+func _heaven() -> void:
+	var e := HomeTerrain.EXTENT
+	var mask := Image.create(HomeTerrain.SIDE, HomeTerrain.SIDE, false, Image.FORMAT_L8)
+	for z in HomeTerrain.SIDE:
+		for x in HomeTerrain.SIDE:
+			var d := home_terrain.shore_distance(x - e, z - e)
+			mask.set_pixel(x, z, Color.WHITE if d >= -HomeTerrain.RIM - 0.5 else Color.BLACK)
+	if has_node("CoastWater"):
+		var water: MeshInstance3D = $CoastWater
+		var material := (water.mesh.surface_get_material(0) as ShaderMaterial).duplicate() as ShaderMaterial
+		material.set_shader_parameter("use_mask", true)
+		material.set_shader_parameter("island_mask", ImageTexture.create_from_image(mask))
+		material.set_shader_parameter("mask_rect", Vector4(-e, -e, HomeTerrain.SIDE, HomeTerrain.SIDE))
+		water.material_override = material
+	_waterfalls()
+	_cloud_rim()
+
+## Short water curtains spill into the clouds at the lagoon edge.
+func _waterfalls() -> void:
+	var e := HomeTerrain.EXTENT
+	var verts := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	var segments := 10
+	for z in range(-e, e + 1):
+		for x in range(-e, e + 1):
+			var d := home_terrain.shore_distance(x, z)
+			if d >= -HomeTerrain.RIM + 0.5 or d < -HomeTerrain.RIM - 1.5 or not HomeTerrain.is_fall(x, z): continue
+			var out := Vector3(x, 0, z).normalized()
+			var side := out.cross(Vector3.UP)
+			var top := Vector3(x + 0.5, IslandGenerator.SEA_LEVEL + 0.6, z + 0.5) + out * 0.8
+			for k in segments:
+				var t0 := float(k) / segments
+				var t1 := float(k + 1) / segments
+				var p0 := top + Vector3.DOWN * t0 * (top.y - CLOUD_FLOOR) + out * t0 * t0 * 9.0
+				var p1 := top + Vector3.DOWN * t1 * (top.y - CLOUD_FLOOR) + out * t1 * t1 * 9.0
+				var w0 := 0.6 + t0 * 0.5
+				var w1 := 0.6 + t1 * 0.5
+				for v: Vector3 in [p0 - side * w0, p1 - side * w1, p1 + side * w1, p0 - side * w0, p1 + side * w1, p0 + side * w0]:
+					verts.append(v)
+				var u := float(x * 7 + z * 3) * 0.13
+				for uv: Vector2 in [Vector2(u, t0), Vector2(u, t1), Vector2(u + 1.0, t1), Vector2(u, t0), Vector2(u + 1.0, t1), Vector2(u + 1.0, t0)]:
+					uvs.append(uv)
+	if verts.is_empty(): return
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var falls := MeshInstance3D.new()
+	falls.name = "Waterfalls"
+	falls.mesh = mesh
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://shaders/waterfall.gdshader")
+	falls.material_override = material
+	falls.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(falls)
+
+## Static box clusters follow the authored coastline. One draw batch, no
+## distant cloud plane, animated nodes, collisions or hidden deep geometry.
+func _cloud_rim() -> void:
+	var transforms: Array[Transform3D] = []
+	var e := HomeTerrain.EXTENT
+	for z in range(-e, e, 3):
+		for x in range(-e, e, 3):
+			var d := home_terrain.shore_distance(x, z)
+			var ripple := sin(x * 0.13) * 2.0 + cos(z * 0.17) * 2.0
+			if d > -HomeTerrain.RIM + 2.0 or d < -HomeTerrain.RIM - 12.0 - ripple:
+				continue
+			var crest := int((sin(x * 0.21) + cos(z * 0.19) + 2.0) * 0.75)
+			var top := 9.0 + crest
+			# Small channels let the lagoon spill into the clouds.
+			if HomeTerrain.is_fall(x, z) and d > -HomeTerrain.RIM - 3.0:
+				top = 6.0
+			var size := Vector3(3, top - CLOUD_FLOOR, 3)
+			transforms.append(Transform3D(Basis.from_scale(size), Vector3(x + 1.5, CLOUD_FLOOR + size.y * 0.5, z + 1.5)))
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.97, 0.98, 1.0)
+	material.roughness = 1.0
+	material.emission_enabled = true
+	material.emission = Color(0.78, 0.85, 1.0)
+	material.emission_energy_multiplier = 0.18
+	var cube := BoxMesh.new()
+	cube.size = Vector3.ONE
+	cube.material = material
+	var batch := MultiMesh.new()
+	batch.transform_format = MultiMesh.TRANSFORM_3D
+	batch.mesh = cube
+	batch.instance_count = transforms.size()
+	for i in transforms.size():
+		batch.set_instance_transform(i, transforms[i])
+	var clouds := MultiMeshInstance3D.new()
+	clouds.name = "VoxelCloudRim"
+	clouds.multimesh = batch
+	clouds.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(clouds)
+
 func _build_market() -> void:
 	var stall_scene: PackedScene = load("res://scenes/home/prefabs/market.tscn")
 	for spec: Array in MARKET_STALLS:
@@ -256,42 +350,3 @@ func _build_market() -> void:
 		var at := Vector3(float(spec[1]), 10, float(spec[2]))
 		var to_center := Vector2(MARKET_CENTER.x-at.x, MARKET_CENTER.y-at.z)
 		ShopKeeper.place(self, str(spec[0]), Transform3D(Basis(Vector3.UP, atan2(-to_center.x, -to_center.y)), at))
-
-func _build_launchpad() -> void:
-	launchpad = TavernLaunchpad.new()
-	launchpad.position = LAUNCHPAD_AT
-	launchpad.rotation.y = LAUNCHPAD_YAW
-	add_child(launchpad)
-	launchpad.build(false)
-	launchpad.set_locked(not _astral_unlocked)
-	_launch_target = InteractionTarget.new()
-	_launch_target.title = "Rocket to the Nexus"
-	_launch_target.reach = 4.0
-	_launch_target.position = launchpad.anchors.get("board", Vector3(0, 0, 4))
-	launchpad.add_child(_launch_target)
-	_launch_target.activated.connect(_on_launch)
-	set_astral_unlocked(_astral_unlocked)
-
-
-func set_astral_unlocked(unlocked: bool) -> void:
-	_astral_unlocked = unlocked
-	if not is_instance_valid(launchpad): return
-	launchpad.set_locked(not unlocked)
-	_launch_target.description = "Orin's rocket flies straight to the Nexus station in the Astral Reach." if unlocked \
-		else "Chained shut. Finish the Theory of Everything (Astral Frontier) to unlock the way to the stars."
-	_launch_target.action_text = "Fly" if unlocked else "Look"
-
-
-func _on_launch(actor: Node3D) -> void:
-	if not _astral_unlocked or not actor is Player: return
-	var player := actor as Player
-	player.cinematic_locked = true
-	var shots := SpaceCinematic.new()
-	add_child(shots)
-	await shots.rocket_launch(player.camera, launchpad.rocket, "To the Nexus")
-	shots.queue_free()
-	if not is_instance_valid(player): return
-	player.cinematic_locked = false
-	launchpad.rocket.position = Vector3.ZERO
-	launchpad.rocket.set_flame(0.0)
-	portal_entered.emit("astral")

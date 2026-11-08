@@ -1,7 +1,7 @@
 class_name StatusEffects
 extends RefCounted
 ## Temporary effects only. The server grants them; clients mirror their remaining time.
-## Same id + source refreshes. Different sources stack and expire independently.
+## One entry per canonical type. Only a longer remaining duration replaces it.
 signal changed
 const IDS := ["speed", "attack", "dexterity", "defense", "magic", "hp", "mp",
 	"regeneration", "mana_regeneration", "static", "quiet", "burning", "armour_broken", "loot_chance", "loot_tier", "immune", "invincible", "drunk"]
@@ -17,6 +17,9 @@ var entries: Dictionary = {}
 var revision := 0
 var burning_immune := false
 var _burn_elapsed := 0.0
+var _last_beer := -INF
+const BEER_WINDOW := 60.0
+const DRUNK_DURATION := 150.0
 
 static func canonical(id: String) -> String:
 	return ALIASES.get(id.to_lower(), id.to_lower())
@@ -47,7 +50,7 @@ static func normalize(id: String, amount: Variant) -> Variant:
 	if not text.is_valid_float(): return null
 	var number := text.to_float() / (100.0 if percent else 1.0)
 	if not is_finite(number): return null
-	if id in ["static","quiet","burning","armour_broken","immune","invincible"]: return 1.0
+	if id in ["static","quiet","burning","armour_broken","immune","invincible","drunk"]: return 1.0
 	if id in ["loot_chance","loot_tier"]: return clampf(number,0.0,10.0 if id == "loot_chance" else 1.0)
 	if id in ["regeneration","mana_regeneration"]: return clampf(number,0.0,100.0)
 	return clampf(roundf(number),-100000.0,100000.0)
@@ -60,21 +63,30 @@ func add(id: String, duration: Variant, amount: Variant = 1, source := "default"
 	var value: Variant = normalize(id,amount)
 	if value == null: return false
 	if id not in ["immune", "invincible"] and (has_effect("immune") or has_effect("invincible")): return false
+	var now := Net.now()
+	var previous: Dictionary = entries.get(id, {})
+	# A shorter or equal application has no effect, even from another source
+	# or with a larger amount. Duration alone decides which entry wins.
+	if not previous.is_empty() and float(previous.expires)>=now+time: return false
 	if id in ["immune", "invincible"]:
 		for old_key in entries.keys():
 			if harmful(entries[old_key]): entries.erase(old_key)
+	if id=="burning" and (previous.is_empty() or float(previous.expires)<=now): _burn_elapsed = 0.0
+	if not entries.has(id) and entries.size()>=MAX_EFFECTS: return false
 	source = source.left(96)
-	var key := id+":"+source
-	if id == "burning":
-		# One fire per target. A small follow-up hit cannot shorten a heavy burn.
-		key = "burning:fire"
-		var previous: Dictionary = entries.get(key,{})
-		if previous.is_empty() or float(previous.expires)<=Net.now(): _burn_elapsed = 0.0
-		if not previous.is_empty() and float(previous.expires)>=Net.now()+time: return true
-	if not entries.has(key) and entries.size() >= MAX_EFFECTS: return false
-	entries[key] = {key=key,id=id,amount=value,expires=Net.now()+time,duration=time,source=source}
+	entries[id] = {key=id,id=id,amount=value,expires=now+time,duration=time,source=source}
 	_notify()
 	return true
+
+## Called when a beer is finished, not once for each sip. This history lives
+## on the character's effects, shared by ship and city drinks across travel.
+func drink_beer() -> bool:
+	var now := Net.now()
+	if has_effect("drunk") or now-_last_beer<=BEER_WINDOW:
+		_last_beer = -INF
+		return add("drunk", DRUNK_DURATION, 1, "beer")
+	_last_beer = now
+	return false
 
 func remove(id: String, source := "") -> void:
 	id = canonical(id)
@@ -89,6 +101,7 @@ func remove(id: String, source := "") -> void:
 
 func clear() -> void:
 	_burn_elapsed = 0.0
+	_last_beer = -INF
 	if entries.is_empty(): return
 	entries.clear()
 	_notify()
@@ -128,7 +141,7 @@ func has_effect(id: String) -> bool:
 		if e.id == id and float(e.expires)>Net.now(): return true
 	return false
 
-## How many separate doses of `id` are active (drinks stack this way).
+## Each type is either absent or active once.
 func count(id: String) -> int:
 	id = canonical(id)
 	var n := 0
@@ -161,12 +174,19 @@ func wire() -> Array:
 
 func replace_wire(data: Array, age := 0.0) -> void:
 	entries.clear()
-	for row: Array in data.slice(0,MAX_EFFECTS):
-		if row.size()<6 or not str(row[1]) in IDS: continue
-		if burning_immune and str(row[1]) == "burning": continue
-		var left := maxf(0.0,float(row[3])-maxf(0.0,age))
-		if left<=0.0: continue
-		entries[str(row[0])] = {key=str(row[0]),id=str(row[1]),amount=row[2],expires=Net.now()+left,duration=float(row[4]),source=str(row[5])}
+	var now := Net.now()
+	for row: Array in data:
+		if row.size()<6: continue
+		var id := canonical(str(row[1]))
+		if not id in IDS or (burning_immune and id=="burning"): continue
+		var left := float(row[3])-maxf(0.0,age)
+		if not is_finite(left) or left<=0.0: continue
+		left = minf(left, MAX_DURATION)
+		var value: Variant = normalize(id,row[2])
+		if value==null: continue
+		var previous: Dictionary = entries.get(id, {})
+		if not previous.is_empty() and float(previous.expires)>=now+left: continue
+		entries[id] = {key=id,id=id,amount=value,expires=now+left,duration=seconds(row[4]),source=str(row[5]).left(96)}
 	_notify()
 
 func _notify() -> void:
@@ -201,7 +221,7 @@ static func time_text(left: float) -> String:
 
 static func description(e: Dictionary) -> String:
 	if e.id == "burning": return "Burning: 10-15 HP/s, ignores armour. Water extinguishes it."
-	if e.id == "drunk": return "Drunk: the world sways a little. Every drink adds to it."
+	if e.id == "drunk": return "Drunk: the world sways. Another beer refreshes the timer."
 	var amount := str(e.amount)
 	if not e.amount is String:
 		if e.id in ["loot_chance","loot_tier"]: amount = "+%s%%" % String.num(float(e.amount)*100.0,1)

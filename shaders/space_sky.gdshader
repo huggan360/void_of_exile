@@ -53,8 +53,10 @@ void sky() {
 	vec3 ray = normalize(EYEDIR);
 	vec3 sun = normalize(sun_dir);
 	float facing = max(dot(ray, sun), 0.0);
-	// The sun itself is a real body now (SpaceBackdrop); the sky keeps a faint warm haze toward it.
+	// The sun is far away: a small bright disc in the sky with a soft corona and warm haze.
 	vec3 sunlight = vec3(1.0, 0.7, 0.45) * pow(facing, 40.0) * 0.1;
+	sunlight += vec3(1.0, 0.82, 0.55) * (pow(facing, 900.0) * 1.6 + pow(facing, 120.0) * 0.25);
+	sunlight += vec3(1.0, 0.94, 0.8) * smoothstep(0.99955, 0.99975, facing) * 7.0;
 	if (AT_HALF_RES_PASS || AT_CUBEMAP_PASS) {
 		COLOR = mix(nebula(ray), day_sky(ray, sun), air_mix) + sunlight * 0.3;
 	} else {

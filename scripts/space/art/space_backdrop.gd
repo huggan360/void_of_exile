@@ -7,7 +7,7 @@ extends Node3D
 ## Reach. On a planet's ground the fog and light take on that world's air.
 
 ## Toward the Haven sun (world space). The sky draws it; planets light by it.
-const SUN_DIR := Vector3(-0.47, 0.32, -0.83)  # toward SpaceLayout.SUN_CENTER
+const SUN_DIR := Vector3(-0.47, 0.32, -0.83)  # the far sun, drawn by the sky
 const SPACE_FOG := Color(0.004, 0.005, 0.011)
 const FOG_BEGIN := 2600.0
 const FOG_END := 15000.0
@@ -37,7 +37,7 @@ func build(server: bool) -> void:
 	_pass_lanterns()
 	_dust_field()
 	_edge()
-	_build_sun()
+	_build_surface()
 	var sun := DirectionalLight3D.new()
 	_light = sun
 	sun.name = "HavenSunlight"
@@ -120,7 +120,7 @@ func set_air(air: Dictionary, amount: float, up := Vector3.UP) -> void:
 ## Sunlight comes from the burning sun itself, as seen from the eye; on a
 ## planet's ground it swings toward a friendly afternoon over the landing site.
 func _aim_sun(eye: Vector3) -> void:
-	var toward := (SpaceLayout.SUN_CENTER-eye).normalized()
+	var toward := SUN_DIR.normalized()
 	if SpaceLayout.pocket_at(eye)>=0:
 		# Rooms are far from everything: they keep the light of the sky above.
 		toward = SUN_DIR.normalized()
@@ -328,33 +328,28 @@ static func _soft_dot() -> Texture2D:
 	return ImageTexture.create_from_image(image)
 
 ## The burning sun: churning plasma and a flickering corona.
-func _build_sun() -> void:
+## The Surface below all of Space: a sphere so big its top reads as a flat
+## world of seas, meadows and clouds, its air glowing blue at the horizon.
+const SURFACE_RADIUS := 600000.0
+
+func _build_surface() -> void:
 	var body := MeshInstance3D.new()
-	body.name = "Sun"
+	body.name = "Surface"
 	var sphere := SphereMesh.new()
-	sphere.radius = SpaceLayout.SUN_RADIUS
-	sphere.height = SpaceLayout.SUN_RADIUS*2.0
-	sphere.radial_segments = 96
-	sphere.rings = 48
+	sphere.radius = SURFACE_RADIUS
+	sphere.height = SURFACE_RADIUS*2.0
+	sphere.radial_segments = 256
+	sphere.rings = 128
 	body.mesh = sphere
-	var plasma := ShaderMaterial.new()
-	plasma.shader = preload("res://shaders/space_sun.gdshader")
-	body.material_override = plasma
-	body.position = SpaceLayout.SUN_CENTER
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://shaders/space_surface.gdshader")
+	material.set_shader_parameter("sun_dir", SUN_DIR.normalized())
+	material.set_shader_parameter("surface_y", SpaceLayout.SURFACE_Y)
+	body.material_override = material
+	body.position = Vector3(0, SpaceLayout.SURFACE_Y-SURFACE_RADIUS, 0)
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	body.extra_cull_margin = 16384.0
 	add_child(body)
-	var corona := MeshInstance3D.new()
-	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE
-	corona.mesh = quad
-	var crown := ShaderMaterial.new()
-	crown.shader = preload("res://shaders/space_corona.gdshader")
-	corona.material_override = crown
-	corona.position = SpaceLayout.SUN_CENTER
-	corona.scale = Vector3.ONE*SpaceLayout.SUN_RADIUS*6.0
-	corona.custom_aabb = AABB(-Vector3.ONE*2.0, Vector3.ONE*4.0)
-	corona.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(corona)
 
 ## The edge of the Reach: a red ward on the world sphere, seen only near it.
 func _edge() -> void:

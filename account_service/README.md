@@ -63,3 +63,17 @@ offers are the same on every server and in Singleplayer.
 
 The game names the shops and their keepers in `scripts/game/shops.gd` (keep the
 ids in step). Put a shop anywhere with `ShopKeeper.place(parent, "wizard", transform)`.
+
+## Account-wide ship fleet
+
+`POST /server/fleet` manages individual paid ships in `fleet_ships` (global integer IDs), independent of character and campaign saves. The game server authenticates with its normal server key. Singleplayer keys retain their account restriction.
+
+- `operation=list|buy|deploy` requires the owning character's live lease. A new ship costs 500 Dots. Purchases use an idempotent `request_id` and charge/create in one SQLite transaction.
+- `deploy` claims an available ship with an unguessable deployment token and a lease. Only one game server can hold the ship at a time. Stored ships are free to deploy, and destroyed ships cannot be claimed again.
+- `heartbeat|store|destroy` requires both the holding server identity and deployment token. This still works while the owner is disconnected and friends are aboard. Tokens never go to game clients.
+- Repeated successful store/destroy operations are idempotent, including after a lost acknowledgement. A newer deployment invalidates the old token. Expired deployments recover to storage; game servers remove their old hull before a lease can be reused.
+- Legacy `reach_ship` ownership migrates once per account. Existing character inventory, Dots and campaigns are preserved.
+
+The game reserves each launch pad across deployment requests. Landed/docked ships return to storage after 120 seconds with nobody aboard or within 120 metres. Flight and spacewalking do not trigger that timer. Owners can also store an empty landed ship from the fleet panel or the interaction beside its hatch. Storage preserves hull condition, parts, boost and beer levels. Fleet identity is preserved across Surface/Space transfers.
+
+Headless checks: `python tools/session_qa/test_fleet_store.py`, `tools/session_qa/fleet_lifetime.tscn` and the isolated account-service/game-server scenario `tools/session_qa/fleet_online.tscn`. The online fixture must use its temporary account database, not live player accounts.

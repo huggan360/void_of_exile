@@ -92,13 +92,6 @@ func _draw() -> void:
 	draw_string(bold, _point(Vector3(-9000, 0, 30000), center), "THE GLOAM", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(1, 0.45, 0.55, 0.9))
 	draw_string(bold, _point(Vector3(-15000, 0, 18600), center), "THE SHARDFIELD", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.55, 1, 0.9, 0.9))
 	draw_string(bold, _point(Vector3(-9000, 0, -9000), center), "THE HAVEN", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.7, 1, 0.65, 0.9))
-	# The sun.
-	var sun := _point(SpaceLayout.SUN_CENTER, center)
-	var sun_r := maxf(10.0, SpaceLayout.SUN_RADIUS*zoom)
-	for k in 6: draw_circle(sun, sun_r*(1.9-k*0.15), Color(1.0, 0.5, 0.15, 0.05))
-	draw_circle(sun, sun_r, Color(1.0, 0.6, 0.2))
-	draw_circle(sun, sun_r*0.7, Color(1.0, 0.85, 0.5))
-	draw_string(bold, sun+Vector2(sun_r+8, 5), "The Sun  %s  -  burns" % _distance(SpaceLayout.SUN_CENTER, center), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(1, 0.7, 0.4))
 	# Planets, far ones first so near ones overlap them.
 	var order: Array = SpaceLayout.PLANETS.duplicate()
 	order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _depth(a.center, center)<_depth(b.center, center))
