@@ -1,28 +1,26 @@
 class_name SpacePlanet
 extends Node3D
-## Radial landing gardens on eight distinct fairytale worlds.
+## One of the Reach's worlds: streamed terrain (PlanetTerrain), its air seen
+## from orbit, a far gloria, the landing pad, the story landmarks and the
+## world's plants, crystals and ruins (PlanetFlora, the realm's voxel obstacles).
 
 var anchors: Dictionary = {}
-static var _surface_mesh: SphereMesh
+var terrain: PlanetTerrain
+var flora: PlanetFlora
 static var _shell_mesh: SphereMesh
-static var _materials: Dictionary = {}
-static var _atmospheres: Dictionary = {}
+static var _quad: QuadMesh
 var _planet: Dictionary
 var _pad: Transform3D
 var _radius: float
 var _colors: Array[Color] = []
 var _server := false
+var _atmosphere: ShaderMaterial
+var _was_near := false
+var _air_strength := 1.0
+var _ground_at := Vector3.INF
 
-const PLACES := {
-	"verdance": ["treehouse_village", "mushroom_grove", "firefly_shrine", "elder_tree"],
-	"rosamund": ["petal_shrine", "rose_crystal_garden", "fairy_court", "wishing_stones"],
-	"amberfall": ["sleepy_market", "lantern_tower", "honey_well", "dune_caravan"],
-	"tidewell": ["stilt_village", "lighthouse", "fishing_jetty", "shell_shrine"],
-	"shardheart": ["singing_spires", "heart_shrine", "resonance_circle", "crystal_nest"],
-	"hollowmoon": ["observatory_ruin", "bone_forest", "ghost_lanterns", "fallen_astrolabe"],
-	"mawgrave": ["brood_hive", "spore_garden", "fungal_altar", "hollow_nest"],
-	"pale_eye": ["obsidian_crown", "storm_observatory", "eye_shrine", "last_beacon"],
-}
+## Kept for older callers: the story places per planet.
+const PLACES := SpaceLayout.PLACES
 
 func build(planet: Dictionary, server: bool) -> void:
 	for child in get_children():
@@ -34,92 +32,114 @@ func build(planet: Dictionary, server: bool) -> void:
 	_pad = SpaceLayout.pad_frame(planet)
 	_pad.origin -= planet.center as Vector3
 	_colors.clear()
-	if not server:
-		for hex: String in planet.palette: _colors.append(Color(hex))
+	for hex: String in planet.palette: _colors.append(Color(hex))
 	anchors = {pad = _pad, spots = {}}
-	var ground := StaticBody3D.new()
-	ground.collision_layer = Player.TERRAIN_LAYER
-	ground.collision_mask = 0
-	var shape := SphereShape3D.new()
-	shape.radius = _radius
-	var collision := CollisionShape3D.new()
-	collision.shape = shape
-	ground.add_child(collision)
-	add_child(ground)
-	if not server: _globe()
-	_landing()
-	var offsets: Array[Vector2] = [Vector2(-40, -30), Vector2(48, -28), Vector2(-50, 53), Vector2(43, 78)]
-	var names: Array = PLACES[planet.id]
+	var names: Array = SpaceLayout.PLACES[planet.id]
 	for i in names.size():
-		var spot := _surface(offsets[i])
+		var spot := SpaceLayout.place_frame(planet, SpaceLayout.PLACE_OFFSETS[i])
 		anchors.spots[names[i]] = spot
+	if server: return
+	terrain = PlanetTerrain.new()
+	terrain.name = "Terrain"
+	add_child(terrain)
+	terrain.setup(planet)
+	_air()
+	_landing()
+	for i in names.size():
 		var place := Node3D.new()
 		place.name = names[i]
-		place.transform = _surface(offsets[i] + Vector2(0, -20))
+		# Just behind the search spot, still on its flattened ground.
+		place.transform = SpaceLayout.place_frame(planet, SpaceLayout.PLACE_OFFSETS[i]+Vector2(0, -12))
+		place.scale = Vector3.ONE*1.3
 		add_child(place)
-		var art := NexusStation.Brush.new(place, server, 700.0)
+		var art := NexusStation.Brush.new(place, false, 1200.0)
 		_landmark(art, i)
 		art.lantern(Vector3(-7, 0, 4), 3.3)
 		art.finish()
-	_scatter()
+	flora = PlanetFlora.new()
+	flora.name = "Flora"
+	add_child(flora)
+	flora.build(planet)
+	var town := PlanetTown.new()
+	town.name = "Town"
+	town.world = get_parent() as SpaceWorld
+	add_child(town)
+	town.build(planet)
 
-func _surface(offset: Vector2) -> Transform3D:
-	var distance := offset.length()
-	var tangent := (_pad.basis.x * offset.x + _pad.basis.z * offset.y).normalized()
-	var normal := _pad.basis.y if distance < 0.001 else _pad.basis.y * cos(distance / _radius) + tangent * sin(distance / _radius)
-	var right := (_pad.basis.x - normal * normal.dot(_pad.basis.x)).normalized()
-	return Transform3D(Basis(right, normal, right.cross(normal)), normal * _radius)
+func _process(_delta: float) -> void:
+	if terrain==null: return
+	var world := get_parent()
+	var local: Node3D = world.get("local_player") if world else null
+	terrain.focus = local
+	var near := is_instance_valid(local) and local.global_position.distance_to(global_position)<_radius+SpaceLayout.max_height(_planet)+80.0
+	# Arriving on the ground, or moved far (hatch, teleport): build it under the feet now.
+	if near and (not _was_near or local.global_position.distance_to(_ground_at)>30.0):
+		terrain.ensure_ground(local.global_position)
+		_ground_at = local.global_position
+	if near and flora: flora.update_collision(global_transform.affine_inverse()*local.global_position)
+	_was_near = near
+	if _atmosphere:
+		_atmosphere.set_shader_parameter("sun_dir", SpaceBackdrop.sun_direction())
+		# Inside the air the sky itself turns to day; the shell would only fog it.
+		_atmosphere.set_shader_parameter("strength", _air_strength*(1.0-smoothstep(0.0, 0.45, SpaceBackdrop.air_amount(_planet.id))))
 
-func _globe() -> void:
-	if _surface_mesh == null:
-		_surface_mesh = SphereMesh.new()
-		_surface_mesh.radius = 1.0
-		_surface_mesh.height = 2.0
-		_surface_mesh.radial_segments = 256
-		_surface_mesh.rings = 128
+func _air() -> void:
+	if _shell_mesh==null:
 		_shell_mesh = SphereMesh.new()
 		_shell_mesh.radius = 1.0
 		_shell_mesh.height = 2.0
-		_shell_mesh.radial_segments = 96
-		_shell_mesh.rings = 48
-	var id: String = _planet.id
-	if not _materials.has(id):
-		var material := ShaderMaterial.new()
-		material.shader = load("res://shaders/space_planet.gdshader")
-		for i in 5:
-			material.set_shader_parameter(["earth", "bright", "shade", "magic", "accent"][i], _colors[i])
-		material.set_shader_parameter("radius", _radius)
-		material.set_shader_parameter("pad_normal", _pad.basis.y)
-		material.set_shader_parameter("biome", PLACES.keys().find(id))
-		_materials[id] = material
-		var atmosphere := ShaderMaterial.new()
-		atmosphere.shader = load("res://shaders/space_atmosphere.gdshader")
-		atmosphere.set_shader_parameter("tint", _colors[3])
-		atmosphere.set_shader_parameter("strength", 0.34 if _planet.region == "haven" else 0.18)
-		_atmospheres[id] = atmosphere
-	var surface := MeshInstance3D.new()
-	surface.mesh = _surface_mesh
-	surface.scale = Vector3.ONE * _radius
-	surface.material_override = _materials[id]
-	# Unit sphere displacement is converted to metres before instance scaling.
-	surface.custom_aabb = AABB(-Vector3.ONE * 1.05, Vector3.ONE * 2.1)
-	add_child(surface)
+		_shell_mesh.radial_segments = 64
+		_shell_mesh.rings = 32
+		_quad = QuadMesh.new()
+		_quad.size = Vector2.ONE
+	var thick := SpaceLayout.air_height(_planet)
+	_atmosphere = ShaderMaterial.new()
+	_atmosphere.shader = preload("res://shaders/planet_atmosphere.gdshader")
+	_atmosphere.set_shader_parameter("sky", _colors[5])
+	_atmosphere.set_shader_parameter("dusk", _colors[4].lerp(Color("ff9a6a"), 0.5))
+	_atmosphere.set_shader_parameter("planet_radius", _radius)
+	_atmosphere.set_shader_parameter("atmo_radius", _radius+thick)
+	_air_strength = 1.0 if _planet.region=="haven" else 0.75
+	_atmosphere.set_shader_parameter("strength", _air_strength)
 	var shell := MeshInstance3D.new()
+	shell.name = "Air"
 	shell.mesh = _shell_mesh
-	shell.scale = Vector3.ONE * (_radius + 3.7)
-	shell.material_override = _atmospheres[id]
+	shell.scale = Vector3.ONE*(_radius+thick)
+	shell.material_override = _atmosphere
 	shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	shell.sorting_offset = -10.0
 	add_child(shell)
-	if id == "tidewell":
+	var halo := MeshInstance3D.new()
+	halo.name = "Gloria"
+	halo.mesh = _quad
+	halo.scale = Vector3.ONE*_radius*4.2
+	var glow := ShaderMaterial.new()
+	glow.shader = preload("res://shaders/planet_halo.gdshader")
+	glow.set_shader_parameter("tint", _colors[5])
+	glow.set_shader_parameter("planet_radius", _radius)
+	glow.set_shader_parameter("strength", 0.55 if _planet.region=="haven" else 0.35)
+	halo.material_override = glow
+	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	halo.custom_aabb = AABB(-Vector3.ONE*3.0, Vector3.ONE*6.0)
+	add_child(halo)
+	if bool(_planet.terrain.get("sea", false)):
 		var sea := MeshInstance3D.new()
-		sea.mesh = _shell_mesh
-		sea.scale = Vector3.ONE * (_radius - 0.18)
+		sea.name = "Sea"
+		var mesh := SphereMesh.new()
+		mesh.radius = _radius
+		mesh.height = _radius*2.0
+		mesh.radial_segments = 160
+		mesh.rings = 80
+		sea.mesh = mesh
 		var water := StandardMaterial3D.new()
-		water.albedo_color = _colors[0]
+		water.albedo_color = Color(_colors[0], 0.86)
+		water.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		water.emission_enabled = true
-		water.emission = _colors[1] * 0.12
-		water.roughness = 0.28
+		water.emission = _colors[1]*0.1
+		water.roughness = 0.12
+		water.metallic_specular = 0.8
 		sea.material_override = water
+		sea.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(sea)
 
 func _landing() -> void:
@@ -127,42 +147,40 @@ func _landing() -> void:
 	landing.name = "LandingPad"
 	landing.transform = _pad
 	add_child(landing)
-	var art := NexusStation.Brush.new(landing, _server, 700.0)
+	var art := NexusStation.Brush.new(landing, false, 1500.0)
 	var timber := Color("785137")
 	var brass := Color("d6ad67")
-	art.round_part(Vector3(0, -0.2, 0), 14, 0.4, timber, true)
-	# Overlapping shallow steps meet even the smallest sphere without a cliff.
-	for i in range(12, 0, -1):
-		var top := -0.25 * i
-		art.round_part(Vector3(0, top - 0.22, 0), 14 + i * 0.45, 0.44, timber.darkened(0.12), true)
-	if not _server:
-		for i in 48:
-			var angle := i * TAU / 48
-			art.box(Vector3(sin(angle) * 13.3, 0.03, cos(angle) * 13.3), Vector3(0.45, 0.06, 0.45), brass, false, 0.9)
-		for i in 9:
-			art.box(Vector3(-3.2 + i * 0.8, 0.025, 0), Vector3(0.08, 0.04, 7), brass)
-	for at: Vector3 in [Vector3(-10, 0, -7), Vector3(10, 0, -7), Vector3(-10, 0, 7), Vector3(10, 0, 7)]:
-		art.lantern(at, 3.5)
-	art.round_part(Vector3(0, 0.45, -11), 0.9, 0.9, brass, true)
-	art.crystal(Vector3(0, 0.9, -11), 2.3, Color("85efb0"))
+	# Broad timber pad on the flattened ground, ringed in brass and lanterns.
+	art.round_part(Vector3(0, -0.4, 0), 27, 0.9, timber, true)
+	art.round_part(Vector3(0, 0.06, 0), 27.6, 0.06, brass)
+	art.round_part(Vector3(0, 0.08, 0), 26.4, 0.04, timber.lightened(0.06))
+	for i in 64:
+		var angle := i*TAU/64
+		art.box(Vector3(sin(angle)*25.6, 0.12, cos(angle)*25.6), Vector3(0.6, 0.08, 0.6), brass, false, 0.9)
+	for i in 13:
+		art.box(Vector3(-6+i, 0.11, 0), Vector3(0.12, 0.05, 12), brass)
+	for i in 8:
+		var angle := i*TAU/8+0.2
+		art.lantern(Vector3(sin(angle)*23, 0, cos(angle)*23), 4.2)
+	art.round_part(Vector3(0, 0.6, -21), 1.2, 1.2, brass, true)
+	art.crystal(Vector3(0, 1.2, -21), 3.2, _colors[3].lerp(Color("85efb0"), 0.5))
 	art.finish()
-	if not _server:
-		var light := OmniLight3D.new()
-		light.position = Vector3(0, 4, -8)
-		light.light_color = Color("ffd6a0")
-		light.light_energy = 1.2
-		light.omni_range = 24
-		light.distance_fade_enabled = true
-		light.distance_fade_begin = 100
-		light.distance_fade_length = 60
-		light.shadow_enabled = false
-		landing.add_child(light)
+	var light := OmniLight3D.new()
+	light.position = Vector3(0, 6, -10)
+	light.light_color = Color("ffd6a0")
+	light.light_energy = 1.4
+	light.omni_range = 36
+	light.distance_fade_enabled = true
+	light.distance_fade_begin = 220
+	light.distance_fade_length = 80
+	light.shadow_enabled = false
+	landing.add_child(light)
 
 func _landmark(art: NexusStation.Brush, index: int) -> void:
 	var timber := Color("75503d")
 	var brass := Color("caa46a")
-	var primary := Color("8ed0aa") if _server else _colors[0]
-	var magic := Color("a4e3bc") if _server else _colors[3]
+	var primary := _colors[0]
+	var magic := _colors[3]
 	match String(_planet.id):
 		"verdance":
 			if index == 1:
@@ -275,40 +293,3 @@ func _observatory(art: NexusStation.Brush, stone: Color, magic: Color) -> void:
 	art.box(Vector3(0, 1.5, 0), Vector3(1.5, 3, 1.5), stone, true)
 	art.part("cylinder", Transform3D(Basis(Vector3.RIGHT, 0.9), Vector3(0, 4, 0)), Vector3(2, 7, 2), Color("947c53"), true)
 	art.part("sphere", Transform3D(Basis.IDENTITY, Vector3(0, 6.2, 2.8)), Vector3.ONE * 1.5, magic, false, 1.5)
-
-func _scatter() -> void:
-	var grove := Node3D.new()
-	grove.name = "SurfaceGardens"
-	grove.transform = _pad
-	add_child(grove)
-	var art := NexusStation.Brush.new(grove, _server, 700.0)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = String(_planet.id).hash()
-	for i in 54:
-		var angle := i * 2.39996
-		var arc := 30 + sqrt(float(i) / 54.0) * 112
-		var offset := Vector2(cos(angle), sin(angle)) * arc
-		var clear := false
-		for spot: Transform3D in anchors.spots.values():
-			if spot.origin.distance_to(_surface(offset).origin) < 23: clear = true
-		if clear: continue
-		var frame := _pad.affine_inverse() * _surface(offset)
-		var height := rng.randf_range(2.5, 7.0)
-		var color := Color("738566") if _server else _colors[i % 2]
-		match String(_planet.id):
-			"verdance", "rosamund":
-				art.part("box", frame.translated_local(Vector3.UP * height * 0.4), Vector3(0.65, height * 0.8, 0.65), Color("75503d"), true)
-				art.part("box", frame.translated_local(Vector3.UP * height * 0.9), Vector3(height * 0.8, height * 0.5, height * 0.8), color)
-			"amberfall":
-				art.part("box", frame.translated_local(Vector3.UP * 1.2), Vector3(0.18, 2.4, 0.18), Color("8a6944"))
-				art.part("box", frame.translated_local(Vector3.UP * 2.5), Vector3(0.6, 0.8, 0.6), Color("ffd58e"), false, 2.0)
-			"tidewell":
-				art.part("box", frame.translated_local(Vector3.UP * 1.4), Vector3(0.5, 2.8, 0.5), Color("679c63"))
-				art.part("box", frame.translated_local(Vector3.UP * 2.8), Vector3(3.5, 0.3, 3.5), Color("82c77d"))
-			"mawgrave":
-				art.part("cylinder", frame.translated_local(Vector3.UP * height * 0.35), Vector3(0.8, height * 0.7, 0.8), color, true)
-				art.part("sphere", frame.translated_local(Vector3.UP * height * 0.75), Vector3(height, height * 0.3, height), color, false, 0.12)
-			_:
-				art.part("cone", frame.translated_local(Vector3.UP * height * 0.5), Vector3(height * 0.4, height, height * 0.4), color, false, 0.25)
-				art.part("box", frame.translated_local(Vector3.UP * height * 0.2), Vector3(height * 0.15, height * 0.4, height * 0.15), color, true)
-	art.finish()

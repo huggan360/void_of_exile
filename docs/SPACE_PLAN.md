@@ -99,3 +99,54 @@ Not yet (moved to pass 2 or later in pass 1):
 - Boss kill is not saved in `run.astral`; resuming a paused run after the kill means fighting her
   again.
 - The Convergence exit portal still returns to the realm; pass 2 retargets it to the Nexus.
+
+## Pass 2 status
+
+Built as planned (see `docs/SPACE_HANDOVER.md` for files): the Nexus, travel
+cutscenes, the Tavern launchpad, battleships with seats and cameras, the space
+world and five Reach tales. Online docking, the launchpad and First Light were
+verified end to end.
+
+## Pass 3 - the big Reach rework
+
+From the user's notes after playing pass 2:
+- The Reach is a sphere of 42 km (`SpaceLayout.WORLD_RADIUS`). Near its edge the
+  ship's charm turns her back (`SpaceShip.step`); a red hex ward shows on the
+  sphere close to it, and the star chart draws it as a red circle.
+- Planets are 300 to 1300 m worlds with real terrain (`SpaceLayout.surface_height`,
+  shared by server and art), streamed in LOD chunks with collision near the crew
+  (`PlanetTerrain`), painted by `PlanetPalette`, and covered in the realm's voxel
+  obstacles (`PlanetFlora`).
+- Air: from space a thin glowing rim and a far gloria; diving in, the planet's day
+  sky replaces space and the sun swings to daylight over the landing site
+  (`SpaceBackdrop.set_air`). No blanket fog.
+- Space is darker and mysterious: depth fog hides far things, drifting dust shows
+  speed, the Shardfield's rocks fade in by distance. The Nexus floats on a voxel
+  rock with glowing crystals.
+- The battleship is a sky-galleon built around its walk-in room; its windows show
+  live views of space (`ShipWindowView`), and the pilot can fly from the helm in
+  first person (V). C toggles the pulse drive for long trips.
+- Ships land anywhere: flying low over a planet sets the ship down on the nearest
+  level, clear ground (`PlanetLanding`), X lands too, the pad is used near it.
+- Brood ships (`BroodShip`): skiffs make attack runs, void eels circle and lunge,
+  carriers launch skiffs. They never enter a planet's air and leave landed ships
+  alone.
+- The large map (M) fits between the HUD bars and dims the world; in space it is a
+  tilted star chart (drag to turn, wheel to zoom).
+
+## Pass 4 - life aboard and in the Reach
+
+- Ship parts (`SpaceShip.PARTS`): engines and hull plating mended outside (airlock or on the ground),
+  helm, cannons and heart crystal inside. Hits wear the nearest part; damaged parts slow, weaken or
+  jam the ship and smoke or burn (`ShipDamage`). Mending a part restores it and 12% hull.
+- Aboard, the HUD bars are the ship's hull and boost; on a spacewalk your health and the jetpack.
+  No magic or weapons aboard. A lost ship leaves the crew floating; R only calls Orin's rescue skiff
+  for the stranded (15 s); anywhere else in the Reach R does nothing.
+- Airlock on the port side, spacewalks with jetpack, X clips a line to the ship (rides along).
+- Ship tavern: armchairs (X drink, C cigar), sloshing beer glasses (`ShipTavern`), a beer tap.
+  Drinks stack the `drunk` status effect (badge, walking sway, screen swirl).
+- Helmet domes in the Reach and the Theory (`SpaceHelmet`), the standard quest marker for marks,
+  hit glitches and health bars on brood ships, turret cameras past the barrels.
+- The plasma sun (`SpaceLayout.SUN_CENTER`) burns ships that come too close.
+- A town on every planet (`SpaceLayout.TOWNS`, `PlanetTown`): townsfolk, a smith (sell items for
+  Dots) and a shipwright (a ship for 500 Dots, also at the Nexus table; lent free on a Reach tale).

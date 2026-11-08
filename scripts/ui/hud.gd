@@ -19,6 +19,9 @@ extends ResponsiveUILayer
 
 const SLOTS := [["weapon", "Bow"], ["armor", "Cloak"], ["spell", "Spell"], ["bonus", "Bonus"]]
 const MARGIN := 18
+## Large map: screen height kept free (top bar, health bars, hint) and the downward nudge.
+const MAP_RESERVED := 290.0
+const MAP_SHIFT := 6.0
 const HEART := ["..o.o..", ".oRoRo.", "oRWRRRo", "oRRRRRo", ".oRRRo.", "..oRo..", "...o..."]
 const STAR := ["...o...", "..oYo..", "ooYWYoo", "oYYYYYo", ".oYYYo.", "oYo.oYo", "oo...oo"]
 
@@ -26,6 +29,14 @@ var stats: PlayerStats
 var player: Player
 var toasts := ToastFeed.new()
 var minimap := Minimap.new()
+var _map_backdrop := ColorRect.new()
+var _drunk_overlay := ColorRect.new()
+var _drunk := 0.0
+## While aboard or out on a spacewalk the bars show other things (set each
+## frame by SpaceTraversal): {hp = [value, max, caption, color, light], mp = [...]}.
+var bar_override := {}
+var _bars_restyled := false
+var _map_hint: Label
 var buff_strip := BuffStrip.new()
 var _bars: Control
 
@@ -138,7 +149,26 @@ func _ready() -> void:
 	UIStyle.add_shadow(_mp_bar)
 
 
-	# Bottom right: minimap.
+	# Bottom right: minimap. The large map (M) dims the world behind it.
+	_map_backdrop.color = Color(0.02, 0.02, 0.05, 0.62)
+	_map_backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_map_backdrop.hide()
+	root.add_child(_map_backdrop)
+	root.move_child(_map_backdrop, 0)  # under every HUD element, over the world
+	# Drunk: a swirl over the world only, under the HUD.
+	_drunk_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_drunk_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var swirl := ShaderMaterial.new()
+	swirl.shader = preload("res://shaders/drunk_swirl.gdshader")
+	_drunk_overlay.material = swirl
+	_drunk_overlay.hide()
+	root.add_child(_drunk_overlay)
+	root.move_child(_drunk_overlay, 0)
+	_map_hint = UIStyle.label("M: close map  -  mouse wheel: zoom", 16, UIStyle.TEXT)
+	_map_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_map_hint.hide()
+	_map_backdrop.add_child(_map_hint)
 	_place_minimap()
 	minimap.player = player
 	root.add_child(minimap)
@@ -266,14 +296,22 @@ func _update_binding_hints() -> void:
 ## Bottom right normally; large and centred while the map is open.
 func _place_minimap() -> void:
 	var span := minimap.custom_minimum_size
+	_map_backdrop.visible = minimap.expanded
+	_map_hint.visible = minimap.expanded
 	if minimap.expanded:
+		# Centred in the band between the top bar and the health bars.
 		minimap.set_anchors_preset(Control.PRESET_CENTER)
 		minimap.grow_horizontal = Control.GROW_DIRECTION_BOTH
 		minimap.grow_vertical = Control.GROW_DIRECTION_BOTH
 		minimap.offset_left = -span.x * 0.5
-		minimap.offset_top = -span.y * 0.5
+		minimap.offset_top = -span.y * 0.5 + MAP_SHIFT
 		minimap.offset_right = span.x * 0.5
-		minimap.offset_bottom = span.y * 0.5
+		minimap.offset_bottom = span.y * 0.5 + MAP_SHIFT
+		_map_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		_map_hint.offset_left = -300
+		_map_hint.offset_right = 300
+		_map_hint.offset_top = span.y * 0.5 + MAP_SHIFT + 10
+		_map_hint.offset_bottom = span.y * 0.5 + MAP_SHIFT + 34
 		return
 	minimap.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	minimap.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -290,7 +328,8 @@ func toggle_map() -> void:
 		return
 	if not minimap.expanded and not minimap.visible: return  # worlds without a planar map
 	var screen := minimap.get_parent_control().size if minimap.get_parent_control() else get_viewport().get_visible_rect().size
-	var art := floorf(minf(screen.x, screen.y) * 0.78 / PixelArt.SCALE)
+	# Leave room for the account bar above and the health bars and hint below.
+	var art := floorf(minf(screen.x * 0.8, screen.y - MAP_RESERVED) / PixelArt.SCALE)
 	minimap.set_expanded(not minimap.expanded, maxf(Minimap.ART_PIXELS, art))
 	_place_minimap()
 
@@ -387,6 +426,23 @@ func add_centered(panel: Control) -> void:
 
 
 ## Where you are (kept for debugging; the top of the screen shows the account bar).
+func _update_bars() -> void:
+	if bar_override.is_empty():
+		if _bars_restyled:
+			_bars_restyled = false
+			_hp_bar.restyle(UIStyle.HP, UIStyle.HP_LIGHT, "")
+			_mp_bar.restyle(UIStyle.MAGIC, UIStyle.MAGIC_LIGHT, "")
+		_hp_bar.set_values(stats.hp, stats.max_hp)
+		_mp_bar.set_values(stats.mp, stats.max_mp)
+		return
+	_bars_restyled = true
+	for pair: Array in [[_hp_bar, bar_override.get("hp", [])], [_mp_bar, bar_override.get("mp", [])]]:
+		var bar: StatBar = pair[0]
+		var spec: Array = pair[1]
+		if spec.size()<5: continue
+		bar.restyle(spec[3], spec[4], str(spec[2]))
+		bar.set_values(float(spec[0]), float(spec[1]))
+
 func set_location(text: String) -> void:
 	_where = text
 
@@ -433,8 +489,10 @@ func _profile_process(_delta: float) -> void:
 	else:
 		buff_strip.position = Vector2(start_x,_ui_root.size.y-MARGIN)
 		buff_strip.fit_gap(end_x-start_x)
-	_hp_bar.set_values(stats.hp, stats.max_hp)
-	_mp_bar.set_values(stats.mp, stats.max_mp)
+	_drunk = move_toward(_drunk, minf(stats.buffs.count("drunk"), 6.0)/3.0, _delta*0.4)
+	_drunk_overlay.visible = _drunk>0.01
+	if _drunk_overlay.visible: (_drunk_overlay.material as ShaderMaterial).set_shader_parameter("strength", _drunk)
+	_update_bars()
 	# The backpack shows while Tab is held or you stand on a loot bag (with
 	# the bag under it), and stays open during a drag.
 	var dragging := get_viewport().gui_is_dragging()

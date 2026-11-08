@@ -91,6 +91,29 @@ func _run() -> void:
 	player.global_position = space.hatch_position(ship)
 	space.request(["board", ship.id])
 	check(SpaceLayout.pocket_at(player.global_position)==ship.slot, "boarding again from the planet")
+	# Free landing: low over open ground far from the pad, the ship sets down
+	# by itself on a clear, level spot; brood leave a landed ship alone.
+	space.request(["sit", "pilot"])
+	var far_dir := (verdance.pad as Vector3).normalized().cross(Vector3.UP).normalized()
+	var far_ground := SpaceLayout.surface_point(verdance, (verdance.center as Vector3)+far_dir)
+	ship.mode = "flying"
+	ship.land_armed = true
+	ship.speed = 60.0
+	ship.xform = Transform3D(Basis.looking_at(far_dir.cross(Vector3.FORWARD).normalized(), far_dir), far_ground+far_dir*110.0)
+	var waited_land := 0.0
+	while ship.mode!="landed" and waited_land<15.0:
+		waited_land += get_process_delta_time()
+		await get_tree().process_frame
+	var site := ship.xform.origin-(verdance.center as Vector3)
+	check(ship.mode=="landed" and ship.planet=="verdance", "flying low over a planet lands the ship by itself (%s)" % ship.mode)
+	check(site.normalized().angle_to((verdance.pad as Vector3).normalized())*float(verdance.radius)>300.0, "it lands where it is, not at the pad")
+	check(not PlanetFlora.blocked(verdance, site.normalized()*(float(verdance.radius)+SpaceLayout.surface_height(verdance, site.normalized())), 15.0), "the landing spot is clear of trees and rocks")
+	await _shot("landed_free", 40)
+	var hull_before := ship.hp
+	space.foes.ambushes.append({at = ship.xform.origin+far_dir*200.0, kind = "brood_skiff", count = 3})
+	await get_tree().create_timer(4.0).timeout
+	check(ship.hp==hull_before and space.foes.foes.values().all(func(f: Dictionary) -> bool: return int(f.target)!=ship.id), "the brood leave a landed ship alone")
+	space.request(["stand"])
 	space.request(["sit", "turret_left"])
 	ship.mode = "flying"
 	ship.xform = Transform3D(Basis.IDENTITY, SpaceLayout.SHARDFIELD.center+Vector3(300, -80, -900))
@@ -105,9 +128,66 @@ func _run() -> void:
 	traversal.toggle_map()
 	await _shot("map", 10)
 	traversal.toggle_map()
-	space.request(["home"])
-	await get_tree().process_frame
-	check(space.zone_at(player.global_position)=="station", "R (home) returns to the Nexus")
+	# Quiet skies for the ship's own systems: no brood, ship parked.
+	for foe: Dictionary in space.foes.foes.values().duplicate(): space.foes._remove(foe, false, 0)
+	ship.mode = "berth"
+	# No quick way home from a ship: R only helps the stranded.
+	space.request(["rescue"])
+	await get_tree().create_timer(0.3).timeout
+	check(SpaceLayout.pocket_at(player.global_position)==ship.slot and space._rescues.is_empty(), "R does nothing aboard a ship")
+	# The tavern: a drink in an armchair stacks the drunk buff; the tap refills.
+	space.request(["sit", "chair_0"])
+	space.request(["drink"])
+	space.request(["drink"])
+	check(player.stats.buffs.count("drunk")==2 and ship.glasses[0]<0.5, "two sips in an armchair: drunk x%d" % player.stats.buffs.count("drunk"))
+	space.request(["cigar"])
+	check(ship.smoking.has(player.player_id), "a cigar is lit")
+	await _shot("tavern", 30)
+	space.request(["stand"])
+	player.global_position = space.pocket_point(ship.slot, space.interior_anchors.tap)
+	space.request(["pour"])
+	check(ship.glasses[0]>0.99, "the tap pours a fresh glass")
+	# Hits wear the part nearest them; the hull bar is the ship's.
+	space.hurt_ship(ship, 600, ship.xform*Vector3(0, -1, 21))
+	check(ship.part("engines")<0.5, "a hit at the stern damages the engines (%d%%)" % roundi(ship.part("engines")*100.0))
+	var hull_low := ship.hp
+	# Out through the airlock onto the hull, jetpack and line.
+	player.global_position = space.pocket_point(ship.slot, space.interior_anchors.airlock)
+	space.request(["airlock"])
+	await get_tree().create_timer(0.4).timeout
+	check(space.zone_at(player.global_position)=="void" and traversal.spacewalk, "the airlock lets the crew out onto the hull")
+	await _shot("spacewalk", 30)
+	traversal._toggle_tether()
+	check(not traversal.tether.is_empty(), "the line clips onto the ship")
+	var before := ship.xform.origin
+	ship.xform.origin += -ship.xform.basis.z*40.0
+	await get_tree().create_timer(0.5).timeout
+	check(player.global_position.distance_to(space.ship_views[ship.id].global_position)<40.0, "tethered, the crew rides along with the ship")
+	ship.xform.origin = before
+	await get_tree().create_timer(0.3).timeout
+	# The line is 26 m: unhook to float back to the engines at the stern.
+	traversal._toggle_tether()
+	player.global_position = ship.xform*Vector3(0, -1, 25)
+	space.request(["repair", ship.id, "engines"])
+	await get_tree().create_timer(SpaceShip.REPAIR_TIME+0.6).timeout
+	check(ship.part("engines")>=1.0 and ship.hp>hull_low, "mending the engines from outside restores them and some hull")
+	player.global_position = ship.xform*SpaceWorld.AIRLOCK_OUTSIDE
+	space.request(["airlock"])
+	await get_tree().create_timer(0.3).timeout
+	check(SpaceLayout.pocket_at(player.global_position)==ship.slot, "back in through the airlock")
+	space.hurt_ship(ship, 100, ship.xform*Vector3(0, -2, 6))
+	player.global_position = space.pocket_point(ship.slot, space.interior_anchors.repairs.heart)
+	space.request(["repair", "heart"])
+	await get_tree().create_timer(SpaceShip.REPAIR_TIME+0.6).timeout
+	check(ship.part("heart")>=1.0, "the heart crystal is mended inside")
+	# The ship breaks apart: the crew floats free and can call for rescue.
+	space.hurt_ship(ship, SpaceShip.MAX_HP*2)
+	await get_tree().create_timer(0.4).timeout
+	check(space.zone_at(player.global_position)=="void" and space.stranded(player.player_id, player.global_position), "a lost ship leaves the crew floating in space")
+	await _shot("adrift", 20)
+	space.request(["rescue"])
+	await get_tree().create_timer(SpaceWorld.RESCUE_TIME+0.8).timeout
+	check(space.zone_at(player.global_position)=="station", "Orin's rescue skiff brings the stranded home")
 	print("[space] camera distance ", player.camera_distance, " camera height ", player.camera.global_position.y)
 	await _shot("nexus_return", 90)
 	player.camera_distance = 22.0

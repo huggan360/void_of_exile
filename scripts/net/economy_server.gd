@@ -118,7 +118,7 @@ func pending_vault(p: Dictionary) -> Variant:
 ## The forge: [place, item id]. The item goes, its Dots come, together.
 func dismantle(p: Dictionary, place: Variant, item_id: String) -> void:
 	var stats := GameServer.character(p.player_id)
-	if stats == null or not place is Dictionary or str(place.get("kind", "")) == "bag" or not Campaigns.is_tavern(p.realm):
+	if stats == null or not place is Dictionary or str(place.get("kind", "")) == "bag" or not (Campaigns.is_tavern(p.realm) or _by_reach_smith(p)):
 		return
 	if not str(place.kind) in ["pack", "gear", "quick"] or not _valid_key(stats, place):
 		return
@@ -156,6 +156,32 @@ func _valid_key(stats: PlayerStats, place: Dictionary) -> bool:
 		"quick":
 			return place.key is int and place.key >= 0 and place.key < stats.quick.size()
 	return place.key is int and place.key >= 0 and place.key < stats.backpack.size()
+
+
+## Standing by one of the Astral Reach's town smiths.
+func _by_reach_smith(p: Dictionary) -> bool:
+	var realm: RealmInstance = server.realms.get(p.get("realm", ""))
+	return realm != null and realm.world is SpaceWorld and (realm.world as SpaceWorld).near_smith(p.pos)
+
+
+## Spends Dots on the server's word (a ship...): false when they can't afford
+## it. The balance changes at once; the account follows (award of -amount).
+func spend(p: Dictionary, amount: int, source: String) -> bool:
+	if amount <= 0 or int(p.get("dots", 0)) < amount:
+		return false
+	p.dots = int(p.dots) - amount
+	send_dots(p, -amount, source)
+	_persist_spend(p, amount, source)
+	return true
+
+
+func _persist_spend(p: Dictionary, amount: int, source: String) -> void:
+	var r := await server.api.call_api("POST", "/server/dots/award", {character_id = p.character_id, amount = -amount})
+	if r.ok:
+		p.dots = int(r.data.get("dots", p.dots))
+		send_dots(p, 0, source)
+	else:
+		push_warning("Couldn't take %d Dots from %s for %s: %s" % [amount, p.name, source, r.error])
 
 
 ## Dots for a first campaign completion, a pack...

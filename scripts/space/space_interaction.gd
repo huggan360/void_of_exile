@@ -4,17 +4,18 @@ extends InteractionTarget
 ## rocket home to the Tavern, a ship's seats and its hatch, and boarding a
 ## landed ship from outside. Each sends one request to the authority.
 var world: SpaceWorld
-var kind := "table"  # table, rocket, seat, hatch, outside
+var kind := "table"  # table, rocket, seat, hatch, outside, repair, airlock, tap
+var part := ""
 var seat := ""
 var ship_id := 0
 var mark_id := ""
 
 const SEAT_TITLES := {pilot = "Pilot's helm", turret_top = "Top cannon", turret_left = "Port cannon",
-	turret_right = "Starboard cannon", map = "Star map table"}
+	turret_right = "Starboard cannon", map = "Star map table", chair_0 = "Armchair", chair_1 = "Armchair", chair_2 = "Armchair", chair_3 = "Armchair"}
 
 func _ready() -> void:
 	super._ready()
-	reach = 3.0 if kind in ["seat", "hatch"] else 4.0 if kind!="outside" else 7.0
+	reach = 3.0 if kind in ["seat", "hatch", "tap", "airlock", "repair"] else 9.0 if kind in ["outside", "repair_out", "airlock_out"] else 4.0
 	match kind:
 		"table":
 			title = "Command table"
@@ -29,8 +30,26 @@ func _ready() -> void:
 			action_text = "Fly home"
 		"seat":
 			title = SEAT_TITLES.get(seat, "Seat")
-			description = "Take the seat. Z stands up again."
+			description = "Sink into it. X for a sip, C for a cigar, Z to stand." if seat.begins_with("chair") else "Take the seat. Z stands up again."
 			action_text = "Sit"
+		"repair", "repair_out":
+			title = str(SpaceShip.PARTS.get(part, {}).get("name", "Part"))
+			action_text = "Mend"
+		"airlock":
+			title = "Airlock"
+			description = "Both doors cycle: out onto the hull, jetpack on."
+			action_text = "Go out"
+		"airlock_out":
+			title = "Airlock"
+			description = "Back inside the ship."
+			action_text = "Go in"
+		"wright":
+			action_text = "Buy a ship (%d Dots)" % SpaceWorld.SHIP_PRICE
+			response = "Fitting her out on the shipyard pad..."
+		"tap":
+			title = "Beer tap"
+			description = "Nexus amber, brewed in the station's own cellar."
+			action_text = "Pour a beer"
 		"hatch":
 			title = "Boarding hatch"
 			description = "The round door at the stern."
@@ -46,16 +65,23 @@ func _ready() -> void:
 func available(actor: Node3D) -> bool:
 	# Seated crew use their seat's own controls (X lands the ship).
 	if kind=="mark": return super.available(actor)
+	if kind in ["repair", "repair_out"]:
+		var ship := _repair_ship(actor)
+		if ship==null or ship.part(part)>=1.0: return false
 	if actor is Player and is_instance_valid(world) and world.ship_of((actor as Player).player_id)!=null: return false
 	return super.available(actor)
 
 func refresh(actor: Node3D) -> void:
+	if kind in ["repair", "repair_out"]:
+		var ship := _repair_ship(actor)
+		description = "%s: %d%%. Mending it restores some of the hull." % [title, roundi(ship.part(part)*100.0)] if ship else ""
+		return
 	if kind!="table": return
 	var mine := _ships_for(actor)
 	extra_text = ""
 	if mine.is_empty():
-		action_text = "Launch a ship"
-		response = "A new battleship is fitted at a free berth. Your party can board it with you."
+		action_text = "Launch a ship (%d Dots)" % SpaceWorld.SHIP_PRICE
+		response = "A new battleship is fitted at a free berth. Your party can board it with you. Free while your party is on a Reach tale."
 	else:
 		var ship: SpaceShip = mine[0]
 		action_text = "Board %s" % ship.name
@@ -92,8 +118,22 @@ func activate(actor: Node3D) -> bool:
 			world.request(["board", ship_id])
 		"mark":
 			if Net.is_client(): Net.client.send_action("camp", ["quest", "obj:"+mark_id])
+		"repair":
+			world.request(["repair", part])
+		"repair_out":
+			world.request(["repair", ship_id, part])
+		"airlock", "airlock_out":
+			world.request(["airlock"])
+		"tap":
+			world.request(["pour"])
+		"wright":
+			world.request(["buy_ship", part])
 	activated.emit(actor)
 	return kind in ["table", "board"]
+
+func _repair_ship(actor: Node3D) -> SpaceShip:
+	if kind=="repair_out": return world.ships.get(ship_id)
+	return world.ship_in_slot(SpaceLayout.pocket_at(actor.global_position))
 
 func extra(_actor: Node3D) -> void:
 	if kind=="table": world.request(["spawn"])

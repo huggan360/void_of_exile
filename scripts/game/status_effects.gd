@@ -4,10 +4,10 @@ extends RefCounted
 ## Same id + source refreshes. Different sources stack and expire independently.
 signal changed
 const IDS := ["speed", "attack", "dexterity", "defense", "magic", "hp", "mp",
-	"regeneration", "mana_regeneration", "static", "quiet", "burning", "armour_broken", "loot_chance", "loot_tier", "immune", "invincible"]
+	"regeneration", "mana_regeneration", "static", "quiet", "burning", "armour_broken", "loot_chance", "loot_tier", "immune", "invincible", "drunk"]
 const NAMES := {"speed":"Speed", "attack":"Attack", "dexterity":"Dexterity", "defense":"Defence", "magic":"Magic",
 	"hp":"Health", "mp":"Magic points", "regeneration":"Regeneration", "mana_regeneration":"Mana regeneration",
-	"static":"Static", "quiet":"Quiet", "burning":"Burning", "armour_broken":"Armour broken", "loot_chance":"Loot chance", "loot_tier":"Loot tier", "immune":"Immune", "invincible":"Invincible"}
+	"static":"Static", "quiet":"Quiet", "burning":"Burning", "armour_broken":"Armour broken", "loot_chance":"Loot chance", "loot_tier":"Loot tier", "immune":"Immune", "invincible":"Invincible", "drunk":"Drunk"}
 const ALIASES := {stasis="static", frozen="static", freeze="static", silence="quiet", burn="burning", defence="defense",
 	health="hp", magic_points="mp", armor_broken="armour_broken", armour_breaking="armour_broken",
 	mp_regen="mana_regeneration", regen="regeneration", higher_loot_chance="loot_chance", higher_loot_tiers="loot_tier"}
@@ -128,6 +128,14 @@ func has_effect(id: String) -> bool:
 		if e.id == id and float(e.expires)>Net.now(): return true
 	return false
 
+## How many separate doses of `id` are active (drinks stack this way).
+func count(id: String) -> int:
+	id = canonical(id)
+	var n := 0
+	for e: Dictionary in entries.values():
+		if e.id == id and float(e.expires)>Net.now(): n += 1
+	return n
+
 func additive(id: String, unbuffed: float) -> float:
 	var value := 0.0
 	for e: Dictionary in entries.values():
@@ -177,6 +185,7 @@ static func banner(e: Dictionary) -> String:
 	if e.id == "armour_broken": return "purple"
 	if e.id == "burning": return "red"
 	if e.id in ["loot_chance","loot_tier"]: return "yellow"
+	if e.id == "drunk": return "purple"
 	var negative: bool = str(e.amount) == "-max"
 	if not e.amount is String:
 		negative = float(e.amount)<(1.0 if e.id in ["regeneration","mana_regeneration"] else 0.0)
@@ -192,10 +201,11 @@ static func time_text(left: float) -> String:
 
 static func description(e: Dictionary) -> String:
 	if e.id == "burning": return "Burning: 10-15 HP/s, ignores armour. Water extinguishes it."
+	if e.id == "drunk": return "Drunk: the world sways a little. Every drink adds to it."
 	var amount := str(e.amount)
 	if not e.amount is String:
 		if e.id in ["loot_chance","loot_tier"]: amount = "+%s%%" % String.num(float(e.amount)*100.0,1)
 		elif e.id in ["regeneration","mana_regeneration"]: amount = "%s%%" % String.num(float(e.amount)*100.0,1)
-		elif e.id in ["static","quiet","armour_broken","immune","invincible"]: amount = ""
+		elif e.id in ["static","quiet","armour_broken","immune","invincible","drunk"]: amount = ""
 		else: amount = "%+d" % int(e.amount)
 	return (str(NAMES.get(e.id,e.id))+" "+amount).strip_edges()

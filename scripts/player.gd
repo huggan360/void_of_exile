@@ -253,6 +253,14 @@ func set_class(p_class_id: String) -> void:
 	old.queue_free()
 
 
+## Drunk: walking drags off to one side and back, more with every drink.
+func drunk_sway(dir: Vector3, up: Vector3) -> Vector3:
+	var level := mini(stats.buffs.count("drunk"), 6)
+	if level == 0 or dir.length_squared() < 0.0001: return dir
+	var t := Time.get_ticks_msec() / 1000.0
+	var angle := (sin(t * 1.3) * 0.6 + sin(t * 0.47 + 1.0) * 0.4) * 0.13 * level
+	return dir.rotated(up, angle)
+
 ## Camera shake from CameraShake: 0..1, adds up and wears off by itself.
 func add_trauma(amount: float) -> void:
 	_trauma = minf(1.0, _trauma + amount)
@@ -313,7 +321,7 @@ func _physics_process(delta: float) -> void:
 		input = Vector2.ZERO
 		_knock = Vector3.ZERO
 		_hop = 0.0
-	var dir := Basis(Vector3.UP, camera_yaw) * Vector3(input.x, 0, input.y)
+	var dir := drunk_sway(Basis(Vector3.UP, camera_yaw) * Vector3(input.x, 0, input.y), Vector3.UP)
 	var speed := BASE_SPEED * stats.move_speed_multiplier() * (SHIELD_MOVE_SPEED if shield.active else CHARGE_MOVE_SPEED if _charging else 1.0)
 	if road.is_valid() and is_on_floor() and road.call(global_position):
 		speed *= ROAD_SPEED

@@ -16,7 +16,18 @@ func build(server: bool) -> void:
 		turret_top = {pos = Vector3(4.9, 0.75, -6), yaw = 0.0, kind = "turret", stand = Vector3(4.9, 0.75, -7.4)},
 		turret_left = {pos = Vector3(-5.3, 0, 1), yaw = PI * 0.5, kind = "turret", stand = Vector3(-6.6, 0, 1)},
 		turret_right = {pos = Vector3(5.3, 0, 1), yaw = -PI * 0.5, kind = "turret", stand = Vector3(6.6, 0, 1)},
-		map = {pos = Vector3(-3.6, 0, -3.9), yaw = 0.0, kind = "map", stand = Vector3(-3.6, 0, -5.3)}}}
+		map = {pos = Vector3(-3.6, 0, -3.9), yaw = 0.0, kind = "map", stand = Vector3(-3.6, 0, -5.3)},
+		# Armchairs around the crew table.
+		chair_0 = {pos = Vector3(-4.7, 0, 4.1), yaw = PI, kind = "chair", stand = Vector3(-4.7, 0, 2.9)},
+		chair_1 = {pos = Vector3(-4.7, 0, 8.3), yaw = 0.0, kind = "chair", stand = Vector3(-3.2, 0, 8.6)},
+		chair_2 = {pos = Vector3(-2.6, 0, 6.2), yaw = PI*0.5, kind = "chair", stand = Vector3(-1.4, 0, 6.2)},
+		chair_3 = {pos = Vector3(-6.8, 0, 6.2), yaw = -PI*0.5, kind = "chair", stand = Vector3(-6.6, 0, 4.4)}},
+		# Where each part inside is mended (stand points), the airlock and the beer tap.
+		repairs = {helm = Vector3(0, 0, -14.4), cannons = Vector3(4.9, 0.75, -7.3), heart = Vector3(5.6, 0, -2.6)},
+		heart = Vector3(6.8, 0, -2.6),
+		airlock = Vector3(-6.9, 0, -10.0),
+		tap = Vector3(5.7, 0, 7.6),
+		glasses = [Vector3(-4.7, 0.87, 5.45), Vector3(-4.7, 0.87, 6.95), Vector3(-3.95, 0.87, 6.2), Vector3(-5.45, 0.87, 6.2)]}
 	var art := Art.new(_root, server)
 	_structure(art)
 	for seat: Dictionary in anchors.seats.values(): _chair(art, seat.pos, seat.yaw, seat.kind)
@@ -24,14 +35,15 @@ func build(server: bool) -> void:
 	_room_finish(art)
 	_bridge(art)
 	_crew(art)
+	_systems(art)
 	art.finish()
 	for side: float in [-1.0, 1.0]:
 		for z: float in [-11, 2, 11]:
 			var light := OmniLight3D.new()
 			light.position = Vector3(side * 4.2, 2.9, z)
 			light.light_color = Color("ffce8b")
-			light.light_energy = 0.85
-			light.omni_range = 8.0
+			light.light_energy = 1.1
+			light.omni_range = 9.0
 			light.shadow_enabled = false
 			light.distance_fade_enabled = true
 			light.distance_fade_begin = 14.0
@@ -64,11 +76,12 @@ func _structure(art: Art) -> void:
 	table.radius = 1.2
 	table.height = 1.1
 	art.collision(table, Transform3D(Basis.IDENTITY, Vector3(-3.6, 0.55, -7)))
-	art.solid(Vector3(-4.7, 0.65, 6.2), Vector3(2.6, 1.3, 2.6))
+	art.solid(Vector3(-4.7, 0.43, 6.2), Vector3(2.6, 0.86, 2.6))
 	art.solid(Vector3(6.65, 0.6, 6.5), Vector3(1.6, 1.2, 5.2))
 	for side: float in [-1.0, 1.0]:
 		art.solid(Vector3(side * 6.9, 1.4, 14.3), Vector3(1.25, 2.8, 3.2))
 		art.solid(Vector3(side * 4.7, 0.5, 15.4), Vector3(1.3, 1, 1.4))
+	art.solid(Vector3(6.8, 0.3, -2.6), Vector3(1.3, 0.6, 1.3))  # heart crystal pedestal
 	for at: Vector3 in [Vector3(-6.8, 0.35, -11.7), Vector3(6.7, 0.35, 10.7)]:
 		art.solid(at, Vector3(0.7, 0.7, 0.7))
 
@@ -77,6 +90,9 @@ func _chair(art: Art, at: Vector3, yaw: float, kind: String) -> void:
 	art.solid(at + Vector3.UP * 0.34, Vector3(0.85, 0.68, 0.85), basis)
 	art.solid(at + basis * Vector3(0, 0.95, 0.38), Vector3(0.9, 0.9, 0.16), basis)
 	if art.server: return
+	if kind == "chair":
+		_armchair(art, at, basis)
+		return
 	var cloth := Art.PINK.darkened(0.33) if kind == "map" else Color("538c72")
 	art.box(at + Vector3.UP * 0.5, Vector3(0.92, 0.22, 0.9), cloth, 0, basis)
 	art.box(at + basis * Vector3(0, 0.99, 0.39), Vector3(0.92, 0.95, 0.18), Art.WOOD, 0, basis)
@@ -135,6 +151,19 @@ func _room_finish(art: Art) -> void:
 	_label("BOARDING HATCH", Vector3(0, 3.7, 17.48), PI)
 	_label("THE ASTRAL HEARTH", Vector3(0, 3.85, -17.55), 0)
 
+## A deep, cushioned armchair facing along -Z of `basis`.
+func _armchair(art: Art, at: Vector3, basis: Basis) -> void:
+	var leather := Color("7a3f3a")
+	var cushion := Color("b7655a")
+	art.box(at + basis * Vector3(0, 0.3, 0), Vector3(1.1, 0.42, 1.0), leather, 0, basis)
+	art.box(at + basis * Vector3(0, 0.56, -0.02), Vector3(0.86, 0.16, 0.86), cushion, 0, basis)
+	art.box(at + basis * Vector3(0, 0.95, 0.42), Vector3(1.1, 0.95, 0.24), leather, 0, basis)
+	art.box(at + basis * Vector3(0, 1.0, 0.3), Vector3(0.8, 0.62, 0.1), cushion, 0, basis)
+	for side: float in [-1.0, 1.0]:
+		art.box(at + basis * Vector3(side * 0.5, 0.72, 0.0), Vector3(0.18, 0.34, 0.95), leather.darkened(0.08), 0, basis)
+		art.box(at + basis * Vector3(side * 0.5, 0.9, -0.38), Vector3(0.2, 0.08, 0.2), Art.BRASS, 0, basis)
+		for z: float in [-0.38, 0.38]: art.box(at + basis * Vector3(side * 0.42, 0.05, z), Vector3(0.12, 0.1, 0.12), Art.DARK, 0, basis)
+
 func _console(art: Art, at: Vector3, size: Vector3) -> void:
 	art.box(at + Vector3.UP * size.y * 0.5, size, Art.WOOD)
 	art.box(at + Vector3.UP * (size.y + 0.035), Vector3(size.x + 0.1, 0.07, size.z + 0.1), Art.BRASS)
@@ -189,15 +218,14 @@ func _crew(art: Art) -> void:
 	art.part("ring", Vector3(6.55, 1.83, 4.5), Vector3.ONE * 0.45, Art.BRASS, 0, Basis(Vector3.FORWARD, PI * 0.5))
 	for z: float in [6.4, 7.1, 7.8]: art.part("cylinder", Vector3(6.6, 1.5, z), Vector3(0.3, 0.4, 0.3), Art.AMBER)
 	# Shared table with chunky mugs, books and a small vase.
-	art.box(Vector3(-4.7, 1.22, 6.2), Vector3(2.6, 0.16, 2.6), Color("aa7547"))
+	# A low tavern table to sit at.
+	art.box(Vector3(-4.7, 0.78, 6.2), Vector3(2.6, 0.16, 2.6), Color("aa7547"))
 	for x: float in [-5.6, -3.8]:
-		for z: float in [5.3, 7.1]: art.box(Vector3(x, 0.6, z), Vector3(0.2, 1.2, 0.2), Art.WOOD)
-	for x: float in [-5.3, -4.1]:
-		for z: float in [5.6, 6.8]:
-			art.part("cylinder", Vector3(x, 1.46, z), Vector3(0.22, 0.3, 0.22), Art.AMBER)
-			art.part("ring", Vector3(x + 0.14, 1.46, z), Vector3.ONE * 0.2, Art.BRASS, 0, Basis(Vector3.RIGHT, PI * 0.5))
-	art.box(Vector3(-4.7, 1.35, 6.2), Vector3(0.55, 0.12, 0.7), Color("4f7274"))
-	art.crystal(Vector3(-4.7, 1.7, 6.2), Vector3(0.16, 0.45, 0.16), Art.PINK)
+		for z: float in [5.3, 7.1]: art.box(Vector3(x, 0.36, z), Vector3(0.2, 0.72, 0.2), Art.WOOD)
+	# A candle and a little crystal in the middle; the glasses are live (ShipTavern).
+	art.part("cylinder", Vector3(-4.7, 0.98, 6.2), Vector3(0.16, 0.22, 0.16), Color("f3e6c8"))
+	art.box(Vector3(-4.7, 1.14, 6.2), Vector3(0.05, 0.1, 0.05), Art.AMBER, 3.0)
+	art.crystal(Vector3(-4.45, 1.11, 6.45), Vector3(0.12, 0.3, 0.12), Art.PINK)
 	# Bookshelves and strapped crates along the aft walls.
 	for side: float in [-1.0, 1.0]:
 		var x := side * 6.9
@@ -222,17 +250,48 @@ func _crew(art: Art) -> void:
 			art.box(tip, Vector3(0.3, 0.16, 0.24), Color("8bb968"))
 			if stem % 3 == 0: art.crystal(tip + Vector3.UP * 0.14, Vector3(0.13, 0.24, 0.13), Art.PINK)
 
-func _star_window(at: Vector3, size: Vector2, basis: Basis, round_window: bool = false) -> void:
+## Windows share two materials (square and round) so the ship's live view
+## can be switched on for every window at once (ShipWindowView).
+static func window_materials() -> Array[ShaderMaterial]:
 	if not is_instance_valid(_stars):
 		_stars = ShaderMaterial.new()
-		_stars.shader = preload("res://shaders/space_starfield.gdshader")
+		_stars.shader = preload("res://shaders/ship_window.gdshader")
 		_round_stars = _stars.duplicate() as ShaderMaterial
 		_round_stars.set_shader_parameter("round_window", true)
 		_window = QuadMesh.new()
 		_window.size = Vector2.ONE
+	return [_stars, _round_stars]
+
+## The heart crystal, the airlock's inner door and the beer tap.
+func _systems(art: Art) -> void:
+	var heart: Vector3 = anchors.heart
+	art.part("cylinder", heart + Vector3.UP * 0.3, Vector3(1.3, 0.6, 1.3), Art.BRASS)
+	art.part("ring", heart + Vector3.UP * 0.62, Vector3.ONE * 1.35, Art.DARK)
+	art.crystal(heart + Vector3.UP * 1.4, Vector3(0.7, 1.6, 0.7), Art.GREEN)
+	for i in 4:
+		var a := i * TAU / 4.0
+		art.beam(heart + Vector3(cos(a) * 0.55, 0.6, sin(a) * 0.55), heart + Vector3(cos(a) * 0.2, 2.6, sin(a) * 0.2), 0.06, Art.BRASS)
+	# Airlock: a round brass-bound door in the port wall (it slides open, ShipTavern).
+	var lock: Vector3 = anchors.airlock + Vector3(-0.7, 0, 0)
+	art.part("ring", lock + Vector3(0, 1.3, 0), Vector3.ONE * 2.7, Art.BRASS, 0, Basis(Vector3.FORWARD, PI * 0.5))
+	art.box(lock + Vector3(0.05, 2.75, 0), Vector3(0.2, 0.4, 1.8), Art.DARK)
+	art.box(lock + Vector3(0.25, 1.3, 1.25), Vector3(0.12, 0.5, 0.3), Art.DARK)
+	art.box(lock + Vector3(0.32, 1.42, 1.25), Vector3(0.05, 0.12, 0.12), Art.GREEN, 2.0)
+	art.box(lock + Vector3(0.32, 1.22, 1.25), Vector3(0.05, 0.12, 0.12), Color("ff6a5a"), 2.0)
+	# Beer tap on the galley counter, with its barrel.
+	var tap: Vector3 = anchors.tap + Vector3(0.9, 0, 0)
+	art.part("cylinder", tap + Vector3(0.1, 1.55, 0), Vector3(0.16, 0.5, 0.16), Art.BRASS)
+	art.beam(tap + Vector3(0.1, 1.75, 0), tap + Vector3(-0.25, 1.75, 0), 0.08, Art.BRASS)
+	art.box(tap + Vector3(0.1, 2.0, 0), Vector3(0.08, 0.3, 0.08), Art.WOOD)
+	art.part("sphere", tap + Vector3(0.1, 2.18, 0), Vector3.ONE * 0.14, Art.PINK, 1.2)
+	art.part("cylinder", tap + Vector3(0.45, 0.7, 1.1), Vector3(1.0, 1.3, 1.0), Art.WOOD, 0, Basis(Vector3.FORWARD, PI * 0.5))
+	for x: float in [-0.35, 0.35]: art.part("ring", tap + Vector3(0.45 + x * 0.0, 0.7, 1.1 + x), Vector3.ONE * 1.05, Art.BRASS, 0, Basis(Vector3.RIGHT, PI * 0.5))
+
+func _star_window(at: Vector3, size: Vector2, basis: Basis, round_window: bool = false) -> void:
+	var materials := window_materials()
 	var panel := MeshInstance3D.new()
 	panel.mesh = _window
-	panel.material_override = _round_stars if round_window else _stars
+	panel.material_override = materials[1] if round_window else materials[0]
 	panel.transform = Transform3D(basis.scaled_local(Vector3(size.x, size.y, 1)), at)
 	panel.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_root.add_child(panel)

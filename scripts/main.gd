@@ -985,8 +985,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Escape: straight back to the Tavern from anywhere in a realm.
 		if not _traveling and not _dead and not menus.is_open() and not Campaigns.is_tavern(world.realm_id) and not player.frozen:
 			get_viewport().set_input_as_handled()
-			# In the Astral Reach, R returns to the Nexus station instead.
-			if world is SpaceWorld: (world as SpaceWorld).request(["home"])
+			# In the Astral Reach there is no quick way home: R only calls a rescue when adrift.
+			if world is SpaceWorld and player.spatial_controller is SpaceTraversal: (player.spatial_controller as SpaceTraversal).recall()
 			else: travel("hall")
 		return
 	if event.is_action_pressed("menu"):
@@ -1001,6 +1001,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	match event.keycode:
 		KEY_F3:
 			atmosphere.env.sdfgi_enabled = not atmosphere.env.sdfgi_enabled
+			# Space worlds light through the camera's own environment.
+			if player.camera.environment: player.camera.environment.sdfgi_enabled = atmosphere.env.sdfgi_enabled
 		KEY_F4:
 			atmosphere.fog_of_war_hidden = not atmosphere.fog_of_war_hidden
 		KEY_F6:

@@ -125,3 +125,17 @@ or pack completion are granted before the future encounter is implemented.
 `tools/check_astral_campaign.tscn` runs an account-free two-member flow through
 the arena and pause/resume, including an account JSON round-trip of ship state.
 Its optional `--preview` captures the launch station without using account data.
+
+## The Astral Reach tales
+
+The five tales after the Theory of Everything (`first_light`, `lantern_road`,
+`shardfield`, `hollowmoon`, `pale_eye`, all `reach = true`) are told by
+`ReachCampaign` in the shared `SpaceWorld` (realm `astral`). Their extra step
+kinds are listed as a comment above `Campaigns.LIST`: `reach_ship`, `reach_fly`,
+`reach_land` (any landing on that planet counts, pad or free landing),
+`reach_dock`, `reach_kill` (ambushes are moved out of a planet's air, where the
+brood never go), `reach_repair` and `reach_search`. Talk steps with world
+`astral` use the Reach's people (`Campaigns.NPCS`, `at.nexus` or `at.planet`).
+Search spots and npcs stand at the planet's story places (`SpaceLayout.PLACES`),
+which the terrain keeps flat. `tools/test_reach_online.tscn` plays First Light
+end to end against a `--test` server.

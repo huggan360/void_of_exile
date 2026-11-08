@@ -100,6 +100,11 @@ func inlay_material() -> ShaderMaterial:
 	return _inlay_material
 
 func _ready() -> void:
+	if not (server_build or Net.is_server()):
+		# Little glass space domes for everyone aboard the Theory.
+		var helmets := SpaceHelmet.new()
+		helmets.world = self
+		add_child(helmets)
 	if art==null: prepare_load()
 	enemy_director.world = self
 	enemy_director.realm_id = realm_id

@@ -28,6 +28,7 @@ var _shine_timer := 0.0
 var _label := Label.new()
 var _value_pill := PanelContainer.new()
 var _rail: StyleBoxTexture
+var _caption := Label.new()
 
 
 func _init(p_color: Color, p_light: Color, p_section_h := 6) -> void:
@@ -64,6 +65,25 @@ func _ready() -> void:
 	_label.add_theme_font_override("font", UIStyle.bold())
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_value_pill.add_child(_label)
+	# A small caption above the bar when it stands for something else (hull, boost, jetpack).
+	_caption.position = Vector2(0, -PX * 7)
+	UIStyle.text(_caption, UIStyle.SIZE_SMALL, UIStyle.GOLD)
+	_caption.add_theme_font_override("font", UIStyle.bold())
+	_caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_caption.hide()
+	add_child(_caption)
+
+
+## New colours and a caption ("" hides it); cheap when nothing changes.
+func restyle(p_color: Color, p_light: Color, caption: String) -> void:
+	_caption.text = caption
+	_caption.visible = caption != ""
+	if p_color == color and p_light == light: return
+	color = p_color
+	light = p_light
+	_rail = null
+	_value_pill.add_theme_stylebox_override("panel", _pill_style())
+	queue_redraw()
 
 
 func _pill_style() -> StyleBoxTexture:

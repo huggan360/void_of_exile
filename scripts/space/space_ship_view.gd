@@ -11,6 +11,7 @@ var _samples: Array = []  # [time, Transform3D, speed]
 var _label: Label3D
 var _ramp: SpaceInteraction
 var _ship: SpaceShip
+var _damage: ShipDamage
 
 func setup(ship: SpaceShip) -> void:
 	hull = ShipHull.new()
@@ -23,7 +24,7 @@ func setup(ship: SpaceShip) -> void:
 	_label.pixel_size = 0.02
 	_label.outline_size = 12
 	_label.modulate = ship.tint.lightened(0.3)
-	_label.position = Vector3(0, 11, 0)
+	_label.position = Vector3(0, 26, 0)
 	_label.no_depth_test = false
 	add_child(_label)
 	_ramp = SpaceInteraction.new()
@@ -31,6 +32,26 @@ func setup(ship: SpaceShip) -> void:
 	_ramp.kind = "outside"
 	_ramp.ship_id = ship.id
 	add_child(_ramp)
+	# Outside: the airlock's outer door and the parts mended on the hull.
+	var lock := SpaceInteraction.new()
+	lock.world = world
+	lock.kind = "airlock_out"
+	lock.ship_id = ship.id
+	lock.position = SpaceWorld.AIRLOCK_OUTSIDE
+	add_child(lock)
+	for id: String in SpaceShip.PARTS:
+		if SpaceShip.PARTS[id].inside: continue
+		# Hull plating can be mended from either side.
+		for side: float in ([1.0, -1.0] if id=="hull" else [1.0]):
+			var mend := SpaceInteraction.new()
+			mend.world = world
+			mend.kind = "repair_out"
+			mend.part = id
+			mend.ship_id = ship.id
+			mend.position = (SpaceShip.PARTS[id].hull as Vector3)*Vector3(side, 1, 1)
+			add_child(mend)
+	_damage = ShipDamage.new()
+	hull.add_child(_damage)
 	global_transform = ship.xform
 
 func push(ship: SpaceShip) -> void:
@@ -62,6 +83,7 @@ func _process(_delta: float) -> void:
 	var speed := float(_samples[-1][2]) if not _samples.is_empty() else 0.0
 	hull.set_engine(2.0 if speed>SpaceShip.MAX_SPEED+5.0 else clampf(speed/SpaceShip.MAX_SPEED, 0.15, 1.0) if _ship.mode=="flying" else 0.1)
 	_label.visible = _ship.mode!="flying" or not _crew_is_local()
+	_damage.show_parts(_ship.parts)
 	for seat: String in ["turret_top", "turret_left", "turret_right"]:
 		var mount := hull.get_node_or_null(_mount_name(seat))
 		if mount==null or not _ship.aims.has(seat): continue
@@ -77,12 +99,20 @@ func _mount_name(seat: String) -> String:
 	return {turret_top = "Turret_top", turret_left = "Turret_left", turret_right = "Turret_right"}[seat]
 
 func _crew_is_local() -> bool:
-	return is_instance_valid(world.local_player) and _ship.seat_of(world.local_player.player_id)!=""
+	if not is_instance_valid(world.local_player): return false
+	return _ship.seat_of(world.local_player.player_id)!="" or SpaceLayout.pocket_at(world.local_player.global_position)==_ship.slot
 
 ## World position of a turret's muzzle as drawn (for local bolt effects).
 func muzzle(seat: String) -> Vector3:
 	var node := hull.get_node_or_null(_mount_name(seat)+"/Yaw/Pitch/Muzzle") as Node3D
 	return node.global_position if node else global_position
+
+## Struck: the glitch on the hull where it hit, and a jolt for the crew.
+func hit(at: Vector3) -> void:
+	ArtGlitch.flash(hull, at, 6.0, 0.6)
+	var local := world.local_player
+	if is_instance_valid(local) and _ship and (_ship.seat_of(local.player_id)!="" or SpaceLayout.pocket_at(local.global_position)==_ship.slot):
+		local.add_trauma(0.35)
 
 func explode() -> void:
 	set_process(false)

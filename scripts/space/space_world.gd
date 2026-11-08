@@ -6,6 +6,16 @@ extends SpatialWorld
 ## crew and moves players between station, ship rooms and planet pads.
 const REALM := "astral"
 const SNAPSHOT_INTERVAL := 0.1
+const DOCK_RANGE := 1200.0
+const RESCUE_TIME := 15.0
+## A new battleship from the Nexus fleet or a town's shipwright.
+const SHIP_PRICE := 500
+const TRADER_REACH := 6.0
+## How much harder parts wear than the hull (share of MAX_HP lost x this).
+const PART_WEAR := 3.5
+const REPAIR_REACH_INSIDE := 2.6
+const REPAIR_REACH_OUTSIDE := 9.0
+const AIRLOCK_OUTSIDE := Vector3(-11.6, -0.5, -10.0)  # hull space, just off the port airlock door
 var record: Dictionary
 var enemy_director := EnemyDirector.new()
 var station: NexusStation
@@ -26,6 +36,10 @@ var _rocket: SmallRocket
 var marks := {}
 var _mark_nodes: Array[Node] = []
 var _npcs_built := false
+var _warm := 0
+var _rescues := {}  # player id -> when Orin's skiff arrives (ticks msec)
+var _repairs := {}  # "ship:part" -> {pid, t, ship, part}
+var _sips := {}  # player id -> drinks so far (each a separate drunk source)
 
 static func is_space(id: String) -> bool:
 	return id==REALM
@@ -37,8 +51,9 @@ func _init(data: Dictionary) -> void:
 	half_extent = 64
 	spawn_point = Vector3(0, 0.1, 18)
 	set_meta("full_3d", true)
-	for spec in [["station", "The Nexus", 0.9, 0.55], ["haven", "The Haven", 0.55, 0.9], ["shardfield", "The Shardfield", 0.45, 0.7],
-			["gloam", "The Gloam", 0.22, 0.3], ["ship", "Aboard", 0.85, 0.2]]:
+	# The Reach is lit by its own sun (SpaceBackdrop); the game's sun stays dark here.
+	for spec in [["station", "The Nexus", 0.5, 0.0], ["haven", "The Haven", 0.4, 0.0], ["shardfield", "The Shardfield", 0.35, 0.0],
+			["gloam", "The Gloam", 0.2, 0.0], ["ship", "Aboard", 0.5, 0.0]]:
 		var biome := BiomeDef.new()
 		biome.id = Biomes.DEEP_DARK
 		biome.biome_name = spec[1]
@@ -66,6 +81,9 @@ func _ready() -> void:
 	add_child(foes)
 	var visual := not (server_build or Net.is_server())
 	if visual:
+		var helmets := SpaceHelmet.new()
+		helmets.world = self
+		add_child(helmets)
 		queue_load_step(func() -> void:
 			backdrop = SpaceBackdrop.new()
 			add_child(backdrop)
@@ -125,15 +143,16 @@ func sample_gravity(position: Vector3) -> Dictionary:
 	if not p.is_empty():
 		var up: Vector3 = (position-p.center).normalized()
 		var right := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD))<0.95 else Vector3.RIGHT).normalized()
-		var surface: Vector3 = p.center+up*float(p.radius)
+		var surface: Vector3 = p.center+up*(float(p.radius)+SpaceLayout.surface_height(p, up))
 		return {frame = Transform3D(Basis(right, up, right.cross(up)), surface), zone = "planet:"+str(p.id), distance = position.distance_to(surface)}
 	return {frame = Transform3D(Basis.IDENTITY, position), zone = "void", distance = 1e6}
 
 func first_person_at(position: Vector3) -> bool:
 	return SpaceLayout.pocket_at(position)>=0
 
+## Anywhere inside the Reach: spacewalkers float in open space on jetpacks.
 func is_walkable(position: Vector3) -> bool:
-	return position.is_finite() and zone_at(position)!="void"
+	return position.is_finite() and (position.length()<SpaceLayout.WORLD_RADIUS or SpaceLayout.pocket_at(position)>=0)
 
 func recovery_point(position: Vector3) -> Vector3:
 	var state := sample_gravity(position)
@@ -184,17 +203,40 @@ func server_action(p: Dictionary, args: Array) -> void:
 	var pid := int(p.player_id)
 	var pos: Vector3 = p.get("pos", Vector3.ZERO)
 	match str(args[0]):
-		"spawn":
-			if zone_at(pos)!="station": return
+		"spawn", "buy_ship":  # [planet id] at a town's shipwright, or none at the Nexus table
+			var town := str(args[1]) if args.size()>1 else ""
+			if town=="" and zone_at(pos)!="station": return
+			if town!="" and pos.distance_to(trader_position(town, "wright"))>TRADER_REACH: return
 			for ship: SpaceShip in ships.values():
 				if ship.owner==pid:
-					_tell(p, "Your ship %s is already at berth %d." % [ship.name, ship.berth+1])
+					_tell(p, "You already have %s. One ship per captain." % ship.name)
 					return
-			var ship := _launch_ship(pid, str(p.get("name", "Captain")))
-			if ship==null:
-				_tell(p, "Every berth and ship room is taken. Try again soon.")
+			# A ship you own (bought, not lost) comes back free; Captain Isolde lends
+			# one to crews on a Reach tale; otherwise it costs Dots.
+			var owned := not _fleet(p).is_empty()
+			var loan := owned or _on_reach_tale(pid)
+			if not loan and not _pay(p, SHIP_PRICE):
+				_tell(p, "A new ship costs %d Dots. Sell items at a smith or the Tavern forge." % SHIP_PRICE)
 				return
-			_tell(p, "%s waits at berth %d. Board it from the command table." % [ship.name, ship.berth+1])
+			var ship := _launch_ship(pid, str(p.get("name", "Captain")))
+			if ship and owned:
+				ship.name = str(_fleet(p).get("name", ship.name))
+				ship.set_meta("account", int(p.get("account_id", 0)))
+			if ship and not loan: _remember(p, ship)
+			if ship==null:
+				if not loan: _refund(p, SHIP_PRICE)
+				_tell(p, "Every ship room is taken. Try again soon.")
+				return
+			if town!="":
+				var planet := SpaceLayout.planet(town)
+				var dock := SpaceLayout.town_frame(planet, "dock")
+				ship.mode = "landed"
+				ship.planet = town
+				ship.xform = Transform3D(dock.basis, (planet.center as Vector3)+dock.origin+dock.basis.y*SpaceShip.LANDED_HEIGHT)
+				_broadcast_ship(ship)
+				_tell(p, "%s waits on the shipyard pad. Walk up the ramp to board.%s" % [ship.name, "" if owned or not loan else " (On loan for your tale.)"])
+			else:
+				_tell(p, "%s waits at berth %d. Board it from the command table.%s" % [ship.name, ship.berth+1, "" if owned or not loan else " (On loan for your tale.)"])
 		"board":
 			var ship: SpaceShip = ships.get(int(args[1]) if args.size()>1 else 0)
 			if ship==null or not _may_board(ship, pid):
@@ -231,8 +273,8 @@ func server_action(p: Dictionary, args: Array) -> void:
 				_broadcast_ship(ship)
 		"pilot":
 			var ship := ship_of(pid)
-			if ship==null or ship.pilot()!=pid or args.size()<2 or not args[1] is Array or (args[1] as Array).size()!=5: return
-			ship.input = args[1]
+			if ship==null or ship.pilot()!=pid or args.size()<2 or not args[1] is Array or not (args[1] as Array).size() in [5, 6]: return
+			ship.input = (args[1] as Array)+([false] if (args[1] as Array).size()==5 else [])
 			ship.input_age = 0.0
 		"land":
 			var ship := ship_of(pid)
@@ -246,7 +288,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 		"dock":
 			var ship := ship_of(pid)
 			if ship==null or ship.pilot()!=pid or ship.mode!="flying": return
-			if ship.xform.origin.distance_to(SpaceLayout.NEXUS)>900.0:
+			if ship.xform.origin.distance_to(SpaceLayout.NEXUS)>DOCK_RANGE:
 				_tell(p, "Fly closer to the Nexus to dock.")
 				return
 			ship.dock(ship.berth)
@@ -261,23 +303,205 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or args.size()<2 or not args[1] is Vector3: return
 			var seat := ship.seat_of(pid)
 			if not seat.begins_with("turret") or Time.get_ticks_msec()<int(ship.cooldowns.get(seat, 0)): return
-			ship.cooldowns[seat] = Time.get_ticks_msec()+180
+			# Damaged cannons fire slowly; broken ones jam.
+			if ship.part("cannons")<=0.0:
+				_tell(p, "The cannons are jammed! Mend them at the gunnery console.")
+				ship.cooldowns[seat] = Time.get_ticks_msec()+3000
+				return
+			ship.cooldowns[seat] = Time.get_ticks_msec()+int(180.0*(1.0+2.0*(1.0-ship.part("cannons"))))
 			var dir := (args[1] as Vector3).normalized()
 			ship.aims[seat] = dir
 			foes.fire_bolt(ship, turret_muzzle(ship, seat), dir)
-		"home":
+		"repair":  # [part] inside, or [ship id, part] outside
+			var ship: SpaceShip = (ships.get(int(args[1])) if args.size()>2 else ship_in_slot(SpaceLayout.pocket_at(pos)))
+			var id := str(args[-1])
+			if ship==null or not SpaceShip.PARTS.has(id) or not _may_board(ship, pid): return
+			if float(ship.parts[id])>=100.0:
+				_tell(p, "The %s need no mending." % str(SpaceShip.PARTS[id].name).to_lower())
+				return
+			if repair_point(ship, id, pos).is_finite():
+				_repairs["%d:%s" % [ship.id, id]] = {pid = pid, t = 0.0, ship = ship.id, part = id}
+				_tell(p, "Mending the %s... stay close." % str(SpaceShip.PARTS[id].name).to_lower())
+			else:
+				_tell(p, "Get closer to the %s." % str(SpaceShip.PARTS[id].name).to_lower())
+		"drink":
 			var ship := ship_of(pid)
-			if ship!=null:
+			var seat := ship.seat_of(pid) if ship else ""
+			if not seat.begins_with("chair"): return
+			var i := int(seat.substr(6))
+			if float(ship.glasses[i])<=0.01:
+				_tell(p, "Your glass is empty. The tap is at the galley.")
+				return
+			ship.glasses[i] = maxf(0.0, float(ship.glasses[i])-0.34)
+			_sips[pid] = int(_sips.get(pid, 0))+1
+			var stats := GameServer.character(pid)
+			if stats: stats.buffs.add("drunk", 150.0, 1, "sip_%d" % (int(_sips[pid]) % 8))
+			_broadcast_ship(ship)
+		"pour":
+			var ship := ship_in_slot(SpaceLayout.pocket_at(pos))
+			if ship==null: return
+			for i in ship.glasses.size():
+				if float(ship.glasses[i])<0.99:
+					ship.glasses[i] = 1.0
+					_broadcast_ship(ship)
+					_tell(p, "A frothy mug of Nexus amber, poured at the table.")
+					return
+			_tell(p, "Every glass on the table is already full.")
+		"cigar":
+			var ship := ship_of(pid)
+			if ship==null or not ship.seat_of(pid).begins_with("chair"): return
+			if ship.smoking.has(pid): ship.smoking.erase(pid)
+			else: ship.smoking[pid] = 40.0
+			_broadcast_ship(ship)
+		"airlock":
+			# From the room out onto the hull, or from outside back in.
+			var slot := SpaceLayout.pocket_at(pos)
+			if slot>=0:
+				var ship := ship_in_slot(slot)
+				if ship==null or pos.distance_to(pocket_point(slot, interior_anchors.get("airlock", Vector3.ZERO)))>3.0: return
 				_stand(ship, pid)
+				teleport(p, ship.xform*AIRLOCK_OUTSIDE, "airlock_out")
+			else:
+				for ship: SpaceShip in ships.values():
+					if _may_board(ship, pid) and pos.distance_to(ship.xform*AIRLOCK_OUTSIDE)<8.0:
+						teleport(p, pocket_point(ship.slot, (interior_anchors.get("airlock", Vector3.ZERO) as Vector3)+Vector3(1.2, 0.1, 0)), "airlock_in")
+						return
+		"rescue":
+			# Only the stranded (no ship of their own crew to go back to) can call Orin's skiff.
+			if not stranded(pid, pos):
+				_tell(p, "There is no quick way home out here. Fly your ship back to the Nexus.")
+				return
+			if not _rescues.has(pid):
+				_rescues[pid] = Time.get_ticks_msec()+int(RESCUE_TIME*1000.0)
+				_tell(p, "Orin's rescue skiff is on its way. Hold on for %d seconds." % int(RESCUE_TIME))
+
+## Where `pos` is close enough to mend `id` on `ship` (the spot), or INF.
+func repair_point(ship: SpaceShip, id: String, pos: Vector3) -> Vector3:
+	if SpaceShip.PARTS[id].inside:
+		var spot := pocket_point(ship.slot, (interior_anchors.get("repairs", {}) as Dictionary).get(id, Vector3.ZERO))
+		return spot if SpaceLayout.pocket_at(pos)==ship.slot and pos.distance_to(spot)<REPAIR_REACH_INSIDE else Vector3.INF
+	var local: Vector3 = SpaceShip.PARTS[id].hull
+	for side: float in [1.0, -1.0]:
+		var spot := ship.xform*Vector3(local.x*side, local.y, local.z)
+		if pos.distance_to(spot)<REPAIR_REACH_OUTSIDE+(6.5 if ship.mode=="landed" else 0.0): return spot
+	return Vector3.INF
+
+## Repairs in progress: done after REPAIR_TIME if the mender stays close.
+func _mend(delta: float) -> void:
+	for key: String in _repairs.keys():
+		var job: Dictionary = _repairs[key]
+		var ship: SpaceShip = ships.get(int(job.ship))
+		var p := _record(int(job.pid))
+		if ship==null or p.is_empty() or not repair_point(ship, str(job.part), p.get("pos", Vector3.INF)).is_finite():
+			_repairs.erase(key)
+			continue
+		job.t = float(job.t)+delta
+		if float(job.t)>=SpaceShip.REPAIR_TIME:
+			_repairs.erase(key)
+			ship.parts[job.part] = 100.0
+			ship.hp = mini(SpaceShip.MAX_HP, ship.hp+int(SpaceShip.MAX_HP*SpaceShip.REPAIR_HULL))
+			_broadcast_ship(ship)
+			_tell_crew(ship, "%s mended the %s." % [str(p.get("name", "Someone")), str(SpaceShip.PARTS[job.part].name).to_lower()])
+
+## Repairs under way, for the menders' progress: "ship:part" -> 0..1.
+func repair_progress(pid: int) -> float:
+	for job: Dictionary in _repairs.values():
+		if int(job.pid)==pid: return float(job.t)/SpaceShip.REPAIR_TIME
+	return -1.0
+
+## Smoke drifts away after a while.
+func _burn_cigars(delta: float) -> void:
+	for ship: SpaceShip in ships.values():
+		for pid: int in ship.smoking.keys():
+			ship.smoking[pid] = float(ship.smoking[pid])-delta
+			if float(ship.smoking[pid])<=0.0 or not ship.seat_of(pid).begins_with("chair"):
+				ship.smoking.erase(pid)
 				_broadcast_ship(ship)
-			teleport(p, spawn_point, "home")
+
+## A message to everyone who belongs to the ship.
+func _tell_crew(ship: SpaceShip, text: String) -> void:
+	if Net.is_server():
+		var realm: RealmInstance = Net.server.realms.get(realm_id)
+		if realm == null: return
+		for pid: int in realm.proxies:
+			var p: Dictionary = Net.server.social.record(pid)
+			if not p.is_empty() and (SpaceLayout.pocket_at(p.pos)==ship.slot or ship.seat_of(pid)!="" or _may_board(ship, pid)): _tell(p, text)
+	else: handle_event(["say", text])
+
+## A town trader's place in the world: "smith" or "wright" on planet `id`.
+func trader_position(id: String, which: String) -> Vector3:
+	var planet := SpaceLayout.planet(id)
+	if planet.is_empty(): return Vector3.INF
+	return (planet.center as Vector3)+SpaceLayout.town_frame(planet, which).origin
+
+## Whether `pos` stands by one of the Reach's smiths (selling at the forge).
+func near_smith(pos: Vector3) -> bool:
+	for planet: Dictionary in SpaceLayout.PLANETS:
+		if pos.distance_to(trader_position(planet.id, "smith"))<TRADER_REACH: return true
+	return false
+
+## The party of `pid` is on a Reach tale (ships are lent for those).
+func _on_reach_tale(pid: int) -> bool:
+	if Net.server==null: return true
+	var party: Dictionary = Net.server.social.party_for(pid)
+	var camp: Dictionary = party.get("campaign", {})
+	return not camp.is_empty() and bool(Campaigns.get_def(str(camp.get("id", ""))).get("reach", false))
+
+## The ship this player's account owns (bought, not yet lost), or {}.
+func _fleet(p: Dictionary) -> Dictionary:
+	if Net.server==null or int(p.get("account_id", 0))==0: return {}
+	return Net.server.campaigns.book(int(p.account_id)).get("reach_ship", {})
+
+func _remember(p: Dictionary, ship: SpaceShip) -> void:
+	if Net.server==null or int(p.get("account_id", 0))==0: return
+	Net.server.campaigns.book(int(p.account_id)).reach_ship = {name = ship.name}
+	ship.set_meta("account", int(p.account_id))
+	Net.server.campaigns._touch(int(p.account_id))
+	Net.server.campaigns.flush()
+
+## A bought ship was destroyed: the account has to buy a new one.
+func _forget(ship: SpaceShip) -> void:
+	var account := int(ship.get_meta("account", 0))
+	if Net.server==null or account==0: return
+	Net.server.campaigns.book(account).erase("reach_ship")
+	Net.server.campaigns._touch(account)
+	Net.server.campaigns.flush()
+
+## Takes Dots for a purchase (offline play is free; test servers too).
+func _pay(p: Dictionary, amount: int) -> bool:
+	if not Net.is_server() or Net.server.config.test_mode: return true
+	return Net.server.economy.spend(p, amount, "ship")
+
+func _refund(p: Dictionary, amount: int) -> void:
+	if Net.is_server() and not Net.server.config.test_mode: Net.server.economy.award(p, amount, "ship refund")
+
+## Adrift in space or on a planet with no ship of their crew in the Reach.
+func stranded(pid: int, pos: Vector3) -> bool:
+	if SpaceLayout.pocket_at(pos)>=0 or zone_at(pos)=="station": return false
+	for ship: SpaceShip in ships.values():
+		if _may_board(ship, pid): return false
+	return true
+
+func _arrive_rescues() -> void:
+	for pid: int in _rescues.keys():
+		if Time.get_ticks_msec()<int(_rescues[pid]): continue
+		_rescues.erase(pid)
+		var p := _record(pid)
+		if not p.is_empty(): teleport(p, spawn_point, "home")
+
+## The player's record (server) or the local player's (offline).
+func _record(pid: int) -> Dictionary:
+	if Net.is_server(): return Net.server.social.record(pid)
+	if is_instance_valid(local_player) and local_player.player_id==pid:
+		return {player_id = pid, peer_id = 0, pos = local_player.global_position, name = "You", account_id = 0}
+	return {}
 
 ## Players in a ship room ride along: leaving the seat they were in.
 func _stand(ship: SpaceShip, pid: int) -> void:
 	var seat := ship.seat_of(pid)
 	if seat=="": return
 	ship.crew.erase(seat)
-	if seat=="pilot": ship.input = [0.0, 0.0, 0.0, 0.0, false]
+	if seat=="pilot": ship.input = [0.0, 0.0, 0.0, 0.0, false, false]
 
 func _launch_ship(pid: int, captain: String) -> SpaceShip:
 	var used_slots: Array = ships.values().map(func(s: SpaceShip) -> int: return s.slot)
@@ -340,7 +564,8 @@ func hatch_position(ship: SpaceShip) -> Vector3:
 	return (gravity.frame as Transform3D).origin+(gravity.frame as Transform3D).basis.y*0.15 if gravity.zone!="void" else at
 
 func turret_muzzle(ship: SpaceShip, seat: String) -> Vector3:
-	var offsets := {turret_top = Vector3(0, 5, 2), turret_left = Vector3(-6, 1.5, 0), turret_right = Vector3(6, 1.5, 0)}
+	# Muzzles of the hull's turret mounts (ShipHull), roughly where the barrels end.
+	var offsets := {turret_top = Vector3(0, ShipHull.DECK_Y+2.6, -18.0), turret_left = Vector3(-10.2, 2.75, -5.0), turret_right = Vector3(10.2, 2.75, -5.0)}
 	return ship.xform*(offsets.get(seat, Vector3.ZERO) as Vector3)
 
 func _ensure_interior(slot: int) -> void:
@@ -356,9 +581,25 @@ func _ensure_interior(slot: int) -> void:
 
 func _physics_process(delta: float) -> void:
 	if Net.is_client(): return
+	_arrive_rescues()
+	_mend(delta)
+	_burn_cigars(delta)
+	# Landing checks need every planet's obstacle list; build one per tick.
+	if _warm<SpaceLayout.PLANETS.size():
+		PlanetFlora._obstacle_index(SpaceLayout.PLANETS[_warm])
+		_warm += 1
 	for ship: SpaceShip in ships.values().duplicate():
 		var damage := ship.step(delta, _asteroids)
 		if damage>0: hurt_ship(ship, damage)
+		# Too close to the sun: the hull scorches, faster the closer.
+		var heat := 1.0-(ship.xform.origin.distance_to(SpaceLayout.SUN_CENTER)-SpaceLayout.SUN_RADIUS)/SpaceLayout.SUN_BURN
+		if heat>0.0 and ships.has(ship.id):
+			ship.set_meta("scorch", float(ship.get_meta("scorch", 0.0))+heat*heat*240.0*delta)
+			if float(ship.get_meta("scorch"))>=1.0:
+				var burn := int(ship.get_meta("scorch"))
+				ship.set_meta("scorch", float(ship.get_meta("scorch"))-burn)
+				if randf()<0.02: _tell_crew(ship, "The sun is scorching the hull! Turn away!")
+				hurt_ship(ship, burn)
 	# Ships nobody owns any more (owner left the server) are scuttled.
 	if Net.is_server():
 		for ship: SpaceShip in ships.values().duplicate():
@@ -370,9 +611,19 @@ func _physics_process(delta: float) -> void:
 		handle_event(event)
 		world_event.emit(event)
 
-func hurt_ship(ship: SpaceShip, damage: int) -> void:
+## A hit: the hull loses `damage` and the part nearest `at` (world) takes its share.
+func hurt_ship(ship: SpaceShip, damage: int, at := Vector3.INF) -> void:
+	if not ships.has(ship.id): return
 	ship.hp = maxi(0, ship.hp-damage)
-	if ship.hp<=0: _scuttle(ship, "%s breaks apart! The crew is pulled back to the Nexus by its lifeline charm." % ship.name)
+	var id: String = SpaceShip.part_at(ship.xform.affine_inverse()*at) if at.is_finite() else SpaceShip.PARTS.keys()[randi() % SpaceShip.PARTS.size()]
+	var before := float(ship.parts.get(id, 100.0))
+	ship.parts[id] = maxf(0.0, before-float(damage)/float(SpaceShip.MAX_HP)*100.0*PART_WEAR)
+	if before>=50.0 and float(ship.parts[id])<50.0:
+		_tell_crew(ship, "The %s %s damaged! Mend %s %s." % [str(SpaceShip.PARTS[id].name).to_lower(), "are" if id in ["engines", "cannons"] else "is",
+			"them" if id in ["engines", "cannons"] else "it", "inside the ship" if SpaceShip.PARTS[id].inside else "from outside (airlock) or on the ground"])
+	if ship.hp<=0:
+		_forget(ship)
+		_scuttle(ship, "%s breaks apart around you! Your jetpacks keep you floating." % ship.name)
 
 ## The ship is lost: its crew wakes at the Nexus.
 func _scuttle(ship: SpaceShip, message: String) -> void:
@@ -380,14 +631,23 @@ func _scuttle(ship: SpaceShip, message: String) -> void:
 	var event: Array = ["ship-", ship.id, ship.xform.origin, message]
 	handle_event(event)
 	world_event.emit(event)
+	# The crew is thrown clear around the wreck, floating on their jetpacks.
+	var wreck := ship.xform.origin
 	if Net.is_server():
 		var realm: RealmInstance = Net.server.realms.get(realm_id)
 		if realm:
 			for pid: int in realm.proxies:
 				var p: Dictionary = Net.server.social.record(pid)
-				if not p.is_empty() and SpaceLayout.pocket_at(p.pos)==ship.slot: teleport(p, spawn_point, "home")
+				if not p.is_empty() and SpaceLayout.pocket_at(p.pos)==ship.slot: teleport(p, _adrift_point(wreck), "adrift")
 	elif is_instance_valid(local_player) and SpaceLayout.pocket_at(local_player.global_position)==ship.slot:
-		teleport({player_id = local_player.player_id}, spawn_point, "home")
+		teleport({player_id = local_player.player_id}, _adrift_point(wreck), "adrift")
+
+func _adrift_point(wreck: Vector3) -> Vector3:
+	var at := wreck+Vector3(randf_range(-1, 1), randf_range(-0.5, 0.5), randf_range(-1, 1)).normalized()*randf_range(25.0, 40.0)
+	var p := SpaceLayout.planet_near(at, 30.0)
+	# Never inside a planet: push out above its ground.
+	if not p.is_empty(): at = SpaceLayout.surface_point(p, at)+(at-(p.center as Vector3)).normalized()*4.0
+	return at
 
 func _broadcast_ship(ship: SpaceShip) -> void:
 	var event: Array = ["ships", [ship.wire()]]
@@ -498,12 +758,17 @@ func _show_marks() -> void:
 			add_child(spot)
 			spot.global_position = mark.pos
 			_mark_nodes.append(spot)
-		var beacon := SpaceBeacon.new()
-		beacon.big = mark.kind=="target"
-		add_child(beacon)
-		beacon.global_position = mark.pos
-		beacon.orient(surface_frame(mark.pos).basis.y if zone_at(mark.pos)!="void" else Vector3.UP)
-		_mark_nodes.append(beacon)
+		# The game's own quest badge; far flight targets show it through fog and walls.
+		var holder := Node3D.new()
+		add_child(holder)
+		holder.global_position = mark.pos
+		if zone_at(mark.pos)!="void": holder.global_basis = surface_frame(mark.pos).basis
+		var badge := QuestMarker.new("main")
+		holder.add_child(badge)
+		if mark.kind=="target":
+			badge._material.disable_fog = true
+			badge._material.no_depth_test = true
+		_mark_nodes.append(holder)
 
 ## The Reach's people stand at the station and on their planets.
 func _build_npcs() -> void:
@@ -570,6 +835,24 @@ func _interior_props(slot: int, room: ShipInterior) -> void:
 	hatch.position = room.position+(anchors.get("hatch", Vector3(0, 1, 17)) as Vector3)
 	add_child(hatch)
 	hatch.set_meta("slot", slot)
+	for id: String in anchors.get("repairs", {}):
+		var mend := SpaceInteraction.new()
+		mend.world = self
+		mend.kind = "repair"
+		mend.part = id
+		mend.position = room.position+(anchors.repairs[id] as Vector3)+Vector3.UP*0.8
+		add_child(mend)
+	for spec: Array in [["airlock", anchors.get("airlock", Vector3.ZERO)], ["tap", anchors.get("tap", Vector3.ZERO)]]:
+		var spot := SpaceInteraction.new()
+		spot.world = self
+		spot.kind = spec[0]
+		spot.position = room.position+(spec[1] as Vector3)+Vector3.UP*1.0
+		add_child(spot)
+	var tavern := ShipTavern.new()
+	tavern.world = self
+	tavern.slot = slot
+	tavern.anchors = anchors
+	room.add_child(tavern)
 
 ## Seat data of this interior: {pos, yaw, kind, stand} in world space for `slot`.
 func seat_spec(slot: int, seat: String) -> Dictionary:
