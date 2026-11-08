@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cuqljiytcm2q5"
+path="res://.godot/imported/leg_l.vox-7c750ceece42910e96489bde4fdd7551.tscn"
+
+[deps]
+
+source_file="res://creatures/resonance_sentinel/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-7c750ceece42910e96489bde4fdd7551.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

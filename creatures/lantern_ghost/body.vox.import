@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b048o7b0vly6r"
+path="res://.godot/imported/body.vox-153a9c5623005c5c32d874d6e63e7cca.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_ghost/body.vox"
+dest_files=["res://.godot/imported/body.vox-153a9c5623005c5c32d874d6e63e7cca.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

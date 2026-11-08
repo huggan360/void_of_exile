@@ -1,0 +1,238 @@
+{
+  "voxel_size": 0.125,
+  "parts": {
+    "telescope": {
+      "frame_min": [
+        -3,
+        -3,
+        -12
+      ],
+      "frame_size": [
+        7,
+        7,
+        15
+      ],
+      "glow": true
+    },
+    "cloak_r": {
+      "frame_min": [
+        -3,
+        -18,
+        -1
+      ],
+      "frame_size": [
+        7,
+        18,
+        3
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -2,
+        -9,
+        -2
+      ],
+      "frame_size": [
+        5,
+        9,
+        5
+      ]
+    },
+    "moon_0": {
+      "frame_min": [
+        9,
+        -2,
+        -2
+      ],
+      "frame_size": [
+        4,
+        4,
+        4
+      ],
+      "glow": true
+    },
+    "moon_2": {
+      "frame_min": [
+        -5,
+        -2,
+        9
+      ],
+      "frame_size": [
+        4,
+        4,
+        4
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -8,
+        2,
+        -4
+      ],
+      "frame_size": [
+        16,
+        28,
+        8
+      ],
+      "glow": true
+    },
+    "cloak_l": {
+      "frame_min": [
+        -3,
+        -18,
+        -1
+      ],
+      "frame_size": [
+        7,
+        18,
+        3
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -2,
+        -9,
+        -2
+      ],
+      "frame_size": [
+        5,
+        9,
+        5
+      ]
+    },
+    "moon_1": {
+      "frame_min": [
+        -12,
+        -2,
+        -6
+      ],
+      "frame_size": [
+        4,
+        4,
+        4
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -6.0,
+        21.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "cloak_l": {
+      "part": "cloak_l",
+      "pivot": [
+        -5.0,
+        21.0,
+        4.0
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        6.0,
+        21.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "cloak_r": {
+      "part": "cloak_r",
+      "pivot": [
+        5.0,
+        21.0,
+        4.0
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "telescope": {
+      "part": "telescope",
+      "pivot": [
+        0.0,
+        -7.0,
+        -2.0
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "arm_r"
+    },
+    "moon_0": {
+      "part": "moon_0",
+      "pivot": [
+        0.0,
+        28.0,
+        0.0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "moon_1": {
+      "part": "moon_1",
+      "pivot": [
+        0.0,
+        26.0,
+        0.0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "moon_2": {
+      "part": "moon_2",
+      "pivot": [
+        0.0,
+        28.0,
+        0.0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {},
+  "hand": [
+    0.0,
+    16.0,
+    -6.0
+  ],
+  "hover": 0.16,
+  "bob": 0.035,
+  "waddle": 0.025,
+  "flap_rate": 1.2,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.4,
+  "animation_style": "wraith",
+  "design_grid": [
+    32,
+    32,
+    32
+  ]
+}

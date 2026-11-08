@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://crk7wkated0t2"
+path="res://.godot/imported/body_glow.vox-35288972cc4c6f25538bd15a148228d7.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_frog/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-35288972cc4c6f25538bd15a148228d7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

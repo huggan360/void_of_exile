@@ -1,0 +1,113 @@
+{
+  "voxel_size": 0.05384615384615384,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -4,
+        2,
+        -4
+      ],
+      "frame_size": [
+        9,
+        13,
+        9
+      ],
+      "glow": true
+    },
+    "chip_0": {
+      "frame_min": [
+        6,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        3,
+        5,
+        3
+      ],
+      "glow": true
+    },
+    "chip_1": {
+      "frame_min": [
+        -7,
+        0,
+        1
+      ],
+      "frame_size": [
+        3,
+        5,
+        3
+      ],
+      "glow": true
+    },
+    "chip_2": {
+      "frame_min": [
+        -1,
+        -4,
+        -8
+      ],
+      "frame_size": [
+        3,
+        5,
+        3
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "chip_0": {
+      "part": "chip_0",
+      "pivot": [
+        0,
+        8,
+        0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "chip_1": {
+      "part": "chip_1",
+      "pivot": [
+        0,
+        8,
+        0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "chip_2": {
+      "part": "chip_2",
+      "pivot": [
+        0,
+        8,
+        0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "hand": [
+    3,
+    8,
+    -3
+  ],
+  "bob": 0.035,
+  "waddle": 0.025,
+  "hover": 0.18,
+  "animation_style": "wraith",
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 2.4,
+  "flap_rate": 1.2,
+  "design_grid": [
+    32,
+    32,
+    32
+  ]
+}

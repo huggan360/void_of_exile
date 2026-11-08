@@ -68,6 +68,7 @@ var boost := 100.0
 var glasses := [1.0, 1.0, 1.0, 1.0]
 var smoking := {}
 var input_age := 0.0
+var city_pad_taken := Callable()
 var landing := {}  # {from: Transform3D, to: Transform3D, t: float, planet}
 var cooldowns := {}
 ## A campaign cripples the ship until its crew mends every repair aboard.
@@ -105,13 +106,16 @@ func altitude(p: Dictionary) -> float:
 func landable() -> Dictionary:
 	if mode!="flying" or speed>140.0: return {}
 	for p: Dictionary in SpaceLayout.PLANETS:
-		if xform.origin.distance_to(p.center)<float(p.radius)+LAND_ALTITUDE+SpaceLayout.max_height(p) and altitude(p)<LAND_ALTITUDE: return p
+		if p.get("city", false):
+			if not CityLayout.landing_site(xform.origin, 150.0, city_pad_taken).is_empty(): return p
+		elif xform.origin.distance_to(p.center)<float(p.radius)+LAND_ALTITUDE+SpaceLayout.max_height(p) and altitude(p)<LAND_ALTITUDE: return p
 	return {}
 
 ## Sets down on the nearest clear, level ground below (PlanetLanding), or on
 ## the pad if nothing nearby is clear.
 func begin_landing(p: Dictionary) -> void:
-	var site := PlanetLanding.find_site(p, xform.origin, -xform.basis.z)
+	var site := CityLayout.landing_site(xform.origin, 150.0, city_pad_taken) if p.get("city", false) else PlanetLanding.find_site(p, xform.origin, -xform.basis.z)
+	if p.get("city", false) and site.is_empty(): return
 	landing = {from = xform, to = site.frame if not site.is_empty() else landed_pose(p), t = 0.0, planet = p.id}
 	mode = "landing"
 	speed = 0.0
@@ -151,7 +155,7 @@ func step(delta: float, asteroids: Array) -> int:
 		if height>AUTO_LAND_ALTITUDE+100.0: land_armed = true
 		elif land_armed and height<AUTO_LAND_ALTITUDE and not broken:
 			begin_landing(p)
-			return 0
+			if mode=="landing": return 0
 	var thrust := 0.0 if broken else clampf(float(input[0]), -1.0, 1.0)
 	# Damaged parts: slow engines (never dead in space), sluggish helm, no boost without the heart.
 	var engines := 0.3+0.7*part("engines")

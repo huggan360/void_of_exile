@@ -16,6 +16,7 @@ const PART_WEAR := 3.5
 const REPAIR_REACH_INSIDE := 2.6
 const REPAIR_REACH_OUTSIDE := 9.0
 const AIRLOCK_OUTSIDE := Vector3(-11.6, -0.5, -10.0)  # hull space, just off the port airlock door
+var city := CityState.new()
 var record: Dictionary
 var enemy_director := EnemyDirector.new()
 var station: NexusStation
@@ -27,6 +28,7 @@ var interiors := {}  # pocket slot -> ShipInterior
 var interior_anchors := {}  # anchors of one interior (identical in every slot)
 var hull_anchors := {}
 var foes: SpaceFoes
+var gates: PlanetStrongholds  # the planets' boss fortresses (StrongholdGates for Boss and the gate keys)
 var _biomes := {}
 var _asteroids: Array = []
 var _next_ship := 1
@@ -116,6 +118,14 @@ func _ready() -> void:
 			hull.free()
 			_build_npcs()
 			_show_marks())
+	queue_load_step(func() -> void:
+		gates = PlanetStrongholds.new()
+		gates.name = "PlanetStrongholds"
+		add_child(gates)
+		gates.build_planets(self, not visual)
+		gates.changed.connect(func(center: Vector2i, locked: bool, sealed: bool) -> void:
+			if Net.is_server(): Net.server.fortress_gate(self, center, locked, sealed)))
+	for p: Dictionary in SpaceLayout.PLANETS: queue_load_step(_place_planet_packs.bind(p))
 	if server_build or Net.is_server():
 		# The dedicated server builds everything right away.
 		while not _load_steps.is_empty(): _load_steps.pop_front().call()
@@ -129,6 +139,10 @@ func biome_at(position: Vector3) -> BiomeDef:
 
 func region_at(position: Vector3) -> String:
 	var zone := zone_at(position)
+	if zone=="planet:"+CityLayout.ID:
+		for d: Dictionary in CityLayout.DISTRICTS:
+			var at: Vector3 = (CityLayout.planet().center as Vector3)+CityLayout.district_frame(d).origin
+			if position.distance_to(at)<260.0: return "Vesperis - "+str(d.name)
 	if zone.begins_with("planet:"): return str(SpaceLayout.planet(zone.substr(7)).name)
 	return biome_at(position).biome_name
 
@@ -148,7 +162,7 @@ func sample_gravity(position: Vector3) -> Dictionary:
 	return {frame = Transform3D(Basis.IDENTITY, position), zone = "void", distance = 1e6}
 
 func first_person_at(position: Vector3) -> bool:
-	return SpaceLayout.pocket_at(position)>=0
+	return SpaceLayout.pocket_at(position)>=0 or city.car_at(position)>=0
 
 ## Anywhere inside the Reach: spacewalkers float in open space on jetpacks.
 func is_walkable(position: Vector3) -> bool:
@@ -156,6 +170,7 @@ func is_walkable(position: Vector3) -> bool:
 
 func recovery_point(position: Vector3) -> Vector3:
 	var state := sample_gravity(position)
+	if state.zone=="planet:"+CityLayout.ID: return position
 	if state.zone=="void" or float(state.distance)>40.0: return spawn_point
 	var frame: Transform3D = state.frame
 	return frame.origin+frame.basis.y*0.12
@@ -168,7 +183,107 @@ func make_controller(actor: Player) -> SpatialController:
 	return SpaceTraversal.new().setup(actor, self)
 
 func map_color(_x: int, _z: int) -> Color: return Color("05060f")
-func ground_height(_x: float, _z: float) -> float: return 0.0
+## On a planet's top the real ground (arrows and bullets fly a fixed height
+## above it, enemies walk on it); elsewhere the station deck.
+## Enemy shots on a planet's top ride shot height over its ground (EnemyBullets).
+func bullet_ground(x: float, z: float) -> float:
+	var p := SpaceLayout.cap_planet(x, z)
+	return SpaceLayout.cap_height(p, x, z) if not p.is_empty() else NAN
+
+func ground_height(x: float, z: float) -> float:
+	var p := SpaceLayout.cap_planet(x, z)
+	return SpaceLayout.cap_height(p, x, z) if not p.is_empty() else 0.0
+
+## Planet enemies keep to the ground (the server has no planet collision).
+func hold_enemy(enemy: Enemy) -> void:
+	var p := SpaceLayout.cap_planet(enemy.global_position.x, enemy.global_position.z)
+	if p.is_empty(): return
+	var ground := SpaceLayout.cap_height(p, enemy.global_position.x, enemy.global_position.z)
+	if enemy.global_position.y<ground+0.35:
+		enemy.global_position.y = ground
+		enemy.velocity.y = 0.0
+
+## Planet enemies walk around trees, rocks and buildings, and stay on their world's top.
+func enemy_blocked(pos: Vector3) -> bool:
+	var p := SpaceLayout.cap_planet(pos.x, pos.z)
+	if p.is_empty(): return false
+	var up: Vector3 = (pos-(p.center as Vector3)).normalized()
+	if up.y<cos(SpaceLayout.COMBAT_CAP+0.08): return true
+	for flat: Array in SpaceLayout._flat_spots(p).slice(1):
+		if flat.size()>2: continue  # the fortress terrace: its walls decide (below)
+		if acos(clampf(up.dot(flat[0]), -1.0, 1.0))*float(p.radius)<float(flat[1])+6.0: return true
+	if is_instance_valid(gates) and gates.blocks_enemy(pos): return true
+	return PlanetFlora.blocked(p, pos-(p.center as Vector3), 0.3)
+
+func enemy_spawn_clear(pos: Vector3, radius: float, height: float) -> bool:
+	if enemy_blocked(pos): return false
+	return super.enemy_spawn_clear(pos, radius, height)
+
+## Packs across every planet's top (SpaceEnemies.PLANET_PACKS), seeded so all
+## clients and the server agree; obstacle packs gather by their obstacles.
+func _place_planet_packs(p: Dictionary) -> void:
+	if true:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = absi(String(p.id).hash())+977
+		var r := float(p.radius)
+		var used: Array[Vector3] = []
+		for spec: Array in SpaceEnemies.PLANET_PACKS.get(p.id, []):
+			var near := str(spec[5])
+			var spots: Array = []
+			if near!="":
+				for item: Dictionary in PlanetFlora.placements(p):
+					if item.decor or str(item.name)!=near: continue
+					var dir: Vector3 = item.dir
+					if acos(clampf(dir.y, -1.0, 1.0))<SpaceLayout.COMBAT_CAP*0.9: spots.append(dir)
+			for i in int(spec[3]):
+				var dir := Vector3.ZERO
+				for attempt in 40:
+					if not spots.is_empty():
+						dir = spots[rng.randi() % spots.size()]
+						# Beside the obstacle, not inside it.
+						dir = (dir+Vector3(rng.randf_range(-1, 1), 0, rng.randf_range(-1, 1)).normalized()*(5.0/r)).normalized()
+					else:
+						var angle := rng.randf()*TAU
+						var arc := rng.randf_range(70.0, SpaceLayout.COMBAT_CAP*r*0.92)
+						dir = Vector3(sin(arc/r)*cos(angle), cos(arc/r), sin(arc/r)*sin(angle))
+					var at := SpaceLayout.surface_point(p, (p.center as Vector3)+dir)
+					if enemy_blocked(at+Vector3(0.01, 0, 0)) and spots.is_empty(): continue
+					if used.any(func(u: Vector3) -> bool: return u.distance_to(at)<34.0): continue
+					if SpaceLayout.FORTS.has(p.id) and at.distance_to(PlanetStrongholds.floor_center(p.id))<80.0: continue
+					used.append(at)
+					_planet_site(p, "%s_%d" % [spec[0], i], spec, at)
+					break
+
+		if SpaceLayout.FORTS.has(p.id): _fort_sites(p)
+
+## The fortress's boss in the middle and its guards inside the walls (they
+## wake only once someone is in). Both come back a while after they fall.
+func _fort_sites(p: Dictionary) -> void:
+	var fort: Dictionary = SpaceLayout.FORTS[p.id]
+	var at := PlanetStrongholds.floor_center(p.id)
+	var boss_key := "%s_%s_fort_boss" % [realm_id, p.id]
+	Enemies.pack_overrides[boss_key] = {members = [], leader = {enemy = fort.boss, min_members = 0}, respawn_time = 480.0, activate_radius = 60.0}
+	enemy_director.add_quest_site({id = boss_key, pack = boss_key, pos = at, seed = absi(boss_key.hash()) % 99991})
+	var guards: Array = []
+	for id: String in SpaceEnemies.CAST:
+		var c: Array = SpaceEnemies.CAST[id]
+		if str(c[1])==p.id and str(c[10]) in ["small", "big"]: guards.append({enemy = id, min = 1 if str(c[10])=="big" else 2, max = 2 if str(c[10])=="big" else 3})
+	if guards.is_empty(): return
+	var frame := SpaceLayout.fort_frame(p)
+	for side in [-1, 1]:
+		var key := "%s_%s_fort_guards_%d" % [realm_id, p.id, side+1]
+		var spot: Vector3 = at+frame.basis*Vector3(side*18.0, 0, -12.0)
+		Enemies.pack_overrides[key] = {members = guards.duplicate(true), respawn_time = 480.0, activate_radius = 30.0}
+		enemy_director.add_quest_site({id = key, pack = key, pos = spot, seed = absi(key.hash()) % 99991})
+
+func _planet_site(p: Dictionary, name: String, spec: Array, at: Vector3) -> void:
+	var key := "%s_%s_%s" % [realm_id, p.id, name]
+	var members: Array = []
+	for m: Array in spec[1]: members.append({enemy = m[0], min = m[1], max = m[2]})
+	var pack := {members = members, respawn_time = float(spec[4]), activate_radius = 42.0}
+	if str(spec[2])!="": pack.leader = {enemy = spec[2], min_members = 0}
+	Enemies.pack_overrides[key] = pack
+	enemy_director.add_quest_site({id = key, pack = key, pos = at, seed = absi(key.hash()) % 99991})
 func obstacles_near(_at: Vector3, _radius: float) -> Array[String]: return []
 func remove_obstacle(_id: String) -> void: pass
 
@@ -203,6 +318,15 @@ func server_action(p: Dictionary, args: Array) -> void:
 	var pid := int(p.player_id)
 	var pos: Vector3 = p.get("pos", Vector3.ZERO)
 	match str(args[0]):
+		"city":
+			var before := city.seat_of(pid)
+			var message := city.handle(pid, pos, args)
+			var after := city.seat_of(pid)
+			if before!=after:
+				if after!="": teleport(p, CityLayout.any_seat(after).pos, "city_seat")
+				elif before!="": teleport(p, CityLayout.any_seat(before).stand, "city_stand")
+			if message!="": _tell(p, message)
+			_broadcast_city()
 		"spawn", "buy_ship":  # [planet id] at a town's shipwright, or none at the Nexus table
 			var town := str(args[1]) if args.size()>1 else ""
 			if town=="" and zone_at(pos)!="station": return
@@ -533,6 +657,7 @@ func _launch_ship(pid: int, captain: String) -> SpaceShip:
 
 ## Moves a player (authority): the client is corrected to the new spot.
 func teleport(p: Dictionary, to: Vector3, reason := "") -> void:
+	if reason!="city_seat" and city.stand(int(p.player_id)): city.changed = true
 	if Net.is_server():
 		var peer := int(p.get("peer_id", 0))
 		p.pos = to
@@ -560,6 +685,9 @@ func pocket_point(slot: int, local: Vector3) -> Vector3:
 func hatch_position(ship: SpaceShip) -> Vector3:
 	var hatch: Transform3D = hull_anchors.get("hatch", Transform3D(Basis.IDENTITY, Vector3(9, -3, 4)))
 	var at := ship.xform*hatch.origin
+	if ship.planet==CityLayout.ID:
+		# Exit onto the flat port deck, above its surface (not the sphere below).
+		return ship.xform*Vector3(hatch.origin.x, -SpaceShip.LANDED_HEIGHT+0.15, hatch.origin.z)
 	var gravity := sample_gravity(at)
 	return (gravity.frame as Transform3D).origin+(gravity.frame as Transform3D).basis.y*0.15 if gravity.zone!="void" else at
 
@@ -581,6 +709,8 @@ func _ensure_interior(slot: int) -> void:
 
 func _physics_process(delta: float) -> void:
 	if Net.is_client(): return
+	city.step()
+	_broadcast_city()
 	_arrive_rescues()
 	_mend(delta)
 	_burn_cigars(delta)
@@ -589,6 +719,7 @@ func _physics_process(delta: float) -> void:
 		PlanetFlora._obstacle_index(SpaceLayout.PLANETS[_warm])
 		_warm += 1
 	for ship: SpaceShip in ships.values().duplicate():
+		ship.city_pad_taken = _city_pad_taken.bind(ship.id)
 		var damage := ship.step(delta, _asteroids)
 		if damage>0: hurt_ship(ship, damage)
 		# Too close to the sun: the hull scorches, faster the closer.
@@ -656,13 +787,29 @@ func _broadcast_ship(ship: SpaceShip) -> void:
 
 ## Players leaving the server or the world give up their seats.
 func player_left(pid: int) -> void:
+	if city.stand(pid): city.changed = true
+	_broadcast_city()
 	for ship: SpaceShip in ships.values():
 		_stand(ship, pid)
 
 # --- Replication --------------------------------------------------------------------------
 
+func _city_pad_taken(pose: Transform3D, except_id: int) -> bool:
+	for ship: SpaceShip in ships.values():
+		if ship.id==except_id: continue
+		var target: Transform3D = ship.landing.to if ship.mode=="landing" else ship.xform
+		if ship.mode in ["landing", "landed"] and target.origin.distance_to(pose.origin)<24.0: return true
+	return false
+
+func _broadcast_city() -> void:
+	if not city.changed: return
+	city.changed = false
+	world_event.emit(["city", city.wire()])
+
 func handle_event(event: Array) -> void:
 	match str(event[0]):
+		"city":
+			if Net.is_client(): city.apply(event[1])
 		"ships":
 			for data: Array in event[1]:
 				var id := int(data[0])
@@ -690,11 +837,15 @@ func handle_event(event: Array) -> void:
 				(local_player.spatial_controller as SpaceTraversal).on_world_message(event)
 
 func state_wire() -> Dictionary:
-	return {ships = ships.values().map(func(s: SpaceShip) -> Array: return s.wire()), marks = marks.duplicate(true)}
+	return {city = city.wire(), ships = ships.values().map(func(s: SpaceShip) -> Array: return s.wire()), marks = marks.duplicate(true),
+		forts = gates.states() if is_instance_valid(gates) else []}
 
 func apply_state(data: Dictionary) -> void:
+	if data.has("city"): city.apply(data.city)
 	if data.has("ships"): handle_event(["ships", data.ships])
 	for party_id in data.get("marks", {}): handle_event(["marks", int(party_id), data.marks[party_id]])
+	if is_instance_valid(gates):
+		for state: Array in data.get("forts", []): gates.apply_state(state[0], bool(state[1]), bool(state[2]))
 
 # --- Campaign places ------------------------------------------------------------------------
 
@@ -865,3 +1016,7 @@ func seat_spec(slot: int, seat: String) -> Dictionary:
 
 func rocket_node() -> SmallRocket:
 	return _rocket
+
+func _exit_tree() -> void:
+	for key: String in Enemies.pack_overrides.keys():
+		if key.begins_with(realm_id+"_"): Enemies.pack_overrides.erase(key)

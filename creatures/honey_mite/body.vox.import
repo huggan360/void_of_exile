@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://da00wvlewoawu"
+path="res://.godot/imported/body.vox-933259eb2f6c4433f45732a7efd811a0.tscn"
+
+[deps]
+
+source_file="res://creatures/honey_mite/body.vox"
+dest_files=["res://.godot/imported/body.vox-933259eb2f6c4433f45732a7efd811a0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

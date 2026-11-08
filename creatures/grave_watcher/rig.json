@@ -1,0 +1,163 @@
+{
+  "voxel_size": 0.08666666666666667,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -6,
+        9,
+        -4
+      ],
+      "frame_size": [
+        12,
+        13,
+        8
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -5,
+        -2,
+        -5
+      ],
+      "frame_size": [
+        10,
+        8,
+        9
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -3,
+        -9,
+        -2
+      ],
+      "frame_size": [
+        6,
+        12,
+        5
+      ],
+      "glow": true
+    },
+    "leg_l": {
+      "frame_min": [
+        -2,
+        -9,
+        -4
+      ],
+      "frame_size": [
+        5,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        0,
+        -9,
+        -2
+      ],
+      "frame_size": [
+        6,
+        12,
+        5
+      ],
+      "glow": true
+    },
+    "leg_r": {
+      "frame_min": [
+        -2,
+        -9,
+        -4
+      ],
+      "frame_size": [
+        5,
+        9,
+        6
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        24,
+        0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -5,
+        20,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l": {
+      "part": "leg_l",
+      "pivot": [
+        -3,
+        9,
+        0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        5,
+        20,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r": {
+      "part": "leg_r",
+      "pivot": [
+        3,
+        9,
+        0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "hand": [
+    3,
+    8,
+    -3
+  ],
+  "bob": 0.008,
+  "waddle": 0.025,
+  "hover": 0,
+  "animation_style": "cantor",
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.4,
+  "flap_rate": 1.2,
+  "design_grid": [
+    32,
+    32,
+    32
+  ]
+}

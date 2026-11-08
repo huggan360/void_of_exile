@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://doj6nksadyqhg"
+path="res://.godot/imported/arm_r_glow.vox-926663b084ae8ff3f27219f3d296a31a.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_ghost/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-926663b084ae8ff3f27219f3d296a31a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

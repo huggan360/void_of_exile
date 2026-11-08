@@ -1,0 +1,380 @@
+{
+  "voxel_size": 0.12222222222222223,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -7,
+        0,
+        -6
+      ],
+      "frame_size": [
+        14,
+        18,
+        12
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -4,
+        -4,
+        -4
+      ],
+      "frame_size": [
+        8,
+        8,
+        6
+      ],
+      "glow": true
+    },
+    "tentacle_l_0_0": {
+      "frame_min": [
+        -5,
+        -4,
+        -1
+      ],
+      "frame_size": [
+        6,
+        6,
+        3
+      ]
+    },
+    "tentacle_l_0_1": {
+      "frame_min": [
+        -4,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        5,
+        4,
+        4
+      ]
+    },
+    "tentacle_l_0_2": {
+      "frame_min": [
+        -4,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        5,
+        6,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_l_1_0": {
+      "frame_min": [
+        -5,
+        -4,
+        -1
+      ],
+      "frame_size": [
+        6,
+        6,
+        3
+      ]
+    },
+    "tentacle_l_1_1": {
+      "frame_min": [
+        -4,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        5,
+        4,
+        4
+      ]
+    },
+    "tentacle_l_1_2": {
+      "frame_min": [
+        -4,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        5,
+        6,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_r_0_0": {
+      "frame_min": [
+        -1,
+        -4,
+        -1
+      ],
+      "frame_size": [
+        7,
+        6,
+        3
+      ]
+    },
+    "tentacle_r_0_1": {
+      "frame_min": [
+        -1,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        6,
+        4,
+        4
+      ]
+    },
+    "tentacle_r_0_2": {
+      "frame_min": [
+        -1,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        6,
+        6,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_r_1_0": {
+      "frame_min": [
+        -1,
+        -4,
+        -1
+      ],
+      "frame_size": [
+        7,
+        6,
+        3
+      ]
+    },
+    "tentacle_r_1_1": {
+      "frame_min": [
+        -1,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        6,
+        4,
+        4
+      ]
+    },
+    "tentacle_r_1_2": {
+      "frame_min": [
+        -1,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        6,
+        6,
+        4
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        10,
+        -5
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "tentacle_l_0_0": {
+      "part": "tentacle_l_0_0",
+      "pivot": [
+        -5,
+        6,
+        -3
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "tentacle_l_0_1": {
+      "part": "tentacle_l_0_1",
+      "pivot": [
+        -3,
+        -3,
+        1
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "tentacle_l_0_0"
+    },
+    "tentacle_l_0_2": {
+      "part": "tentacle_l_0_2",
+      "pivot": [
+        -2,
+        -1,
+        2
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "tentacle_l_0_1"
+    },
+    "tentacle_l_1_0": {
+      "part": "tentacle_l_1_0",
+      "pivot": [
+        -5,
+        6,
+        3
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "tentacle_l_1_1": {
+      "part": "tentacle_l_1_1",
+      "pivot": [
+        -3,
+        -3,
+        1
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "tentacle_l_1_0"
+    },
+    "tentacle_l_1_2": {
+      "part": "tentacle_l_1_2",
+      "pivot": [
+        -2,
+        -1,
+        2
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "tentacle_l_1_1"
+    },
+    "tentacle_r_0_0": {
+      "part": "tentacle_r_0_0",
+      "pivot": [
+        5,
+        6,
+        -3
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "tentacle_r_0_1": {
+      "part": "tentacle_r_0_1",
+      "pivot": [
+        3,
+        -3,
+        1
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "tentacle_r_0_0"
+    },
+    "tentacle_r_0_2": {
+      "part": "tentacle_r_0_2",
+      "pivot": [
+        2,
+        -1,
+        2
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "tentacle_r_0_1"
+    },
+    "tentacle_r_1_0": {
+      "part": "tentacle_r_1_0",
+      "pivot": [
+        5,
+        6,
+        3
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "tentacle_r_1_1": {
+      "part": "tentacle_r_1_1",
+      "pivot": [
+        3,
+        -3,
+        1
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "tentacle_r_1_0"
+    },
+    "tentacle_r_1_2": {
+      "part": "tentacle_r_1_2",
+      "pivot": [
+        2,
+        -1,
+        2
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "tentacle_r_1_1"
+    }
+  },
+  "hand": [
+    0,
+    10,
+    -9
+  ],
+  "bob": 0.018,
+  "waddle": 0.06,
+  "hover": 0,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.4,
+  "animation_style": "cantor"
+}

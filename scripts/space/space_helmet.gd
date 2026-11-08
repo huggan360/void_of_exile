@@ -1,26 +1,21 @@
 class_name SpaceHelmet
 extends Node
 ## Space gear for everyone in a space world (the Astral Reach and the Theory
-## of Everything): a square glass helmet fitted to each character's own head
-## (measured from its body voxels, hats and fins included) and, while
-## floating in open space, a jetpack on the back whose nozzles burn when
-## thrusting. Added to the world; dresses the local player and every remote
+## of Everything): while floating in open space, a jetpack on the back (fitted
+## to the head's size, from the body voxels) whose nozzles burn when thrusting. Added to the world; dresses the local player and every remote
 ## player it finds, and undresses them when the world goes.
 const HELMET := "space_helmet"
 const JETPACK := "space_jetpack"
 ## Body rows from here up are the head (arms attach at row 9 on every class).
 const NECK_ROW := 9
 var world: Node3D
-var _timer := 0.0
 static var _heads := {}  # body.vox path -> AABB (voxel units)
-static var _glass: ShaderMaterial
 static var _brass: StandardMaterial3D
 static var _tank: StandardMaterial3D
 static var _bulb: StandardMaterial3D
 static var _fire: ShaderMaterial
 
 func _process(delta: float) -> void:
-	_timer -= delta
 	var actors: Array = []
 	var local: Node3D = world.get("local_player") if is_instance_valid(world) else null
 	if is_instance_valid(local): actors.append(local)
@@ -28,7 +23,6 @@ func _process(delta: float) -> void:
 	for actor: Node3D in actors:
 		var model: Node3D = actor.get("model")
 		if not is_instance_valid(model): continue
-		if _timer<=0.0: dress(model)
 		# The jetpack shows out in open space; the nozzles burn while thrusting.
 		var out := world is SpaceWorld and (world as SpaceWorld).zone_at(actor.global_position)=="void"
 		var pack := _jetpack(model, out)
@@ -41,7 +35,6 @@ func _process(delta: float) -> void:
 			for flame: Node3D in pack.get_meta("flames"):
 				flame.visible = thrust
 				flame.scale = Vector3(1, 1, 1)*(0.85+0.3*sin(Time.get_ticks_msec()/40.0+flame.position.x*9.0))
-	if _timer<=0.0: _timer = 0.5
 
 func _exit_tree() -> void:
 	var local: Node3D = world.get("local_player") if is_instance_valid(world) else null
@@ -86,45 +79,6 @@ static func _head_box(model: Node3D) -> AABB:
 			if lo.x<INF: box = AABB(lo, hi-lo)
 	_heads[path] = box
 	return box
-
-## A square glass helmet a voxel clear of the head on every side.
-static func dress(model: Variant) -> void:
-	if not model is Node3D or not is_instance_valid(model): return
-	var body := _body(model as Node3D)
-	if body==null or body.has_node(HELMET): return
-	_materials()
-	var box := _head_box(model as Node3D).grow(1.0)
-	box.position.y += 0.5  # leave the neck free
-	box.size.y -= 0.5
-	var helmet := Node3D.new()
-	helmet.name = HELMET
-	body.add_child(helmet)
-	var glass := MeshInstance3D.new()
-	var cube := BoxMesh.new()
-	cube.size = box.size
-	glass.mesh = cube
-	glass.material_override = _glass
-	glass.position = box.get_center()
-	glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	helmet.add_child(glass)
-	# Brass edges: the twelve edges of the box, voxel-thick.
-	var c := box.get_center()
-	var h := box.size*0.5
-	for axis in 3:
-		for a in [-1.0, 1.0]:
-			for b in [-1.0, 1.0]:
-				var at := c
-				var size := Vector3.ONE*0.5
-				size[axis] = box.size[axis]+0.5
-				var u := (axis+1) % 3
-				var v := (axis+2) % 3
-				at[u] += a*h[u]
-				at[v] += b*h[v]
-				_add_box(helmet, at, size, _brass)
-	# Collar ring and a little antenna with a glowing bulb.
-	_add_box(helmet, Vector3(c.x, box.position.y-0.25, c.z), Vector3(box.size.x+0.6, 0.7, box.size.z+0.6), _brass)
-	_add_box(helmet, Vector3(box.end.x-1.0, box.end.y+1.2, c.z), Vector3(0.35, 2.4, 0.35), _brass)
-	_add_box(helmet, Vector3(box.end.x-1.0, box.end.y+2.6, c.z), Vector3.ONE*0.9, _bulb)
 
 ## The jetpack on the back (+Z, the character faces -Z), shown or hidden.
 static func _jetpack(model: Node3D, show: bool) -> Node3D:
@@ -175,9 +129,7 @@ static func _add_box(parent: Node3D, at: Vector3, size: Vector3, material: Mater
 	parent.add_child(mesh)
 
 static func _materials() -> void:
-	if _glass!=null: return
-	_glass = ShaderMaterial.new()
-	_glass.shader = preload("res://shaders/space_glass.gdshader")
+	if _brass!=null: return
 	_brass = StandardMaterial3D.new()
 	_brass.albedo_color = Color("d3a34e")
 	_brass.metallic = 0.6

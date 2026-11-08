@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dw1g8l0dnjdtf"
+path="res://.godot/imported/body.vox-6aae20a498d66f1612c0e94230928df7.tscn"
+
+[deps]
+
+source_file="res://creatures/city_dancer/body.vox"
+dest_files=["res://.godot/imported/body.vox-6aae20a498d66f1612c0e94230928df7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

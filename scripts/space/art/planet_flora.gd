@@ -66,6 +66,9 @@ var _by_cell := {}  # cell -> obstacle placements
 ## frames in planet space.
 static func placements(p: Dictionary) -> Array:
 	if _placements.has(p.id): return _placements[p.id]
+	if not SETS.has(p.id):
+		_placements[p.id] = []
+		return []
 	var set: Dictionary = SETS[p.id]
 	var radius := float(p.radius)
 	var pad := SpaceLayout.pad_frame(p).basis.y

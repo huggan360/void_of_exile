@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://y5msb1oes3hy"
+path="res://.godot/imported/model.vox-e8930675d1688eb4e933b5cb69ff383e.tscn"
+
+[deps]
+
+source_file="res://props/city/cafe_table/model.vox"
+dest_files=["res://.godot/imported/model.vox-e8930675d1688eb4e933b5cb69ff383e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

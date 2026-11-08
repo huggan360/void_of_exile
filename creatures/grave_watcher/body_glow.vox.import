@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b6y3r1s4tgxm4"
+path="res://.godot/imported/body_glow.vox-d1924a0748f6925521e142675a5fda27.tscn"
+
+[deps]
+
+source_file="res://creatures/grave_watcher/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-d1924a0748f6925521e142675a5fda27.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

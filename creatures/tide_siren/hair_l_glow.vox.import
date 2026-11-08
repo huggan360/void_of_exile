@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ctqdlfwet8vgh"
+path="res://.godot/imported/hair_l_glow.vox-f26dc05818da9df38b9646d9062ba3f7.tscn"
+
+[deps]
+
+source_file="res://creatures/tide_siren/hair_l_glow.vox"
+dest_files=["res://.godot/imported/hair_l_glow.vox-f26dc05818da9df38b9646d9062ba3f7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

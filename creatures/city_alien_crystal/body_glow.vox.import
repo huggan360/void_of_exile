@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://73ne4n1a74ds"
+path="res://.godot/imported/body_glow.vox-4e32a1006a61cbdf5888fc103b63dc53.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_crystal/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-4e32a1006a61cbdf5888fc103b63dc53.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

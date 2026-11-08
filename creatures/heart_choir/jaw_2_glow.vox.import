@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cs137ldrlhd3j"
+path="res://.godot/imported/jaw_2_glow.vox-8262bc7610491e0ab6e4081988afc654.tscn"
+
+[deps]
+
+source_file="res://creatures/heart_choir/jaw_2_glow.vox"
+dest_files=["res://.godot/imported/jaw_2_glow.vox-8262bc7610491e0ab6e4081988afc654.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

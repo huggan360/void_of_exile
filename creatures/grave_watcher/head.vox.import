@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://5ykg4t5cveny"
+path="res://.godot/imported/head.vox-70d1fbfdd85163133465adb563c74f4f.tscn"
+
+[deps]
+
+source_file="res://creatures/grave_watcher/head.vox"
+dest_files=["res://.godot/imported/head.vox-70d1fbfdd85163133465adb563c74f4f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

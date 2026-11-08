@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://4cxi8n0sgxvg"
+path="res://.godot/imported/leg.vox-06b69e8b3ff541a8483a973957182a46.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_crystal/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-06b69e8b3ff541a8483a973957182a46.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

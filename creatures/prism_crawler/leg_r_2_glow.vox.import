@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7m62kvorhj4x"
+path="res://.godot/imported/leg_r_2_glow.vox-3883a34320c78b55dc6f90cfac84aca0.tscn"
+
+[deps]
+
+source_file="res://creatures/prism_crawler/leg_r_2_glow.vox"
+dest_files=["res://.godot/imported/leg_r_2_glow.vox-3883a34320c78b55dc6f90cfac84aca0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

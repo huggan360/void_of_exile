@@ -1,0 +1,272 @@
+[
+  {
+    "id": "shard_wisp",
+    "display_name": "Shard Wisp",
+    "biome": "Shardheart",
+    "folder": "creatures/shard_wisp",
+    "status": "live",
+    "height_m": 0.7,
+    "voxel_size": 0.05384615384615384,
+    "parts": [
+      "body",
+      "chip_0",
+      "chip_1",
+      "chip_2"
+    ],
+    "behavior": "orbit",
+    "god": false,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "variants": [],
+    "tail_segments": 0
+  },
+  {
+    "id": "prism_crawler",
+    "display_name": "Prism Crawler",
+    "biome": "Shardheart",
+    "folder": "creatures/prism_crawler",
+    "status": "live",
+    "height_m": 1.1,
+    "voxel_size": 0.08461538461538462,
+    "parts": [
+      "body",
+      "head",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_l_2",
+      "leg_l_3",
+      "leg_r_0",
+      "leg_r_1",
+      "leg_r_2",
+      "leg_r_3"
+    ],
+    "behavior": "dart",
+    "god": false,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "variants": [],
+    "tail_segments": 0
+  },
+  {
+    "id": "resonance_sentinel",
+    "display_name": "Resonance Sentinel",
+    "biome": "Shardheart",
+    "folder": "creatures/resonance_sentinel",
+    "status": "live",
+    "height_m": 2.4,
+    "voxel_size": 0.07741935483870968,
+    "parts": [
+      "body",
+      "head",
+      "arm_l",
+      "leg_l",
+      "arm_r",
+      "leg_r"
+    ],
+    "behavior": "stationary",
+    "god": false,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "variants": [],
+    "tail_segments": 0
+  },
+  {
+    "id": "heart_choir",
+    "display_name": "The Heart Choir",
+    "biome": "Shardheart",
+    "folder": "creatures/heart_choir",
+    "status": "live",
+    "height_m": 3.5,
+    "voxel_size": 0.016203703703703703,
+    "parts": [
+      "arm_l",
+      "jaw_1",
+      "arm_r",
+      "jaw_2",
+      "jaw_0",
+      "shard_halo",
+      "body"
+    ],
+    "behavior": "stationary",
+    "god": true,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8,
+    "variants": [],
+    "tail_segments": 0,
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 118470
+      }
+    }
+  },
+  {
+    "id": "lantern_ghost",
+    "display_name": "Lantern Ghost",
+    "biome": "Hollowmoon",
+    "folder": "creatures/lantern_ghost",
+    "status": "live",
+    "height_m": 1.4,
+    "voxel_size": 0.05833333333333333,
+    "parts": [
+      "body",
+      "head",
+      "arm_l",
+      "arm_r",
+      "lantern",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3"
+    ],
+    "behavior": "spirit",
+    "god": false,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "variants": [],
+    "tail_segments": 4
+  },
+  {
+    "id": "bone_crawler",
+    "display_name": "Bone Crawler",
+    "biome": "Hollowmoon",
+    "folder": "creatures/bone_crawler",
+    "status": "live",
+    "height_m": 1.0,
+    "voxel_size": 0.1111111111111111,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_l_2",
+      "leg_l_3",
+      "leg_r_0",
+      "leg_r_1",
+      "leg_r_2",
+      "leg_r_3"
+    ],
+    "behavior": "dart",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "variants": [],
+    "tail_segments": 0
+  },
+  {
+    "id": "grave_watcher",
+    "display_name": "Grave Watcher",
+    "biome": "Hollowmoon",
+    "folder": "creatures/grave_watcher",
+    "status": "live",
+    "height_m": 2.6,
+    "voxel_size": 0.08666666666666667,
+    "parts": [
+      "body",
+      "head",
+      "arm_l",
+      "leg_l",
+      "arm_r",
+      "leg_r"
+    ],
+    "behavior": "stationary",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "variants": [],
+    "tail_segments": 0
+  },
+  {
+    "id": "pale_astronomer",
+    "display_name": "The Pale Astronomer",
+    "biome": "Hollowmoon",
+    "folder": "creatures/pale_astronomer",
+    "status": "live",
+    "height_m": 3.5,
+    "voxel_size": 0.015625,
+    "parts": [
+      "telescope",
+      "cloak_r",
+      "arm_r",
+      "moon_0",
+      "moon_2",
+      "body",
+      "cloak_l",
+      "arm_l",
+      "moon_1"
+    ],
+    "behavior": "strafe",
+    "god": true,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8,
+    "variants": [],
+    "tail_segments": 0,
+    "poses": {
+      "default": {
+        "file": "model.vox",
+        "frame_min": [
+          -128,
+          0,
+          -128
+        ],
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "voxels": 187934
+      }
+    }
+  }
+]

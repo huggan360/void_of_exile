@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwan063owekh0"
+path="res://.godot/imported/arm_l.vox-bab631643ad5e23f154620924a7862fc.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_briarrose/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-bab631643ad5e23f154620924a7862fc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

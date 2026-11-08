@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://rsrvlvdupnep"
+path="res://.godot/imported/arm_r_glow.vox-e22803b5443172113834ee9985dddd3e.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_mushroom/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-e22803b5443172113834ee9985dddd3e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7ou74ej3yje2"
+path="res://.godot/imported/arm_r.vox-2ce36520fb8ef21cc8672e7e9789b6b6.tscn"
+
+[deps]
+
+source_file="res://creatures/city_bartender/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-2ce36520fb8ef21cc8672e7e9789b6b6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

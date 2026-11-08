@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c3w4rltq6qou0"
+path="res://.godot/imported/model.vox-3beafec81475ef755f9b74dc1eb94cd0.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_mushroom/model.vox"
+dest_files=["res://.godot/imported/model.vox-3beafec81475ef755f9b74dc1eb94cd0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

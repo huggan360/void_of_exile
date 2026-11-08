@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bpyp1opv680ct"
+path="res://.godot/imported/arm_l.vox-ea373d7a70ca2276fb6ed0a67094c7f5.tscn"
+
+[deps]
+
+source_file="res://creatures/pale_astronomer/source_32/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-ea373d7a70ca2276fb6ed0a67094c7f5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

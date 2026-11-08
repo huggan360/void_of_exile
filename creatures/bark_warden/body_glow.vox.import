@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://olm8v42t4gdc"
+path="res://.godot/imported/body_glow.vox-ed9e08538e2694c59db4bea198deb762.tscn"
+
+[deps]
+
+source_file="res://creatures/bark_warden/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-ed9e08538e2694c59db4bea198deb762.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

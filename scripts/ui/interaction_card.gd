@@ -118,6 +118,9 @@ func close() -> void:
 	hide()
 
 func update_prompt(player: Player, blocked: bool) -> void:
+	if player.spatial_controller is SpaceTraversal:
+		var space := player.spatial_controller as SpaceTraversal
+		blocked = blocked or space.city_seat!="" or space._lift>=0
 	if suppressed or blocked or not is_instance_valid(world) or player.frozen or player.input_locked:
 		close()
 		return

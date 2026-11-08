@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwvjxpqeksfaq"
+path="res://.godot/imported/model.vox-b609693dd2748aa0aa8de117326ca3de.tscn"
+
+[deps]
+
+source_file="res://props/city/sign_bar/model.vox"
+dest_files=["res://.godot/imported/model.vox-b609693dd2748aa0aa8de117326ca3de.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

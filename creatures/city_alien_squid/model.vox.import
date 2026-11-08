@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bpab7yf1760wb"
+path="res://.godot/imported/model.vox-9421d78136558de6c5741b052c6f9a18.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_squid/model.vox"
+dest_files=["res://.godot/imported/model.vox-9421d78136558de6c5741b052c6f9a18.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

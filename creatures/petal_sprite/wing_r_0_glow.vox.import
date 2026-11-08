@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://1w6rauoa8ems"
+path="res://.godot/imported/wing_r_0_glow.vox-7497b66c573772c92009115c06c565c1.tscn"
+
+[deps]
+
+source_file="res://creatures/petal_sprite/wing_r_0_glow.vox"
+dest_files=["res://.godot/imported/wing_r_0_glow.vox-7497b66c573772c92009115c06c565c1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

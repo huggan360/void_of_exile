@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bdtpsvxsv2wha"
+path="res://.godot/imported/arm_l.vox-6f0c45a344ae74d173a3bf0380d2e7ec.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_frog/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-6f0c45a344ae74d173a3bf0380d2e7ec.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

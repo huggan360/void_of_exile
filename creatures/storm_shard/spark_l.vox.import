@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7apk1dakurfj"
+path="res://.godot/imported/spark_l.vox-738ca4210dd9be3c7e6377134927d86b.tscn"
+
+[deps]
+
+source_file="res://creatures/storm_shard/spark_l.vox"
+dest_files=["res://.godot/imported/spark_l.vox-738ca4210dd9be3c7e6377134927d86b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

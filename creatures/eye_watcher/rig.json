@@ -1,0 +1,207 @@
+{
+  "voxel_size": 0.1285714285714286,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -7,
+        5,
+        -5
+      ],
+      "frame_size": [
+        14,
+        10,
+        9
+      ],
+      "glow": true
+    },
+    "iris": {
+      "frame_min": [
+        -3,
+        -3,
+        -2
+      ],
+      "frame_size": [
+        6,
+        6,
+        3
+      ],
+      "glow": true
+    },
+    "petal_0": {
+      "frame_min": [
+        0,
+        0,
+        -1
+      ],
+      "frame_size": [
+        6,
+        2,
+        3
+      ],
+      "glow": true
+    },
+    "petal_1": {
+      "frame_min": [
+        0,
+        0,
+        -1
+      ],
+      "frame_size": [
+        4,
+        5,
+        3
+      ],
+      "glow": true
+    },
+    "petal_2": {
+      "frame_min": [
+        -2,
+        0,
+        -1
+      ],
+      "frame_size": [
+        3,
+        4,
+        3
+      ],
+      "glow": true
+    },
+    "petal_3": {
+      "frame_min": [
+        -6,
+        0,
+        -1
+      ],
+      "frame_size": [
+        7,
+        2,
+        3
+      ],
+      "glow": true
+    },
+    "petal_4": {
+      "frame_min": [
+        -4,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        5,
+        5,
+        3
+      ],
+      "glow": true
+    },
+    "petal_5": {
+      "frame_min": [
+        0,
+        -3,
+        -1
+      ],
+      "frame_size": [
+        4,
+        5,
+        3
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "iris": {
+      "part": "iris",
+      "pivot": [
+        0,
+        10,
+        -5
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "petal_0": {
+      "part": "petal_0",
+      "pivot": [
+        6,
+        10,
+        0
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "petal_1": {
+      "part": "petal_1",
+      "pivot": [
+        3,
+        13,
+        0
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "petal_2": {
+      "part": "petal_2",
+      "pivot": [
+        -3,
+        13,
+        0
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "petal_3": {
+      "part": "petal_3",
+      "pivot": [
+        -6,
+        10,
+        0
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "petal_4": {
+      "part": "petal_4",
+      "pivot": [
+        -3,
+        7,
+        0
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "petal_5": {
+      "part": "petal_5",
+      "pivot": [
+        3,
+        7,
+        0
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "hand": [
+    0,
+    16,
+    -7
+  ],
+  "bob": 0.025,
+  "waddle": 0.035,
+  "hover": 0.3,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 2.8,
+  "flap_rate": 2.5
+}

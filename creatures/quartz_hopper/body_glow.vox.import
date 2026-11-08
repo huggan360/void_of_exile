@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://de8i2mohy1fkg"
+path="res://.godot/imported/body_glow.vox-050237e6a5d78fad3e3985980748d09a.tscn"
+
+[deps]
+
+source_file="res://creatures/quartz_hopper/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-050237e6a5d78fad3e3985980748d09a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

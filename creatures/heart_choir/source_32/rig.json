@@ -1,0 +1,189 @@
+{
+  "voxel_size": 0.12962962962962962,
+  "parts": {
+    "arm_l": {
+      "frame_min": [
+        -4,
+        -8,
+        -2
+      ],
+      "frame_size": [
+        5,
+        11,
+        5
+      ],
+      "glow": true
+    },
+    "jaw_1": {
+      "frame_min": [
+        -2,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        4,
+        2,
+        2
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        0,
+        -8,
+        -2
+      ],
+      "frame_size": [
+        5,
+        11,
+        5
+      ],
+      "glow": true
+    },
+    "jaw_2": {
+      "frame_min": [
+        -2,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        4,
+        2,
+        2
+      ],
+      "glow": true
+    },
+    "jaw_0": {
+      "frame_min": [
+        -2,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        4,
+        2,
+        2
+      ],
+      "glow": true
+    },
+    "shard_halo": {
+      "frame_min": [
+        -12,
+        -2,
+        -13
+      ],
+      "frame_size": [
+        26,
+        5,
+        27
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -10,
+        5,
+        -6
+      ],
+      "frame_size": [
+        20,
+        20,
+        10
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "jaw_0": {
+      "part": "jaw_0",
+      "pivot": [
+        -5.0,
+        13.0,
+        -4.0
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "jaw_1": {
+      "part": "jaw_1",
+      "pivot": [
+        0.0,
+        10.0,
+        -4.0
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "jaw_2": {
+      "part": "jaw_2",
+      "pivot": [
+        5.0,
+        13.0,
+        -4.0
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "shard_halo": {
+      "part": "shard_halo",
+      "pivot": [
+        0.0,
+        29.0,
+        0.0
+      ],
+      "role": "tail",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -10.0,
+        17.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        10.0,
+        17.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {},
+  "hand": [
+    0.0,
+    16.0,
+    -6.0
+  ],
+  "hover": 0.25,
+  "bob": 0.035,
+  "waddle": 0.025,
+  "flap_rate": 1.2,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 2.4,
+  "animation_style": "cantor",
+  "design_grid": [
+    32,
+    32,
+    32
+  ]
+}

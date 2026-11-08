@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c7hdlxl5tt42h"
+path="res://.godot/imported/arm_l.vox-1bd0a39343306e667a0a15e03d08c3f1.tscn"
+
+[deps]
+
+source_file="res://creatures/fungal_brute/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-1bd0a39343306e667a0a15e03d08c3f1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

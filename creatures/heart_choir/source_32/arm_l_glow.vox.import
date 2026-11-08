@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c1cowc8dypy3t"
+path="res://.godot/imported/arm_l_glow.vox-43088270e7a440207722222d113f370a.tscn"
+
+[deps]
+
+source_file="res://creatures/heart_choir/source_32/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-43088270e7a440207722222d113f370a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

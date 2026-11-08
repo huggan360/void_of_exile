@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dtqvinnhvar5v"
+path="res://.godot/imported/head_rot_glow.vox-957a7ccac27f4b1e100d389c7e85c38f.tscn"
+
+[deps]
+
+source_file="res://creatures/brood_matriarch/head_rot_glow.vox"
+dest_files=["res://.godot/imported/head_rot_glow.vox-957a7ccac27f4b1e100d389c7e85c38f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

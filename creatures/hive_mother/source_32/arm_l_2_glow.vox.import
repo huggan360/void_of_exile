@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://5y3e7ttb4yq"
+path="res://.godot/imported/arm_l_2_glow.vox-764de1beba8e8ba9be566128cc927bc7.tscn"
+
+[deps]
+
+source_file="res://creatures/hive_mother/source_32/arm_l_2_glow.vox"
+dest_files=["res://.godot/imported/arm_l_2_glow.vox-764de1beba8e8ba9be566128cc927bc7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

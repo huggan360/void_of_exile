@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://6w4xh0foy2v5"
+path="res://.godot/imported/arm_r.vox-bab5b0ac5f412faf2ad4627fd0c565f5.tscn"
+
+[deps]
+
+source_file="res://creatures/storm_warden/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-bab5b0ac5f412faf2ad4627fd0c565f5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

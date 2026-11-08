@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://n374s0dig2kl"
+path="res://.godot/imported/model_glow.vox-93af699dee8a3190834c49311cece402.tscn"
+
+[deps]
+
+source_file="res://vehicles/ground_tram/model_glow.vox"
+dest_files=["res://.godot/imported/model_glow.vox-93af699dee8a3190834c49311cece402.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

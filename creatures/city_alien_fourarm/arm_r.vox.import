@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dlwmlq8x65167"
+path="res://.godot/imported/arm_r.vox-9eec55e60faffe7969df7e9a3d76edbf.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_fourarm/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-9eec55e60faffe7969df7e9a3d76edbf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

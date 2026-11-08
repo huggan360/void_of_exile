@@ -54,7 +54,7 @@ static func build(defs: Dictionary) -> void:
 					cooldown = 1.8, windup = 0.55, root = true, recover = 0.25}, true)])
 			"crest_brute":
 				d.attacks.assign([glob.merged({pattern = "spread", count = 5, spread_deg = 13.0, cooldown = 3.0, windup = 0.9}, true),
-					{pattern = "shockwave", cooldown = 6.5, windup = 1.1, root = true, recover = 0.5, color = ACID,
+					{pattern = "shockwave", range = 7.5, cooldown = 6.5, windup = 1.1, root = true, recover = 0.5, color = ACID,
 						ripple = {radius = 6.5, speed = 4.5, damage_min = damage - 10, damage_max = damage}}])
 		d.loot.assign([{item = "elixir_hp", chance = 0.25}, {pool = {tier = 4}, chance = 0.15}, {pool = {tier = 5}, chance = 0.05}])
 		defs[d.id] = d

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://6ml82xupedhu"
+path="res://.godot/imported/head.vox-8610d07aa5df47d213ed1d5271451d80.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_briarrose/source_64/head.vox"
+dest_files=["res://.godot/imported/head.vox-8610d07aa5df47d213ed1d5271451d80.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

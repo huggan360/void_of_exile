@@ -1,0 +1,967 @@
+{
+  "city": "Vesperis, the Lantern City",
+  "generator": "tools/make_city_props.py",
+  "coordinates": "Game XYZ: +Y up, front -Z; VOX file axes are ZXY",
+  "origin": "Centered frame on X/Z, bottom Y=0; both layers use the identical frame",
+  "palette": {
+    "wood": [
+      139,
+      76,
+      57
+    ],
+    "wood_light": [
+      192,
+      119,
+      77
+    ],
+    "wood_dark": [
+      91,
+      48,
+      59
+    ],
+    "brass": [
+      214,
+      163,
+      81
+    ],
+    "gold": [
+      250,
+      210,
+      124
+    ],
+    "plum": [
+      98,
+      57,
+      112
+    ],
+    "rose": [
+      205,
+      108,
+      146
+    ],
+    "teal": [
+      57,
+      137,
+      142
+    ],
+    "mint": [
+      140,
+      204,
+      168
+    ],
+    "cream": [
+      248,
+      222,
+      177
+    ],
+    "leaf": [
+      64,
+      148,
+      116
+    ],
+    "leaf_light": [
+      104,
+      188,
+      144
+    ],
+    "soil": [
+      80,
+      49,
+      64
+    ],
+    "glow_amber": [
+      255,
+      192,
+      100
+    ],
+    "glow_rose": [
+      255,
+      141,
+      195
+    ],
+    "glow_teal": [
+      100,
+      230,
+      220
+    ],
+    "glow_violet": [
+      195,
+      156,
+      255
+    ],
+    "glow_mint": [
+      172,
+      255,
+      201
+    ]
+  },
+  "requested_count": 30,
+  "named_count": 32,
+  "note": "The request enumerates 32 IDs; every named prop is included. Antenna beacon is static emissive; runtime blinking is not encoded in VOX.",
+  "props": [
+    {
+      "id": "sign_cafe",
+      "path": "props/city/sign_cafe",
+      "voxel_size": 0.09,
+      "size_m": [
+        3.6,
+        1.62,
+        0.54
+      ],
+      "solid": false,
+      "frame_min": [
+        -20,
+        0,
+        -3
+      ],
+      "frame_size": [
+        40,
+        18,
+        6
+      ],
+      "base_voxels": 2312,
+      "glow_voxels": 104,
+      "sha256": {
+        "model.vox": "323a9a712d6e0f7c79f212ca466bc5c6b9fd83d472e21fc7142750eadcf45e7c",
+        "model_glow.vox": "1f9a3215280ed60499e28b8e7cea9fbceac4d66ed0a579d7ac5f2666c53625ab"
+      }
+    },
+    {
+      "id": "sign_bar",
+      "path": "props/city/sign_bar",
+      "voxel_size": 0.10588235,
+      "size_m": [
+        3.6,
+        1.905882,
+        0.635294
+      ],
+      "solid": false,
+      "frame_min": [
+        -17,
+        0,
+        -3
+      ],
+      "frame_size": [
+        34,
+        18,
+        6
+      ],
+      "base_voxels": 1952,
+      "glow_voxels": 98,
+      "sha256": {
+        "model.vox": "e5c0558a972e5407cf30dff3e8bd220e90afcd3a07a109218adb3f9a4566917a",
+        "model_glow.vox": "5f975496225bdc02aa822eb6f807fbc0155bc9876b05d7ff9df7bfc738b75bae"
+      }
+    },
+    {
+      "id": "sign_noodles",
+      "path": "props/city/sign_noodles",
+      "voxel_size": 0.06206897,
+      "size_m": [
+        3.6,
+        1.117241,
+        0.372414
+      ],
+      "solid": false,
+      "frame_min": [
+        -29,
+        0,
+        -3
+      ],
+      "frame_size": [
+        58,
+        18,
+        6
+      ],
+      "base_voxels": 3392,
+      "glow_voxels": 155,
+      "sha256": {
+        "model.vox": "6b137b5566520f29014136daf885dfcd8c3b77839a7753dfac357cb2163df4ca",
+        "model_glow.vox": "a5687ac16d6115851deeda5df511e818ae075488ff13a0a37180a1d3698b0c1a"
+      }
+    },
+    {
+      "id": "sign_shop",
+      "path": "props/city/sign_shop",
+      "voxel_size": 0.09,
+      "size_m": [
+        3.6,
+        1.62,
+        0.54
+      ],
+      "solid": false,
+      "frame_min": [
+        -20,
+        0,
+        -3
+      ],
+      "frame_size": [
+        40,
+        18,
+        6
+      ],
+      "base_voxels": 2312,
+      "glow_voxels": 94,
+      "sha256": {
+        "model.vox": "323a9a712d6e0f7c79f212ca466bc5c6b9fd83d472e21fc7142750eadcf45e7c",
+        "model_glow.vox": "7f0a554c66e4651755eab0b419548424f62259d093cd86b398c6cb9c40fbf09e"
+      }
+    },
+    {
+      "id": "sign_hotel",
+      "path": "props/city/sign_hotel",
+      "voxel_size": 0.07826087,
+      "size_m": [
+        3.6,
+        1.408696,
+        0.469565
+      ],
+      "solid": false,
+      "frame_min": [
+        -23,
+        0,
+        -3
+      ],
+      "frame_size": [
+        46,
+        18,
+        6
+      ],
+      "base_voxels": 2672,
+      "glow_voxels": 107,
+      "sha256": {
+        "model.vox": "cec42acdaa02a753f859661fa0bd5a1602c398ca20edeb451c80f92d971040b1",
+        "model_glow.vox": "f354bb31e2ca480412570d9697f5ce9f2b353a4f332ff5664b34a843485acf66"
+      }
+    },
+    {
+      "id": "sign_arcade",
+      "path": "props/city/sign_arcade",
+      "voxel_size": 0.06923077,
+      "size_m": [
+        3.6,
+        1.246154,
+        0.415385
+      ],
+      "solid": false,
+      "frame_min": [
+        -26,
+        0,
+        -3
+      ],
+      "frame_size": [
+        52,
+        18,
+        6
+      ],
+      "base_voxels": 3032,
+      "glow_voxels": 143,
+      "sha256": {
+        "model.vox": "b9500676d2e88efb2faa40ae33cb50e844da2823d42b3e823186108fcc98c1b3",
+        "model_glow.vox": "3e434ad7797ae4ab663209989f5641e5acd587c0c36ec9d41a752e5a6a598ecc"
+      }
+    },
+    {
+      "id": "holo_board",
+      "path": "props/city/holo_board",
+      "voxel_size": 0.1,
+      "size_m": [
+        6.0,
+        3.5,
+        0.6
+      ],
+      "solid": false,
+      "frame_min": [
+        -30,
+        0,
+        -3
+      ],
+      "frame_size": [
+        60,
+        35,
+        6
+      ],
+      "base_voxels": 7777,
+      "glow_voxels": 2359,
+      "sha256": {
+        "model.vox": "1405e5ec4d7b69a535baed704212498c461c56de179e6f31d2a4f921eb04cad4",
+        "model_glow.vox": "a96bef084293c189269b96214df41b56330431e29ed166084254648440699e06"
+      }
+    },
+    {
+      "id": "street_lamp",
+      "path": "props/city/street_lamp",
+      "voxel_size": 0.1,
+      "size_m": [
+        1.4,
+        5.0,
+        1.4
+      ],
+      "solid": true,
+      "frame_min": [
+        -7,
+        0,
+        -7
+      ],
+      "frame_size": [
+        14,
+        50,
+        14
+      ],
+      "base_voxels": 811,
+      "glow_voxels": 191,
+      "sha256": {
+        "model.vox": "e98de887c09f42b26359f92452ee4662c2fa4cd3a3bbdc027d4f6b4a54a994e0",
+        "model_glow.vox": "e0173c9f00c1b5afb151ce13a8c06a39f5113cfa483b33484f635125797e749d"
+      }
+    },
+    {
+      "id": "bench",
+      "path": "props/city/bench",
+      "voxel_size": 0.1,
+      "size_m": [
+        2.2,
+        1.3,
+        1.0
+      ],
+      "solid": true,
+      "frame_min": [
+        -11,
+        0,
+        -5
+      ],
+      "frame_size": [
+        22,
+        13,
+        10
+      ],
+      "base_voxels": 410,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "d8e19da65f5981811904d134776cf5dafefa65ac80b657fd9b33309cf6f31e75",
+        "model_glow.vox": "cb8cb542d8d03e4cc557da65e279bd4e59395c5e4d05d3f8174cda90d864a49e"
+      }
+    },
+    {
+      "id": "planter",
+      "path": "props/city/planter",
+      "voxel_size": 0.1,
+      "size_m": [
+        2.2,
+        1.6,
+        1.0
+      ],
+      "solid": true,
+      "frame_min": [
+        -11,
+        0,
+        -5
+      ],
+      "frame_size": [
+        22,
+        16,
+        10
+      ],
+      "base_voxels": 1388,
+      "glow_voxels": 120,
+      "sha256": {
+        "model.vox": "2f63a8c800cef20cf1a73fdd0e2f0eafa7e93a78edaed9e0d8052fddd26f1397",
+        "model_glow.vox": "cfb565a5991c38dea7c36ef04e55d4e2bd07fbc26a4b33257ab94782dc1efe6e"
+      }
+    },
+    {
+      "id": "vending_machine",
+      "path": "props/city/vending_machine",
+      "voxel_size": 0.1,
+      "size_m": [
+        1.4,
+        2.5,
+        1.4
+      ],
+      "solid": true,
+      "frame_min": [
+        -7,
+        0,
+        -7
+      ],
+      "frame_size": [
+        14,
+        25,
+        14
+      ],
+      "base_voxels": 3585,
+      "glow_voxels": 25,
+      "sha256": {
+        "model.vox": "5d20a24e5521982973db4891ea6a5c513b674dc3ff1d15de05a4fe8be4a5f659",
+        "model_glow.vox": "7097babcaa8fe66b71bf48f9a16e9bfbe2665593efaf448cc857db381c42757f"
+      }
+    },
+    {
+      "id": "coffee_machine",
+      "path": "props/city/coffee_machine",
+      "voxel_size": 0.05,
+      "size_m": [
+        1.0,
+        0.75,
+        0.6
+      ],
+      "solid": true,
+      "frame_min": [
+        -10,
+        0,
+        -6
+      ],
+      "frame_size": [
+        20,
+        15,
+        12
+      ],
+      "base_voxels": 1718,
+      "glow_voxels": 3,
+      "sha256": {
+        "model.vox": "966361d9e4b9b42c6c3d199db89171beca9f297d066ce5fd6df1537888515d1c",
+        "model_glow.vox": "08ed741ab51ac66ad8368fe4bf4d2974b42e9191b19cdf59db5c7d1604533b47"
+      }
+    },
+    {
+      "id": "beer_taps",
+      "path": "props/city/beer_taps",
+      "voxel_size": 0.05,
+      "size_m": [
+        1.4,
+        0.9,
+        0.5
+      ],
+      "solid": true,
+      "frame_min": [
+        -14,
+        0,
+        -5
+      ],
+      "frame_size": [
+        28,
+        18,
+        10
+      ],
+      "base_voxels": 791,
+      "glow_voxels": 72,
+      "sha256": {
+        "model.vox": "ca115b70b4963bcde717e546f8de0d2cea3b7219dfb0fc9cab57d745b76f86f0",
+        "model_glow.vox": "16168de2d44246be6d6d8d26eb859100ee9b66057c05951681124828abef6ce2"
+      }
+    },
+    {
+      "id": "bar_stool",
+      "path": "props/city/bar_stool",
+      "voxel_size": 0.1,
+      "size_m": [
+        0.8,
+        1.1,
+        0.8
+      ],
+      "solid": true,
+      "frame_min": [
+        -4,
+        0,
+        -4
+      ],
+      "frame_size": [
+        8,
+        11,
+        8
+      ],
+      "base_voxels": 300,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "50614caa07068e8f521ca8cc5c543e2ce20613edf03635a70f2da4fc2c7ca8cb",
+        "model_glow.vox": "86e92984f9a7df44d51b2efd60677fcbed17365fb091c586190680dd385a68eb"
+      }
+    },
+    {
+      "id": "cafe_table",
+      "path": "props/city/cafe_table",
+      "voxel_size": 0.1,
+      "size_m": [
+        1.2,
+        1.9,
+        1.2
+      ],
+      "solid": true,
+      "frame_min": [
+        -6,
+        0,
+        -6
+      ],
+      "frame_size": [
+        12,
+        19,
+        12
+      ],
+      "base_voxels": 326,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "ad002af73cbfd1036302c51a4c168647612fcd79fd23ea6c8f6cb41f6ecce5c9",
+        "model_glow.vox": "4d6128e8ff95c7fb6b09cd626fd9fb5d49b1a94be1cc503d8f2f16231e86bf8f"
+      }
+    },
+    {
+      "id": "cafe_chair",
+      "path": "props/city/cafe_chair",
+      "voxel_size": 0.1,
+      "size_m": [
+        0.8,
+        1.4,
+        0.8
+      ],
+      "solid": true,
+      "frame_min": [
+        -4,
+        0,
+        -4
+      ],
+      "frame_size": [
+        8,
+        14,
+        8
+      ],
+      "base_voxels": 250,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "8ee88c1bc868cd5e17cfe19161acbd8b7c42dbde210333d23824ea06417d2d66",
+        "model_glow.vox": "846bf833b8be0f90a1adb96da6db8d7a3572fb5b83b05a93d820ad16fb839ff7"
+      }
+    },
+    {
+      "id": "booth_sofa",
+      "path": "props/city/booth_sofa",
+      "voxel_size": 0.05,
+      "size_m": [
+        2.0,
+        1.2,
+        1.3
+      ],
+      "solid": true,
+      "frame_min": [
+        -20,
+        0,
+        -13
+      ],
+      "frame_size": [
+        40,
+        24,
+        26
+      ],
+      "base_voxels": 9605,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "b8529fc4ded9f109ae5745484f89ba0b5371e5f8683cb8e37ed4d45e956bc410",
+        "model_glow.vox": "4d1ef1d98bd28a690c3117e31ea8e6c3cfc795ca0cf90c6361e519ff89495615"
+      }
+    },
+    {
+      "id": "noodle_stall",
+      "path": "props/city/noodle_stall",
+      "voxel_size": 0.1,
+      "size_m": [
+        3.4,
+        3.1,
+        2.4
+      ],
+      "solid": true,
+      "frame_min": [
+        -17,
+        0,
+        -12
+      ],
+      "frame_size": [
+        34,
+        31,
+        24
+      ],
+      "base_voxels": 8652,
+      "glow_voxels": 152,
+      "sha256": {
+        "model.vox": "d6c5e3b17b48695d65164b4035c31ceb1acaead2f34adf9c278b4582c7df0e0d",
+        "model_glow.vox": "5aa65d3fcb2fae2dc824331ca8400c43c99c0b73a2c16673df5da28f1e3d94ea"
+      }
+    },
+    {
+      "id": "kiosk",
+      "path": "props/city/kiosk",
+      "voxel_size": 0.1,
+      "size_m": [
+        3.4,
+        3.1,
+        2.4
+      ],
+      "solid": true,
+      "frame_min": [
+        -17,
+        0,
+        -12
+      ],
+      "frame_size": [
+        34,
+        31,
+        24
+      ],
+      "base_voxels": 8936,
+      "glow_voxels": 138,
+      "sha256": {
+        "model.vox": "89f9aa2dfcf6c5bf9fd230aa2315e952748b7ecf2aba3f03d84a0cd2a170ec3a",
+        "model_glow.vox": "540067df9ef944e00eb5ee473a49532788a831bbc1ce4638e26500ffe716169d"
+      }
+    },
+    {
+      "id": "trash_bin",
+      "path": "props/city/trash_bin",
+      "voxel_size": 0.1,
+      "size_m": [
+        1.0,
+        1.3,
+        1.2
+      ],
+      "solid": true,
+      "frame_min": [
+        -5,
+        0,
+        -6
+      ],
+      "frame_size": [
+        10,
+        13,
+        12
+      ],
+      "base_voxels": 966,
+      "glow_voxels": 4,
+      "sha256": {
+        "model.vox": "b1bec561b19d10dfe05ccff702a1841e950bf56f0bd38ccc0ec41dfd8e9a27ac",
+        "model_glow.vox": "6aa75cd04164032ea8589c647f98aa85152fef14549740476289ba4e5e476a05"
+      }
+    },
+    {
+      "id": "air_vent",
+      "path": "props/city/air_vent",
+      "voxel_size": 0.1,
+      "size_m": [
+        2.0,
+        2.0,
+        1.0
+      ],
+      "solid": false,
+      "frame_min": [
+        -10,
+        0,
+        -5
+      ],
+      "frame_size": [
+        20,
+        20,
+        10
+      ],
+      "base_voxels": 1933,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "e37f0b49f8e56d4624a1d23ee2a4f0a46d5fd2354750119dd7075ee759400a89",
+        "model_glow.vox": "3d1938ea58f340ee68695b65a26d99be51fe8a1edeb5edb4c859a051e5435cb3"
+      }
+    },
+    {
+      "id": "ac_unit",
+      "path": "props/city/ac_unit",
+      "voxel_size": 0.1,
+      "size_m": [
+        2.0,
+        1.6,
+        2.2
+      ],
+      "solid": true,
+      "frame_min": [
+        -10,
+        0,
+        -11
+      ],
+      "frame_size": [
+        20,
+        16,
+        22
+      ],
+      "base_voxels": 3861,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "87c7930790ccb4e519d40afc8bbda3389608fa64d7c87f2ffc8e63f9a23cea82",
+        "model_glow.vox": "645bdf283c00814ca09d2e07ed684ff091e7d650af7befad01b0e657adcbb8f9"
+      }
+    },
+    {
+      "id": "water_tank",
+      "path": "props/city/water_tank",
+      "voxel_size": 0.1,
+      "size_m": [
+        2.4,
+        3.2,
+        2.4
+      ],
+      "solid": true,
+      "frame_min": [
+        -12,
+        0,
+        -12
+      ],
+      "frame_size": [
+        24,
+        32,
+        24
+      ],
+      "base_voxels": 9130,
+      "glow_voxels": 26,
+      "sha256": {
+        "model.vox": "cda19a6e4e3aa33dec2adbe23fc4a16bf7b3a0e29157428396ed6aef45e2fb4e",
+        "model_glow.vox": "b0272e69448fce6b037636ba6a3ae2376d5179b472af6a6880f5f2fd416beda3"
+      }
+    },
+    {
+      "id": "antenna",
+      "path": "props/city/antenna",
+      "voxel_size": 0.1,
+      "size_m": [
+        1.8,
+        3.0,
+        1.8
+      ],
+      "solid": true,
+      "frame_min": [
+        -9,
+        0,
+        -9
+      ],
+      "frame_size": [
+        18,
+        30,
+        18
+      ],
+      "base_voxels": 739,
+      "glow_voxels": 32,
+      "sha256": {
+        "model.vox": "8494738f707085a43ccbd707f0ee16aa0666a107b1a882d3c2d442edd5240fac",
+        "model_glow.vox": "06b500413f3ad561e5a6bd48357d1165c29a744cd474da52f980963d14a659af"
+      }
+    },
+    {
+      "id": "pipe_bundle",
+      "path": "props/city/pipe_bundle",
+      "voxel_size": 0.1,
+      "size_m": [
+        4.0,
+        0.8,
+        1.4
+      ],
+      "solid": true,
+      "frame_min": [
+        -20,
+        0,
+        -7
+      ],
+      "frame_size": [
+        40,
+        8,
+        14
+      ],
+      "base_voxels": 877,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "8a286482ad5e47494dfb0bf38f600738ef6965b6633004399f1e19cfeb3917dd",
+        "model_glow.vox": "618e9ecaeb9765b8240395eadc4aad0d51ea43c9f88f416f8d3cb352a42c15ba"
+      }
+    },
+    {
+      "id": "lantern_string",
+      "path": "props/city/lantern_string",
+      "voxel_size": 0.1,
+      "size_m": [
+        6.0,
+        1.4,
+        0.6
+      ],
+      "solid": false,
+      "frame_min": [
+        -30,
+        0,
+        -3
+      ],
+      "frame_size": [
+        60,
+        14,
+        6
+      ],
+      "base_voxels": 666,
+      "glow_voxels": 144,
+      "sha256": {
+        "model.vox": "77f0fd560c27e6747f3bc591c8821f425503deda8f398f88fa35f5addb2ee5e6",
+        "model_glow.vox": "9970fe6b1e8a36c91e12d5707a3d9501a502530c9e6aed18084a965cc62162d2"
+      }
+    },
+    {
+      "id": "arcade_cabinet",
+      "path": "props/city/arcade_cabinet",
+      "voxel_size": 0.1,
+      "size_m": [
+        1.2,
+        2.5,
+        1.4
+      ],
+      "solid": true,
+      "frame_min": [
+        -6,
+        0,
+        -7
+      ],
+      "frame_size": [
+        12,
+        25,
+        14
+      ],
+      "base_voxels": 2553,
+      "glow_voxels": 83,
+      "sha256": {
+        "model.vox": "304b20968ba6126f79bdde9449d80073cc3977eb5532ec9ad5b584dd81b73f3b",
+        "model_glow.vox": "7b554cf591e59878669805e6aa3ff9df6991be55341abcd00cdb72ee43e46bac"
+      }
+    },
+    {
+      "id": "potted_tree",
+      "path": "props/city/potted_tree",
+      "voxel_size": 0.1,
+      "size_m": [
+        2.4,
+        3.5,
+        2.0
+      ],
+      "solid": true,
+      "frame_min": [
+        -12,
+        0,
+        -10
+      ],
+      "frame_size": [
+        24,
+        35,
+        20
+      ],
+      "base_voxels": 3129,
+      "glow_voxels": 45,
+      "sha256": {
+        "model.vox": "ace1884b49708ad47fa03c8f2d3f363ce26a6dc869091c5af76f5f2009131c79",
+        "model_glow.vox": "92f8eacbaa3bdf80caeecae41fab952a12bda0818fc54e52343e85d96105f5c4"
+      }
+    },
+    {
+      "id": "hydrant_fountain",
+      "path": "props/city/hydrant_fountain",
+      "voxel_size": 0.1,
+      "size_m": [
+        1.0,
+        1.6,
+        1.0
+      ],
+      "solid": true,
+      "frame_min": [
+        -5,
+        0,
+        -5
+      ],
+      "frame_size": [
+        10,
+        16,
+        10
+      ],
+      "base_voxels": 330,
+      "glow_voxels": 59,
+      "sha256": {
+        "model.vox": "de6cdd110c1356c2ab6f0e8108ecbfd541c993d92889a8a901d9a7d72d49aeb6",
+        "model_glow.vox": "e5898e4167dba991d758dbc6ac4f8ad72ee9aea6bb00743520cd4cf749a6fc47"
+      }
+    },
+    {
+      "id": "elevator_panel",
+      "path": "props/city/elevator_panel",
+      "voxel_size": 0.05,
+      "size_m": [
+        0.5,
+        1.2,
+        0.4
+      ],
+      "solid": false,
+      "frame_min": [
+        -5,
+        0,
+        -4
+      ],
+      "frame_size": [
+        10,
+        24,
+        8
+      ],
+      "base_voxels": 968,
+      "glow_voxels": 66,
+      "sha256": {
+        "model.vox": "85deef97e39f554075c28e00a12f59a4cf985d13a13991d39471d06392fa011c",
+        "model_glow.vox": "fff933c8eeb4431258f640d09916d9a8cf50c4ff19b9bae5a0860983be9c06d0"
+      }
+    },
+    {
+      "id": "shelf_goods",
+      "path": "props/city/shelf_goods",
+      "voxel_size": 0.1,
+      "size_m": [
+        2.0,
+        2.3,
+        1.0
+      ],
+      "solid": true,
+      "frame_min": [
+        -10,
+        0,
+        -5
+      ],
+      "frame_size": [
+        20,
+        23,
+        10
+      ],
+      "base_voxels": 2318,
+      "glow_voxels": 6,
+      "sha256": {
+        "model.vox": "ff6d7b6a31e08ca2d0e7806f9e151ec3faada46287c627251b603a85ba8a8600",
+        "model_glow.vox": "0054276011a417b0507c02cf52da420d9c98b24e5f60726f0693822fa0fd5834"
+      }
+    },
+    {
+      "id": "counter",
+      "path": "props/city/counter",
+      "voxel_size": 0.1,
+      "size_m": [
+        3.0,
+        1.3,
+        1.8
+      ],
+      "solid": true,
+      "frame_min": [
+        -15,
+        0,
+        -9
+      ],
+      "frame_size": [
+        30,
+        13,
+        18
+      ],
+      "base_voxels": 4175,
+      "glow_voxels": 0,
+      "sha256": {
+        "model.vox": "28de392171b162f6b4c38d98c21be2136239a3861c3bbedb718718e8311ff427",
+        "model_glow.vox": "2eaae92c0d53bac7b6622743fde0cead7e80de2efce8a635bf430fc6783e2640"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cv84jrca5fojh"
+path="res://.godot/imported/ear_l.vox-ef5948673ec3ca12cdfb34ecf9b37ba0.tscn"
+
+[deps]
+
+source_file="res://creatures/quartz_hopper/ear_l.vox"
+dest_files=["res://.godot/imported/ear_l.vox-ef5948673ec3ca12cdfb34ecf9b37ba0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -94,7 +94,9 @@ func _run() -> void:
 	# Free landing: low over open ground far from the pad, the ship sets down
 	# by itself on a clear, level spot; brood leave a landed ship alone.
 	space.request(["sit", "pilot"])
-	var far_dir := (verdance.pad as Vector3).normalized().cross(Vector3.UP).normalized()
+	# Square to the pad (pads sit on top of their worlds, so any horizontal way).
+	var pad_up := (verdance.pad as Vector3).normalized()
+	var far_dir := pad_up.cross(Vector3.RIGHT if absf(pad_up.dot(Vector3.RIGHT))<0.9 else Vector3.FORWARD).normalized()
 	var far_ground := SpaceLayout.surface_point(verdance, (verdance.center as Vector3)+far_dir)
 	ship.mode = "flying"
 	ship.land_armed = true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ct3xisf2wn8l0"
+path="res://.godot/imported/body_glow.vox-75146b42b00b100875d137c4221433f4.tscn"
+
+[deps]
+
+source_file="res://creatures/spore_drone/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-75146b42b00b100875d137c4221433f4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

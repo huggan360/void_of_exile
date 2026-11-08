@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://pd2kmesw5rg8"
+path="res://.godot/imported/arm_r.vox-101f298d47c846b12806ff59dbc6bbe6.tscn"
+
+[deps]
+
+source_file="res://creatures/city_robot_tiny/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-101f298d47c846b12806ff59dbc6bbe6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

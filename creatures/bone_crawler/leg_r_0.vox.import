@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c3l1qe5opbovr"
+path="res://.godot/imported/leg_r_0.vox-8cc7c512ee18c9c8f97a64512d78f226.tscn"
+
+[deps]
+
+source_file="res://creatures/bone_crawler/leg_r_0.vox"
+dest_files=["res://.godot/imported/leg_r_0.vox-8cc7c512ee18c9c8f97a64512d78f226.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

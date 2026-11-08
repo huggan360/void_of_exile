@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ciuipwk5xdp56"
+path="res://.godot/imported/arm_r.vox-438127b8ab0c87a3c0c8dabfa2de49d0.tscn"
+
+[deps]
+
+source_file="res://creatures/tide_siren/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-438127b8ab0c87a3c0c8dabfa2de49d0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

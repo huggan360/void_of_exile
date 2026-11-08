@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b2ujw1d50qc84"
+path="res://.godot/imported/claw_r.vox-c11128743316b12f0398cffed3293276.tscn"
+
+[deps]
+
+source_file="res://creatures/surf_crab/claw_r.vox"
+dest_files=["res://.godot/imported/claw_r.vox-c11128743316b12f0398cffed3293276.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

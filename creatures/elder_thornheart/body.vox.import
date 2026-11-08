@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dmedycxra23k2"
+path="res://.godot/imported/body.vox-2b2d915888095733679b7cb9b9d7c617.tscn"
+
+[deps]
+
+source_file="res://creatures/elder_thornheart/body.vox"
+dest_files=["res://.godot/imported/body.vox-2b2d915888095733679b7cb9b9d7c617.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

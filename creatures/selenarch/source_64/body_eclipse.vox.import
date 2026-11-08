@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://tecbt6twy6g0"
+path="res://.godot/imported/body_eclipse.vox-58c3a1fde145b7b2a737717e230a4be5.tscn"
+
+[deps]
+
+source_file="res://creatures/selenarch/source_64/body_eclipse.vox"
+dest_files=["res://.godot/imported/body_eclipse.vox-58c3a1fde145b7b2a737717e230a4be5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

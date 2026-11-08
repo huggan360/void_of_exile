@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://duegg5reftl8x"
+path="res://.godot/imported/body_hive.vox-f2468ef2f6106ead0c365110a3426650.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_colossus/source_64/body_hive.vox"
+dest_files=["res://.godot/imported/body_hive.vox-f2468ef2f6106ead0c365110a3426650.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

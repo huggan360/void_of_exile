@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b6hikwcad6uqt"
+path="res://.godot/imported/model.vox-4865325dc6a5ab78b32aedecaa4b6028.tscn"
+
+[deps]
+
+source_file="res://vehicles/sky_hauler/model.vox"
+dest_files=["res://.godot/imported/model.vox-4865325dc6a5ab78b32aedecaa4b6028.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

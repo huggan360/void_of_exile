@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://00wpmglntvwp"
+path="res://.godot/imported/body_void.vox-d9200cade582eb90142504e3a58cd54d.tscn"
+
+[deps]
+
+source_file="res://creatures/selenarch/source_64/body_void.vox"
+dest_files=["res://.godot/imported/body_void.vox-d9200cade582eb90142504e3a58cd54d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

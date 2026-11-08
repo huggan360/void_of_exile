@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bverput2t3hkw"
+path="res://.godot/imported/body.vox-8c77a957a545a51f1bf7aa21c8658665.tscn"
+
+[deps]
+
+source_file="res://creatures/heart_choir/body.vox"
+dest_files=["res://.godot/imported/body.vox-8c77a957a545a51f1bf7aa21c8658665.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

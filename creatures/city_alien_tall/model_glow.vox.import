@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ct8t1ul355mlq"
+path="res://.godot/imported/model_glow.vox-97ee7c50044d32d23a902f68b2347ac5.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_tall/model_glow.vox"
+dest_files=["res://.godot/imported/model_glow.vox-97ee7c50044d32d23a902f68b2347ac5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

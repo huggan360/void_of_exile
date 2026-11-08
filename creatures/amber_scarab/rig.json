@@ -1,0 +1,212 @@
+{
+  "voxel_size": 0.08125,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -5,
+        2,
+        -5
+      ],
+      "frame_size": [
+        10,
+        10,
+        12
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -4,
+        -3,
+        -4
+      ],
+      "frame_size": [
+        9,
+        13,
+        7
+      ],
+      "glow": true
+    },
+    "leg_l_0": {
+      "frame_min": [
+        -6,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        7,
+        5,
+        4
+      ]
+    },
+    "leg_l_1": {
+      "frame_min": [
+        -6,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        7,
+        5,
+        4
+      ]
+    },
+    "leg_l_2": {
+      "frame_min": [
+        -6,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        7,
+        5,
+        4
+      ]
+    },
+    "leg_r_0": {
+      "frame_min": [
+        0,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        7,
+        5,
+        4
+      ]
+    },
+    "leg_r_1": {
+      "frame_min": [
+        0,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        7,
+        5,
+        4
+      ]
+    },
+    "leg_r_2": {
+      "frame_min": [
+        0,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        7,
+        5,
+        4
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        6,
+        -5
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_0": {
+      "part": "leg_l_0",
+      "pivot": [
+        -4,
+        4,
+        -3
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "y"
+    },
+    "leg_l_1": {
+      "part": "leg_l_1",
+      "pivot": [
+        -4,
+        4,
+        1
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "y"
+    },
+    "leg_l_2": {
+      "part": "leg_l_2",
+      "pivot": [
+        -4,
+        4,
+        4
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "y"
+    },
+    "leg_r_0": {
+      "part": "leg_r_0",
+      "pivot": [
+        4,
+        4,
+        -3
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "y"
+    },
+    "leg_r_1": {
+      "part": "leg_r_1",
+      "pivot": [
+        4,
+        4,
+        1
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "y"
+    },
+    "leg_r_2": {
+      "part": "leg_r_2",
+      "pivot": [
+        4,
+        4,
+        4
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "y"
+    }
+  },
+  "hand": [
+    0,
+    6,
+    -9
+  ],
+  "bob": 0.018,
+  "waddle": 0.06,
+  "hover": 0,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.4
+}

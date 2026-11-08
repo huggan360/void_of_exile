@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://nsc3hdqaky0d"
+path="res://.godot/imported/arm_l.vox-a1bfcb3e4826a0f9bd7b4b87171f47ff.tscn"
+
+[deps]
+
+source_file="res://creatures/hive_tender/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-a1bfcb3e4826a0f9bd7b4b87171f47ff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

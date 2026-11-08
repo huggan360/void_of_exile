@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cgutmu7leoyut"
+path="res://.godot/imported/head_glow.vox-23338e4250888fa33cce2f578203a0f0.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_colossus/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-23338e4250888fa33cce2f578203a0f0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

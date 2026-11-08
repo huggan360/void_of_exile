@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cmx78s8sft7bk"
+path="res://.godot/imported/model_glow.vox-a315753a2121d123ace116deab772e1d.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_frog/model_glow.vox"
+dest_files=["res://.godot/imported/model_glow.vox-a315753a2121d123ace116deab772e1d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

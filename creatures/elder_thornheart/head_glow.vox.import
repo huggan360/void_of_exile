@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkq1orkjty7rn"
+path="res://.godot/imported/head_glow.vox-105be000181c07b661381dae1f070f98.tscn"
+
+[deps]
+
+source_file="res://creatures/elder_thornheart/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-105be000181c07b661381dae1f070f98.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

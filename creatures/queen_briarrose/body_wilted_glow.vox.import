@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://f32uk0oa2s4v"
+path="res://.godot/imported/body_wilted_glow.vox-766a854b251f63d3b70ee568f6c0c4ed.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_briarrose/body_wilted_glow.vox"
+dest_files=["res://.godot/imported/body_wilted_glow.vox-766a854b251f63d3b70ee568f6c0c4ed.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

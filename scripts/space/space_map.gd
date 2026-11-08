@@ -103,6 +103,12 @@ func _draw() -> void:
 	var order: Array = SpaceLayout.PLANETS.duplicate()
 	order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _depth(a.center, center)<_depth(b.center, center))
 	for p: Dictionary in order: _planet(p, center, font, bold)
+	if center.distance_to(CityLayout.planet().center)<4000.0 and zoom>0.065:
+		for district: Dictionary in CityLayout.DISTRICTS:
+			var pos: Vector3 = (CityLayout.planet().center as Vector3)+CityLayout.district_frame(district).origin
+			var at := _point(pos, center)
+			draw_circle(at, 4.5, UIStyle.GOLD)
+			draw_string(font, at+Vector2(8, -5), str(district.port), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, UIStyle.GOLD)
 	# The Nexus on its rock.
 	var nexus := _point(SpaceLayout.NEXUS, center)
 	draw_colored_polygon(PackedVector2Array([nexus+Vector2(0, -9), nexus+Vector2(8, 0), nexus+Vector2(0, 9), nexus+Vector2(-8, 0)]), UIStyle.GOLD)

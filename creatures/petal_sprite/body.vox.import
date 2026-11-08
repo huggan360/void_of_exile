@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://blhfeadmpm3q3"
+path="res://.godot/imported/body.vox-c2aa1c674c9e51d72b2d55ca81630cc3.tscn"
+
+[deps]
+
+source_file="res://creatures/petal_sprite/body.vox"
+dest_files=["res://.godot/imported/body.vox-c2aa1c674c9e51d72b2d55ca81630cc3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

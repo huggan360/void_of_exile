@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ciudb43fkegty"
+path="res://.godot/imported/arm_r.vox-69c11180993a5f392b3b629c5cb7f468.tscn"
+
+[deps]
+
+source_file="res://creatures/quartz_hopper/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-69c11180993a5f392b3b629c5cb7f468.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d2a2jehv7vsg2"
+path="res://.godot/imported/eyestalk_r_glow.vox-606e8e275dd25e9b48be5cdf18318834.tscn"
+
+[deps]
+
+source_file="res://creatures/surf_crab/eyestalk_r_glow.vox"
+dest_files=["res://.godot/imported/eyestalk_r_glow.vox-606e8e275dd25e9b48be5cdf18318834.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

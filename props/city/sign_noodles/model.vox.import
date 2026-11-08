@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ce3wxa7r2vqmt"
+path="res://.godot/imported/model.vox-0a428942f11bb2ce04e981d4eca0d24e.tscn"
+
+[deps]
+
+source_file="res://props/city/sign_noodles/model.vox"
+dest_files=["res://.godot/imported/model.vox-0a428942f11bb2ce04e981d4eca0d24e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

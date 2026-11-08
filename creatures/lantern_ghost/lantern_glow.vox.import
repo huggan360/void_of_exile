@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://i0ngvhdyjqxh"
+path="res://.godot/imported/lantern_glow.vox-7909e2ba5785457b49ef04e931a8bc06.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_ghost/lantern_glow.vox"
+dest_files=["res://.godot/imported/lantern_glow.vox-7909e2ba5785457b49ef04e931a8bc06.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

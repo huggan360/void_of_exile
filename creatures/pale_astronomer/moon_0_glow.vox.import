@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://5hwkb2w1mr6n"
+path="res://.godot/imported/moon_0_glow.vox-89e06dc9445f3cb897de456cfd37889d.tscn"
+
+[deps]
+
+source_file="res://creatures/pale_astronomer/moon_0_glow.vox"
+dest_files=["res://.godot/imported/moon_0_glow.vox-89e06dc9445f3cb897de456cfd37889d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c7nyvinp2yw2c"
+path="res://.godot/imported/model_glow.vox-c33aa1744aec1d2c11dd745760db1667.tscn"
+
+[deps]
+
+source_file="res://props/city/beer_taps/model_glow.vox"
+dest_files=["res://.godot/imported/model_glow.vox-c33aa1744aec1d2c11dd745760db1667.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

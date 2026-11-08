@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://j1ar52afgrcn"
+path="res://.godot/imported/body_glow.vox-be27f4282741e8afccf2ba0bb64a4a15.tscn"
+
+[deps]
+
+source_file="res://creatures/pale_astronomer/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-be27f4282741e8afccf2ba0bb64a4a15.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

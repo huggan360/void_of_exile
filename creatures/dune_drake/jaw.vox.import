@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b5fcf2jo033l"
+path="res://.godot/imported/jaw.vox-59e8d25a7aaac1c69f7c099a26d8027c.tscn"
+
+[deps]
+
+source_file="res://creatures/dune_drake/jaw.vox"
+dest_files=["res://.godot/imported/jaw.vox-59e8d25a7aaac1c69f7c099a26d8027c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

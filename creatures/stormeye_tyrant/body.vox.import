@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://rmegxhsbe281"
+path="res://.godot/imported/body.vox-a5c8cf9e36df126c5a44a5c3aea6bf41.tscn"
+
+[deps]
+
+source_file="res://creatures/stormeye_tyrant/body.vox"
+dest_files=["res://.godot/imported/body.vox-a5c8cf9e36df126c5a44a5c3aea6bf41.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

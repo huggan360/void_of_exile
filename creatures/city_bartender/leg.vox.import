@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d0wd6ee80tcm8"
+path="res://.godot/imported/leg.vox-0e9c3f01150e9483cb0b9df2de92704d.tscn"
+
+[deps]
+
+source_file="res://creatures/city_bartender/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-0e9c3f01150e9483cb0b9df2de92704d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

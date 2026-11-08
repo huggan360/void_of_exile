@@ -1,0 +1,8 @@
+{
+  "voxel_size": 0.1,
+  "length_m": 10.0,
+  "width_m": 3.0,
+  "height_m": 3.8000000000000003,
+  "kind": "ground",
+  "front": "-z"
+}

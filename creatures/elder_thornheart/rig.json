@@ -1,0 +1,282 @@
+{
+  "voxel_size": 0.015625,
+  "parts": {
+    "lantern_l_1": {
+      "frame_min": [
+        -8,
+        -40,
+        -8
+      ],
+      "frame_size": [
+        16,
+        48,
+        16
+      ],
+      "glow": true
+    },
+    "leg_r_0": {
+      "frame_min": [
+        -8,
+        -72,
+        -16
+      ],
+      "frame_size": [
+        24,
+        88,
+        40
+      ]
+    },
+    "leg_r_1": {
+      "frame_min": [
+        -8,
+        -72,
+        -16
+      ],
+      "frame_size": [
+        24,
+        88,
+        40
+      ]
+    },
+    "tail": {
+      "frame_min": [
+        -16,
+        -24,
+        -8
+      ],
+      "frame_size": [
+        32,
+        32,
+        48
+      ]
+    },
+    "body": {
+      "frame_min": [
+        -40,
+        56,
+        -80
+      ],
+      "frame_size": [
+        80,
+        120,
+        160
+      ],
+      "glow": true
+    },
+    "leg_l_1": {
+      "frame_min": [
+        -8,
+        -72,
+        -16
+      ],
+      "frame_size": [
+        24,
+        88,
+        40
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -96,
+        -24,
+        -56
+      ],
+      "frame_size": [
+        200,
+        112,
+        80
+      ],
+      "glow": true
+    },
+    "lantern_l_0": {
+      "frame_min": [
+        -8,
+        -40,
+        -8
+      ],
+      "frame_size": [
+        16,
+        48,
+        16
+      ],
+      "glow": true
+    },
+    "lantern_r_1": {
+      "frame_min": [
+        -8,
+        -40,
+        -8
+      ],
+      "frame_size": [
+        16,
+        48,
+        16
+      ],
+      "glow": true
+    },
+    "leg_l_0": {
+      "frame_min": [
+        -8,
+        -72,
+        -16
+      ],
+      "frame_size": [
+        24,
+        88,
+        40
+      ]
+    },
+    "lantern_r_0": {
+      "frame_min": [
+        -8,
+        -40,
+        -8
+      ],
+      "frame_size": [
+        16,
+        48,
+        16
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        168,
+        -40
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "lantern_l_0": {
+      "part": "lantern_l_0",
+      "pivot": [
+        -48,
+        40,
+        8
+      ],
+      "role": "sway",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "lantern_l_1": {
+      "part": "lantern_l_1",
+      "pivot": [
+        -88,
+        48,
+        8
+      ],
+      "role": "sway",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "leg_l_0": {
+      "part": "leg_l_0",
+      "pivot": [
+        -24,
+        72,
+        -24
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_1": {
+      "part": "leg_l_1",
+      "pivot": [
+        -24,
+        72,
+        56
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "lantern_r_0": {
+      "part": "lantern_r_0",
+      "pivot": [
+        48,
+        40,
+        8
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "lantern_r_1": {
+      "part": "lantern_r_1",
+      "pivot": [
+        88,
+        48,
+        8
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "leg_r_0": {
+      "part": "leg_r_0",
+      "pivot": [
+        24,
+        72,
+        -24
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r_1": {
+      "part": "leg_r_1",
+      "pivot": [
+        24,
+        72,
+        56
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        0,
+        104,
+        72
+      ],
+      "role": "tail",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {},
+  "hand": [
+    0,
+    120,
+    -64
+  ],
+  "hover": 0,
+  "bob": 0.015,
+  "waddle": 0.04,
+  "flap_rate": 2.8,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.5
+}

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ciemxgqlc1ng0"
+path="res://.godot/imported/wing_l.vox-c9a644bd8ce32dedc02854b920464406.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_sphinx/wing_l.vox"
+dest_files=["res://.godot/imported/wing_l.vox-c9a644bd8ce32dedc02854b920464406.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

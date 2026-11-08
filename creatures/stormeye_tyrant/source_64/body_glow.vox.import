@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://rp0638wqtxak"
+path="res://.godot/imported/body_glow.vox-533510cac4d6625f7c36382c0ae1cd11.tscn"
+
+[deps]
+
+source_file="res://creatures/stormeye_tyrant/source_64/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-533510cac4d6625f7c36382c0ae1cd11.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

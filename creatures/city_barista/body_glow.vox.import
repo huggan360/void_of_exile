@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dd10apkmsx5i0"
+path="res://.godot/imported/body_glow.vox-a2373844d05a05b2bc85f538779983e5.tscn"
+
+[deps]
+
+source_file="res://creatures/city_barista/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-a2373844d05a05b2bc85f538779983e5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

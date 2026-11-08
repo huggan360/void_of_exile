@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dhd3rgbbdqyd5"
+path="res://.godot/imported/leg_l.vox-86389381cc3b0ead163d1c3c6f66cc29.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_lumeria/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-86389381cc3b0ead163d1c3c6f66cc29.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

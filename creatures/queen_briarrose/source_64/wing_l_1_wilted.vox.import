@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bahvfy7xpi0lq"
+path="res://.godot/imported/wing_l_1_wilted.vox-1ebc5818e0c949023096b6792456d9d7.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_briarrose/source_64/wing_l_1_wilted.vox"
+dest_files=["res://.godot/imported/wing_l_1_wilted.vox-1ebc5818e0c949023096b6792456d9d7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

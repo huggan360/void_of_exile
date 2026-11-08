@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c4ad28845lank"
+path="res://.godot/imported/model.vox-9a5d7afd7e4893ef46938c2b7ff12340.tscn"
+
+[deps]
+
+source_file="res://creatures/city_vendor/model.vox"
+dest_files=["res://.godot/imported/model.vox-9a5d7afd7e4893ef46938c2b7ff12340.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

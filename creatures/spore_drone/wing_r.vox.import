@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://boy7ahljvxk0i"
+path="res://.godot/imported/wing_r.vox-4993921f089cd63295342039e2b395c3.tscn"
+
+[deps]
+
+source_file="res://creatures/spore_drone/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-4993921f089cd63295342039e2b395c3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

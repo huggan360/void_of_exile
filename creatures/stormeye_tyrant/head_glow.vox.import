@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d2wgu5f1vx02g"
+path="res://.godot/imported/head_glow.vox-2a0374798f8706192f466fc9943615b1.tscn"
+
+[deps]
+
+source_file="res://creatures/stormeye_tyrant/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-2a0374798f8706192f466fc9943615b1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

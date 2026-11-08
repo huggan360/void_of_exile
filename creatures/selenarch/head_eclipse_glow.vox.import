@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c47il1jhmpl7u"
+path="res://.godot/imported/head_eclipse_glow.vox-b11d21ba07d544faf4021be84bedfdaa.tscn"
+
+[deps]
+
+source_file="res://creatures/selenarch/head_eclipse_glow.vox"
+dest_files=["res://.godot/imported/head_eclipse_glow.vox-b11d21ba07d544faf4021be84bedfdaa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

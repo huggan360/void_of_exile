@@ -588,6 +588,11 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		speed = 0.0
 		if GameServer.intro_locked(p.player_id): flags = flags & ~1
 	var active_realm: RealmInstance = realms.get(p.realm)
+	if active_realm and active_realm.world is SpaceWorld:
+		var seat := (active_realm.world as SpaceWorld).city.seat_of(int(p.player_id))
+		if seat!="":
+			pos = CityLayout.any_seat(seat).pos
+			speed = 0.0
 	var recovering := false
 	if active_realm and active_realm.world is SpatialWorld:
 		if not pos.is_finite(): return
@@ -945,7 +950,7 @@ func fx(source: Node, pos: Vector3, ev: Array) -> void:
 	_queue(Net.realm_of(source), pos, ev)
 
 
-func fortress_gate(world: IslandWorld, center: Vector2i, locked: bool, sealed: bool) -> void:
+func fortress_gate(world: GameWorld, center: Vector2i, locked: bool, sealed: bool) -> void:
 	_to_realm(world.realm_id,Vector3.INF,["fort_gate",center,locked,sealed])
 
 
@@ -953,7 +958,7 @@ func fortress_gate(world: IslandWorld, center: Vector2i, locked: bool, sealed: b
 ## that fortress's key, which is spent.
 func _use_gate_key(peer_id: int, p: Dictionary, center: Variant) -> void:
 	var realm: RealmInstance = realms.get(p.realm)
-	if realm == null or not realm.world is IslandWorld or not center is Vector2i:
+	if realm == null or not realm.world.get("gates") is StrongholdGates or not center is Vector2i:
 		return
 	if realm.world.gates.try_open(center, GameServer.character(p.player_id), p.pos):
 		_send_character(peer_id)

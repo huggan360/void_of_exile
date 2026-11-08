@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dooj0x6qj0vo5"
+path="res://.godot/imported/gown_2_glow.vox-d66d736e53b682ee5cd589626035ebfd.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_lumeria/gown_2_glow.vox"
+dest_files=["res://.godot/imported/gown_2_glow.vox-d66d736e53b682ee5cd589626035ebfd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

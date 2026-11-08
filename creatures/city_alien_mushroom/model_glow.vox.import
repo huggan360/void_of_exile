@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cs63ftgw0iiap"
+path="res://.godot/imported/model_glow.vox-d981038d944f0a13f4f38289d166f7e5.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_mushroom/model_glow.vox"
+dest_files=["res://.godot/imported/model_glow.vox-d981038d944f0a13f4f38289d166f7e5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

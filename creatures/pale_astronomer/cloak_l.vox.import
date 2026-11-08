@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnhus4xa227by"
+path="res://.godot/imported/cloak_l.vox-251d447fccb226ae9db7b5ffea387de1.tscn"
+
+[deps]
+
+source_file="res://creatures/pale_astronomer/cloak_l.vox"
+dest_files=["res://.godot/imported/cloak_l.vox-251d447fccb226ae9db7b5ffea387de1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

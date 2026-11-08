@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0xa264c6kxd8"
+path="res://.godot/imported/arm_r_glow.vox-05cea73cde3145897fd4a3ab0c2f7068.tscn"
+
+[deps]
+
+source_file="res://creatures/grave_watcher/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-05cea73cde3145897fd4a3ab0c2f7068.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

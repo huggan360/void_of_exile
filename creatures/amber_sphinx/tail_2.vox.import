@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c1p4477bl4s4a"
+path="res://.godot/imported/tail_2.vox-8029ffd32a396cea4028a6bdece4d457.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_sphinx/tail_2.vox"
+dest_files=["res://.godot/imported/tail_2.vox-8029ffd32a396cea4028a6bdece4d457.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

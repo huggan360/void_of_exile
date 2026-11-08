@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cw3vsx0mjusc1"
+path="res://.godot/imported/model.vox-ae3a329b97b8072ac97c4f0a840f132c.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/acid_lance/model.vox"
+dest_files=["res://.godot/imported/model.vox-ae3a329b97b8072ac97c4f0a840f132c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

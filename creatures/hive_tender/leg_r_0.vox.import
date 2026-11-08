@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyan00ictx3ji"
+path="res://.godot/imported/leg_r_0.vox-7ff2e3734843f84201aaf5bf58d189e6.tscn"
+
+[deps]
+
+source_file="res://creatures/hive_tender/leg_r_0.vox"
+dest_files=["res://.godot/imported/leg_r_0.vox-7ff2e3734843f84201aaf5bf58d189e6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

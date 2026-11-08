@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0tjyehl6kwei"
+path="res://.godot/imported/arm_l.vox-e8cc5556a6ed8c0c88bcfb36b8de06ff.tscn"
+
+[deps]
+
+source_file="res://creatures/city_noodle_cook/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-e8cc5556a6ed8c0c88bcfb36b8de06ff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

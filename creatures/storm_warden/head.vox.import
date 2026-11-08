@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dbwodkctq1kfb"
+path="res://.godot/imported/head.vox-3edf4f26bf0e484d2af1a49ee01c8461.tscn"
+
+[deps]
+
+source_file="res://creatures/storm_warden/head.vox"
+dest_files=["res://.godot/imported/head.vox-3edf4f26bf0e484d2af1a49ee01c8461.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

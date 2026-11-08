@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://eaqsa3i27v1x"
+path="res://.godot/imported/robe_tail_2_2_eclipse_glow.vox-a5c1efb7318a4e3167e659f5cb7902be.tscn"
+
+[deps]
+
+source_file="res://creatures/selenarch/robe_tail_2_2_eclipse_glow.vox"
+dest_files=["res://.godot/imported/robe_tail_2_2_eclipse_glow.vox-a5c1efb7318a4e3167e659f5cb7902be.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

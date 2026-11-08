@@ -1,0 +1,258 @@
+[
+  {
+    "id": "queen_briarrose",
+    "display_name": "Queen Briarrose",
+    "planet": "Rosamund",
+    "folder": "creatures/queen_briarrose",
+    "status": "live",
+    "height_m": 7.5,
+    "voxel_size": 0.03177966101694915,
+    "parts": [
+      "arm_r",
+      "body",
+      "body_wilted",
+      "body_bloom",
+      "wing_r_1_wilted",
+      "wing_r_1_bloom",
+      "wing_r_1",
+      "head",
+      "head_bloom",
+      "head_wilted",
+      "wing_l_0_wilted",
+      "wing_l_0",
+      "wing_l_0_bloom",
+      "wing_l_1_bloom",
+      "wing_l_1",
+      "wing_l_1_wilted",
+      "wing_r_0",
+      "wing_r_0_wilted",
+      "wing_r_0_bloom",
+      "arm_l"
+    ],
+    "variants": [
+      "bloom",
+      "wilted"
+    ],
+    "projectiles": [
+      "rose_petal",
+      "thorn_spike"
+    ],
+    "design_grid": [
+      64,
+      64,
+      64
+    ],
+    "upscale": 4
+  },
+  {
+    "id": "amber_colossus",
+    "display_name": "Aurum, the Amber Colossus",
+    "planet": "Amberfall",
+    "folder": "creatures/amber_colossus",
+    "status": "live",
+    "height_m": 9.0,
+    "voxel_size": 0.039473684210526314,
+    "parts": [
+      "arm_r",
+      "leg_l_0",
+      "body_hive",
+      "body_molten",
+      "body",
+      "leg_l_1",
+      "leg_r_1",
+      "leg_r_0",
+      "head_molten",
+      "head",
+      "head_hive",
+      "arm_l"
+    ],
+    "variants": [
+      "molten",
+      "hive"
+    ],
+    "projectiles": [
+      "amber_shard",
+      "honey_orb"
+    ],
+    "design_grid": [
+      64,
+      64,
+      64
+    ],
+    "upscale": 4
+  },
+  {
+    "id": "selenarch",
+    "display_name": "Selenarch, the Moon-Eater",
+    "planet": "Hollowmoon",
+    "folder": "creatures/selenarch",
+    "status": "live",
+    "height_m": 8.0,
+    "voxel_size": 0.031746031746031744,
+    "parts": [
+      "arm_r",
+      "robe_tail_1_1_eclipse",
+      "robe_tail_1_1",
+      "body_eclipse",
+      "body",
+      "body_void",
+      "robe_tail_1_0_eclipse",
+      "robe_tail_1_0",
+      "robe_tail_1_2",
+      "robe_tail_1_2_eclipse",
+      "arm_l",
+      "robe_tail_0_1_eclipse",
+      "robe_tail_0_1",
+      "robe_tail_2_1",
+      "robe_tail_2_1_eclipse",
+      "robe_tail_2_0_eclipse",
+      "robe_tail_2_0",
+      "robe_tail_2_2",
+      "robe_tail_2_2_eclipse",
+      "orrery_0_void",
+      "orrery_0",
+      "head",
+      "head_eclipse",
+      "head_void",
+      "orrery_1",
+      "orrery_1_void",
+      "robe_tail_0_0_eclipse",
+      "robe_tail_0_0",
+      "robe_tail_0_2_eclipse",
+      "robe_tail_0_2"
+    ],
+    "variants": [
+      "eclipse",
+      "void"
+    ],
+    "projectiles": [
+      "moon_shard",
+      "ghost_wisp"
+    ],
+    "design_grid": [
+      64,
+      64,
+      64
+    ],
+    "upscale": 4
+  },
+  {
+    "id": "brood_matriarch",
+    "display_name": "The Brood Matriarch",
+    "planet": "Mawgrave",
+    "folder": "creatures/brood_matriarch",
+    "status": "live",
+    "height_m": 8.5,
+    "voxel_size": 0.035416666666666666,
+    "parts": [
+      "leg_r_2",
+      "arm_r",
+      "leg_l_0",
+      "body_swarm",
+      "body_rot",
+      "body",
+      "leg_l_1",
+      "leg_l_2",
+      "leg_r_1",
+      "head_rot",
+      "head",
+      "head_swarm",
+      "leg_r_0",
+      "arm_l",
+      "jaw"
+    ],
+    "variants": [
+      "swarm",
+      "rot"
+    ],
+    "projectiles": [
+      "spore_cluster",
+      "acid_lance"
+    ],
+    "design_grid": [
+      64,
+      64,
+      64
+    ],
+    "upscale": 4
+  },
+  {
+    "id": "stormeye_tyrant",
+    "display_name": "The Stormeye Tyrant",
+    "planet": "The Pale Eye",
+    "folder": "creatures/stormeye_tyrant",
+    "status": "live",
+    "height_m": 9.5,
+    "voxel_size": 0.03958333333333333,
+    "parts": [
+      "tentacle_2_0",
+      "tentacle_2_0_cataclysm",
+      "tentacle_2_1_cataclysm",
+      "tentacle_2_1",
+      "tentacle_4_2",
+      "tentacle_4_2_cataclysm",
+      "tentacle_3_2_cataclysm",
+      "tentacle_3_2",
+      "tentacle_4_3_cataclysm",
+      "tentacle_4_3",
+      "tentacle_0_1",
+      "tentacle_0_1_cataclysm",
+      "tentacle_2_3_cataclysm",
+      "tentacle_2_3",
+      "tentacle_3_3_cataclysm",
+      "tentacle_3_3",
+      "tentacle_1_3_cataclysm",
+      "tentacle_1_3",
+      "tentacle_5_3",
+      "tentacle_5_3_cataclysm",
+      "head",
+      "head_cataclysm",
+      "head_tempest",
+      "tentacle_3_0",
+      "tentacle_3_0_cataclysm",
+      "tentacle_4_1_cataclysm",
+      "tentacle_4_1",
+      "tentacle_1_1_cataclysm",
+      "tentacle_1_1",
+      "tentacle_3_1_cataclysm",
+      "tentacle_3_1",
+      "tentacle_0_2_cataclysm",
+      "tentacle_0_2",
+      "tentacle_0_0",
+      "tentacle_0_0_cataclysm",
+      "body_cataclysm",
+      "body_tempest",
+      "body",
+      "tentacle_2_2",
+      "tentacle_2_2_cataclysm",
+      "tentacle_5_2",
+      "tentacle_5_2_cataclysm",
+      "tentacle_5_1_cataclysm",
+      "tentacle_5_1",
+      "tentacle_1_0",
+      "tentacle_1_0_cataclysm",
+      "tentacle_4_0_cataclysm",
+      "tentacle_4_0",
+      "tentacle_0_3",
+      "tentacle_0_3_cataclysm",
+      "tentacle_1_2_cataclysm",
+      "tentacle_1_2",
+      "tentacle_5_0",
+      "tentacle_5_0_cataclysm"
+    ],
+    "variants": [
+      "tempest",
+      "cataclysm"
+    ],
+    "projectiles": [
+      "storm_orb",
+      "eye_lance"
+    ],
+    "design_grid": [
+      64,
+      64,
+      64
+    ],
+    "upscale": 4
+  }
+]

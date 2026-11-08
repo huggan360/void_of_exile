@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkbipd6f1ifg4"
+path="res://.godot/imported/arm_r.vox-dcf4d50d3486142c1abb6044e005813b.tscn"
+
+[deps]
+
+source_file="res://creatures/city_robot_butler/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-dcf4d50d3486142c1abb6044e005813b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

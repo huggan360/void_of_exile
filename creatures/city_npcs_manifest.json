@@ -1,0 +1,282 @@
+[
+  {
+    "id": "city_barista",
+    "name": "Lantern Cafe Barista",
+    "folder": "creatures/city_barista",
+    "height_m": 1.7,
+    "voxel_size": 0.07391304347826087,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Cafe keeper"
+  },
+  {
+    "id": "city_bartender",
+    "name": "Roseglass Bartender",
+    "folder": "creatures/city_bartender",
+    "height_m": 1.8,
+    "voxel_size": 0.0782608695652174,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Tavern keeper"
+  },
+  {
+    "id": "city_noodle_cook",
+    "name": "Moonsteam Noodle Cook",
+    "folder": "creatures/city_noodle_cook",
+    "height_m": 1.85,
+    "voxel_size": 0.07115384615384615,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Noodle stall cook"
+  },
+  {
+    "id": "city_vendor",
+    "name": "Glimmer Gadget Vendor",
+    "folder": "creatures/city_vendor",
+    "height_m": 1.68,
+    "voxel_size": 0.07304347826086956,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Gadget merchant"
+  },
+  {
+    "id": "city_courier",
+    "name": "Skylane Courier",
+    "folder": "creatures/city_courier",
+    "height_m": 1.72,
+    "voxel_size": 0.07478260869565218,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Parcel courier"
+  },
+  {
+    "id": "city_noble",
+    "name": "Lamplight Noble",
+    "folder": "creatures/city_noble",
+    "height_m": 1.9,
+    "voxel_size": 0.06333333333333332,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "City patron"
+  },
+  {
+    "id": "city_guard",
+    "name": "Friendly Lantern Guard",
+    "folder": "creatures/city_guard",
+    "height_m": 1.88,
+    "voxel_size": 0.07833333333333332,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Lantern watch"
+  },
+  {
+    "id": "city_mechanic",
+    "name": "Brasswork Mechanic",
+    "folder": "creatures/city_mechanic",
+    "height_m": 1.75,
+    "voxel_size": 0.07608695652173914,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Hovercraft mechanic"
+  },
+  {
+    "id": "city_kid",
+    "name": "Cat Hood Kid",
+    "folder": "creatures/city_kid",
+    "height_m": 1.25,
+    "voxel_size": 0.05,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Neighborhood child"
+  },
+  {
+    "id": "city_dancer",
+    "name": "Ribbonlight Dancer",
+    "folder": "creatures/city_dancer",
+    "height_m": 1.77,
+    "voxel_size": 0.07695652173913044,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Street performer"
+  },
+  {
+    "id": "city_elder",
+    "name": "Lantern Storykeeper",
+    "folder": "creatures/city_elder",
+    "height_m": 1.76,
+    "voxel_size": 0.07333333333333333,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "City storyteller"
+  },
+  {
+    "id": "city_alien_tall",
+    "name": "Three-Eyed Silk Walker",
+    "folder": "creatures/city_alien_tall",
+    "height_m": 2.35,
+    "voxel_size": 0.08392857142857144,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Star chart scholar"
+  },
+  {
+    "id": "city_alien_fourarm",
+    "name": "Four-Handed Merchant",
+    "folder": "creatures/city_alien_fourarm",
+    "height_m": 1.82,
+    "voxel_size": 0.07583333333333334,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Market merchant"
+  },
+  {
+    "id": "city_alien_squid",
+    "name": "Bubblehelm Wayfarer",
+    "folder": "creatures/city_alien_squid",
+    "height_m": 1.85,
+    "voxel_size": 0.07400000000000001,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Aquatic visitor"
+  },
+  {
+    "id": "city_alien_frog",
+    "name": "Raincoat Frog Folk",
+    "folder": "creatures/city_alien_frog",
+    "height_m": 1.45,
+    "voxel_size": 0.06304347826086956,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Canal ferryman"
+  },
+  {
+    "id": "city_alien_moth",
+    "name": "Lantern Moth Tender",
+    "folder": "creatures/city_alien_moth",
+    "height_m": 1.9,
+    "voxel_size": 0.07307692307692307,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Lantern tender"
+  },
+  {
+    "id": "city_alien_crystal",
+    "name": "Prism Songkeeper",
+    "folder": "creatures/city_alien_crystal",
+    "height_m": 2.05,
+    "voxel_size": 0.0732142857142857,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Crystal musician"
+  },
+  {
+    "id": "city_alien_mushroom",
+    "name": "Little Cap Gardener",
+    "folder": "creatures/city_alien_mushroom",
+    "height_m": 1.35,
+    "voxel_size": 0.051923076923076926,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Rooftop gardener"
+  },
+  {
+    "id": "city_robot_butler",
+    "name": "Brass Bell Butler",
+    "folder": "creatures/city_robot_butler",
+    "height_m": 1.7,
+    "voxel_size": 0.07083333333333333,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Hospitality robot"
+  },
+  {
+    "id": "city_robot_tiny",
+    "name": "Little Errand Bot",
+    "folder": "creatures/city_robot_tiny",
+    "height_m": 1.2,
+    "voxel_size": 0.04615384615384615,
+    "parts": [
+      "body",
+      "arm_l",
+      "arm_r",
+      "leg"
+    ],
+    "role": "Service robot"
+  }
+]

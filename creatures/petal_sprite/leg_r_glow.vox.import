@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dj4yq18jfkrtj"
+path="res://.godot/imported/leg_r_glow.vox-cff67897dd1918c6357a227d31305bf4.tscn"
+
+[deps]
+
+source_file="res://creatures/petal_sprite/leg_r_glow.vox"
+dest_files=["res://.godot/imported/leg_r_glow.vox-cff67897dd1918c6357a227d31305bf4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

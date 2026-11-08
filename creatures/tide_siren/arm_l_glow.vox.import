@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://x0lqmsqcxd0b"
+path="res://.godot/imported/arm_l_glow.vox-8d52e155b59e18c5a51229c20fc23f02.tscn"
+
+[deps]
+
+source_file="res://creatures/tide_siren/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-8d52e155b59e18c5a51229c20fc23f02.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

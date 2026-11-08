@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://boaeilwsnd8ig"
+path="res://.godot/imported/arm_r_glow.vox-2b4859176cfcb8f4f584b1b5f5aeac27.tscn"
+
+[deps]
+
+source_file="res://creatures/obsidian_knight/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-2b4859176cfcb8f4f584b1b5f5aeac27.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

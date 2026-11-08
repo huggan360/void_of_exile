@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dm157ck8xhoya"
+path="res://.godot/imported/arm_r_glow.vox-b582e66d7ea05023c509bded56b9882b.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_lumeria/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-b582e66d7ea05023c509bded56b9882b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

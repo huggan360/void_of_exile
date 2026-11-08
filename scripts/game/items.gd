@@ -200,6 +200,17 @@ const GATE_KEYS := {
 		"A gilded scarab folds its wings around the bow. It warms toward noon."],
 	key_hollow_throne = ["Hollow Throne Key", "The Hollow Throne",
 		"Lighter than it should be. Holding it, you hear a crown being set down."],
+	# The Astral Reach's planet strongholds (SpaceLayout.FORTS).
+	key_rose_bastion = ["Rose Bastion Key", "The Rose Bastion",
+		"A stem of pink crystal, thorns and all. It smells of roses when the Queen is near."],
+	key_amber_ziggurat = ["Amber Ziggurat Key", "The Amber Ziggurat",
+		"Honey-amber, warm as a hand. A tiny bee sleeps in the bow."],
+	key_shattered_observatory = ["Observatory Key", "The Shattered Observatory",
+		"A brass star-key with a moon in its bow. It points at Hollowmoon's dead sky."],
+	key_rotting_hive = ["Hive Key", "The Rotting Hive",
+		"Grown, not forged: violet chitin that twitches now and then."],
+	key_stormeye_citadel = ["Stormeye Key", "The Stormeye Citadel",
+		"Obsidian with a blue spark trapped inside. Your hair stands up holding it."],
 }
 
 

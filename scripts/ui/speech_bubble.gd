@@ -99,8 +99,11 @@ func _follow() -> void:
 	if camera == null:
 		hide()
 		return
-	var point: Vector3 = anchor.global_position + Vector3.UP * _height
+	var point: Vector3 = anchor.global_position + anchor.global_basis.y.normalized() * _height
 	visible = not camera.is_position_behind(point) and camera.global_position.distance_to(point) <= 80.0
+	if visible and anchor.has_meta("city_actor"):
+		var ray := PhysicsRayQueryParameters3D.create(camera.global_position, point, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
+		visible = anchor.get_world_3d().direct_space_state.intersect_ray(ray).is_empty()
 	if visible:
 		position = (camera.unproject_position(point) / _layer.scale - pivot_offset).round()
 

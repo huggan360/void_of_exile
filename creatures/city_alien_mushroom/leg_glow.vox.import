@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d1gsld7si2joo"
+path="res://.godot/imported/leg_glow.vox-a3aa97dc81f0c3e9ee6e6ba2649f4eb3.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_mushroom/leg_glow.vox"
+dest_files=["res://.godot/imported/leg_glow.vox-a3aa97dc81f0c3e9ee6e6ba2649f4eb3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

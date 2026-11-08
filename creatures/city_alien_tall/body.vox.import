@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://caq363hhb5mxd"
+path="res://.godot/imported/body.vox-204cdde0db1e305b04e87fd86e6ee993.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_tall/body.vox"
+dest_files=["res://.godot/imported/body.vox-204cdde0db1e305b04e87fd86e6ee993.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

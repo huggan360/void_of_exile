@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bxitpxjpx3oap"
+path="res://.godot/imported/leg_l_0.vox-c53cc0e9989b675264a40e82358689f3.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_scarab/leg_l_0.vox"
+dest_files=["res://.godot/imported/leg_l_0.vox-c53cc0e9989b675264a40e82358689f3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

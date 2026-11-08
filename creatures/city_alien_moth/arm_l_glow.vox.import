@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://grnlsnokh5xg"
+path="res://.godot/imported/arm_l_glow.vox-414956339914db32fd81339c7a3b3c25.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_moth/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-414956339914db32fd81339c7a3b3c25.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

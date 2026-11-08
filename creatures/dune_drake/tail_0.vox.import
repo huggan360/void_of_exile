@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnhv2nqs6luoy"
+path="res://.godot/imported/tail_0.vox-57853ef8b3140d33a514b858cf7edd87.tscn"
+
+[deps]
+
+source_file="res://creatures/dune_drake/tail_0.vox"
+dest_files=["res://.godot/imported/tail_0.vox-57853ef8b3140d33a514b858cf7edd87.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

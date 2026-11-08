@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnse3akywtxts"
+path="res://.godot/imported/tentacle_4_3_cataclysm_glow.vox-f75b90fed8b4963656d24fd359e0bcc6.tscn"
+
+[deps]
+
+source_file="res://creatures/stormeye_tyrant/source_64/tentacle_4_3_cataclysm_glow.vox"
+dest_files=["res://.godot/imported/tentacle_4_3_cataclysm_glow.vox-f75b90fed8b4963656d24fd359e0bcc6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

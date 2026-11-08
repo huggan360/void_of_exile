@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dawpr7cstbpik"
+path="res://.godot/imported/model.vox-c257e4a77e789f5eb8c3ec0885c82765.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_crystal/model.vox"
+dest_files=["res://.godot/imported/model.vox-c257e4a77e789f5eb8c3ec0885c82765.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

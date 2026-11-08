@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bohtvujxc8wyq"
+path="res://.godot/imported/leg_l.vox-a6261312395e5318f3116f4a5c15ca00.tscn"
+
+[deps]
+
+source_file="res://creatures/quartz_hopper/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-a6261312395e5318f3116f4a5c15ca00.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cp2apf3a2bls6"
+path="res://.godot/imported/body.vox-df4030dbeceae705cd37c63d41b4f3a7.tscn"
+
+[deps]
+
+source_file="res://creatures/leviathan_herald/body.vox"
+dest_files=["res://.godot/imported/body.vox-df4030dbeceae705cd37c63d41b4f3a7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

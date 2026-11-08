@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://gks2i5kbl8vl"
+path="res://.godot/imported/body.vox-e1ee1a5a1cf7ff086a40a5a128deb546.tscn"
+
+[deps]
+
+source_file="res://creatures/eye_watcher/body.vox"
+dest_files=["res://.godot/imported/body.vox-e1ee1a5a1cf7ff086a40a5a128deb546.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

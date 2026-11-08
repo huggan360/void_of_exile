@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://buslyx8wcjun2"
+path="res://.godot/imported/lantern_l_1.vox-c6993bda01e7b1b8fcadde5f3022c5f9.tscn"
+
+[deps]
+
+source_file="res://creatures/elder_thornheart/source_32/lantern_l_1.vox"
+dest_files=["res://.godot/imported/lantern_l_1.vox-c6993bda01e7b1b8fcadde5f3022c5f9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

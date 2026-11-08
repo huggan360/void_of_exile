@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dqj1g317aqdxn"
+path="res://.godot/imported/body_glow.vox-83f9723ba08f24450a1dc5916125525f.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_fourarm/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-83f9723ba08f24450a1dc5916125525f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c54fjspyu54xv"
+path="res://.godot/imported/head_eclipse.vox-0dde4e69a956c2091815451732a2a395.tscn"
+
+[deps]
+
+source_file="res://creatures/selenarch/head_eclipse.vox"
+dest_files=["res://.godot/imported/head_eclipse.vox-0dde4e69a956c2091815451732a2a395.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

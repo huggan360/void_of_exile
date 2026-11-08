@@ -1,0 +1,256 @@
+[
+  {
+    "id": "honey_mite",
+    "display_name": "Honey Mite",
+    "biome": "Amberfall",
+    "folder": "creatures/honey_mite",
+    "status": "live",
+    "height_m": 0.7,
+    "voxel_size": 0.04375,
+    "parts": [
+      "body",
+      "head",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_l_2",
+      "leg_r_0",
+      "leg_r_1",
+      "leg_r_2"
+    ],
+    "behavior": "dart",
+    "behavior_notes": "Swarms in quick darts.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "honey_comet"
+  },
+  {
+    "id": "amber_scarab",
+    "display_name": "Amber Scarab",
+    "biome": "Amberfall",
+    "folder": "creatures/amber_scarab",
+    "status": "live",
+    "height_m": 1.3,
+    "voxel_size": 0.08125,
+    "parts": [
+      "body",
+      "head",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_l_2",
+      "leg_r_0",
+      "leg_r_1",
+      "leg_r_2"
+    ],
+    "behavior": "strafe",
+    "behavior_notes": "Armored strafing beetle.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "honey_comet"
+  },
+  {
+    "id": "dune_drake",
+    "display_name": "Dune Drake",
+    "biome": "Amberfall",
+    "folder": "creatures/dune_drake",
+    "status": "live",
+    "height_m": 2.6,
+    "voxel_size": 0.13,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_r_0",
+      "leg_r_1",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3"
+    ],
+    "behavior": "chase",
+    "behavior_notes": "Four-legged pursuit with ember throat.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "honey_comet"
+  },
+  {
+    "id": "amber_sphinx",
+    "display_name": "The Amber Sphinx",
+    "biome": "Amberfall",
+    "folder": "creatures/amber_sphinx",
+    "status": "live",
+    "height_m": 4.5,
+    "voxel_size": 0.140625,
+    "parts": [
+      "body",
+      "head",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_r_0",
+      "leg_r_1",
+      "wing_l",
+      "wing_r",
+      "tail_0",
+      "tail_1",
+      "tail_2"
+    ],
+    "behavior": "stationary",
+    "behavior_notes": "God guarding the ruins.",
+    "god": true,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "honey_comet"
+  },
+  {
+    "id": "surf_crab",
+    "display_name": "Surf Crab",
+    "biome": "Tidewell",
+    "folder": "creatures/surf_crab",
+    "status": "live",
+    "height_m": 0.9,
+    "voxel_size": 0.075,
+    "parts": [
+      "body",
+      "eyestalk_l",
+      "claw_l",
+      "eyestalk_r",
+      "claw_r",
+      "leg_l_0",
+      "leg_l_1",
+      "leg_l_2",
+      "leg_r_0",
+      "leg_r_1",
+      "leg_r_2"
+    ],
+    "behavior": "skirmish",
+    "behavior_notes": "Skirmishes with snapping claws.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "tide_pearl"
+  },
+  {
+    "id": "tide_siren",
+    "display_name": "Tide Siren",
+    "biome": "Tidewell",
+    "folder": "creatures/tide_siren",
+    "status": "live",
+    "height_m": 1.6,
+    "voxel_size": 0.05925925925925926,
+    "parts": [
+      "body",
+      "head",
+      "hair_l",
+      "fin_l",
+      "arm_l",
+      "hair_r",
+      "fin_r",
+      "arm_r"
+    ],
+    "behavior": "strafe",
+    "behavior_notes": "Sings needle bursts while strafing.",
+    "god": false,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "tide_pearl"
+  },
+  {
+    "id": "kelp_horror",
+    "display_name": "Kelp Horror",
+    "biome": "Tidewell",
+    "folder": "creatures/kelp_horror",
+    "status": "live",
+    "height_m": 2.2,
+    "voxel_size": 0.12222222222222223,
+    "parts": [
+      "body",
+      "head",
+      "tentacle_l_0_0",
+      "tentacle_l_0_1",
+      "tentacle_l_0_2",
+      "tentacle_l_1_0",
+      "tentacle_l_1_1",
+      "tentacle_l_1_2",
+      "tentacle_r_0_0",
+      "tentacle_r_0_1",
+      "tentacle_r_0_2",
+      "tentacle_r_1_0",
+      "tentacle_r_1_1",
+      "tentacle_r_1_2"
+    ],
+    "behavior": "stationary",
+    "behavior_notes": "Sits at the shore with swaying tentacles.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "tide_pearl"
+  },
+  {
+    "id": "leviathan_herald",
+    "display_name": "The Leviathan Herald",
+    "biome": "Tidewell",
+    "folder": "creatures/leviathan_herald",
+    "status": "live",
+    "height_m": 4.0,
+    "voxel_size": 0.13333333333333333,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "arm_l",
+      "arm_r",
+      "tail_0",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5",
+      "tail_6",
+      "tail_7",
+      "tail_8",
+      "tail_9"
+    ],
+    "behavior": "strafe",
+    "behavior_notes": "Serpent priest god with a pearl staff.",
+    "god": true,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "projectile": "tide_pearl"
+  }
+]

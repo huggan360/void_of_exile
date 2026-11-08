@@ -91,4 +91,11 @@ func _process(delta: float) -> void:
 		model.rotation.y = lerp_angle(model.rotation.y, float(s[1]), blend)
 	_speed = lerpf(_speed, float(s[2]), minf(1.0, delta * 10.0))
 	model.animate(0.0 if buffs.has_effect("static") else _speed, delta)
+	if Net.client and Net.client.world is SpaceWorld:
+		var seat := (Net.client.world as SpaceWorld).city.seat_of(player_id)
+		if seat!="":
+			var spec := CityLayout.any_seat(seat)
+			global_transform = Transform3D(spec.basis, spec.pos)
+			model.rotation.y = float(spec.yaw)
+			CityState.seated_pose(model)
 	shield.active = (int(s[3]) & 1) != 0

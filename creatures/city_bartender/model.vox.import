@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dsiv4gh64mblg"
+path="res://.godot/imported/model.vox-e4d8ad2a93c5286fbec34dd93efd74bb.tscn"
+
+[deps]
+
+source_file="res://creatures/city_bartender/model.vox"
+dest_files=["res://.godot/imported/model.vox-e4d8ad2a93c5286fbec34dd93efd74bb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

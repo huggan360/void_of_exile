@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://hvfxb1xn3xwe"
+path="res://.godot/imported/model.vox-110b612e8b5b703525fbdfeeedefef39.tscn"
+
+[deps]
+
+source_file="res://props/city/arcade_cabinet/model.vox"
+dest_files=["res://.godot/imported/model.vox-110b612e8b5b703525fbdfeeedefef39.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

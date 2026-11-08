@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cefnxym7lo532"
+path="res://.godot/imported/body_rot_glow.vox-dcbeded5a8ac72b4154d40a41637fa1d.tscn"
+
+[deps]
+
+source_file="res://creatures/brood_matriarch/body_rot_glow.vox"
+dest_files=["res://.godot/imported/body_rot_glow.vox-dcbeded5a8ac72b4154d40a41637fa1d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

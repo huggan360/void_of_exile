@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://djeg6iyiwuo5k"
+path="res://.godot/imported/wing_l_1_glow.vox-5800a76964664cbceaa92582370dd203.tscn"
+
+[deps]
+
+source_file="res://creatures/moss_glimmer/wing_l_1_glow.vox"
+dest_files=["res://.godot/imported/wing_l_1_glow.vox-5800a76964664cbceaa92582370dd203.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

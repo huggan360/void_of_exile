@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dl4id6d7pq0i3"
+path="res://.godot/imported/body_glow.vox-d29d26de8e973a410edab2c285079eaa.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_sphinx/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-d29d26de8e973a410edab2c285079eaa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

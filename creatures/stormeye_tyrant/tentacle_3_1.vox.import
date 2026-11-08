@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d28b5b64wftye"
+path="res://.godot/imported/tentacle_3_1.vox-a683e05c5a34355b6a05719758a483cd.tscn"
+
+[deps]
+
+source_file="res://creatures/stormeye_tyrant/tentacle_3_1.vox"
+dest_files=["res://.godot/imported/tentacle_3_1.vox-a683e05c5a34355b6a05719758a483cd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

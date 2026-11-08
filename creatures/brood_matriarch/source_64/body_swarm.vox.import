@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://co7f4wc6xnu78"
+path="res://.godot/imported/body_swarm.vox-932b52e22a01cac79cd236db2c837632.tscn"
+
+[deps]
+
+source_file="res://creatures/brood_matriarch/source_64/body_swarm.vox"
+dest_files=["res://.godot/imported/body_swarm.vox-932b52e22a01cac79cd236db2c837632.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

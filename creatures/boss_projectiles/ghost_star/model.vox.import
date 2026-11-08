@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cjyawffoavi1f"
+path="res://.godot/imported/model.vox-1cb9e44fe575bfefa5772e6d8e3383d7.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/ghost_star/model.vox"
+dest_files=["res://.godot/imported/model.vox-1cb9e44fe575bfefa5772e6d8e3383d7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bbdwnwfpb7mg4"
+path="res://.godot/imported/leg_r_1.vox-ae333d87b1b59e0c0c31504feaa9fd5f.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_sphinx/leg_r_1.vox"
+dest_files=["res://.godot/imported/leg_r_1.vox-ae333d87b1b59e0c0c31504feaa9fd5f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dmwse7me742ll"
+path="res://.godot/imported/head_glow.vox-9e978788f777f50801eafafec295271e.tscn"
+
+[deps]
+
+source_file="res://creatures/obsidian_knight/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-9e978788f777f50801eafafec295271e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

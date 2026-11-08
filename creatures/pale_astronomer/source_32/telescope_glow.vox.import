@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b7cuoxincrado"
+path="res://.godot/imported/telescope_glow.vox-164f24b485e801d70db3416050323e43.tscn"
+
+[deps]
+
+source_file="res://creatures/pale_astronomer/source_32/telescope_glow.vox"
+dest_files=["res://.godot/imported/telescope_glow.vox-164f24b485e801d70db3416050323e43.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

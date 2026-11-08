@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ckh7lxinu5rru"
+path="res://.godot/imported/arm_r.vox-a62efe487eb4f213c567108b443b5700.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_crystal/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-a62efe487eb4f213c567108b443b5700.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

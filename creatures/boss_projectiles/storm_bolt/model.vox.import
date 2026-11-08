@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bww6ernx3ia5t"
+path="res://.godot/imported/model.vox-450d1cff61db5208edaad13ebc12a37c.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/storm_bolt/model.vox"
+dest_files=["res://.godot/imported/model.vox-450d1cff61db5208edaad13ebc12a37c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,207 @@
+{
+  "voxel_size": 0.05555555555555555,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -5,
+        2,
+        -4
+      ],
+      "frame_size": [
+        11,
+        14,
+        12
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -4,
+        -3,
+        -4
+      ],
+      "frame_size": [
+        8,
+        6,
+        7
+      ],
+      "glow": true
+    },
+    "ear_l": {
+      "frame_min": [
+        -2,
+        0,
+        -1
+      ],
+      "frame_size": [
+        2,
+        8,
+        2
+      ],
+      "glow": true
+    },
+    "leg_l": {
+      "frame_min": [
+        -4,
+        -4,
+        -4
+      ],
+      "frame_size": [
+        7,
+        6,
+        8
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        0,
+        -3,
+        -2
+      ],
+      "frame_size": [
+        2,
+        5,
+        4
+      ]
+    },
+    "ear_r": {
+      "frame_min": [
+        0,
+        0,
+        -1
+      ],
+      "frame_size": [
+        2,
+        8,
+        2
+      ],
+      "glow": true
+    },
+    "leg_r": {
+      "frame_min": [
+        -2,
+        -4,
+        -4
+      ],
+      "frame_size": [
+        6,
+        6,
+        8
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        0,
+        -3,
+        -2
+      ],
+      "frame_size": [
+        2,
+        5,
+        4
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        8,
+        -4
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "ear_l": {
+      "part": "ear_l",
+      "pivot": [
+        -2,
+        2,
+        0
+      ],
+      "role": "sway",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "leg_l": {
+      "part": "leg_l",
+      "pivot": [
+        -4,
+        4,
+        3
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 1.4
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -3,
+        5,
+        -3
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "ear_r": {
+      "part": "ear_r",
+      "pivot": [
+        2,
+        2,
+        0
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "leg_r": {
+      "part": "leg_r",
+      "pivot": [
+        4,
+        4,
+        3
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 1.4
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        3,
+        5,
+        -3
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "hand": [
+    0,
+    9,
+    -5
+  ],
+  "bob": 0.015,
+  "waddle": 0.24,
+  "hover": 0,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.2,
+  "flap_rate": 2.8
+}

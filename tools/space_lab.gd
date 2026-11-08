@@ -58,6 +58,31 @@ func _run() -> void:
 		if p.id=="verdance": continue
 		var pc: Vector3 = p.center
 		views.append(["orbit_"+str(p.id), pc+(SpaceLayout.pad_frame(p).basis.y*2.6+Vector3(0.3, 0.4, 0))*float(p.radius), pc])
+	if _args.has("lineup"):
+		# Each planet's creatures in a row on a plain floor, biggest last.
+		traversal.cinematic = true
+		hud.visible = false
+		var row := Vector3(0, 300, 0)
+		for planet: Dictionary in SpaceLayout.PLANETS:
+			if not _wanted("lineup_"+str(planet.id)): continue
+			var holder := Node3D.new()
+			space.add_child(holder)
+			var x := 0.0
+			for id: String in SpaceEnemies.CAST:
+				if SpaceEnemies.CAST[id][1]!=planet.id: continue
+				var model := CreatureModel.new(id)
+				holder.add_child(model)
+				var height: float = SpaceEnemies.CAST[id][2]
+				model.position = row+Vector3(x+height*0.6, 0, 0)
+				model.rotation.y = PI*0.85
+				x += height*1.6+1.0
+			for k in 30:
+				for m: CreatureModel in holder.get_children(): m.animate(0.0, 0.05)
+			_view(row+Vector3(x*0.5, 2.2, 3.5+x*0.42), row+Vector3(x*0.5, 1.3, 0))
+			await _shot("lineup_"+str(planet.id), 30)
+			holder.queue_free()
+		get_tree().quit()
+		return
 	if _args.has("gear"):
 		# The local player's helmet and jetpack up close, flames on.
 		await get_tree().create_timer(1.0).timeout

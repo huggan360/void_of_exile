@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c5nl38jplop24"
+path="res://.godot/imported/body.vox-30aa6a11410293288c2b59bc43a06ee5.tscn"
+
+[deps]
+
+source_file="res://creatures/hive_tender/body.vox"
+dest_files=["res://.godot/imported/body.vox-30aa6a11410293288c2b59bc43a06ee5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

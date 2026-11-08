@@ -327,8 +327,9 @@ func _physics_process(delta: float) -> void:
 		_move = Vector3.ZERO
 	velocity.x = move.x * speed
 	velocity.z = move.z * speed
-	if not director.world.is_walkable(global_position + Vector3(velocity.x, 0, velocity.z).normalized() * 0.6) \
-			or director.world.is_hazard(global_position + Vector3(velocity.x, 0, velocity.z).normalized() * 0.6):
+	var ahead := global_position + Vector3(velocity.x, 0, velocity.z).normalized() * 0.6
+	if not director.world.is_walkable(ahead) or director.world.is_hazard(ahead) \
+			or (director.world.has_method("enemy_blocked") and director.world.enemy_blocked(ahead)):
 		velocity.x = 0.0
 		velocity.z = 0.0
 		_wander_timer = 0.0  # pick somewhere else
@@ -336,6 +337,8 @@ func _physics_process(delta: float) -> void:
 	velocity.y = 0.0 if is_on_floor() else velocity.y - GRAVITY * delta
 	var prev_y := global_position.y
 	move_and_slide()
+	# Worlds without walkable collision everywhere (planets on the server) hold their enemies to the ground.
+	if director.world.has_method("hold_enemy"): director.world.hold_enemy(self)
 	if move != Vector3.ZERO and is_on_floor() and is_on_wall():
 		_try_step_up(move)
 	var dy := global_position.y - prev_y
@@ -601,6 +604,12 @@ func _fire(a: Dictionary) -> void:
 		"burst", "sweep":
 			_volleys.append({attack = a, left = count, timer = 0.0, t = 0.0,
 					side = 1.0 if randf() < 0.5 else -1.0, base = dir})
+		"summon":
+			# Calls workers or minions to its side, up to `max` of them at once.
+			var kind := str(a.get("minion", ""))
+			var alive := pack.members.filter(func(m: Enemy) -> bool: return is_instance_valid(m) and m.is_alive() and m.def.id == kind).size()
+			for k in mini(count, int(a.get("max", 4)) - alive):
+				director.spawn_minion(kind, global_position + Vector3.FORWARD.rotated(Vector3.UP, randf() * TAU) * 2.5, pack)
 		"shockwave":
 			EnemyRipple.spawn(director.bullets, global_position, a.ripple, a.get("color", Color.WHITE),
 					director.bullets.players, [])

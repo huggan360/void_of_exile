@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnaa4bwltq6w0"
+path="res://.godot/imported/tail_3_glow.vox-e9ae7d54c5fa173e01d4f48bd89a96c2.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_ghost/tail_3_glow.vox"
+dest_files=["res://.godot/imported/tail_3_glow.vox-e9ae7d54c5fa173e01d4f48bd89a96c2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

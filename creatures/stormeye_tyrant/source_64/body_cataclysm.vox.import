@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cqw8xo20mhnva"
+path="res://.godot/imported/body_cataclysm.vox-23de77f5754972fbbd1a13bfac3ff286.tscn"
+
+[deps]
+
+source_file="res://creatures/stormeye_tyrant/source_64/body_cataclysm.vox"
+dest_files=["res://.godot/imported/body_cataclysm.vox-23de77f5754972fbbd1a13bfac3ff286.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

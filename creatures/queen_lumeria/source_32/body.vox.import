@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://nqj5anxg6bs"
+path="res://.godot/imported/body.vox-79de38934077d096f419e7a1c0132259.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_lumeria/source_32/body.vox"
+dest_files=["res://.godot/imported/body.vox-79de38934077d096f419e7a1c0132259.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

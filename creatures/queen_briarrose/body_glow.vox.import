@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dmdjlkurr725e"
+path="res://.godot/imported/body_glow.vox-45449b5ab31322f29e4e7dcb701e9d34.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_briarrose/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-45449b5ab31322f29e4e7dcb701e9d34.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

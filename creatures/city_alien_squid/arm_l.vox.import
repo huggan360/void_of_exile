@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ddl22nyykqqcj"
+path="res://.godot/imported/arm_l.vox-a5b345b042895d57181336516c24ccae.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_squid/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-a5b345b042895d57181336516c24ccae.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

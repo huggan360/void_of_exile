@@ -46,6 +46,8 @@ func setup(p_player: Player, p_bullets: EnemyBullets, cleared: Array, saved_surv
 	if p_player != null and not p_player in players:
 		players.append(p_player)
 	bullets = p_bullets
+	# Worlds with rolling ground (planet tops) keep shots at shot height over it.
+	bullets.ground_follow = world.bullet_ground if world != null and world.has_method("bullet_ground") else Callable()
 	for id in saved_survivors:
 		var living: Array = saved_survivors[id]
 		_memory[id] = {survivors = living.duplicate(), back_at = -1 if living.is_empty() else 0, finite = true}

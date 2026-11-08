@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cotx7dp6a56ob"
+path="res://.godot/imported/head.vox-5f8bd0bcc8e09deb06bf6cc085bc5a52.tscn"
+
+[deps]
+
+source_file="res://creatures/quartz_hopper/head.vox"
+dest_files=["res://.godot/imported/head.vox-5f8bd0bcc8e09deb06bf6cc085bc5a52.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

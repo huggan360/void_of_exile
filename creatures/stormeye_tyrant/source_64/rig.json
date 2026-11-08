@@ -1,0 +1,1117 @@
+{
+  "voxel_size": 0.15833333333333333,
+  "parts": {
+    "tentacle_2_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ]
+    },
+    "tentacle_2_0_cataclysm": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "tentacle_2_1_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_2_1": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "tentacle_4_2": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_4_2_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_3_2_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_3_2": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_4_3_cataclysm": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_4_3": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_0_1": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "tentacle_0_1_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_2_3_cataclysm": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_2_3": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_3_3_cataclysm": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_3_3": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_1_3_cataclysm": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_1_3": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_5_3": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_5_3_cataclysm": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -12,
+        -12,
+        -8
+      ],
+      "frame_size": [
+        24,
+        24,
+        13
+      ],
+      "glow": true
+    },
+    "head_cataclysm": {
+      "frame_min": [
+        -12,
+        -12,
+        -8
+      ],
+      "frame_size": [
+        24,
+        24,
+        13
+      ],
+      "glow": true
+    },
+    "head_tempest": {
+      "frame_min": [
+        -12,
+        -12,
+        -8
+      ],
+      "frame_size": [
+        24,
+        24,
+        13
+      ],
+      "glow": true
+    },
+    "tentacle_3_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ]
+    },
+    "tentacle_3_0_cataclysm": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "tentacle_4_1_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_4_1": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "tentacle_1_1_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_1_1": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "tentacle_3_1_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_3_1": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "tentacle_0_2_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_0_2": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_0_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ]
+    },
+    "tentacle_0_0_cataclysm": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "body_cataclysm": {
+      "frame_min": [
+        -27,
+        21,
+        -16
+      ],
+      "frame_size": [
+        55,
+        40,
+        33
+      ],
+      "glow": true
+    },
+    "body_tempest": {
+      "frame_min": [
+        -27,
+        21,
+        -16
+      ],
+      "frame_size": [
+        55,
+        40,
+        33
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -27,
+        21,
+        -16
+      ],
+      "frame_size": [
+        55,
+        40,
+        33
+      ],
+      "glow": true
+    },
+    "tentacle_2_2": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_2_2_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_5_2": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_5_2_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_5_1_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_5_1": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "tentacle_1_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ]
+    },
+    "tentacle_1_0_cataclysm": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "tentacle_4_0_cataclysm": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "tentacle_4_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ]
+    },
+    "tentacle_0_3": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_0_3_cataclysm": {
+      "frame_min": [
+        -1,
+        -6,
+        0
+      ],
+      "frame_size": [
+        4,
+        7,
+        3
+      ],
+      "glow": true
+    },
+    "tentacle_1_2_cataclysm": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_1_2": {
+      "frame_min": [
+        -2,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ],
+      "glow": true
+    },
+    "tentacle_5_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ]
+    },
+    "tentacle_5_0_cataclysm": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        6
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0.0,
+        40.0,
+        -14.0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "tentacle_0_0": {
+      "part": "tentacle_0_0",
+      "pivot": [
+        12.0,
+        25.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 4
+    },
+    "tentacle_0_1": {
+      "part": "tentacle_0_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 4,
+      "parent_limb": "tentacle_0_0"
+    },
+    "tentacle_0_2": {
+      "part": "tentacle_0_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 4,
+      "parent_limb": "tentacle_0_1"
+    },
+    "tentacle_0_3": {
+      "part": "tentacle_0_3",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 3,
+      "segments": 4,
+      "parent_limb": "tentacle_0_2"
+    },
+    "tentacle_1_0": {
+      "part": "tentacle_1_0",
+      "pivot": [
+        6.0,
+        25.0,
+        10.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 4
+    },
+    "tentacle_1_1": {
+      "part": "tentacle_1_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 4,
+      "parent_limb": "tentacle_1_0"
+    },
+    "tentacle_1_2": {
+      "part": "tentacle_1_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 4,
+      "parent_limb": "tentacle_1_1"
+    },
+    "tentacle_1_3": {
+      "part": "tentacle_1_3",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 3,
+      "segments": 4,
+      "parent_limb": "tentacle_1_2"
+    },
+    "tentacle_2_0": {
+      "part": "tentacle_2_0",
+      "pivot": [
+        -6.0,
+        25.0,
+        10.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 4
+    },
+    "tentacle_2_1": {
+      "part": "tentacle_2_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 4,
+      "parent_limb": "tentacle_2_0"
+    },
+    "tentacle_2_2": {
+      "part": "tentacle_2_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 4,
+      "parent_limb": "tentacle_2_1"
+    },
+    "tentacle_2_3": {
+      "part": "tentacle_2_3",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 3,
+      "segments": 4,
+      "parent_limb": "tentacle_2_2"
+    },
+    "tentacle_3_0": {
+      "part": "tentacle_3_0",
+      "pivot": [
+        -12.0,
+        25.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 4
+    },
+    "tentacle_3_1": {
+      "part": "tentacle_3_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 4,
+      "parent_limb": "tentacle_3_0"
+    },
+    "tentacle_3_2": {
+      "part": "tentacle_3_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 4,
+      "parent_limb": "tentacle_3_1"
+    },
+    "tentacle_3_3": {
+      "part": "tentacle_3_3",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 3,
+      "segments": 4,
+      "parent_limb": "tentacle_3_2"
+    },
+    "tentacle_4_0": {
+      "part": "tentacle_4_0",
+      "pivot": [
+        -6.0,
+        25.0,
+        -6.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 4
+    },
+    "tentacle_4_1": {
+      "part": "tentacle_4_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 4,
+      "parent_limb": "tentacle_4_0"
+    },
+    "tentacle_4_2": {
+      "part": "tentacle_4_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 4,
+      "parent_limb": "tentacle_4_1"
+    },
+    "tentacle_4_3": {
+      "part": "tentacle_4_3",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 3,
+      "segments": 4,
+      "parent_limb": "tentacle_4_2"
+    },
+    "tentacle_5_0": {
+      "part": "tentacle_5_0",
+      "pivot": [
+        6.0,
+        25.0,
+        -6.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 4
+    },
+    "tentacle_5_1": {
+      "part": "tentacle_5_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 4,
+      "parent_limb": "tentacle_5_0"
+    },
+    "tentacle_5_2": {
+      "part": "tentacle_5_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 4,
+      "parent_limb": "tentacle_5_1"
+    },
+    "tentacle_5_3": {
+      "part": "tentacle_5_3",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 3,
+      "segments": 4,
+      "parent_limb": "tentacle_5_2"
+    }
+  },
+  "variants": {
+    "tempest": {
+      "body": "body_tempest",
+      "head": "head_tempest"
+    },
+    "cataclysm": {
+      "body": "body_cataclysm",
+      "head": "head_cataclysm",
+      "tentacle_0_0": "tentacle_0_0_cataclysm",
+      "tentacle_0_1": "tentacle_0_1_cataclysm",
+      "tentacle_0_2": "tentacle_0_2_cataclysm",
+      "tentacle_0_3": "tentacle_0_3_cataclysm",
+      "tentacle_1_0": "tentacle_1_0_cataclysm",
+      "tentacle_1_1": "tentacle_1_1_cataclysm",
+      "tentacle_1_2": "tentacle_1_2_cataclysm",
+      "tentacle_1_3": "tentacle_1_3_cataclysm",
+      "tentacle_2_0": "tentacle_2_0_cataclysm",
+      "tentacle_2_1": "tentacle_2_1_cataclysm",
+      "tentacle_2_2": "tentacle_2_2_cataclysm",
+      "tentacle_2_3": "tentacle_2_3_cataclysm",
+      "tentacle_3_0": "tentacle_3_0_cataclysm",
+      "tentacle_3_1": "tentacle_3_1_cataclysm",
+      "tentacle_3_2": "tentacle_3_2_cataclysm",
+      "tentacle_3_3": "tentacle_3_3_cataclysm",
+      "tentacle_4_0": "tentacle_4_0_cataclysm",
+      "tentacle_4_1": "tentacle_4_1_cataclysm",
+      "tentacle_4_2": "tentacle_4_2_cataclysm",
+      "tentacle_4_3": "tentacle_4_3_cataclysm",
+      "tentacle_5_0": "tentacle_5_0_cataclysm",
+      "tentacle_5_1": "tentacle_5_1_cataclysm",
+      "tentacle_5_2": "tentacle_5_2_cataclysm",
+      "tentacle_5_3": "tentacle_5_3_cataclysm"
+    }
+  },
+  "hand": [
+    0.0,
+    38.0,
+    -20.0
+  ],
+  "hover": 0,
+  "bob": 0.035,
+  "waddle": 0.025,
+  "flap_rate": 2.2,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.6,
+  "design_grid": [
+    64,
+    64,
+    64
+  ],
+  "upscale": 1,
+  "height_m": 9.5,
+  "animation_style": "xeno_queen"
+}

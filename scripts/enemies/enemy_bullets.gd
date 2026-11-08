@@ -46,6 +46,10 @@ const RETURN_REHIT := 0.6
 ## enemies' shots itself and only checks its own player; the server sends
 ## each shot as an event instead of flying it (see Net).
 var players: Array[Player] = []
+## func(x, z) -> ground height or NAN, set by worlds with rolling ground: shots
+## there ride shot height over the ground, up and down the hills, like the
+## players' arrows aim, instead of flying level at their start height.
+var ground_follow := Callable()
 
 static var _cleave_collision := {}
 
@@ -125,7 +129,7 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 		collision_boxes = attack.get("collision_boxes",[]),
 		trail = trail, attack = attack, owner = owner if owner != 0 else _owner_id(source), origin = origin,
 		returns = attack.get("returns", 0.0), turn = attack.get("turn", 0.0), returned = false, hit_at = {}, contract = -1.0,
-		blocked = false, hit_object = false, clashed_waves = [],
+		blocked = false, hit_object = false, clashed_waves = [], slope = _slope(origin, direction, attack, shot_y),
 	})
 
 
@@ -328,10 +332,18 @@ func _physics_process(delta: float) -> void:
 		s.travelled += step
 		var to: Vector3 = from + s.dir * step
 		var drop := maxf(0.0, 1.0 - s.travelled / SETTLE_DISTANCE)
+		var riding := not is_nan(float(s.slope))
+		var hill := false
 		if not s.attack.get("falling", false):
-			to.y = s.shot_y + (s.start_y - s.shot_y) * drop * drop
+			var level: float = s.shot_y
+			if riding:
+				# A straight line up or down the slope; a hill rising into it stops it.
+				level += float(s.slope)*Vector2(to.x-s.origin.x, to.z-s.origin.z).length()
+				var ground: float = ground_follow.call(to.x, to.z)
+				hill = not is_nan(ground) and ground>level-0.3
+			to.y = level + (s.start_y - s.shot_y) * drop * drop
 			if s.attack.has("bowl"): to.y += _bowl_floor(s.attack.bowl, to) - _bowl_floor(s.attack.bowl, s.origin)
-		var query := PhysicsRayQueryParameters3D.create(from, to, Player.TERRAIN_LAYER | Player.OBSTACLE_LAYER)
+		var query := PhysicsRayQueryParameters3D.create(from, to, (0 if riding else Player.TERRAIN_LAYER) | Player.OBSTACLE_LAYER)
 		query.exclude = excluded
 		var wall: Dictionary = space.intersect_ray(query) if s.collision_boxes.is_empty() else {}
 		if s.half_extents!=Vector3.ZERO:
@@ -340,6 +352,8 @@ func _physics_process(delta: float) -> void:
 				to = from.lerp(to,fraction)
 				s.travelled = s.range
 				s.hit_object = true
+		if hill and wall.is_empty():
+			wall = {position = to}
 		if not wall.is_empty():
 			s.hit_object = true
 			if from.distance_squared_to(wall.position)<from.distance_squared_to(to): to = wall.position
@@ -495,6 +509,24 @@ func _scatter_projectile(s: Dictionary, at: Vector3, floor_y: float) -> void:
 		points.append(transform*vertices[vertex])
 		colors.append(palette[vertex] if palette.size()==vertices.size() else s.color)
 	Debris.burst_points(self,points,colors,.09*clampf(float(s.attack.get("size",1.0)),.7,2.0),28,at-s.dir*.35,floor_y,.45)
+
+
+## On rolling ground (ground_follow): the climb per metre of a straight line from
+## the shot height here to shot height over the ground as far out as the nearest
+## player, like the players' arrows aim; NAN elsewhere (shots fly level).
+func _slope(origin: Vector3, direction: Vector3, attack: Dictionary, shot_y: float) -> float:
+	if not ground_follow.is_valid() or attack.get("falling", false): return NAN
+	var start := origin.y if is_nan(shot_y) else shot_y
+	if is_nan(float(ground_follow.call(origin.x, origin.z))): return NAN
+	var reach := float(attack.get("range", 10.0))*0.6
+	var nearest := INF
+	for p in players:
+		if is_instance_valid(p): nearest = minf(nearest, Vector2(p.global_position.x-origin.x, p.global_position.z-origin.z).length())
+	if nearest<INF: reach = clampf(nearest, 2.0, float(attack.get("range", 10.0)))
+	var flat := Vector3(direction.x, 0, direction.z).normalized()*reach
+	var ground: float = ground_follow.call(origin.x+flat.x, origin.z+flat.z)
+	if is_nan(ground): return 0.0
+	return (ground+Player.SHOT_HEIGHT-start)/reach
 
 
 ## An orb that has finished contracting releases its ring of needles; they

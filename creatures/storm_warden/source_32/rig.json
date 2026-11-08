@@ -1,0 +1,159 @@
+{
+  "voxel_size": 0.14516129032258066,
+  "parts": {
+    "head": {
+      "frame_min": [
+        -6,
+        -2,
+        -4
+      ],
+      "frame_size": [
+        13,
+        9,
+        7
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -5,
+        -12,
+        -4
+      ],
+      "frame_size": [
+        9,
+        15,
+        8
+      ],
+      "glow": true
+    },
+    "leg_l": {
+      "frame_min": [
+        -2,
+        -9,
+        -4
+      ],
+      "frame_size": [
+        4,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -6,
+        9,
+        -6
+      ],
+      "frame_size": [
+        12,
+        12,
+        10
+      ],
+      "glow": true
+    },
+    "leg_r": {
+      "frame_min": [
+        -2,
+        -9,
+        -4
+      ],
+      "frame_size": [
+        4,
+        9,
+        6
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -4,
+        -12,
+        -4
+      ],
+      "frame_size": [
+        10,
+        15,
+        8
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0.0,
+        24.0,
+        0.0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l": {
+      "part": "leg_l",
+      "pivot": [
+        -3.0,
+        9.0,
+        0.0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -7.0,
+        20.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r": {
+      "part": "leg_r",
+      "pivot": [
+        3.0,
+        9.0,
+        0.0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        7.0,
+        20.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {},
+  "hand": [
+    0,
+    16,
+    -7
+  ],
+  "hover": 0,
+  "bob": 0.012,
+  "waddle": 0.035,
+  "flap_rate": 2.5,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 2.8,
+  "animation_style": "xeno_queen"
+}

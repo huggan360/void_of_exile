@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b2hjnc2doqhg5"
+path="res://.godot/imported/leg_r.vox-b5faf9a3740ece4b5436b1a0198e7c17.tscn"
+
+[deps]
+
+source_file="res://creatures/fungal_brute/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-b5faf9a3740ece4b5436b1a0198e7c17.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

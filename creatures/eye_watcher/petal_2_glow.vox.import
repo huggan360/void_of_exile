@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnhu72egps5vg"
+path="res://.godot/imported/petal_2_glow.vox-62746a03f2ad2a7df322c4fb8544782a.tscn"
+
+[deps]
+
+source_file="res://creatures/eye_watcher/petal_2_glow.vox"
+dest_files=["res://.godot/imported/petal_2_glow.vox-62746a03f2ad2a7df322c4fb8544782a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

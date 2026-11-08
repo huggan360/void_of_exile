@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://31t47r6svcm4"
+path="res://.godot/imported/head.vox-abfa1d8872294d6f3aa9f55762972521.tscn"
+
+[deps]
+
+source_file="res://creatures/spore_drone/head.vox"
+dest_files=["res://.godot/imported/head.vox-abfa1d8872294d6f3aa9f55762972521.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

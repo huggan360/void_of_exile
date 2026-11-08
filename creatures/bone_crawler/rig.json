@@ -1,0 +1,279 @@
+{
+  "voxel_size": 0.1111111111111111,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -4,
+        3,
+        -4
+      ],
+      "frame_size": [
+        9,
+        5,
+        12
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -4,
+        -3,
+        -4
+      ],
+      "frame_size": [
+        8,
+        6,
+        7
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -3,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        6,
+        2,
+        2
+      ]
+    },
+    "leg_l_0": {
+      "frame_min": [
+        -6,
+        -5,
+        -3
+      ],
+      "frame_size": [
+        8,
+        9,
+        5
+      ]
+    },
+    "leg_l_1": {
+      "frame_min": [
+        -6,
+        -5,
+        -2
+      ],
+      "frame_size": [
+        8,
+        9,
+        4
+      ]
+    },
+    "leg_l_2": {
+      "frame_min": [
+        -6,
+        -5,
+        -1
+      ],
+      "frame_size": [
+        8,
+        9,
+        3
+      ]
+    },
+    "leg_l_3": {
+      "frame_min": [
+        -6,
+        -5,
+        0
+      ],
+      "frame_size": [
+        8,
+        9,
+        3
+      ]
+    },
+    "leg_r_0": {
+      "frame_min": [
+        0,
+        -5,
+        -3
+      ],
+      "frame_size": [
+        7,
+        9,
+        5
+      ]
+    },
+    "leg_r_1": {
+      "frame_min": [
+        0,
+        -5,
+        -2
+      ],
+      "frame_size": [
+        7,
+        9,
+        4
+      ]
+    },
+    "leg_r_2": {
+      "frame_min": [
+        0,
+        -5,
+        -1
+      ],
+      "frame_size": [
+        7,
+        9,
+        3
+      ]
+    },
+    "leg_r_3": {
+      "frame_min": [
+        0,
+        -5,
+        0
+      ],
+      "frame_size": [
+        7,
+        9,
+        3
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        6,
+        -5
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -2,
+        -2
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "leg_l_0": {
+      "part": "leg_l_0",
+      "pivot": [
+        -3,
+        5,
+        -4
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_1": {
+      "part": "leg_l_1",
+      "pivot": [
+        -3,
+        5,
+        -1
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_2": {
+      "part": "leg_l_2",
+      "pivot": [
+        -3,
+        5,
+        2
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_3": {
+      "part": "leg_l_3",
+      "pivot": [
+        -3,
+        5,
+        5
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r_0": {
+      "part": "leg_r_0",
+      "pivot": [
+        3,
+        5,
+        -4
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r_1": {
+      "part": "leg_r_1",
+      "pivot": [
+        3,
+        5,
+        -1
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r_2": {
+      "part": "leg_r_2",
+      "pivot": [
+        3,
+        5,
+        2
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r_3": {
+      "part": "leg_r_3",
+      "pivot": [
+        3,
+        5,
+        5
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "hand": [
+    3,
+    8,
+    -3
+  ],
+  "bob": 0.008,
+  "waddle": 0.025,
+  "hover": 0,
+  "animation_style": "cantor",
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.4,
+  "flap_rate": 1.2,
+  "design_grid": [
+    32,
+    32,
+    32
+  ]
+}

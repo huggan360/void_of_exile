@@ -1,0 +1,177 @@
+{
+  "voxel_size": 0.05555555555555555,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -4,
+        2,
+        -3
+      ],
+      "frame_size": [
+        8,
+        10,
+        6
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -9,
+        -2,
+        -7
+      ],
+      "frame_size": [
+        18,
+        10,
+        14
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -1,
+        -1,
+        -2
+      ],
+      "frame_size": [
+        2,
+        2,
+        2
+      ]
+    },
+    "leg_l": {
+      "frame_min": [
+        -2,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        4,
+        4,
+        4
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -2,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        4,
+        4,
+        3
+      ]
+    },
+    "leg_r": {
+      "frame_min": [
+        -2,
+        -4,
+        -3
+      ],
+      "frame_size": [
+        4,
+        4,
+        4
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        0,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        4,
+        4,
+        3
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        10,
+        0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -1,
+        -3
+      ],
+      "role": "jaw",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "parent_limb": "head"
+    },
+    "leg_l": {
+      "part": "leg_l",
+      "pivot": [
+        -2,
+        4,
+        0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -3,
+        7,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r": {
+      "part": "leg_r",
+      "pivot": [
+        2,
+        4,
+        0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        3,
+        7,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "hand": [
+    0,
+    9,
+    -5
+  ],
+  "bob": 0.015,
+  "waddle": 0.04,
+  "hover": 0,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.2,
+  "flap_rate": 2.8
+}

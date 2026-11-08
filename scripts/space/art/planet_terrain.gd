@@ -55,7 +55,11 @@ func setup(p: Dictionary) -> void:
 static func material_for(p: Dictionary) -> ShaderMaterial:
 	if _material_cache.has(p.id): return _material_cache[p.id]
 	var mat := ShaderMaterial.new()
-	mat.shader = preload("res://shaders/planet_terrain.gdshader")
+	mat.shader = preload("res://shaders/city_ground.gdshader") if p.get("city", false) else preload("res://shaders/planet_terrain.gdshader")
+	if p.get("city", false):
+		mat.set_shader_parameter("planet_center", p.center)
+		mat.set_shader_parameter("planet_radius", p.radius)
+		mat.set_shader_parameter("cells", CityLayout.N)
 	mat.set_shader_parameter("magic", Color(str(p.palette[3])))
 	mat.set_shader_parameter("detail_scale", 1.0/maxf(6.0, float(p.terrain.size)*0.04))
 	_material_cache[p.id] = mat

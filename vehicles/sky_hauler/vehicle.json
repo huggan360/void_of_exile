@@ -1,0 +1,8 @@
+{
+  "voxel_size": 0.1,
+  "length_m": 10.0,
+  "width_m": 2.6,
+  "height_m": 4.9,
+  "kind": "sky",
+  "front": "-z"
+}

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ix3ibn2ox1cg"
+path="res://.godot/imported/model.vox-f2ce07f86bdc4f7efd4bf0584c9cc080.tscn"
+
+[deps]
+
+source_file="res://props/city/water_tank/model.vox"
+dest_files=["res://.godot/imported/model.vox-f2ce07f86bdc4f7efd4bf0584c9cc080.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

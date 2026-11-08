@@ -1,0 +1,9 @@
+{
+  "voxel_size": 0.1,
+  "size_m": [
+    1.4,
+    5.0,
+    1.4
+  ],
+  "solid": true
+}

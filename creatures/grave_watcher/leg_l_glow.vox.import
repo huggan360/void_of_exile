@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cre8w4fwcgdtj"
+path="res://.godot/imported/leg_l_glow.vox-5db1eb572334923a5a71711788206bd1.tscn"
+
+[deps]
+
+source_file="res://creatures/grave_watcher/leg_l_glow.vox"
+dest_files=["res://.godot/imported/leg_l_glow.vox-5db1eb572334923a5a71711788206bd1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

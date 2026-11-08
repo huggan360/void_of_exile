@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bfcgpnfs0bbrn"
+path="res://.godot/imported/body_molten.vox-165d7da1e9f872af532efd58bbc26b87.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_colossus/body_molten.vox"
+dest_files=["res://.godot/imported/body_molten.vox-165d7da1e9f872af532efd58bbc26b87.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

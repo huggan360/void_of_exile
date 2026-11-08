@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ca56shg8j6o4a"
+path="res://.godot/imported/tentacle_0_0_cataclysm.vox-cb72999e8e5a0f05f7a468e978f3847e.tscn"
+
+[deps]
+
+source_file="res://creatures/stormeye_tyrant/source_64/tentacle_0_0_cataclysm.vox"
+dest_files=["res://.godot/imported/tentacle_0_0_cataclysm.vox-cb72999e8e5a0f05f7a468e978f3847e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ba368ku2aqwqx"
+path="res://.godot/imported/arm_l_glow.vox-439c5f9c8dd5d91f311b335867e4d26f.tscn"
+
+[deps]
+
+source_file="res://creatures/city_barista/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-439c5f9c8dd5d91f311b335867e4d26f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

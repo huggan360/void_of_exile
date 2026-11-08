@@ -391,7 +391,7 @@ func _apply(ev: Array) -> void:
 		"castle":  # the Hollow Castle's gates, walls, doors and cutscenes
 			if world and world.has_method("castle_event"): world.castle_event(ev)
 		"fort_gate":
-			if world is IslandWorld: (world as IslandWorld).gates.apply_state(ev[2],bool(ev[3]),bool(ev[4]) if ev.size()>4 else bool(ev[3]))
+			if world and world.get("gates") is StrongholdGates: (world.gates as StrongholdGates).apply_state(ev[2],bool(ev[3]),bool(ev[4]) if ev.size()>4 else bool(ev[3]))
 		"e+": _spawn_mirror(ev)
 		"enemy_buffs":
 			var enemy: Enemy = _mirrors.get(int(ev[2]))

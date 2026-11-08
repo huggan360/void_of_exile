@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cua4pjywvuf45"
+path="res://.godot/imported/body.vox-c157db7b93d6848fa18e12df902251d1.tscn"
+
+[deps]
+
+source_file="res://creatures/city_kid/body.vox"
+dest_files=["res://.godot/imported/body.vox-c157db7b93d6848fa18e12df902251d1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

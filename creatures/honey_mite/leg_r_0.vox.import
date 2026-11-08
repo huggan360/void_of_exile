@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://br8liry4l2wo7"
+path="res://.godot/imported/leg_r_0.vox-0027aa12c036db585016cd66438a1a4d.tscn"
+
+[deps]
+
+source_file="res://creatures/honey_mite/leg_r_0.vox"
+dest_files=["res://.godot/imported/leg_r_0.vox-0027aa12c036db585016cd66438a1a4d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

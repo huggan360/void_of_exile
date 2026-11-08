@@ -1,0 +1,273 @@
+{
+  "voxel_size": 0.15789473684210525,
+  "parts": {
+    "arm_r": {
+      "frame_min": [
+        -2,
+        -16,
+        -8
+      ],
+      "frame_size": [
+        12,
+        19,
+        12
+      ],
+      "glow": true
+    },
+    "leg_l_0": {
+      "frame_min": [
+        -7,
+        -12,
+        -7
+      ],
+      "frame_size": [
+        12,
+        14,
+        12
+      ]
+    },
+    "body_hive": {
+      "frame_min": [
+        -19,
+        9,
+        -18
+      ],
+      "frame_size": [
+        38,
+        40,
+        46
+      ],
+      "glow": true
+    },
+    "body_molten": {
+      "frame_min": [
+        -19,
+        9,
+        -18
+      ],
+      "frame_size": [
+        38,
+        40,
+        46
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -19,
+        9,
+        -18
+      ],
+      "frame_size": [
+        38,
+        40,
+        46
+      ],
+      "glow": true
+    },
+    "leg_l_1": {
+      "frame_min": [
+        -7,
+        -12,
+        -7
+      ],
+      "frame_size": [
+        12,
+        14,
+        12
+      ]
+    },
+    "leg_r_1": {
+      "frame_min": [
+        -4,
+        -12,
+        -7
+      ],
+      "frame_size": [
+        11,
+        14,
+        12
+      ]
+    },
+    "leg_r_0": {
+      "frame_min": [
+        -4,
+        -12,
+        -7
+      ],
+      "frame_size": [
+        11,
+        14,
+        12
+      ]
+    },
+    "head_molten": {
+      "frame_min": [
+        -11,
+        -11,
+        -7
+      ],
+      "frame_size": [
+        22,
+        25,
+        13
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -11,
+        -11,
+        -7
+      ],
+      "frame_size": [
+        22,
+        25,
+        13
+      ],
+      "glow": true
+    },
+    "head_hive": {
+      "frame_min": [
+        -11,
+        -11,
+        -7
+      ],
+      "frame_size": [
+        22,
+        25,
+        13
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -10,
+        -16,
+        -8
+      ],
+      "frame_size": [
+        12,
+        19,
+        12
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0.0,
+        43.0,
+        -14.0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_0": {
+      "part": "leg_l_0",
+      "pivot": [
+        -13.0,
+        12.0,
+        -10.0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_1": {
+      "part": "leg_l_1",
+      "pivot": [
+        -13.0,
+        12.0,
+        17.0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -15.0,
+        33.0,
+        -10.0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r_0": {
+      "part": "leg_r_0",
+      "pivot": [
+        13.0,
+        12.0,
+        -10.0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_r_1": {
+      "part": "leg_r_1",
+      "pivot": [
+        13.0,
+        12.0,
+        17.0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        15.0,
+        33.0,
+        -10.0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {
+    "molten": {
+      "body": "body_molten",
+      "head": "head_molten"
+    },
+    "hive": {
+      "body": "body_hive",
+      "head": "head_hive"
+    }
+  },
+  "hand": [
+    0.0,
+    38.0,
+    -20.0
+  ],
+  "hover": 0,
+  "bob": 0.035,
+  "waddle": 0.025,
+  "flap_rate": 2.2,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.6,
+  "design_grid": [
+    64,
+    64,
+    64
+  ],
+  "upscale": 1,
+  "height_m": 9.0,
+  "animation_style": "xeno_queen"
+}

@@ -1,0 +1,628 @@
+{
+  "voxel_size": 0.031746031746031744,
+  "parts": {
+    "arm_r": {
+      "frame_min": [
+        -12,
+        -72,
+        -44
+      ],
+      "frame_size": [
+        48,
+        80,
+        60
+      ]
+    },
+    "robe_tail_1_1_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "robe_tail_1_1": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ]
+    },
+    "body_eclipse": {
+      "frame_min": [
+        -52,
+        52,
+        -48
+      ],
+      "frame_size": [
+        104,
+        128,
+        88
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -52,
+        52,
+        -48
+      ],
+      "frame_size": [
+        104,
+        128,
+        88
+      ],
+      "glow": true
+    },
+    "body_void": {
+      "frame_min": [
+        -52,
+        52,
+        -48
+      ],
+      "frame_size": [
+        104,
+        128,
+        88
+      ],
+      "glow": true
+    },
+    "robe_tail_1_0_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        24,
+        36,
+        24
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "robe_tail_1_0": {
+      "frame_min": [
+        -12,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        24,
+        36,
+        24
+      ]
+    },
+    "robe_tail_1_2": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ]
+    },
+    "robe_tail_1_2_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -32,
+        -72,
+        -44
+      ],
+      "frame_size": [
+        44,
+        80,
+        60
+      ]
+    },
+    "robe_tail_0_1_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "robe_tail_0_1": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ]
+    },
+    "robe_tail_2_1": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ]
+    },
+    "robe_tail_2_1_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "robe_tail_2_0_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        24,
+        36,
+        24
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "robe_tail_2_0": {
+      "frame_min": [
+        -12,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        24,
+        36,
+        24
+      ]
+    },
+    "robe_tail_2_2": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ]
+    },
+    "robe_tail_2_2_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "orrery_0_void": {
+      "frame_min": [
+        -104,
+        -40,
+        -104
+      ],
+      "frame_size": [
+        208,
+        80,
+        208
+      ],
+      "glow": true
+    },
+    "orrery_0": {
+      "frame_min": [
+        -104,
+        -40,
+        -104
+      ],
+      "frame_size": [
+        208,
+        80,
+        208
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -56,
+        -44,
+        -28
+      ],
+      "frame_size": [
+        116,
+        116,
+        52
+      ],
+      "glow": true
+    },
+    "head_eclipse": {
+      "frame_min": [
+        -56,
+        -44,
+        -28
+      ],
+      "frame_size": [
+        116,
+        116,
+        52
+      ],
+      "glow": true
+    },
+    "head_void": {
+      "frame_min": [
+        -56,
+        -44,
+        -28
+      ],
+      "frame_size": [
+        116,
+        116,
+        52
+      ],
+      "glow": true
+    },
+    "orrery_1": {
+      "frame_min": [
+        -92,
+        -40,
+        -92
+      ],
+      "frame_size": [
+        188,
+        80,
+        188
+      ],
+      "glow": true
+    },
+    "orrery_1_void": {
+      "frame_min": [
+        -92,
+        -40,
+        -92
+      ],
+      "frame_size": [
+        188,
+        80,
+        188
+      ],
+      "glow": true
+    },
+    "robe_tail_0_0_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        24,
+        36,
+        24
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "robe_tail_0_0": {
+      "frame_min": [
+        -12,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        24,
+        36,
+        24
+      ]
+    },
+    "robe_tail_0_2_eclipse": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ],
+      "solid": false,
+      "glow": true
+    },
+    "robe_tail_0_2": {
+      "frame_min": [
+        -12,
+        -28,
+        -4
+      ],
+      "frame_size": [
+        24,
+        32,
+        16
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        184,
+        -8
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -40,
+        152,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        40,
+        152,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "robe_tail_0_0": {
+      "part": "robe_tail_0_0",
+      "pivot": [
+        -24,
+        80,
+        16
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "robe_tail_0_1": {
+      "part": "robe_tail_0_1",
+      "pivot": [
+        0,
+        -24,
+        8
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "robe_tail_0_0"
+    },
+    "robe_tail_0_2": {
+      "part": "robe_tail_0_2",
+      "pivot": [
+        0,
+        -24,
+        8
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "robe_tail_0_1"
+    },
+    "robe_tail_1_0": {
+      "part": "robe_tail_1_0",
+      "pivot": [
+        0,
+        80,
+        16
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "robe_tail_1_1": {
+      "part": "robe_tail_1_1",
+      "pivot": [
+        0,
+        -24,
+        8
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "robe_tail_1_0"
+    },
+    "robe_tail_1_2": {
+      "part": "robe_tail_1_2",
+      "pivot": [
+        0,
+        -24,
+        8
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "robe_tail_1_1"
+    },
+    "robe_tail_2_0": {
+      "part": "robe_tail_2_0",
+      "pivot": [
+        24,
+        80,
+        16
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "robe_tail_2_1": {
+      "part": "robe_tail_2_1",
+      "pivot": [
+        0,
+        -24,
+        8
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "robe_tail_2_0"
+    },
+    "robe_tail_2_2": {
+      "part": "robe_tail_2_2",
+      "pivot": [
+        0,
+        -24,
+        8
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "robe_tail_2_1"
+    },
+    "orrery_0": {
+      "part": "orrery_0",
+      "pivot": [
+        0,
+        116,
+        0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "orrery_1": {
+      "part": "orrery_1",
+      "pivot": [
+        0,
+        136,
+        0
+      ],
+      "role": "",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {
+    "eclipse": {
+      "body": "body_eclipse",
+      "head": "head_eclipse",
+      "robe_tail_0_0": "robe_tail_0_0_eclipse",
+      "robe_tail_0_1": "robe_tail_0_1_eclipse",
+      "robe_tail_0_2": "robe_tail_0_2_eclipse",
+      "robe_tail_1_0": "robe_tail_1_0_eclipse",
+      "robe_tail_1_1": "robe_tail_1_1_eclipse",
+      "robe_tail_1_2": "robe_tail_1_2_eclipse",
+      "robe_tail_2_0": "robe_tail_2_0_eclipse",
+      "robe_tail_2_1": "robe_tail_2_1_eclipse",
+      "robe_tail_2_2": "robe_tail_2_2_eclipse"
+    },
+    "void": {
+      "body": "body_void",
+      "head": "head_void",
+      "orrery_0": "orrery_0_void",
+      "orrery_1": "orrery_1_void"
+    }
+  },
+  "hand": [
+    0,
+    152,
+    -80
+  ],
+  "hover": 0,
+  "bob": 0.035,
+  "waddle": 0.025,
+  "flap_rate": 2.2,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.6,
+  "design_grid": [
+    64,
+    64,
+    64
+  ],
+  "upscale": 4,
+  "height_m": 8.0,
+  "animation_style": "wraith"
+}

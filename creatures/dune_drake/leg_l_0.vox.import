@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chiarwx7ggx6m"
+path="res://.godot/imported/leg_l_0.vox-8d89ac36c40c83f7b4bbf1d9078997ef.tscn"
+
+[deps]
+
+source_file="res://creatures/dune_drake/leg_l_0.vox"
+dest_files=["res://.godot/imported/leg_l_0.vox-8d89ac36c40c83f7b4bbf1d9078997ef.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

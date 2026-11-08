@@ -1,0 +1,292 @@
+{
+  "voxel_size": 0.140625,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -6,
+        4,
+        -9
+      ],
+      "frame_size": [
+        12,
+        14,
+        18
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -7,
+        -5,
+        -5
+      ],
+      "frame_size": [
+        14,
+        16,
+        9
+      ],
+      "glow": true
+    },
+    "leg_l_0": {
+      "frame_min": [
+        -3,
+        -6,
+        -3
+      ],
+      "frame_size": [
+        5,
+        8,
+        5
+      ]
+    },
+    "leg_l_1": {
+      "frame_min": [
+        -3,
+        -6,
+        -3
+      ],
+      "frame_size": [
+        5,
+        8,
+        5
+      ]
+    },
+    "leg_r_0": {
+      "frame_min": [
+        0,
+        -6,
+        -3
+      ],
+      "frame_size": [
+        4,
+        8,
+        5
+      ]
+    },
+    "leg_r_1": {
+      "frame_min": [
+        0,
+        -6,
+        -3
+      ],
+      "frame_size": [
+        4,
+        8,
+        5
+      ]
+    },
+    "wing_l": {
+      "frame_min": [
+        -3,
+        0,
+        0
+      ],
+      "frame_size": [
+        4,
+        8,
+        9
+      ],
+      "glow": true
+    },
+    "wing_r": {
+      "frame_min": [
+        0,
+        0,
+        0
+      ],
+      "frame_size": [
+        4,
+        8,
+        9
+      ],
+      "glow": true
+    },
+    "tail_0": {
+      "frame_min": [
+        -1,
+        -2,
+        -1
+      ],
+      "frame_size": [
+        6,
+        4,
+        5
+      ]
+    },
+    "tail_1": {
+      "frame_min": [
+        -1,
+        -1,
+        -1
+      ],
+      "frame_size": [
+        6,
+        5,
+        4
+      ]
+    },
+    "tail_2": {
+      "frame_min": [
+        -1,
+        0,
+        0
+      ],
+      "frame_size": [
+        5,
+        5,
+        2
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        21,
+        -5
+      ],
+      "role": "sway",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "leg_l_0": {
+      "part": "leg_l_0",
+      "pivot": [
+        -4,
+        6,
+        -5
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "x"
+    },
+    "leg_l_1": {
+      "part": "leg_l_1",
+      "pivot": [
+        -4,
+        6,
+        5
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "x"
+    },
+    "leg_r_0": {
+      "part": "leg_r_0",
+      "pivot": [
+        4,
+        6,
+        -5
+      ],
+      "role": "leg",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "x"
+    },
+    "leg_r_1": {
+      "part": "leg_r_1",
+      "pivot": [
+        4,
+        6,
+        5
+      ],
+      "role": "leg",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false,
+      "amount": 0.55,
+      "axis": "x"
+    },
+    "wing_l": {
+      "part": "wing_l",
+      "pivot": [
+        -5,
+        12,
+        -2
+      ],
+      "role": "wing",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "wing_r": {
+      "part": "wing_r",
+      "pivot": [
+        5,
+        12,
+        -2
+      ],
+      "role": "wing",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "tail_0": {
+      "part": "tail_0",
+      "pivot": [
+        0,
+        8,
+        7
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "tail_1": {
+      "part": "tail_1",
+      "pivot": [
+        2,
+        -1,
+        3
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "tail_0"
+    },
+    "tail_2": {
+      "part": "tail_2",
+      "pivot": [
+        2,
+        1,
+        2
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "tail_1"
+    }
+  },
+  "hand": [
+    0,
+    24,
+    -10
+  ],
+  "bob": 0.018,
+  "waddle": 0.06,
+  "hover": 0,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.4,
+  "flap_rate": 0.8
+}

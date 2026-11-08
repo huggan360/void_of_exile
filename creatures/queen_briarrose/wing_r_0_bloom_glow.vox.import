@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c3rew3qi4so4c"
+path="res://.godot/imported/wing_r_0_bloom_glow.vox-d5b4c79b48b6b17c8019be92768e4d1d.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_briarrose/wing_r_0_bloom_glow.vox"
+dest_files=["res://.godot/imported/wing_r_0_bloom_glow.vox-d5b4c79b48b6b17c8019be92768e4d1d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

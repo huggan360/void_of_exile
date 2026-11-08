@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b8o86qk81m3q8"
+path="res://.godot/imported/arm_l_glow.vox-6353fa7541af4e34a9d7d9947d185936.tscn"
+
+[deps]
+
+source_file="res://creatures/moss_glimmer/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-6353fa7541af4e34a9d7d9947d185936.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

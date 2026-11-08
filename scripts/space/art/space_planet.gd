@@ -44,6 +44,14 @@ func build(planet: Dictionary, server: bool) -> void:
 	add_child(terrain)
 	terrain.setup(planet)
 	_air()
+	if planet.get("city", false):
+		# Vesperis: the whole world is the city (streets, towers, ports, people).
+		var city := CityPlanet.new()
+		city.name = "City"
+		city.world = get_parent() as SpaceWorld
+		add_child(city)
+		city.build()
+		return
 	_landing()
 	for i in names.size():
 		var place := Node3D.new()

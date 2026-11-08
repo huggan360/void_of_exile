@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0ti1iu4a03b8"
+path="res://.godot/imported/model.vox-2929aa2272fe26742c95ab82b9228d12.tscn"
+
+[deps]
+
+source_file="res://creatures/city_noodle_cook/model.vox"
+dest_files=["res://.godot/imported/model.vox-2929aa2272fe26742c95ab82b9228d12.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

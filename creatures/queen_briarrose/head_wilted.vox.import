@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b7rv6l48e26t4"
+path="res://.godot/imported/head_wilted.vox-92e16fc35ddfad7664c2d0087c6a9b5b.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_briarrose/head_wilted.vox"
+dest_files=["res://.godot/imported/head_wilted.vox-92e16fc35ddfad7664c2d0087c6a9b5b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

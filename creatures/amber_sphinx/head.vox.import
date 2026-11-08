@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bf3j7ik34a5lb"
+path="res://.godot/imported/head.vox-9280686c951bdf507a8dca0c6ca44714.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_sphinx/head.vox"
+dest_files=["res://.godot/imported/head.vox-9280686c951bdf507a8dca0c6ca44714.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

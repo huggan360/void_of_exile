@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cctiu6q146r3g"
+path="res://.godot/imported/arm_r_glow.vox-50f0e8607bff88344c0369a00fc1d4df.tscn"
+
+[deps]
+
+source_file="res://creatures/leviathan_herald/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-50f0e8607bff88344c0369a00fc1d4df.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

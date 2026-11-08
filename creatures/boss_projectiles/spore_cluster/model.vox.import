@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dycwjvj0sxv1e"
+path="res://.godot/imported/model.vox-dff3f800ef1738f5e5006f2698cfe954.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/spore_cluster/model.vox"
+dest_files=["res://.godot/imported/model.vox-dff3f800ef1738f5e5006f2698cfe954.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

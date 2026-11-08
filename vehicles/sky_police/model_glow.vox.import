@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://davhaph7s3gjy"
+path="res://.godot/imported/model_glow.vox-345d316b7c014350df15a3353c6e41cf.tscn"
+
+[deps]
+
+source_file="res://vehicles/sky_police/model_glow.vox"
+dest_files=["res://.godot/imported/model_glow.vox-345d316b7c014350df15a3353c6e41cf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

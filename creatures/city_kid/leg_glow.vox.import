@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d15ypah4cb5on"
+path="res://.godot/imported/leg_glow.vox-deb5b8438dbbfd8b5e7bdec48086253e.tscn"
+
+[deps]
+
+source_file="res://creatures/city_kid/leg_glow.vox"
+dest_files=["res://.godot/imported/leg_glow.vox-deb5b8438dbbfd8b5e7bdec48086253e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkkwg5aqc5nh"
+path="res://.godot/imported/head.vox-aa0e0ddb54a5c01c5239fba2df2d9c8a.tscn"
+
+[deps]
+
+source_file="res://creatures/fungal_brute/head.vox"
+dest_files=["res://.godot/imported/head.vox-aa0e0ddb54a5c01c5239fba2df2d9c8a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

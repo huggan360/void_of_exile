@@ -1,0 +1,214 @@
+[
+  {
+    "id": "spore_drone",
+    "display_name": "Spore Drone",
+    "biome": "Mawgrave",
+    "folder": "creatures/spore_drone",
+    "status": "live",
+    "height_m": 0.8,
+    "voxel_size": 0.1142857142857143,
+    "parts": [
+      "body",
+      "head",
+      "wing_l",
+      "arm_l",
+      "wing_r",
+      "arm_r"
+    ],
+    "behavior": "orbit",
+    "glow": true,
+    "god": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1
+  },
+  {
+    "id": "hive_tender",
+    "display_name": "Hive Tender",
+    "biome": "Mawgrave",
+    "folder": "creatures/hive_tender",
+    "status": "live",
+    "height_m": 1.4,
+    "voxel_size": 0.10769230769230768,
+    "parts": [
+      "body",
+      "head",
+      "leg_l_0",
+      "leg_l_1",
+      "arm_l",
+      "leg_r_0",
+      "leg_r_1",
+      "arm_r"
+    ],
+    "behavior": "skirmish",
+    "glow": false,
+    "god": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1
+  },
+  {
+    "id": "fungal_brute",
+    "display_name": "Fungal Brute",
+    "biome": "Mawgrave",
+    "folder": "creatures/fungal_brute",
+    "status": "live",
+    "height_m": 2.8,
+    "voxel_size": 0.09655172413793103,
+    "parts": [
+      "body",
+      "head",
+      "leg_l",
+      "arm_l",
+      "leg_r",
+      "arm_r"
+    ],
+    "behavior": "chase",
+    "glow": false,
+    "god": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1
+  },
+  {
+    "id": "hive_mother",
+    "display_name": "The Hive Mother",
+    "biome": "Mawgrave",
+    "folder": "creatures/hive_mother",
+    "status": "live",
+    "height_m": 4.5,
+    "voxel_size": 0.017578125,
+    "parts": [
+      "head",
+      "arm_r_0",
+      "arm_l_1",
+      "arm_l_2",
+      "jaw",
+      "arm_r_1",
+      "arm_r_2",
+      "body",
+      "arm_l_0"
+    ],
+    "behavior": "stationary",
+    "glow": true,
+    "god": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  },
+  {
+    "id": "storm_shard",
+    "display_name": "Storm Shard",
+    "biome": "The Pale Eye",
+    "folder": "creatures/storm_shard",
+    "status": "live",
+    "height_m": 1.0,
+    "voxel_size": 0.06666666666666667,
+    "parts": [
+      "body",
+      "spark_l",
+      "spark_r"
+    ],
+    "behavior": "dart",
+    "glow": true,
+    "god": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1
+  },
+  {
+    "id": "obsidian_knight",
+    "display_name": "Obsidian Knight",
+    "biome": "The Pale Eye",
+    "folder": "creatures/obsidian_knight",
+    "status": "live",
+    "height_m": 2.2,
+    "voxel_size": 0.07333333333333333,
+    "parts": [
+      "body",
+      "head",
+      "leg_l",
+      "arm_l",
+      "leg_r",
+      "arm_r"
+    ],
+    "behavior": "chase",
+    "glow": false,
+    "god": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1
+  },
+  {
+    "id": "eye_watcher",
+    "display_name": "Eye Watcher",
+    "biome": "The Pale Eye",
+    "folder": "creatures/eye_watcher",
+    "status": "live",
+    "height_m": 1.8,
+    "voxel_size": 0.1285714285714286,
+    "parts": [
+      "body",
+      "iris",
+      "petal_0",
+      "petal_1",
+      "petal_2",
+      "petal_3",
+      "petal_4",
+      "petal_5"
+    ],
+    "behavior": "stationary",
+    "glow": true,
+    "god": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1
+  },
+  {
+    "id": "storm_warden",
+    "display_name": "The Storm Warden",
+    "biome": "The Pale Eye",
+    "folder": "creatures/storm_warden",
+    "status": "live",
+    "height_m": 4.5,
+    "voxel_size": 0.018145161290322582,
+    "parts": [
+      "head",
+      "arm_l",
+      "leg_l",
+      "body",
+      "leg_r",
+      "arm_r"
+    ],
+    "behavior": "strafe",
+    "glow": true,
+    "god": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8
+  }
+]

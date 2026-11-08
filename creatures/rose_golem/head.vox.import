@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://6xwtc38xby3b"
+path="res://.godot/imported/head.vox-eb3474c34d87ef8b14e9c2115756ad05.tscn"
+
+[deps]
+
+source_file="res://creatures/rose_golem/head.vox"
+dest_files=["res://.godot/imported/head.vox-eb3474c34d87ef8b14e9c2115756ad05.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0vr5dc8h0rve"
+path="res://.godot/imported/tentacle_r_1_1.vox-b6ed98c8117f9b6bf832a19bf534da86.tscn"
+
+[deps]
+
+source_file="res://creatures/kelp_horror/tentacle_r_1_1.vox"
+dest_files=["res://.godot/imported/tentacle_r_1_1.vox-b6ed98c8117f9b6bf832a19bf534da86.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

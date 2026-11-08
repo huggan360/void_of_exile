@@ -1,0 +1,284 @@
+{
+  "planet": "Vesperis, the Lantern City",
+  "generator": "tools/make_city_vehicles.py",
+  "coordinates": "Game XYZ, Y up, front -Z; VOX file axes are ZXY",
+  "origin": "Centered X/Z, bottom Y=0. Shared base/glow frame_min is in game voxels.",
+  "vehicles": [
+    {
+      "id": "sky_taxi",
+      "description": "Amber checker taxi with bubble canopy",
+      "folder": "vehicles/sky_taxi",
+      "voxel_size": 0.09782608695652174,
+      "length_m": 4.5,
+      "width_m": 1.9565217391304348,
+      "height_m": 2.0543478260869565,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -10,
+        0,
+        -23
+      ],
+      "frame_size": [
+        20,
+        21,
+        46
+      ],
+      "solid_voxels": 7262,
+      "glow_voxels": 3032
+    },
+    {
+      "id": "sky_sedan",
+      "description": "Rose bubble sedan with brass ribs",
+      "folder": "vehicles/sky_sedan",
+      "voxel_size": 0.09782608695652174,
+      "length_m": 4.5,
+      "width_m": 1.9565217391304348,
+      "height_m": 1.7608695652173914,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -10,
+        0,
+        -23
+      ],
+      "frame_size": [
+        20,
+        18,
+        46
+      ],
+      "solid_voxels": 7094,
+      "glow_voxels": 3042
+    },
+    {
+      "id": "sky_sports",
+      "description": "Teal coupe with swept rear fins",
+      "folder": "vehicles/sky_sports",
+      "voxel_size": 0.1,
+      "length_m": 4.2,
+      "width_m": 2.4000000000000004,
+      "height_m": 1.8,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -12,
+        0,
+        -21
+      ],
+      "frame_size": [
+        24,
+        18,
+        42
+      ],
+      "solid_voxels": 6845,
+      "glow_voxels": 2652
+    },
+    {
+      "id": "sky_police",
+      "description": "Cream patrol car with blue and warm lanterns",
+      "folder": "vehicles/sky_police",
+      "voxel_size": 0.09999999999999999,
+      "length_m": 4.6,
+      "width_m": 1.9999999999999998,
+      "height_m": 2.4,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -10,
+        0,
+        -23
+      ],
+      "frame_size": [
+        20,
+        24,
+        46
+      ],
+      "solid_voxels": 7238,
+      "glow_voxels": 3098
+    },
+    {
+      "id": "sky_van",
+      "description": "Violet delivery van with parcel pictograms",
+      "folder": "vehicles/sky_van",
+      "voxel_size": 0.09821428571428571,
+      "length_m": 5.5,
+      "width_m": 2.5535714285714284,
+      "height_m": 2.6517857142857144,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -13,
+        0,
+        -28
+      ],
+      "frame_size": [
+        26,
+        27,
+        56
+      ],
+      "solid_voxels": 32190,
+      "glow_voxels": 718
+    },
+    {
+      "id": "sky_bus",
+      "description": "Double-deck teal sky tram with warm window rows",
+      "folder": "vehicles/sky_bus",
+      "voxel_size": 0.1,
+      "length_m": 12.0,
+      "width_m": 2.6,
+      "height_m": 3.6,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -13,
+        0,
+        -60
+      ],
+      "frame_size": [
+        26,
+        36,
+        120
+      ],
+      "solid_voxels": 94502,
+      "glow_voxels": 1850
+    },
+    {
+      "id": "sky_hauler",
+      "description": "Mint cargo tug with suspended timber crate",
+      "folder": "vehicles/sky_hauler",
+      "voxel_size": 0.1,
+      "length_m": 10.0,
+      "width_m": 2.6,
+      "height_m": 4.9,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -13,
+        0,
+        -50
+      ],
+      "frame_size": [
+        26,
+        49,
+        100
+      ],
+      "solid_voxels": 51710,
+      "glow_voxels": 550
+    },
+    {
+      "id": "sky_bike",
+      "description": "Teal hover bike with empty plum seat",
+      "folder": "vehicles/sky_bike",
+      "voxel_size": 0.09999999999999999,
+      "length_m": 2.4,
+      "width_m": 1.2,
+      "height_m": 1.4999999999999998,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -6,
+        0,
+        -12
+      ],
+      "frame_size": [
+        12,
+        15,
+        24
+      ],
+      "solid_voxels": 1107,
+      "glow_voxels": 72
+    },
+    {
+      "id": "sky_gondola",
+      "description": "Rose cream and violet balloon with lantern gondola",
+      "folder": "vehicles/sky_gondola",
+      "voxel_size": 0.1,
+      "length_m": 6.0,
+      "width_m": 3.2,
+      "height_m": 5.9,
+      "kind": "sky",
+      "front": "-z",
+      "frame_min": [
+        -16,
+        0,
+        -30
+      ],
+      "frame_size": [
+        32,
+        59,
+        60
+      ],
+      "solid_voxels": 44664,
+      "glow_voxels": 152
+    },
+    {
+      "id": "ground_cab",
+      "description": "Rounded mint street cab with brass wheel hubs",
+      "folder": "vehicles/ground_cab",
+      "voxel_size": 0.1,
+      "length_m": 4.0,
+      "width_m": 2.4000000000000004,
+      "height_m": 1.8,
+      "kind": "ground",
+      "front": "-z",
+      "frame_min": [
+        -12,
+        0,
+        -20
+      ],
+      "frame_size": [
+        24,
+        18,
+        40
+      ],
+      "solid_voxels": 6412,
+      "glow_voxels": 2296
+    },
+    {
+      "id": "ground_truck",
+      "description": "Rose food truck with striped glowing awning",
+      "folder": "vehicles/ground_truck",
+      "voxel_size": 0.1,
+      "length_m": 6.0,
+      "width_m": 3.4000000000000004,
+      "height_m": 3.3000000000000003,
+      "kind": "ground",
+      "front": "-z",
+      "frame_min": [
+        -17,
+        0,
+        -30
+      ],
+      "frame_size": [
+        34,
+        33,
+        60
+      ],
+      "solid_voxels": 35346,
+      "glow_voxels": 702
+    },
+    {
+      "id": "ground_tram",
+      "description": "Amber timber street tram with brass pantograph",
+      "folder": "vehicles/ground_tram",
+      "voxel_size": 0.1,
+      "length_m": 10.0,
+      "width_m": 3.0,
+      "height_m": 3.8000000000000003,
+      "kind": "ground",
+      "front": "-z",
+      "frame_min": [
+        -15,
+        0,
+        -50
+      ],
+      "frame_size": [
+        30,
+        38,
+        100
+      ],
+      "solid_voxels": 58516,
+      "glow_voxels": 854
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c21a7twqcgin2"
+path="res://.godot/imported/robe_tail_1_1.vox-4981f0d34d0284a4123d13d27d33c8fa.tscn"
+
+[deps]
+
+source_file="res://creatures/selenarch/source_64/robe_tail_1_1.vox"
+dest_files=["res://.godot/imported/robe_tail_1_1.vox-4981f0d34d0284a4123d13d27d33c8fa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

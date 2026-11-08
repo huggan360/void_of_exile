@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bnr57x0j27shl"
+path="res://.godot/imported/chip_0_glow.vox-dcfa758888e7a8beaaf6b107268a0678.tscn"
+
+[deps]
+
+source_file="res://creatures/shard_wisp/chip_0_glow.vox"
+dest_files=["res://.godot/imported/chip_0_glow.vox-dcfa758888e7a8beaaf6b107268a0678.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

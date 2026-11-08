@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7eel0ffheoog"
+path="res://.godot/imported/leg_r_1.vox-2fa8daa77c90aad62e0f9cead0f4af76.tscn"
+
+[deps]
+
+source_file="res://creatures/amber_colossus/source_64/leg_r_1.vox"
+dest_files=["res://.godot/imported/leg_r_1.vox-2fa8daa77c90aad62e0f9cead0f4af76.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

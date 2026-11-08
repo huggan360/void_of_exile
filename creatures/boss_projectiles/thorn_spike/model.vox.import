@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cn03svb44tp3x"
+path="res://.godot/imported/model.vox-6b4f18541f94a992a2d4962b1b3f8620.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/thorn_spike/model.vox"
+dest_files=["res://.godot/imported/model.vox-6b4f18541f94a992a2d4962b1b3f8620.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

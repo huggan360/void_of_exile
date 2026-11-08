@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d0vijnxiqa6hh"
+path="res://.godot/imported/shard_halo.vox-1238a386244d7b579f8a224d8f1349e8.tscn"
+
+[deps]
+
+source_file="res://creatures/heart_choir/source_32/shard_halo.vox"
+dest_files=["res://.godot/imported/shard_halo.vox-1238a386244d7b579f8a224d8f1349e8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

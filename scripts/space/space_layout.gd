@@ -38,37 +38,41 @@ const BOUNDARY_WARN := 2500.0
 ## it is. `terrain` shapes the ground: style, height (m), feature size (m).
 const PLANETS := [
 	{id = "verdance", name = "Verdance", region = "haven", center = Vector3(4200, 400, -3200), radius = 650.0,
-		pad = Vector3(-0.72, 0.3, 0.62), danger = 0, palette = ["3f9d4a", "8fd16a", "2c5d36", "f2d27a", "7fe8c7", "8fe0c0"],
+		pad = Vector3.UP, danger = 0, palette = ["3f9d4a", "8fd16a", "2c5d36", "f2d27a", "7fe8c7", "8fe0c0"],
 		terrain = {style = "hills", height = 46.0, size = 260.0},
 		about = "Mossy forest world: giant glowing mushrooms, treehouse villages, rope bridges, fireflies."},
 	{id = "rosamund", name = "Rosamund", region = "haven", center = Vector3(-4600, -700, 2200), radius = 520.0,
-		pad = Vector3(0.8, 0.25, -0.55), danger = 0, palette = ["e07fb5", "ffc6e2", "8a3f78", "8de0ff", "fff3b0", "ffb8de"],
+		pad = Vector3.UP, danger = 0, palette = ["e07fb5", "ffc6e2", "8a3f78", "8de0ff", "fff3b0", "ffb8de"],
 		terrain = {style = "terraces", height = 38.0, size = 210.0},
 		about = "Pink crystal meadows, candy-coloured trees, fairy shrines and floating petals."},
 	{id = "amberfall", name = "Amberfall", region = "haven", center = Vector3(2800, 900, 7400), radius = 760.0,
-		pad = Vector3(-0.3, 0.2, -0.93), danger = 1, palette = ["b07a34", "d9a85a", "6a3e18", "5fd18a", "fff0c8", "ffc27a"],
+		pad = Vector3.UP, danger = 1, palette = ["b07a34", "d9a85a", "6a3e18", "5fd18a", "fff0c8", "ffc27a"],
 		terrain = {style = "dunes", height = 42.0, size = 170.0},
 		about = "Amber dunes, honey lakes, lantern towers and a sleepy desert market."},
 	{id = "tidewell", name = "Tidewell", region = "haven", center = Vector3(-7400, 500, 8600), radius = 900.0,
-		pad = Vector3(0.62, 0.3, -0.72), danger = 1, palette = ["2f86c9", "7fd6e8", "e8d6a0", "3f9d6a", "ffffff", "8ad2ff"],
+		pad = Vector3.UP, danger = 1, palette = ["2f86c9", "7fd6e8", "e8d6a0", "3f9d6a", "ffffff", "8ad2ff"],
 		terrain = {style = "islands", height = 34.0, size = 240.0, sea = true},
 		about = "Ocean world: an archipelago of small islands, a lighthouse and a fishing village on stilts."},
 	{id = "shardheart", name = "Shardheart", region = "shardfield", center = Vector3(3600, 0, 18800), radius = 300.0,
-		pad = Vector3(-0.5, 0.4, -0.77), danger = 2, palette = ["3a8a7a", "8af0d8", "1a2a34", "ff8ae0", "1a2030", "6af0c8"],
+		pad = Vector3.UP, danger = 2, palette = ["3a8a7a", "8af0d8", "1a2a34", "ff8ae0", "1a2030", "6af0c8"],
 		terrain = {style = "crystal", height = 30.0, size = 90.0},
 		about = "A hollow crystal planetoid hidden inside the Shardfield, humming and half-alive."},
 	{id = "hollowmoon", name = "Hollowmoon", region = "gloam", center = Vector3(-4200, 800, 26000), radius = 640.0,
-		pad = Vector3(0.4, 0.3, -0.87), danger = 2, palette = ["7d818e", "b8b4a8", "3a3d48", "7dff6a", "1a1a22", "4a5a52"],
+		pad = Vector3.UP, danger = 2, palette = ["7d818e", "b8b4a8", "3a3d48", "7dff6a", "1a1a22", "4a5a52"],
 		terrain = {style = "craters", height = 44.0, size = 150.0},
 		about = "A dead grey moon: bone forests, a ruined observatory, cold green ghost-lights."},
 	{id = "mawgrave", name = "Mawgrave", region = "gloam", center = Vector3(5600, -900, 30500), radius = 950.0,
-		pad = Vector3(-0.55, 0.35, -0.76), danger = 3, palette = ["4a2a5a", "8a4aa0", "1a0f22", "ff5fd2", "7dff6a", "6a3a7a"],
+		pad = Vector3.UP, danger = 3, palette = ["4a2a5a", "8a4aa0", "1a0f22", "ff5fd2", "7dff6a", "6a3a7a"],
 		terrain = {style = "fungal", height = 46.0, size = 260.0},
 		about = "Rotting violet fungal planet; the brood's hives swell out of the ground."},
 	{id = "pale_eye", name = "The Pale Eye", region = "gloam", center = Vector3(-600, 1800, 35500), radius = 1300.0,
-		pad = Vector3(0.1, 0.3, -0.95), danger = 3, palette = ["4a5266", "a8b0c4", "14161e", "9ab0ff", "ff4a5a", "8090b8"],
+		pad = Vector3.UP, danger = 3, palette = ["4a5266", "a8b0c4", "14161e", "9ab0ff", "ff4a5a", "8090b8"],
 		terrain = {style = "spires", height = 110.0, size = 230.0},
 		about = "Storm planet with a vast eye-shaped storm; obsidian spires and the end of the map."},
+	{id = "vesperis", name = "Vesperis", region = "haven", center = Vector3(-2400, 700, -6600), radius = 1000.0,
+		pad = Vector3.UP, danger = 0, palette = ["2c2638", "ffb86a", "1a1626", "ff6eb4", "6af0e0", "594362"],
+		terrain = {style = "city", height = 0.0, size = 200.0}, city = true,
+		about = "The Lantern City: one city around the whole world, at eternal dusk. Three spaceports, peaceful."},
 ]
 
 ## Named story places on each planet (campaign search spots and npcs), as
@@ -82,6 +86,7 @@ const PLACES := {
 	"hollowmoon": ["observatory_ruin", "bone_forest", "ghost_lanterns", "fallen_astrolabe"],
 	"mawgrave": ["brood_hive", "spore_garden", "fungal_altar", "hollow_nest"],
 	"pale_eye": ["obsidian_crown", "storm_observatory", "eye_shrine", "last_beacon"],
+	"vesperis": [],
 }
 const PLACE_OFFSETS: Array[Vector2] = [Vector2(-46, -36), Vector2(56, -34), Vector2(-60, 62), Vector2(50, 92)]
 ## Each planet's town (offsets from the pad like the places): its plaza, the
@@ -110,6 +115,19 @@ const TOWN_OFFSET := Vector2(0, 180)
 const TOWN_RADIUS := 44.0
 const DOCK_OFFSET := Vector2(0, 268)
 const TOWN_SPOTS := {smith = Vector2(-13, 9), wright = Vector2(-20, 0), center = Vector2.ZERO}
+## The boss strongholds (PlanetStrongholds): a walled fortress on a level
+## terrace cut into the planet's top, FORT_OFFSET from the pad (opposite the
+## town), sealed until its key is turned; the boss waits inside.
+const FORTS := {
+	rosamund = {name = "The Rose Bastion", key = "key_rose_bastion", boss = "queen_briarrose", style = "rose"},
+	amberfall = {name = "The Amber Ziggurat", key = "key_amber_ziggurat", boss = "amber_colossus", style = "amber"},
+	hollowmoon = {name = "The Shattered Observatory", key = "key_shattered_observatory", boss = "selenarch", style = "moon"},
+	mawgrave = {name = "The Rotting Hive", key = "key_rotting_hive", boss = "brood_matriarch", style = "hive"},
+	pale_eye = {name = "The Stormeye Citadel", key = "key_stormeye_citadel", boss = "stormeye_tyrant", style = "storm"},
+}
+const FORT_OFFSET := Vector2(0, -125)
+const FORT_FLAT := 56.0  # level ground around the fortress centre (m, past the corner towers), then FORT_BLEND
+const FORT_BLEND := 40.0
 ## Flat ground kept around the pad and each place (arc metres), then a blend.
 const PAD_FLAT := 34.0
 const PLACE_FLAT := 22.0
@@ -131,18 +149,44 @@ static func region_at(position: Vector3) -> String:
 static func region_name(id: String) -> String:
 	return {haven = "The Haven", shardfield = "The Shardfield", gloam = "The Gloam"}.get(id, "Deep space")
 
+## Every pad sits on top of its world, so the ground around it faces up and
+## realm combat (enemies, bullets, arrows: all "up is +Y") works there. The
+## cap within this angle of the top is where planet enemies live.
+const COMBAT_CAP := 0.42
+
+## The planet whose top cap lies under x/z (world), or {}.
+static func cap_planet(x: float, z: float) -> Dictionary:
+	for p: Dictionary in PLANETS:
+		var c: Vector3 = p.center
+		var d := Vector2(x-c.x, z-c.z).length()
+		if d<float(p.radius)*0.75: return p
+	return {}
+
+## Ground height (world y) on a planet's top cap at x/z.
+static func cap_height(p: Dictionary, x: float, z: float) -> float:
+	var c: Vector3 = p.center
+	var r := float(p.radius)
+	var flat := Vector2(x-c.x, z-c.z)
+	var dir := Vector3(flat.x, sqrt(maxf(r*r-flat.length_squared(), 0.0)), flat.y).normalized()
+	var top := r+surface_height(p, dir)
+	# Again from the sphere at that height, closing in on the ground straight below x/z.
+	for i in 3:
+		dir = Vector3(flat.x, sqrt(maxf(top*top-flat.length_squared(), 0.0)), flat.y).normalized()
+		top = r+surface_height(p, dir)
+	return c.y+sqrt(maxf(top*top-flat.length_squared(), 0.0))
+
 ## Highest ground above the base radius, for broad checks.
 static func max_height(p: Dictionary) -> float:
 	return float(p.terrain.height)*1.25
 
 ## Height of a planet's air above its base radius (its sky starts below it).
 static func air_height(p: Dictionary) -> float:
-	return float(p.radius)*0.12+max_height(p)
+	return 320.0 if p.get("city", false) else float(p.radius)*0.12+max_height(p)
 
 ## The planet whose gravity holds `position` (within `margin` of its highest ground).
 static func planet_near(position: Vector3, margin := 60.0) -> Dictionary:
 	for p: Dictionary in PLANETS:
-		if position.distance_to(p.center)<float(p.radius)+max_height(p)+margin: return p
+		if position.distance_to(p.center)<float(p.radius)+maxf(max_height(p), 260.0 if p.get("city", false) else 0.0)+margin: return p
 	return {}
 
 ## Ground frame on a planet's pad (origin on the surface, basis.y = up).
@@ -176,8 +220,30 @@ static func _flat_spots(p: Dictionary) -> Array:
 		var tangent := (pad.basis.x*offset.x+pad.basis.z*offset.y).normalized()
 		var flat := TOWN_RADIUS+8.0 if offset==TOWN_OFFSET else PAD_FLAT if offset==DOCK_OFFSET else PLACE_FLAT
 		out.append([pad.basis.y*cos(distance/radius)+tangent*sin(distance/radius), flat])
+	if FORTS.has(id):
+		# Level (not following the sphere): [direction, radius, plane height above the centre].
+		var fort := place_frame_raw(p, FORT_OFFSET)
+		out.append([fort, FORT_FLAT, radius*fort.y])
 	_flats[id] = out
 	return out
+
+## The unit direction `offset` arc metres from the pad (no terrain needed).
+static func place_frame_raw(p: Dictionary, offset: Vector2) -> Vector3:
+	var pad := pad_frame(p)
+	var radius := float(p.radius)
+	var distance := offset.length()
+	if distance<0.001: return pad.basis.y
+	var tangent := (pad.basis.x*offset.x+pad.basis.z*offset.y).normalized()
+	return pad.basis.y*cos(distance/radius)+tangent*sin(distance/radius)
+
+## The planet's fortress frame (relative to the planet centre): level, Y up,
+## its main gate (-Z) facing the pad. Identity when it has none.
+static func fort_frame(p: Dictionary) -> Transform3D:
+	if not FORTS.has(p.id): return Transform3D()
+	var dir := place_frame_raw(p, FORT_OFFSET)
+	var toward := -Vector3(dir.x, 0, dir.z)
+	if toward.length()<0.001: toward = Vector3.FORWARD
+	return Transform3D(Basis.looking_at(toward.normalized(), Vector3.UP), dir*float(p.radius))
 
 static func _noise(p: Dictionary, layer: int) -> FastNoiseLite:
 	var key := "%s:%d" % [p.id, layer]
@@ -204,6 +270,7 @@ static func _noise(p: Dictionary, layer: int) -> FastNoiseLite:
 ## Raw terrain shape in metres before flattening.
 static func _shape(p: Dictionary, at: Vector3) -> float:
 	var t: Dictionary = p.terrain
+	if str(t.style)=="city": return 0.0  # streets: a perfect sphere
 	var height := float(t.height)
 	var fbm := _noise(p, 0).get_noise_3dv(at)
 	match str(t.style):
@@ -237,13 +304,23 @@ static func _shape(p: Dictionary, at: Vector3) -> float:
 ## Terrain height above the base radius along unit direction `dir` (metres).
 ## Zero on the pad and the story places, blending out to full terrain.
 static func surface_height(p: Dictionary, dir: Vector3) -> float:
+	if p.get("city", false): return 0.0
 	var radius := float(p.radius)
 	var raw := _shape(p, dir*radius)
 	var mask := 1.0
 	for flat: Array in _flat_spots(p):
+		if flat.size()>2: continue
 		var arc := acos(clampf(dir.dot(flat[0]), -1.0, 1.0))*radius
 		mask = minf(mask, smoothstep(float(flat[1]), float(flat[1])+FLAT_BLEND, arc))
-	return raw*mask
+	var h := raw*mask
+	for flat: Array in _flat_spots(p):
+		if flat.size()<3: continue
+		# A fortress terrace: a level plane, cut into the slope and built up below it.
+		var arc := acos(clampf(dir.dot(flat[0]), -1.0, 1.0))*radius
+		if arc>=float(flat[1])+FORT_BLEND or dir.y<0.2: continue
+		var level := float(flat[2])/dir.y-radius
+		h = lerpf(level, h, smoothstep(float(flat[1]), float(flat[1])+FORT_BLEND, arc))
+	return h
 
 ## World-space ground point below or above `position` on planet `p`.
 static func surface_point(p: Dictionary, position: Vector3) -> Vector3:

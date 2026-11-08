@@ -169,15 +169,15 @@ func _start_intro() -> void:
 	intro_serial += 1
 	if model.uses_articulated_intro(): model.boss_pose("awaken",intro_duration)
 	var ids: Array = []
-	var island := director.world as IslandWorld
-	if island: _gate_center = island.gates.center_for(encounter_center)
+	var gates := _gates()
+	if gates: _gate_center = gates.center_for(encounter_center)
 	for player: Node3D in director.players:
 		if not is_instance_valid(player) or player.frozen: continue
 		if player.global_position.distance_to(encounter_center)>boss_def.bar_radius: continue
-		if island and not island.gates.inside_arena(_gate_center,player.global_position): continue
+		if gates and not gates.inside_arena(_gate_center,player.global_position): continue
 		ids.append(player.player_id)
 	intro_players = GameServer.begin_boss_intro(encounter_id,director.realm_id,ids,intro_duration)
-	if island and boss_def.lock_gates: island.gates.request(_gate_center,true)
+	if gates and boss_def.lock_gates: gates.request(_gate_center,true)
 	CameraShake.shake_from(self, global_position, PHASE_SHAKE, boss_def.bar_radius)
 	model.flap()
 	var tw := create_tween()
@@ -882,8 +882,7 @@ func reset_attempt() -> void:
 	if Net.is_server():
 		Net.server.campaigns.boss_reset(self)
 	# Nobody is left fighting: the fortress seals again and needs a new key.
-	if is_instance_valid(director) and director.world is IslandWorld:
-		(director.world as IslandWorld).gates.seal(_gate_center)
+	if _gates(): _gates().seal(_gate_center)
 	_release_encounter()
 	_abandon = 0.0
 	despawn_support()
@@ -927,9 +926,14 @@ func reset_attempt() -> void:
 func _release_encounter() -> void:
 	GameServer.cancel_boss_intro(encounter_id)
 	intro_players.clear()
-	if is_instance_valid(director) and is_instance_valid(director.world) and director.world is IslandWorld:
-		var island := director.world as IslandWorld
-		if is_instance_valid(island.gates): island.gates.request(_gate_center,false)
+	if _gates(): _gates().request(_gate_center,false)
+
+
+## The fortress gates of this world (the realm's strongholds, the planets'), or null.
+func _gates() -> StrongholdGates:
+	if not is_instance_valid(director) or not is_instance_valid(director.world): return null
+	var gates: Variant = director.world.get("gates")
+	return gates if gates is StrongholdGates and is_instance_valid(gates) else null
 
 
 func _reset_hook() -> void:

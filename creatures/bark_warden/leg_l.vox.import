@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dbju0uj1qfsdn"
+path="res://.godot/imported/leg_l.vox-8f14c89c5c155719496d5afab410b449.tscn"
+
+[deps]
+
+source_file="res://creatures/bark_warden/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-8f14c89c5c155719496d5afab410b449.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

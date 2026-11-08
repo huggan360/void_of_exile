@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cg1rgaswh5ui0"
+path="res://.godot/imported/leg_l_glow.vox-8a92739005f05c1088228d2356795317.tscn"
+
+[deps]
+
+source_file="res://creatures/storm_warden/leg_l_glow.vox"
+dest_files=["res://.godot/imported/leg_l_glow.vox-8a92739005f05c1088228d2356795317.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

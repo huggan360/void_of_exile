@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dw7jgdhj7n4ba"
+path="res://.godot/imported/model.vox-b4326911a7022a3c91b8770453a3e143.tscn"
+
+[deps]
+
+source_file="res://props/city/sign_hotel/model.vox"
+dest_files=["res://.godot/imported/model.vox-b4326911a7022a3c91b8770453a3e143.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://btckex4golh77"
+path="res://.godot/imported/iris.vox-d50064620d0d23d8a277ee3aebeee4d9.tscn"
+
+[deps]
+
+source_file="res://creatures/eye_watcher/iris.vox"
+dest_files=["res://.godot/imported/iris.vox-d50064620d0d23d8a277ee3aebeee4d9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

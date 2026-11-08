@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bp8g66xgvan6d"
+path="res://.godot/imported/orrery_0_void.vox-6de494655a25cb67b3151e6eb3189e1e.tscn"
+
+[deps]
+
+source_file="res://creatures/selenarch/source_64/orrery_0_void.vox"
+dest_files=["res://.godot/imported/orrery_0_void.vox-6de494655a25cb67b3151e6eb3189e1e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,248 @@
+[
+  {
+    "id": "moss_glimmer",
+    "display_name": "Moss Glimmer",
+    "biome": "Verdance",
+    "folder": "creatures/moss_glimmer",
+    "status": "live",
+    "height_m": 0.7,
+    "voxel_size": 0.05833333333333333,
+    "parts": [
+      "body",
+      "head",
+      "wing_l_0",
+      "wing_l_1",
+      "wing_r_0",
+      "wing_r_1",
+      "arm_l",
+      "arm_r"
+    ],
+    "behavior": "dart",
+    "behavior_notes": "Flies in swarms with two pairs of fluttering wings.",
+    "god": false,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "projectile": "spore_puff"
+  },
+  {
+    "id": "capling",
+    "display_name": "Capling",
+    "biome": "Verdance",
+    "folder": "creatures/capling",
+    "status": "live",
+    "height_m": 1.0,
+    "voxel_size": 0.05555555555555555,
+    "parts": [
+      "body",
+      "head",
+      "jaw",
+      "leg_l",
+      "arm_l",
+      "leg_r",
+      "arm_r"
+    ],
+    "behavior": "skirmish",
+    "behavior_notes": "Spits spores and spawns around glowing mushrooms.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "projectile": "spore_puff"
+  },
+  {
+    "id": "bark_warden",
+    "display_name": "Bark Warden",
+    "biome": "Verdance",
+    "folder": "creatures/bark_warden",
+    "status": "live",
+    "height_m": 2.4,
+    "voxel_size": 0.08275862068965517,
+    "parts": [
+      "body",
+      "head",
+      "leg_l",
+      "arm_l",
+      "leg_r",
+      "arm_r"
+    ],
+    "behavior": "chase",
+    "behavior_notes": "Treant guardian that slams the ground.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "projectile": "spore_puff"
+  },
+  {
+    "id": "elder_thornheart",
+    "display_name": "Elder Thornheart",
+    "biome": "Verdance",
+    "folder": "creatures/elder_thornheart",
+    "status": "live",
+    "height_m": 4.0,
+    "voxel_size": 0.015625,
+    "parts": [
+      "lantern_l_1",
+      "leg_r_0",
+      "leg_r_1",
+      "tail",
+      "body",
+      "leg_l_1",
+      "head",
+      "lantern_l_0",
+      "lantern_r_1",
+      "leg_l_0",
+      "lantern_r_0"
+    ],
+    "behavior": "strafe",
+    "behavior_notes": "Ancient moss stag god with lantern antlers and a luminous green heart.",
+    "god": true,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8,
+    "projectile": "spore_puff"
+  },
+  {
+    "id": "petal_sprite",
+    "display_name": "Petal Sprite",
+    "biome": "Rosamund",
+    "folder": "creatures/petal_sprite",
+    "status": "live",
+    "height_m": 0.7,
+    "voxel_size": 0.04375,
+    "parts": [
+      "body",
+      "head",
+      "wing_l_0",
+      "wing_l_1",
+      "wing_r_0",
+      "wing_r_1",
+      "arm_l",
+      "leg_l",
+      "arm_r",
+      "leg_r"
+    ],
+    "behavior": "orbit",
+    "behavior_notes": "Circles its queen or leader.",
+    "god": false,
+    "glow": true,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "projectile": "rose_shard"
+  },
+  {
+    "id": "quartz_hopper",
+    "display_name": "Quartz Hopper",
+    "biome": "Rosamund",
+    "folder": "creatures/quartz_hopper",
+    "status": "live",
+    "height_m": 1.0,
+    "voxel_size": 0.05555555555555555,
+    "parts": [
+      "body",
+      "head",
+      "ear_l",
+      "leg_l",
+      "arm_l",
+      "ear_r",
+      "leg_r",
+      "arm_r"
+    ],
+    "behavior": "skirmish",
+    "behavior_notes": "Rabbit-frog that hops on large hind legs.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "projectile": "rose_shard"
+  },
+  {
+    "id": "rose_golem",
+    "display_name": "Rose Golem",
+    "biome": "Rosamund",
+    "folder": "creatures/rose_golem",
+    "status": "live",
+    "height_m": 2.2,
+    "voxel_size": 0.07586206896551725,
+    "parts": [
+      "body",
+      "head",
+      "leg_l",
+      "arm_l",
+      "leg_r",
+      "arm_r"
+    ],
+    "behavior": "chase",
+    "behavior_notes": "Pink crystal guardian wrapped in thorny rose vines.",
+    "god": false,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 1,
+    "projectile": "rose_shard"
+  },
+  {
+    "id": "queen_lumeria",
+    "display_name": "Queen Lumeria",
+    "biome": "Rosamund",
+    "folder": "creatures/queen_lumeria",
+    "status": "live",
+    "height_m": 3.2,
+    "voxel_size": 0.013333333333333334,
+    "parts": [
+      "gown_1",
+      "gown_2",
+      "wing_r_1",
+      "leg_l",
+      "arm_r",
+      "gown_0",
+      "leg_r",
+      "body",
+      "arm_l",
+      "head",
+      "wing_r_0",
+      "wing_l_0",
+      "wing_l_1",
+      "gown_3"
+    ],
+    "behavior": "strafe",
+    "behavior_notes": "Fairy queen god with four butterfly wings; petal sprites orbit her.",
+    "god": true,
+    "glow": false,
+    "design_grid": [
+      32,
+      32,
+      32
+    ],
+    "upscale": 8,
+    "projectile": "rose_shard"
+  }
+]

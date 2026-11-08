@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c2nkskqdmm15f"
+path="res://.godot/imported/wing_r_0.vox-3ee64d49e6f1b3d14b122bb13aa01e91.tscn"
+
+[deps]
+
+source_file="res://creatures/queen_lumeria/wing_r_0.vox"
+dest_files=["res://.godot/imported/wing_r_0.vox-3ee64d49e6f1b3d14b122bb13aa01e91.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

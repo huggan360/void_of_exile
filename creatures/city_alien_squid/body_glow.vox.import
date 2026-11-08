@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bvcfu4jpe1oir"
+path="res://.godot/imported/body_glow.vox-27b4d2be9bc830d4e2c067e8cadc5bb9.tscn"
+
+[deps]
+
+source_file="res://creatures/city_alien_squid/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-27b4d2be9bc830d4e2c067e8cadc5bb9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

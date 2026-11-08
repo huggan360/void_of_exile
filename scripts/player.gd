@@ -367,7 +367,7 @@ func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
 		# On the cursor's own ray, so the ring's middle is always at the cursor's tip.
 		aim_marker.track(_aim_point,
 				(Input.is_action_pressed("shoot") or _charging) and free_hands and stats.gear.weapon != null, delta)
-	if _aim_hold > 0.0 or (is_instance_valid(spatial_controller) and spatial_controller.first_person>0.8):
+	if _aim_hold > 0.0 or (is_instance_valid(spatial_controller) and (spatial_controller.first_person>0.8 or (spatial_controller is SpaceTraversal and spatial_controller.free_look()))):
 		facing = lerp_angle(facing, aim_yaw(), minf(1.0, delta * AIM_TURN_SPEED))
 	elif dir != Vector3.ZERO:
 		var local_dir := global_basis.inverse()*dir if is_instance_valid(spatial_controller) else dir
