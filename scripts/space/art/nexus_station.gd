@@ -185,7 +185,7 @@ func build(server: bool) -> void:
 		art.box(at, Vector3(0.4, 0.05, 0.4), GREEN, false, 1.6)
 	_board(art, anchors.campaign_board)
 	for i in 3:
-		_stall(art, Vector3(18 + i * 9, 0, -12 - i * 3), PINK if i % 2 else GREEN)
+		_stall(art, stall_at(i), PINK if i % 2 else GREEN)
 	for at: Vector3 in [Vector3(-33, 0, 19), Vector3(-10, 0, 35), Vector3(15, 0, 35), Vector3(39, 0, -3), Vector3(-40, 0, -4)]:
 		art.round_part(at + Vector3.UP * 0.55, 2.6, 1.1, DARK, true)
 		art.box(at + Vector3.UP * 3, Vector3(0.8, 5, 0.8), WOOD, true)
@@ -250,15 +250,23 @@ func _board(art: Brush, at: Vector3) -> void:
 		art.box(at + Vector3(-1.6 + i * 1.05, 3.2 + (i % 2) * 0.3, 0.26), Vector3(0.8, 1.5, 0.04), Color("ffe4ad"))
 	art.lantern(at + Vector3(3, 0, 0), 4.0)
 
+## The market stalls on the deck (each with a shopkeeper behind it, SpaceWorld).
+const STALL_SHOPS := ["general", "premium", "curio"]
+
+static func stall_at(i: int) -> Vector3:
+	return Vector3(18 + i * 9, 0, -12 - i * 3)
+
+## A stall: counter, awning (its front is +Z, the keeper stands behind at -Z).
 func _stall(art: Brush, at: Vector3, cloth: Color) -> void:
-	art.box(at + Vector3.UP * 1.05, Vector3(6, 2.1, 2), WOOD, true)
+	art.box(at + Vector3.UP * 0.55, Vector3(6, 1.1, 2), WOOD, true)
+	art.box(at + Vector3.UP * 1.13, Vector3(6.2, 0.08, 2.2), BRASS)
 	for side in [-1.0, 1.0]:
 		art.box(at + Vector3(side * 3, 2.6, -0.7), Vector3(0.25, 5.2, 0.25), DARK, true)
 	for i in 8:
 		art.box(at + Vector3(-2.8 + i * 0.8, 4.4, 0), Vector3(0.8, 0.16, 3.8), cloth if i % 2 else Color("ffe0ae"))
 		art.box(at + Vector3(-2.8 + i * 0.8, 4, 1.8), Vector3(0.8, 0.8, 0.15), cloth)
 	for i in 5:
-		art.crystal(at + Vector3(-2 + i, 2.1, 0), 0.5 + i % 2 * 0.3, GREEN if i % 2 else PINK)
+		art.crystal(at + Vector3(-2 + i, 1.17, 0.3), 0.5 + i % 2 * 0.3, GREEN if i % 2 else PINK)
 
 ## The island of stone the Nexus is built on, tapering to a crystal tip.
 const ROCK_DEPTH := 96.0

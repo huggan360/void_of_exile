@@ -19,7 +19,16 @@ var campaign_portal: Portal
 var launchpad: TavernLaunchpad
 var _launch_target: InteractionTarget
 var _astral_unlocked := false
-const LAUNCHPAD_AT := Vector3(81, 10, -8)
+## Orin's launch deck: on the garden avenue between the fountain and the chapel,
+## where the middle cross path leaves exactly room between the flower beds. Its
+## gate faces the fountain.
+const LAUNCHPAD_AT := Vector3(0, 10, 52)
+const LAUNCHPAD_YAW := PI
+## The chapel market (ShopKeeper): red and white stalls either side of the chapel
+## yard, facing it, and two keepers by the chapel door. [shop, x, z].
+const MARKET_STALLS := [["priest", -11.5, 74.5], ["wizard", -17.0, 74.5], ["bowyer", 11.5, 74.5], ["alchemist", 17.0, 74.5]]
+const MARKET_KEEPERS := [["relic", -5.5, 75.5], ["curio", 5.5, 75.5]]
+const MARKET_CENTER := Vector2(0, 70)
 var _prepared_decor := {}
 var _prepared_load := false
 
@@ -69,6 +78,7 @@ func _ready() -> void:
 		sign.position = Vector3(0, 4.6, 0)
 		gate.add_child(sign)
 	_build_launchpad()
+	_build_market()
 	if navigation==null: _prepare_navigation()
 	if has_node("Residents"):
 		var index := 0
@@ -226,9 +236,31 @@ func ground_height(x: float, z: float) -> float:
 	return home_terrain.stand_height(floori(x), floori(z))
 
 
+## Stalls from the village market prefab, a shopkeeper behind each counter.
+func _build_market() -> void:
+	var stall_scene: PackedScene = load("res://scenes/home/prefabs/market.tscn")
+	for spec: Array in MARKET_STALLS:
+		var at := Vector3(float(spec[1]), 10, float(spec[2]))
+		var to_center := Vector2(MARKET_CENTER.x-at.x, MARKET_CENTER.y-at.z)
+		var yaw := atan2(-to_center.x, -to_center.y)  # the stall's front (-Z) faces the yard
+		var stall: Node3D = stall_scene.instantiate()
+		stall.name = "MarketStall_"+str(spec[0])
+		stall.position = at
+		stall.rotation.y = yaw
+		add_child(stall)
+		var behind := Basis(Vector3.UP, yaw)*Vector3(0, 0, 2.1)
+		var keeper := ShopKeeper.place(self, str(spec[0]), Transform3D(Basis(Vector3.UP, yaw), at+behind))
+		keeper.target.reach = 5.5  # over the counter
+		_add_light(at+Vector3(0, 3.6, 0), Color(1, .78, .5), .55, 6.0)
+	for spec: Array in MARKET_KEEPERS:
+		var at := Vector3(float(spec[1]), 10, float(spec[2]))
+		var to_center := Vector2(MARKET_CENTER.x-at.x, MARKET_CENTER.y-at.z)
+		ShopKeeper.place(self, str(spec[0]), Transform3D(Basis(Vector3.UP, atan2(-to_center.x, -to_center.y)), at))
+
 func _build_launchpad() -> void:
 	launchpad = TavernLaunchpad.new()
 	launchpad.position = LAUNCHPAD_AT
+	launchpad.rotation.y = LAUNCHPAD_YAW
 	add_child(launchpad)
 	launchpad.build(false)
 	launchpad.set_locked(not _astral_unlocked)

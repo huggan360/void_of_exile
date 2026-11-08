@@ -969,6 +969,11 @@ func _station_props() -> void:
 	rocket.kind = "rocket"
 	rocket.position = pad.origin+pad.basis.z*3.5
 	add_child(rocket)
+	# Shopkeepers behind the deck's market stalls, facing the plaza.
+	for i in NexusStation.STALL_SHOPS.size():
+		var at := station.global_transform*(NexusStation.stall_at(i)+Vector3(0, 0, -1.5))
+		var keeper := ShopKeeper.place(self, str(NexusStation.STALL_SHOPS[i]), Transform3D(Basis(Vector3.UP, PI), at))
+		keeper.target.reach = 5.0  # over the counter
 
 func _interior_props(slot: int, room: ShipInterior) -> void:
 	var anchors: Dictionary = room.anchors

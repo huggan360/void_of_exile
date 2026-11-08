@@ -10,6 +10,8 @@ const BUBBLE_RANGE := 26.0
 @export var shop_id := "general"
 ## Optional: another creature than the shop's own keeper.
 @export var model_id := ""
+## How far away you can talk to them (more over a stall's counter).
+@export var reach := 4.0
 var model: CreatureModel
 var target: InteractionTarget
 var _beat := 0
@@ -33,7 +35,7 @@ func _ready() -> void:
 	target.description = str(def.title)
 	target.response = str(def.hello[0])
 	target.action_text = "Trade"
-	target.reach = 4.0
+	target.reach = reach
 	target.position = Vector3.UP
 	add_child(target)
 	target.activated.connect(func(_actor: Node3D) -> void: get_tree().call_group("shop_panels", "open_for", target, shop_id))
