@@ -147,6 +147,8 @@ func _on_event(ev: Array) -> void:
 			if int(ev[2])>0 and str(ev[3])=="forge": GameAudio.play("forge_dismantle")
 			Account.set_dots(int(ev[1]), int(ev[2]), str(ev[3]))
 		"camp_pack_done": pack_done.emit(ev[1])
+		"shops":
+			if ev[1] is Dictionary: Shops.set_state(ev[1])
 		"warp": warp.emit(ev[1])
 		"camp_scene", "camp_scene_page", "camp_scene_end", "camp_answer": scene.emit(ev)
 

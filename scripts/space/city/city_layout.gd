@@ -48,6 +48,8 @@ const VENUE_NAMES := {
 	arcade = ["Pixel Palace", "Starlight Arcade", "The Blinking Den"],
 	lobby = ["Grand Lobby"],
 }
+## The shops (Shops.DEFS) the city's shop rooms hold, in turn.
+const SHOP_ROTATION := ["wizard", "priest", "general", "bowyer", "premium", "relic", "tidecaller", "alchemist", "curio"]
 ## Venue room in its own frame: x across the front, -z the street side (door), y up.
 const ROOM := Vector3(16.0, 5.2, 12.0)
 const PODIUM := 30.0  # podium footprint (m), centred in the lot
@@ -210,6 +212,7 @@ static func venues(d: Dictionary) -> Array:
 	if _cache.has(key): return _cache[key]
 	var out: Array = []
 	var n := 0
+	var shops_dealt := 0
 	for item: Dictionary in district_cells(d):
 		var c: Dictionary = item.cell
 		var frame: Transform3D = c.frame
@@ -222,7 +225,13 @@ static func venues(d: Dictionary) -> Array:
 					var at := frame*Vector3(0, 0, side*(PODIUM*0.5-ROOM.z*0.5))
 					var dir := at.normalized()
 					var room := _tangent(dir, frame.basis.z*-side)
-					out.append(_venue("%s_%d_%d_%d" % [d.id, item.local.x, item.local.y, side+1], kind, room, d, n))
+					var v := _venue("%s_%d_%d_%d" % [d.id, item.local.x, item.local.y, side+1], kind, room, d, n)
+					# Shop rooms get a real shop (Shops), dealt round so every kind is somewhere.
+					if kind.begins_with("shop"):
+						v.shop = SHOP_ROTATION[(DISTRICTS.find(d)*6+shops_dealt) % SHOP_ROTATION.size()]
+						v.name = str(Shops.DEFS[v.shop].name)
+						shops_dealt += 1
+					out.append(v)
 			"elevator":
 				var room := _tangent(frame.origin.normalized(), frame.basis.z)
 				var v := _venue("%s_%d_%d_lobby" % [d.id, item.local.x, item.local.y], "lobby", room, d, n)

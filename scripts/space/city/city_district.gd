@@ -132,6 +132,8 @@ func _sign(parent: Node3D, text: String, at: Vector3, color: Color, size := 1.0,
 	label.position = at
 	label.rotation.y = yaw
 	label.double_sided = false
+	# Drawn with the walls (not blended after them), so rooms hide the street's signs.
+	label.alpha_cut = Label3D.ALPHA_CUT_OPAQUE_PREPASS
 	label.visibility_range_end = 220.0
 	parent.add_child(label)
 	return label
@@ -349,6 +351,9 @@ func _furnish(node: Node3D, v: Dictionary, art: NexusStation.Brush, look: Dictio
 			_counter(node, v, art, look, "noodle_stall")
 			_props.add("lantern_string", frame, Vector3(0, size.y-0.6, 0.0), 0.0, 0.8)
 		"shop_budget", "shop_premium", "shop_curio":
+			if v.has("shop"):
+				var staff: Dictionary = v.staff[0]
+				ShopKeeper.place(node, str(v.shop), Transform3D(Basis(Vector3.UP, float(staff.yaw)), staff.pos))
 			_counter(node, v, art, look, "")
 			for side: float in [-1.0, 1.0]:
 				for k in 3: _props.add("shelf_goods", frame, Vector3(side*(hx-0.8), 0.02, -3.5+k*2.6), -side*PI*0.5)

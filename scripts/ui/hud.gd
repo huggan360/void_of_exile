@@ -55,6 +55,8 @@ var _inventory: InventoryPanel
 var _bag_panel: BagPanel
 ## Bram's forge, under the backpack while you talk to the smith.
 var forge: ForgePanel
+## A shopkeeper's wares, on the right while you talk to them.
+var shop: ShopPanel
 var _center := CenterContainer.new()
 var _stack := VBoxContainer.new()  # backpack, and the loot bag under it
 var _quick: Array[ItemSlot] = []
@@ -263,6 +265,17 @@ func _ready() -> void:
 	forge.item_hovered.connect(_tooltip.show_item)
 	forge.item_unhovered.connect(_tooltip.hide)
 	_stack.add_child(forge)
+	shop = ShopPanel.new(stats)
+	shop.interaction = interaction
+	shop.item_hovered.connect(_tooltip.show_item)
+	shop.item_unhovered.connect(_tooltip.hide)
+	var right := CenterContainer.new()
+	right.set_anchors_preset(Control.PRESET_FULL_RECT)
+	right.anchor_left = 0.5
+	right.offset_left = 0.0
+	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(right)
+	right.add_child(shop)
 
 	# Top center: the account's XP bar, level and reward drawer.
 	account_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -500,12 +513,12 @@ func _profile_process(_delta: float) -> void:
 	if bag != _bag_panel.bag or (bag == null and _bag_panel.visible):
 		_bag_panel.show_bag(bag)
 	var tab := not player.controls_locked() and (Input.is_action_pressed("inventory") or (_inventory.visible and dragging and bag == null))
-	var open := tab or bag != null or forge.visible
+	var open := tab or bag != null or forge.visible or shop.visible
 	if open != _inventory.visible:
 		_inventory.visible = open
 		if not open:
 			_tooltip.hide()
-	interaction.update_prompt(player, account_bar.is_open() or (open or dragging) and not forge.visible)
+	interaction.update_prompt(player, account_bar.is_open() or (open or dragging) and not forge.visible and not shop.visible)
 	if social_panel and social_panel.visible:
 		social_panel.reset_size()
 		social_panel.global_position = Vector2(chat.button_row.global_position.x,

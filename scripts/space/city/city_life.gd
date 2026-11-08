@@ -42,7 +42,7 @@ func add_district(d: Dictionary) -> void:
 	for v: Dictionary in CityLayout.venues(d):
 		var frame: Transform3D = v.frame
 		frame.origin += CityLayout.planet().center as Vector3
-		for staff: Dictionary in v.staff:
+		for staff: Dictionary in (v.staff if not v.has("shop") else []):  # shopkeepers are ShopKeepers
 			_people.append({pose = frame*Transform3D(Basis(Vector3.UP, float(staff.yaw)), staff.pos), model = staff.model,
 				node = null, bubble = -1, lines = staff.lines, title = v.name})
 		for k: int in v.patrons:

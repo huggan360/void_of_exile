@@ -61,8 +61,12 @@ func _build(content: String, kind: String) -> void:
 		"tell": _background = Color("b8e6bc")
 		"party": _background = Color("d7c4f4")
 		"system": _background = UIStyle.GOLD
+		"shop": _background = Color("fff4dc")
 	_border = _background.darkened(0.72)
 	var shown := content.strip_edges().replace("\n", " ").replace("\r", " ").replace("\t", " ")
+	if kind == "shop":
+		_build_rich(shown)
+		return
 	if shown.length() > MAX_CHARACTERS:
 		shown = shown.left(MAX_CHARACTERS - 1) + "…"
 	var label := Label.new()
@@ -81,6 +85,39 @@ func _build(content: String, kind: String) -> void:
 	label.position = Vector2(12, 8)
 	label.custom_minimum_size = size - Vector2(24, 16)
 	label.size = size - Vector2(24, 16)
+	add_child(label)
+	pivot_offset = Vector2(size.x * 0.5, size.y + 8)
+	scale = Vector2.ONE * 0.6
+
+
+## Shopkeepers' bubbles (game text only, never player chat): BBCode for bold
+## and coloured offers. Sized from the plain text, a little wider for bold.
+func _build_rich(markup: String) -> void:
+	var plain := markup
+	var regex := RegEx.create_from_string("\\[[^\\]]*\\]")
+	plain = regex.sub(plain, "", true)
+	var font_size := UIStyle.SIZE_NORMAL
+	var width := clampf(UIStyle.font().get_string_size(plain, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x*1.08, 24.0, MAX_WIDTH - 24.0)
+	var measured := UIStyle.font().get_multiline_string_size(plain, HORIZONTAL_ALIGNMENT_LEFT, width, font_size, -1,
+			TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE)
+	size = Vector2(ceilf(width) + 24.0, ceilf(measured.y) + 18.0)
+	custom_minimum_size = size
+	var label := RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.scroll_active = false
+	label.fit_content = true
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_override("normal_font", UIStyle.font())
+	label.add_theme_font_override("bold_font", UIStyle.bold())
+	label.add_theme_font_size_override("normal_font_size", font_size)
+	label.add_theme_font_size_override("bold_font_size", font_size)
+	label.add_theme_color_override("default_color", UIStyle.OUTLINE)
+	label.add_theme_color_override("font_outline_color", Color(0.12, 0.07, 0.04))
+	label.text = markup
+	label.position = Vector2(12, 8)
+	label.size = size - Vector2(24, 14)
+	label.custom_minimum_size = label.size
 	add_child(label)
 	pivot_offset = Vector2(size.x * 0.5, size.y + 8)
 	scale = Vector2.ONE * 0.6

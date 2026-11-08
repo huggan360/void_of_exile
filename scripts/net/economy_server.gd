@@ -14,12 +14,110 @@ extends Node
 ## ({items, chests, dirty, bags} once loaded).
 
 const SAVE_DELAY := 1.5  # seconds after a vault change before it is saved
+const SHOPS_EVERY := 60.0  # seconds between asking the account service for the shops
 
 var server: NetServer
+## The shops as the account service last told (Shops.state on clients).
+var shops := {}
+var _shops_timer := 0.0
+var _fetching := false
 
 
 func _ready() -> void:
 	GameServer.bag_changed.connect(_on_bag_changed)
+
+
+func _process(delta: float) -> void:
+	_shops_timer -= delta
+	var ended := not shops.is_empty() and Time.get_unix_time_from_system()>float(shops.get("ends", 0.0))+2.0
+	if (_shops_timer<=0.0 or ended) and not _fetching:
+		_shops_timer = SHOPS_EVERY
+		refresh_shops()
+
+
+# --- Shops ---------------------------------------------------------------------------
+
+## Asks the account service for every shop's stock and offers, and tells
+## every player (a test-mode server sells the plain grades at base price).
+func refresh_shops() -> void:
+	_fetching = true
+	var state := {}
+	if server.config.test_mode:
+		state = Shops.fallback()
+	else:
+		var r: Dictionary = await server.api.call_api("POST", "/server/shops", {})
+		if r.ok: state = r.data
+		else: push_warning("Couldn't load the shops: %s" % r.error)
+	_fetching = false
+	if state.is_empty(): return
+	# The service's clock may differ: keep "now" as it said, the client corrects.
+	shops = state
+	for p: Dictionary in server.peers.values():
+		if p.get("joined", false): send_shops(p)
+
+
+func send_shops(p: Dictionary) -> void:
+	if shops.is_empty(): return
+	var data := shops.duplicate(true)
+	data.now = float(shops.get("now", 0.0))
+	server.social.send(p.player_id, ["shops", data])
+
+
+## A purchase: [shop, item id, price seen]. The item goes into the backpack and
+## the character is saved with the payment (/server/shop/buy) in one go; if the
+## account service says no, the item is taken back.
+func buy(p: Dictionary, shop: String, item_id: String, seen_price: int) -> void:
+	var stats := GameServer.character(p.player_id)
+	if stats == null or p.get("dead", false) or not Shops.DEFS.has(shop): return
+	var entry := {}
+	for e: Dictionary in shops.get("shops", {}).get(shop, {}).get("stock", []):
+		if str(e.id)==item_id: entry = e
+	if entry.is_empty():
+		server.social.system(p.player_id, "That isn't for sale here any more.")
+		return
+	var price := int(entry.price)
+	if int(entry.left)==0:
+		server.social.system(p.player_id, "Someone bought the last one.")
+		return
+	if price>seen_price:
+		server.social.system(p.player_id, "The price changed: it is %s Dots now." % Dots.format(price))
+		send_shops(p)
+		return
+	if int(p.get("dots", 0))<price:
+		server.social.system(p.player_id, "Not enough Dots: %s costs %s." % [Items.make(item_id).item_name, Dots.format(price)])
+		return
+	var item := Items.make(item_id)
+	if item==null: return
+	if stats.give([item])==0:
+		server.social.system(p.player_id, "Your backpack is full.")
+		return
+	if server.config.test_mode:
+		p.dots = int(p.get("dots", 0))-price
+		send_dots(p, -price, "shop")
+		server.social.system(p.player_id, "You bought [b]%s[/b] for %s Dots." % [item.item_name, Dots.format(price)])
+		return
+	var r: Dictionary = await server.save_record(p, {kind = "buy", shop = shop, item_id = item_id, price = seen_price})
+	if r.get("ok", false):
+		p.dots = int(r.data.get("dots", p.dots))
+		send_dots(p, -int(r.data.get("price", price)), "shop")
+		server.social.system(p.player_id, "You bought [b]%s[/b] for %s Dots." % [item.item_name, Dots.format(int(r.data.get("price", price)))])
+		# A limited piece is gone for everyone: tell them all now.
+		if int(entry.left)>0: refresh_shops()
+	else:
+		_take_back(stats, item_id)
+		server.social.system(p.player_id, "No sale: %s" % str(r.get("error", "no answer")))
+		send_shops(p)
+
+
+func _take_back(stats: PlayerStats, item_id: String) -> void:
+	var place := stats.find_item(item_id)
+	if place.is_empty(): return
+	var held := stats.item_at(place)
+	if held.count>1:
+		held.count -= 1
+		stats.changed.emit()
+	else:
+		stats.take(place)
 
 
 ## A character was claimed (joined or switched): the account's part of it.

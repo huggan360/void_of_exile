@@ -187,6 +187,7 @@ func on_hello(peer_id: int, protocol: int, token: String, character_id: int, acc
 	p.erase("story_migration")
 	p.joined = true
 	by_player[player_id] = peer_id
+	economy.send_shops.call_deferred(p)
 	stats.changed.connect(_on_stats_changed.bind(peer_id))
 	stats.leveled_up.connect(func(level: int, gains: Dictionary) -> void:
 		_to_peer(peer_id, ["lvl", level, gains]))
@@ -716,6 +717,8 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 			_send_character(peer_id)  # even a refused request gets the true state back
 		"xp":
 			GameServer.collect_xp(pid, int(args[0]))
+		"shop":  # [shop id, item id, price seen]: buy it for Dots
+			if args.size() == 3: economy.buy(p, str(args[0]), str(args[1]), int(args[2]))
 		"forge":  # [place, item id]: dismantle it at the forge for Dots
 			if args.size() == 2:
 				economy.dismantle(p, args[0], str(args[1]))
@@ -879,7 +882,10 @@ func save_record(p: Dictionary, extra := {}) -> Dictionary:
 	var r: Dictionary
 	var vault: Variant = economy.pending_vault(p)
 	var vault_revision := int(p.vault.get("revision", 0)) if vault != null else -1
-	if extra.get("kind", "") == "dismantle":
+	if extra.get("kind", "") == "buy":
+		r = await api.call_api("POST", "/server/shop/buy", {character_id = p.character_id, data = stats.to_data(),
+				shop = extra.shop, item_id = extra.item_id, price = extra.price})
+	elif extra.get("kind", "") == "dismantle":
 		r = await api.call_api("POST", "/server/dismantle", {character_id = p.character_id, data = stats.to_data(),
 				item_id = extra.item_id, count = extra.count})
 	elif vault != null:

@@ -42,3 +42,24 @@ Presence uses unexpired leases on living characters, including the played charac
 in friends responses. Server labels map to heartbeat names, falling back to the label; singleplayer
 shows as `Singleplayer`. Offline players have empty server/class and level 0. `mutual` means the friend
 also added you. No server-key friends endpoint is needed.
+
+## Shops
+
+Shopkeepers in every game world sell from this service, so stock, prices and
+offers are the same on every server and in Singleplayer.
+
+- `SHOPS` lists each shop: its item families, the grades always in stock, how many
+  rare high-grade pieces it gets per window, extras (elixirs, backpacks) and, for
+  the relic keeper, 0 to 3 Divine items.
+- Stock and offers follow 2 hour windows seeded by the window number, so no state
+  is needed. The only stored state is `shop_sales`: rare pieces and Divine items
+  are one each, server wide, per window.
+- Prices: `SHOP_PRICE` by grade (twice the forge's Dots up to Grade 5, Grade 6 is
+  1000), Divine 3000. Offers take 10 to 25 percent off a family in one shop, or
+  sometimes in every shop (`shop: "*"`).
+- `POST /server/shops` returns everything; `POST /server/shop/buy` takes the
+  character's data with the item in it, checks stock, price and Dots, and saves
+  data and payment in one transaction.
+
+The game names the shops and their keepers in `scripts/game/shops.gd` (keep the
+ids in step). Put a shop anywhere with `ShopKeeper.place(parent, "wizard", transform)`.

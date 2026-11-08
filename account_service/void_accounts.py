@@ -43,6 +43,7 @@ import hmac
 import ipaddress
 import json
 import os
+import random
 import secrets
 import sqlite3
 import sys
@@ -140,6 +141,134 @@ def dismantle_value(item_id, count):
     if item_id == "backpack":
         return 20 * count
     return 0
+
+
+# --- Shops -----------------------------------------------------------------------
+# Every shopkeeper in every game world sells from here, so stock, prices and
+# offers are the same on every server (and switching servers changes nothing).
+# Stock and offers follow 2 hour windows, seeded by the window: no state but
+# the sales of limited items (shop_sales). The game's Shops (scripts/game/
+# shops.gd) names the shops and their keepers; keep the ids in step.
+SHOP_WINDOW = 2 * 3600
+# What a grade costs to buy: twice the forge's Dots up to Grade 5, then dearer.
+SHOP_PRICE = (0, 20, 50, 90, 150, 240, 1000, 1800, 2600)
+SHOP_DIVINE = 3000
+SHOP_FIXED = {"elixir_hp": 15, "elixir_mp": 15, "backpack": 120}
+SHOP_ELIXIR_OF = 160
+STAT_ELIXIRS = ("attack", "defense", "speed", "dexterity", "magic", "hp", "mp")
+SPELL_MAX = 5
+DIVINE_IDS = (
+    "D_bow_Darkmatter", "D_bow_Fallenwoods", "D_bow_dragon", "D_cloak_burningman", "D_cloak_silvershield", "D_cloak_theblue",
+    "D_cloak_thevoid", "D_spell_oftheblue", "D_spell_ofthedivine", "D_robe_oftheblue", "D_trident_oftheblue",
+    "D_bonus_crucifix_oftheblue", "D_bow_offrost", "D_wand_offrost", "D_trident_offrost", "D_spell_offrost", "D_cloak_offrost",
+    "D_robe_offrost", "D_bonus_crucifix_offrost", "D_bonus_flame_offrost", "D_bonus_eye_offrost", "D_bonus_crystal_offrost",
+    "D_bonus_talisman_offrost", "D_trident_ofsatan", "D_wand_thewandofsatan", "D_bonus_crucifix_ofsatan", "D_trident_ofthedivine",
+    "D_wand_thewandofthedivine", "D_bonus_flame_ofthedivine", "D_robe_ofthegalaxy", "D_trident_ofthevoid", "D_wand_thewandofdarkness",
+    "D_trident_ofthefallenwood", "D_wand_thewandofthefallenwood", "D_wand_thewandofsteel", "D_bonus_crucifix_ofthalao",
+    "D_robe_ofthedragonsbreath", "D_bonus_flame_ofthebroken", "D_bow_ofstorm", "D_wand_ofstorm", "D_trident_ofstorm",
+    "D_spell_ofstorm", "D_cloak_ofstorm", "D_robe_ofstorm", "D_bonus_crucifix_ofstorm", "D_bonus_flame_ofstorm", "D_bonus_eye_ofstorm",
+    "D_bonus_crystal_ofstorm", "D_bonus_talisman_ofstorm", "D_bow_ofiron", "D_wand_ofiron", "D_trident_ofiron", "D_cloak_ofiron",
+    "D_robe_ofiron", "D_spell_ofiron", "D_bonus_crucifix_ofiron")
+ALL_FAMILIES = ("bow", "cloak", "spell", "wand", "trident", "robe", "bonus_crucifix", "bonus_flame", "bonus_eye",
+                "bonus_crystal", "bonus_talisman")
+# families, grades always in stock, rare high-grade pieces per window (limited, one each), extras.
+SHOPS = {
+    "wizard": {"families": ("wand", "spell", "robe", "bonus_crystal"), "grades": (2, 5), "rare": 2},
+    "priest": {"families": ("bonus_crucifix", "robe", "spell"), "grades": (2, 5), "rare": 2, "extra": ("elixir_hp", "elixir_mp")},
+    "bowyer": {"families": ("bow", "cloak", "bonus_eye"), "grades": (2, 5), "rare": 3},
+    "tidecaller": {"families": ("trident", "cloak", "bonus_talisman"), "grades": (2, 5), "rare": 2},
+    "alchemist": {"families": ("bonus_flame",), "grades": (2, 5), "rare": 2, "extra": ("elixir_hp", "elixir_mp"), "elixirs": 2},
+    "general": {"families": ALL_FAMILIES, "grades": (2, 4), "rare": 0, "extra": ("elixir_hp", "elixir_mp", "backpack")},
+    "premium": {"families": ALL_FAMILIES, "grades": (4, 5), "rare": 3},
+    "curio": {"families": ("bonus_crucifix", "bonus_flame", "bonus_eye", "bonus_crystal", "bonus_talisman"), "grades": (2, 5), "rare": 2,
+              "elixirs": 1},
+    "relic": {"families": (), "grades": (0, 0), "rare": 0, "divine": 3},
+}
+# Readable names of what an offer covers (the game shows them in speech bubbles).
+FAMILY_NAMES = {"bow": "bows", "cloak": "cloaks", "spell": "spells", "wand": "wands", "trident": "tridents", "robe": "robes",
+                "bonus_crucifix": "crucifixes", "bonus_flame": "flames", "bonus_eye": "eyes", "bonus_crystal": "crystals",
+                "bonus_talisman": "talismans", "elixir": "elixirs", "divine": "relics"}
+
+
+def shop_family(item_id):
+    """The family an item id belongs to ("wand", "bonus_eye", "elixir", "divine")."""
+    if item_id.startswith("D_"):
+        return "divine"
+    if item_id.startswith("elixir"):
+        return "elixir"
+    if len(item_id) > 3 and item_id[0] == "G" and item_id[1].isdigit():
+        return item_id[3:]
+    return item_id
+
+
+def shop_base_price(item_id):
+    if item_id.startswith("D_"):
+        return SHOP_DIVINE
+    if item_id in SHOP_FIXED:
+        return SHOP_FIXED[item_id]
+    if item_id.startswith("elixir_of_"):
+        return SHOP_ELIXIR_OF
+    if len(item_id) > 2 and item_id[0] == "G" and item_id[1].isdigit():
+        return SHOP_PRICE[max(1, min(8, int(item_id[1])))]
+    return 0
+
+
+def shop_offers(window):
+    """This window's offers: per shop maybe one, and sometimes one everywhere.
+    [{shop ("*" = every shop), family or item, percent, ends}]."""
+    rng = random.Random("offers:%d" % window)
+    ends = (window + 1) * SHOP_WINDOW
+    out = []
+    for shop in sorted(SHOPS):
+        if rng.random() < 0.4:
+            spec = SHOPS[shop]
+            pool = list(spec["families"]) + (["elixir"] if spec.get("extra") or spec.get("elixirs") else []) \
+                + (["divine"] if spec.get("divine") else [])
+            if pool:
+                out.append({"shop": shop, "family": rng.choice(pool), "percent": rng.choice((10, 15, 15, 20, 25)), "ends": ends})
+    if rng.random() < 0.3:
+        out.append({"shop": "*", "family": rng.choice(ALL_FAMILIES), "percent": rng.choice((10, 15)), "ends": ends})
+    return out
+
+
+def shop_discount(shop, item_id, offers):
+    family = shop_family(item_id)
+    best = 0
+    for offer in offers:
+        if offer["shop"] in (shop, "*") and offer["family"] == family:
+            best = max(best, int(offer["percent"]))
+    return best
+
+
+def shop_stock(shop, window):
+    """[(item id, limited)] a shop sells this window (limited ones: one each, server wide)."""
+    spec = SHOPS[shop]
+    rng = random.Random("stock:%s:%d" % (shop, window))
+    out = []
+    lo, hi = spec["grades"]
+    for family in spec["families"]:
+        for tier in range(lo, hi + 1):
+            if family == "spell" and tier > SPELL_MAX:
+                continue
+            out.append(("G%d_%s" % (tier, family), False))
+    for item in spec.get("extra", ()):
+        out.append((item, False))
+    for stat in rng.sample(STAT_ELIXIRS, spec.get("elixirs", 0)):
+        out.append(("elixir_of_" + stat, True))
+    for _ in range(spec["rare"]):
+        family = rng.choice(spec["families"])
+        tier = rng.choice((6, 6, 6, 7, 7, 8))
+        if family == "spell":
+            tier = min(tier, SPELL_MAX)
+        item = "G%d_%s" % (tier, family)
+        if (item, False) not in out and (item, True) not in out:
+            out.append((item, True))
+    # The relic keeper: two or three divine pieces, and some windows nothing at all.
+    if spec.get("divine"):
+        count = rng.choice((0, 2, 2, 3, 3))
+        for item in rng.sample(DIVINE_IDS, count):
+            out.append((item, True))
+    return out
 
 
 def valid_item(item):
@@ -285,6 +414,13 @@ CREATE TABLE IF NOT EXISTS vaults (
     items TEXT NOT NULL DEFAULT '[]',
     bonus_chests INTEGER NOT NULL DEFAULT 0,
     updated REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS shop_sales (
+    win INTEGER NOT NULL,
+    shop TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    sold INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (win, shop, item_id)
 );
 CREATE INDEX IF NOT EXISTS characters_account ON characters(account_id);
 CREATE INDEX IF NOT EXISTS dead_account ON dead_characters(account_id);
@@ -842,6 +978,61 @@ class Store:
                          lambda account_id: self.add_dots(account_id, gained))
         return {"dots": dots, "gained": gained}
 
+    # --- Shops ------------------------------------------------------------------------
+
+    def shops_state(self, now=None):
+        """Every shop's stock with today's prices, and the window's offers."""
+        now = time.time() if now is None else now
+        window = int(now // SHOP_WINDOW)
+        offers = shop_offers(window)
+        sold = {(r["shop"], r["item_id"]): r["sold"] for r in self.db().execute(
+            "SELECT shop, item_id, sold FROM shop_sales WHERE win=?", (window,))}
+        shops = {}
+        for shop in SHOPS:
+            stock = []
+            for item_id, limited in shop_stock(shop, window):
+                base = shop_base_price(item_id)
+                off = shop_discount(shop, item_id, offers)
+                stock.append({"id": item_id, "base": base, "price": int(round(base * (100 - off) / 100.0)), "off": off,
+                              "left": (max(0, 1 - int(sold.get((shop, item_id), 0))) if limited else -1)})
+            shops[shop] = {"stock": stock}
+        return {"now": now, "window": window, "ends": (window + 1) * SHOP_WINDOW, "offers": offers, "shops": shops,
+                "families": FAMILY_NAMES}
+
+    def buy(self, character_id, server, data, shop, item_id, expected, lease_seconds, only_account=None):
+        """The character (saved with the item) pays its price, in one go."""
+        if shop not in SHOPS:
+            raise ApiError(400, "No such shop.")
+        state = self.shops_state()
+        entry = next((e for e in state["shops"][shop]["stock"] if e["id"] == item_id), None)
+        if entry is None:
+            raise ApiError(409, "That isn't for sale here any more.")
+        if entry["left"] == 0:
+            raise ApiError(409, "Someone bought the last one.")
+        price = int(entry["price"])
+        if expected is not None and price > int(expected):
+            raise ApiError(409, "The price changed: it is %d Dots now." % price)
+        if not any(i == item_id for i, _c in carried(data)):
+            raise ApiError(400, "The bought item must be in the saved character.")
+        window = state["window"]
+
+        def pay(account_id):
+            db = self.db()
+            have = db.execute("SELECT dots FROM accounts WHERE id=?", (account_id,)).fetchone()["dots"]
+            if have < price:
+                raise ApiError(402, "Not enough Dots (%d of %d)." % (have, price))
+            if entry["left"] > 0:
+                row = db.execute("SELECT sold FROM shop_sales WHERE win=? AND shop=? AND item_id=?",
+                                 (window, shop, item_id)).fetchone()
+                if row and row["sold"] >= 1:
+                    raise ApiError(409, "Someone bought the last one.")
+                db.execute("INSERT INTO shop_sales (win, shop, item_id, sold) VALUES (?,?,?,1) "
+                           "ON CONFLICT(win, shop, item_id) DO UPDATE SET sold = sold + 1", (window, shop, item_id))
+            return self.add_dots(account_id, -price)
+
+        dots = self.save(character_id, server, data, lease_seconds, 0, only_account, pay)
+        return {"dots": dots, "price": price, "item_id": item_id}
+
     def award_dots(self, character_id, server, amount, lease_seconds, only_account=None):
         amount = max(0, min(MAX_DOTS_AWARD, int(amount)))
         dots = self.save(character_id, server, None, lease_seconds, 0, only_account,
@@ -1243,6 +1434,20 @@ class Handler(BaseHTTPRequestHandler):
         return self.store.dismantle(int(body.get("character_id", 0)), label, data, str(body.get("item_id", "")),
                                     int(body.get("count", 1)), self.config["lease_seconds"], self.only_account)
 
+    def api_shops(self, _body):
+        self.server_label()
+        return self.store.shops_state()
+
+    def api_buy(self, body):
+        label = self.server_label()
+        data = body.get("data")
+        if not isinstance(data, dict):
+            raise ApiError(400, "data must be an object.")
+        expected = body.get("price")
+        return self.store.buy(int(body.get("character_id", 0)), label, data, str(body.get("shop", "")),
+                              str(body.get("item_id", "")), None if expected is None else int(expected),
+                              self.config["lease_seconds"], self.only_account)
+
     def api_award_dots(self, body):
         label = self.server_label()
         return self.store.award_dots(int(body.get("character_id", 0)), label, int(body.get("amount", 0)),
@@ -1293,6 +1498,8 @@ ROUTES = {
     ("POST", "/server/vault/load"): Handler.api_load_vault,
     ("POST", "/server/vault/save"): Handler.api_save_vault,
     ("POST", "/server/dismantle"): Handler.api_dismantle,
+    ("POST", "/server/shops"): Handler.api_shops,
+    ("POST", "/server/shop/buy"): Handler.api_buy,
     ("POST", "/server/dots/award"): Handler.api_award_dots,
     ("POST", "/server/die"): Handler.api_die,
 }
