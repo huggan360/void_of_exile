@@ -182,7 +182,7 @@ func install_bindings() -> void:
 
 func conflict_for(action: String, binding: Dictionary) -> String:
 	for other: String in bindings:
-		if other!=action and bindings[other]==binding: return other
+		if other!=action and ControlBindings.overlaps(action,other) and bindings[other]==binding: return other
 	return ""
 
 func set_binding(action: String, value: Dictionary, persist := true) -> void:

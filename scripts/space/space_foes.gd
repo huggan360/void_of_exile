@@ -217,7 +217,7 @@ func _fly_bolts(delta: float) -> void:
 		bolt.life = float(bolt.life)-delta
 		var from: Vector3 = bolt.pos
 		if bolt.friendly:
-			bolt.vel = TurretTargeting.steer(bolt.vel, bolt.initial, from, TurretTargeting.sample(bolt.get("target", {}), world), delta)
+			bolt.vel = TurretTargeting.steer(bolt.vel, bolt.initial, from, TurretTargeting.sample(bolt.get("target", {}), world), delta, TurretTargeting.PILOT_MAX_BEND if bolt.get("pilot", false) else TurretTargeting.MAX_BEND, TurretTargeting.PILOT_TURN_RATE if bolt.get("pilot", false) else TurretTargeting.TURN_RATE)
 		bolt.pos = from+(bolt.vel as Vector3)*delta
 		var done := float(bolt.life)<=0.0
 		if bolt.friendly:
@@ -341,8 +341,8 @@ func _nearest(ships: Array, at: Vector3) -> SpaceShip:
 	return best
 
 ## A cannon bolt from a ship's turret (authority).
-func fire_bolt(ship: SpaceShip, from: Vector3, dir: Vector3, gunner := 0) -> void:
-	var targets := TurretTargeting.select(world, from, dir)
+func fire_bolt(ship: SpaceShip, from: Vector3, dir: Vector3, gunner := 0, pilot := false) -> void:
+	var targets := TurretTargeting.select(world, from, dir, TurretTargeting.PILOT_CONE if pilot else TurretTargeting.CONE)
 	var target := {}
 	if not targets.is_empty():
 		var key := "%d:%d" % [ship.id, gunner]
@@ -351,6 +351,7 @@ func fire_bolt(ship: SpaceShip, from: Vector3, dir: Vector3, gunner := 0) -> voi
 		_lock_cursor[key] = (cursor+1) % targets.size()
 	var bolt := _shoot(from, dir*BOLT_SPEED+ship.velocity, true, ship.id, BOLT_DAMAGE, 1.0, gunner)
 	bolt.target = target
+	bolt.pilot = pilot
 
 func _shoot(from: Vector3, vel: Vector3, friendly: bool, ship: int, damage: int, size: float, gunner := 0) -> Dictionary:
 	var bolt := {id = _next_bolt, pos = from, vel = vel, initial = vel.normalized(), life = 3.2, friendly = friendly, ship = ship, gunner = gunner, damage = damage, radius = 1.0+size*0.1}
