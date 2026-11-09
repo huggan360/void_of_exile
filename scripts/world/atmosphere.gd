@@ -30,7 +30,7 @@ var env := Environment.new()
 var sun := DirectionalLight3D.new()
 var particles := GPUParticles3D.new()
 var fog_of_war: FogOfWar
-## Debug: force fog of war off (F4).
+## force fog of war off (F4).
 var fog_of_war_hidden := false
 
 var _current := BiomeDef.new()

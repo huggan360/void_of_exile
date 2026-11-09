@@ -4,10 +4,12 @@ Edit, then restart the server. Missing files are recreated with the game's curre
 
 * **server.cfg**: the important switches.
   * `[server]` name (shown in the server list), port (UDP; status ping uses port+1), max_players, motd,
-    public (also list for players on other networks), lan_discovery, data_dir (realm records).
-  * `[realms]` max_players_per_realm, max_realms, unload_after_empty (seconds).
+    public (also list for players on other networks), lan_discovery, data_dir (realm records),
+    max_memory_mb (soft memory budget; 0 disables it).
+  * `[realms]` max_players_per_realm, max_realms, unload_after_empty (seconds),
+    keep_loaded (comma-separated permanent world IDs), preload (prepare them at startup).
   * `[gameplay]` player_collision (players block each other and each other's shots), xp_multiplier,
-    enemy_hp_multiplier, enemy_damage_multiplier, spawn_density_multiplier, godmode.
+    enemy_hp_multiplier, enemy_damage_multiplier, spawn_density_multiplier.
   * `[network]` tick_rate (snapshots/s), interest_radius (m), event_radius (m), max_speed_tolerance.
   * `[accounts]` url (account service), server_key (from `void_accounts.py new-server-key`),
     save_interval, heartbeat_interval (seconds).

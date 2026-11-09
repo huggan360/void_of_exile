@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://yw6ik1buk51" path="res://scripts/world/hall_world.gd" id="E0"]
 [ext_resource type="Script" uid="uid://cx0dppuqpm8v0" path="res://scripts/world/home_resident.gd" id="E1"]
 [ext_resource type="Script" uid="uid://x0yqn8uk7rb7" path="res://scripts/world/voxel_fountain.gd" id="E2"]
-[ext_resource type="Script" uid="uid://b4div4atu176a" path="res://scripts/world/home_preview_ground.gd" id="E3"]
 [ext_resource type="Script" uid="uid://qklxn4w68nkl" path="res://scripts/world/home_road.gd" id="E4"]
 [ext_resource type="Script" uid="uid://dq8oxn3ixf2ae" path="res://scripts/world/home_plaza.gd" id="E5"]
 [ext_resource type="Shader" uid="uid://d0vsdpgy5lqr7" path="res://shaders/water.gdshader" id="E6"]
@@ -583,11 +582,6 @@ transform = Transform3D(0.65, 0, -0.76, 0, 1, 0, 0.76, 0, 0.65, 13, 10, 11)
 
 [node name="Coastline" type="Path3D" parent="." unique_id=510201788]
 curve = SubResource("Curve2")
-
-[node name="EditorGround" type="MeshInstance3D" parent="." unique_id=304176886]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 9.98, 0.5)
-mesh = SubResource("PlaneMesh_3o0ph")
-script = ExtResource("E3")
 
 [node name="CoastWater" type="MeshInstance3D" parent="." unique_id=301737811]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.6, 0)

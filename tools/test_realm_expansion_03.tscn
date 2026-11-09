@@ -1,4 +1,0 @@
-[gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://tools/test_realm_expansion_03.gd" id="1"]
-[node name="RealmExpansionChecks" type="Node"]
-script = ExtResource("1")

@@ -100,9 +100,7 @@ var _talk_last := Vector3.ZERO
 var _talk_camera_offset := Vector3.ZERO
 var _talk_camera_timer := 0.0
 var _talk_camera_partner: Node3D
-## Debug/test hooks: when non-zero, used instead of WASD / the mouse aim.
-var debug_input := Vector2.ZERO
-var debug_aim := Vector3.ZERO  # world point
+
 
 var stats: PlayerStats
 ## The class's figure (ArcherModel or ClassModel: animate, play_shot, hold).
@@ -316,8 +314,6 @@ func _physics_process(delta: float) -> void:
 		camera_yaw += Input.get_axis("orbit_right", "orbit_left") * ORBIT_SPEED * delta
 
 	var input := Vector2.ZERO if controls_locked() else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	if debug_input != Vector2.ZERO:
-		input = debug_input
 	if stats.buffs.has_effect("static"):
 		input = Vector2.ZERO
 		_knock = Vector3.ZERO
@@ -358,7 +354,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
-	_aim_point = debug_aim if debug_aim != Vector3.ZERO else spatial_controller.mouse_point() if is_instance_valid(spatial_controller) else _mouse_point()
+	_aim_point = spatial_controller.mouse_point() if is_instance_valid(spatial_controller) else _mouse_point()
 	# Clicks on the UI (buttons, slots) don't shoot.
 	var free_hands := not interacting() and not stats.buffs.has_effect("quiet") and not shield.active and not ui_blocked and not controls_locked() and get_viewport().gui_get_hovered_control() == null
 	_update_charge(delta, free_hands)

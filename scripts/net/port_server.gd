@@ -26,7 +26,7 @@ static func surface_for(space: String) -> String:
 
 
 func owns_ship(p: Dictionary) -> bool:
-	if server.config.test_mode: return bool(p.get("test_ship", false))
+
 	if int(p.get("account_id", 0)) == 0: return false
 	return not server.campaigns.book(int(p.account_id)).get("reach_ship", {}).is_empty()
 

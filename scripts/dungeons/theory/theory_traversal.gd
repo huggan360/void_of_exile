@@ -176,7 +176,7 @@ func physics_step(delta: float) -> void:
 	if not player.controls_locked() and first_person<0.5:
 		player.camera_yaw += Input.get_axis("orbit_right","orbit_left")*Player.ORBIT_SPEED*delta
 	var input := Vector2.ZERO if player.controls_locked() else Input.get_vector("move_left","move_right","move_forward","move_back")
-	if player.debug_input!=Vector2.ZERO: input = player.debug_input
+
 	if player.stats.buffs.has_effect("static"): input = Vector2.ZERO
 	var dir := (player.global_basis*Basis(Vector3.UP,player.camera_yaw)*Vector3(input.x,0,input.y)).slide(up).normalized()*input.length()
 	var speed := Player.BASE_SPEED*player.stats.move_speed_multiplier()*(Player.SHIELD_MOVE_SPEED if player.shield.active else Player.CHARGE_MOVE_SPEED if player._charging else 1.0)

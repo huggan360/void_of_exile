@@ -92,7 +92,7 @@ static func pitch(shop: String, beat: int) -> String:
 	if not list.is_empty() and beat % 2==0: return lines[(beat/2) % list.size()]
 	return lines[beat % lines.size()]
 
-## A stand-in state when no account service answers (a test-mode server):
+## A stand-in state when no account service answers:
 ## every shop's plain grades at their base price, no offers, no rare pieces.
 static func fallback() -> Dictionary:
 	var base := [0, 20, 50, 90, 150, 240, 1000, 1800, 2600]

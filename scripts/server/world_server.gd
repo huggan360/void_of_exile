@@ -124,7 +124,7 @@ func report_pack_survivors(realm_id: String, site_id: String, survivors: Array) 
 	_save(record)
 
 
-## Development helper: throws the realm away so the next visit makes a new one.
+## Reset a campaign realm so its next visit starts a fresh run.
 func reset_realm(realm_id: String) -> void:
 	_realms.erase(realm_id)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(_path(realm_id)))

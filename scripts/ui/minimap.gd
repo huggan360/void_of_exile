@@ -162,12 +162,6 @@ func _draw_routes() -> void:
 
 
 func _process(delta: float) -> void:
-	if not FrameTrace.enabled: _profile_process(delta); return
-	var started := Time.get_ticks_usec()
-	_profile_process(delta)
-	FrameTrace.record("ui/minimap",started)
-
-func _profile_process(delta: float) -> void:
 	if world == null or player == null:
 		return
 	var pos := player.global_position
@@ -178,21 +172,15 @@ func _profile_process(delta: float) -> void:
 		_map_tex = _back_tex
 		_back_tex = previous
 		_material.set_shader_parameter("map_tex",_map_tex)
-	var profile_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	_collect_patches()
-	if FrameTrace.enabled: FrameTrace.record("minimap/collect",profile_started)
-	profile_started = Time.get_ticks_usec() if FrameTrace.enabled else 0
 	_paint_around(pos)
-	if FrameTrace.enabled: FrameTrace.record("minimap/paint",profile_started)
 	_upload_timer -= delta
 	if _dirty and _upload_timer <= 0.0 and _upload_task<0:
-		profile_started = Time.get_ticks_usec() if FrameTrace.enabled else 0
 		if _upload_task>=0: WorkerThreadPool.wait_for_task_completion(_upload_task)
 		# Snapshot mutable painting data; the worker owns its copy and a texture
 		# reference until the thread-safe RenderingServer upload finishes.
 		# Upload only to the back texture, so the GPU keeps sampling the front.
 		_upload_task = WorkerThreadPool.add_task(_upload_snapshot.bind(_back_tex,_map.duplicate()))
-		if FrameTrace.enabled: FrameTrace.record("minimap/upload",profile_started)
 		_dirty = false
 		_upload_timer = UPLOAD_INTERVAL
 	_rotation = -player.camera_yaw  # screen-up on the map = the camera's forward

@@ -135,19 +135,3 @@ func keeps_origin_open(realm_id: String) -> bool:
 		if instance.record.has("dungeon") and instance.record.get("origin", "") == realm_id:
 			return true
 	return false
-
-
-## Only reached from NetServer's --test action; normal damage/phase handling stays intact.
-func debug_defeat(p: Dictionary) -> void:
-	var realm: RealmInstance = server.realms.get(p.realm)
-	if realm == null or not realm.world is DungeonWorld: return
-	var actor: Boss
-	for enemy: Enemy in realm.enemies.values():
-		if enemy.def.id == realm.world.definition.boss: actor = enemy as Boss
-	if actor == null: return
-	var elapsed := 0.0
-	while is_instance_valid(actor) and actor.is_alive() and elapsed < 25.0:
-		if actor.state == Enemy.State.ACTIVE:
-			actor.take_hit(actor.global_position + Vector3.UP, Vector3.ZERO, 100000, realm.proxies.get(p.player_id))
-		await get_tree().create_timer(0.4).timeout
-		elapsed += 0.4

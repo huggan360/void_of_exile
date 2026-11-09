@@ -367,10 +367,6 @@ func dots() -> int:
 	return int(data.get("account", {}).get("dots", 0))
 
 
-func is_developer() -> bool:
-	return bool(data.get("account", {}).get("developer", false))
-
-
 ## Live updates while playing (the server sends the account's Dots).
 func set_dots(total: int, gained := 0, source := "") -> void:
 	if data.is_empty():

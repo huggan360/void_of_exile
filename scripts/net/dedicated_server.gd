@@ -1,9 +1,8 @@
 extends Node
-## The dedicated server (run headless, see tools/net/run_server.sh):
+## The dedicated server (run headless, see run_server.sh):
 ##
 ##     godot --headless --path <project> res://scenes/server/dedicated.tscn -- [--config=<folder>] [--port=N]
-##         [--name=NAME] [--accounts=URL] [--godmode]   (override server.cfg for this run)
-##         [--test]   godmode, full gear kit, nothing saved, weak bosses
+##         [--name=NAME] [--accounts=URL]   (override server.cfg for this run)
 ##         [--set=section.key=value]   any server.cfg value, e.g. --set=gameplay.player_collision=true
 ##         [--singleplayer --key=SP_KEY --parent=PID]   run by the game for Singleplayer;
 ##         quits when the game (PID) is gone
@@ -52,18 +51,7 @@ func _ready() -> void:
 		config.global.set_value("realms", "preload", false)
 		config.global.set_value("server", "max_memory_mb", 1500)
 		_parent_pid = int(args.get("parent", "0"))
-	if args.has("godmode") or args.has("test"):
-		config.global.set_value("gameplay", "godmode", true)
 	config.apply()
-	if args.has("test"):
-		# Test runs: every character gets the full kit, nothing is saved, bosses are weak.
-		config.test_mode = true
-		for id in Enemies.all_ids():
-			var def := Enemies.get_def(id)
-			if def is BossDef:
-				def.hp = 3000
-				(def as BossDef).shell_hp = 300
-		print("[server] TEST MODE: godmode, full kits, no saving, weak bosses")
 	print("[server] config: %s  data: %s" % [config.dir, config.data_dir()])
 	var started := Time.get_ticks_msec()
 	for id in Enemies.all_ids():

@@ -1198,7 +1198,7 @@ func member_left(party: Dictionary, player_id: int) -> void:
 	_scene_event(party, ["camp_scene", scene])
 
 
-## Story inventory belongs to the run too, including in test mode where characters aren't saved.
+## Story inventory belongs to the run too, when a character leaves.
 func _keep_items(party: Dictionary) -> void:
 	if party.is_empty(): return
 	for pid: int in party.members:

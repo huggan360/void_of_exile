@@ -125,34 +125,6 @@ func add_xp(amount: int) -> void:
 	changed.emit()
 
 
-## Developer command: apply the same class-specific random growth as earned
-## levels, without awarding account XP. Repeating it never rerolls past levels.
-## Lowering a testing level keeps permanent stats (including potion gains).
-func developer_set_level(target: int) -> void:
-	target = clampi(target, 1, MAX_LEVEL)
-	var previous := level
-	var gains := {}
-	while level < target:
-		level += 1
-		for stat in STAT_NAMES:
-			var gain := _raise(stat, _gain(stat))
-			if gain > 0: gains[stat] = int(gains.get(stat, 0)) + gain
-	level = target
-	xp = 0
-	hp = max_hp
-	mp = max_mp
-	if target > previous: leveled_up.emit(level, gains)
-	changed.emit()
-
-
-## Fully trained permanent stats, excluding equipment and temporary buffs.
-func developer_max_stats() -> void:
-	for stat in STAT_NAMES: _raise(stat, stat_max(stat) - stat_base(stat))
-	hp = max_hp
-	mp = max_mp
-	changed.emit()
-
-
 ## Called only by the authoritative XP path; clients load the resulting stats.
 func _gain(stat: String) -> int:
 	return PlayerClasses.growth_roll(class_id, stat)

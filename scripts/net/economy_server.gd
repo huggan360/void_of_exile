@@ -9,8 +9,7 @@ extends Node
 ##   * Dots, the account currency: dismantling at the forge
 ##     (/server/dismantle pays and saves the character together), first
 ##     campaign completions and packs (/server/dots/award).
-##   * developer accounts: /give.
-## Player records (NetServer.peers) carry: dots, developer, vault
+## Player records (NetServer.peers) carry: dots, vault
 ## ({items, chests, dirty, bags} once loaded).
 
 const SAVE_DELAY := 1.5  # seconds after a vault change before it is saved
@@ -38,16 +37,13 @@ func _process(delta: float) -> void:
 # --- Shops ---------------------------------------------------------------------------
 
 ## Asks the account service for every shop's stock and offers, and tells
-## every player (a test-mode server sells the plain grades at base price).
+## every player.
 func refresh_shops() -> void:
 	_fetching = true
 	var state := {}
-	if server.config.test_mode:
-		state = Shops.fallback()
-	else:
-		var r: Dictionary = await server.api.call_api("POST", "/server/shops", {})
-		if r.ok: state = r.data
-		else: push_warning("Couldn't load the shops: %s" % r.error)
+	var r: Dictionary = await server.api.call_api("POST", "/server/shops", {})
+	if r.ok: state = r.data
+	else: push_warning("Couldn't load the shops: %s" % r.error)
 	_fetching = false
 	if state.is_empty(): return
 	# The service's clock may differ: keep "now" as it said, the client corrects.
@@ -91,11 +87,6 @@ func buy(p: Dictionary, shop: String, item_id: String, seen_price: int) -> void:
 	if stats.give([item])==0:
 		server.social.system(p.player_id, "Your backpack is full.")
 		return
-	if server.config.test_mode:
-		p.dots = int(p.get("dots", 0))-price
-		send_dots(p, -price, "shop")
-		server.social.system(p.player_id, "You bought [b]%s[/b] for %s Dots." % [item.item_name, Dots.format(price)])
-		return
 	var r: Dictionary = await server.save_record(p, {kind = "buy", shop = shop, item_id = item_id, price = seen_price})
 	if r.get("ok", false):
 		p.dots = int(r.data.get("dots", p.dots))
@@ -123,7 +114,6 @@ func _take_back(stats: PlayerStats, item_id: String) -> void:
 ## A character was claimed (joined or switched): the account's part of it.
 func take_account(p: Dictionary, account: Dictionary) -> void:
 	p.dots = int(account.get("dots", 0))
-	p.developer = bool(account.get("developer", false))
 	p.chests = int(account.get("chests", 4))
 
 
@@ -229,10 +219,6 @@ func dismantle(p: Dictionary, place: Variant, item_id: String) -> void:
 		server.social.system(p.player_id, "Bram shakes his head: that can't go in the forge.")
 		return
 	stats.take(place)
-	if server.config.test_mode:  # nothing is saved in test mode
-		p.dots = int(p.get("dots", 0)) + value
-		send_dots(p, value, "forge")
-		return
 	var r: Dictionary = await server.save_record(p, {kind = "dismantle", item_id = item.id, count = item.count})
 	if r.get("ok", false):
 		p.dots = int(r.data.get("dots", p.dots))
@@ -286,10 +272,6 @@ func _persist_spend(p: Dictionary, amount: int, source: String) -> void:
 func award(p: Dictionary, amount: int, source: String) -> void:
 	if amount <= 0 or p.is_empty():
 		return
-	if server.config.test_mode:
-		p.dots = int(p.get("dots", 0)) + amount
-		send_dots(p, amount, source)
-		return
 	var r := await server.api.call_api("POST", "/server/dots/award", {character_id = p.character_id, amount = amount})
 	if r.ok:
 		p.dots = int(r.data.get("dots", p.dots))
@@ -299,40 +281,3 @@ func award(p: Dictionary, amount: int, source: String) -> void:
 
 
 # --- Developers ----------------------------------------------------------------------
-
-## /give <player> <item id> [count]
-func give(p: Dictionary, args: String) -> void:
-	if not p.get("developer", false):
-		server.social.system(p.player_id, "Only developers can use /give.")
-		return
-	var parts := args.split(" ", false)
-	if parts.size() < 2:
-		server.social.system(p.player_id, "Write /give <player> <item id> [count], e.g. /give p2 G5_bow.")
-		return
-	var o := server.social.find(parts[0])
-	var item := Items.make(parts[1])
-	if o.is_empty():
-		server.social.system(p.player_id, "%s isn't on this server." % parts[0])
-		return
-	if item == null:
-		server.social.system(p.player_id, "There's no item called %s." % parts[1])
-		return
-	var stats := GameServer.character(o.player_id)
-	if stats == null or o.dead:
-		server.social.system(p.player_id, "%s can't take items right now." % o.name)
-		return
-	var count := clampi(int(parts[2]) if parts.size() > 2 and parts[2].is_valid_int() else 1, 1, 99)
-	var items: Array = []
-	if item.stack_max > 1:
-		item.count = mini(count, item.stack_max)
-		items.append(item)
-	else:
-		for i in mini(count, 20):
-			items.append(Items.make(parts[1]))
-	var given := stats.give(items)
-	if given < items.size():
-		var rest := items.slice(given)
-		GameServer.spawn_bag(o.realm, rest, o.pos, o.player_id, (rest[0] as Item).bag_type())
-	server.social.system(p.player_id, "Gave %s ×%d to %s." % [item.item_name, items.size() if item.stack_max <= 1 else item.count, o.name])
-	if o != p:
-		server.social.system(o.player_id, "A developer gave you [b]%s[/b]." % item.item_name)

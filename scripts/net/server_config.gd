@@ -29,8 +29,6 @@ var bosses := {}
 var loot := {}
 var spawns := {}
 var player := {}
-## --test runs: full kits, no saving.
-var test_mode := false
 ## Run by the game for Singleplayer (one player, not announced anywhere).
 var singleplayer := false
 
@@ -120,7 +118,6 @@ func apply() -> void:
 		if key.to_upper() in GameServer:
 			GameServer.set(key.to_upper(), player.tunables[key])
 	GameServer.xp_multiplier = float(value("gameplay", "xp_multiplier", 1.0))
-	GameServer.debug_godmode = bool(value("gameplay", "godmode", false))
 	GameServer.BAG_LIFETIME = float(loot.get("bags", {}).get("lifetime", GameServer.BAG_LIFETIME))
 	GameServer.PERSONAL_BAG_LIFETIME = float(loot.get("bags", {}).get("personal_lifetime", GameServer.PERSONAL_BAG_LIFETIME))
 	WorldServer.save_dir = data_dir() + "realms/"
@@ -194,7 +191,7 @@ func _load_global() -> void:
 			public = false, lan_discovery = true, data_dir = "data", max_memory_mb = 0},
 		realms = {"max_players_per_realm": 85, "max_realms": 8, "unload_after_empty": 120.0, "keep_loaded": "realm_1,astral", "preload": true},
 		gameplay = {player_collision = false, xp_multiplier = 1.0, enemy_hp_multiplier = 1.0,
-			enemy_damage_multiplier = 1.0, spawn_density_multiplier = 1.0, godmode = false},
+			enemy_damage_multiplier = 1.0, spawn_density_multiplier = 1.0},
 		network = {tick_rate = 20, interest_radius = 72.0, event_radius = 85.0, max_speed_tolerance = 1.6},
 		accounts = {url = "https://void.plainshow.se", server_key = "", save_interval = 30.0, heartbeat_interval = 5.0},
 	}

@@ -20,6 +20,7 @@ var seat := ""
 var _ship: SpaceShip
 var _checkpoint := Vector3.ZERO
 var _old_far := 4000.0
+var _old_safe_margin := 0.001
 var _old_mouse := Input.MOUSE_MODE_VISIBLE
 var _prior_env: Environment
 var _hud: ResponsiveUILayer
@@ -88,6 +89,7 @@ func setup(actor: Player, place: SpaceWorld) -> SpaceTraversal:
 	world = place
 	_checkpoint = actor.global_position
 	_old_far = actor.camera.far
+	_old_safe_margin = actor.safe_margin
 	_old_mouse = Input.mouse_mode
 	camera_mode = CameraMode.FIRST_PERSON if place is SurfaceShipWorld else int(AppSettings.video.get("space_camera", CameraMode.ANGLED))
 	return self
@@ -95,6 +97,10 @@ func setup(actor: Player, place: SpaceWorld) -> SpaceTraversal:
 func _ready() -> void:
 	player.camera.far = 90000.0
 	_prior_env = player.camera.environment
+	# Pocket decks are 14 km below the origin. The default 1 mm margin
+	# is too close to floating-point precision there: repeated floor contacts
+	# can consume every slide iteration before the player moves.
+	player.safe_margin = 0.01
 	player.floor_snap_length = 0.9
 	player.floor_max_angle = deg_to_rad(60.0)
 	player.floor_constant_speed = true
@@ -547,9 +553,6 @@ func _seated(delta: float) -> void:
 				_input_timer = INPUT_RATE
 				var thrust := Input.get_axis("move_back", "move_forward")
 				var yaw := Input.get_axis("move_left", "move_right")+_mouse.x
-				if player.debug_input!=Vector2.ZERO:
-					thrust = -player.debug_input.y
-					yaw = player.debug_input.x
 				var roll := Input.get_axis("orbit_left", "orbit_right")
 				world.request(["pilot", [thrust, clampf(yaw, -1.0, 1.0), clampf(-_mouse.y, -1.0, 1.0), roll, Input.is_key_pressed(KEY_SHIFT), _pulse]])
 			_mouse = _mouse.lerp(Vector2.ZERO, 1.0-exp(-delta*2.2))
@@ -671,7 +674,7 @@ func physics_step(delta: float) -> void:
 	if not player.controls_locked() and not free_look():
 		player.camera_yaw += Input.get_axis("orbit_right", "orbit_left")*Player.ORBIT_SPEED*delta
 	var input := Vector2.ZERO if player.controls_locked() else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	if player.debug_input!=Vector2.ZERO: input = player.debug_input
+
 	if player.stats.buffs.has_effect("static"): input = Vector2.ZERO
 	var dir := player.drunk_sway((player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(input.x, 0, input.y)).slide(up).normalized()*input.length(), up)
 	var speed := Player.BASE_SPEED*player.stats.move_speed_multiplier()*(Player.SHIELD_MOVE_SPEED if player.shield.active else Player.CHARGE_MOVE_SPEED if player._charging else 1.0)
@@ -1115,6 +1118,7 @@ func _exit_tree() -> void:
 	player.cinematic_locked = false
 	player.global_basis = Basis.IDENTITY
 	player.up_direction = Vector3.UP
+	player.safe_margin = _old_safe_margin
 	player.floor_snap_length = Player.STEP_HEIGHT
 	player.floor_constant_speed = false
 	player.floor_max_angle = deg_to_rad(45.0)

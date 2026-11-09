@@ -71,7 +71,6 @@ class RewardIcon extends Control:
 				{"o": Color("17131d"), "g": Color("935528"), "Y": YELLOW}, art_scale)
 
 
-
 class RewardTile extends PanelContainer:
 	var reward := {}
 	var unlocked := false

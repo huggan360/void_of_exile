@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://tools/simulate_character_leveling.gd" id="1"]
-
-[node name="CharacterLevelingSimulation" type="Node"]
-script = ExtResource("1")

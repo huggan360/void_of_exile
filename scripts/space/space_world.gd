@@ -614,13 +614,13 @@ func _forget(ship: SpaceShip) -> void:
 	Net.server.campaigns._touch(account)
 	Net.server.campaigns.flush()
 
-## Takes Dots for a purchase (offline play is free; test servers too).
+## Takes Dots for a purchase.
 func _pay(p: Dictionary, amount: int) -> bool:
-	if not Net.is_server() or Net.server.config.test_mode: return true
+	if not Net.is_server(): return true
 	return Net.server.economy.spend(p, amount, "ship")
 
 func _refund(p: Dictionary, amount: int) -> void:
-	if Net.is_server() and not Net.server.config.test_mode: Net.server.economy.award(p, amount, "ship refund")
+	if Net.is_server(): Net.server.economy.award(p, amount, "ship refund")
 
 ## Adrift in space or on a planet with no ship of their crew in the Reach.
 func stranded(pid: int, pos: Vector3) -> bool:

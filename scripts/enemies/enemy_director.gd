@@ -102,12 +102,6 @@ func _nearest_distance(pos: Vector3) -> float:
 
 
 func _process(delta: float) -> void:
-	if not FrameTrace.enabled: _profile_process(delta); return
-	var started := Time.get_ticks_usec()
-	_profile_process(delta)
-	FrameTrace.record("enemies/enemy_director",started)
-
-func _profile_process(delta: float) -> void:
 	if remote or players.all(func(p: Variant) -> bool: return not is_instance_valid(p) or p.frozen):
 		return
 	_timer -= delta

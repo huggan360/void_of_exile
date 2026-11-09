@@ -144,7 +144,6 @@ func _lay_streets(rng: RandomNumberGenerator) -> Array[Dictionary]:
 	return streets
 
 
-
 func _near_exit(a: float, gap: float) -> bool:
 	for e in exits:
 		if absf(angle_difference(a, e)) < gap:

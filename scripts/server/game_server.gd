@@ -60,12 +60,8 @@ const XP_REACH := 12.0  # orbs fly to you; collecting one this far from where it
 var XP_ORB_LIFETIME := 45.0
 const PUBLIC := 0  # a bag's viewer when everyone can see it
 
-## Development: players take no damage.
-var debug_godmode := false
 ## Server config: XP from kills and orbs is multiplied by this.
 var xp_multiplier := 1.0
-## Offline only: what a fresh character starts with after dying.
-var _demo := false
 
 var _next_id := 1
 ## player id -> {stats, realm, pos, since_hurt, since_magic, shield, ring_ready}
@@ -108,14 +104,9 @@ func _physics_process(delta: float) -> void:
 
 # --- Characters ---------------------------------------------------------------------
 
-## A player connects; returns their id. demo: the demo character's kit (a
-## Backpack on, one of every gear item, a few elixirs on the quickslots).
-func join(demo := false) -> int:
-	_demo = demo
-	var stats := PlayerStats.new()
-	if demo:
-		give_demo_kit(stats)
-	return add_player(stats)
+## The menu's local character, before the account character is loaded.
+func join() -> int:
+	return add_player(PlayerStats.new())
 
 
 ## Server: a connected player's character (loaded from the account service).
@@ -209,20 +200,6 @@ func adopt(old_id: int, new_id: int) -> void:
 	_orbs.clear()
 
 
-## Development kit: a Backpack on, one of every gear item, a few elixirs.
-func give_demo_kit(stats: PlayerStats) -> void:
-	var equipped_ids: Array = stats.gear.values().filter(func(i: Item) -> bool: return i != null).map(
-			func(i: Item) -> String: return i.id)
-	stats.add_backpack()
-	# One of every stronghold key first, so they're never crowded out.
-	stats.give(Items.GATE_KEYS.keys().map(func(id: String) -> Item: return Items.gate_key(id)))
-	stats.give(Items.all().filter(func(i: Item) -> bool:
-		return not i.id in equipped_ids and not i.is_consumable() and not i.is_key() and not i.is_story()))
-	for k in PlayerStats.QUICKSLOTS:
-		stats.quick[k] = Items.make(["elixir_hp", "elixir_mp"][k])
-		stats.quick[k].count = 3
-
-
 ## A player's character, to read (never to change: ask the server).
 func character(player_id: int) -> PlayerStats:
 	return _players[player_id].stats if _players.has(player_id) else null
@@ -271,7 +248,7 @@ func hit_player(player_id: int, amount: float, armor_piercing := false, shielded
 	if p.is_empty():
 		return {landed = 0.0, soaked = 0.0}
 	var stats: PlayerStats = p.stats
-	if debug_godmode or intro_protected(player_id) or stats.buffs.has_effect("invincible"):
+	if intro_protected(player_id) or stats.buffs.has_effect("invincible"):
 		amount = 0.0
 	var after_shield := amount * stats.shield_damage_multiplier() if shielded and p.shield else amount
 	var soaked := amount-after_shield
@@ -367,7 +344,7 @@ func _tick_vitals(p: Dictionary, delta: float) -> void:
 ## Dying is permanent: the character, its level, stats and everything it
 ## carried are gone. Online the server's Net moves it to the dead table and
 ## the player makes a new one; offline a fresh character starts in the
-## Tavern (with the development kit again when the game runs with one).
+## Tavern.
 func _die(player_id: int) -> void:
 	var p: Dictionary = _players[player_id]
 	var stats: PlayerStats = p.stats
@@ -378,17 +355,7 @@ func _die(player_id: int) -> void:
 		player_died.emit(player_id, lost)
 		return
 	stats.reset()
-	if _demo:
-		give_demo_kit(stats)
 	player_died.emit(player_id, lost)
-
-
-func debug_grant_xp(player_id: int, amount: int) -> void:
-	if Net.is_client():
-		return
-	var stats := character(player_id)
-	if stats:
-		stats.add_xp(amount)
 
 
 # --- Inventory ----------------------------------------------------------------------

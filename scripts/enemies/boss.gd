@@ -776,27 +776,6 @@ func clear_point(pos: Vector3, radius := 0.6) -> Vector3:
 	return Vector3.INF
 
 
-## Development: jumps straight to a phase (old objectives cleared, the new
-## phase set up normally, health at its start).
-func debug_skip_to(index: int) -> void:
-	if state == State.IDLE:
-		if _shell != null:
-			_hatch()
-		else:
-			activate()
-	if state == State.INTRO:
-		_begin_fight()
-	despawn_support()
-	_pips.clear()
-	hazards.clear()
-	director.bullets.clear_owner(encounter_id)
-	hp_floor = 0
-	immune = false
-	hp = int(max_hp * boss_def.phases[index - 1].get("until", 1.0)) - 1 if index > 0 else max_hp
-	phase = mini(phase, index - 1)
-	_enter_phase(index)
-
-
 # --- Damage, reset and death --------------------------------------------------------
 
 func take_hit(_hit_position: Vector3, direction: Vector3, damage := 10, source: Node = null) -> void:

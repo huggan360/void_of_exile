@@ -13,7 +13,7 @@ extends Node
 ##
 ## Commands typed in chat: /t or /tell <name> <text>, /p <text> (party),
 ## /invite <name>, /accept, /decline, /leave, /kick <name>, /lead <name>,
-## /tp <name>, /who, /help. Developers also have /give, /lvl and /max.
+## /tp <name>, /who, /help.
 ## Parties live on this server; a departing leader hands the lead to the next member.
 
 const MAX_PARTY := 6
@@ -131,85 +131,12 @@ func _command(p: Dictionary, text: String) -> void:
 		"/kick": kick(p, arg)
 		"/lead": promote(p, arg)
 		"/tp", "/teleport": teleport(p, arg)
-		"/give": server.economy.give(p, (arg + " " + rest).strip_edges())
-		"/lvl": _level(p, (arg + " " + rest).strip_edges())
-		"/max": _max_stats(p, (arg + " " + rest).strip_edges())
-		"/theory":
-			if not p.get("developer",false):
-				system(p.player_id,"Only developers can open this entrance.")
-			elif not server.realms.has(p.realm) or Dungeons.is_dungeon(p.realm):
-				system(p.player_id,"Enter a realm, then use /theory to open the entrance.")
-			else:
-				var entrance := server.dungeons.spawn(p.realm,p.pos+Vector3(2,0,0),"theory_of_everything",false,true)
-				system(p.player_id,"Theory of Everything entrance opened nearby." if not entrance.is_empty() else "Move to open ground and try /theory again.")
 		"/who":
 			var here := server.peers.values().filter(func(o: Dictionary) -> bool: return o.joined and o.realm == p.realm)
 			system(p.player_id, "%d here (%s), %d on this server." % [here.size(),
 					", ".join(here.map(func(o: Dictionary) -> String: return str(o.name)).slice(0, 12)), server.player_count()])
-		"/help", "/?": system(p.player_id, HELP + (". Developer: /lvl [level], /lvl <player> [level], /max [player], /give <player> <item> [count], /theory" if p.get("developer", false) else ""))
+		"/help", "/?": system(p.player_id, HELP)
 		_: system(p.player_id, "Unknown command %s. %s" % [word, HELP])
-
-
-## Server-authenticated developer flag, as with /give. Defaults to max level.
-func _level(p: Dictionary, args: String) -> void:
-	if not p.get("developer", false):
-		system(p.player_id, "Only developers can use /lvl.")
-		return
-	var parts := args.split(" ", false)
-	var target := p
-	var desired := PlayerStats.MAX_LEVEL
-	if parts.size() > 2:
-		system(p.player_id, "Write /lvl [1-50] or /lvl <player> [1-50]. No level means 50.")
-		return
-	if not parts.is_empty():
-		if parts[0].is_valid_int():
-			if parts.size() > 1:
-				system(p.player_id, "Write /lvl [1-50] or /lvl <player> [1-50].")
-				return
-			desired = int(parts[0])
-		else:
-			target = find(parts[0])
-			if target.is_empty():
-				system(p.player_id, "%s isn't on this server." % parts[0])
-				return
-			if parts.size() > 1:
-				if not parts[1].is_valid_int():
-					system(p.player_id, "The level must be a whole number from 1 to 50.")
-					return
-				desired = int(parts[1])
-	if desired < 1 or desired > PlayerStats.MAX_LEVEL:
-		system(p.player_id, "The level must be from 1 to 50.")
-		return
-	var stats := GameServer.character(target.player_id)
-	if stats == null or target.get("dead", false) or target.get("switching", false):
-		system(p.player_id, "That player needs a living, active character.")
-		return
-	stats.developer_set_level(desired)
-	target.dirty = true
-	system(p.player_id, "%s is now level %d." % [target.name, desired])
-	if target != p: system(target.player_id, "A developer set your character to level %d." % desired)
-
-
-func _max_stats(p: Dictionary, args: String) -> void:
-	if not p.get("developer", false):
-		system(p.player_id, "Only developers can use /max.")
-		return
-	var parts := args.split(" ", false)
-	if parts.size() > 1:
-		system(p.player_id, "Write /max or /max <player>.")
-		return
-	var target := p if parts.is_empty() else find(parts[0])
-	if target.is_empty():
-		system(p.player_id, "%s isn't on this server." % args)
-		return
-	var stats := GameServer.character(target.player_id)
-	if stats == null or target.get("dead", false) or target.get("switching", false):
-		system(p.player_id, "That player needs a living, active character.")
-		return
-	stats.developer_max_stats()
-	target.dirty = true
-	system(p.player_id, "All of %s's permanent stats are now maxed." % target.name)
-	if target != p: system(target.player_id, "A developer maxed your permanent stats.")
 
 
 func _tell(p: Dictionary, to_name: String, text: String) -> void:

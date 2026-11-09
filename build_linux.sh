@@ -21,6 +21,8 @@ command -v sha256sum >/dev/null || fail "sha256sum is required."
 
 if [[ -n "${GODOT:-}" ]]; then
     GODOT_BIN="$GODOT"
+elif [[ -x "$HOME/godot/engine/godot_voxel_editor" ]]; then
+    GODOT_BIN="$HOME/godot/engine/godot_voxel_editor"
 elif [[ -x "$HOME/Godot/godot.sh" ]]; then
     GODOT_BIN="$HOME/Godot/godot.sh"
 elif [[ -x "$HOME/Godot/godot_voxel_editor" ]]; then

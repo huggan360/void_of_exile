@@ -7,3 +7,7 @@ perf_logs/
 .aws/
 .codex/
 .agents/
+
+# Server runtime state and release outputs
+server_config/data/
+releases/

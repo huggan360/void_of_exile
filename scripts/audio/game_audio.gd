@@ -330,7 +330,6 @@ func stop(handle: Dictionary, fade := .2) -> void:
 	handle.fade = maxf(.01,fade)
 
 func _start_players(v: Dictionary, from := 0.0) -> void:
-	var profile_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	if v.positional and str(AppSettings.audio.output_mode)=="surround":
 		var p := AudioStreamPlayer3D.new()
 		p.stream = v.stream
@@ -357,7 +356,6 @@ func _start_players(v: Dictionary, from := 0.0) -> void:
 			p.volume_db = -80
 			p.play(from)
 	v.mode = str(AppSettings.audio.output_mode)
-	if FrameTrace.enabled: FrameTrace.record("audio/start",profile_started)
 
 func _rebuild_voice(v: Dictionary) -> void:
 	var position := fmod(float(v.seek)+float(v.age)*float(v.pitch),maxf(.01,v.stream.get_length()))
@@ -373,22 +371,13 @@ func _rebuild_voice(v: Dictionary) -> void:
 	_start_players(v,position)
 
 func _dispose(v: Dictionary) -> void:
-	var profile_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	for p in v.players:
 		if is_instance_valid(p): p.stop(); p.queue_free()
 	v.players = []
 	v.stopping = true
-	if FrameTrace.enabled: FrameTrace.record("audio/dispose",profile_started)
 
 func _process(delta: float) -> void:
-	if not FrameTrace.enabled: _profile_process(delta); return
-	var started := Time.get_ticks_usec()
-	_profile_process(delta)
-	FrameTrace.record("audio/game_audio",started)
-
-func _profile_process(delta: float) -> void:
 	if Net.is_server(): return
-	var segment_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	if is_instance_valid(_player):
 		if is_instance_valid(_player.spatial_controller):
 			_listener.global_transform = Transform3D(_player.camera.global_basis,_player.global_position+_player.up_direction*1.4)
@@ -405,23 +394,15 @@ func _profile_process(delta: float) -> void:
 	var music_bus := AudioServer.get_bus_index("Music")
 	var music_db := _music_volume_db(float(AppSettings.audio.music))
 	if absf(AudioServer.get_bus_volume_db(music_bus)-music_db)>.05: AudioServer.set_bus_volume_db(music_bus,music_db)
-	if FrameTrace.enabled: FrameTrace.record("audio/listener_mix",segment_started)
-	segment_started = Time.get_ticks_usec() if FrameTrace.enabled else 0
 	_update_footsteps(delta)
-	if FrameTrace.enabled: FrameTrace.record("audio/steps",segment_started)
 	_mix_tick -= delta
 	var update_positions := _mix_tick<=0
 	if update_positions: _mix_tick = 1.0/30.0
 	_tick -= delta
 	if _tick<=0:
 		_tick = .15
-		var context_start := Time.get_ticks_usec() if FrameTrace.enabled else 0
 		_update_context()
-		if FrameTrace.enabled: FrameTrace.record("audio/context",context_start)
-		context_start = Time.get_ticks_usec() if FrameTrace.enabled else 0
 		_update_emitters()
-		if FrameTrace.enabled: FrameTrace.record("audio/emitters",context_start)
-	segment_started = Time.get_ticks_usec() if FrameTrace.enabled else 0
 	for i in range(voices.size()-1,-1,-1):
 		var v := voices[i]
 		v.age += delta
@@ -435,7 +416,6 @@ func _profile_process(delta: float) -> void:
 		if (v.stopping and v.level<=.001) or (not v.loop and v.age>v.length+.08):
 			_dispose(v); voices.remove_at(i); continue
 		if update_positions or v.stopping or absf(float(v.level)-float(v.target))>.001: _update_voice(v)
-	if FrameTrace.enabled: FrameTrace.record("audio/voices",segment_started)
 	if _cooldowns.size()>2048:
 		var now := Time.get_ticks_msec()/1000.0
 		for key in _cooldowns.keys():

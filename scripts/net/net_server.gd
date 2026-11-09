@@ -235,7 +235,7 @@ func on_hello(peer_id: int, protocol: int, token: String, character_id: int, acc
 		server_name = config.value("server", "name"), motd = config.value("server", "motd"),
 		player_collision = config.value("gameplay", "player_collision", false),
 		tick_rate = config.value("network", "tick_rate", 20), account_xp = p.acct_xp,
-		singleplayer = config.singleplayer, dots = p.dots, developer = p.developer,
+		singleplayer = config.singleplayer, dots = p.dots,
 	})
 	print("[server] %s joined with character #%d (%d online)" % [p.name, character_id, player_count()])
 
@@ -246,7 +246,7 @@ func _new_record(peer_id: int, character_id: int, account_name: String) -> Dicti
 		joined = false, dead = false, realm = "", pos = Vector3.ZERO, facing = 0.0, speed = 0.0, flags = 0,
 		moved_at = 0.0, grace = 0.0, known = {}, known_players = {}, sent_attacks = {}, ack = 0,
 		dirty = false, rtt = 0.0, gear_key = "", acct_xp = 0, acct_pending = 0, switching = false,
-		dots = 0, developer = false, vault = {}, saving = false,
+		dots = 0, vault = {}, saving = false,
 	}
 
 
@@ -288,8 +288,6 @@ func _take_character(p: Dictionary, stats: PlayerStats, claim: Dictionary) -> vo
 		p.dirty = true
 		if int(p.get("account_id", 0)) == 0:
 			p.story_migration = removed.map(func(item: Item) -> Dictionary: return {id = item.id, count = item.count})
-	if config.test_mode:
-		GameServer.give_demo_kit(stats)
 	p.acct_xp = int(claim.account.get("progress", {}).get("xp", 0))
 	p.acct_pending = 0
 	economy.take_account(p, claim.account)
@@ -550,7 +548,7 @@ func _leave_realm(p: Dictionary) -> void:
 ## The Reach opens after the Theory of Everything: for its tellers, and for a
 ## party standing in a Theory instance whose Empress has fallen.
 func _astral_unlocked(p: Dictionary) -> bool:
-	if config.test_mode: return true
+
 	var here: RealmInstance = realms.get(p.realm)
 	if here and here.world is TheoryWorld and here.world.boss_defeated: return true
 	if int(p.get("account_id", 0)) == 0 or not is_instance_valid(campaigns): return false
@@ -668,8 +666,8 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		Net.c_correct.rpc_id(peer_id,p.pos)
 		p.moved_at = t
 		return
-	if p.moved_at > 0.0 and p.grace <= 0.0 and not config.test_mode:
-		# Believable? Walking speed (test servers allow debug teleports) (with slack for knockback and lag), not a teleport.
+	if p.moved_at > 0.0 and p.grace <= 0.0:
+		# Believable? Walking speed, with slack for knockback and lag, not a teleport.
 		var dt := maxf(0.05, t - p.moved_at)
 		var flat := pos.distance_to(p.pos) if spatial!=null else Vector2(pos.x-p.pos.x,pos.z-p.pos.z).length()
 		var limit := Player.BASE_SPEED * stats.move_speed_multiplier() * float(config.value("network", "max_speed_tolerance", 1.6)) \
@@ -725,18 +723,6 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 		"theory":
 			var instance: RealmInstance = realms.get(p.realm)
 			if instance!=null and instance.world is SpatialWorld: instance.world.server_action(p,args)
-		"camp_test":
-			if config.test_mode:
-				CampaignQA.handle(self, p, args)
-		"dungeon_test":
-			if config.test_mode and args.size() == 1:
-				if str(args[0]) == "portal" and p.realm == "realm_1":
-					dungeons.spawn(p.realm, p.pos + Vector3(1, 0, 0), "goblins_cave")
-				elif str(args[0]) == "defeat" and Dungeons.is_dungeon(p.realm):
-					dungeons.debug_defeat(p)
-				elif str(args[0]) == "boss" and Dungeons.is_dungeon(p.realm):
-					dungeons.grants[p.player_id] = p.realm
-					social.send_to(p.player_id, p.realm, realms[p.realm].world.layout.boss + Vector3(0, 0, 8))
 		"status_hit":
 			if args.size()==1: _status_hit(p,int(args[0]))
 		"hurt":  # [seq, amount, armor_piercing, shielded, by]: an enemy hit them on their screen
@@ -899,7 +885,7 @@ func _on_player_died(player_id: int, lost: int) -> void:
 	print("[server] %s's character #%d died (level %d, killed by %s)" % [p.name, p.character_id, stats.level, killed_by])
 	var data := stats.to_data()
 	var r := await api.call_api("POST", "/server/die", {character_id = p.character_id, data = data,
-			killed_by = killed_by, realm = realm_id, account_xp = p.acct_pending if not config.test_mode else 0})
+			killed_by = killed_by, realm = realm_id, account_xp = p.acct_pending})
 	if not r.ok:
 		push_error("Couldn't record the death of #%d: %s" % [p.character_id, r.error])
 	else:
@@ -931,8 +917,8 @@ func _save_record(p: Dictionary) -> void:
 ## Returns the account service's answer ({ok = false} when nothing was sent).
 func save_record(p: Dictionary, extra := {}) -> Dictionary:
 	var stats := GameServer.character(p.player_id)
-	if stats == null or config.test_mode:
-		return {ok = false, error = "test mode"}
+	if stats == null:
+		return {ok = false, error = "character unavailable"}
 	while p.get("saving", false):
 		await get_tree().process_frame
 	if p.dead:
@@ -1276,7 +1262,6 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 	var per_players := SNAPSHOT_ENEMIES*2*Net.PLAYER_STRIDE
 	for at in range(0,players.size(),per_players):
 		Net.c_snapshot.rpc_id(peer_id,t,PackedFloat32Array(),[],players.slice(at,at+per_players),[])
-
 
 
 ## What another player looks like: their gear (for colors and auras).

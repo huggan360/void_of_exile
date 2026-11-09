@@ -273,7 +273,6 @@ func update_streaming_multi(positions: Array, build_all_now := false) -> void:
 
 
 func _retire_step() -> void:
-	var started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	var deadline := Time.get_ticks_usec()+600
 	var count := 0
 	while not _retired.is_empty() and count<8:
@@ -287,7 +286,6 @@ func _retire_step() -> void:
 			child.queue_free()
 		count += 1
 		if Time.get_ticks_usec()>=deadline: break
-	if FrameTrace.enabled: FrameTrace.record("stream/retire",started)
 
 func _prune_chunks(keep: Dictionary, all_now: bool) -> void:
 	_retire_step()
@@ -299,7 +297,6 @@ func _prune_chunks(keep: Dictionary, all_now: bool) -> void:
 			_build_steps.clear()
 			_building_root = null
 		# Remove collision and processing immediately; destruction is deferred.
-		var unload_started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 		if all_now or server_build:
 			remove_child(root)
 			root.queue_free()
@@ -310,7 +307,6 @@ func _prune_chunks(keep: Dictionary, all_now: bool) -> void:
 			root.process_mode = Node.PROCESS_MODE_DISABLED
 			_retired.append(root)
 		_chunks.erase(c)
-		if FrameTrace.enabled: FrameTrace.record("stream/unload",unload_started)
 		enemy_director.remove_chunk(c)
 		removed += 1
 		if not all_now and removed >= UNLOADS_PER_FRAME: break
@@ -323,14 +319,11 @@ func _build_queued(build_all_now: bool) -> void:
 			_start_chunk(_queue.pop_front())
 		if not _build_steps.is_empty():
 			var step: Callable = _build_steps.pop_front()
-			var started := Time.get_ticks_usec() if FrameTrace.enabled else 0
 			step.call()
-			if FrameTrace.enabled: FrameTrace.record("stream/"+str(step.get_method()),started)
 		if not build_all_now and Time.get_ticks_usec() >= deadline: break
 
 func is_presentation_ready() -> bool:
 	return super.is_presentation_ready() and _queue.is_empty() and _build_steps.is_empty()
-
 
 
 ## A conversation with a townsperson. The steward also offers to make the
@@ -442,7 +435,7 @@ func pack_survivors() -> Dictionary:
 	return _record.get("pack_survivors", {})
 
 
-## Debug helper: the nearest enemy pack site of a type around `near`.
+## the nearest enemy pack site of a type around `near`.
 func find_pack_site(pack_id: String, near: Vector3) -> Dictionary:
 	var best := {}
 	var c := _chunk_of(near)
@@ -641,7 +634,7 @@ func _on_obstacle_destroyed(obstacle: Obstacle) -> void:
 	WorldServer.report_obstacle_destroyed(realm_id, obstacle.obstacle_id)
 
 
-## Debug helper: an open, walkable spot as close as possible to the middle
+## an open, walkable spot as close as possible to the middle
 ## of the first feature of a type (not inside a wall or pillar).
 func find_feature_point(type: String) -> Vector3:
 	for f in generator.features:
@@ -657,7 +650,7 @@ func find_feature_point(type: String) -> Vector3:
 	return spawn_point
 
 
-## Debug helper: a walkable spot inside the given biome, searching rings
+## a walkable spot inside the given biome, searching rings
 ## outward from where that biome usually lies.
 func find_biome_point(biome_id: int) -> Vector3:
 	var typical := 0.74

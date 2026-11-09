@@ -128,13 +128,6 @@ func invalidate() -> void:
 
 
 func _process(delta: float) -> void:
-	if not FrameTrace.enabled: _guide_process(delta); return
-	var started := Time.get_ticks_usec()
-	_guide_process(delta)
-	FrameTrace.record("quest/guide", started)
-
-
-func _guide_process(delta: float) -> void:
 	if not is_instance_valid(world) or not world.is_inside_tree() or not is_instance_valid(player): return
 	if Dungeons.is_dungeon(world.realm_id): return
 	if world is IslandWorld: _prewarm_step()

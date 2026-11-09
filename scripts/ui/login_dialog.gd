@@ -42,13 +42,6 @@ func _ready() -> void:
 	_user.grab_focus.call_deferred()
 
 
-## Fills in and logs in (debug runs).
-func auto(user: String, password: String) -> void:
-	_user.text = user
-	_pass.text = password
-	_login()
-
-
 func _login() -> void:
 	if Account.busy or _user.text.strip_edges() == "":
 		return

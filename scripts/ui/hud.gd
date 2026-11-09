@@ -287,7 +287,7 @@ func _ready() -> void:
 	right.add_child(shop)
 	fleet = FleetPanel.new()
 	fleet.interaction = interaction
-	right.add_child(fleet)
+	add_centered(fleet)
 
 	# Top center: the account's XP bar, level and reward drawer.
 	account_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -379,11 +379,6 @@ func toggle_stats() -> void:
 		_hud_reveal_left = 1.0
 
 
-## Debug: shows a slot's tooltip as if hovered.
-func debug_show_tooltip(slot_id: String) -> void:
-	_tooltip.show_item(stats.gear.get(slot_id))
-
-
 func set_world(world: GameWorld, fog_of_war: FogOfWar) -> void:
 	interaction.set_world(world)
 	minimap.fog_of_war = fog_of_war
@@ -457,7 +452,7 @@ func add_centered(panel: Control) -> void:
 	_ui_root.add_child(center)
 
 
-## Where you are (kept for debugging; the top of the screen shows the account bar).
+## Where you are.
 func _update_bars() -> void:
 	if bar_override.is_empty():
 		if _bars_restyled:
@@ -512,12 +507,6 @@ func drop_to_ground(from: Dictionary) -> void:
 
 
 func _process(_delta: float) -> void:
-	if not FrameTrace.enabled: _profile_process(_delta); return
-	var started := Time.get_ticks_usec()
-	_profile_process(_delta)
-	FrameTrace.record("ui/hud",started)
-
-func _profile_process(_delta: float) -> void:
 	_update_world_ui_fade(_delta, _ui_root.get_global_mouse_position())
 	_fps_readout.visible = AppSettings.video.show_fps
 	_fps_timer -= _delta
@@ -587,11 +576,6 @@ func _update_world_ui_fade(delta: float, pointer: Vector2) -> void:
 		if not is_instance_valid(control): continue
 		var blend := 1.0 - exp(-delta * (14.0 if target > control.modulate.a else 3.5))
 		control.modulate.a = lerpf(control.modulate.a, target, blend)
-
-
-## Debug: opens the backpack as if Tab were held.
-func debug_open_inventory() -> void:
-	Input.action_press("inventory")
 
 
 func _input(event: InputEvent) -> void:
