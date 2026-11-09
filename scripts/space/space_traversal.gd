@@ -20,6 +20,7 @@ var seat := ""
 var _ship: SpaceShip
 var _checkpoint := Vector3.ZERO
 var _old_far := 4000.0
+var _old_cull_mask := (1<<20)-1
 var _old_safe_margin := 0.001
 var _old_mouse := Input.MOUSE_MODE_VISIBLE
 var _prior_env: Environment
@@ -92,6 +93,7 @@ func setup(actor: Player, place: SpaceWorld) -> SpaceTraversal:
 	world = place
 	_checkpoint = actor.global_position
 	_old_far = actor.camera.far
+	_old_cull_mask = actor.camera.cull_mask
 	_old_safe_margin = actor.safe_margin
 	_old_mouse = Input.mouse_mode
 	camera_mode = CameraMode.FIRST_PERSON if place is SurfaceShipWorld else int(AppSettings.video.get("space_camera", CameraMode.ANGLED))
@@ -227,11 +229,11 @@ func _process(delta: float) -> void:
 		_ship_info.add_theme_color_override("font_color", UIStyle.HP_LIGHT if _ship.hp<SpaceShip.MAX_HP/3 or _ship.broken else UIStyle.TEXT)
 	_update_bars(zone)
 	_update_hint()
-	_cull_outside()
 	_pin_to_hull()
 	if seat!="":
 		_seated(delta)
 	update_camera(delta)
+	_cull_outside()
 	if _ship!=null and _ship.mode=="flying":
 		if seat=="pilot": _update_target_locks(_pilot_direction())
 		elif seat.begins_with("turret"): _update_target_locks(_turret_direction())
@@ -273,12 +275,12 @@ func _update_air() -> void:
 func _seat_title(id: String) -> String:
 	return SpaceInteraction.SEAT_TITLES.get(id, "Aboard")
 
-## Live windows render the outside world, so it must remain visible to their camera.
+## Cull exterior geometry only from the room's main camera. Live windows
+## keep their own full mask and continue to show the world outside.
 func _cull_outside() -> void:
-	if not _outside_culled: return
-	_outside_culled = false
-	for node: Variant in world.planets.values()+world.ship_views.values()+[world.station, world.foes]:
-		if is_instance_valid(node) and node is Node3D: (node as Node3D).visible = true
+	var camera := player.get_viewport().get_camera_3d()
+	_outside_culled = camera==player.camera and SpaceLayout.pocket_at(player.camera.global_position)>=0 and SpaceLayout.pocket_at(player.global_position)>=0
+	player.camera.cull_mask = _old_cull_mask & ~ShipWindowView.EXTERIOR_LAYER if _outside_culled else _old_cull_mask
 
 ## The keys for what you are doing now, in the HUD's key help above the
 ## minimap (only while seated, out on the hull, in a lift or at a city table).
@@ -1200,4 +1202,5 @@ func _exit_tree() -> void:
 	player.aura.visible = true
 	player.camera.environment = _prior_env
 	player.camera.far = _old_far
+	player.camera.cull_mask = _old_cull_mask
 	player.camera.fov = Player.CAMERA_FOV
