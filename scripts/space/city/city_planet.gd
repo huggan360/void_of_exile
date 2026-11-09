@@ -36,20 +36,38 @@ class Batch extends RefCounted:
 		parts[key][0].append(xform)
 		parts[key][1].append(color)
 		parts[key][2].append(custom)
-	func flush(parent: Node3D, label: String, far: float, detail_far := CityPlanet.DETAIL_RANGE) -> void:
+	## Each kind as one packed MultiMesh buffer (transform, colour, custom per
+	## instance): handed to the GPU in one go, and what the city cache stores.
+	func buffers() -> Dictionary:
+		var out := {}
 		for key: String in parts:
 			var data: Array = parts[key]
+			var count: int = data[0].size()
+			var buf := PackedFloat32Array()
+			buf.resize(count*20)
+			for i in count:
+				var t: Transform3D = data[0][i]
+				var c: Color = data[1][i]
+				var u: Color = data[2][i]
+				var o := i*20
+				buf[o] = t.basis.x.x; buf[o+1] = t.basis.y.x; buf[o+2] = t.basis.z.x; buf[o+3] = t.origin.x
+				buf[o+4] = t.basis.x.y; buf[o+5] = t.basis.y.y; buf[o+6] = t.basis.z.y; buf[o+7] = t.origin.y
+				buf[o+8] = t.basis.x.z; buf[o+9] = t.basis.y.z; buf[o+10] = t.basis.z.z; buf[o+11] = t.origin.z
+				buf[o+12] = c.r; buf[o+13] = c.g; buf[o+14] = c.b; buf[o+15] = c.a
+				buf[o+16] = u.r; buf[o+17] = u.g; buf[o+18] = u.b; buf[o+19] = u.a
+			out[key] = [count, buf]
+		return out
+	func flush(parent: Node3D, label: String, far: float, detail_far := CityPlanet.DETAIL_RANGE, packed := {}) -> void:
+		var all := packed if not packed.is_empty() else buffers()
+		for key: String in all:
 			var detail := key.begins_with("d:")
 			var multi := MultiMesh.new()
 			multi.transform_format = MultiMesh.TRANSFORM_3D
 			multi.use_colors = true
 			multi.use_custom_data = true
 			multi.mesh = CityPlanet.mesh(key.trim_prefix("d:"))
-			multi.instance_count = data[0].size()
-			for i in data[0].size():
-				multi.set_instance_transform(i, data[0][i])
-				multi.set_instance_color(i, data[1][i])
-				multi.set_instance_custom_data(i, data[2][i])
+			multi.instance_count = int(all[key][0])
+			multi.buffer = all[key][1]
 			var node := MultiMeshInstance3D.new()
 			node.name = "%s_%s" % [label, key.replace(":", "_")]
 			node.multimesh = multi
@@ -174,6 +192,12 @@ func _build_next(eye: Vector3) -> void:
 
 func _build_chunk(face: int, ci: int, cj: int) -> void:
 	var batch := Batch.new()
+	var file := _cache_file(face, ci, cj)
+	var kept := _read_cache(file)
+	if not kept.is_empty():
+		for key: Vector3i in kept.solids: _solids[key] = kept.solids[key]
+		_finish_chunk(face, ci, cj, batch, kept.buffers)
+		return
 	var start := Time.get_ticks_usec()
 	for j in range(cj, mini(cj+CHUNK, CityLayout.N)):
 		for i in range(ci, mini(ci+CHUNK, CityLayout.N)):
@@ -184,12 +208,52 @@ func _build_chunk(face: int, ci: int, cj: int) -> void:
 				await get_tree().process_frame
 				if not is_inside_tree(): return
 				start = Time.get_ticks_usec()
+	var buffers := batch.buffers()
+	var solids := {}
+	for key: Vector3i in _solids:
+		if key.x==face and key.y/CHUNK==ci/CHUNK and key.z/CHUNK==cj/CHUNK: solids[key] = _solids[key]
+	_write_cache(file, {buffers = buffers, solids = solids})
+	_finish_chunk(face, ci, cj, batch, buffers)
+
+func _finish_chunk(face: int, ci: int, cj: int, batch: Batch, buffers: Dictionary) -> void:
 	var holder := Node3D.new()
 	holder.name = "Skyline_%d_%d_%d" % [face, ci, cj]
 	_done[Vector3i(face, ci/CHUNK, cj/CHUNK)] = true
 	add_child(holder)
-	batch.flush(holder, "c", 6000.0)
+	batch.flush(holder, "c", 6000.0, DETAIL_RANGE, buffers)
 	_building = false
+
+# --- The city kept on disk ------------------------------------------------------------------
+
+## Bump when the city's buildings change in a way the scripts' dates won't show.
+const CACHE_VERSION := 1
+const CACHE_DIR := "user://cache/city/"
+static var _cache_tag := ""
+
+## Each chunk's buildings and collision, saved the first time it is built and
+## loaded after that; a new game version or edited city scripts make it anew.
+static func _cache_file(face: int, ci: int, cj: int) -> String:
+	if _cache_tag=="":
+		var stamp := "%d|%s" % [CACHE_VERSION, Net.VERSION]
+		for path in ["res://scripts/space/city/city_art.gd", "res://scripts/space/city/city_planet.gd", "res://scripts/space/city/city_roads.gd",
+				"res://scripts/space/city/city_layout.gd", "res://scripts/space/space_layout.gd"]:
+			stamp += "|%d" % FileAccess.get_modified_time(path)
+		_cache_tag = stamp.md5_text().substr(0, 10)
+		DirAccess.make_dir_recursive_absolute(CACHE_DIR)
+		for old in DirAccess.get_files_at(CACHE_DIR):
+			if not old.begins_with(_cache_tag): DirAccess.remove_absolute(CACHE_DIR+old)
+	return "%s%s_%d_%d_%d.bin" % [CACHE_DIR, _cache_tag, face, ci, cj]
+
+static func _read_cache(file: String) -> Dictionary:
+	if not FileAccess.file_exists(file): return {}
+	var f := FileAccess.open_compressed(file, FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
+	if f==null: return {}
+	var data: Variant = f.get_var()
+	return data if data is Dictionary and data.has("buffers") and data.has("solids") else {}
+
+static func _write_cache(file: String, data: Dictionary) -> void:
+	var f := FileAccess.open_compressed(file, FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
+	if f: f.store_var(data)
 
 ## A cell's blocks: buildings on round footprints, or a park or a lake.
 func _block(batch: Batch, face: int, i: int, j: int, role: String) -> void:

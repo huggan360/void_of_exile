@@ -51,6 +51,8 @@ func _ready() -> void:
 	world.enemy_director.setup(null, bullets, world.cleared_packs(), world.pack_survivors())
 	GameServer.set_spot_finder(realm_id, func(origin: Vector3, taken: Array) -> Vector3:
 		return _bag_spots.find_spot(world, origin, taken) if is_instance_valid(world) else origin)
+	# Opened ahead of anyone (preloaded): asleep until the first player comes.
+	(func() -> void: if proxies.is_empty(): _sleep()).call_deferred()
 
 
 func _exit_tree() -> void:

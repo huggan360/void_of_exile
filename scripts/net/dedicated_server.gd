@@ -47,6 +47,10 @@ func _ready() -> void:
 		config.global.set_value("server", "lan_discovery", false)
 		config.global.set_value("server", "name", "Singleplayer")
 		config.global.set_value("server", "data_dir", ProjectSettings.globalize_path("user://singleplayer"))
+		# Quick to start, and gentle on the player's own computer: worlds load on
+		# the first visit and stay, within a memory budget.
+		config.global.set_value("realms", "preload", false)
+		config.global.set_value("server", "max_memory_mb", 1500)
 		_parent_pid = int(args.get("parent", "0"))
 	if args.has("godmode") or args.has("test"):
 		config.global.set_value("gameplay", "godmode", true)

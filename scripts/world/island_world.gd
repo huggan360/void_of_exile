@@ -161,7 +161,8 @@ func _warm_stream_assets() -> void:
 func _ready() -> void:
 	if not get_meta("assets_prepared",false): _warm_stream_assets()
 	var r := half_extent
-	_add_terrain(generator, AABB(Vector3(-r, -8, -r), Vector3(r * 2, IslandGenerator.MAX_HEIGHT + 16, r * 2)))
+	_add_terrain(generator, AABB(Vector3(-r, -8, -r), Vector3(r * 2, IslandGenerator.MAX_HEIGHT + 16, r * 2)),
+		"surface_%d" % generator.realm_seed, ["res://realm/realm_layout.tscn"])
 	if not server_build:
 		_add_water(IslandGenerator.SEA_LEVEL + 0.6, r + 300.0)
 	_add_portal(_portal_pos, spawn_point - _portal_pos, "hall",

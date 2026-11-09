@@ -191,8 +191,8 @@ func _load_global() -> void:
 		global = ConfigFile.new()
 	var defaults := {
 		server = {name = "Void Realm", port = Net.DEFAULT_PORT, max_players = 300, motd = "Welcome to the Void.",
-			public = false, lan_discovery = true, data_dir = "data"},
-		realms = {max_players_per_realm = 85, max_realms = 8, unload_after_empty = 120.0},
+			public = false, lan_discovery = true, data_dir = "data", max_memory_mb = 0},
+		realms = {"max_players_per_realm": 85, "max_realms": 8, "unload_after_empty": 120.0, "keep_loaded": "realm_1,astral", "preload": true},
 		gameplay = {player_collision = false, xp_multiplier = 1.0, enemy_hp_multiplier = 1.0,
 			enemy_damage_multiplier = 1.0, spawn_density_multiplier = 1.0, godmode = false},
 		network = {tick_rate = 20, interest_radius = 72.0, event_radius = 85.0, max_speed_tolerance = 1.6},

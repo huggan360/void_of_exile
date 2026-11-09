@@ -42,8 +42,11 @@ class Prefab:
 			var palette: VoxelColorPalette = _palette.duplicate()
 			for slot in range(1, biome.obstacle_colors.size()):
 				palette.set_color(slot, biome.obstacle_colors[slot])
-			var base := VoxModel.mesh_from_buffer(_base_buffer, palette) if voxel_positions.size() > 0 else null
-			var glow := VoxModel.mesh_from_buffer(_glow_buffer, palette) if has_glow else null
+			# Kept on disk per prefab and biome colours (VoxModel.cached).
+			var source := DIR + prefab_name + ".vox"
+			var colors := str(biome.id)+":"+str(Array(biome.obstacle_colors).map(func(c: Color) -> String: return c.to_html()))
+			var base := VoxModel.cached("%s|base|%s" % [source, colors], source, func() -> Mesh: return VoxModel.mesh_from_buffer(_base_buffer, palette)) if voxel_positions.size() > 0 else null
+			var glow := VoxModel.cached("%s|glow|%s" % [source, colors], source, func() -> Mesh: return VoxModel.mesh_from_buffer(_glow_buffer, palette)) if has_glow else null
 			_meshes[biome.id] = [base, glow]
 		return _meshes[biome.id]
 

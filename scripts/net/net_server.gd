@@ -101,7 +101,33 @@ func start(p_config: ServerConfig) -> Error:
 			config.value("server", "name"), port, port + Net.STATUS_PORT_OFFSET, api.base_url])
 	if api.server_key == "":
 		push_warning("accounts/server_key is empty in server.cfg: players can't log in until it's set.")
+	if bool(config.value("realms", "preload", true)): _preload_worlds.call_deferred()
 	return OK
+
+
+## The worlds that are the same every time (realms/keep_loaded: the Surface,
+## Space) are built at start, one a frame, and stay loaded (asleep while empty,
+## RealmInstance) so nobody waits for them; only memory pressure unloads them.
+func _preload_worlds() -> void:
+	for id in _kept():
+		if realms.has(id): continue
+		var started := Time.get_ticks_msec()
+		_open_kept(id)
+		print("[server] prepared %s in %d ms" % [id, Time.get_ticks_msec()-started])
+		await get_tree().process_frame
+
+func _kept() -> PackedStringArray:
+	return str(config.value("realms", "keep_loaded", "realm_1,astral")).replace(" ", "").split(",", false)
+
+func _open_kept(id: String) -> RealmInstance:
+	if SpaceWorld.is_space(id) and id == SpaceWorld.REALM:
+		return open_realm_record(id, {id = id, seed = 0, destroyed = [], space = true, name = "The Space"})
+	return _open_realm(id)
+
+## Over server/max_memory_mb (0: no limit), in megabytes of static memory.
+func _over_memory() -> bool:
+	var cap := int(config.value("server", "max_memory_mb", 0))
+	return cap > 0 and OS.get_static_memory_usage() > cap * 1048576
 
 
 func player_count() -> int:
@@ -589,9 +615,14 @@ func close_realm(realm_id: String) -> void:
 
 func _unload_empty_realms(_delta: float) -> void:
 	var after := float(config.value("realms", "unload_after_empty", 120.0))
+	var kept := _kept()
+	var squeezed := _over_memory()
 	for id in realms.keys():
 		var realm: RealmInstance = realms[id]
-		if realm.proxies.is_empty() and realm.empty_for > after and not dungeons.keeps_origin_open(id):
+		if not realm.proxies.is_empty() or dungeons.keeps_origin_open(id): continue
+		# Kept worlds stay (asleep) unless memory runs short; others go when empty long enough.
+		var due := realm.empty_for > (2.0 if squeezed else after)
+		if due and (not id in kept or squeezed):
 			realms.erase(id)
 			realm.queue_free()
 			print("[server] closed %s (empty)" % id)

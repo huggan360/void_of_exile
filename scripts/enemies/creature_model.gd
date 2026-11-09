@@ -1224,12 +1224,16 @@ static func _ensure_part(data: Dictionary, part: String) -> void:
 	var info: Dictionary = data.rig.parts[part]
 	var meshes := [null, null]
 	if info.get("solid", true):
-		var loaded := VoxModel.load_vox(data.dir + part + ".vox")
-		meshes[0] = VoxModel.mesh_from_buffer(loaded[0], loaded[1])
+		var path: String = data.dir + part + ".vox"
+		var loaded := VoxModel.load_vox(path)
+		# The dedicated server never draws: the rig and sizes (buffers) are enough.
+		meshes[0] = null if Net.is_server() else VoxModel.cached(path, path, func() -> Mesh: return VoxModel.mesh_from_buffer(loaded[0], loaded[1]))
 		data.buffers[part] = loaded
 	if info.get("glow", false):
-		var loaded := VoxModel.load_vox(data.dir + part + "_glow.vox")
-		meshes[1] = VoxModel.mesh_from_buffer(loaded[0], loaded[1])
+		var path: String = data.dir + part + "_glow.vox"
+		var loaded := VoxModel.load_vox(path)
+		# The dedicated server never draws: the rig and sizes (buffers) are enough.
+		meshes[1] = null if Net.is_server() else VoxModel.cached(path, path, func() -> Mesh: return VoxModel.mesh_from_buffer(loaded[0], loaded[1]))
 		data.buffers[part + "_glow"] = loaded
 	data.meshes[part] = meshes
 

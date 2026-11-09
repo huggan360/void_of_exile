@@ -90,11 +90,25 @@ func interact(p: Dictionary, id: String) -> void:
 		server.social.send_to(p.player_id, origin, back)
 		return
 	if portal.instance == "" or not server.realms.has(portal.instance):
+		if portal.get("preparing", false): return
+		portal.preparing = true
 		_serial += 1
-		portal.instance = "dng_%s_%d" % [portal.dungeon, _serial]
-		var record := Dungeons.record(portal.instance, portal.dungeon, randi(), p.realm)
+		var instance := "dng_%s_%d" % [portal.dungeon, _serial]
+		var record := Dungeons.record(instance, portal.dungeon, randi(), p.realm)
 		record.origin_pos = portal.pos
+		# Worked out on a worker thread: nobody else on the server waits for it.
+		if portal.dungeon != "theory_of_everything":
+			var definition := Dungeons.definition(portal.dungeon)
+			var made: Array = [null]
+			var task := WorkerThreadPool.add_task(func() -> void: made[0] = DungeonLayout.new(definition, int(record.seed)))
+			while not WorkerThreadPool.is_task_completed(task): await get_tree().process_frame
+			WorkerThreadPool.wait_for_task_completion(task)
+			DungeonWorld.prepared[instance] = made[0]
+		portal.preparing = false
+		portal.instance = instance
 		server.open_realm_record(record.id, record)
+		# Meanwhile they may have gone: the dungeon stays open for the others.
+		if p.dead or p.switching or not p.joined or p.realm != portal.realm: return
 	var members: Array = [p.player_id]
 	var party := server.social.party_for(p.player_id)
 	if not party.is_empty():

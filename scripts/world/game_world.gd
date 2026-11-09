@@ -130,9 +130,17 @@ func _add_light(pos: Vector3, color: Color, energy := 1.5, light_range := 6.0) -
 	return light
 
 
-func _add_terrain(generator: VoxelGenerator, bounds: AABB) -> void:
+## `cache` names a world that is the same every time (the Tavern, the
+## Surface): its generated chunks are kept on disk (TerrainCache) and loaded
+## after the first time instead of generated. Unique worlds (dungeons) pass "".
+func _add_terrain(generator: VoxelGenerator, bounds: AABB, cache := "", sources: Array = []) -> void:
 	terrain = VoxelTerrain.new()
 	terrain.generator = generator
+	if cache != "":
+		var stream := TerrainCache.open(cache, sources+[(generator.get_script() as Script).resource_path])
+		if stream:
+			terrain.stream = stream
+			terrain.tree_exiting.connect(func() -> void: TerrainCache.close(stream))
 	terrain.mesher = Blocks.mesher()
 	terrain.gi_mode = GeometryInstance3D.GI_MODE_STATIC  # lets SDFGI bounce light off it
 	terrain.bounds = bounds

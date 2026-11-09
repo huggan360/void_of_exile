@@ -3,6 +3,8 @@ extends GameWorld
 var record: Dictionary
 var definition: Dictionary
 var layout: DungeonLayout
+## Layouts generated ahead of opening (instance id -> DungeonLayout).
+static var prepared := {}
 var enemy_director := EnemyDirector.new()
 var server_build := false
 var _biome: BiomeDef
@@ -14,7 +16,9 @@ func _init(p_record: Dictionary) -> void:
 	realm_id = record.id
 	definition = Dungeons.definition(record.dungeon)
 	display_name = definition.name
-	layout = DungeonLayout.new(definition, int(record.seed))
+	# Made ahead on a worker thread by the server (DungeonServer), or right here.
+	layout = prepared.get(str(record.id)) if prepared.has(str(record.id)) else DungeonLayout.new(definition, int(record.seed))
+	prepared.erase(str(record.id))
 	half_extent = layout.extent
 	spawn_point = layout.spawn
 	theme = Dungeons.theme(definition)

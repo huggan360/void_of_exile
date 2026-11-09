@@ -45,7 +45,7 @@ func _ready() -> void:
 	if home_terrain==null: home_terrain = HomeTerrain.from_scene(self)
 	var e := HomeTerrain.EXTENT
 	# Only the playable plateau and shallow lagoon need terrain.
-	_add_terrain(HallGenerator.new(home_terrain), AABB(Vector3(-e, 0, -e), Vector3(e * 2 + 1, 40, e * 2 + 1)))
+	_add_terrain(HallGenerator.new(home_terrain), AABB(Vector3(-e, 0, -e), Vector3(e * 2 + 1, 40, e * 2 + 1)), "tavern", [scene_file_path])
 	if not has_node("CoastWater"): _add_water(IslandGenerator.SEA_LEVEL + 0.6, 400.0)
 	_heaven()
 	if has_node("Spawn"): spawn_point = $Spawn.position
