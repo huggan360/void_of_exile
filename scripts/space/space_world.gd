@@ -178,6 +178,16 @@ func recovery_point(position: Vector3) -> Vector3:
 	var frame: Transform3D = state.frame
 	return frame.origin+frame.basis.y*0.12
 
+func extra_speed(from: Vector3, to: Vector3) -> float:
+	if SpaceLayout.pocket_at(to)>=0 or SpaceLayout.pocket_at(from)>=0: return 0.0
+	var extra := 0.0
+	if zone_at(to)=="void" or zone_at(from)=="void": extra += SpaceTraversal.JET_MAX*1.8
+	# Near a ship: she may be carrying them (line or boots), turning included.
+	for ship: SpaceShip in ships.values():
+		if ship.xform.origin.distance_to(to)<90.0 or ship.xform.origin.distance_to(from)<90.0:
+			extra = maxf(extra, ship.velocity.length()*1.3+ship.speed*0.3+25.0)
+	return extra
+
 func legal_recovery(from: Vector3, to: Vector3) -> bool:
 	return to.distance_to(recovery_point(from))<2.5
 

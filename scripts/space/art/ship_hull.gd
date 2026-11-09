@@ -4,6 +4,7 @@ extends Node3D
 ## are real openings. All anchors use the builder's local frame.
 
 var anchors := {}
+
 var _root: Node3D
 var _flames: Array[Node3D] = []
 var _fire: ShaderMaterial
@@ -164,6 +165,36 @@ static func beam(z: float) -> float:
 	if z< -18.0: return 9.2*clampf((z-BOW_Z)/(-18.0-BOW_Z), 0.0, 1.0)
 	if z>14.0: return lerpf(9.2, 6.8, clampf((z-14.0)/(STERN_Z-14.0), 0.0, 1.0))
 	return 9.2
+
+## The hull as a solid for ropes (SpaceTraversal): how far `p` (hull space)
+## is inside it (> 0 inside) and the way out. The sides taper toward the keel.
+static func inside(p: Vector3) -> Array:
+	if p.z<BOW_Z or p.z>STERN_Z or p.y>DECK_Y or p.y<KEEL_Y: return [-1.0, Vector3.ZERO]
+	var depth_frac := clampf((DECK_Y-p.y)/(DECK_Y-KEEL_Y), 0.0, 1.0)
+	var half := beam(p.z)*lerpf(1.0, 0.45, depth_frac)
+	var side := half-absf(p.x)
+	if side<=0.0: return [-1.0, Vector3.ZERO]
+	var top := DECK_Y-p.y
+	var bottom := p.y-KEEL_Y
+	var bow := p.z-BOW_Z
+	var stern := STERN_Z-p.z
+	var best := side
+	var out := Vector3(signf(p.x) if p.x!=0.0 else 1.0, 0, 0)
+	for pair: Array in [[top, Vector3.UP], [bottom, Vector3.DOWN], [bow, Vector3.FORWARD], [stern, Vector3.BACK]]:
+		if float(pair[0])<best:
+			best = pair[0]
+			out = pair[1]
+	return [best, out]
+
+## The point on the hull's surface nearest `p` (hull space): where a line clips on.
+static func surface_point(p: Vector3) -> Vector3:
+	var q := Vector3(p.x, clampf(p.y, KEEL_Y, DECK_Y), clampf(p.z, BOW_Z+0.5, STERN_Z-0.5))
+	var depth_frac := clampf((DECK_Y-q.y)/(DECK_Y-KEEL_Y), 0.0, 1.0)
+	var half := beam(q.z)*lerpf(1.0, 0.45, depth_frac)
+	q.x = clampf(q.x, -half, half)
+	var hit: Array = inside(q)
+	if float(hit[0])>0.0: q += (hit[1] as Vector3)*float(hit[0])
+	return q
 
 ## Whether a strake (centre y, height, centre z) crosses a porthole opening.
 func _porthole_at(y: float, height: float, z: float) -> bool:

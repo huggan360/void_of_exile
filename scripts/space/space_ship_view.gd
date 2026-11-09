@@ -70,10 +70,18 @@ func push(ship: SpaceShip) -> void:
 	_ramp.position = hatch.origin
 	_recall.position = hatch.origin+Vector3(0, 0.8, 2.0)
 
+var _clock := 0.0
+var _clock_frame := -1
+
 ## The interpolated pose `DELAY` seconds ago.
 func pose() -> Transform3D:
 	if _samples.is_empty(): return global_transform
-	var at := Time.get_ticks_msec()/1000.0-DELAY
+	# One clock reading per frame, so the hull and whoever rides it agree.
+	var frame := Engine.get_process_frames()
+	if frame!=_clock_frame:
+		_clock_frame = frame
+		_clock = Time.get_ticks_msec()/1000.0
+	var at := _clock-DELAY
 	if at<=float(_samples[0][0]): return _samples[0][1]
 	for i in range(_samples.size()-1):
 		var a: Array = _samples[i]

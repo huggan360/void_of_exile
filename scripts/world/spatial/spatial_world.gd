@@ -27,6 +27,11 @@ func barrier_between(_from: Vector3,_to: Vector3) -> Dictionary:
 func recovery_point(position: Vector3) -> Vector3:
 	return surface_frame(position).origin
 
+## Extra speed (m/s) a move from `from` to `to` may have beyond walking:
+## a spacewalker's jetpack, a ship towing someone on its line or deck.
+func extra_speed(_from: Vector3,_to: Vector3) -> float:
+	return 0.0
+
 func legal_recovery(_from: Vector3,_to: Vector3) -> bool:
 	return false
 

@@ -641,7 +641,7 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		var dt := maxf(0.05, t - p.moved_at)
 		var flat := pos.distance_to(p.pos) if spatial!=null else Vector2(pos.x-p.pos.x,pos.z-p.pos.z).length()
 		var limit := Player.BASE_SPEED * stats.move_speed_multiplier() * float(config.value("network", "max_speed_tolerance", 1.6)) \
-				+ Player.KNOCKBACK_MAX
+				+ Player.KNOCKBACK_MAX + (spatial.extra_speed(p.pos, pos) if spatial else 0.0)
 		if flat > limit * dt + 0.75 and not recovering:
 			Net.c_correct.rpc_id(peer_id, p.pos)
 			p.grace = SNAP_BACK_GRACE
