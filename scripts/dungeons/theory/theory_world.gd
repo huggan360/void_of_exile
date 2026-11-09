@@ -83,9 +83,9 @@ func _init(data: Dictionary) -> void:
 		_biomes.append(biome)
 	_biomes[0].ambient_energy = 0.9
 	_biomes[0].sun_energy = 0.55
-	_biomes[2].ambient_energy = 0.115
-	_biomes[2].sun_energy = 0.025
-	_biomes[2].torch_energy = 0.12
+	_biomes[2].ambient_energy = 0.32
+	_biomes[2].sun_energy = 0.08
+	_biomes[2].torch_energy = 0.3
 	if data.has("theory_state"): apply_state(data.theory_state)
 
 func prepare_load() -> void:

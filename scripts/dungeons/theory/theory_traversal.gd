@@ -121,12 +121,12 @@ func _process(delta: float) -> void:
 		_flashlight_fault = maxf(0.0,_flashlight_fault-delta)
 		power = 0.92+0.025*sin(_flashlight_clock*7.3)
 		if _flashlight_fault>0.0:
-			power *= 0.20 if sin(_flashlight_clock*47.0)+0.4*sin(_flashlight_clock*83.0)>0.15 else 0.7
+			power *= 0.45 if sin(_flashlight_clock*47.0)+0.4*sin(_flashlight_clock*83.0)>0.15 else 0.7
 	else:
 		_flashlight_fault = 0.0
-	_flashlight.light_energy = (4.8 if wreck else 4.0)*power
-	_flashlight.spot_angle = 32.0 if wreck else 36.0
-	_flashlight.spot_range = 29.0 if wreck else 27.0
+	_flashlight.light_energy = (9.0 if wreck else 5.0)*power
+	_flashlight.spot_angle = 42.0 if wreck else 38.0
+	_flashlight.spot_range = 42.0 if wreck else 32.0
 
 func hide_overlay() -> void:
 	if is_instance_valid(_overlay): _overlay.hide()
@@ -251,7 +251,7 @@ func update_camera(delta: float) -> void:
 	var in_wreck := biome==world._biomes[2]
 	var in_bright_ship := biome==world._biomes[0]
 	_camera_env.volumetric_fog_enabled = (in_wreck or in_bright_ship) and GraphicsSettings.volumetric_fog_allowed(AppSettings.graphics)
-	_camera_env.volumetric_fog_density = 0.004 if in_wreck else 0.0018
+	_camera_env.volumetric_fog_density = 0.0025 if in_wreck else 0.0018
 	_camera_env.volumetric_fog_length = 28 if in_wreck else 48
 	_camera_env.volumetric_fog_albedo = Color("8895ae") if in_wreck else Color("c3dfed")
 	_title.text = ""  # no place titles on screen
