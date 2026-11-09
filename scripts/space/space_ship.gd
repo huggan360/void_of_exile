@@ -255,7 +255,7 @@ static func pulse_clear(at: Vector3) -> bool:
 ## Compact snapshot for clients.
 func wire() -> Array:
 	return [id, slot, name, owner, party, tint.to_html(false), xform, speed, mode, planet, hp, crew.duplicate(), aims.duplicate(), broken, repairs.duplicate(true), pulse, turned_back,
-		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys(), fleet_id, account_id]
+		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys(), fleet_id, account_id, velocity]
 
 static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 	var s := into if into!=null else SpaceShip.new()
@@ -285,6 +285,7 @@ static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 	if data.size()>22:
 		s.fleet_id = int(data[21])
 		s.account_id = int(data[22])
+	if data.size()>23 and data[23] is Vector3: s.velocity = data[23]
 	return s
 
 func fleet_state() -> Dictionary:

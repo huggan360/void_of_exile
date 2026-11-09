@@ -122,8 +122,8 @@ func _room_finish(art: Art) -> void:
 			art.beam(Vector3(side * 7.5, 3.8, z), Vector3(side * 6.6, 4.14, z), 0.2, Art.BRASS)
 		for z: float in [-12.5, -7.5, 3.5, 11.5]:
 			var frame := Basis(Vector3.UP, -side * PI * 0.5)
-			_star_window(Vector3(side * 7.66, 2.3, z), Vector2(1.15, 1.15), frame, true)
-			art.part("ring", Vector3(side * 7.59, 2.3, z), Vector3.ONE * 1.65, Art.BRASS, 0, Basis(Vector3.FORWARD, PI * 0.5))
+			_star_window(Vector3(side * 7.66, 1.55, z), Vector2(1.15, 1.15), frame, true)
+			art.part("ring", Vector3(side * 7.59, 1.55, z), Vector3.ONE * 1.65, Art.BRASS, 0, Basis(Vector3.FORWARD, PI * 0.5))
 	for z: float in [-15, -10, -5, 0, 5, 10, 15]:
 		art.box(Vector3(0, 4.08, z), Vector3(15.5, 0.24, 0.25), Art.DARK)
 		art.box(Vector3(0, 3.93, z), Vector3(2, 0.06, 0.32), Art.BRASS)
@@ -174,9 +174,9 @@ func _console(art: Art, at: Vector3, size: Vector3) -> void:
 		art.box(at + delta, Vector3(0.12, 0.06, 0.12), Art.GREEN if i % 2 else Art.PINK, 1.3)
 
 func _bridge(art: Art) -> void:
-	_star_window(Vector3(0, 2.7, -17.66), Vector2(10.6, 2.0), Basis.IDENTITY)
-	for x: float in [-5.45, -2.75, 0, 2.75, 5.45]: art.box(Vector3(x, 2.7, -17.52), Vector3(0.16, 2.2, 0.18), Art.BRASS)
-	for y: float in [1.64, 3.77]: art.box(Vector3(0, y, -17.52), Vector3(11, 0.16, 0.18), Art.BRASS)
+	_star_window(Vector3(0, 1.95, -17.66), Vector2(10.6, 2.2), Basis.IDENTITY)
+	for x: float in [-5.45, -2.75, 0, 2.75, 5.45]: art.box(Vector3(x, 1.95, -17.52), Vector3(0.16, 2.4, 0.18), Art.BRASS)
+	for y: float in [0.79, 3.11]: art.box(Vector3(0, y, -17.52), Vector3(11, 0.16, 0.18), Art.BRASS)
 	_console(art, Vector3(0, 0, -16.1), Vector3(4.4, 1.1, 1.0))
 	# Helm spokes and handles surround a polished brass hub.
 	var center := Vector3(0, 1.37, -15.3)

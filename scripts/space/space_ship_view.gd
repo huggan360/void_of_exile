@@ -3,7 +3,8 @@ extends Node3D
 ## A ship as clients see it: the hull interpolated between authority
 ## snapshots (shown slightly in the past), turrets following their gunners,
 ## engines by speed, a boarding ramp while landed and a burst when lost.
-const DELAY := 0.12
+const DELAY := 0.15
+const MAX_EXTRAPOLATION := 0.25
 var world: SpaceWorld
 var ship_id := 0
 var hull: ShipHull
@@ -16,6 +17,7 @@ var arrival_started := -1
 var _damage: ShipDamage
 
 func setup(ship: SpaceShip) -> void:
+	process_priority = -30  # hull first, crew camera next, live windows last
 	hull = ShipHull.new()
 	add_child(hull)
 	hull.build(ship.tint)
@@ -60,9 +62,17 @@ func setup(ship: SpaceShip) -> void:
 	hull.add_child(_damage)
 	global_transform = ship.xform
 
-func push(ship: SpaceShip) -> void:
+func push(ship: SpaceShip, stamp := -1.0) -> void:
 	_ship = ship
-	_samples.append([Time.get_ticks_msec()/1000.0, ship.xform, ship.speed])
+	var now := Net.client.server_time() if Net.is_client() else Net.now()
+	var time := stamp if stamp>=0.0 else now
+	if not _samples.is_empty():
+		var previous: Array = _samples[-1]
+		if time<float(previous[0]): return
+		if time==float(previous[0]): _samples.pop_back()
+		elif ship.xform.origin.distance_to((previous[1] as Transform3D).origin)>maxf(500.0, SpaceShip.PULSE_SPEED*(time-float(previous[0]))*2.0):
+			_samples.clear()  # a docking teleport must not fly across the world
+	_samples.append([time, ship.xform, ship.speed, ship.velocity])
 	while _samples.size()>12: _samples.pop_front()
 	_label.text = ship.name
 	_ramp.enabled = ship.mode=="landed"
@@ -80,7 +90,7 @@ func pose() -> Transform3D:
 	var frame := Engine.get_process_frames()
 	if frame!=_clock_frame:
 		_clock_frame = frame
-		_clock = Time.get_ticks_msec()/1000.0
+		_clock = Net.client.server_time() if Net.is_client() else Net.now()
 	var at := _clock-DELAY
 	if at<=float(_samples[0][0]): return _samples[0][1]
 	for i in range(_samples.size()-1):
@@ -89,8 +99,18 @@ func pose() -> Transform3D:
 		if at<=float(b[0]):
 			var k := (at-float(a[0]))/maxf(0.001, float(b[0])-float(a[0]))
 			return (a[1] as Transform3D).interpolate_with(b[1], k)
-	# Past the newest sample: hold it rather than guessing ahead.
-	return _samples[-1][1]
+	# Coast briefly through a late packet. Bound prediction so outages stop the ship.
+	var last: Array = _samples[-1]
+	var latest: Transform3D = last[1]
+	if _ship==null or _ship.mode!="flying" or _samples.size()<2: return latest
+	var previous: Array = _samples[-2]
+	var span := float(last[0])-float(previous[0])
+	if span<=0.001 or span>0.5: return latest
+	var ahead := clampf(at-float(last[0]), 0.0, MAX_EXTRAPOLATION)
+	var velocity: Vector3 = last[3]
+	if velocity.is_zero_approx(): velocity = (latest.origin-(previous[1] as Transform3D).origin)/span
+	var rotation := (previous[1] as Transform3D).basis.slerp(latest.basis, 1.0+ahead/span).orthonormalized()
+	return Transform3D(rotation, latest.origin+velocity*ahead)
 
 func _process(_delta: float) -> void:
 	if _ship==null: return

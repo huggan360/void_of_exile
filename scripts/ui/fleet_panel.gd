@@ -1,11 +1,11 @@
 class_name FleetPanel
 extends PanelContainer
-## The shipwright's counter (on the right while you talk to them, like a
-## shop): your battleships, each its own ship on the account (FleetServer).
+## The shipwright's centered fleet window, matching the Chronicler's book.
+## Your battleships, each its own ship on the account (FleetServer).
 ## Take a stored one out onto the pad, store one in use, or buy a new one.
 ## A lost ship is gone; a stored one costs nothing to take out.
 ## Drawn in the game's own skin: the ivy window, stone cards and buttons.
-const WIDTH := 440.0
+const SIZE := CampaignBrowser.SIZE
 const SHIP_ICON := ["........w.......", ".......ww.......", "......wws.......", ".....wwss.......", "....wwsss..p....", "...wwssss..pp...",
 	"........m..ppp..", "........m.......", "bbbbbbbbbbbbbbbb", ".bkkkkkkkkkkkkb.", "..bkokkkokkkokb.", "...bkkkkkkkkkb..",
 	"....bbbbbbbbbb..", "......cccc......", ".......cc.......", "................"]
@@ -26,7 +26,7 @@ static var _icon: ImageTexture
 func _ready() -> void:
 	add_to_group("fleet_panels")
 	add_theme_stylebox_override("panel", UIStyle.ornament_panel())
-	custom_minimum_size.x = WIDTH
+	custom_minimum_size = SIZE
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
 	add_child(column)
@@ -39,14 +39,26 @@ func _ready() -> void:
 	_dots.custom_minimum_size.x = 150
 	_dots.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(_dots)
+	var close := UIStyle.button("Close")
+	close.focus_mode = Control.FOCUS_NONE
+	close.pressed.connect(func() -> void:
+		interaction.close()
+		hide()
+		_waiting = false)
+	head.add_child(close)
 	column.add_child(head)
 	column.add_child(_note)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", 8)
-	column.add_child(_list)
+	scroll.add_child(_list)
 	var buy_row := HBoxContainer.new()
 	buy_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	buy_row.add_theme_constant_override("separation", 12)
-	UIStyle.button_styles(_buy, "ivy")
+	UIStyle.button_styles(_buy)
 	_buy.text = "Buy a battleship"
 	_buy.custom_minimum_size = Vector2(220, 48)
 	_buy.focus_mode = Control.FOCUS_NONE
@@ -83,6 +95,8 @@ func open_for(target: InteractionTarget) -> void:
 	_target = target
 	_data = {}
 	_hint.text = ""
+	_waiting = false
+	interaction.hide()
 	show()
 	_render()
 	_request(["list"])
@@ -152,7 +166,9 @@ func _card(ship: Dictionary, clear: bool) -> Control:
 	var words := VBoxContainer.new()
 	words.alignment = BoxContainer.ALIGNMENT_CENTER
 	words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	words.add_child(UIStyle.label(str(ship.get("name", "Battleship")), UIStyle.SIZE_LARGE, UIStyle.GOLD if status!="destroyed" else UIStyle.TEXT_DIM))
+	var name_label := UIStyle.label(str(ship.get("name", "Battleship")), UIStyle.SIZE_LARGE, UIStyle.GOLD if status!="destroyed" else UIStyle.TEXT_DIM)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	words.add_child(name_label)
 	var where: String = {stored = "In the hangar", deployed = str(ship.get("location", "Out")), destroyed = "Lost"}.get(status, status)
 	var tone: Color = {stored = UIStyle.GOOD, deployed = UIStyle.ACCENT, destroyed = UIStyle.BAD}.get(status, UIStyle.TEXT_DIM)
 	words.add_child(UIStyle.label(where, UIStyle.SIZE_SMALL, tone))

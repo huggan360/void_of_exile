@@ -394,7 +394,7 @@ func _refresh_graphics() -> void:
 
 func _build_controls(page: Control) -> void:
 	var column := _scroll_page(page)
-	var hint := UIStyle.label("Click a binding, then press a key or mouse button. Escape cancels. Conflicting bindings can be swapped.",16,UIStyle.TEXT_DIM)
+	var hint := UIStyle.label("Click a binding, then press a key or mouse button. Escape cancels. Flight and on-foot controls can share keys. While flying, flight controls take priority. Conflicts within a section can be swapped.",16,UIStyle.TEXT_DIM)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(hint)
 	var category := ""
@@ -547,7 +547,7 @@ func _input(event: InputEvent) -> void:
 		if escape or event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and Rect2(Vector2.ZERO,_modal_buttons.size).has_point(_modal_buttons.get_global_transform_with_canvas().affine_inverse()*event.position): cancel_modal()
 		else:
 			var binding := ControlBindings.from_event(event)
-			if binding.is_empty(): _modal_text.text = "That key is reserved for development. Choose another key, or Escape to cancel."
+			if binding.is_empty(): _modal_text.text = "Choose a key or mouse button, or Escape to cancel."
 			else: _request_binding(_capture_action,binding)
 		get_viewport().set_input_as_handled()
 	elif _modal_kind!="":

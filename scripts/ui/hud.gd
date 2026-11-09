@@ -287,7 +287,7 @@ func _ready() -> void:
 	right.add_child(shop)
 	fleet = FleetPanel.new()
 	fleet.interaction = interaction
-	right.add_child(fleet)
+	add_centered(fleet)
 
 	# Top center: the account's XP bar, level and reward drawer.
 	account_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -544,7 +544,8 @@ func _profile_process(_delta: float) -> void:
 	var bag: LootBag = loot.bag_at(player) if loot else null
 	if bag != _bag_panel.bag or (bag == null and _bag_panel.visible):
 		_bag_panel.show_bag(bag)
-	var tab := not player.controls_locked() and (Input.is_action_pressed("inventory") or (_inventory.visible and dragging and bag == null))
+	var flight := player.spatial_controller as SpaceTraversal
+	var tab := not player.controls_locked() and (flight==null or not flight.blocks_action("inventory")) and (Input.is_action_pressed("inventory") or (_inventory.visible and dragging and bag == null))
 	var open := tab or bag != null or forge.visible or shop.visible
 	if open != _inventory.visible:
 		_inventory.visible = open
@@ -562,9 +563,9 @@ func _profile_process(_delta: float) -> void:
 	# Only catch drops while something is being dragged (so clicks still shoot).
 	_drop_zone.mouse_filter = Control.MOUSE_FILTER_STOP if dragging else Control.MOUSE_FILTER_IGNORE
 	if not player.frozen and not player.controls_locked():
-		if Input.is_action_just_pressed("quick_1"):
+		if Input.is_action_just_pressed("quick_1") and (flight==null or not flight.blocks_action("quick_1")):
 			GameServer.request_use(player.player_id, {kind = "quick", key = 0})
-		if Input.is_action_just_pressed("quick_2"):
+		if Input.is_action_just_pressed("quick_2") and (flight==null or not flight.blocks_action("quick_2")):
 			GameServer.request_use(player.player_id, {kind = "quick", key = 1})
 
 
@@ -610,6 +611,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if player.controls_locked() or player.frozen: return
+	if player.spatial_controller is SpaceTraversal and (player.spatial_controller as SpaceTraversal).consumes_event(event): return
 	if interaction.handle_input(event):
 		get_viewport().set_input_as_handled()
 		return

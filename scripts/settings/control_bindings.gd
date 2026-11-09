@@ -6,7 +6,7 @@ const ACTIONS := [
 	{id="move_back",title="Move backward",category="Movement",key=KEY_S},
 	{id="move_left",title="Move left",category="Movement",key=KEY_A},
 	{id="move_right",title="Move right",category="Movement",key=KEY_D},
-	{id="nexus",title="Escape to the Tavern",category="Movement",key=KEY_R},
+	{context="global",id="nexus",title="Escape to the Tavern",category="Movement",key=KEY_R},
 	{id="shoot",title="Shoot",category="Combat",mouse=MOUSE_BUTTON_LEFT},
 	{id="charge",title="Charge attack",category="Combat",mouse=MOUSE_BUTTON_RIGHT},
 	{id="magic",title="Shield / double-tap ring",category="Combat",key=KEY_SPACE},
@@ -22,8 +22,24 @@ const ACTIONS := [
 	{id="stats",title="Toggle character stats",category="Interface",key=KEY_C},
 	{id="map",title="Toggle large map",category="Interface",key=KEY_M},
 	{id="interact",title="Interact / leave conversation",category="Interface",key=KEY_X},
-	{id="chat",title="Open chat / send message",category="Interface",key=KEY_ENTER},
-	{id="menu",title="Pause menu",category="Interface",key=KEY_ESCAPE},
+	{context="global",id="chat",title="Open chat / send message",category="Interface",key=KEY_ENTER},
+	{context="global",id="menu",title="Pause menu",category="Interface",key=KEY_ESCAPE},
+	{context="ship",id="ship_forward",title="Forward thrust",category="Spaceship flight",key=KEY_W},
+	{context="ship",id="ship_reverse",title="Reverse thrust",category="Spaceship flight",key=KEY_S},
+	{context="ship",id="ship_left",title="Turn left",category="Spaceship flight",key=KEY_A},
+	{context="ship",id="ship_right",title="Turn right",category="Spaceship flight",key=KEY_D},
+	{context="ship",id="ship_pitch_up",title="Pitch up",category="Spaceship flight",key=KEY_UP},
+	{context="ship",id="ship_pitch_down",title="Pitch down",category="Spaceship flight",key=KEY_DOWN},
+	{context="ship",id="ship_roll_left",title="Roll left",category="Spaceship flight",key=KEY_Q},
+	{context="ship",id="ship_roll_right",title="Roll right",category="Spaceship flight",key=KEY_E},
+	{context="ship",id="ship_boost",title="Boost",category="Spaceship flight",key=KEY_SHIFT},
+	{context="ship",id="ship_pulse",title="Toggle pulse drive",category="Spaceship flight",key=KEY_C},
+	{context="ship",id="ship_launch",title="Launch",category="Spaceship flight",key=KEY_SPACE},
+	{context="ship",id="ship_land",title="Land / dock / descend",category="Spaceship flight",key=KEY_X},
+	{context="ship",id="ship_fire",title="Fire cannons",category="Spaceship weapons",mouse=MOUSE_BUTTON_LEFT},
+	{context="ship",id="seat_camera",title="Change camera",category="Ship seats",key=KEY_V},
+	{context="ship",id="seat_stand",title="Stand up",category="Ship seats",key=KEY_Z},
+
 ]
 const RESERVED := [KEY_F3,KEY_F4,KEY_F6,KEY_F7,KEY_F9]
 
@@ -77,3 +93,9 @@ static func text(binding: Dictionary) -> String:
 	if binding.get("shift",false): prefix += "Shift+"
 	if binding.get("meta",false): prefix += "Meta+"
 	return prefix+OS.get_keycode_string(binding.code)
+
+## Flight and on-foot bindings can share keys; global menu/chat/recall stay available.
+static func overlaps(a: String, b: String) -> bool:
+	var first := str(spec(a).get("context", "foot"))
+	var second := str(spec(b).get("context", "foot"))
+	return first==second or first=="global" or second=="global"

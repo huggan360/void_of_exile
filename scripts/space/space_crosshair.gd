@@ -5,6 +5,7 @@ extends Control
 var mode := ""
 var locks: Array[Vector2] = []
 var lock_radius := 0.0
+var aim_center := Vector2.INF
 var lock_ids: Array[String] = []
 var _appeared := {}
 const LOCK_TWIST_TIME := 0.28
@@ -19,7 +20,7 @@ func set_locks(points: Array[Vector2], ids: Array[String]) -> void:
 	queue_redraw()
 
 func _process(_delta: float) -> void:
-	if mode!="turret":
+	if mode not in ["turret", "pilot"]:
 		if not locks.is_empty():
 			locks.clear()
 			lock_ids.clear()
@@ -31,7 +32,7 @@ func _process(_delta: float) -> void:
 			break
 
 func _draw() -> void:
-	var c := size*0.5
+	var c := aim_center if mode=="pilot" and aim_center.is_finite() else size*0.5
 	var ink := Color(1, 0.95, 0.85, 0.9)
 	var shade := Color(0, 0, 0, 0.55)
 	match mode:
@@ -51,14 +52,15 @@ func _draw() -> void:
 				var d := Vector2.from_angle(a*PI*0.5)
 				draw_line(c+d*8.0, c+d*16.0, ink, 2.0)
 			draw_circle(c, 2.0, Color(1, 0.4, 0.8))
-			if lock_radius>0.0: draw_arc(c, lock_radius, 0, TAU, 64, Color(0.55, 0.9, 1.0, 0.25), 1.0)
-			for i in locks.size():
-				var point := locks[i]
-				var age := float(Time.get_ticks_msec()-int(_appeared.get(lock_ids[i], Time.get_ticks_msec())))/1000.0
-				var t := clampf(age/LOCK_TWIST_TIME, 0.0, 1.0)
-				var angle := (1.0-pow(1.0-t, 3.0))*PI*0.25
-				var square := PackedVector2Array()
-				for corner in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1), Vector2(-1, -1)]:
-					square.append(point+(corner*12.0).rotated(angle))
-				draw_polyline(square, Color(0.12, 0.0, 0.0, 0.8), 4.0, true)
-				draw_polyline(square, Color(1.0, 0.16, 0.12, 0.95), 2.0, true)
+	if mode in ["pilot", "turret"]:
+		if lock_radius>0.0: draw_arc(c, lock_radius, 0, TAU, 64, Color(0.55, 0.9, 1.0, 0.25), 1.0)
+		for i in locks.size():
+			var point := locks[i]
+			var age := float(Time.get_ticks_msec()-int(_appeared.get(lock_ids[i], Time.get_ticks_msec())))/1000.0
+			var t := clampf(age/LOCK_TWIST_TIME, 0.0, 1.0)
+			var angle := (1.0-pow(1.0-t, 3.0))*PI*0.25
+			var square := PackedVector2Array()
+			for corner in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1), Vector2(-1, -1)]:
+				square.append(point+(corner*12.0).rotated(angle))
+			draw_polyline(square, Color(0.12, 0.0, 0.0, 0.8), 4.0, true)
+			draw_polyline(square, Color(1.0, 0.16, 0.12, 0.95), 2.0, true)

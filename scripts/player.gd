@@ -678,6 +678,7 @@ func _try_step_up(dir: Vector3) -> void:
 
 
 func _update_zoom(delta: float) -> void:
+	if spatial_controller is SpaceTraversal and (spatial_controller as SpaceTraversal).seat!="": return
 	_zoom_target = clampf(
 			_zoom_target + (0.0 if controls_locked() else Input.get_axis("zoom_in", "zoom_out")) * ZOOM_SPEED * delta,
 			ZOOM_MIN, ZOOM_MAX)

@@ -450,16 +450,16 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or args.size()<2 or not args[1] is Vector3: return
 			if not (args[1] as Vector3).is_finite() or (args[1] as Vector3).length_squared()<0.001: return
 			var seat := ship.seat_of(pid)
-			if not seat.begins_with("turret") or Time.get_ticks_msec()<int(ship.cooldowns.get(seat, 0)): return
+			if (seat!="pilot" and not seat.begins_with("turret")) or ship.mode!="flying" or Time.get_ticks_msec()<int(ship.cooldowns.get(seat, 0)): return
 			# Damaged cannons fire slowly; broken ones jam.
 			if ship.part("cannons")<=0.0:
 				_tell(p, "The cannons are jammed! Mend them at the gunnery console.")
 				ship.cooldowns[seat] = Time.get_ticks_msec()+3000
 				return
 			ship.cooldowns[seat] = Time.get_ticks_msec()+int(180.0*(1.0+2.0*(1.0-ship.part("cannons"))))
-			var dir := (args[1] as Vector3).normalized()
+			var dir := -ship.xform.basis.z if seat=="pilot" else (args[1] as Vector3).normalized()
 			ship.aims[seat] = dir
-			foes.fire_bolt(ship, turret_muzzle(ship, seat), dir, pid)
+			foes.fire_bolt(ship, turret_muzzle(ship, seat), dir, pid, seat=="pilot")
 		"repair":  # [part] inside, or [ship id, part] outside
 			var ship: SpaceShip = (ships.get(int(args[1])) if args.size()>2 else ship_in_slot(SpaceLayout.pocket_at(pos)))
 			var id := str(args[-1])
@@ -803,7 +803,7 @@ func hatch_position(ship: SpaceShip) -> Vector3:
 
 func turret_muzzle(ship: SpaceShip, seat: String) -> Vector3:
 	# Muzzles of the hull's turret mounts (ShipHull), roughly where the barrels end.
-	var offsets := {turret_top = Vector3(0, ShipHull.DECK_Y+2.6, -18.0), turret_left = Vector3(-10.2, 2.75, -5.0), turret_right = Vector3(10.2, 2.75, -5.0)}
+	var offsets := {pilot = Vector3(0, 0.45, ShipHull.BOW_Z-7.0), turret_top = Vector3(0, ShipHull.DECK_Y+2.6, -18.0), turret_left = Vector3(-10.2, 2.75, -5.0), turret_right = Vector3(10.2, 2.75, -5.0)}
 	return ship.xform*(offsets.get(seat, Vector3.ZERO) as Vector3)
 
 func _ensure_interior(slot: int) -> void:
@@ -887,7 +887,7 @@ func _adrift_point(wreck: Vector3) -> Vector3:
 	return at
 
 func _broadcast_ship(ship: SpaceShip) -> void:
-	var event: Array = ["ships", [ship.wire()]]
+	var event: Array = ["ships", [ship.wire()], Net.now()]
 	handle_event(event)
 	world_event.emit(event)
 
@@ -924,7 +924,7 @@ func handle_event(event: Array) -> void:
 					ship = SpaceShip.from_wire(data, ship if Net.is_client() else null)
 					ships[id] = ship
 				_ensure_interior(ship.slot)
-				if not (server_build or Net.is_server()): _view_for(ship).push(ship)
+				if not (server_build or Net.is_server()): _view_for(ship).push(ship, float(event[2]) if event.size()>2 else -1.0)
 		"ship-":
 			var id := int(event[1])
 			if Net.is_client(): ships.erase(id)

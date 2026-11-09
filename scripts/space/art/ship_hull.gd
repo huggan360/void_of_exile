@@ -156,9 +156,9 @@ const KEEL_Y := -6.2
 const BOW_Z := -29.0
 const STERN_Z := 22.0
 ## Interior window openings in hull space: [centre, half size].
-const BRIDGE_WINDOW := [Vector3(0, 1.2, -17.66), Vector2(5.3, 1.0)]
+const BRIDGE_WINDOW := [Vector3(0, 0.45, -17.66), Vector2(5.3, 1.1)]
 const PORTHOLES: Array[float] = [-12.5, -7.5, 3.5, 11.5]
-const PORTHOLE_Y := 0.8
+const PORTHOLE_Y := 0.05
 
 ## Half beam at deck height along the keel.
 static func beam(z: float) -> float:
@@ -254,8 +254,8 @@ func build(tint: Color) -> void:
 			if absf(at.x)<half.x+0.2 and absf(at.y-window.y)<half.y+0.15: continue
 			if absf(at.x)>beam(-18.0)*sqrt(clampf((at.y-KEEL_Y)/(DECK_Y-KEEL_Y), 0.0, 1.0))+0.2: continue
 			art.box(at, Vector3(1.02, 1.02, 0.5), ArtBatch.WOOD.darkened(0.08))
-	for x: float in [-5.45, -2.75, 0.0, 2.75, 5.45]: art.box(Vector3(x, window.y, -18.25), Vector3(0.18, 2.3, 0.2), ArtBatch.BRASS)
-	for y: float in [window.y-1.08, window.y+1.08]: art.box(Vector3(0, y, -18.25), Vector3(11.2, 0.18, 0.2), ArtBatch.BRASS)
+	for x: float in [-5.45, -2.75, 0.0, 2.75, 5.45]: art.box(Vector3(x, window.y, -18.25), Vector3(0.18, 2.5, 0.2), ArtBatch.BRASS)
+	for y: float in [window.y-1.18, window.y+1.18]: art.box(Vector3(0, y, -18.25), Vector3(11.2, 0.18, 0.2), ArtBatch.BRASS)
 	# Wheelhouse dome above the bridge, tinted roof tiles.
 	for tier in 4:
 		art.box(Vector3(0, DECK_Y+0.5+tier*0.42, -15.0), Vector3(9.0-tier*1.8, 0.42, 6.0-tier*1.0), accent.darkened(tier*0.05))
