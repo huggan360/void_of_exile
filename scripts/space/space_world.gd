@@ -334,6 +334,11 @@ func server_action(p: Dictionary, args: Array) -> void:
 	var pid := int(p.player_id)
 	var pos: Vector3 = p.get("pos", Vector3.ZERO)
 	match str(args[0]):
+		"rocket_surface":
+			if not Net.is_server() or not is_instance_valid(station): return
+			var pad: Transform3D = station.anchors.get("rocket_pad", Transform3D.IDENTITY)
+			if pos.distance_to(station.to_global(pad.origin))>8.0 or zone_at(pos)!="station": return
+			p.port = {kind = "rocket", destination = surface_realm()}
 		"city":
 			var before := city.seat_of(pid)
 			var message := city.handle(pid, pos, args)
@@ -1072,7 +1077,7 @@ func _station_props() -> void:
 	var table := SpaceInteraction.new()
 	table.world = self
 	table.kind = "table"
-	table.position = station.anchors.get("command_table", Vector3(10, 0, 0))
+	table.position = (station.anchors.get("command_table", Vector3(10, 0, 0)) as Vector3)+Vector3(0, 1.0, 1.7)
 	add_child(table)
 	var board := SpaceInteraction.new()
 	board.world = self

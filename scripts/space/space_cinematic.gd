@@ -63,13 +63,13 @@ func nexus_intro(camera: Camera3D, world: SpaceWorld) -> void:
 		"Captain Isolde's board holds the tales of the Reach. Start a tale from here or from the Tavern.")
 	var table: Vector3 = a.get("command_table", centre)
 	await _shot(camera, table+Vector3(-10, 8, 10), table+Vector3(-6, 5, 7), func() -> Vector3: return table+Vector3.UP, 4.0,
-		"At the command table you launch a battleship. Your whole party can crew it.")
+		"Bell's shipwright sells battleships. Take yours out to a numbered berth, then board.")
 	var berth := SpaceLayout.berth_frame(0).origin
 	await _shot(camera, berth+Vector3(60, 30, 70), berth+Vector3(30, 18, 40), func() -> Vector3: return berth, 4.0,
 		"Pilot, gunners and navigator: every seat aboard has its own view.")
 	var pad: Transform3D = a.get("rocket_pad", Transform3D(Basis.IDENTITY, centre))
 	await _shot(camera, pad.origin+Vector3(12, 6, 12), pad.origin+Vector3(8, 4, 9), func() -> Vector3: return pad.origin+Vector3.UP*3.0, 4.0,
-		"Orin's rocket flies home to the Tavern. R brings you back here from anywhere in the Reach.")
+		"Orin's rocket lands on the Surface. R returns you to the Tavern from anywhere in the Reach.")
 	var far: Vector3 = SpaceLayout.planet("verdance").center
 	await _shot(camera, centre+Vector3(0, 40, -80), centre+Vector3(0, 60, -140), func() -> Vector3: return far, 4.0,
 		"Planets wait in the Haven. Beyond the Shardfield lies the Gloam. M opens the star map.")

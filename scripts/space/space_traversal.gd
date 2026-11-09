@@ -1093,7 +1093,7 @@ func aim_ray() -> Array:
 
 # --- Cinematics -------------------------------------------------------------------------
 
-## Orin's rocket home: the camera watches the launch, then the usual travel.
+## Orin's shuttle to the Surface: launch, covered loading, then arrival.
 ## The ship dives for the Surface (SpaceWorld "descend"): a stand-in hull
 ## takes the plunge while the shared ship state travels through the loading screen.
 func descend(_ship_id: int, surface: String) -> void:
@@ -1135,14 +1135,16 @@ func rise() -> void:
 	_hide_hud(false)
 	notice("Fly to the Nexus above, or anywhere you like. Low over the Surface, X takes you back down.")
 
-func fly_rocket_home() -> void:
+func fly_rocket_surface() -> void:
 	if cinematic or _rocket_flight: return
-	_rocket_flight = true
-	var rocket := world.rocket_node()
 	var game := world.game_root()
-	if rocket==null or game==null or not game.has_method("travel"):
-		if game and game.has_method("travel"): game.travel("hall")
+	if game==null or not game.has_method("travel"): return
+	var destination := world.surface_realm()
+	var rocket := world.rocket_node()
+	if rocket==null:
+		game.travel(destination, Vector3.INF, true)
 		return
+	_rocket_flight = true
 	cinematic = true
 	player.cinematic_locked = true
 	player.model.visible = false
@@ -1150,13 +1152,19 @@ func fly_rocket_home() -> void:
 	var start := rocket.global_transform
 	var shots := SpaceCinematic.new()
 	add_child(shots)
-	await shots.rocket_launch(player.camera, rocket, "To the Tavern")
+	await shots.rocket_launch(player.camera, rocket, "To the Surface")
+	# Keep the departure camera fixed until loading covers the source scene.
+	await game.transition.fade_to_black(0.25)
 	rocket.global_transform = start
 	rocket.set_flame(0.0)
+	shots.queue_free()
+	world.request(["rocket_surface"])
+	await game.travel(destination, Vector3.INF, true)
+	# Successful travel destroys this controller. Only a refused trip gets here.
 	cinematic = false
 	player.cinematic_locked = false
 	_rocket_flight = false
-	game.travel("hall")
+	_hide_hud(false)
 
 ## First arrival: a short tour of the Nexus.
 func play_intro() -> void:

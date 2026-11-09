@@ -31,8 +31,8 @@ func _context(p: Dictionary) -> Dictionary:
 		if space.zone_at(at)=="station":
 			for berth in SpaceLayout.BERTHS:
 				var pose := SpaceLayout.berth_frame(berth)
-				if not _occupied(space, pose.origin) and not _pads.has(realm.realm_id+":berth:"+str(berth)): return {world = space, pose = pose, key = realm.realm_id+":berth:"+str(berth), planet = "", berth = berth, label = "Nexus berth"}
-			return {world = space, pose = SpaceLayout.berth_frame(0), key = realm.realm_id+":berth:0", planet = "", berth = 0, label = "Nexus berth"}
+				if not _occupied(space, pose.origin) and not _pads.has(realm.realm_id+":berth:"+str(berth)): return {world = space, pose = pose, key = realm.realm_id+":berth:"+str(berth), planet = "", berth = berth, label = "Nexus berth %d" % (berth+1)}
+			return {world = space, pose = SpaceLayout.berth_frame(0), key = realm.realm_id+":berth:0", planet = "", berth = 0, label = "Nexus berth 1"}
 		for spec: Dictionary in SpaceLayout.PLANETS:
 			if at.distance_to(space.trader_position(str(spec.id), "wright"))>SpaceWorld.TRADER_REACH: continue
 			var frame := SpaceLayout.town_frame(spec, "dock")
