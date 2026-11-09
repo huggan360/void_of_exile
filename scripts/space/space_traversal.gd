@@ -550,7 +550,8 @@ func _seated(delta: float) -> void:
 			_input_timer -= delta
 			if _input_timer<=0.0:
 				_input_timer = INPUT_RATE
-				var thrust := throttle if enabled else 0.0
+				# A menu or the chat only frees the controls: the throttle holds.
+				var thrust := throttle if _ship.mode=="flying" else 0.0
 				var yaw := Input.get_axis("ship_left", "ship_right") if enabled else 0.0
 				if enabled and player.debug_input!=Vector2.ZERO:
 					thrust = -player.debug_input.y

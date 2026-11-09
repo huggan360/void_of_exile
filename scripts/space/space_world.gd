@@ -679,7 +679,8 @@ func _stand(ship: SpaceShip, pid: int) -> void:
 	var seat := ship.seat_of(pid)
 	if seat=="": return
 	ship.crew.erase(seat)
-	if seat=="pilot": ship.input = [0.0, 0.0, 0.0, 0.0, false, false]
+	# Leaving the helm: she keeps her throttle (holds speed and heading).
+	if seat=="pilot": ship.input = [ship.cruise(), 0.0, 0.0, 0.0, false, false]
 
 # --- To and from the Surface ---------------------------------------------------------------
 
