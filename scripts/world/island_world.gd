@@ -514,12 +514,13 @@ func _build_town_tree(root: Node3D, tree: Dictionary) -> void:
 
 
 func _build_service(root: Node3D, service: Dictionary) -> void:
-	var sign := Label3D.new()
-	sign.text = {smith = "Forge", magician = "Arcane Lodge", inn = "Lodge", herbalist = "Herbs"}.get(service.role, "Home")
-	sign.position = service.door + Vector3.UP * 2.5
-	sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sign.font_size = 36
-	sign.pixel_size = 0.005
+	# A signpost beside the keeper, square to the house front.
+	var words: String = {smith = "Forge", magician = "Arcane Lodge", inn = "Lodge", herbalist = "Herbs"}.get(service.role, "Home")
+	var icon: String = {smith = "sword", magician = "potion", inn = "beer", herbalist = "heart"}.get(service.role, "")
+	var sign := SignBoard.post(words, "plank", icon, 2.0, 0.55)
+	var yaw := float(service.npc.get("yaw", 0.0))
+	sign.position = service.door+Vector3(cos(yaw), 0, -sin(yaw))*1.6+Vector3.DOWN*1.0
+	sign.rotation.y = yaw
 	root.add_child(sign)
 
 

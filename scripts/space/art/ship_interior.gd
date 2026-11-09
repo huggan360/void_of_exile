@@ -36,6 +36,7 @@ func build(server: bool) -> void:
 	_bridge(art)
 	_crew(art)
 	_systems(art)
+	_plaques()
 	art.finish()
 	for side: float in [-1.0, 1.0]:
 		for z: float in [-11, 2, 11]:
@@ -148,8 +149,8 @@ func _room_finish(art: Art) -> void:
 		art.box(Vector3(px, 1.6, 17.48), Vector3(0.3, height, 0.12), Art.WOOD.lightened(x % 2 * 0.06))
 	art.part("ring", Vector3(0.7, 1.6, 17.32), Vector3.ONE * 0.4, Art.BRASS, 0, face)
 	art.crystal(Vector3(0, 3.26, 17.5), Vector3(0.25, 0.4, 0.2), Art.GREEN)
-	_label("BOARDING HATCH", Vector3(0, 3.7, 17.48), PI)
-	_label("THE ASTRAL HEARTH", Vector3(0, 3.85, -17.55), 0)
+	_label("EXIT", Vector3(0, 3.6, 17.62), PI, "door")
+	_label("THE ASTRAL HEARTH", Vector3(0, 3.62, -17.2), 0, "star", 0.7)
 
 ## A deep, cushioned armchair facing along -Z of `basis`.
 func _armchair(art: Art, at: Vector3, basis: Basis) -> void:
@@ -296,14 +297,20 @@ func _star_window(at: Vector3, size: Vector2, basis: Basis, round_window: bool =
 	panel.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_root.add_child(panel)
 
-func _label(text: String, at: Vector3, yaw: float) -> void:
-	var label := Label3D.new()
-	label.text = text
-	label.font = Art.heading_font()
-	label.font_size = 64
-	label.outline_size = 10
-	label.pixel_size = 0.004
-	label.modulate = Art.AMBER
-	label.position = at
-	label.rotation.y = yaw
-	_root.add_child(label)
+## A brass plaque on a wall or a chair (its face +Z turned by `yaw`).
+func _label(text: String, at: Vector3, yaw: float, icon := "", size := 0.8) -> void:
+	var plaque := SignBoard.make(text, "brass", icon, Color(0, 0, 0, 0), size)
+	plaque.position = at
+	plaque.rotation.y = yaw
+	_root.add_child(plaque)
+
+## Who sits where, on the back of each seat; the airlock and the galley.
+func _plaques() -> void:
+	var titles := {pilot = ["PILOT", "helm"], turret = ["GUNNER", "cannon"], map = ["NAVIGATOR", "map"], chair = ["CREW", "chair"]}
+	for seat: Dictionary in anchors.seats.values():
+		var spec: Array = titles.get(seat.kind, ["CREW", "chair"])
+		var basis := Basis(Vector3.UP, float(seat.yaw))
+		_label(spec[0], (seat.pos as Vector3)+basis*Vector3(0, 1.08, 0.53), float(seat.yaw), spec[1], 0.32)
+	var lock: Vector3 = anchors.airlock+Vector3(-0.7, 0, 0)
+	_label("AIRLOCK", lock+Vector3(0.62, 3.5, 0), PI*0.5, "door", 0.5)
+	_label("GALLEY", (anchors.tap as Vector3)+Vector3(1.6, 2.9, 0), -PI*0.5, "beer", 0.55)

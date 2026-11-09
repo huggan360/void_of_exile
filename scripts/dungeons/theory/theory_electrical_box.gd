@@ -63,14 +63,8 @@ func _ready() -> void:
 		_quest_badge = QuestMarker.new("main")
 		add_child(_quest_badge)
 		_quest_badge._material.no_depth_test = true
-		var placard := Label3D.new()
-		placard.text = TheoryLayout.ELECTRICAL_NAMES[index]
-		placard.font = UIStyle.bold()
-		placard.font_size = 30
-		placard.pixel_size = 0.006
+		var placard := SignBoard.make(SignBoard.wrap(TheoryLayout.ELECTRICAL_NAMES[index],16),"brass","",Color("ffce89") if index>=5 else Color("a6f7ff"),0.3)
 		placard.position = Vector3(0,1.0,0.14)
-		placard.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		placard.modulate = Color("ffce89") if index>=5 else Color("a6f7ff")
 		add_child(placard)
 		if index>=5:
 			var task_lamp := OmniLight3D.new()

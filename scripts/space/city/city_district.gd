@@ -75,6 +75,7 @@ static func glass() -> StandardMaterial3D:
 	return _glass
 
 func build() -> void:
+	process_physics_priority = -100  # cars move before anyone rides them
 	_neon = Color(str(data.neon))
 	_tint = Color(str(data.tint))
 	_body = StaticBody3D.new()
@@ -86,9 +87,10 @@ func build() -> void:
 	var venues := CityLayout.venues(data)
 	for item: Dictionary in CityLayout.district_cells(data):
 		match str(item.role):
-			"venues": _podium(item.cell, venues)
+			"venues": _shopfront(item.cell, venues)
 			"plaza": _plaza(item.cell)
 			"secret": _secret(item.cell, venues)
+			"park", "lake": _green(item.cell)
 	for v: Dictionary in venues:
 		if v.kind!="lobby": _room(v)
 	for e: Dictionary in CityLayout.elevators():
@@ -120,23 +122,13 @@ func _mass(frame: Transform3D, at: Vector3, size: Vector3, color: Color, windows
 	_towers.add("box", frame*Transform3D(Basis.from_scale(size), at), color, Color(CityLayout.rnd(at.x+at.z*0.1, 3), windows, 0, trims))
 	if solid: _solid(frame, at, size)
 
-func _sign(parent: Node3D, text: String, at: Vector3, color: Color, size := 1.0, yaw := 0.0) -> Label3D:
-	var label := Label3D.new()
-	label.text = text
-	label.font = UIStyle.font()
-	label.font_size = int(72*size)
-	label.pixel_size = 0.008
-	label.modulate = color.lightened(0.25)
-	label.outline_modulate = color.darkened(0.7)
-	label.outline_size = 18
-	label.position = at
-	label.rotation.y = yaw
-	label.double_sided = false
-	# Drawn with the walls (not blended after them), so rooms hide the street's signs.
-	label.alpha_cut = Label3D.ALPHA_CUT_OPAQUE_PREPASS
-	label.visibility_range_end = 220.0
-	parent.add_child(label)
-	return label
+## A real sign (SignBoard) on a wall or post: neon boxes, plank boards, brass plaques.
+func _sign(parent: Node3D, text: String, at: Vector3, color: Color, size := 1.0, yaw := 0.0, style := "neon", icon := "") -> SignBoard:
+	var sign := SignBoard.make(text, style, icon, color.lightened(0.2) if style in ["neon", "paint"] else Color(0, 0, 0, 0), size*1.4)
+	sign.position = at
+	sign.rotation.y = yaw
+	parent.add_child(sign)
+	return sign
 
 func _light(parent: Node3D, at: Vector3, color: Color, energy := 1.2, reach := 9.0) -> void:
 	var omni := OmniLight3D.new()
@@ -170,7 +162,7 @@ func _port() -> void:
 		for c in 8:
 			var a := TAU*c/8.0
 			art.box(pad+Vector3(cos(a)*13.6, 0.4, sin(a)*13.6), Vector3(0.5, 0.5, 0.5), _neon if c % 2 else _tint, false, 2.2)
-		_sign(port, "PAD %d" % (k+1), pad+Vector3(0, 0.3, 14.5), _tint, 2.0).rotation.x = -PI*0.5
+		_sign(port, "PAD %d" % (k+1), pad+Vector3(0, 0.3, 14.5), _tint, 2.0, 0.0, "paint").rotation.x = -PI*0.5
 	# The terminal: a long hall with a glass front to the pads, walk in at either end.
 	# Four broad ramps connect the flat deck to the curved street below.
 	for side in 4:
@@ -203,7 +195,7 @@ func _port() -> void:
 	_props.add("kiosk", port.transform, Vector3(-36.0, 0.35, hz-6.0))
 	_props.add("holo_board", port.transform, Vector3(0, 6.5, hz-8.6))
 	_sign(port, str(data.port).to_upper(), Vector3(0, 14.5, front+0.6), _tint, 3.2)
-	_sign(port, "Arrivals - Departures - Ship parking", Vector3(0, 5.2, hz-8.4), _neon, 0.9)
+	_sign(port, "Arrivals - Departures\nShip parking", Vector3(0, 5.2, hz-8.7), _neon, 0.9, 0.0, "slate", "arrow")
 	for k in 4: _light(port, Vector3(-30.0+k*20.0, 10.0, hz), _tint, 1.6, 16.0)
 	# Control tower with a beacon, landing light masts on the deck's edge.
 	art.round_part(Vector3(44, 18, -44), 3.0, 36.0, Color("4a3a5a"), true)
@@ -233,41 +225,101 @@ func _glass_panel(parent: Node3D, at: Vector3, size: Vector3, solid: bool) -> vo
 
 # --- Podiums and their rooms ---------------------------------------------------------------
 
-## A podium filling the lot: two venue rooms on its front and back streets, the
-## rest solid, and a tower rising out of it.
-func _podium(c: Dictionary, venues: Array) -> void:
-	var frame: Transform3D = c.frame
-	var p := CityLayout.PODIUM*0.5
-	var t := CityLayout.PODIUM_TALL
-	var room := CityLayout.ROOM
-	var facade := Color(CityPlanet.FACADES[int(float(c.seed)*97.0) % CityPlanet.FACADES.size()])
-	var front_z := p-room.z
-	# Side blocks, the middle between the two rooms and the roof over them.
-	for side: float in [-1.0, 1.0]:
-		_mass(frame, Vector3(side*(p+room.x*0.5)*0.5, t*0.5-0.4, 0), Vector3(p-room.x*0.5, t+0.8, p*2.0), facade, 0.0, 0.0)
-	_mass(frame, Vector3(0, t*0.5-0.4, 0), Vector3(room.x, t+0.8, front_z*2.0), facade.darkened(0.1), 0.0, 0.0)
-	for side: float in [-1.0, 1.0]:
-		_mass(frame, Vector3(0, (room.y+0.2+t)*0.5, side*(front_z+room.z*0.5)), Vector3(room.x, t-room.y-0.2, room.z), facade, 0.4, 1.0)
-	# Neon trim along the podium's top and a tower above.
-	_towers.add("box", frame*Transform3D(Basis.from_scale(Vector3(p*2.0+0.4, 0.4, p*2.0+0.4)), Vector3(0, t+0.2, 0)), _neon, Color(0, 0, 1, 0))
+## A shop block: each room (on its own street) in a storybook cottage with a
+## barrel, dome, stepped gable or turret roof, and fairytale houses in what
+## the cottages leave of the block.
+func _shopfront(c: Dictionary, venues: Array) -> void:
+	var local: Vector2i = Vector2i(int(c.i)-(int(data.corner.x)-3), int(c.j)-(int(data.corner.y)-3))
+	var prefix := "%s_%d_%d_" % [data.id, local.x, local.y]
+	var avoid: Array = []
+	for side: int in [-1, 1]:
+		var v: Dictionary = {}
+		for x: Dictionary in venues:
+			if str(x.key)==prefix+str(side+1): v = x
+		if v.is_empty(): continue
+		_cottage(v, float(c.seed)+side*0.21)
+		var street := CityLayout.room_street(c, side)
+		var inward: Vector2 = street[1]
+		avoid.append([street[0], Vector2(CityLayout.ROOM.x*0.5+1.4, CityLayout.ROOM.z*0.5+1.4), inward.orthogonal().angle()])
 	var solids: Array = []
-	var height := lerpf(50.0, float(data.tower)*0.8, CityLayout.rnd(float(c.seed), 9))
-	city._tower(_towers, frame, Vector2.ZERO, Vector2(p*1.4, p*1.4), height, t, facade.lightened(0.05), _neon, float(c.seed), solids)
-	for solid: Array in solids:
-		var shape := CollisionShape3D.new()
+	for block: Dictionary in CityRoads.blocks(int(c.face), int(c.i), int(c.j)):
+		var seed := CityLayout.rnd(float(c.seed), 30)
+		var art := CityArt.new(_towers, block.frame, solids)
+		var feet := CityArt.pack(block, CityLayout.ROAD+CityLayout.WALK+0.8, seed, 4, 3.0, 8.0, avoid)
+		for k in feet.size():
+			var tall := lerpf(40.0, float(data.tower)*0.7, CityLayout.rnd(seed, 9)) if k==0 else lerpf(10.0, 32.0, CityLayout.rnd(seed, 10+k))
+			art.building(feet[k][0], float(feet[k][1]), tall, CityLayout.rnd(seed, 20+k), "", _neon)
+		art.gardens(block, CityLayout.ROAD+CityLayout.WALK+0.8, seed, feet+avoid.map(func(a: Array) -> Array: return [a[0], (a[1] as Vector2).length()]))
+	for solid: Array in solids: _solid_shape(solid)
+
+## Collision for a CityArt solid ([planet-space transform, size, kind]).
+func _solid_shape(solid: Array) -> void:
+	var shape := CollisionShape3D.new()
+	var size: Vector3 = solid[1]
+	if str(solid[2])=="cyl":
+		var cyl := CylinderShape3D.new()
+		cyl.radius = size.x*0.5
+		cyl.height = size.y
+		shape.shape = cyl
+	else:
 		var box := BoxShape3D.new()
-		box.size = solid[1]
+		box.size = size
 		shape.shape = box
-		shape.transform = solid[0]
-		_body.add_child(shape)
-	# Rooftop clutter on the podium around the tower.
-	for k in 4:
-		var corner := Vector3((1 if k % 2 else -1)*(p-3.0), t, (1 if k>1 else -1)*(p-3.0))
-		_props.add(["ac_unit", "water_tank", "antenna", "ac_unit"][k], frame, corner, k*0.7)
-	# Air vents and pipe runs on the side walls (Theory of Everything style).
+	shape.transform = solid[0]
+	_body.add_child(shape)
+
+## The cottage round a shop room (its own frame, -Z the street): walls of
+## plaster, stone or planks, timber corners, an attic over the room and a roof.
+func _cottage(v: Dictionary, seed: float) -> void:
+	var frame: Transform3D = v.frame
+	var size: Vector3 = v.size
+	var hx := size.x*0.5
+	var hz := size.z*0.5
+	var solids: Array = []
+	var art := CityArt.new(_towers, frame, solids)
+	art.seed = seed
+	var wall_h := 8.4
+	var mats := [[CityArt.PLASTER, CityArt.M_PLASTER], [CityArt.STONE, CityArt.M_STONE], [CityArt.BARK, CityArt.M_PLANK]]
+	var look: Array = mats[int(art.r()*3.0) % 3]
+	var wall := art.pick(look[0]).lightened(0.12 if look[1]==CityArt.M_PLANK else 0.0)
+	var mat: float = look[1]
 	for side: float in [-1.0, 1.0]:
-		_props.add("air_vent", frame, Vector3(side*(p+0.1), 1.6, -4.0), side*PI*0.5)
-		_props.add("pipe_bundle", frame, Vector3(side*(p+0.3), 6.5, 6.0), side*PI*0.5)
+		art.part("box", Vector3(side*(hx+0.35), wall_h*0.5-0.3, 0.35), Basis.IDENTITY, Vector3(0.7, wall_h, size.z+0.7), wall, mat, 0.3, false)
+		_solid(frame, Vector3(side*(hx+0.35), wall_h*0.5-0.3, 0.35), Vector3(0.7, wall_h, size.z+0.7))
+		_graffiti_on(frame, Vector3(side*(hx+0.72), 2.2, (art.r()-0.5)*5.0), Basis(Vector3.UP, side*PI*0.5), int(art.r()*CityTextures.GRAFFITI_COUNT), art.r()<0.55)
+	art.part("box", Vector3(0, wall_h*0.5-0.3, hz+0.35), Basis.IDENTITY, Vector3(size.x+1.4, wall_h, 0.7), wall, mat, 0.3, false)
+	_solid(frame, Vector3(0, wall_h*0.5-0.3, hz+0.35), Vector3(size.x+1.4, wall_h, 0.7))
+	art.part("box", Vector3(0, (size.y+wall_h)*0.5-0.15, -hz), Basis.IDENTITY, Vector3(size.x+1.4, wall_h-size.y+0.3, 0.7), wall, mat, 0.4, false)
+	var beam := art.pick(CityArt.BARK)
+	for x: float in [-1.0, 1.0]:
+		for z: float in [-1.0, 1.0]:
+			art.part("box", Vector3(x*(hx+0.55), wall_h*0.5-0.3, z*(hz+0.35)), Basis.IDENTITY, Vector3(0.6, wall_h+0.2, 0.6), beam, CityArt.M_PLANK, 0.0, false, true)
+	art.part("box", Vector3(0, size.y+0.2, -hz-0.4), Basis.IDENTITY, Vector3(size.x+1.6, 0.5, 0.5), beam, CityArt.M_PLANK, 0.0, false, true)
+	var roof := art.pick(CityArt.ROOF)
+	var depth := size.z+2.4
+	match int(art.r()*4.0) % 4:
+		0:
+			# Barrel roof.
+			art.part("cyl", Vector3(0, wall_h, 0.35), Basis(Vector3.FORWARD, PI*0.5), Vector3(5.6, size.x+2.2, depth), roof, CityArt.M_SHINGLE, 0.0, true)
+		1:
+			# Dome with a cupola.
+			art.part("dome", Vector3(0, wall_h-0.3, 0.35), Basis.IDENTITY, Vector3(size.x+1.8, 6.0, depth), roof, CityArt.M_SHINGLE)
+			art.part("cyl", Vector3(0, wall_h+6.2, 0.35), Basis.IDENTITY, Vector3(2.0, 1.6, 2.0), wall, mat, 0.6)
+			art.part("cone", Vector3(0, wall_h+7.8, 0.35), Basis.IDENTITY, Vector3(2.6, 1.8, 2.6), roof, CityArt.M_SHINGLE)
+		2:
+			# A steep gable, stepped like a voxel staircase.
+			for k in 7:
+				var w := depth*(1.0-k/7.0)
+				art.part("box", Vector3(0, wall_h+0.45+k*0.9, 0.35), Basis.IDENTITY, Vector3(size.x+2.2, 0.9, w), roof if k<6 else roof.lightened(0.2), CityArt.M_SHINGLE, 0.0, false)
+		_:
+			# Flat roof garden with a round turret at a front corner.
+			art.part("box", Vector3(0, wall_h+0.1, 0.35), Basis.IDENTITY, Vector3(size.x+1.6, 0.5, depth-0.6), CityArt.STONE[0], CityArt.M_STONE, 0.0, false)
+			art.part("box", Vector3(0, wall_h+0.45, 0.35), Basis.IDENTITY, Vector3(size.x, 0.3, depth-2.0), Color("3a6a42"), CityArt.M_GRASS, 0.0, false)
+			var tx := (hx+0.6)*(1.0 if art.r()<0.5 else -1.0)
+			art.part("cyl", Vector3(tx, wall_h+2.5, -hz), Basis.IDENTITY, Vector3(4.4, wall_h+6.0, 4.4), wall.darkened(0.08), mat, 0.5)
+			art.part("cone", Vector3(tx, wall_h*2.0+0.2, -hz), Basis.IDENTITY, Vector3(5.4, 4.5, 5.4), roof, CityArt.M_SHINGLE)
+			art.part("sphere", Vector3(tx, wall_h*2.0+2.6, -hz), Basis.IDENTITY, Vector3.ONE*0.7, _neon, CityArt.M_GLOW, 0.0, true, true)
+	art.part("box", Vector3(hx*0.6, wall_h+2.5, hz*0.4), Basis.IDENTITY, Vector3(1.2, 4.0, 1.2), art.pick(CityArt.STONE), CityArt.M_STONE, 0.0, false, true)
 
 ## A venue's room: floor, the front wall with its door and shop window, the
 ## inside finish, the sign over the door, furniture and the people's spots.
@@ -323,7 +375,9 @@ func _room(v: Dictionary) -> void:
 	var sign_id: String = {cafe = "sign_cafe", teahouse = "sign_cafe", bar = "sign_bar", speakeasy = "sign_bar", noodle = "sign_noodles",
 		arcade = "sign_arcade", shop_budget = "sign_shop", shop_premium = "sign_shop", shop_curio = "sign_shop"}.get(v.kind, "")
 	if sign_id!="" and v.kind!="speakeasy": _props.add(sign_id, frame, Vector3(-hx+2.6, 6.0, -hz-0.4), PI)
-	_sign(node, str(v.name), Vector3(1.8, 6.6, -hz-0.45), _neon if v.kind.begins_with("shop") else look.lamp, 1.1, PI)
+	var sign_look: Array = {cafe = ["plank", "coffee"], teahouse = ["plank", "tea"], bar = ["neon", "beer"], noodle = ["neon", "bowl"],
+		arcade = ["neon", "game"], shop_budget = ["brass", "potion"], shop_premium = ["brass", "sword"], shop_curio = ["brass", "gem"]}.get(v.kind, ["plank", ""])
+	_sign(node, str(v.name), Vector3(0, 6.8, -hz-0.75), _neon if v.kind.begins_with("shop") or v.kind=="arcade" else look.lamp, 0.9, PI, sign_look[0], sign_look[1])
 	_light(node, Vector3(0, 3.0, -hz-2.0), look.lamp, 0.8, 6.0)
 	art.finish()
 
@@ -442,15 +496,24 @@ func _elevator_tower(e: Dictionary) -> void:
 		# Solid tower (windows) between this floor and the next.
 		var next := float(floors[f+1].h) if f+1<floors.size() else float(e.height)
 		var gap_h := next-(h+ceiling+0.3)
-		if gap_h>1.0: _mass(frame, Vector3(0, h+ceiling+0.3+gap_h*0.5, 0), Vector3(half*2.0, gap_h, half*2.0), facade, 0.55, 1.0, false)
+		# Between floors a round shell, open in the middle so the shaft runs clear
+		# from the lobby to the sky bar; a stone ledge under and over each glass floor.
+		var shell := half*2.0*1.42
+		if gap_h>1.0:
+			var mid := h+ceiling+0.3+gap_h*0.5
+			_towers.add("tube", frame*Transform3D(Basis.from_scale(Vector3(shell, gap_h, shell)), Vector3(0, mid, 0)), facade, Color(float(e.id)*0.13, 0.55, 0.0, 2.0))
+			_towers.add("ring", frame*Transform3D(Basis.from_scale(Vector3(shell+0.6, 0.9, shell+0.6)), Vector3(0, h+ceiling+0.45, 0)), Color("8a7a7a"), Color(0, 0, CityArt.M_STONE, 2.0))
+			_towers.add("ring", frame*Transform3D(Basis.from_scale(Vector3(shell+0.6, 0.9, shell+0.6)), Vector3(0, next-0.15, 0)), Color("8a7a7a"), Color(0, 0, CityArt.M_STONE, 2.0))
 		if gap_h>1.0:
 			for side in 4:
 				var b := Basis(Vector3.UP, side*PI*0.5)
 				_solid(frame, b*Vector3(0, h+ceiling+0.3+gap_h*0.5, -half+0.4), (b*Vector3(half*2.0, gap_h, 0.8)).abs())
-	# Crown over the sky bar.
+	# A lid over the shell and an onion dome over the sky bar.
 	var solids: Array = []
-	city._tower(_towers, frame, Vector2.ZERO, Vector2(half*1.6, half*1.6), 22.0, float(e.height), facade.lightened(0.1), _neon, float(e.id)*0.31, solids)
-	_sign(node, "%s TOWER" % str(data.name).to_upper(), Vector3(0, 7.5, -half-0.4), _neon, 1.8, PI)
+	_towers.add("cyl", frame*Transform3D(Basis.from_scale(Vector3(half*2.0*1.42, 0.6, half*2.0*1.42)), Vector3(0, float(e.height), 0)), facade.lightened(0.1), Color(0, 0, CityArt.M_STONE, 2.0))
+	var crown := CityArt.new(_towers, frame, solids)
+	crown.building(Vector2.ZERO, half*0.75, 30.0, float(e.id)*0.31+0.05, "onion", _neon, float(e.height))
+	_sign(node, "%s TOWER" % str(data.name).to_upper(), Vector3(0, 7.5, -half-0.4), _neon, 1.6, PI, "neon", "lift")
 	_shaft(node, art, e, half)
 	art.finish()
 
@@ -466,7 +529,12 @@ func _slab(art: NexusStation.Brush, y: float, half: float, ceiling := false) -> 
 	for side: float in [-1.0, 1.0]:
 		art.box(Vector3(side*(hole.x+half)*0.5, top, shaft.z), Vector3(half-hole.x, 0.3, hole.y*2.0), color, true)
 	if not ceiling:
-		art.box(Vector3(0, y+0.005, 0), Vector3(half*2.0-1.0, 0.01, half*2.0-1.0), Color("8a7a8a"))
+		# The floor's finish, cut round the shaft like the slab (the car rides through here).
+		var inner := half-0.5
+		art.box(Vector3(0, y+0.005, (shaft.z-hole.y-inner)*0.5), Vector3(inner*2.0, 0.01, shaft.z-hole.y+inner), Color("8a7a8a"))
+		art.box(Vector3(0, y+0.005, (shaft.z+hole.y+inner)*0.5), Vector3(inner*2.0, 0.01, inner-shaft.z-hole.y), Color("8a7a8a"))
+		for side: float in [-1.0, 1.0]:
+			art.box(Vector3(side*(hole.x+inner)*0.5, y+0.005, shaft.z), Vector3(inner-hole.x, 0.01, hole.y*2.0), Color("8a7a8a"))
 	else:
 		for k in 4: art.box(Vector3(-half+3.0+k*(half*2.0-6.0)/3.0, y-0.02, -half*0.4), Vector3(0.3, 0.06, half*1.2), Color("ffd890"), false, 1.5)
 
@@ -505,7 +573,7 @@ func _floor_room(node: Node3D, art: NexusStation.Brush, e: Dictionary, f: int, h
 	var kind: String = e.floors[f].kind
 	_light(node, Vector3(0, h+4.2, -6.0), Color("ffd890"), 1.4, 16.0)
 	_light(node, Vector3(0, h+4.2, 7.0), Color("ffc8e0"), 1.0, 14.0)
-	_sign(node, str(e.floors[f].name), Vector3(0, h+3.6, CityState.SHAFT.z-CityState.CAR.z*0.5-0.45), _tint, 0.8, PI)
+	_sign(node, str(e.floors[f].name), Vector3(0, h+3.6, CityState.SHAFT.z-CityState.CAR.z*0.5-0.62), _tint, 0.6, PI, "brass", "lift")
 	match kind:
 		"lobby":
 			art.box(Vector3(-7.0, h+0.6, -4.0), Vector3(4.0, 1.2, 1.2), Color("6a3a2a"), true)
@@ -619,7 +687,8 @@ func _shaft(node: Node3D, art: NexusStation.Brush, e: Dictionary, half: float) -
 		car_art.box(Vector3(side*car.x*0.5, car.y*0.5, 0), Vector3(0.12, car.y, car.z), Color("8a5a3a"))
 		car_art.box(Vector3(side*(car.x*0.5-0.08), 1.0, 0), Vector3(0.06, 0.08, car.z-0.2), Color("d9ac60"))
 	car_art.finish()
-	for at: Array in [[Vector3(0, -0.1, 0), Vector3(car.x, 0.2, car.z)], [Vector3(0, car.y+0.1, 0), Vector3(car.x, 0.2, car.z)],
+	# A thick floor (only its top is seen): a late step can never drop a rider through it.
+	for at: Array in [[Vector3(0, -0.7, 0), Vector3(car.x, 1.4, car.z)], [Vector3(0, car.y+0.1, 0), Vector3(car.x, 0.2, car.z)],
 			[Vector3(0, car.y*0.5, car.z*0.5), Vector3(car.x, car.y, 0.12)], [Vector3(-car.x*0.5, car.y*0.5, 0), Vector3(0.12, car.y, car.z)],
 			[Vector3(car.x*0.5, car.y*0.5, 0), Vector3(0.12, car.y, car.z)]]:
 		var shape := CollisionShape3D.new()
@@ -678,16 +747,11 @@ func _shaft(node: Node3D, art: NexusStation.Brush, e: Dictionary, half: float) -
 		button.position = at
 		button.rotation.z = PI*0.5
 		body.add_child(button)
-		var label := Label3D.new()
-		label.text = ["L", "G", "R", "B"][f]+"  "+str(floors[f].name)
-		label.font = UIStyle.font()
-		label.font_size = 18
-		label.pixel_size = 0.004
-		label.position = at+Vector3(-0.01, 0, 0.32)
-		label.rotation.y = -PI*0.5
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		label.modulate = Color("fff0c8")
-		body.add_child(label)
+		# The floor's letter painted beside its button.
+		var mark := SignBoard.make(["L", "G", "R", "B"][f], "paint", "", Color("fff0c8"), 0.35)
+		mark.position = at+Vector3(-0.01, 0, 0.14)
+		mark.rotation.y = -PI*0.5
+		body.add_child(mark)
 	var lamp := OmniLight3D.new()
 	lamp.position = Vector3(0, car.y-0.4, 0)
 	lamp.light_color = Color("ffd8a0")
@@ -775,26 +839,33 @@ func _bridge() -> void:
 		var t := k/8.0
 		var a2 := PI*t
 		art.box(Vector3(cos(a2)*2.2, 2.6+sin(a2)*1.2, 0), Vector3(0.35, 0.35, length*0.98), _neon.darkened(0.2) if k % 2 else Color("d9ac60"), false, 0.8 if k % 2 else 0.0)
-	_sign(node, "SKY BRIDGE", Vector3(0, 4.2, 0), _tint, 1.2, PI*0.5)
+	for end: float in [-1.0, 1.0]:
+		_sign(node, "SKY BRIDGE", Vector3(0, 3.6, end*length*0.5), _tint, 0.8, 0.0 if end>0.0 else PI, "plank", "star")
 	art.finish()
 
-## A plaza: paved, a fountain in the middle (a canal in Rosewater), trees,
-## benches, lamps, a vendor's stall.
+## A plaza on its block: cobbles (the ground's), a ring of paving round a
+## fountain (a canal in Rosewater), benches and planters in a circle, trees,
+## lamps and a vendor's stall, all sized to the room the streets leave.
 func _plaza(c: Dictionary) -> void:
-	var frame: Transform3D = c.frame
+	var blocks := CityRoads.blocks(int(c.face), int(c.i), int(c.j))
+	if blocks.is_empty(): return
+	var block: Dictionary = blocks[0]
+	var cell_frame: Transform3D = block.frame
+	var seed: Vector2 = block.seed
+	var room := CityRoads.field(block, seed)-CityLayout.ROAD-CityLayout.WALK-1.0
+	var frame := Transform3D(cell_frame.basis, cell_frame*Vector3(seed.x, CityRoads.drop(seed), seed.y))
 	var node := _holder(frame, "Plaza_%d_%d" % [c.i, c.j])
 	var art := NexusStation.Brush.new(node, false, 500.0)
-	var half: Vector2 = c.half
-	var lot := Vector2(half.x, half.y)-Vector2.ONE*(CityLayout.ROAD+CityLayout.WALK)
-	art.box(Vector3(0, 0.0, 0), Vector3(lot.x*2.0, 0.2, lot.y*2.0), Color("5a4a5a"), true)
-	art.round_part(Vector3(0, 0.12, 0), 14.0, 0.04, Color("7a6a7a"))
-	art.round_part(Vector3(0, 0.14, 0), 13.4, 0.04, _neon, false, 1.0)
+	var ring := minf(13.4, room*0.75)
+	art.round_part(Vector3(0, 0.08, 0), ring+0.6, 0.12, Color("7a6a7a"))
+	art.round_part(Vector3(0, 0.12, 0), ring, 0.06, _neon, false, 0.6)
 	if data.theme=="rose":
 		# A canal across the plaza, two arched bridges over it.
-		art.box(Vector3(0, 0.4, 0), Vector3(lot.x*2.0, 0.6, 6.4), Color("8a6a7a"), true)
-		art.box(Vector3(0, 0.72, 0), Vector3(lot.x*2.0, 0.06, 5.6), Color("2a8aa8"), false, 0.5)
-		for s: float in [-1.0, 1.0]: art.box(Vector3(0, 0.75, s*2.9), Vector3(lot.x*2.0, 0.08, 0.2), _neon, false, 1.4)
-		for x: float in [-lot.x*0.5, lot.x*0.5]:
+		var span := room*2.0
+		art.box(Vector3(0, 0.4, 0), Vector3(span, 0.6, 6.4), Color("8a6a7a"), true)
+		art.box(Vector3(0, 0.72, 0), Vector3(span, 0.06, 5.6), Color("2a8aa8"), false, 0.5)
+		for s: float in [-1.0, 1.0]: art.box(Vector3(0, 0.75, s*2.9), Vector3(span, 0.08, 0.2), _neon, false, 1.4)
+		for x: float in [-room*0.5, room*0.5]:
 			for k in 8:
 				var z0 := -7.0+k*1.75
 				var z1 := z0+1.75
@@ -816,18 +887,97 @@ func _plaza(c: Dictionary) -> void:
 		fountain.scale = Vector3.ONE*1.6
 		node.add_child(fountain)
 		_light(node, Vector3(0, 3.0, 0), Color("6af0e0"), 1.0, 10.0)
+	var bench := minf(10.0, ring*0.75)
 	for k in 8:
 		var a := TAU*k/8.0+0.39
-		var at := Vector3(cos(a)*10.0, 0.1, sin(a)*10.0)
-		_props.add("bench" if k % 2 else "planter", frame, at, -a+PI*0.5)
-		_props.add("potted_tree", frame, Vector3(cos(a)*15.5, 0.1, sin(a)*15.5))
+		_props.add("bench" if k % 2 else "planter", frame, Vector3(cos(a)*bench, 0.1, sin(a)*bench), -a+PI*0.5)
+		var at := Vector2(cos(a), sin(a))*minf(15.5, room*0.92)
+		if CityRoads.field(block, seed+at)>CityLayout.ROAD+CityLayout.WALK+1.0: _props.add("potted_tree", frame, Vector3(at.x, 0.1, at.y))
 	for k in 4:
-		var at := Vector3((1 if k % 2 else -1)*(lot.x-1.5), 0.1, (1 if k>1 else -1)*(lot.y-1.5))
-		_props.add("street_lamp", frame, at)
-	_props.add("noodle_stall" if c.i % 2 else "kiosk", frame, Vector3(lot.x-4.0, 0.1, 0), -PI*0.5)
-	_props.add("hydrant_fountain", frame, Vector3(-lot.x+2.0, 0.1, 3.0))
-	_props.add("holo_board", frame, Vector3(-lot.x+1.5, 0.1, -6.0), PI*0.5)
+		var a := TAU*k/4.0+PI*0.25
+		_props.add("street_lamp", frame, Vector3(cos(a), 0, sin(a))*room*0.95+Vector3.UP*0.1)
+	_props.add("noodle_stall" if int(c.i) % 2 else "kiosk", frame, Vector3(room*0.8, 0.1, 0), -PI*0.5)
+	_props.add("hydrant_fountain", frame, Vector3(-room*0.8, 0.1, 3.0))
+	_props.add("holo_board", frame, Vector3(-room*0.75, 0.1, -6.0), PI*0.5)
 	art.finish()
+
+## The district's lake and park (the lawns, water and trees are the
+## skyline's; here what people use): benches round the water, lamps, a
+## wooden bridge over the big pool, a kiosk and lantern strings.
+func _green(c: Dictionary) -> void:
+	for block: Dictionary in CityRoads.blocks(int(c.face), int(c.i), int(c.j)):
+		var frame: Transform3D = block.frame
+		var seed := CityLayout.rnd(float(c.seed), 40+int(block.sub))
+		var lot := CityLayout.ROAD+CityLayout.WALK+0.8
+		var lake: bool = block.role=="lake"
+		var spots := CityArt.pack(block, lot+1.5, seed, 3, 6.0, 60.0) if lake else CityArt.pack(block, lot, seed, 4, 5.0, 40.0)
+		var lift := func(at: Vector2, y: float) -> Vector3: return Vector3(at.x, CityRoads.drop(at)+y, at.y)
+		for k in spots.size():
+			var at: Vector2 = spots[k][0]
+			var rr := float(spots[k][1])+(2.6 if lake else 0.0)
+			var benches := 6 if lake else 4
+			for b in benches:
+				var a := TAU*(b+0.5)/benches+k
+				var p := at+Vector2.from_angle(a)*(rr+1.6 if lake else rr*0.85)
+				if CityRoads.field(block, p)<lot+0.5: continue
+				_props.add("bench" if b % 2==0 else "street_lamp", frame, lift.call(p, 0.15), -a-PI*0.5 if lake else -a+PI*0.5)
+			if lake and k==0 and rr>11.0:
+				_bridge_over(frame, at, rr-2.6, seed)
+		if not spots.is_empty():
+			var edge: Vector2 = spots[0][0]+Vector2.from_angle(seed*TAU)*(float(spots[0][1])+(5.5 if lake else 0.5))
+			if CityRoads.field(block, edge)>lot+2.0: _props.add("kiosk" if lake else "noodle_stall", frame, lift.call(edge, 0.15), seed*TAU)
+
+## A humped wooden footbridge across a round pool (in a block frame).
+func _bridge_over(frame: Transform3D, at: Vector2, radius: float, seed: float) -> void:
+	var a := seed*TAU
+	var along := Vector2.from_angle(a)
+	var basis := Basis(Vector3.UP, -a)
+	var holder := _holder(Transform3D(frame.basis*basis, frame*Vector3(at.x, CityRoads.drop(at), at.y)), "LakeBridge")
+	var art := NexusStation.Brush.new(holder, false, 400.0)
+	var half := radius+2.0
+	var steps := 12
+	for k in steps:
+		var x0 := -half+k*half*2.0/steps
+		var x1 := x0+half*2.0/steps
+		var y0 := 0.3+2.2*(1.0-pow(x0/half, 2))
+		var y1 := 0.3+2.2*(1.0-pow(x1/half, 2))
+		var pitch := atan2(y1-y0, x1-x0)
+		art.part("box", Transform3D(Basis(Vector3.BACK, pitch), Vector3((x0+x1)*0.5, (y0+y1)*0.5-0.12, 0)), Vector3(Vector2(x1-x0, y1-y0).length()+0.05, 0.24, 2.8), Color("8a5a3a"), true)
+		for s: float in [-1.0, 1.0]:
+			art.box(Vector3((x0+x1)*0.5, (y0+y1)*0.5+0.5, s*1.35), Vector3(0.12, 1.0, 0.12), Color("d9ac60"))
+	for s: float in [-1.0, 1.0]:
+		art.box(Vector3(0, 3.1, s*1.35), Vector3(half*1.2, 0.1, 0.1), Color("d9ac60"))
+	_props.add("lantern_string", holder.transform, Vector3(0, 4.2, 0), 0.0, 1.0)
+	art.finish()
+
+## A graffiti on a wall: `basis` turns the picture's face (+Z) outward from it.
+func _graffiti_on(frame: Transform3D, at: Vector3, basis: Basis, index: int, show := true) -> void:
+	if not show: return
+	var size := CityTextures.graffiti_size(index)
+	var quad := QuadMesh.new()
+	quad.size = size
+	var node := MeshInstance3D.new()
+	node.mesh = quad
+	node.material_override = graffiti_material(index)
+	node.transform = frame*Transform3D(basis, at)
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	node.visibility_range_end = 160.0
+	add_child(node)
+
+static var _graffiti_mats := {}
+static func graffiti_material(index: int) -> StandardMaterial3D:
+	if _graffiti_mats.has(index): return _graffiti_mats[index]
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = CityTextures.graffiti(index)
+	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	m.alpha_scissor_threshold = 0.5
+	m.roughness = 0.9
+	m.emission_enabled = true
+	m.emission_texture = m.albedo_texture
+	m.emission_energy_multiplier = 0.25
+	_graffiti_mats[index] = m
+	return m
 
 ## The secret: an alley door on the west street, a service tunnel full of pipes,
 ## vents and steam, and the hidden bar inside the block.
@@ -845,8 +995,11 @@ func _secret(c: Dictionary, venues: Array) -> void:
 	_mass(frame, Vector3(0, (5.4+t)*0.5, 4.0), Vector3(16.0, t-5.4, 12.0), facade, 0.0, 0.0)
 	_mass(frame, Vector3((-p-8.0)*0.5, (3.0+t)*0.5, 4.0), Vector3(p-8.0, t-3.0, 2.4), facade, 0.0, 0.0)
 	var solids: Array = []
-	city._tower(_towers, frame, Vector2.ZERO, Vector2(p*1.5, p*1.5), lerpf(60.0, 110.0, float(c.seed)), t, facade.lightened(0.1), _neon, float(c.seed), solids)
-	for solid: Array in solids: _solid(solid[0], Vector3.ZERO, solid[1])
+	CityArt.new(_towers, frame, solids).building(Vector2.ZERO, p*0.7, lerpf(60.0, 110.0, float(c.seed)), float(c.seed), "crooked", _neon, t)
+	for solid: Array in solids: _solid_shape(solid)
+	# The alley is where the city's painters work.
+	for k in 4:
+		_graffiti_on(frame, Vector3(-p-0.05, 2.3, -11.0+k*2.6 if k<2 else 9.0+(k-2)*3.0), Basis(Vector3.UP, -PI*0.5), (int(float(c.seed)*97.0)+k*4) % CityTextures.GRAFFITI_COUNT, true)
 	# The tunnel uses the same conduit meshes and metal finish as Theory ships.
 	var node := _holder(frame, "SecretTunnel")
 	var art := NexusStation.Brush.new(node, false, 120.0)
@@ -893,37 +1046,58 @@ func _secret(c: Dictionary, venues: Array) -> void:
 
 # --- Streets ------------------------------------------------------------------------------
 
-## Lamps on both sidewalks of every district street, lantern strings across, a
-## bench, bin or vending machine now and then.
+## Lamps on the sidewalks of every district street (whichever way it runs),
+## benches, bins and vending machines now and then, lantern strings across;
+## nothing at the junctions or in front of shop doors.
 func _streets() -> void:
 	var f := int(data.face)
 	var c: Vector2i = data.corner
-	for k in 7:
-		for along_u: bool in [true, false]:
-			var fixed := float((c.y if along_u else c.x)-3+k)/CityLayout.N*2.0-1.0
-			var start := float((c.x if along_u else c.y)-3)/CityLayout.N*2.0-1.0
-			var span := 6.0/CityLayout.N*2.0
-			var steps := 22
-			for s in steps:
-				var t := start+span*(s+0.5)/steps
-				var u := t if along_u else fixed
-				var v := fixed if along_u else t
-				# Skip the port's deck.
-				var cu := (u+1.0)*0.5*CityLayout.N
-				var cv := (v+1.0)*0.5*CityLayout.N
-				if absf(cu-c.x)<2.0 and absf(cv-c.y)<2.0: continue
-				var frame := CityLayout.frame_at(f, u, v)
-				if not along_u: frame.basis = frame.basis*Basis(Vector3.UP, PI*0.5)
-				for side: float in [-1.0, 1.0]:
-					var at := Vector3(0, 0.05, side*(CityLayout.ROAD+CityLayout.WALK*0.75))
-					var salt := k*1000+s*10+(1 if side>0 else 0)+(500 if along_u else 0)
-					if s % 3==0:
-						_props.add("street_lamp", frame, at, PI*0.5 if side>0 else -PI*0.5)
-					else:
-						var roll := CityLayout.rnd(0.17, salt)
-						if roll<0.12: _props.add("bench", frame, at+Vector3(0, 0, side*0.6), PI if side>0 else 0.0)
-						elif roll<0.2: _props.add("trash_bin", frame, at)
-						elif roll<0.25: _props.add("vending_machine", frame, at+Vector3(0, 0, side*0.9), PI if side>0 else 0.0)
-						elif roll<0.3: _props.add("planter", frame, at)
-				if s % 3==1:
-					_props.add("lantern_string", frame, Vector3(0, 7.0, 0), PI*0.5, 2.2)
+	var r := CityLayout.radius()
+	var seen := {}
+	var deck := CityLayout.district_frame(data)
+	for lj in 6:
+		for li in 6:
+			var i := c.x-3+li
+			var j := c.y-3+lj
+			for street: Dictionary in CityRoads.cell_streets(f, i, j):
+				var ends: Array = street.ends
+				var key := "%s-%s" % [ends[0], ends[1]]
+				if seen.has(key): continue
+				seen[key] = true
+				var pts: Array = street.points
+				var clear_a := _junction_clear(f, ends[0])
+				var clear_b := _junction_clear(f, ends[1])
+				var a: Vector3 = (pts[0] as Vector3)*r
+				var m: Vector3 = (pts[1] as Vector3)*r
+				var b: Vector3 = (pts[2] as Vector3)*r
+				var total := a.distance_to(m)+m.distance_to(b)
+				var steps := int(total/6.5)
+				for s in steps:
+					var d := (s+0.5)*total/steps
+					if d<clear_a or total-d<clear_b or absf(d-total*0.5)<5.0: continue
+					var p := a.lerp(m, d/a.distance_to(m)) if d<a.distance_to(m) else m.lerp(b, (d-a.distance_to(m))/m.distance_to(b))
+					var dir := (m-a if d<a.distance_to(m) else b-m).normalized()
+					var up := p.normalized()
+					var local := deck.affine_inverse()*p
+					if absf(local.x)<60.0 and absf(local.z)<66.0: continue  # the port's deck and ramps
+					var x := dir.slide(up).normalized()
+					var frame := Transform3D(Basis(x, up, x.cross(up)), up*r)
+					for side: float in [-1.0, 1.0]:
+						var at := Vector3(0, CityRoads.KERB+0.02, side*(CityLayout.ROAD+CityLayout.WALK*0.72))
+						var salt := s*10+(1 if side>0 else 0)+key.hash() % 1000*100
+						if s % 3==0:
+							_props.add("street_lamp", frame, at, PI*0.5 if side>0 else -PI*0.5)
+						else:
+							var roll := CityLayout.rnd(0.17, salt)
+							if roll<0.12: _props.add("bench", frame, at+Vector3(0, 0, side*0.5), PI if side>0 else 0.0)
+							elif roll<0.2: _props.add("trash_bin", frame, at)
+							elif roll<0.25: _props.add("vending_machine", frame, at+Vector3(0, 0, side*0.7), PI if side>0 else 0.0)
+							elif roll<0.32: _props.add("planter", frame, at)
+					if s % 3==1:
+						_props.add("lantern_string", frame, Vector3(0, 7.0, 0), PI*0.5, 1.8)
+
+## How far from a corner the street furniture keeps clear (the junction, or
+## the roundabout's ring and its sidewalk).
+func _junction_clear(face: int, corner: Vector2i) -> float:
+	var island := CityRoads.round_at(face, corner.x, corner.y)
+	return island+CityRoads.RING+CityLayout.WALK+1.5 if island>0.0 else CityLayout.ROAD+CityLayout.WALK+2.0

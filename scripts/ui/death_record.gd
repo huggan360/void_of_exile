@@ -59,7 +59,7 @@ func _init(p_record: Dictionary, can_delete := true, continue_text := "Close", j
 	who.add_child(UIStyle.heading(PlayerClasses.display_name(_stats.class_id), 38, PlayerClasses.get_def(_stats.class_id).color))
 	who.add_child(UIStyle.label("Level %d" % int(record.get("level", _stats.level)), 24, UIStyle.TEXT))
 	var killer := str(record.get("killed_by", ""))
-	var place := str(record.get("realm", "")).replace("realm_", "Realm ").replace("hall", "the Tavern")
+	var place := str(record.get("realm", "")).replace("realm_1", "the Surface").replace("realm_", "the Surface ").replace("hall", "the Tavern")
 	who.add_child(UIStyle.label("Killed by %s%s" % [killer if killer != "" else "something unseen", "  in " + place if place != "" else ""], 20, UIStyle.TEXT))
 	var died := float(record.get("died", 0.0))
 	if died > 0.0:

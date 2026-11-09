@@ -137,16 +137,12 @@ func _shipyard(p: Dictionary) -> void:
 		art.box(Vector3(-22.0, 2.5, side*3.0), Vector3(0.4, 5.0, 0.4), Color("6d4839"), true)
 	art.box(Vector3(-22.0, 4.6, 0), Vector3(0.3, 1.4, 6.8), Color("e8c48a"))
 	art.finish()
-	var sign := Label3D.new()
-	sign.text = "SHIPYARD"
-	sign.font = UIStyle.bold()
-	sign.font_size = 48
-	sign.pixel_size = 0.02
-	sign.outline_size = 10
-	sign.modulate = Color("ffe9c2")
-	sign.position = Vector3(-21.7, 4.6, 0)
-	sign.rotation.y = -PI*0.5
-	dock.add_child(sign)
+	# Painted on the board between the two posts, both faces.
+	for k in 2:
+		var sign := SignBoard.make("SHIPYARD", "paint", "", Color("4a3024"), 1.6)
+		sign.position = Vector3(-22.0+(0.16 if k==0 else -0.16), 4.6, 0)
+		sign.rotation.y = PI*0.5 if k==0 else -PI*0.5
+		dock.add_child(sign)
 
 func _trader(p: Dictionary, which: String, model_id: String, title: String, line: String) -> void:
 	var frame := SpaceLayout.town_frame(p, which)

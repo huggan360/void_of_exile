@@ -9,7 +9,7 @@ var _root: Node3D
 var _lock_root: Node3D
 var _gate: CollisionShape3D
 var _locked := true
-var _sign: Label3D
+var _sign: SignBoard
 
 func build(server: bool) -> void:
 	_root = ShipHull.content(self, _root)
@@ -76,12 +76,8 @@ func build(server: bool) -> void:
 	art.box(Vector3(2.55, 1.45, 3.8), Vector3(1.5, 0.85, 0.18), Art.DARK)
 	for y: float in [1.03, 1.87]: art.box(Vector3(2.55, y, 3.91), Vector3(1.6, 0.08, 0.08), Art.BRASS)
 	art.finish()
-	_sign = Label3D.new()
-	_sign.font = Art.heading_font()
-	_sign.font_size = 56
-	_sign.outline_size = 10
-	_sign.pixel_size = 0.0038
-	_sign.modulate = Art.AMBER
+	# Painted on the board by the deck.
+	_sign = SignBoard.make("LAUNCH LOCKED", "paint", "", Art.AMBER, 0.38)
 	_sign.position = Vector3(2.55, 1.45, 3.92)
 	_root.add_child(_sign)
 	rocket = SmallRocket.new()
@@ -114,4 +110,4 @@ func set_locked(locked: bool) -> void:
 	_locked = locked
 	if is_instance_valid(_lock_root): _lock_root.visible = locked
 	if is_instance_valid(_gate): _gate.set_deferred("disabled", not locked)
-	if is_instance_valid(_sign): _sign.text = "LAUNCH LOCKED\nAsk the keeper" if locked else "READY TO SAIL\nAll aboard!"
+	if is_instance_valid(_sign): _sign.set_text("LAUNCH LOCKED\nAsk the keeper" if locked else "READY TO SAIL\nAll aboard!")

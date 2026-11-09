@@ -542,14 +542,10 @@ func _signpost(at: Vector3) -> void:
 		var frame := Transform3D(Basis(along, Vector3.UP, along.cross(Vector3.UP)), at + Vector3.UP * float(entry[2]))
 		art.part("box", frame.translated_local(Vector3(1.05, 0, 0)), Vector3(2.1, 0.5, 0.12), Color("e8c48a"))
 		art.part("box", frame.translated_local(Vector3(2.1, 0, 0)).rotated_local(Vector3.BACK, PI * 0.25), Vector3(0.36, 0.36, 0.12), Color("e8c48a"))
-		var label := Label3D.new()
-		label.text = entry[0]
-		label.font = UIStyle.bold()
-		label.font_size = 30
-		label.pixel_size = 0.009
-		label.outline_size = 8
-		label.modulate = Color("ffe9c2")
-		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		label.position = frame * Vector3(2.6, 0.45, 0.0)
-		add_child(label)
+		# The name painted on both faces of its arrow.
+		var words := str(entry[0])
+		for k in 2:
+			var paint := SignBoard.make(words, "paint", "", Color("4a3024"), minf(0.75, 1.85/(words.length()*6.0*SignBoard.PX)))
+			paint.transform = frame*Transform3D(Basis(Vector3.UP, k*PI), Vector3(1.05, 0, 0.065 if k==0 else -0.065))
+			add_child(paint)
 	art.finish()

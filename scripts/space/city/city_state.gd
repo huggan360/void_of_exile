@@ -20,7 +20,21 @@ var orders := {}  # seat id -> clock time it arrives
 var elevators := {}
 var changed := false  # authority: something to broadcast
 
+static var _tick := -1
+static var _tick_time := 0.0
+
+## The shared clock, read once per physics step: the car and whoever rides it
+## are placed for the very same moment.
 static func clock() -> float:
+	if Engine.is_in_physics_frame():
+		var tick := Engine.get_physics_frames()
+		if tick!=_tick:
+			_tick = tick
+			_tick_time = _now()
+		return _tick_time
+	return _now()
+
+static func _now() -> float:
 	if Net.is_client() and Net.client: return Net.client.server_time()
 	return Net.now()
 

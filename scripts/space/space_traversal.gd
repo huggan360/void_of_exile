@@ -191,7 +191,7 @@ func _process(delta: float) -> void:
 	_notice_time -= delta
 	_notice.modulate.a = clampf(_notice_time, 0.0, 1.0)
 	var zone := world.zone_at(player.global_position)
-	_title.text = "" if zone=="ship" else world.region_at(player.global_position)
+	_title.text = ""  # no place titles on screen
 	_ship_panel.visible = _ship!=null
 	if _ship:
 		var place := SpaceLayout.region_name(SpaceLayout.region_at(_ship.xform.origin))
@@ -266,7 +266,6 @@ func _update_hint() -> void:
 		lines.append("WASD walk the deck - Space jetpack off" if deck else "Space fires the jetpack (WASD steers) - Ctrl brakes - Shift faster")
 		lines.append(("X: unhook, or clip on again where you are  -  zoom: reel the line (%d m)" % roundi(rope_length)) if not tether.is_empty() else "X near a ship's hull: clip your line on")
 	elif world.zone_at(player.global_position)=="ship":
-		lines.append("X at a seat to sit - the airlock is on the port side, the hatch at the stern")
 		var ship := world.ship_in_slot(SpaceLayout.pocket_at(player.global_position))
 		if ship:
 			var hurt: Array[String] = []
@@ -277,7 +276,6 @@ func _update_hint() -> void:
 	if _lift>=0:
 		var button := _lift_button()
 		lines.append("Look at a floor button and click or press X" if button<0 else "X / click: "+str(CityLayout.elevators()[_lift].floors[button].name))
-	elif seat=="": lines.append("V: camera - "+["Angled", "Shoulder", "First person"][camera_mode])
 	_hint.text = "\n".join(lines)
 
 func _notice_edge() -> void:
@@ -308,8 +306,7 @@ func on_world_message(event: Array) -> void:
 				"airlock_out": notice("Out on the hull, your line clipped by the airlock. X unhooks it.")
 				"airlock_in": notice("Back inside. The airlock hisses shut.")
 				"adrift": notice("Your ship is gone! You float on your jetpack. Another crew can pick you up, or press R to call Orin's rescue skiff.")
-				"board": notice("Aboard. Sit at the helm to fly, or at a cannon to fight.")
-				"planet": notice(world.region_at(player.global_position))
+				"planet": pass
 
 func _flash_fade() -> void:
 	_fade.color.a = 1.0
@@ -593,7 +590,12 @@ func physics_step(delta: float) -> void:
 		var tower := CityLayout.tower_world(CityLayout.elevators()[_lift])
 		var local := tower.affine_inverse()*player.global_position-CityState.SHAFT
 		if absf(local.x)<CityState.CAR.x*0.5+0.3 and absf(local.z)<CityState.CAR.z*0.5+0.3 and absf(local.y-_lift_height)<3.0:
-			player.global_position += tower.basis.y*(float(world.city.car_state(_lift)[0])-_lift_height)
+			# Stand on the car's floor itself while it rides (no sinking through it
+			# a frame behind); the car was placed first this frame (CityDistrict).
+			var car := float(world.city.car_state(_lift)[0])
+			if str(world.city.elevators[_lift].phase)=="moving" or absf(car-_lift_height)>0.001:
+				player.global_position += tower.basis.y*(car-local.y)
+				player.velocity = player.velocity.slide(tower.basis.y)
 	_lift = world.city.car_at(player.global_position)
 	if _lift>=0: _lift_height = float(world.city.car_state(_lift)[0])
 	if cinematic or seat!="":

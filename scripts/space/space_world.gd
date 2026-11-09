@@ -49,7 +49,7 @@ static func is_space(id: String) -> bool:
 func _init(data: Dictionary) -> void:
 	record = data
 	realm_id = str(data.get("id", REALM))
-	display_name = "Space"
+	display_name = "The Space"
 	half_extent = 64
 	spawn_point = Vector3(0, 0.1, 18)
 	set_meta("full_3d", true)

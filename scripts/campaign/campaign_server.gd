@@ -467,7 +467,7 @@ func may_enter(p: Dictionary, place: String) -> bool:
 
 func tavern_record(p: Dictionary, place: String) -> Dictionary:
 	var party := server.social.party_for(p.player_id)
-	return {id = place, hall = true, name = "Hearthhaven - %s" % Campaigns.get_def(party.campaign.id).get("title", "")}
+	return {id = place, hall = true, name = "The Tavern"}
 
 
 ## Opens (or finds) a party's campaign world, as it was left.

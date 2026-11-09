@@ -34,7 +34,7 @@ func prepare_load() -> void:
 	_prepared_load = true
 
 func _init() -> void:
-	display_name = "Hearthhaven - The Tavern"
+	display_name = "The Tavern"
 	realm_id = "hall"
 	half_extent = 120
 
@@ -59,17 +59,12 @@ func _ready() -> void:
 	# The Chambers Gate: into the account's own vault hall.
 	if has_node("ChambersGate"):
 		var gate := _add_portal($ChambersGate.position, -$ChambersGate.basis.z, "chambers", Color(0.85, 0.2, 0.25), Color(1.0, 0.75, 0.35))
-		var sign := Label3D.new()
-		sign.text = "Chambers"
-		sign.font = UIStyle.bold()
-		sign.font_size = 56
-		sign.outline_size = 14
-		sign.modulate = Color(1.0, 0.85, 0.6)
-		sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		sign.fixed_size = false
-		sign.pixel_size = 0.01
-		sign.position = Vector3(0, 4.6, 0)
-		gate.add_child(sign)
+		# A brass plaque over the gate, on both faces.
+		for k in 2:
+			var sign := SignBoard.make("Chambers", "brass", "door", Color(0, 0, 0, 0), 0.8)
+			sign.position = Vector3(0, 4.6, 0.06 if k==0 else -0.06)
+			sign.rotation.y = k*PI
+			gate.add_child(sign)
 	_build_market()
 	if navigation==null: _prepare_navigation()
 	if has_node("Residents"):

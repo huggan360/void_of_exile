@@ -228,14 +228,7 @@ func _open_star_portal() -> void:
 	if server_build or Net.is_server() or has_node("StarPortal"): return
 	var portal := _add_portal(TheoryLayout.ARENA+Vector3(0,0.6,8),Vector3.BACK,"astral",Color("7dff9a"),Color("ff8ad8"))
 	portal.name = "StarPortal"
-	var sign := Label3D.new()
-	sign.text = "To the Nexus"
-	sign.font = UIStyle.bold()
-	sign.font_size = 56
-	sign.outline_size = 14
-	sign.modulate = Color("ffe6a8")
-	sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sign.pixel_size = 0.01
+	var sign := SignBoard.pair("To the Nexus","brass","star")
 	sign.position = Vector3(0,4.6,0)
 	portal.add_child(sign)
 
@@ -370,10 +363,14 @@ func _publish_puzzle(puzzle: TheoryPuzzle) -> void:
 			if puzzle.kind=="algorithm" and i>0: continue
 			var cell: Vector2i = puzzle.active_cells[i]
 			var point := puzzle.frame*Vector3((cell.x-(puzzle.size-1)*0.5)*puzzle.cell_size,0.2,(cell.y-(puzzle.size-1)*0.5)*puzzle.cell_size)
-			_sign(point,"START" if puzzle.kind=="algorithm" else char(65+i),Color.WHITE,0.024)
-		_labels[puzzle.id] = _sign(puzzle.frame*Vector3(0,3.2,-3.9 if puzzle.id==2 else 6.0),puzzle.clue(),Color("c5ebff"),0.012)
-		_labels[puzzle.id].width = 900
-		_labels[puzzle.id].autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			# The tile's letter painted on it.
+			var mark := SignBoard.make("START" if puzzle.kind=="algorithm" else char(65+i),"paint","",Color.WHITE,1.2)
+			mark.transform = Transform3D(puzzle.frame.basis*Basis(Vector3.RIGHT,-PI*0.5),point+puzzle.frame.basis.y*0.05)
+			add_child(mark)
+		var screen := SignBoard.pair(SignBoard.wrap(puzzle.clue()),"slate","",Color("c5ebff"),0.7)
+		screen.transform = Transform3D(puzzle.frame.basis,puzzle.frame*Vector3(0,3.2,-3.9 if puzzle.id==2 else 6.0))
+		add_child(screen)
+		_labels[puzzle.id] = screen
 		_paint_board(puzzle)
 	var target := InteractionTarget.new()
 	target.title = "Pathfinder" if puzzle.id==0 else "Parity engine (optional)"
@@ -399,22 +396,14 @@ func _paint_board(puzzle: TheoryPuzzle) -> void:
 			if puzzle.solved: color = color.lerp(Color("8effbe"),0.65)
 			multi.set_instance_color(y*puzzle.size+x,color)
 	if _labels.has(puzzle.id):
-		_labels[puzzle.id].text = ("LOCK RELEASED" if puzzle.id==0 else "DIAGNOSTIC COMPLETE") if puzzle.solved else ("CURRENT %s / TARGET %s\n%s" % [TheoryPuzzle.binary(puzzle.bits),TheoryPuzzle.binary(puzzle.target),puzzle.clue()] if puzzle.kind=="parity" else puzzle.clue())
+		SignBoard.pair_text(_labels[puzzle.id], SignBoard.wrap(("LOCK RELEASED" if puzzle.id==0 else "DIAGNOSTIC COMPLETE") if puzzle.solved else ("CURRENT %s / TARGET %s\n%s" % [TheoryPuzzle.binary(puzzle.bits),TheoryPuzzle.binary(puzzle.target),puzzle.clue()] if puzzle.kind=="parity" else puzzle.clue())))
 
-func _sign(at: Vector3,text: String,color: Color,pixel := 0.018) -> Label3D:
-	var label := Label3D.new()
-	label.text = text
-	label.font = UIStyle.bold()
-	label.font_size = 36
-	label.pixel_size = pixel
-	label.modulate = color
-	label.outline_size = 5
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position = at
-	label.no_depth_test = false
-	label.visibility_range_end = 60.0
-	add_child(label)
-	return label
+## A sign hung over the way, readable from both sides.
+func _sign(at: Vector3,text: String,color: Color,pixel := 0.018) -> Node3D:
+	var sign := SignBoard.pair(text,"neon","",color,pixel/0.018)
+	sign.position = at
+	add_child(sign)
+	return sign
 
 func _process(delta: float) -> void:
 	super._process(delta)

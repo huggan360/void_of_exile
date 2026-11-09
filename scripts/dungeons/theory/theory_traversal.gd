@@ -268,7 +268,7 @@ func update_camera(delta: float) -> void:
 	_camera_env.volumetric_fog_density = 0.004 if in_wreck else 0.0018
 	_camera_env.volumetric_fog_length = 28 if in_wreck else 48
 	_camera_env.volumetric_fog_albedo = Color("8895ae") if in_wreck else Color("c3dfed")
-	_title.text = biome.biome_name
+	_title.text = ""  # no place titles on screen
 	_objective.text = ("Forward airlock open" if world.ship_airlock_open else "Inspect electrical boxes to find the airlock relay. %d/5 checked." % world.inspected_boxes.size()) if want_fp else "Follow the magnetic ribbon. Gravity follows the surface."
 	if world.zone_at(player.global_position)=="ship" and not world.ship_airlock_open:
 		var nearest := -1

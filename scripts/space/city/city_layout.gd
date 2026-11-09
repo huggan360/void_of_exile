@@ -13,8 +13,8 @@ class_name CityLayout
 ## the local normal), so floors are level wherever they are.
 const ID := "vesperis"
 const N := 28
-const ROAD := 6.0  # half width of the carriageway (m)
-const WALK := 4.0  # sidewalk width on each side
+const ROAD := 4.5  # half width of the carriageway (m)
+const WALK := 3.5  # sidewalk width on each side
 const FACES: Array[Vector3] = [Vector3.RIGHT, Vector3.LEFT, Vector3.UP, Vector3.DOWN, Vector3.BACK, Vector3.FORWARD]
 ## District: the 2 x 2 cells inside `corner` (cells corner-1..corner) are its spaceport; the
 ## 6 x 6 cells around it are built in full.
@@ -33,6 +33,7 @@ const ROLES := {
 	Vector2i(1, 1): "venues", Vector2i(1, 2): "venues", Vector2i(1, 3): "venues", Vector2i(1, 4): "venues",
 	Vector2i(2, 1): "venues", Vector2i(3, 1): "venues", Vector2i(2, 4): "venues", Vector2i(3, 4): "venues",
 	Vector2i(4, 1): "venues", Vector2i(4, 4): "venues", Vector2i(0, 3): "secret",
+	Vector2i(0, 1): "lake", Vector2i(0, 2): "lake", Vector2i(5, 2): "park", Vector2i(5, 3): "park", Vector2i(3, 5): "park",
 }
 ## Ground-floor venue kinds, dealt round a district's podiums (front, back).
 const VENUE_CYCLE := ["cafe", "bar", "shop_budget", "noodle", "shop_premium", "teahouse", "bar", "shop_curio", "cafe", "arcade",
@@ -134,7 +135,10 @@ static func district_of(face: int, i: int, j: int) -> Dictionary:
 
 static func role(face: int, i: int, j: int) -> String:
 	var at := district_of(face, i, j)
-	if at.is_empty(): return "skyline"
+	if at.is_empty():
+		# Now and then a park or a lake among the towers.
+		var roll := _hash(face*10007+i*131+j*7+555)
+		return "lake" if roll<0.035 else "park" if roll<0.1 else "skyline"
 	var local: Vector2i = at.local
 	if local.x in [2, 3] and local.y in [2, 3]: return "port"
 	return ROLES.get(local, "district")
@@ -221,10 +225,11 @@ static func venues(d: Dictionary) -> Array:
 				for side: int in [-1, 1]:
 					var kind: String = VENUE_CYCLE[(n+DISTRICTS.find(d)*3) % VENUE_CYCLE.size()]
 					n += 1
-					# On the street side of the podium, door outward.
-					var at := frame*Vector3(0, 0, side*(PODIUM*0.5-ROOM.z*0.5))
+					# Along its own street (front or back of the block), door to the sidewalk.
+					var street := room_street(c, side)
+					var at := frame*Vector3(street[0].x, 0, street[0].y)
 					var dir := at.normalized()
-					var room := _tangent(dir, frame.basis.z*-side)
+					var room := _tangent(dir, frame.basis*Vector3(street[1].x, 0, street[1].y))
 					var v := _venue("%s_%d_%d_%d" % [d.id, item.local.x, item.local.y, side+1], kind, room, d, n)
 					# Shop rooms get a real shop (Shops), dealt round so every kind is somewhere.
 					if kind.begins_with("shop"):
@@ -246,6 +251,17 @@ static func venues(d: Dictionary) -> Array:
 				out.append(v)
 	_cache[key] = out
 	return out
+
+## A shop room's place on its street: [local centre, inward normal (local)]:
+## the front wall flush with the sidewalk's inner edge, square to the street.
+static func room_street(c: Dictionary, side: int) -> Array:
+	var j := int(c.j)+(0 if side<0 else 1)
+	var a := CityRoads.corner_local(int(c.face), int(c.i), j, c.frame)
+	var b := CityRoads.corner_local(int(c.face), int(c.i)+1, j, c.frame)
+	var along := (b-a).normalized()
+	var inward := Vector2(-along.y, along.x)
+	if inward.dot(-(a+b)*0.5)<0.0: inward = -inward
+	return [(a+b)*0.5+inward*(ROAD+WALK+0.2+ROOM.z*0.5), inward]
 
 static func _venue(key: String, kind: String, frame: Transform3D, d: Dictionary, n: int) -> Dictionary:
 	var names: Array = VENUE_NAMES.get(kind, VENUE_NAMES.get(kind.split("_")[0], ["Lantern Hall"]))
@@ -407,16 +423,22 @@ static func walk_loops(d: Dictionary) -> Array:
 	for item: Dictionary in district_cells(d):
 		if item.role in ["port"]: continue
 		var c: Dictionary = item.cell
-		var frame: Transform3D = c.frame
-		var h: Vector2 = c.half
-		var ex := h.x-ROAD-WALK*0.5
-		var ez := h.y-ROAD-WALK*0.5
-		var loop: Array[Vector3] = []
-		for corner: Vector2 in [Vector2(-ex, -ez), Vector2(ex, -ez), Vector2(ex, ez), Vector2(-ex, ez)]:
-			loop.append(center+(frame*Vector3(corner.x, 0, corner.y)).normalized()*radius())
-		out.append(loop)
+		for block: Dictionary in CityRoads.blocks(int(c.face), int(c.i), int(c.j)):
+			var frame: Transform3D = block.frame
+			var loop: Array[Vector3] = []
+			var line := CityRoads.outline(block, ROAD+WALK*0.5, 18)
+			for k in line.size():
+				# Thin the ring to its turns (walkers pause at each).
+				if k>0 and k<line.size()-1 and line[k].distance_to(loop_last(loop, frame, center))<6.0: continue
+				loop.append(center+(frame*Vector3(line[k].x, 0, line[k].y)).normalized()*(radius()+CityRoads.KERB))
+			if loop.size()>=3: out.append(loop)
 	_cache[key] = out
 	return out
+
+static func loop_last(loop: Array[Vector3], frame: Transform3D, center: Vector3) -> Vector2:
+	if loop.is_empty(): return Vector2(1e9, 1e9)
+	var p := frame.affine_inverse()*((loop[-1]-center).normalized()*radius())
+	return Vector2(p.x, p.z)
 
 ## Walkers of a district: {model, loop, phase, speed, pause}.
 const FOLK := ["city_courier", "city_noble", "city_guard", "city_mechanic", "city_kid", "city_dancer", "city_elder", "city_vendor",
@@ -438,26 +460,27 @@ static func walkers(d: Dictionary) -> Array:
 ## Where a walker is at time `t` (seconds, server clock): [world position, forward].
 static func walker_pose(d: Dictionary, w: Dictionary, t: float) -> Array:
 	var loop: Array = walk_loops(d)[w.loop]
+	var count := loop.size()
 	var lengths: Array[float] = []
 	var total := 0.0
-	for k in 4:
-		var l := (loop[k] as Vector3).distance_to(loop[(k+1) % 4])
+	for k in count:
+		var l := (loop[k] as Vector3).distance_to(loop[(k+1) % count])
 		lengths.append(l)
 		total += l
-	# Walk, with a short stop at each corner (looking around, chatting).
-	var stop := 3.0 if w.chat else 1.2
-	var cycle := total/float(w.speed)+stop*4.0
+	# Walk, with a short stop at a few corners (looking around, chatting).
+	var stop := (3.0 if w.chat else 1.2)*4.0/count
+	var cycle := total/float(w.speed)+stop*count
 	var at := fposmod(t+float(w.phase)*cycle, cycle)
 	if w.reverse: at = cycle-at
-	for k in 4:
+	for k in count:
 		var seg := lengths[k]/float(w.speed)
 		if at<seg+stop:
 			var a: Vector3 = loop[k]
-			var b: Vector3 = loop[(k+1) % 4]
+			var b: Vector3 = loop[(k+1) % count]
 			var f := clampf(at/seg, 0.0, 1.0)
 			var pos := a.lerp(b, f)
 			var c := (planet().center as Vector3)
-			pos = c+(pos-c).normalized()*radius()
+			pos = c+(pos-c).normalized()*(radius()+CityRoads.KERB)
 			var fwd := (b-a).normalized()*(-1.0 if w.reverse else 1.0)
 			return [pos, fwd, at>seg]
 		at -= seg+stop
@@ -485,8 +508,9 @@ static func lanes() -> Array:
 					pts.append(dir)
 				var dk := DISTRICTS.find(d)*100+k*2+(1 if along_u else 0)
 				if k!=3:  # the middle lines cross the port: no street traffic there
-					out.append({kind = "ground", dirs = pts, altitude = 0.0, side = 2.6, speed = 9.0+rnd(0.3, dk)*3.0, count = 3,
-						models = ["ground_cab", "ground_truck", "ground_tram", "ground_cab"], seed = dk})
+					for run: Array in street_runs(f, c, k, along_u):
+						out.append({kind = "ground", dirs = run, altitude = 0.0, side = 2.2, speed = 8.0+rnd(0.3, dk)*3.0, count = maxi(1, run.size()/8),
+							models = ["ground_cab", "ground_truck", "ground_tram", "ground_cab"], seed = dk+run.size()*1000})
 				for layer in 3:
 					if (k+layer) % 2==1: continue
 					out.append({kind = "sky", dirs = pts, altitude = 34.0+layer*26.0+rnd(0.7, dk)*6.0, side = 3.5, speed = 16.0+layer*5.0,
@@ -509,6 +533,53 @@ static func lanes() -> Array:
 		for k in pts.size()-1: total += pts[k].distance_to(pts[k+1])
 		lane.length = total
 	_cache.lanes = out
+	return out
+
+## The streets of a district's grid line `k` (0..6 across it) as unit-direction
+## polylines, split where a park or lake drops a street, going round the
+## roundabouts on their ring.
+static func street_runs(face: int, corner: Vector2i, k: int, along_u: bool) -> Array:
+	var runs: Array = []
+	var run: Array[Vector3] = []
+	var at := func(s: int) -> Vector2i: return Vector2i(corner.x-3+s, corner.y-3+k) if along_u else Vector2i(corner.x-3+k, corner.y-3+s)
+	for s in 6:
+		var a: Vector2i = at.call(s)
+		var b: Vector2i = at.call(s+1)
+		var node := CityRoads.node(face, a.x, a.y)
+		var present: bool = node[3] if along_u else node[5]
+		if not present:
+			if run.size()>2: runs.append(run)
+			run = []
+			continue
+		if run.is_empty(): run.append(CityRoads.dir(face, a.x, a.y))
+		run.append(node[2] if along_u else node[4])
+		run.append(CityRoads.dir(face, b.x, b.y))
+	if run.size()>2: runs.append(run)
+	# Round the roundabouts (inner corners of a run) on the middle of the ring.
+	var out: Array = []
+	for line: Array in runs:
+		var pts: Array[Vector3] = []
+		for q in line.size():
+			var here: Vector3 = line[q]
+			var g := face_uv(here)
+			var gi := roundi((float(g[1])+1.0)*0.5*N)
+			var gj := roundi((float(g[2])+1.0)*0.5*N)
+			var island := CityRoads.round_at(face, gi, gj) if q % 2==0 else 0.0
+			if island<=0.0 or q==0 or q==line.size()-1:
+				pts.append(here)
+				continue
+			var frame := _tangent(here, Vector3.UP if absf(here.y)<0.9 else Vector3.RIGHT)
+			var inv := frame.affine_inverse()
+			var p0 := inv*((line[q-1] as Vector3)*radius())
+			var p1 := inv*((line[q+1] as Vector3)*radius())
+			var a0 := atan2(p0.z, p0.x)
+			var a1 := atan2(p1.z, p1.x)
+			var sweep := fposmod(a1-a0, TAU)  # counter-clockwise round the island
+			var ring := island+CityRoads.RING*0.5
+			for m in 7:
+				var a := a0+sweep*m/6.0
+				pts.append((frame*Vector3(cos(a)*ring, 0, sin(a)*ring)).normalized())
+		out.append(pts)
 	return out
 
 ## A vehicle on a lane at time t: [position, forward]. Lanes are driven both

@@ -326,11 +326,11 @@ static func place_name(destination: String) -> String:
 			if destination.begins_with("dng_" + id + "_"): return Dungeons.definition(id).name
 		return "Dungeon"
 	if Campaigns.is_tavern(destination):
-		return "Tavern"
+		return "The Tavern"
 	if ChambersWorld.is_chambers(destination):
 		return "Chambers"
 	if SpaceWorld.is_space(destination):
-		return "Space"
+		return "The Space"
 	if destination == "castle" or Campaigns.is_castle(destination):
 		return "The Hollow Castle"
 	return "Campaign" if destination == "campaign" or Campaigns.is_campaign_realm(destination) else "The Surface"
@@ -1058,15 +1058,8 @@ func _process(delta: float) -> void:
 	player.torch_strength = atmosphere.torch_energy()
 	fog_of_war.reveal_around(player.global_position)
 
-	var where := world.display_name
-	if world is IslandWorld:
-		where += "  -  %s" % biome.biome_name
-		var region := world.region_at(player.global_position)
-		if region != "":
-			where += "  -  %s" % region
-	if Net.is_client() and Net.client.connected:
-		where += "  -  %s  -  %d ms" % [Net.client.info.get("server_name", ""), roundi(Net.client.rtt * 1000.0)]
-	hud.set_location(where + ("  -  loading..." if player.frozen else ""))
+	# Only the place itself: The Tavern, The Surface, The Space.
+	hud.set_location(world.display_name + ("  -  loading..." if player.frozen else ""))
 	if FrameTrace.enabled: FrameTrace.record("main_process",profile_started)
 
 

@@ -296,15 +296,9 @@ func _publish(parent: Node3D,groups: Dictionary,pipes: Array) -> void:
 	TheoryRoundDetails.attach(parent,pipes)
 
 func _sign(text: String,at: Vector3,pixel: float) -> void:
-	var label := Label3D.new()
-	label.text=text
-	label.position=at
-	label.font=UIStyle.bold()
-	label.font_size=36
-	label.pixel_size=pixel
-	label.modulate=Color("e4f3e7")
-	label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-	add_child(label)
+	var sign := SignBoard.pair(text,"slate","",Color("e4f3e7"),pixel/0.012)
+	sign.position=at
+	add_child(sign)
 
 func _effects() -> void:
 	for smoke in [false,true]:

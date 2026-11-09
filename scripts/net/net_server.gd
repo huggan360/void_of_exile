@@ -436,7 +436,7 @@ func on_enter(peer_id: int, destination: String) -> void:
 			Net.c_entered.rpc_id(peer_id, {error = "That Space belongs to another party's tale."})
 			return
 		realm = realms.get(destination)
-		if realm == null: realm = open_realm_record(destination, {id = destination, seed = 0, destroyed = [], space = true, name = "Space"})
+		if realm == null: realm = open_realm_record(destination, {id = destination, seed = 0, destroyed = [], space = true, name = "The Space"})
 	elif Dungeons.is_dungeon(destination):
 		if not dungeons.may_enter(p, destination):
 			Net.c_entered.rpc_id(peer_id, {error = "Enter through a living dungeon portal."})
@@ -560,7 +560,8 @@ func _pick_realm(wanted: String) -> RealmInstance:
 
 func _open_realm(realm_id: String) -> RealmInstance:
 	var record := WorldServer.get_or_create_realm(realm_id)
-	record.name = "Realm %s" % realm_id.trim_prefix("realm_")
+	var number := realm_id.trim_prefix("realm_")
+	record.name = "The Surface" if number=="1" else "The Surface %s" % number
 	return open_realm_record(realm_id, record)
 
 

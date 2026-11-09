@@ -242,7 +242,7 @@ const LIST := {
 		blurb="Help a woodland starwright finish his impossible ship. Board together, cross the chromatic void and restore a haunted vessel on the way to the Convergence.",
 		xp=8000,stars=[],side=[],
 		steps=[
-			{id="realm",kind="enter",world="campaign",text="Return to Realm 1 through the Chronicle Gate"},
+			{id="realm",kind="enter",world="campaign",text="Return to the Surface through the Chronicle Gate"},
 			{id="mechanic",kind="talk",world="campaign",npc="astral_mechanic",shared=true,
 				text="Find Orin at Starfall Launchworks in the woods",
 				say="You found my little clearing! [place]Starfall Launchworks[/place], first port to a very unreasonable sky.|My ship needs a [b]starcoil[/b], a [b]spellsteel nozzle[/b] and an [b]aether heart[/b]. My supply chest is beside the workshop. Bring all three to me.|Once she is ready, every member of your party must board. Nobody gets left in the trees."},
