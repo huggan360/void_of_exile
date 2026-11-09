@@ -88,12 +88,12 @@ func _structure(art: Art) -> void:
 
 func _chair(art: Art, at: Vector3, yaw: float, kind: String) -> void:
 	var basis := Basis(Vector3.UP, yaw)
+	if kind=="chair":
+		LeisureFurniture.chair(_root, "", Transform3D(basis, at), art.server, false, false)
+		return
 	art.solid(at + Vector3.UP * 0.34, Vector3(0.85, 0.68, 0.85), basis)
 	art.solid(at + basis * Vector3(0, 0.95, 0.38), Vector3(0.9, 0.9, 0.16), basis)
 	if art.server: return
-	if kind == "chair":
-		_armchair(art, at, basis)
-		return
 	var cloth := Art.PINK.darkened(0.33) if kind == "map" else Color("538c72")
 	art.box(at + Vector3.UP * 0.5, Vector3(0.92, 0.22, 0.9), cloth, 0, basis)
 	art.box(at + basis * Vector3(0, 0.99, 0.39), Vector3(0.92, 0.95, 0.18), Art.WOOD, 0, basis)
@@ -153,18 +153,6 @@ func _room_finish(art: Art) -> void:
 	_label("THE ASTRAL HEARTH", Vector3(0, 3.62, -17.2), 0, "star", 0.7)
 
 ## A deep, cushioned armchair facing along -Z of `basis`.
-func _armchair(art: Art, at: Vector3, basis: Basis) -> void:
-	var leather := Color("7a3f3a")
-	var cushion := Color("b7655a")
-	art.box(at + basis * Vector3(0, 0.3, 0), Vector3(1.1, 0.42, 1.0), leather, 0, basis)
-	art.box(at + basis * Vector3(0, 0.56, -0.02), Vector3(0.86, 0.16, 0.86), cushion, 0, basis)
-	art.box(at + basis * Vector3(0, 0.95, 0.42), Vector3(1.1, 0.95, 0.24), leather, 0, basis)
-	art.box(at + basis * Vector3(0, 1.0, 0.3), Vector3(0.8, 0.62, 0.1), cushion, 0, basis)
-	for side: float in [-1.0, 1.0]:
-		art.box(at + basis * Vector3(side * 0.5, 0.72, 0.0), Vector3(0.18, 0.34, 0.95), leather.darkened(0.08), 0, basis)
-		art.box(at + basis * Vector3(side * 0.5, 0.9, -0.38), Vector3(0.2, 0.08, 0.2), Art.BRASS, 0, basis)
-		for z: float in [-0.38, 0.38]: art.box(at + basis * Vector3(side * 0.42, 0.05, z), Vector3(0.12, 0.1, 0.12), Art.DARK, 0, basis)
-
 func _console(art: Art, at: Vector3, size: Vector3) -> void:
 	art.box(at + Vector3.UP * size.y * 0.5, size, Art.WOOD)
 	art.box(at + Vector3.UP * (size.y + 0.035), Vector3(size.x + 0.1, 0.07, size.z + 0.1), Art.BRASS)
@@ -281,10 +269,6 @@ func _systems(art: Art) -> void:
 	art.box(lock + Vector3(0.32, 1.22, 1.25), Vector3(0.05, 0.12, 0.12), Color("ff6a5a"), 2.0)
 	# Beer tap on the galley counter, with its barrel.
 	var tap: Vector3 = anchors.tap + Vector3(0.9, 0, 0)
-	art.part("cylinder", tap + Vector3(0.1, 1.55, 0), Vector3(0.16, 0.5, 0.16), Art.BRASS)
-	art.beam(tap + Vector3(0.1, 1.75, 0), tap + Vector3(-0.25, 1.75, 0), 0.08, Art.BRASS)
-	art.box(tap + Vector3(0.1, 2.0, 0), Vector3(0.08, 0.3, 0.08), Art.WOOD)
-	art.part("sphere", tap + Vector3(0.1, 2.18, 0), Vector3.ONE * 0.14, Art.PINK, 1.2)
 	art.part("cylinder", tap + Vector3(0.45, 0.7, 1.1), Vector3(1.0, 1.3, 1.0), Art.WOOD, 0, Basis(Vector3.FORWARD, PI * 0.5))
 	for x: float in [-0.35, 0.35]: art.part("ring", tap + Vector3(0.45 + x * 0.0, 0.7, 1.1 + x), Vector3.ONE * 1.05, Art.BRASS, 0, Basis(Vector3.RIGHT, PI * 0.5))
 

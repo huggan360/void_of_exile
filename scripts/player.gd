@@ -204,6 +204,9 @@ func _ready() -> void:
 	camera.top_level = true  # follows the player in code, doesn't inherit rotation
 	add_child(camera)
 	camera.make_current()
+	var leisure := LeisurePresentation.new()
+	leisure.actor = self
+	add_child(leisure)
 
 	_torch.light_color = TORCH_COLOR
 	_torch.light_energy = TORCH_ENERGY
@@ -297,6 +300,7 @@ func place(pos: Vector3, p_terrain: VoxelTerrain, p_walkable := Callable()) -> v
 
 func _physics_process(delta: float) -> void:
 	_update_zoom(delta)
+	if not frozen and Leisure.apply_seat(self, delta): return
 	if is_instance_valid(spatial_controller):
 		spatial_controller.physics_step(delta)
 		return
@@ -354,9 +358,10 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
+	if Leisure.hands_busy(player_id): _cancel_weapon_actions()
 	_aim_point = spatial_controller.mouse_point() if is_instance_valid(spatial_controller) else _mouse_point()
 	# Clicks on the UI (buttons, slots) don't shoot.
-	var free_hands := not interacting() and not stats.buffs.has_effect("quiet") and not shield.active and not ui_blocked and not controls_locked() and get_viewport().gui_get_hovered_control() == null
+	var free_hands := not Leisure.hands_busy(player_id) and not interacting() and not stats.buffs.has_effect("quiet") and not shield.active and not ui_blocked and not controls_locked() and get_viewport().gui_get_hovered_control() == null
 	_update_charge(delta, free_hands)
 	var shooting := Input.is_action_pressed("shoot") and free_hands and not _charging and _burst_left == 0
 	_aim_hold = AIM_HOLD if shooting or _charging or _winding > 0.0 else _aim_hold - delta
@@ -389,7 +394,7 @@ func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
 ## ground there, so shots go up or down slopes directly. Multi-shot weapons
 ## fan their shots out (spread) or send weaving pairs (opposite phases).
 func shoot() -> void:
-	if interacting(): return
+	if interacting() or Leisure.hands_busy(player_id): return
 	var weapon: Item = stats.gear.weapon
 	if stats.buffs.has_effect("quiet") or shield.active or weapon == null or _winding > 0.0:
 		return
@@ -594,6 +599,9 @@ func knockback(push: Vector3) -> void:
 
 
 func _update_magic(delta: float) -> void:
+	if Leisure.hands_busy(player_id):
+		_set_shield(false)
+		return
 	_ring_cooldown -= delta
 	var now := Time.get_ticks_msec() / 1000.0
 	if Input.is_action_just_pressed("magic") and not controls_locked() and not interacting():

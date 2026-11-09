@@ -203,7 +203,7 @@ func set_port_arrival(kind: String) -> void:
 		var source: SpaceWorld = world if world is SpaceWorld else world.surface_ships if world is IslandWorld else null
 		var vessel := source.ship_in_slot(SpaceLayout.pocket_at(player.global_position)) if source else null
 		if vessel:
-			_offline_ship_transfer = {wire = vessel.wire().duplicate(true), smoking = vessel.smoking.duplicate(),
+			_offline_ship_transfer = {cups = Leisure.ship_tables(source.realm_id, vessel), wire = vessel.wire().duplicate(true), smoking = vessel.smoking.duplicate(),
 				imported = {}, passengers = {player.player_id: player.global_position-SpaceLayout.pocket_origin(vessel.slot)}}
 
 func travel(destination: String, at := Vector3.INF, cinematic_departure := false) -> void:
@@ -367,6 +367,7 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 	else:
 		world = IslandWorld.new(record)
 	add_child(world)
+	Leisure.enter_world(world, player, record.get("leisure_state", {}))
 	world.portal_entered.connect(func(dest: String) -> void: travel.call_deferred(dest))
 	world.obstacle_broken.connect(func(o: Obstacle) -> void:
 		if Net.is_client():
@@ -505,6 +506,7 @@ func _on_level_up(level: int, gains: Dictionary) -> void:
 func _on_died(player_id: int, items_lost: int) -> void:
 	if player_id != player.player_id or Net.is_online():
 		return
+	Leisure.forget_player(player_id)
 	GameAudio.shield(false)
 	GameAudio.play("player.death", Vector3.INF, {bus = "SFX", priority = 3, fixed_pitch = true})
 	hud.toasts.push("You died. Your character is gone, with everything it carried.", UIStyle.HP)
@@ -726,6 +728,7 @@ func _on_switch_failed(reason: String) -> void:
 ## record shows, then we pick or make another character and go home.
 func _on_online_death(info: Dictionary) -> void:
 	if _dead: return
+	Leisure.forget_player(player.player_id)
 	GameAudio.shield(false)
 	GameAudio.play("player.death", Vector3.INF, {bus = "SFX", priority = 3, fixed_pitch = true})
 	_dead = true

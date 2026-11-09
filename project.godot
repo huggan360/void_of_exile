@@ -28,6 +28,7 @@ Net="*res://scripts/net/net.gd"
 Account="*res://scripts/net/account.gd"
 WorldServer="*res://scripts/server/world_server.gd"
 GameServer="*res://scripts/server/game_server.gd"
+Leisure="*res://scripts/leisure/leisure.gd"
 AppSettings="*res://scripts/settings/app_settings.gd"
 GameAudio="*res://scripts/audio/game_audio.gd"
 

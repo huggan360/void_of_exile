@@ -507,6 +507,7 @@ func drop_to_ground(from: Dictionary) -> void:
 
 
 func _process(_delta: float) -> void:
+	if not is_instance_valid(player.spatial_controller): key_help.set_rows(Leisure.hint_rows(player.player_id))
 	_update_world_ui_fade(_delta, _ui_root.get_global_mouse_position())
 	_fps_readout.visible = AppSettings.video.show_fps
 	_fps_timer -= _delta
@@ -596,6 +597,7 @@ func _input(event: InputEvent) -> void:
 		return
 	if player.controls_locked() or player.frozen: return
 	if player.spatial_controller is SpaceTraversal and (player.spatial_controller as SpaceTraversal).consumes_event(event): return
+	if Leisure.handle_input(player, event, interaction): return
 	if interaction.handle_input(event):
 		get_viewport().set_input_as_handled()
 		return

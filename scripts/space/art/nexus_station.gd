@@ -250,32 +250,10 @@ func _facing(at: Vector3, toward: Vector3) -> Transform3D:
 	return Transform3D(Basis.looking_at((toward - at).normalized(), Vector3.UP), at)
 
 func _tavern(art: Brush) -> void:
-	# Roofless courtyard inn, open toward the arrival plaza (+Z).
-	art.box(Vector3(0, 3.2, -35), Vector3(29, 6.4, 0.65), DARK, true)
-	for side in [-1.0, 1.0]:
-		art.box(Vector3(side * 14.5, 2.4, -27), Vector3(0.65, 4.8, 16), WOOD, true)
-		for z in [-34, -27, -20]:
-			art.box(Vector3(side * 14.5, 4.3, z), Vector3(0.9, 8.6, 0.9), DARK, true)
-			art.lantern(Vector3(side * 13.4, 0, z), 4.3)
-	art.box(Vector3(0, 7.5, -35), Vector3(30, 0.65, 0.9), BRASS)
-	art.box(Vector3(-4, 0.55, -29), Vector3(15, 1.1, 1.8), WOOD, true)
-	art.box(Vector3(-4, 1.15, -29), Vector3(16, 0.15, 2.0), BRASS)
-	for i in 9:
-		art.box(Vector3(-10 + i * 1.5, 3.3, -34.4), Vector3(0.5, 0.8 + (i % 3) * 0.3, 0.5), GREEN if i % 2 else PINK, false, 0.4)
-	for at: Vector3 in [Vector3(-7, 0, -20), Vector3(5, 0, -21)]:
-		art.round_part(at + Vector3.UP * 0.9, 1.1, 0.16, WOOD, true)
-		art.round_part(at + Vector3.UP * 0.41, 0.25, 0.82, DARK, true)
-		for side in [-1.0, 1.0]:
-			art.box(at + Vector3(side * 1.9, 0.3, 0), Vector3(0.7, 0.6, 2.2), WOOD, true)
-	art.box(Vector3(9, 0.55, -32), Vector3(5, 1.1, 3.4), Color("695864"), true)
-	for side in [-1.0, 1.0]:
-		art.box(Vector3(9 + side * 2, 2.6, -32.5), Vector3(0.8, 4.2, 2.7), DARK, true)
-	art.box(Vector3(9, 4.7, -32.5), Vector3(5, 0.8, 2.7), BRASS, true)
-	for i in 7:
-		art.crystal(Vector3(7.5 + i * 0.5, 1.1, -32), 1.4 + sin(i * 3.0) * 0.6, GREEN)
-	# Hanging cloth and window light read from the overhead camera.
-	for i in 5:
-		art.box(Vector3(-11 + i * 4.0, 5, -34.5), Vector3(2.3, 2.5, 0.2), PINK if i % 2 else GREEN)
+	var bar := NexusBar.new()
+	bar.name = "LanternBar"
+	add_child(bar)
+	bar.build(art.server_only)
 
 func _board(art: Brush, at: Vector3) -> void:
 	for side in [-1.0, 1.0]:

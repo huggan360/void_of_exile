@@ -433,7 +433,10 @@ func _counter(node: Node3D, v: Dictionary, art: NexusStation.Brush, look: Dictio
 	art.box(Vector3(0, 0.55, 4.0), Vector3(9.0, 1.1, 1.0), look.counter, true)
 	art.box(Vector3(0, 1.12, 4.0), Vector3(9.2, 0.08, 1.15), Color("d9ac60"))
 	art.box(Vector3(0, 0.25, 3.45), Vector3(9.0, 0.06, 0.06), _neon, false, 1.6)
-	if machine!="": _props.add(machine, frame, Vector3(-2.5, 1.16, 4.1), PI)
+	if machine!="":
+		_props.add(machine, frame, Vector3(-2.5, 1.16, 4.1), PI)
+		if machine in ["beer_taps", "coffee_machine"]:
+			LeisureFurniture.target(node, "citytap|"+str(v.key), "tap", Transform3D(Basis.IDENTITY, Vector3(-2.5, 1.3, 4.1)), "coffee" if machine=="coffee_machine" else "beer")
 	_props.add("shelf_goods", frame, Vector3(3.5, 0.02, 5.6), PI)
 	_props.add("shelf_goods", frame, Vector3(-3.5, 0.02, 5.6), PI)
 	art.box(Vector3(0, 3.2, 5.85), Vector3(6.0, 1.6, 0.1), look.lamp.darkened(0.3), false, 0.9)
@@ -455,9 +458,17 @@ func _seat_target(parent: Node3D, s: Dictionary, place: String) -> void:
 	target.kind = "seat"
 	target.seat = str(s.id)
 	target.title = place
-	target.description = "Sit down. A %s will be brought to you. X sips, C orders another, Z stands." % ("coffee" if s.drink=="coffee" else "beer")
+	target.description = "Sit down. Bring a %s from the counter. Right-click sips, Z stands." % ("coffee" if s.drink=="coffee" else "beer")
 	target.position = (s.pos as Vector3)+Vector3.UP*0.8
 	parent.add_child(target)
+	var spec := CityLayout.any_seat(str(s.id))
+	if not spec.is_empty():
+		var cup_target := LeisureTarget.new()
+		cup_target.key = "citycup|"+str(s.id)
+		cup_target.kind = "table"
+		cup_target.place = city.world
+		parent.add_child(cup_target)
+		cup_target.global_position = spec.cup
 
 # --- Elevator skyscrapers -------------------------------------------------------------------
 

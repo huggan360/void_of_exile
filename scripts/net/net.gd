@@ -89,6 +89,7 @@ func join(address: String, port: int, token: String, character_id: int, account_
 
 ## Back to offline.
 func leave() -> void:
+	Leisure.reset()
 	if client:
 		client.stop()
 		client.queue_free()

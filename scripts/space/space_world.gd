@@ -340,6 +340,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if pos.distance_to(station.to_global(pad.origin))>8.0 or zone_at(pos)!="station": return
 			p.port = {kind = "rocket", destination = surface_realm()}
 		"city":
+			if args.size()>1 and str(args[1]) in ["sip", "order"]: return
 			var before := city.seat_of(pid)
 			var message := city.handle(pid, pos, args)
 			var after := city.seat_of(pid)
@@ -377,6 +378,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if taken!=0 and taken!=pid:
 				_tell(p, "Someone already sits there.")
 				return
+			Leisure.before_travel(p)
 			_stand(ship, pid)
 			ship.crew[seat] = pid
 			_broadcast_ship(ship)
@@ -455,7 +457,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or args.size()<2 or not args[1] is Vector3: return
 			if not (args[1] as Vector3).is_finite() or (args[1] as Vector3).length_squared()<0.001: return
 			var seat := ship.seat_of(pid)
-			if (seat!="pilot" and not seat.begins_with("turret")) or ship.mode!="flying" or Time.get_ticks_msec()<int(ship.cooldowns.get(seat, 0)): return
+			if Leisure.hands_busy(pid) or (seat!="pilot" and not seat.begins_with("turret")) or ship.mode!="flying" or Time.get_ticks_msec()<int(ship.cooldowns.get(seat, 0)): return
 			# Damaged cannons fire slowly; broken ones jam.
 			if ship.part("cannons")<=0.0:
 				_tell(p, "The cannons are jammed! Mend them at the gunnery console.")
@@ -478,33 +480,12 @@ func server_action(p: Dictionary, args: Array) -> void:
 			else:
 				_tell(p, "Get closer to the %s." % str(SpaceShip.PARTS[id].name).to_lower())
 		"drink":
-			var ship := ship_of(pid)
-			var seat := ship.seat_of(pid) if ship else ""
-			if not seat.begins_with("chair"): return
-			var i := int(seat.substr(6))
-			if float(ship.glasses[i])<=0.01:
-				_tell(p, "Your glass is empty. The tap is at the galley.")
-				return
-			ship.glasses[i] = maxf(0.0, float(ship.glasses[i])-0.34)
-			var stats := GameServer.character(pid)
-			if stats and float(ship.glasses[i])<=0.01: stats.buffs.drink_beer()
-			_broadcast_ship(ship)
+			Leisure.action(p, ["sip"], self)
 		"pour":
-			var ship := ship_in_slot(SpaceLayout.pocket_at(pos))
-			if ship==null: return
-			for i in ship.glasses.size():
-				if float(ship.glasses[i])<0.99:
-					ship.glasses[i] = 1.0
-					_broadcast_ship(ship)
-					_tell(p, "A frothy mug of Nexus amber, poured at the table.")
-					return
-			_tell(p, "Every glass on the table is already full.")
+			var vessel := ship_in_slot(SpaceLayout.pocket_at(pos))
+			if vessel: Leisure.action(p, ["use", "ship:%d:beer" % (vessel.fleet_id if vessel.fleet_id>0 else vessel.id)], self)
 		"cigar":
-			var ship := ship_of(pid)
-			if ship==null or not ship.seat_of(pid).begins_with("chair"): return
-			if ship.smoking.has(pid): ship.smoking.erase(pid)
-			else: ship.smoking[pid] = 40.0
-			_broadcast_ship(ship)
+			Leisure.action(p, ["cigar"], self)
 		"airlock":
 			# From the room out onto the hull, or from outside back in.
 			var slot := SpaceLayout.pocket_at(pos)
@@ -619,13 +600,13 @@ func _forget(ship: SpaceShip) -> void:
 	Net.server.campaigns._touch(account)
 	Net.server.campaigns.flush()
 
-## Takes Dots for a purchase.
+## Takes Dots for a purchase (offline play is free; test servers too).
 func _pay(p: Dictionary, amount: int) -> bool:
-	if not Net.is_server(): return true
+	if not Net.is_server() or Net.server.config.test_mode: return true
 	return Net.server.economy.spend(p, amount, "ship")
 
 func _refund(p: Dictionary, amount: int) -> void:
-	if Net.is_server(): Net.server.economy.award(p, amount, "ship refund")
+	if Net.is_server() and not Net.server.config.test_mode: Net.server.economy.award(p, amount, "ship refund")
 
 ## Adrift in space or on a planet with no ship of their crew in the Reach.
 func stranded(pid: int, pos: Vector3) -> bool:
@@ -772,6 +753,7 @@ func _launch_ship(pid: int, captain: String) -> SpaceShip:
 
 ## Moves a player (authority): the client is corrected to the new spot.
 func teleport(p: Dictionary, to: Vector3, reason := "") -> void:
+	if str(Leisure.state(int(p.player_id)).get("seat", ""))!="": Leisure.before_travel(p)
 	if reason!="city_seat" and city.stand(int(p.player_id)): city.changed = true
 	if Net.is_server():
 		var peer := int(p.get("peer_id", 0))
@@ -812,12 +794,25 @@ func turret_muzzle(ship: SpaceShip, seat: String) -> Vector3:
 	return ship.xform*(offsets.get(seat, Vector3.ZERO) as Vector3)
 
 func _ensure_interior(slot: int) -> void:
-	if interiors.has(slot): return
+	var vessel := ship_in_slot(slot)
+	var identity := (vessel.fleet_id if vessel.fleet_id>0 else vessel.id) if vessel else 0
+	if interiors.has(slot):
+		var existing: ShipInterior = interiors[slot]
+		if int(existing.get_meta("vessel", 0))==identity: return
+		existing.set_meta("vessel", identity)
+		var furniture := existing.get_node_or_null("LeisureFurniture")
+		if furniture:
+			existing.remove_child(furniture)
+			furniture.queue_free()
+		LeisureFurniture.ship(self, existing, slot, server_build or Net.is_server())
+		return
 	var room := ShipInterior.new()
+	room.set_meta("vessel", identity)
 	room.position = SpaceLayout.pocket_origin(slot)
 	add_child(room)
 	room.build(server_build or Net.is_server())
 	interiors[slot] = room
+	LeisureFurniture.ship(self, room, slot, server_build or Net.is_server())
 	if not (server_build or Net.is_server()): _interior_props(slot, room)
 
 # --- Authority loop ------------------------------------------------------------------
@@ -1123,7 +1118,7 @@ func _interior_props(slot: int, room: ShipInterior) -> void:
 		mend.part = id
 		mend.position = room.position+(anchors.repairs[id] as Vector3)+Vector3.UP*0.8
 		add_child(mend)
-	for spec: Array in [["airlock", anchors.get("airlock", Vector3.ZERO)], ["tap", anchors.get("tap", Vector3.ZERO)]]:
+	for spec: Array in [["airlock", anchors.get("airlock", Vector3.ZERO)]]:
 		var spot := SpaceInteraction.new()
 		spot.world = self
 		spot.kind = spec[0]
@@ -1141,6 +1136,7 @@ func seat_spec(slot: int, seat: String) -> Dictionary:
 	if not seats.has(seat): return {}
 	var spec: Dictionary = (seats[seat] as Dictionary).duplicate()
 	spec.pos = pocket_point(slot, spec.pos)
+	if seat.begins_with("chair"): spec.pos += Vector3.DOWN*0.32
 	spec.stand = pocket_point(slot, spec.get("stand", seats[seat].pos))
 	return spec
 
@@ -1168,10 +1164,11 @@ func accept_transfer(transfer: Dictionary, mode: String) -> SpaceShip:
 	_next_ship += 1
 	ship.slot = slot
 	ships[ship.id] = ship
-	_ensure_interior(slot)
 	data[0] = ship.id
 	data[1] = ship.slot
 	SpaceShip.from_wire(data, ship)
+	_ensure_interior(slot)
+	Leisure.import_ship_tables(realm_id, ship, transfer.get("cups", {}))
 	ship.smoking = transfer.get("smoking", {}).duplicate()
 	ship.cooldowns = transfer.get("cooldowns", {}).duplicate()
 	ship.set_meta("account", int(transfer.get("account", 0)))
