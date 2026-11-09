@@ -1,7 +1,8 @@
 class_name CampaignBrowser
 extends PanelContainer
-## The Chronicler's book of tales: a scrolling list of every campaign as a
-## card (its stars, and whether it's new, half told, completed or locked).
+## The Chronicler's book of tales: each pack a mossy dropdown (its tales told
+## so far), opening onto its tales as cards (stars, and a word on where the
+## party stands: new, half told, completed, locked).
 ## Choosing one opens its page: the whole story, what each star asks, and
 ## Begin / Resume / Start over for the party leader.
 
@@ -11,6 +12,8 @@ var social: SocialClient
 var _runs := {}
 var _open := ""  # the tale whose page is open ("" = the list)
 var _body := VBoxContainer.new()
+## Packs folded open, kept while the game runs.
+static var _open_packs := {}
 
 
 func _init(p_social: SocialClient) -> void:
@@ -59,64 +62,115 @@ func _status(id: String) -> Array:
 	var run: Dictionary = _runs.get(id, {})
 	var playing := social.campaign_state()
 	if not playing.is_empty() and playing.id == id:
-		return ["Your party is playing this tale", UIStyle.GOOD, true]
+		return ["Playing", UIStyle.GOOD, true]
 	if not Campaigns.unlocked(id, {runs = _runs}):
 		if def.get("coming_soon", false):
-			return ["Locked  -  coming soon", UIStyle.TEXT_DIM, false]
-		return ["Locked  -  finish %s first" % Campaigns.get_def(str(def.requires)).get("title", "another tale"), UIStyle.TEXT_DIM, false]
+			return ["Coming soon", UIStyle.TEXT_DIM, false]
+		return ["Locked", UIStyle.TEXT_DIM, false]
 	match str(run.get("status", "")):
 		"paused", "active":
-			return ["Half told  -  step %d of %d" % [int(run.step) + 1, def.steps.size()], UIStyle.ACCENT, true]
+			return ["Half told  %d/%d" % [int(run.step) + 1, def.steps.size()], UIStyle.ACCENT, true]
 		"done":
 			return ["Completed", UIStyle.GOLD, true]
-	return ["A new tale", UIStyle.TEXT, true]
+	return ["New", UIStyle.TEXT, true]
 
 
 func _list() -> void:
-	_body.add_child(_note("Tales are played by your whole party, in a Tavern and a realm of your own. Only the party leader can begin one."))
-	var pack := ""
+	# The tales of each pack (in order), the unpacked ones last.
+	var packs: Array = []
+	var tales := {}
 	for id: String in Campaigns.LIST:
 		var def: Dictionary = Campaigns.LIST[id]
 		# Hidden tales appear only once the one before them is told.
 		if def.get("hidden", false) and str(_runs.get(str(def.get("requires", "")), {}).get("status", "")) != "done":
 			continue
-		var status := _status(id)
-		if str(def.get("pack", "")) != pack:  # a pack's tales under its title, in order
-			pack = str(def.get("pack", ""))
-			if pack != "":
-				_body.add_child(UIStyle.label(Campaigns.PACKS[pack].title, UIStyle.SIZE_LARGE, UIStyle.ACCENT))
-				_body.add_child(_note(Campaigns.PACKS[pack].blurb))
-		var card := Button.new()
-		UIStyle.button_styles(card)
-		card.custom_minimum_size = Vector2(0, 74)
-		card.focus_mode = Control.FOCUS_NONE
-		card.disabled = not status[2] and not def.get("coming_soon", false)
-		card.pressed.connect(func() -> void:
-			_open = id
-			_fill())
-		var inside := HBoxContainer.new()
-		inside.set_anchors_preset(Control.PRESET_FULL_RECT)
-		inside.offset_left = 14
-		inside.offset_right = -14
-		inside.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var text := VBoxContainer.new()
-		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		text.alignment = BoxContainer.ALIGNMENT_CENTER
-		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		text.add_child(UIStyle.label(str(def.title), UIStyle.SIZE_LARGE, UIStyle.GOLD if status[2] else UIStyle.TEXT_DIM))
-		text.add_child(UIStyle.label("%s  -  level %d" % [status[0], int(def.get("level", 1))], UIStyle.SIZE_SMALL, status[1]))
-		inside.add_child(text)
-		var stars := StarRow.new(2.5)
-		var best := int(_runs.get(id, {}).get("stars_best", 0))
-		stars.set_stars(range(def.get("stars",[]).size()).map(func(i: int) -> bool: return i < best))
-		stars.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		stars.visible=not def.get("stars",[]).is_empty()
-		inside.add_child(stars)
-		for node: Control in [text, stars]:
-			for child in node.get_children():
-				if child is Control: (child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
-		card.add_child(inside)
-		_body.add_child(card)
+		var pack := str(def.get("pack", ""))
+		if not tales.has(pack):
+			tales[pack] = []
+			packs.append(pack)
+		tales[pack].append(id)
+	if _open_packs.is_empty() and not packs.is_empty():
+		var playing := social.campaign_state()
+		var pick: String = packs[0]
+		for pack: String in packs:
+			for id: String in tales[pack]:
+				if (not playing.is_empty() and playing.id == id) or str(_runs.get(id, {}).get("status", "")) in ["paused", "active"]: pick = pack
+		_open_packs[pick] = true
+	for pack: String in packs:
+		_body.add_child(_pack_header(pack, tales[pack]))
+		if _open_packs.get(pack, false):
+			for id: String in tales[pack]: _body.add_child(_tale_card(id))
+
+
+## A pack's mossy header: its name, tales told, and a fold mark; click to open.
+func _pack_header(pack: String, ids: Array) -> Button:
+	var header := Button.new()
+	UIStyle.button_styles(header, "ivy")
+	header.custom_minimum_size = Vector2(0, 56)
+	header.focus_mode = Control.FOCUS_NONE
+	header.pressed.connect(func() -> void:
+		_open_packs[pack] = not _open_packs.get(pack, false)
+		_fill())
+	var told := ids.filter(func(id: String) -> bool: return str(_runs.get(id, {}).get("status", "")) == "done").size()
+	var inside := HBoxContainer.new()
+	inside.set_anchors_preset(Control.PRESET_FULL_RECT)
+	inside.offset_left = 18
+	inside.offset_right = -18
+	inside.offset_bottom = -6
+	inside.add_theme_constant_override("separation", 12)
+	inside.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var title := UIStyle.label(str(Campaigns.PACKS[pack].title) if Campaigns.PACKS.has(pack) else "Other tales", UIStyle.SIZE_LARGE, UIStyle.GOLD)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	inside.add_child(title)
+	var count := UIStyle.label("%d/%d" % [told, ids.size()], UIStyle.SIZE_NORMAL, UIStyle.TEXT_DIM)
+	count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	inside.add_child(count)
+	var fold := UIStyle.label("-" if _open_packs.get(pack, false) else "+", UIStyle.SIZE_LARGE, UIStyle.TEXT)
+	fold.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	fold.custom_minimum_size.x = 14
+	inside.add_child(fold)
+	for child in inside.get_children(): (child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header.add_child(inside)
+	return header
+
+
+## A tale in its pack: name, a word on how far the party is, its stars.
+func _tale_card(id: String) -> Button:
+	var def := Campaigns.get_def(id)
+	var status := _status(id)
+	var card := Button.new()
+	UIStyle.button_styles(card)
+	card.custom_minimum_size = Vector2(0, 64)
+	card.focus_mode = Control.FOCUS_NONE
+	card.disabled = not status[2] and not def.get("coming_soon", false)
+	card.pressed.connect(func() -> void:
+		_open = id
+		_fill())
+	var inside := HBoxContainer.new()
+	inside.set_anchors_preset(Control.PRESET_FULL_RECT)
+	inside.offset_left = 30
+	inside.offset_right = -14
+	inside.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var text := VBoxContainer.new()
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.alignment = BoxContainer.ALIGNMENT_CENTER
+	text.add_theme_constant_override("separation", 0)
+	text.add_child(UIStyle.label(str(def.title), UIStyle.SIZE_NORMAL+2, UIStyle.TEXT if status[2] else UIStyle.TEXT_DIM))
+	text.add_child(UIStyle.label(str(status[0]), UIStyle.SIZE_SMALL, status[1]))
+	inside.add_child(text)
+	var stars := StarRow.new(2.0)
+	var best := int(_runs.get(id, {}).get("stars_best", 0))
+	stars.set_stars(range(def.get("stars", []).size()).map(func(i: int) -> bool: return i < best))
+	stars.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	stars.visible = not def.get("stars", []).is_empty()
+	inside.add_child(stars)
+	for node: Control in [text, stars]:
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for child in node.get_children():
+			if child is Control: (child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(inside)
+	return card
 
 
 ## One tale's page.
