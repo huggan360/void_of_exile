@@ -35,7 +35,7 @@ const ORBIT_SETTLE := 4.0
 const ORBIT_PULL := 0.7  # how firmly she swings onto the orbit (per second)
 ## Off a planet's pad she climbs at least this throttle until she is up at
 ## orbit height: nobody can stop her halfway, inside the planet's sky.
-const LAUNCH_THRUST := 0.35
+const LAUNCH_THRUST := 0.4
 const LAND_TIME := 6.0
 ## Seats a crew member can take; the pilot flies, gunners aim turrets, the
 ## tavern chairs are for a drink and a cigar.

@@ -54,7 +54,9 @@ var throttle := 0.0
 const STEP_UP := 0.55
 const LAUNCH_THROTTLE := SpaceShip.LAUNCH_THRUST
 var _launching := false
-const THROTTLE_RATE := 0.6  # throttle per second while a key is held
+const THROTTLE_STEP := 0.1
+const THROTTLE_REPEAT := 0.18  # seconds between steps while a key is held
+var _throttle_hold := 0.0
 ## Outside the ship on the jetpack: walking her deck or flying beside her.
 var spacewalk := false
 ## Open space is only for those who went out on purpose (up the ladder, a
@@ -256,6 +258,9 @@ func _update_bars(zone: String) -> void:
 	var hud: Variant = game.get("hud") if game else null
 	if hud==null: return
 	var aboard: SpaceShip = _ship if _ship else world.ship_in_slot(SpaceLayout.pocket_at(player.global_position)) if zone=="ship" else null
+	var helm := seat=="pilot" and _ship!=null and _ship.mode=="flying"
+	hud.throttle.visible = helm
+	if helm: hud.throttle.set_value(throttle)
 	if aboard:
 		hud.bar_override = {hp = [aboard.hp, SpaceShip.MAX_HP, "", SHIP_HULL, SHIP_HULL_LIGHT, "ship"],
 			mp = [aboard.boost, 100.0, "", SHIP_BOOST, SHIP_BOOST_LIGHT, "flame"], parts = aboard.parts}
@@ -299,7 +304,7 @@ func _update_hint() -> void:
 			if _ship.mode in ["berth", "landed"]:
 				rows.append([["@ship_boost"], "Launch"])
 			elif _ship.mode=="flying":
-				rows.append([["@ship_forward", "@ship_reverse"], "Throttle %d%%" % roundi(throttle*100.0)])
+				rows.append([["@ship_forward", "@ship_reverse"], "Throttle"])
 				if _ship.climbing!="": rows.append([["@ship_forward"], "Climbing to orbit"])
 				elif _ship.orbit!="": rows.append([["Steer"], "In orbit: %s - steer to leave" % str(SpaceLayout.planet(_ship.orbit).get("name", ""))])
 				rows.append([["@ship_left", "@ship_right"], "Turn"])
@@ -544,7 +549,15 @@ func _seated(delta: float) -> void:
 				# Just launched: an easy speed, and she climbs into orbit by herself.
 				_launching = false
 				throttle = LAUNCH_THROTTLE
-			elif enabled: throttle = clampf(throttle+Input.get_axis("ship_reverse", "ship_forward")*THROTTLE_RATE*delta, -1.0, 1.0)
+			elif enabled:
+				# 10% a step: one on the press, then more while the key is held.
+				var axis := Input.get_axis("ship_reverse", "ship_forward")
+				if is_zero_approx(axis): _throttle_hold = 0.0
+				else:
+					_throttle_hold -= delta
+					if _throttle_hold<=0.0:
+						_throttle_hold = THROTTLE_REPEAT
+						throttle = clampf(snappedf(throttle+signf(axis)*THROTTLE_STEP, THROTTLE_STEP), -1.0, 1.0)
 			# Climbing out after a launch: no slower than launch speed (the server holds her there too).
 			if _ship.climbing!="": throttle = maxf(throttle, SpaceShip.LAUNCH_THRUST)
 			_input_timer -= delta
@@ -1333,6 +1346,7 @@ func _exit_tree() -> void:
 	if hud:
 		hud.key_help.set_rows([])
 		hud.toasts.unpin("landing_queue")
+		hud.throttle.hide()
 	if is_instance_valid(_fp_shield): _fp_shield.queue_free()
 	if not is_instance_valid(player): return
 	player.cinematic_locked = false

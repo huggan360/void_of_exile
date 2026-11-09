@@ -54,6 +54,8 @@ var _where := ""
 var _hp_bar := StatBar.new(UIStyle.HP, UIStyle.HP_LIGHT, 7)
 ## Aboard: the ship's four breakable parts, over the hull bar.
 var _ship_parts := ShipPartIcons.new()
+## At the helm: the throttle, a short upright bar on the left (SpaceTraversal).
+var throttle := ThrottleBar.new()
 var _mp_bar := StatBar.new(UIStyle.MAGIC, UIStyle.MAGIC_LIGHT, 5)
 var _xp_ring := XpRing.new()
 var _stats_panel: StatsPanel
@@ -166,6 +168,15 @@ func _ready() -> void:
 	_ship_parts.offset_right = parts_size.x*0.5
 	_ship_parts.hide()
 	root.add_child(_ship_parts)
+	throttle.set_anchors_preset(Control.PRESET_CENTER_LEFT)
+	throttle.grow_vertical = Control.GROW_DIRECTION_BOTH
+	var throttle_size := throttle.custom_minimum_size
+	throttle.offset_left = MARGIN+12
+	throttle.offset_right = throttle.offset_left+throttle_size.x
+	throttle.offset_top = -throttle_size.y*0.5
+	throttle.offset_bottom = throttle_size.y*0.5
+	throttle.hide()
+	root.add_child(throttle)
 	UIStyle.add_shadow(_hp_bar)
 	UIStyle.add_shadow(_mp_bar)
 
