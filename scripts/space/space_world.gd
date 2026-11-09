@@ -378,8 +378,11 @@ func server_action(p: Dictionary, args: Array) -> void:
 		"stand":
 			var ship := ship_of(pid)
 			if ship!=null:
+				# Up off the chair onto its standing spot (not left wedged in the chair).
+				var spot: Vector3 = seat_spec(ship.slot, ship.seat_of(pid)).get("stand", Vector3.INF)
 				_stand(ship, pid)
 				_broadcast_ship(ship)
+				if spot.is_finite(): teleport(p, spot+Vector3.UP*0.05, "ship_stand")
 		"takeoff":
 			var ship := ship_of(pid)
 			if ship==null or ship.pilot()!=pid or not ship.mode in ["landed", "berth"] or ship.broken: return

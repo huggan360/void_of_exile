@@ -2162,7 +2162,7 @@ script = ExtResource("E1")
 role = "traveler"
 resident_name = "Aldous the Chronicler"
 stationary = true
-greeting = "Every road out of Hearthhaven is a story waiting to be told. Gather your party, and choose a tale from my book."
+greeting = "Every road out of the Tavern is a story waiting to be told. Gather your party, and choose a tale from my book."
 interaction_enabled = true
 metadata/description = "Browse the book of tales"
 
@@ -2182,167 +2182,167 @@ script = ExtResource("E1")
 role = "baker"
 resident_name = "Tessa the Innkeeper"
 stationary = true
-greeting = "Welcome to the Hearthhaven Tavern. Rest by the fountain, then follow the north road to the realm gate."
+greeting = "Welcome to the Tavern. Rest by the fountain, then follow the north road to the gate down to the Surface."
 interaction_enabled = true
 
 [node name="Neighbor1" type="Marker3D" parent="Residents" unique_id=230090744]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 10, -50)
 script = ExtResource("E1")
 resident_name = "Neighbor 1"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor2" type="Marker3D" parent="Residents" unique_id=1666128105]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 10, -50)
 script = ExtResource("E1")
 role = "gardener"
 resident_name = "Neighbor 2"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor3" type="Marker3D" parent="Residents" unique_id=2070429706]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 10, 12)
 script = ExtResource("E1")
 role = "traveler"
 resident_name = "Neighbor 3"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor4" type="Marker3D" parent="Residents" unique_id=662665366]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 10, -12)
 script = ExtResource("E1")
 role = "baker"
 resident_name = "Neighbor 4"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor5" type="Marker3D" parent="Residents" unique_id=123298177]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 10, 20)
 script = ExtResource("E1")
 resident_name = "Neighbor 5"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor6" type="Marker3D" parent="Residents" unique_id=590470856]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 10, 20)
 script = ExtResource("E1")
 role = "gardener"
 resident_name = "Neighbor 6"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor7" type="Marker3D" parent="Residents" unique_id=430043467]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 30)
 script = ExtResource("E1")
 role = "traveler"
 resident_name = "Neighbor 7"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor8" type="Marker3D" parent="Residents" unique_id=1308569250]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 60)
 script = ExtResource("E1")
 role = "baker"
 resident_name = "Neighbor 8"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor9" type="Marker3D" parent="Residents" unique_id=621741862]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 10, 0)
 script = ExtResource("E1")
 resident_name = "Neighbor 9"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor10" type="Marker3D" parent="Residents" unique_id=1516354966]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 10, 0)
 script = ExtResource("E1")
 role = "gardener"
 resident_name = "Neighbor 10"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor11" type="Marker3D" parent="Residents" unique_id=1705552015]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 10, -30)
 script = ExtResource("E1")
 role = "traveler"
 resident_name = "Neighbor 11"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor12" type="Marker3D" parent="Residents" unique_id=1484966630]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 10, -30)
 script = ExtResource("E1")
 role = "baker"
 resident_name = "Neighbor 12"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor13" type="Marker3D" parent="Residents" unique_id=1935485671]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, 10, 30)
 script = ExtResource("E1")
 resident_name = "Neighbor 13"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor14" type="Marker3D" parent="Residents" unique_id=951031766]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 10, 30)
 script = ExtResource("E1")
 role = "gardener"
 resident_name = "Neighbor 14"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor15" type="Marker3D" parent="Residents" unique_id=1954650702]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62, 10, 0)
 script = ExtResource("E1")
 role = "traveler"
 resident_name = "Neighbor 15"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor16" type="Marker3D" parent="Residents" unique_id=1728852970]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 10, -4)
 script = ExtResource("E1")
 role = "baker"
 resident_name = "Neighbor 16"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor17" type="Marker3D" parent="Residents" unique_id=299645859]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -90)
 script = ExtResource("E1")
 resident_name = "Neighbor 17"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor18" type="Marker3D" parent="Residents" unique_id=418441149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 10, -60)
 script = ExtResource("E1")
 role = "gardener"
 resident_name = "Neighbor 18"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor19" type="Marker3D" parent="Residents" unique_id=375510888]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 10, -60)
 script = ExtResource("E1")
 role = "traveler"
 resident_name = "Neighbor 19"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor20" type="Marker3D" parent="Residents" unique_id=145555577]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 10, 75)
 script = ExtResource("E1")
 role = "baker"
 resident_name = "Neighbor 20"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor21" type="Marker3D" parent="Residents" unique_id=935206550]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 10, 75)
 script = ExtResource("E1")
 resident_name = "Neighbor 21"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor22" type="Marker3D" parent="Residents" unique_id=668957506]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -58, 10, 20)
 script = ExtResource("E1")
 role = "gardener"
 resident_name = "Neighbor 22"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor23" type="Marker3D" parent="Residents" unique_id=1217522397]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 10, 20)
 script = ExtResource("E1")
 role = "traveler"
 resident_name = "Neighbor 23"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"
 
 [node name="Neighbor24" type="Marker3D" parent="Residents" unique_id=1718586363]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 10, -72)
 script = ExtResource("E1")
 role = "baker"
 resident_name = "Neighbor 24"
-greeting = "Lovely day in Hearthhaven!"
+greeting = "Lovely day at the Tavern!"

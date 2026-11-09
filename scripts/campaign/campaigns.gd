@@ -16,7 +16,7 @@ const PACKS := {
 		campaigns=["theory_of_everything","first_light","lantern_road","shardfield","hollowmoon","pale_eye"]},
 	hidden_power = {
 		id = "hidden_power", title = "The Hidden Power",
-		blurb = "Torn pieces of an old map, a power hidden in the mountains, and a Hearthhaven gardener who only wanted his lilies back.",
+		blurb = "Torn pieces of an old map, a power hidden in the mountains, and a Tavern gardener who only wanted his lilies back.",
 		campaigns = ["lily_thief", "frozen_whisper", "sunken_court", "ember_oath", "drowned_choir", "hollow_hour", "hollow_castle"],
 	},
 }
@@ -76,7 +76,7 @@ const _LILY_INTRO := {
 	loading = {title = "The Lily Thief", subtitle = "The Hidden Power  -  part one", seconds = 3.0},
 	shots = [
 		{from = Vector3(46, 32, 96), to = Vector3(26, 22, 74), look_from = Vector3(0, 10, 40), look_to = Vector3(0, 10, 46), duration = 7.5,
-			cards = [{text = "[place]Hearthhaven[/place] sleeps.", at = 0.8, hold = 2.6},
+			cards = [{text = "[place]The Tavern[/place] sleeps.", at = 0.8, hold = 2.6},
 				{text = "But every night, something creeps through [npc]Gerald[/npc]'s garden.", at = 3.8, hold = 3.4}]},
 		{from = Vector3(-20, 14, 26), to = Vector3(-14, 12.5, 52), look_from = Vector3(-9.5, 10, 36), look_to = Vector3(-9.5, 10, 58), duration = 7.0,
 			cards = [{text = "And every morning, another bed of moon-lilies is gone.", at = 0.6, hold = 3.0},

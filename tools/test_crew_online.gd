@@ -61,7 +61,8 @@ func _run() -> void:
 	player.global_position = island.launchpad_arrival()
 	await get_tree().create_timer(1.0).timeout
 	# One crew: the pilot invites, the others accept (only the party may board).
-	if role == "pilot":
+	if role == "solo": pass
+	elif role == "pilot":
 		await get_tree().create_timer(4.0).timeout
 		for name: String in ["p4", "p5", "p6"]: Net.client.send_action("party", ["invite", name])
 		check(await _wait(func() -> bool: return social.party.get("members", []).size() >= 4, 40.0), "the crew joined the party")
@@ -71,7 +72,7 @@ func _run() -> void:
 			Net.client.send_action("party", ["accept", "p2"])
 			await get_tree().create_timer(2.0).timeout
 		check(not social.party.is_empty(), "joined the pilot's party")
-	if role == "pilot":
+	if role in ["pilot", "solo"]:
 		var list := await _fleet(["list"])
 		if list.get("ships", []).is_empty(): list = await _fleet(["buy"])
 		var stored: Array = list.get("ships", []).filter(func(s: Dictionary) -> bool: return str(s.status) == "stored")
@@ -82,6 +83,20 @@ func _run() -> void:
 	await get_tree().create_timer(0.5).timeout
 	Net.client.send_action("port", ["board"])
 	check(await _wait(func() -> bool: return SpaceLayout.pocket_at(player.global_position) >= 0, 15.0), "boarded")
+	if role == "solo":
+		await get_tree().create_timer(2.0).timeout
+		await _stroll("on the Surface")
+		Net.client.send_action("port", ["ship", ["sit", "pilot"]])
+		await _wait(func() -> bool: return vessel.pilot() == player.player_id, 10.0)
+		Net.client.send_action("port", ["ship", ["takeoff"]])
+		check(await _wait(func() -> bool: return world is SpaceWorld and _settled(), 120.0), "up in Space")
+		await get_tree().create_timer(4.0).timeout
+		(world as SpaceWorld).request(["stand"])
+		await get_tree().create_timer(2.0).timeout
+		await _stroll("in Space")
+		print("[crew-%s] done failures=%d" % [role, _failures])
+		get_tree().quit(0 if _failures == 0 else 1)
+		return
 	if role == "pilot":
 		await get_tree().create_timer(1.0).timeout
 		var until := Time.get_ticks_msec()+15000
@@ -105,6 +120,36 @@ func _run() -> void:
 		"rope", "boots": await _outside(space, ship, traversal)
 	print("[crew-%s] done failures=%d" % [role, _failures])
 	get_tree().quit(0 if _failures == 0 else 1)
+
+## Walk back and forth in the room for ten seconds as a player would:
+## how far, how smooth, how often the server pulls us back, at what frame rate.
+func _stroll(where: String) -> void:
+	var snaps := [0]
+	var on_snap := func(_pos: Vector3) -> void: snaps[0] += 1
+	var start_pos := player.global_position
+	var last := player.global_position
+	var walked := 0.0
+	var worst := 0.0
+	var frames := 0
+	var t0 := Time.get_ticks_msec()
+	var k := 0
+	while Time.get_ticks_msec()-t0 < 10000:
+		# Back from the helm into the open room first, then to and fro.
+		player.debug_input = Vector2(0, 1) if k<150 else Vector2(0, -1 if (k / 90) % 2 == 0 else 1)
+		await get_tree().physics_frame
+		k += 1
+		var step := player.global_position.distance_to(last)
+		if step > 0.5: snaps[0] += 1
+		worst = maxf(worst, step)
+		walked += step
+		last = player.global_position
+	player.debug_input = Vector2.ZERO
+	var t1 := Time.get_ticks_msec()
+	var fps_frames := Engine.get_process_frames()
+	await get_tree().create_timer(3.0).timeout
+	var fps := (Engine.get_process_frames()-fps_frames)/((Time.get_ticks_msec()-t1)/1000.0)
+	print("[crew-%s] %s: walked %.1f m in 10 s (%d physics steps), largest step %.2f m, %d snap-backs, %.0f fps, %d draw calls" % [role, where, walked, k, worst, snaps[0], fps, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)])
+	check(walked > 25.0 and snaps[0] == 0, "walks freely in the ship %s" % where)
 
 ## Full ahead for half a minute, a gentle turn halfway.
 func _fly(space: SpaceWorld, ship: SpaceShip) -> void:

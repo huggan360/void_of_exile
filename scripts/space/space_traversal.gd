@@ -13,6 +13,7 @@ enum CameraMode { ANGLED, SHOULDER, FIRST_PERSON }
 var camera_mode := CameraMode.ANGLED
 var city_seat := ""
 var _lift := -1
+var _ship_slot := -1  # the room of the ship we sat in, to stand up beside the chair
 var _lift_height := 0.0
 var seat := ""
 var _ship: SpaceShip
@@ -183,7 +184,15 @@ func _process(delta: float) -> void:
 		player.camera_yaw = float(CityLayout.any_seat(city_seat).yaw)
 		look_pitch = -0.25
 	var was := seat
+	var was_ship := _ship_slot
 	seat = _ship.seat_of(player.player_id) if _ship else ""
+	_ship_slot = _ship.slot if _ship else -1
+	if was!="" and seat=="" and was_ship>=0:
+		# Stood up: step off the chair right away (the server sends us there too).
+		var spot: Vector3 = world.seat_spec(was_ship, was).get("stand", Vector3.INF)
+		if spot.is_finite() and player.global_position.distance_to(spot)<4.0:
+			player.global_position = spot+Vector3.UP*0.05
+			player.velocity = Vector3.ZERO
 	if seat!=was and seat.begins_with("chair"):
 		# Sitting down: look across the table, a little down at the glasses.
 		player.camera_yaw = float(world.seat_spec(_ship.slot, seat).get("yaw", 0.0))
@@ -214,11 +223,11 @@ func _update_bars(zone: String) -> void:
 	if hud==null: return
 	var aboard: SpaceShip = _ship if _ship else world.ship_in_slot(SpaceLayout.pocket_at(player.global_position)) if zone=="ship" else null
 	if aboard:
-		hud.bar_override = {hp = [aboard.hp, SpaceShip.MAX_HP, "SHIP HULL", SHIP_HULL, SHIP_HULL_LIGHT],
-			mp = [aboard.boost, 100.0, "SHIP BOOST", SHIP_BOOST, SHIP_BOOST_LIGHT]}
+		hud.bar_override = {hp = [aboard.hp, SpaceShip.MAX_HP, "", SHIP_HULL, SHIP_HULL_LIGHT, "ship"],
+			mp = [aboard.boost, 100.0, "", SHIP_BOOST, SHIP_BOOST_LIGHT, "flame"]}
 	elif spacewalk:
-		hud.bar_override = {hp = [player.stats.hp, player.stats.max_hp, "HEALTH", UIStyle.HP, UIStyle.HP_LIGHT],
-			mp = [fuel, 100.0, "JETPACK", JETPACK, JETPACK_LIGHT]}
+		hud.bar_override = {hp = [player.stats.hp, player.stats.max_hp, "", UIStyle.HP, UIStyle.HP_LIGHT, "heart"],
+			mp = [fuel, 100.0, "", JETPACK, JETPACK_LIGHT, "flame"]}
 	else:
 		hud.bar_override = {}
 
@@ -243,40 +252,45 @@ func _update_air() -> void:
 func _seat_title(id: String) -> String:
 	return SpaceInteraction.SEAT_TITLES.get(id, "Aboard")
 
+## The keys for what you are doing now, in the HUD's key help above the
+## minimap (only while seated, out on the hull, in a lift or at a city table).
 func _update_hint() -> void:
-	var lines: Array[String] = []
+	var rows: Array = []
 	match seat:
 		"pilot":
-			lines.append("W/S thrust - A/D turn - mouse steers - Q/E roll - Shift boost - C pulse drive - V first person")
-			if _ship.mode in ["berth", "landed"]: lines.append("Space: launch when everyone is aboard")
+			rows.append([["@move_forward", "@move_back"], "Thrust"])
+			rows.append([["@move_left", "@move_right"], "Turn"])
+			rows.append([["@orbit_left", "@orbit_right"], "Roll"])
+			rows.append([["Shift"], "Boost"])
+			rows.append([["C"], "Pulse drive"])
+			if _ship.mode in ["berth", "landed"]: rows.append([["Space"], "Launch"])
 			var land := _ship.landable()
-			if not land.is_empty(): lines.append("X: land on %s" % land.name)
-			elif _ship.mode=="flying" and SpaceLayout.can_descend(_ship.xform.origin): lines.append("X: descend to the Surface")
-			elif _ship.mode=="flying" and _ship.xform.origin.y<SpaceLayout.DESCEND_HEIGHT+4000.0: lines.append("Fly lower to descend to the Surface")
-			elif _ship.mode=="flying" and _ship.xform.origin.distance_to(SpaceLayout.NEXUS)<SpaceWorld.DOCK_RANGE: lines.append("X: dock at the Nexus")
-			if _pulse and not SpaceShip.pulse_clear(_ship.xform.origin): lines.append("The pulse drive is quiet this close to worlds, rocks or the Nexus")
+			if not land.is_empty(): rows.append([["@interact"], "Land"])
+			elif _ship.mode=="flying" and SpaceLayout.can_descend(_ship.xform.origin): rows.append([["@interact"], "Descend"])
+			elif _ship.mode=="flying" and _ship.xform.origin.distance_to(SpaceLayout.NEXUS)<SpaceWorld.DOCK_RANGE: rows.append([["@interact"], "Dock"])
 		"turret_top", "turret_left", "turret_right":
-			lines.append("Mouse aims - left mouse fires - targets %d/3" % (_crosshair as SpaceCrosshair).locks.size())
-		"map":
-			lines.append("The star map is open")
+			rows.append([["Mouse"], "Aim"])
+			rows.append([["@shoot"], "Fire"])
 		"chair_0", "chair_1", "chair_2", "chair_3":
-			lines.append("X: drink - C: light a cigar")
-	if seat!="": lines.append("Z: stand up")
+			rows.append([["@interact"], "Drink"])
+			rows.append([["C"], "Cigar"])
+	if seat!="": rows.append([["Z"], "Stand up"])
 	elif spacewalk:
-		lines.append("WASD walk the deck - Space jetpack off" if deck else "Space fires the jetpack (WASD steers) - Ctrl brakes - Shift faster")
-		lines.append(("X: unhook, or clip on again where you are  -  zoom: reel the line (%d m)" % roundi(rope_length)) if not tether.is_empty() else "X near a ship's hull: clip your line on")
-	elif world.zone_at(player.global_position)=="ship":
-		var ship := world.ship_in_slot(SpaceLayout.pocket_at(player.global_position))
-		if ship:
-			var hurt: Array[String] = []
-			for id: String in SpaceShip.PARTS:
-				if ship.part(id)<1.0: hurt.append("%s %d%%" % [SpaceShip.PARTS[id].name, roundi(ship.part(id)*100.0)])
-			if not hurt.is_empty(): lines.append("Damaged: "+", ".join(hurt))
-	if city_seat!="": lines.append("X: sip - C: order another - Z: stand up")
-	if _lift>=0:
-		var button := _lift_button()
-		lines.append("Look at a floor button and click or press X" if button<0 else "X / click: "+str(CityLayout.elevators()[_lift].floors[button].name))
-	_hint.text = "\n".join(lines)
+		if deck: rows.append([["Space"], "Jump off"])
+		else:
+			rows.append([["Space"], "Jetpack"])
+			rows.append([["Ctrl"], "Brake"])
+		rows.append([["@interact"], "Unhook" if not tether.is_empty() else "Clip on"])
+		if not tether.is_empty(): rows.append([["@zoom_in", "@zoom_out"], "Reel"])
+	if city_seat!="":
+		rows.append([["@interact"], "Sip"])
+		rows.append([["C"], "Order"])
+		rows.append([["Z"], "Stand up"])
+	if _lift>=0: rows.append([["@interact"], "Press button"])
+	_hint.text = ""
+	var game := world.game_root()
+	var hud: Variant = game.get("hud") if game else null
+	if hud: hud.key_help.set_rows(rows)
 
 func _notice_edge() -> void:
 	if _notice_time>1.0 and _notice.text.begins_with("The edge"): return
@@ -315,6 +329,9 @@ func _flash_fade() -> void:
 
 func hide_overlay() -> void:
 	if is_instance_valid(_overlay): _overlay.hide()
+	var game := world.game_root() if is_instance_valid(world) else null
+	var hud: Variant = game.get("hud") if game else null
+	if hud: hud.key_help.set_rows([])
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func toggle_map() -> void:
@@ -1070,6 +1087,9 @@ func _hide_hud(hidden: bool) -> void:
 
 func _exit_tree() -> void:
 	Input.mouse_mode = _old_mouse
+	var game := world.game_root() if is_instance_valid(world) else null
+	var hud: Variant = game.get("hud") if game else null
+	if hud: hud.key_help.set_rows([])
 	if not is_instance_valid(player): return
 	player.cinematic_locked = false
 	player.global_basis = Basis.IDENTITY

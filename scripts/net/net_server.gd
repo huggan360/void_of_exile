@@ -498,8 +498,8 @@ func on_enter(peer_id: int, destination: String) -> void:
 			_to_peer(peer_id, ["grave", g.pos, g.title, false])
 	if record.get("chambers", false):
 		social.system(p.player_id, "Your Chambers: %d chests, shared by every character of your account." % record.chests)
-	else: social.system(p.player_id, ("Welcome to [place]Hearthhaven[/place], %s." % p.name if record.id == "hall" else
-			"Back in [place]Hearthhaven[/place]. Your party's tale goes on.") if realm == null else
+	else: social.system(p.player_id, ("Welcome to [place]the Tavern[/place], %s." % p.name if record.id == "hall" else
+			"Back at [place]the Tavern[/place]. Your party's tale goes on.") if realm == null else
 			"Welcome to %s. %s" % [realm.record.get("name", "the Surface"), "Your party's story continues here."
 			if Campaigns.is_campaign_realm(realm.realm_id) else str(config.value("server", "motd", ""))])
 	dungeons.entered(p)

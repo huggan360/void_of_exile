@@ -24,17 +24,23 @@ const MAP_RESERVED := 290.0
 const MAP_SHIFT := 6.0
 const HEART := ["..o.o..", ".oRoRo.", "oRWRRRo", "oRRRRRo", ".oRRRo.", "..oRo..", "...o..."]
 const STAR := ["...o...", "..oYo..", "ooYWYoo", "oYYYYYo", ".oYYYo.", "oYo.oYo", "oo...oo"]
+## A little green ship (her hull) and a flame (boost, jetpack) for the bars aboard.
+const SHIP := ["...o...", "..oGo..", ".oGWGo.", ".oGGGo.", "oGGGGGo", "oGoGoGo", "oo.o.oo"]
+const FLAME := ["...o...", "..oYo..", "..oYYo.", ".oYWYo.", "oYWWYo.", "oYYYYo.", ".oooo.."]
 
 var stats: PlayerStats
 var player: Player
 var toasts := ToastFeed.new()
 var minimap := Minimap.new()
+## The keys for what you are doing now, right above the minimap (KeyHelp).
+var key_help := KeyHelp.new()
 var _map_backdrop := ColorRect.new()
 var _drunk_overlay := ColorRect.new()
 var _drunk := 0.0
 ## While aboard or out on a spacewalk the bars show other things (set each
 ## frame by SpaceTraversal): {hp = [value, max, caption, color, light], mp = [...]}.
 var bar_override := {}
+var _bar_icons := ["heart", "star"]
 var _bars_restyled := false
 var _map_hint: Label
 var buff_strip := BuffStrip.new()
@@ -176,6 +182,8 @@ func _ready() -> void:
 	minimap.player = player
 	root.add_child(minimap)
 	UIStyle.add_shadow(minimap, true)
+	root.add_child(key_help)
+	_place_minimap()
 	buff_strip.effects = stats.buffs
 	root.add_child(buff_strip)
 
@@ -337,6 +345,13 @@ func _place_minimap() -> void:
 	minimap.offset_top = -MARGIN - span.y
 	minimap.offset_right = -MARGIN
 	minimap.offset_bottom = -MARGIN
+	key_help.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	key_help.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	key_help.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	key_help.offset_left = -MARGIN - 320
+	key_help.offset_right = -MARGIN
+	key_help.offset_top = -MARGIN - span.y - 220
+	key_help.offset_bottom = -MARGIN - span.y - 12
 
 
 func toggle_map() -> void:
@@ -449,6 +464,9 @@ func _update_bars() -> void:
 			_bars_restyled = false
 			_hp_bar.restyle(UIStyle.HP, UIStyle.HP_LIGHT, "")
 			_mp_bar.restyle(UIStyle.MAGIC, UIStyle.MAGIC_LIGHT, "")
+			_hp_bar.set_icon(PackedStringArray(HEART), {"o": UIStyle.OUTLINE, "R": UIStyle.HP, "W": Color(1, 0.8, 0.8)})
+			_mp_bar.set_icon(PackedStringArray(STAR), {"o": UIStyle.OUTLINE, "Y": UIStyle.MAGIC, "W": Color(1, 1, 0.85)})
+			_bar_icons = ["heart", "star"]
 		_hp_bar.set_values(stats.hp, stats.max_hp)
 		_mp_bar.set_values(stats.mp, stats.max_mp)
 		return
@@ -459,6 +477,16 @@ func _update_bars() -> void:
 		if spec.size()<5: continue
 		bar.restyle(spec[3], spec[4], str(spec[2]))
 		bar.set_values(float(spec[0]), float(spec[1]))
+		# The icon says what the bar is (no words): spec[5] "ship", "flame" or "heart".
+		var icon := str(spec[5]) if spec.size()>5 else "heart"
+		var slot := 0 if bar==_hp_bar else 1
+		if _bar_icons[slot]!=icon:
+			_bar_icons[slot] = icon
+			var light := (spec[4] as Color)
+			match icon:
+				"ship": bar.set_icon(PackedStringArray(SHIP), {"o": UIStyle.OUTLINE, "G": spec[3], "W": light})
+				"flame": bar.set_icon(PackedStringArray(FLAME), {"o": UIStyle.OUTLINE, "Y": spec[3], "W": light})
+				_: bar.set_icon(PackedStringArray(HEART), {"o": UIStyle.OUTLINE, "R": UIStyle.HP, "W": Color(1, 0.8, 0.8)})
 
 func set_location(text: String) -> void:
 	_where = text

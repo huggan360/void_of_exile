@@ -1,4 +1,4 @@
-# Editing the Tavern (Hearthhaven)
+# Editing the Tavern
 
 Open `res://scenes/home/tavern.tscn` in the Godot editor. The home island is fixed: no seed or runtime generator changes it. The voxel ground is baked from this scene each time the Tavern loads.
 
