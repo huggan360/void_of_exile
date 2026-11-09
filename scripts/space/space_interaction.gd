@@ -4,7 +4,7 @@ extends InteractionTarget
 ## rocket down to the Surface, a ship's seats and its hatch, and boarding a
 ## landed ship from outside. Each sends one request to the authority.
 var world: SpaceWorld
-var kind := "table"  # table, rocket, seat, hatch, outside, repair, airlock, tap
+var kind := "table"  # table, rocket, seat, hatch, outside, repair, ladder, deck_hatch, tap
 var part := ""
 var seat := ""
 var ship_id := 0
@@ -15,7 +15,7 @@ const SEAT_TITLES := {pilot = "Pilot's helm", turret_top = "Top cannon", turret_
 
 func _ready() -> void:
 	super._ready()
-	reach = 3.0 if kind in ["seat", "hatch", "tap", "airlock", "repair"] else 9.0 if kind in ["outside", "repair_out", "airlock_out"] else 4.0
+	reach = 3.0 if kind in ["seat", "hatch", "tap", "ladder", "repair", "deck_hatch"] else 3.5 if kind=="repair_out" else 6.0 if kind=="outside" else 4.0
 	match kind:
 		"table":
 			title = "Bell's shipwright"
@@ -35,14 +35,14 @@ func _ready() -> void:
 		"repair", "repair_out":
 			title = str(SpaceShip.PARTS.get(part, {}).get("name", "Part"))
 			action_text = "Mend"
-		"airlock":
-			title = "Airlock"
-			description = "Both doors cycle: out onto the hull, jetpack on."
-			action_text = "Go out"
-		"airlock_out":
-			title = "Airlock"
-			description = "Back inside the ship."
-			action_text = "Go in"
+		"ladder":
+			title = "Ladder to the deck"
+			description = "Up through the deck hatch, jetpack on."
+			action_text = "Climb up"
+		"deck_hatch":
+			title = "Deck hatch"
+			description = "The ladder down into the ship."
+			action_text = "Climb down"
 		"wright":
 			action_text = "Ships"
 			response = "Need a ship, captain?"
@@ -65,6 +65,8 @@ func _ready() -> void:
 func available(actor: Node3D) -> bool:
 	# Seated crew use their seat's own controls (X lands the ship).
 	if kind=="mark": return super.available(actor)
+	# On the Surface the ship stays fenced in: in and out only through the pad.
+	if world is SurfaceShipWorld and kind in ["outside", "ladder", "deck_hatch", "repair_out"]: return false
 	if kind in ["repair", "repair_out"]:
 		var ship := _repair_ship(actor)
 		if ship==null or ship.part(part)>=1.0: return false
@@ -112,8 +114,8 @@ func activate(actor: Node3D) -> bool:
 			world.request(["repair", part])
 		"repair_out":
 			world.request(["repair", ship_id, part])
-		"airlock", "airlock_out":
-			_through_black(["airlock"])
+		"ladder", "deck_hatch":
+			_through_black(["deck"])
 		"tap":
 			world.request(["pour"])
 		"wright":

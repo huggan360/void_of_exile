@@ -27,7 +27,7 @@ func game_root() -> Node:
 	return surface.get_parent()
 
 func pad_pose() -> Transform3D:
-	return Transform3D(Basis.IDENTITY, surface.launchpad_center()+SurfaceLaunchpad.SHIP_REST)
+	return Transform3D(SurfaceLaunchpad.SHIP_BASIS, surface.launchpad_center()+SurfaceLaunchpad.SHIP_REST)
 
 func hatch_position(_ship: SpaceShip) -> Vector3:
 	return surface.launchpad_arrival()
@@ -43,7 +43,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 	if op == "board":
 		var ship: SpaceShip = ships.get(int(args[1]) if args.size()>1 else 0)
 		if ship==null or ship.mode!="landed" or not _may_board(ship, int(p.player_id)): return
-		if (p.pos as Vector3).distance_to(surface.launchpad_arrival())>32.0: return
+		if (p.pos as Vector3).distance_to(surface.launchpad_center())>PortServer.PAD_REACH: return
 		teleport(p, pocket_point(ship.slot, interior_anchors.get("spawn", Vector3(0, 0.1, 14))), "board")
 	elif op == "hatch":
 		var ship := ship_in_slot(SpaceLayout.pocket_at(p.pos))

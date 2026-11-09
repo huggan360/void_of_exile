@@ -23,6 +23,7 @@ var _timer := 0.0
 var _chunks: Array = []  # [face, ci, cj] still to build
 var _building := false
 var _done := {}  # Vector3i(face, chunk i, chunk j) -> true once built
+var _country := false  # the farmland's farmsteads and roads, once the chunks are in
 static var _tower_material: ShaderMaterial
 static var _meshes := {}
 
@@ -71,7 +72,7 @@ class Batch extends RefCounted:
 			var node := MultiMeshInstance3D.new()
 			node.name = "%s_%s" % [label, key.replace(":", "_")]
 			node.multimesh = multi
-			node.material_override = CityPlanet.tower_material()
+			node.material_override = VoxModel.material() if key.contains("vox:") else CityPlanet.tower_material()
 			node.visibility_range_end = minf(far, detail_far) if detail else far
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if far<2000.0 and not detail else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			parent.add_child(node)
@@ -85,6 +86,11 @@ static func tower_material() -> ShaderMaterial:
 
 static func mesh(kind: String) -> Mesh:
 	if _meshes.has(kind): return _meshes[kind]
+	if kind.begins_with("vox:"):
+		# One of the realm's voxel obstacles (obstacles/*.vox) in woodland colours.
+		var voxel: Mesh = ObstacleLibrary.get_prefab(kind.trim_prefix("vox:")).meshes_for(Biomes.get_biome(Biomes.WOODS))[0]
+		_meshes[kind] = voxel
+		return voxel
 	var m: Mesh
 	match kind:
 		"box":
@@ -168,6 +174,7 @@ func _process(delta: float) -> void:
 			districts[d.id] = district
 			life.add_district(d)
 	if not _chunks.is_empty() and not _building: _build_next(to_local(eye) if eye.is_finite() else Vector3.ZERO)
+	elif _chunks.is_empty() and not _building and not _country: _build_country()
 	_timer -= delta
 	if _timer<=0.0 and is_instance_valid(local):
 		_timer = 0.25
@@ -202,7 +209,7 @@ func _build_chunk(face: int, ci: int, cj: int) -> void:
 	for j in range(cj, mini(cj+CHUNK, CityLayout.N)):
 		for i in range(ci, mini(ci+CHUNK, CityLayout.N)):
 			var r := CityLayout.role(face, i, j)
-			if r in ["skyline", "district", "park", "lake"]: _block(batch, face, i, j, r)
+			if r in ["district", "park", "lake"]: _block(batch, face, i, j, r)
 			_island(batch, face, i, j)
 			if Time.get_ticks_usec()-start>BUDGET_USEC:
 				await get_tree().process_frame
@@ -223,10 +230,27 @@ func _finish_chunk(face: int, ci: int, cj: int, batch: Batch, buffers: Dictionar
 	batch.flush(holder, "c", 6000.0, DETAIL_RANGE, buffers)
 	_building = false
 
+## The farmland between the city cores (CityCountryArt): farmsteads, roadside
+## trees and the dirt roads. Collision near the player is rebuilt to take them in.
+func _build_country() -> void:
+	_country = true
+	var batch := Batch.new()
+	CityCountryArt.build(batch, _solids)
+	var holder := Node3D.new()
+	holder.name = "Country"
+	add_child(holder)
+	batch.flush(holder, "farm", 3000.0, 400.0)
+	CityCountryArt.road_meshes(holder)
+	for key: Vector3i in _bodies.keys(): _drop_body(key)
+	var flora := CountryFlora.new()
+	flora.name = "Flora"
+	flora.city = self
+	add_child(flora)
+
 # --- The city kept on disk ------------------------------------------------------------------
 
 ## Bump when the city's buildings change in a way the scripts' dates won't show.
-const CACHE_VERSION := 1
+const CACHE_VERSION := 3
 const CACHE_DIR := "user://cache/city/"
 static var _cache_tag := ""
 
@@ -354,7 +378,7 @@ func _update_collision(at: Vector3) -> void:
 ## the ground shader (slabs on top, kerb stones on the sides), and solid.
 func _sidewalks(holder: Node3D, key: Vector3i) -> void:
 	var role := CityLayout.role(key.x, key.y, key.z)
-	if role=="port": return
+	if role in ["port", "farm"]: return
 	var r := CityLayout.radius()
 	var h := CityRoads.KERB
 	var verts := PackedVector3Array()

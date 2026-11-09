@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cmgc2ado86na7"
+path="res://.godot/imported/leg.vox-2a25c567ee6877e6a5bd7e6a1a82b275.tscn"
+
+[deps]
+
+source_file="res://creatures/farm_cow/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-2a25c567ee6877e6a5bd7e6a1a82b275.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

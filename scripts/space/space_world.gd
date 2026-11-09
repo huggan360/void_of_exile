@@ -14,8 +14,11 @@ const TRADER_REACH := 6.0
 ## How much harder parts wear than the hull (share of MAX_HP lost x this).
 const PART_WEAR := 3.5
 const REPAIR_REACH_INSIDE := 2.6
-const REPAIR_REACH_OUTSIDE := 9.0
-const AIRLOCK_OUTSIDE := Vector3(-11.6, -0.5, -10.0)  # hull space, just off the port airlock door
+const REPAIR_REACH_OUTSIDE := 4.5
+## The deck hatch the room's ladder climbs to (hull space, on the port side
+## of the main deck), and where you stand when you come up through it.
+const DECK_HATCH := Vector3(-5.5, 3.3, -9.0)
+const DECK_ARRIVAL := Vector3(-5.5, 3.44, -7.2)
 var city := CityState.new()
 var record: Dictionary
 var enemy_director := EnemyDirector.new()
@@ -41,6 +44,10 @@ var _npcs_built := false
 var _warm := 0
 var _rescues := {}  # player id -> when Orin's skiff arrives (ticks msec)
 var _repairs := {}  # "ship:part" -> {pid, t, ship, part}
+## Ships waiting for a busy port: port key -> [ship id, ...] in order.
+var port_queues := {}
+## Farther than this from a planet's surface, a waiting ship leaves its line.
+const QUEUE_RANGE := 1600.0
 
 ## The shared Space ("astral") or a private realm's own ("astral_<campaign realm>").
 static func is_space(id: String) -> bool:
@@ -182,7 +189,7 @@ func extra_speed(from: Vector3, to: Vector3) -> float:
 	if SpaceLayout.pocket_at(to)>=0 or SpaceLayout.pocket_at(from)>=0: return 0.0
 	var extra := 0.0
 	if zone_at(to)=="void" or zone_at(from)=="void": extra += SpaceTraversal.JET_MAX*1.8
-	# Near a ship: she may be carrying them (line or boots), turning included.
+	# Near a ship: she may be carrying them (on deck or on the line), turning included.
 	for ship: SpaceShip in ships.values():
 		if ship.xform.origin.distance_to(to)<90.0 or ship.xform.origin.distance_to(from)<90.0:
 			extra = maxf(extra, ship.velocity.length()*1.3+ship.speed*0.3+25.0)
@@ -395,7 +402,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or ship.pilot()!=pid or not ship.mode in ["landed", "berth"] or ship.broken: return
 			ship.mode = "flying"
 			ship.planet = ""
-			ship.land_armed = false
+			ship.port = ""
 			ship.velocity = ship.xform.basis.y*30.0
 			ship.speed = 0.0
 			_broadcast_ship(ship)
@@ -412,10 +419,9 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or ship.pilot()!=pid: return
 			var target := ship.landable()
 			if target.is_empty():
-				_tell(p, "Slow down near a planet's landing pad to land.")
+				_tell(p, "Fly in low and slow over one of the planet's ports (the red ship marks) to land.")
 				return
-			ship.begin_landing(target)
-			_broadcast_ship(ship)
+			_ask_port(ship, target)
 		"dock":
 			var ship := ship_of(pid)
 			if ship==null or ship.pilot()!=pid or ship.mode!="flying": return
@@ -458,12 +464,13 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if not (args[1] as Vector3).is_finite() or (args[1] as Vector3).length_squared()<0.001: return
 			var seat := ship.seat_of(pid)
 			if Leisure.hands_busy(pid) or (seat!="pilot" and not seat.begins_with("turret")) or ship.mode!="flying" or Time.get_ticks_msec()<int(ship.cooldowns.get(seat, 0)): return
-			# Damaged cannons fire slowly; broken ones jam.
-			if ship.part("cannons")<=0.0:
-				_tell(p, "The cannons are jammed! Mend them at the gunnery console.")
+			# A damaged top cannon fires slowly; a broken one jams.
+			var gun := ship.part("turret") if seat=="turret_top" else 1.0
+			if gun<=0.0:
+				_tell(p, "The top cannon is jammed! Mend it from the deck.")
 				ship.cooldowns[seat] = Time.get_ticks_msec()+3000
 				return
-			ship.cooldowns[seat] = Time.get_ticks_msec()+int(180.0*(1.0+2.0*(1.0-ship.part("cannons"))))
+			ship.cooldowns[seat] = Time.get_ticks_msec()+int(180.0*(1.0+2.0*(1.0-gun)))
 			var dir := -ship.xform.basis.z if seat=="pilot" else (args[1] as Vector3).normalized()
 			ship.aims[seat] = dir
 			foes.fire_bolt(ship, turret_muzzle(ship, seat), dir, pid, seat=="pilot")
@@ -486,18 +493,21 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if vessel: Leisure.action(p, ["use", "ship:%d:beer" % (vessel.fleet_id if vessel.fleet_id>0 else vessel.id)], self)
 		"cigar":
 			Leisure.action(p, ["cigar"], self)
-		"airlock":
-			# From the room out onto the hull, or from outside back in.
+		"deck":
+			# Up the room's ladder onto the deck, or back down through the deck hatch.
 			var slot := SpaceLayout.pocket_at(pos)
 			if slot>=0:
 				var ship := ship_in_slot(slot)
-				if ship==null or pos.distance_to(pocket_point(slot, interior_anchors.get("airlock", Vector3.ZERO)))>3.0: return
+				if ship==null or pos.distance_to(pocket_point(slot, interior_anchors.get("ladder", Vector3.ZERO)))>3.5: return
+				if not ship.mode in ["flying", "berth"]:
+					_tell(p, "The deck hatch stays shut while she is landed. Go out through the boarding hatch.")
+					return
 				_stand(ship, pid)
-				teleport(p, ship.xform*AIRLOCK_OUTSIDE, "airlock_out")
+				teleport(p, ship.xform*DECK_ARRIVAL, "deck")
 			else:
 				for ship: SpaceShip in ships.values():
-					if _may_board(ship, pid) and pos.distance_to(ship.xform*AIRLOCK_OUTSIDE)<8.0:
-						teleport(p, pocket_point(ship.slot, (interior_anchors.get("airlock", Vector3.ZERO) as Vector3)+Vector3(1.2, 0.1, 0)), "airlock_in")
+					if _may_board(ship, pid) and pos.distance_to(ship.xform*DECK_HATCH)<5.0:
+						teleport(p, pocket_point(ship.slot, (interior_anchors.get("ladder", Vector3.ZERO) as Vector3)+Vector3(1.2, 0.1, 0)), "below")
 						return
 		"rescue":
 			# Only the stranded (no ship of their own crew to go back to) can call Orin's skiff.
@@ -513,10 +523,8 @@ func repair_point(ship: SpaceShip, id: String, pos: Vector3) -> Vector3:
 	if SpaceShip.PARTS[id].inside:
 		var spot := pocket_point(ship.slot, (interior_anchors.get("repairs", {}) as Dictionary).get(id, Vector3.ZERO))
 		return spot if SpaceLayout.pocket_at(pos)==ship.slot and pos.distance_to(spot)<REPAIR_REACH_INSIDE else Vector3.INF
-	var local: Vector3 = SpaceShip.PARTS[id].hull
-	for side: float in [1.0, -1.0]:
-		var spot := ship.xform*Vector3(local.x*side, local.y, local.z)
-		if pos.distance_to(spot)<REPAIR_REACH_OUTSIDE+(6.5 if ship.mode=="landed" else 0.0): return spot
+	var spot := ship.xform*(SpaceShip.PARTS[id].mend as Vector3)
+	if pos.distance_to(spot)<REPAIR_REACH_OUTSIDE+(9.0 if ship.mode=="landed" else 0.0): return spot
 	return Vector3.INF
 
 ## Repairs in progress: done after REPAIR_TIME if the mender stays close.
@@ -790,7 +798,7 @@ func hatch_position(ship: SpaceShip) -> Vector3:
 
 func turret_muzzle(ship: SpaceShip, seat: String) -> Vector3:
 	# Muzzles of the hull's turret mounts (ShipHull), roughly where the barrels end.
-	var offsets := {pilot = Vector3(0, 0.45, ShipHull.BOW_Z-7.0), turret_top = Vector3(0, ShipHull.DECK_Y+2.6, -18.0), turret_left = Vector3(-10.2, 2.75, -5.0), turret_right = Vector3(10.2, 2.75, -5.0)}
+	var offsets := {pilot = Vector3(0, 0.45, ShipHull.BOW_Z-7.0), turret_top = Vector3(0, ShipHull.DECK_TOP+2.1, -17.9), turret_left = Vector3(-10.2, 2.42, -4.9), turret_right = Vector3(10.2, 2.42, -4.9)}
 	return ship.xform*(offsets.get(seat, Vector3.ZERO) as Vector3)
 
 func _ensure_interior(slot: int) -> void:
@@ -828,8 +836,8 @@ func _physics_process(delta: float) -> void:
 	if _warm<SpaceLayout.PLANETS.size():
 		PlanetFlora._obstacle_index(SpaceLayout.PLANETS[_warm])
 		_warm += 1
+	if not port_queues.is_empty(): _update_queues()
 	for ship: SpaceShip in ships.values().duplicate():
-		ship.city_pad_taken = _city_pad_taken.bind(ship.id)
 		if ship.mode=="descending": ship.xform.origin += Vector3.DOWN*600.0*delta
 		var damage := ship.step(delta, _asteroids)
 		if damage>0: hurt_ship(ship, damage)
@@ -848,8 +856,9 @@ func hurt_ship(ship: SpaceShip, damage: int, at := Vector3.INF) -> void:
 	var before := float(ship.parts.get(id, 100.0))
 	ship.parts[id] = maxf(0.0, before-float(damage)/float(SpaceShip.MAX_HP)*100.0*PART_WEAR)
 	if before>=50.0 and float(ship.parts[id])<50.0:
-		_tell_crew(ship, "The %s %s damaged! Mend %s %s." % [str(SpaceShip.PARTS[id].name).to_lower(), "are" if id in ["engines", "cannons"] else "is",
-			"them" if id in ["engines", "cannons"] else "it", "inside the ship" if SpaceShip.PARTS[id].inside else "from outside (airlock) or on the ground"])
+		var many := id in ["engines", "sails"]
+		_tell_crew(ship, "The %s %s damaged! Mend %s %s." % [str(SpaceShip.PARTS[id].name).to_lower(), "are" if many else "is",
+			"them" if many else "it", "inside the ship" if SpaceShip.PARTS[id].inside else "outside (ladder to the deck) or from the ground"])
 	if ship.hp<=0:
 		if Net.is_server() and ship.fleet_id>0: Net.server.fleet.destroyed(ship)
 		else: _forget(ship)
@@ -900,12 +909,62 @@ func player_left(pid: int) -> void:
 
 # --- Replication --------------------------------------------------------------------------
 
-func _city_pad_taken(pose: Transform3D, except_id: int) -> bool:
+## Whether another ship is on port `key` or setting down on it.
+func port_taken(key: String, except_id := 0) -> bool:
 	for ship: SpaceShip in ships.values():
 		if ship.id==except_id: continue
-		var target: Transform3D = ship.landing.to if ship.mode=="landing" else ship.xform
-		if ship.mode in ["landing", "landed"] and target.origin.distance_to(pose.origin)<24.0: return true
+		if (ship.mode=="landed" and ship.port==key) or (ship.mode=="landing" and str(ship.landing.get("port", ""))==key): return true
 	return false
+
+## The pilot asks to land at a port: straight down if it is free and nobody
+## is waiting ahead, else into its line.
+func _ask_port(ship: SpaceShip, target: Dictionary) -> void:
+	var key := str(target.port.key)
+	for other: String in port_queues.keys():
+		if other!=key: port_queues[other].erase(ship.id)
+	var line: Array = port_queues.get(key, [])
+	if not port_taken(key, ship.id) and (line.is_empty() or int(line[0])==ship.id):
+		line.erase(ship.id)
+		ship.begin_landing(target.planet, target.port)
+		_broadcast_ship(ship)
+		return
+	if not ship.id in line:
+		line.append(ship.id)
+		_tell_crew(ship, "%s is busy. You are number %d in line to land." % [target.port.name, line.size()])
+	port_queues[key] = line
+	_update_queues()
+
+## Every tick: waiting ships that flew off leave their line; the first ship of
+## a line whose port came free sets down by herself.
+func _update_queues() -> void:
+	for key: String in port_queues.keys():
+		var found := SpaceLayout.port(key)
+		var line: Array = port_queues[key]
+		for id: int in line.duplicate():
+			var ship: SpaceShip = ships.get(id)
+			if ship==null or ship.mode!="flying":
+				line.erase(id)
+				if ship: ship.queue = []
+				continue
+			var p: Dictionary = found.get("planet", {})
+			if p.is_empty() or ship.xform.origin.distance_to(p.center)>float(p.radius)+QUEUE_RANGE:
+				line.erase(id)
+				ship.queue = []
+				_tell_crew(ship, "You flew away from %s and left the landing line." % str(p.get("name", "the planet")))
+				_broadcast_ship(ship)
+		if not line.is_empty() and not port_taken(key):
+			var first: SpaceShip = ships[int(line.pop_front())]
+			first.begin_landing(found.planet, found.port)
+			_tell_crew(first, "%s is free. Setting down." % found.port.name)
+			_broadcast_ship(first)
+		for k in line.size():
+			var ship: SpaceShip = ships[int(line[k])]
+			var place := [str(found.port.name), k+1]
+			if ship.queue!=place:
+				ship.queue = place
+				_broadcast_ship(ship)
+		if line.is_empty(): port_queues.erase(key)
+		else: port_queues[key] = line
 
 func _broadcast_city() -> void:
 	if not city.changed: return
@@ -1118,7 +1177,7 @@ func _interior_props(slot: int, room: ShipInterior) -> void:
 		mend.part = id
 		mend.position = room.position+(anchors.repairs[id] as Vector3)+Vector3.UP*0.8
 		add_child(mend)
-	for spec: Array in [["airlock", anchors.get("airlock", Vector3.ZERO)]]:
+	for spec: Array in [["ladder", anchors.get("ladder", Vector3.ZERO)]]:
 		var spot := SpaceInteraction.new()
 		spot.world = self
 		spot.kind = spec[0]
@@ -1210,6 +1269,7 @@ func create_fleet_ship(p: Dictionary, deployment: Dictionary, context: Dictionar
 	ship.mode = "berth" if context.has("berth") else "landed"
 	ship.berth = int(context.get("berth", 0))
 	ship.planet = str(context.planet)
+	if ship.planet!="": ship.port = ship.planet+":dock"
 	ships[ship.id] = ship
 	_ensure_interior(ship.slot)
 	return ship

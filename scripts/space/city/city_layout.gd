@@ -7,7 +7,7 @@ class_name CityLayout
 ## edges and every cell holds a block of towers. Three districts around the
 ## three spaceports are built in full: cafes and bars you can sit in, shops,
 ## plazas with fountains, elevator skyscrapers joined by a sky bridge, and a
-## secret service tunnel. Everything else is skyline.
+## secret service tunnel. Everything else is farmland (CityCountry).
 ##
 ## Every building piece stands in its own tangent frame (planet space, Y up
 ## the local normal), so floors are level wherever they are.
@@ -135,10 +135,7 @@ static func district_of(face: int, i: int, j: int) -> Dictionary:
 
 static func role(face: int, i: int, j: int) -> String:
 	var at := district_of(face, i, j)
-	if at.is_empty():
-		# Now and then a park or a lake among the towers.
-		var roll := _hash(face*10007+i*131+j*7+555)
-		return "lake" if roll<0.035 else "park" if roll<0.1 else "skyline"
+	if at.is_empty(): return "farm"  # outside the three city cores: farmland (CityCountry)
 	var local: Vector2i = at.local
 	if local.x in [2, 3] and local.y in [2, 3]: return "port"
 	return ROLES.get(local, "district")

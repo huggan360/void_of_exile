@@ -16,22 +16,27 @@ const PITCH_RATE := 0.8
 const ROLL_RATE := 1.5
 const RADIUS := 24.0
 const MAX_HP := 3200
-const LAND_ALTITUDE := 420.0
-## Flying lower than this over a planet sets the ship down by itself; it has
-## to climb above it again after a take-off before that rearms.
-const AUTO_LAND_ALTITUDE := 130.0
+## Ships only set down at a planet's ports (SpaceLayout.ports): low over one,
+## within PORT_RANGE of it and under PORT_ALTITUDE, the pilot may land (X).
+## Lower than MIN_ALTITUDE the ship's charm lifts her nose, as at the edge of
+## the Reach, so she never flies into the ground.
+const PORT_RANGE := 340.0
+const PORT_ALTITUDE := 240.0
+const MIN_ALTITUDE := 120.0
+const LAND_SPEED := 140.0
 const LAND_TIME := 6.0
 ## Seats a crew member can take; the pilot flies, gunners aim turrets, the
 ## tavern chairs are for a drink and a cigar.
 const SEATS := ["pilot", "turret_top", "turret_left", "turret_right", "map", "chair_0", "chair_1", "chair_2", "chair_3"]
 ## Parts that take damage where the ship is hit and are mended by the crew:
 ## where they sit on the hull (hull space, for which part a hit strikes),
-## and whether they are mended inside the room or outside on the hull.
+## whether they are mended inside the room or outside, and where outside
+## (`mend`, hull space: on deck, or at the stern on the jetpack).
+## Sails steer, engines thrust, the top cannon fires, the heart fills the boost.
 const PARTS := {
-	engines = {name = "Engines", hull = Vector3(0, -1, 21), inside = false},
-	hull = {name = "Hull plating", hull = Vector3(8, 0, 4), inside = false},
-	helm = {name = "Helm", hull = Vector3(0, 1, -17), inside = true},
-	cannons = {name = "Cannons", hull = Vector3(0, 4, -4), inside = true},
+	sails = {name = "Sails", hull = Vector3(0, 12.0, -4), mend = Vector3(1.5, 4.1, -4.0), inside = false},
+	engines = {name = "Engines", hull = Vector3(0, -1, 21), mend = Vector3(0, -0.6, 25.2), inside = false},
+	turret = {name = "Top cannon", hull = Vector3(0, 5.3, -15), mend = Vector3(5.6, 4.1, -13.5), inside = false},
 	heart = {name = "Heart crystal", hull = Vector3(0, -2, 6), inside = true},
 }
 ## Hull restored by mending a part.
@@ -61,17 +66,19 @@ var input := [0.0, 0.0, 0.0, 0.0, false, false]  # thrust, yaw, pitch, roll, boo
 var pulse := false
 ## True while the edge of the Reach steers the ship home.
 var turned_back := false
-var land_armed := true
+## The port she has landed at (SpaceLayout.ports key), and her place while
+## waiting for a busy one: [port name, place in line] or [].
+var port := ""
+var queue := []
 ## Part id -> integrity 0..100.
-var parts := {engines = 100.0, hull = 100.0, helm = 100.0, cannons = 100.0, heart = 100.0}
+var parts := {sails = 100.0, engines = 100.0, turret = 100.0, heart = 100.0}
 ## Boost energy 0..100 (the pilot's bar).
 var boost := 100.0
 ## Tavern aboard: glass level per chair (0..1) and who is smoking (pid -> seconds left).
 var glasses := [1.0, 1.0, 1.0, 1.0]
 var smoking := {}
 var input_age := 0.0
-var city_pad_taken := Callable()
-var landing := {}  # {from: Transform3D, to: Transform3D, t: float, planet}
+var landing := {}  # {from: Transform3D, to: Transform3D, t: float, time: float, planet, port}
 var cooldowns := {}
 ## A campaign cripples the ship until its crew mends every repair aboard.
 var broken := false
@@ -104,22 +111,30 @@ func altitude(p: Dictionary) -> float:
 	var up: Vector3 = (xform.origin-(p.center as Vector3))
 	return up.length()-float(p.radius)-SpaceLayout.surface_height(p, up.normalized())
 
-## The planet a pilot may land on from here (X), or {}: anywhere low over it.
+## The port a pilot may land at from here (X): {planet, port}, or {}.
 func landable() -> Dictionary:
-	if mode!="flying" or speed>140.0: return {}
+	if mode!="flying" or speed>LAND_SPEED: return {}
+	var best := {}
+	var best_d := PORT_RANGE
 	for p: Dictionary in SpaceLayout.PLANETS:
-		if p.get("city", false):
-			if not CityLayout.landing_site(xform.origin, 150.0, city_pad_taken).is_empty(): return p
-		elif xform.origin.distance_to(p.center)<float(p.radius)+LAND_ALTITUDE+SpaceLayout.max_height(p) and altitude(p)<LAND_ALTITUDE: return p
-	return {}
+		if xform.origin.distance_to(p.center)>float(p.radius)+SpaceLayout.max_height(p)+PORT_ALTITUDE+PORT_RANGE: continue
+		if altitude(p)>PORT_ALTITUDE: continue
+		for entry: Dictionary in SpaceLayout.ports(p):
+			var d := xform.origin.distance_to((entry.pose as Transform3D).origin)
+			if d<best_d+PORT_ALTITUDE:
+				var up := (entry.pose as Transform3D).basis.y
+				var across := (xform.origin-(entry.pose as Transform3D).origin).slide(up).length()
+				if across<best_d:
+					best_d = across
+					best = {planet = p, port = entry}
+	return best
 
-## Sets down on the nearest clear, level ground below (PlanetLanding), or on
-## the pad if nothing nearby is clear.
-func begin_landing(p: Dictionary) -> void:
-	var site := CityLayout.landing_site(xform.origin, 150.0, city_pad_taken) if p.get("city", false) else PlanetLanding.find_site(p, xform.origin, -xform.basis.z)
-	if p.get("city", false) and site.is_empty(): return
-	landing = {from = xform, to = site.frame if not site.is_empty() else landed_pose(p), t = 0.0, planet = p.id}
+## Sets down on a port: an arc in from where she is.
+func begin_landing(p: Dictionary, entry: Dictionary) -> void:
+	var to: Transform3D = entry.pose
+	landing = {from = xform, to = to, t = 0.0, time = LAND_TIME+xform.origin.distance_to(to.origin)/250.0, planet = p.id, port = entry.key}
 	mode = "landing"
+	queue = []
 	speed = 0.0
 	velocity = Vector3.ZERO
 
@@ -131,7 +146,7 @@ func step(delta: float, asteroids: Array) -> int:
 		"descending":  # going down to the Surface (SpaceWorld retires it)
 			return 0
 		"landing":
-			landing.t = minf(1.0, float(landing.t)+delta/LAND_TIME)
+			landing.t = minf(1.0, float(landing.t)+delta/float(landing.get("time", LAND_TIME)))
 			var k := smoothstep(0.0, 1.0, float(landing.t))
 			var from: Transform3D = landing.from
 			var to: Transform3D = landing.to
@@ -141,18 +156,11 @@ func step(delta: float, asteroids: Array) -> int:
 			if landing.t>=1.0:
 				mode = "landed"
 				planet = str(landing.planet)
+				port = str(landing.get("port", ""))
 				landing = {}
 			return 0
 		"berth", "landed", "ascending", "transit", "surface_landing", "storing":
 			return 0
-	# Close over a planet: land on the nearest clear ground by itself.
-	for p: Dictionary in SpaceLayout.PLANETS:
-		if xform.origin.distance_to(p.center)>float(p.radius)+AUTO_LAND_ALTITUDE+200.0+SpaceLayout.max_height(p): continue
-		var height := altitude(p)
-		if height>AUTO_LAND_ALTITUDE+100.0: land_armed = true
-		elif land_armed and height<AUTO_LAND_ALTITUDE and not broken:
-			begin_landing(p)
-			if mode=="landing": return 0
 	var thrust := 0.0 if broken else clampf(float(input[0]), -1.0, 1.0)
 	# Damaged parts: slow engines (never dead in space), sluggish helm, no boost without the heart.
 	var engines := 0.3+0.7*part("engines")
@@ -164,7 +172,7 @@ func step(delta: float, asteroids: Array) -> int:
 	var top := (PULSE_SPEED if pulse else BOOST_SPEED if boosting else MAX_SPEED)*engines
 	var accel := ACCEL*engines*(8.0 if pulse or speed>BOOST_SPEED+1.0 else 2.2 if boosting else 1.0)
 	speed = move_toward(speed, top*maxf(thrust, 0.0) if thrust>=0.0 else -25.0*-thrust, accel*delta)
-	var steer := (0.45 if pulse else 1.0)*(0.4+0.6*part("helm"))
+	var steer := (0.45 if pulse else 1.0)*(0.4+0.6*part("sails"))
 	var basis := xform.basis
 	basis = basis.rotated(basis.y, -clampf(float(input[1]), -1.0, 1.0)*TURN_RATE*steer*delta)
 	basis = basis.rotated(basis.x, clampf(float(input[2]), -1.0, 1.0)*PITCH_RATE*steer*delta)
@@ -175,6 +183,20 @@ func step(delta: float, asteroids: Array) -> int:
 	if turned_back:
 		var home := Basis.looking_at(-xform.origin.normalized(), basis.y if absf(basis.y.dot(xform.origin.normalized()))<0.95 else Vector3.FORWARD)
 		basis = basis.slerp(home, clampf(delta*(0.35+out/SpaceLayout.BOUNDARY_WARN*1.6), 0.0, 1.0))
+		speed = minf(speed, BOOST_SPEED)
+		pulse = false
+	# Too low over a planet: the same charm lifts her nose away from the ground.
+	for p: Dictionary in SpaceLayout.PLANETS:
+		if xform.origin.distance_to(p.center)>float(p.radius)+SpaceLayout.max_height(p)+MIN_ALTITUDE+200.0: continue
+		var low := MIN_ALTITUDE-altitude(p)
+		if low<=0.0: continue
+		var away := (xform.origin-(p.center as Vector3)).normalized()
+		var ahead := (-basis.z).slide(away)
+		if ahead.length()<0.1: ahead = basis.y.slide(away)
+		var climb := (ahead.normalized()+away*0.7).normalized()
+		basis = basis.slerp(Basis.looking_at(climb, away), clampf(delta*(0.6+low/MIN_ALTITUDE*3.0), 0.0, 1.0))
+		var into := -velocity.dot(away)
+		if into>0.0: velocity += away*into*clampf(delta*4.0, 0.0, 1.0)
 		speed = minf(speed, BOOST_SPEED)
 		pulse = false
 	xform.basis = basis.orthonormalized()
@@ -255,7 +277,7 @@ static func pulse_clear(at: Vector3) -> bool:
 ## Compact snapshot for clients.
 func wire() -> Array:
 	return [id, slot, name, owner, party, tint.to_html(false), xform, speed, mode, planet, hp, crew.duplicate(), aims.duplicate(), broken, repairs.duplicate(true), pulse, turned_back,
-		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys(), fleet_id, account_id, velocity]
+		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys(), fleet_id, account_id, velocity, port, queue.duplicate()]
 
 static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 	var s := into if into!=null else SpaceShip.new()
@@ -286,6 +308,9 @@ static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 		s.fleet_id = int(data[21])
 		s.account_id = int(data[22])
 	if data.size()>23 and data[23] is Vector3: s.velocity = data[23]
+	if data.size()>25:
+		s.port = str(data[24])
+		s.queue = data[25]
 	return s
 
 func fleet_state() -> Dictionary:

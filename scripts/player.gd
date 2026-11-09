@@ -37,8 +37,7 @@ const TURN_SPEED := 10.0
 const STEP_HEIGHT := 1.05  # climbs single 1 m blocks, walls of 2+ still block
 const STEP_SMOOTHING := 12.0  # how fast the model catches up after a step
 
-const CAMERA_PITCH := deg_to_rad(55.0)
-const OVERHEAD_PITCH := deg_to_rad(72.0)
+const CAMERA_PITCH := deg_to_rad(72.0)
 const CAMERA_FOV := 35.0
 const ZOOM_MIN := 6.0
 const ZOOM_MAX := 60.0
@@ -705,8 +704,7 @@ func _update_camera(delta: float) -> void:
 	var target_y := global_position.y + _visual_offset + 1.0
 	_camera_y = lerpf(_camera_y, target_y, minf(1.0, delta * CAMERA_HEIGHT_SMOOTHING))
 	var target := Vector3(global_position.x, _camera_y, global_position.z)
-	var pitch := OVERHEAD_PITCH if AppSettings.video.get("camera_angle", "standard") == "overhead" else CAMERA_PITCH
-	var direction := Basis(Vector3.UP, camera_yaw) * Vector3(0, sin(pitch), cos(pitch))
+	var direction := Basis(Vector3.UP, camera_yaw) * Vector3(0, sin(CAMERA_PITCH), cos(CAMERA_PITCH))
 	# The camera keeps the zoom the player chose: it never pulls in because a
 	# hill, wall or tree is between it and the character.
 	_camera_reach = lerpf(_camera_reach, camera_distance, minf(1.0, delta * CAMERA_PULL_OUT_SPEED))

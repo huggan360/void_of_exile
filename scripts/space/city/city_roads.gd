@@ -47,6 +47,13 @@ static func merged(face: int, a: Vector2i, b: Vector2i) -> bool:
 	var db := CityLayout.district_of(face, b.x, b.y)
 	return not da.is_empty() and not db.is_empty() and da.district.id==db.district.id
 
+## Streets run only where a city core is on at least one side; the farmland
+## has its own winding country roads (CityCountry).
+static func _city_side(face: int, cells: Array) -> bool:
+	for c: Vector2i in cells:
+		if c.x>=0 and c.y>=0 and c.x<_n() and c.y<_n() and CityLayout.role(face, c.x, c.y)!="farm": return true
+	return false
+
 ## Bending is only for streets between open blocks.
 static func _may_bend(face: int, cells: Array) -> bool:
 	for c: Vector2i in cells:
@@ -79,12 +86,12 @@ static func node(face: int, i: int, j: int) -> Array:
 			if int(d.face)!=face: continue
 			var local := Vector2i(i-(d.corner.x-3), j-(d.corner.y-3))
 			if local in DISTRICT_ROUNDS: forced = true
-		if forced or (at.is_empty() and _r(face, i, j, 3)<0.09): round = ISLAND
+		if forced: round = ISLAND
 	var out: Array = [dir, round, Vector3.ZERO, false, Vector3.ZERO, false, Vector3.ZERO, 0]
 	_nodes[key] = out
 	# Streets to the next corners (their middles bend sideways).
 	if i<n:
-		var keep := not (j>0 and j<n and merged(face, Vector2i(i, j-1), Vector2i(i, j)))
+		var keep := not (j>0 and j<n and merged(face, Vector2i(i, j-1), Vector2i(i, j))) and _city_side(face, [Vector2i(i, j-1), Vector2i(i, j)])
 		var bend := (_r(face, i, j, 4)-0.5)*2.0*BEND if _may_bend(face, [Vector2i(i, j-1), Vector2i(i, j)]) else 0.0
 		var a := _node_g(face, i, j)
 		var b := _node_g(face, i+1, j)
@@ -92,7 +99,7 @@ static func node(face: int, i: int, j: int) -> Array:
 		out[2] = _grid_dir(face, mid.x, mid.y)
 		out[3] = keep
 	if j<n:
-		var keep := not (i>0 and i<n and merged(face, Vector2i(i-1, j), Vector2i(i, j)))
+		var keep := not (i>0 and i<n and merged(face, Vector2i(i-1, j), Vector2i(i, j))) and _city_side(face, [Vector2i(i-1, j), Vector2i(i, j)])
 		var bend := (_r(face, i, j, 5)-0.5)*2.0*BEND if _may_bend(face, [Vector2i(i-1, j), Vector2i(i, j)]) else 0.0
 		var a := _node_g(face, i, j)
 		var b := _node_g(face, i, j+1)

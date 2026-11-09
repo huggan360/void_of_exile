@@ -40,24 +40,22 @@ func setup(ship: SpaceShip) -> void:
 	_recall.world = world
 	_recall.ship_id = ship.id
 	add_child(_recall)
-	# Outside: the airlock's outer door and the parts mended on the hull.
-	var lock := SpaceInteraction.new()
-	lock.world = world
-	lock.kind = "airlock_out"
-	lock.ship_id = ship.id
-	lock.position = SpaceWorld.AIRLOCK_OUTSIDE
-	add_child(lock)
+	# Outside: the deck hatch down to the room and the parts mended out here.
+	var hatch := SpaceInteraction.new()
+	hatch.world = world
+	hatch.kind = "deck_hatch"
+	hatch.ship_id = ship.id
+	hatch.position = SpaceWorld.DECK_HATCH+Vector3.UP*0.6
+	add_child(hatch)
 	for id: String in SpaceShip.PARTS:
 		if SpaceShip.PARTS[id].inside: continue
-		# Hull plating can be mended from either side.
-		for side: float in ([1.0, -1.0] if id=="hull" else [1.0]):
-			var mend := SpaceInteraction.new()
-			mend.world = world
-			mend.kind = "repair_out"
-			mend.part = id
-			mend.ship_id = ship.id
-			mend.position = (SpaceShip.PARTS[id].hull as Vector3)*Vector3(side, 1, 1)
-			add_child(mend)
+		var mend := SpaceInteraction.new()
+		mend.world = world
+		mend.kind = "repair_out"
+		mend.part = id
+		mend.ship_id = ship.id
+		mend.position = SpaceShip.PARTS[id].mend
+		add_child(mend)
 	_damage = ShipDamage.new()
 	hull.add_child(_damage)
 	global_transform = ship.xform
@@ -75,7 +73,7 @@ func push(ship: SpaceShip, stamp := -1.0) -> void:
 	_samples.append([time, ship.xform, ship.speed, ship.velocity])
 	while _samples.size()>12: _samples.pop_front()
 	_label.text = ship.name
-	_ramp.enabled = ship.mode=="landed"
+	_ramp.enabled = ship.mode in ["landed", "berth"]
 	var hatch: Transform3D = hull.anchors.get("hatch", Transform3D(Basis.IDENTITY, Vector3(9, -3, 4)))
 	_ramp.position = hatch.origin
 	_recall.position = hatch.origin+Vector3(0, 0.8, 2.0)
@@ -142,6 +140,10 @@ func _crew_is_local() -> bool:
 	return _ship.seat_of(world.local_player.player_id)!="" or SpaceLayout.pocket_at(world.local_player.global_position)==_ship.slot
 
 ## World position of a turret's muzzle as drawn (for local bolt effects).
+func turret_pivot(seat: String) -> Vector3:
+	var node := hull.get_node_or_null(_mount_name(seat)+"/Yaw") as Node3D
+	return node.global_position if node else global_position
+
 func muzzle(seat: String) -> Vector3:
 	var node := hull.get_node_or_null(_mount_name(seat)+"/Yaw/Pitch/Muzzle") as Node3D
 	return node.global_position if node else global_position

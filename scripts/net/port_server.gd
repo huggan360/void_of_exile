@@ -10,7 +10,7 @@ extends Node
 ##     if that is where you were, else your hometown on the Surface
 ##     (PlayerStats.travel keeps it with the character).
 ## A private realm (a campaign's world) has its own private Space.
-const PAD_REACH := 32.0
+const PAD_REACH := 50.0  # the fence around the moored ship reaches 44 m west
 const CREW_REACH := 26.0
 
 var server: NetServer

@@ -228,7 +228,7 @@ func update_camera(delta: float) -> void:
 	var orbit := player.global_basis*Basis(Vector3.UP,player.camera_yaw)
 	var target := player.global_position+up*1.0
 	var head := player.global_position+up*1.57
-	var pitch := Player.OVERHEAD_PITCH if AppSettings.video.get("camera_angle","standard")=="overhead" else Player.CAMERA_PITCH
+	var pitch := Player.CAMERA_PITCH
 	var from := target+orbit*Vector3(0,sin(pitch),cos(pitch))*player.camera_distance
 	var camera_ray := PhysicsRayQueryParameters3D.create(head,from,Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 	camera_ray.exclude = [player.get_rid()]

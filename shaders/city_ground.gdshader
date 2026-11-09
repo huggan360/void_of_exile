@@ -7,7 +7,9 @@ render_mode cull_back;
 // stones, cobbled courtyards and grassy roundabout islands. Everything is
 // sampled on a 10 cm pixel grid so it reads as pixel art up close, and melts
 // into flat colour far away. Also drawn on the raised sidewalks (CityPlanet),
-// whose side faces get the kerb stones.
+// whose side faces get the kerb stones. Outside the three city cores
+// (cells_tex) the ground is farmland: a patchwork of fields of every shape
+// (wheat, green crops, ploughed earth, meadow) with hedges between them.
 uniform vec3 planet_center;
 uniform float planet_radius = 1000.0;
 uniform float cells = 28.0;
@@ -21,6 +23,8 @@ uniform sampler2D slab_tex : source_color, filter_nearest, repeat_enable;
 uniform sampler2D kerb_tex : source_color, filter_nearest, repeat_enable;
 uniform sampler2D cobble_tex : source_color, filter_nearest, repeat_enable;
 uniform sampler2D grass_tex : source_color, filter_nearest, repeat_enable;
+uniform sampler2D cells_tex : filter_nearest;
+#include "res://shaders/farm_fields.gdshaderinc"
 varying vec3 world_pos;
 varying vec3 world_normal;
 
@@ -49,6 +53,53 @@ void street(vec3 p, vec3 up, vec4 a, vec3 m, vec4 b, inout float best, inout vec
 		float total = l0 + l1;
 		info = along < total - along ? vec3(along, along, a.w) : vec3(along, total - along, b.w);
 	}
+}
+
+float hash2(vec2 q) { return fract(sin(dot(q, vec2(12.9898, 78.233))) * 43758.5453); }
+
+// A field of the patchwork round p (planet space): cells of a 3D Voronoi
+// over the sphere, so every field has its own shape, crop and row direction.
+// far_c gets the field's plain colour for distance.
+vec3 field(vec3 p, vec2 at, out vec3 far_c) {
+	vec3 id;
+	vec4 info = farm_field(p, id);
+	float edge = info.y;
+	bool hedged = info.z > 0.5;
+	vec2 px = floor(at * 10.0) / 10.0;
+	float n = hash2(px);
+	float n2 = hash2(floor(at * 2.5));
+	float row = farm_row(px, id);
+	vec3 c;
+	if (id.x < 0.42) {
+		// Wheat: golden ears in rows, darker furrows.
+		c = mix(vec3(0.84, 0.66, 0.3), vec3(0.96, 0.82, 0.44), n);
+		if (row < 0.22) c = vec3(0.6, 0.45, 0.22) + n * 0.05;
+		far_c = vec3(0.86, 0.7, 0.36);
+	} else if (id.x < 0.64) {
+		// A green crop: leafy rows on brown soil.
+		c = row < 0.55 ? mix(vec3(0.3, 0.52, 0.22), vec3(0.42, 0.66, 0.3), n) : vec3(0.42, 0.3, 0.2) + n * 0.05;
+		far_c = vec3(0.36, 0.48, 0.24);
+	} else if (id.x < 0.8) {
+		// Ploughed earth.
+		c = mix(vec3(0.38, 0.26, 0.17), vec3(0.5, 0.35, 0.22), n) * (row < 0.4 ? 0.82 : 1.0);
+		far_c = vec3(0.44, 0.3, 0.2);
+	} else {
+		// Meadow: grass with flowers.
+		c = mix(vec3(0.33, 0.55, 0.27), vec3(0.45, 0.66, 0.33), n2) * (0.9 + n * 0.2);
+		if (n > 0.985) c = id.z < 0.5 ? vec3(0.96, 0.9, 0.5) : vec3(0.95, 0.7, 0.85);
+		far_c = vec3(0.38, 0.58, 0.3);
+	}
+	c *= 0.93 + id.z * 0.14;  // no two fields quite the same shade
+	// Hedges along the borders between different fields, a grass margin inside them.
+	if (hedged && edge < 0.7) {
+		c = mix(vec3(0.18, 0.34, 0.15), vec3(0.26, 0.44, 0.19), n);
+		far_c = mix(far_c, vec3(0.24, 0.4, 0.18), 0.3);
+	} else if (hedged && edge < 1.5) {
+		c = mix(vec3(0.32, 0.52, 0.25), vec3(0.4, 0.6, 0.3), n);
+	} else if (!hedged && edge < 0.25) {
+		c *= 0.9;  // a plough line between plots of one crop
+	}
+	return c;
 }
 
 vec3 tex_at(sampler2D t, vec2 metres) {
@@ -130,6 +181,8 @@ void fragment() {
 	float glow = 0.0;
 	vec3 glow_color = vec3(1.0, 0.78, 0.45);
 	vec2 q = floor(vec2(info.x, best) * 10.0) / 10.0 + 0.05;  // the pixel grid along/across the street
+	bool farm = texelFetch(cells_tex, ivec2(c.x, face * count + c.y), 0).r > 0.5;
+	vec3 field_far = vec3(0.0);
 	if (side) {
 		// A kerb's face: pale stones.
 		color = tex_at(kerb_tex, vec2(info.x, 0.9 + kerb_height - height));
@@ -159,6 +212,8 @@ void fragment() {
 		color = mix(color, vec3(0.78, 0.76, 0.8), paint * 0.9);
 		color = mix(color, vec3(0.86, 0.66, 0.3), lane * 0.9);
 		glow = lane * 0.35 + paint * 0.05;
+	} else if (farm && best >= road + 0.35) {
+		color = field(p, vec2(dot(p, ax), dot(p, bx)), field_far);
 	} else if (best < road + walk) {
 		float across = best - road;
 		if (across < 0.3) {
@@ -172,6 +227,7 @@ void fragment() {
 	// Far away the pixels give way to their average so nothing shimmers.
 	vec3 far_color = best < road ? vec3(0.17, 0.15, 0.2) : best < road + walk ? vec3(0.55, 0.52, 0.57) : vec3(0.45, 0.4, 0.46);
 	if (island >= 0.0) far_color = vec3(0.24, 0.4, 0.27);
+	if (farm && best >= road + 0.35 && !side) far_color = field_far;
 	color = mix(far_color, color, detail);
 	ALBEDO = color;
 	ROUGHNESS = 0.85;

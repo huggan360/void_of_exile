@@ -13,7 +13,6 @@ var _resizable := CheckButton.new()
 var _fps := OptionButton.new()
 var _gui := OptionButton.new()
 var _show_fps := CheckButton.new()
-var _camera_angle := OptionButton.new()
 var _resolution_label: Label
 var _apply: Button
 var _draft := {}
@@ -164,9 +163,6 @@ func _build_video(page: Control) -> void:
 	_gui.add_item("Medium - default",1)
 	_gui.add_item("Large",2)
 	_row(column,"GUI scale",_gui)
-	_camera_angle.add_item("Standard - 55 degrees", 0)
-	_camera_angle.add_item("Overhead - 72 degrees", 1)
-	_row(column,"Camera angle",_camera_angle)
 	_row(column,"Resizable window",_resizable)
 	_row(column,"Show FPS",_show_fps)
 	var note := UIStyle.label("Fullscreen resolution changes the game image; the interface stays sharp.\nGUI scale follows the window size. Medium matches the original fullscreen interface.",16,UIStyle.TEXT_DIM)
@@ -192,8 +188,6 @@ func _build_video(page: Control) -> void:
 		if not _refreshing: _draft.max_fps = _fps.get_item_id(index); _update_footer())
 	_gui.item_selected.connect(func(index: int) -> void:
 		if not _refreshing: _draft.gui_scale = ["small","medium","large"][index]; _update_footer())
-	_camera_angle.item_selected.connect(func(index: int) -> void:
-		if not _refreshing: _draft.camera_angle = ["standard", "overhead"][index]; _update_footer())
 	_resizable.toggled.connect(func(value: bool) -> void:
 		if not _refreshing: _draft.resizable = value; _update_footer())
 	_show_fps.toggled.connect(func(value: bool) -> void:
@@ -334,7 +328,6 @@ func _refresh_video() -> void:
 		fps_index = _fps.item_count-1
 	_fps.select(fps_index)
 	_gui.select(["small","medium","large"].find(_draft.gui_scale))
-	_camera_angle.select(1 if _draft.camera_angle == "overhead" else 0)
 	_refreshing = false
 	_update_footer()
 

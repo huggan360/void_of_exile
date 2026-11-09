@@ -22,10 +22,10 @@ func build(server: bool) -> void:
 		chair_1 = {pos = Vector3(-4.7, 0, 8.3), yaw = 0.0, kind = "chair", stand = Vector3(-3.2, 0, 8.6)},
 		chair_2 = {pos = Vector3(-2.6, 0, 6.2), yaw = PI*0.5, kind = "chair", stand = Vector3(-1.4, 0, 6.2)},
 		chair_3 = {pos = Vector3(-6.8, 0, 6.2), yaw = -PI*0.5, kind = "chair", stand = Vector3(-6.6, 0, 4.4)}},
-		# Where each part inside is mended (stand points), the airlock and the beer tap.
-		repairs = {helm = Vector3(0, 0, -14.4), cannons = Vector3(4.9, 0.75, -7.3), heart = Vector3(5.6, 0, -2.6)},
+		# Where the heart crystal is mended (stand point), the ladder up and the beer tap.
+		repairs = {heart = Vector3(5.6, 0, -2.6)},
 		heart = Vector3(6.8, 0, -2.6),
-		airlock = Vector3(-6.9, 0, -10.0),
+		ladder = Vector3(-6.6, 0, -9.0),
 		tap = Vector3(5.7, 0, 7.6),
 		glasses = [Vector3(-4.7, 0.87, 5.45), Vector3(-4.7, 0.87, 6.95), Vector3(-3.95, 0.87, 6.2), Vector3(-5.45, 0.87, 6.2)]}
 	var art := Art.new(_root, server)
@@ -162,9 +162,22 @@ func _console(art: Art, at: Vector3, size: Vector3) -> void:
 		art.box(at + delta, Vector3(0.12, 0.06, 0.12), Art.GREEN if i % 2 else Art.PINK, 1.3)
 
 func _bridge(art: Art) -> void:
-	_star_window(Vector3(0, 1.95, -17.66), Vector2(10.6, 2.2), Basis.IDENTITY)
-	for x: float in [-5.45, -2.75, 0, 2.75, 5.45]: art.box(Vector3(x, 1.95, -17.52), Vector3(0.16, 2.4, 0.18), Art.BRASS)
-	for y: float in [0.79, 3.11]: art.box(Vector3(0, y, -17.52), Vector3(11, 0.16, 0.18), Art.BRASS)
+	# The great forward glass and a tall window either side of the helm, cut
+	# through the hull where ShipHull leaves them open.
+	var room := -ShipHull.INTERIOR_OFFSET
+	var front: Vector3 = (ShipHull.BRIDGE_WINDOW[0] as Vector3)+room
+	var half: Vector2 = ShipHull.BRIDGE_WINDOW[1]
+	_star_window(front, half*2.0, Basis.IDENTITY)
+	for x: float in [-half.x, -half.x*0.62, -half.x*0.3, half.x*0.3, half.x*0.62, half.x]:
+		art.box(Vector3(x, front.y, front.z+0.14), Vector3(0.14, half.y*2.0+0.2, 0.16), Art.BRASS)
+	for y: float in [front.y-half.y, front.y+half.y]: art.box(Vector3(0, y, front.z+0.14), Vector3(half.x*2.0+0.3, 0.14, 0.16), Art.BRASS)
+	for window: Array in ShipHull.SIDE_WINDOWS:
+		var at: Vector3 = (window[0] as Vector3)+room
+		var size: Vector2 = window[1]
+		var side := signf(at.x)
+		_star_window(at, size*2.0, Basis(Vector3.UP, -side*PI*0.5))
+		for z: float in [-size.x, 0.0, size.x]: art.box(Vector3(at.x-side*0.14, at.y, at.z+z), Vector3(0.16, size.y*2.0+0.2, 0.14), Art.BRASS)
+		for y: float in [-size.y, size.y]: art.box(Vector3(at.x-side*0.14, at.y+y, at.z), Vector3(0.16, 0.14, size.x*2.0+0.3), Art.BRASS)
 	_console(art, Vector3(0, 0, -16.1), Vector3(4.4, 1.1, 1.0))
 	# Helm spokes and handles surround a polished brass hub.
 	var center := Vector3(0, 1.37, -15.3)
@@ -251,7 +264,7 @@ static func window_materials() -> Array[ShaderMaterial]:
 		_window.size = Vector2.ONE
 	return [_stars, _round_stars]
 
-## The heart crystal, the airlock's inner door and the beer tap.
+## The heart crystal, the ladder up to the deck and the beer tap.
 func _systems(art: Art) -> void:
 	var heart: Vector3 = anchors.heart
 	art.part("cylinder", heart + Vector3.UP * 0.3, Vector3(1.3, 0.6, 1.3), Art.BRASS)
@@ -260,13 +273,14 @@ func _systems(art: Art) -> void:
 	for i in 4:
 		var a := i * TAU / 4.0
 		art.beam(heart + Vector3(cos(a) * 0.55, 0.6, sin(a) * 0.55), heart + Vector3(cos(a) * 0.2, 2.6, sin(a) * 0.2), 0.06, Art.BRASS)
-	# Airlock: a round brass-bound door in the port wall (it slides open, ShipTavern).
-	var lock: Vector3 = anchors.airlock + Vector3(-0.7, 0, 0)
-	art.part("ring", lock + Vector3(0, 1.3, 0), Vector3.ONE * 2.7, Art.BRASS, 0, Basis(Vector3.FORWARD, PI * 0.5))
-	art.box(lock + Vector3(0.05, 2.75, 0), Vector3(0.2, 0.4, 1.8), Art.DARK)
-	art.box(lock + Vector3(0.25, 1.3, 1.25), Vector3(0.12, 0.5, 0.3), Art.DARK)
-	art.box(lock + Vector3(0.32, 1.42, 1.25), Vector3(0.05, 0.12, 0.12), Art.GREEN, 2.0)
-	art.box(lock + Vector3(0.32, 1.22, 1.25), Vector3(0.05, 0.12, 0.12), Color("ff6a5a"), 2.0)
+	# Ladder up the port wall to a square hatch in the ceiling.
+	var foot: Vector3 = anchors.ladder + Vector3(-0.9, 0, 0)
+	for z: float in [-0.42, 0.42]: art.box(foot + Vector3(0, 2.1, z), Vector3(0.12, 4.2, 0.12), Art.WOOD.darkened(0.1))
+	for i in 11: art.box(foot + Vector3(0, 0.3 + i * 0.36, 0), Vector3(0.09, 0.07, 0.84), Art.BRASS if i % 4 == 0 else Art.WOOD.lightened(0.08))
+	for z: float in [-0.66, 0.66]: art.box(foot + Vector3(0.3, 4.16, z), Vector3(1.5, 0.12, 0.12), Art.BRASS)
+	for x: float in [-0.42, 1.02]: art.box(foot + Vector3(x, 4.16, 0), Vector3(0.12, 0.12, 1.44), Art.BRASS)
+	art.box(foot + Vector3(0.3, 4.2, 0), Vector3(1.32, 0.04, 1.2), Color("1d2d3a"), 0.4)
+	art.lantern(foot + Vector3(0.45, 3.2, 0.75))
 	# Beer tap on the galley counter, with its barrel.
 	var tap: Vector3 = anchors.tap + Vector3(0.9, 0, 0)
 	art.part("cylinder", tap + Vector3(0.45, 0.7, 1.1), Vector3(1.0, 1.3, 1.0), Art.WOOD, 0, Basis(Vector3.FORWARD, PI * 0.5))
@@ -288,13 +302,12 @@ func _label(text: String, at: Vector3, yaw: float, icon := "", size := 0.8) -> v
 	plaque.rotation.y = yaw
 	_root.add_child(plaque)
 
-## Who sits where, on the back of each seat; the airlock and the galley.
+## Who sits where, on the back of each seat; the ladder up and the galley.
 func _plaques() -> void:
 	var titles := {pilot = ["PILOT", "helm"], turret = ["GUNNER", "cannon"], map = ["NAVIGATOR", "map"], chair = ["CREW", "chair"]}
 	for seat: Dictionary in anchors.seats.values():
 		var spec: Array = titles.get(seat.kind, ["CREW", "chair"])
 		var basis := Basis(Vector3.UP, float(seat.yaw))
 		_label(spec[0], (seat.pos as Vector3)+basis*Vector3(0, 1.08, 0.53), float(seat.yaw), spec[1], 0.32)
-	var lock: Vector3 = anchors.airlock+Vector3(-0.7, 0, 0)
-	_label("AIRLOCK", lock+Vector3(0.62, 3.5, 0), PI*0.5, "door", 0.5)
+	_label("DECK", (anchors.ladder as Vector3)+Vector3(-0.7, 3.5, -0.9), PI*0.5, "door", 0.5)
 	_label("GALLEY", (anchors.tap as Vector3)+Vector3(1.6, 2.9, 0), -PI*0.5, "beer", 0.55)

@@ -51,6 +51,14 @@ func pick(list: Array) -> Color:
 func part(kind: String, at: Vector3, basis: Basis, size: Vector3, color: Color, mat := M_PLASTER, windows := 0.0, round := true, detail := false) -> void:
 	batch.add(kind, frame*Transform3D(basis*Basis.from_scale(size), at), color, Color(seed, windows, mat, 2.0 if round else 0.0), detail)
 
+## One of the realm's voxel obstacles (obstacles/*.vox: trees, bushes, flowers,
+## grass tufts...) standing on its base at `at`, turned by `yaw`.
+func obstacle(prefab: String, at: Vector3, yaw: float, scale := 1.0, detail := false) -> void:
+	var box := CityPlanet.mesh("vox:"+prefab).get_aabb()
+	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE*ObstacleLibrary.get_prefab(prefab).voxel_size*scale)
+	var offset := -Vector3(box.position.x+box.size.x*0.5, box.position.y, box.position.z+box.size.z*0.5)
+	batch.add("vox:"+prefab, frame*Transform3D(basis, at+basis*offset), Color.WHITE, Color(), detail)
+
 func solid(at: Vector3, size: Vector3, kind := "cyl") -> void:
 	solids.append([frame*Transform3D(Basis.IDENTITY, at), size, kind])
 
@@ -381,12 +389,17 @@ func gardens(block: Dictionary, offset: float, p_seed: float, taken: Array) -> v
 		match int(r()*5.0) % 5:
 			0, 1: tree(at, lerpf(1.6, minf(rr, 3.4), r()), seed+0.11)
 			2:
-				for b in 5:
-					var p := at+Vector2.from_angle(TAU*b/5.0)*rr*0.55
-					part("sphere", Vector3(p.x, y+0.4, p.y), Basis.IDENTITY, Vector3(1.0, 0.7, 1.0), Color(str(["ff9ccf", "ffe08a", "b89aff", "ff8a5a", "f0f0ff"][b])).darkened(0.25), M_LEAVES, 0.0, true, true)
+				# A flower bed: voxel flowers and tufts round a bush.
+				obstacle("bush", Vector3(at.x, y+0.15, at.y), r()*TAU, 0.8)
+				for b in 7:
+					var p := at+Vector2.from_angle(TAU*b/7.0+r())*rr*lerpf(0.45, 0.8, r())
+					obstacle("decor_flowers" if b % 3!=2 else "decor_tuft", Vector3(p.x, ground(p)+0.15, p.y), r()*TAU, 1.0, true)
 			3:
-				part("torus", Vector3(at.x, y+0.5, at.y), Basis.IDENTITY, Vector3(rr*1.8, 1.4, rr*1.8), Color("2f5a3a"), M_LEAVES, 0.0, true, true)
-				part("sphere", Vector3(at.x, y+0.9, at.y), Basis.IDENTITY, Vector3.ONE*1.2, pick(LEAVES), M_LEAVES, 0.0, true, true)
+				# A ring of hedge bushes.
+				for b in 6:
+					var p := at+Vector2.from_angle(TAU*b/6.0)*rr*0.7
+					obstacle("bush", Vector3(p.x, ground(p)+0.15, p.y), r()*TAU, lerpf(0.7, 0.95, r()))
+				obstacle("decor_fern", Vector3(at.x, y+0.15, at.y), r()*TAU, 1.2, true)
 			_:
 				part("cyl", Vector3(at.x, y+0.6, at.y), Basis.IDENTITY, Vector3(1.6, 1.2, 1.6), pick(STONE), M_STONE)
 				if r()<0.5:
@@ -398,23 +411,19 @@ func gardens(block: Dictionary, offset: float, p_seed: float, taken: Array) -> v
 
 # --- Green ---------------------------------------------------------------------------------------
 
-## A little tree: a trunk and a few leafy balls (parks, roundabouts).
+## A tree: one of the realm's voxel trees, `size` about its crown's width
+## (parks, gardens, roundabouts, farms and roadsides), with a few tufts at its foot.
 func tree(at: Vector2, size: float, p_seed: float) -> void:
 	seed = p_seed
 	_salt = 0
-	var base := Vector3(at.x, ground(at)-0.2, at.y)
-	var leaf := pick(LEAVES)
-	var trunk := size*0.16
-	var h := size*1.2
-	part("trunk", base+Vector3.UP*h*0.5, Basis(Vector3.FORWARD, (r()-0.5)*0.2), Vector3(trunk, h, trunk), pick(BARK), M_BARK)
-	solid(base+Vector3.UP*1.5, Vector3(trunk, 3.0, trunk))
-	for k in 3:
-		var a := TAU*r()
-		var off := Vector3(cos(a), 0, sin(a))*size*0.3+Vector3.UP*(h+size*lerpf(0.0, 0.4, r()))
-		part("sphere", base+off, Basis.IDENTITY, Vector3.ONE*size*lerpf(0.7, 1.0, r()), leaf.lerp(leaf.lightened(0.25), r()), M_LEAVES)
-	if r()<0.4:
-		var curl := Basis(Vector3.UP, r()*TAU)*Basis(Vector3.RIGHT, PI*0.5)
-		part("torus", base+Vector3.UP*h*0.6+curl.x*size*0.3, curl, Vector3(size*0.4, size*0.2, size*0.4), pick(BARK), M_BARK, 0.0, true, true)
+	var base := Vector3(at.x, ground(at)-0.05, at.y)
+	var kind: String = ["tree_round", "tree_small", "tree_tall", "tree_round", "pine"][int(r()*5.0) % 5]
+	var scale := clampf(size/3.0, 0.6, 1.5)
+	obstacle(kind, base, r()*TAU, scale)
+	solid(base+Vector3.UP*1.5, Vector3(0.6*scale, 3.0, 0.6*scale))
+	for k in 2:
+		var p := at+Vector2.from_angle(r()*TAU)*size*lerpf(0.4, 0.8, r())
+		obstacle("decor_tuft", Vector3(p.x, ground(p), p.y), r()*TAU, 1.0, true)
 
 ## A park on a block: a lawn (the lot's largest circle and a few more),
 ## trees, a gazebo and maybe a pond. `lot` is how far from the streets.

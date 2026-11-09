@@ -32,8 +32,6 @@ var _hint: Label
 var _notice: Label
 var _notice_time := 0.0
 var _crosshair: Control
-var _ship_panel: Control
-var _ship_info: Label
 var _fade: ColorRect
 var map: SpaceMap
 var _input_timer := 0.0
@@ -45,42 +43,41 @@ var _pilot_look := Vector2.ZERO
 var _seat_interior := false
 var _turret_yaw := 0.0
 var _turret_pitch := 0.15
+const SIDE_TURRET_SWEEP := 1.3
 var _chase := Transform3D.IDENTITY
 var _cockpit := true
 var _rocket_flight := false
 var _pulse := false
-## Out on a spacewalk (jetpack in open space), and the line clipped to a ship.
+## Outside the ship on the jetpack: walking her deck or flying beside her.
 var spacewalk := false
-## Open space is only for those who went out on purpose (airlock, a lost
-## ship); anyone else who drops off the deck or a planet is put back.
+## Open space is only for those who went out on purpose (up the ladder, a
+## lost ship); anyone else who drops off the deck or a planet is put back.
 var _out_on_purpose := false
-var _safety_line := false  # out through the airlock: clip on there first thing
 var _last_zone := ""
 var fuel := 100.0
 var _fuel_rest := 0.0
 var _jet := Vector3.ZERO
-## Clipped to a ship's hull: {ship (id), anchor (hull space, on the hull), at
-## (hull space, you), rope/prev: the line's points (hull space, a real rope:
-## slack, taut, wrapping round the hull)}.
-var tether := {}
-## Standing on a ship's deck in magnetic boots: {ship, at (hull space)}. The
-## boots hold you to her whether or not your line is clipped on.
-var boots := {}
+## Outside a ship: {ship (id), at (hull space, you), flying, vel (hull space)}.
+## Flying, a line runs from her deck hatch to your belt: it pays out by itself
+## up to ROPE_MAX and winds in only while you hold Ctrl.
+var outside := {}
 var deck := false
-## How much line is paid out (zoom in reels it in, zoom out lets it out).
-var rope_length := 10.0
+## Jetpacking down into a planet's air after unhooking: until you touch the
+## ground, then the jetpack is spent.
+var _descent := false
+var _deck_arrival := false
+var _rehook_after := 0
+## Red port badges over the planets' ports (key -> holder node).
+var _port_marks := {}
+var _queue_text := ""
 var _rope: MeshInstance3D
 var _rope_mesh := ImmediateMesh.new()
-const ROPE_MIN := 2.0
-const ROPE_MAX := 40.0
-const REEL_SPEED := 6.0  # m/s the winch pulls you in
-## Brass cleats on the hull a line clips to (hull space): the airlock ring,
-## the deck rails along both sides, the stern.
-const CLIP_REACH := 4.0  # close enough to the hull to move the clip there
-const ROPE_POINTS := 26
-const JET_ACCEL := 14.0
-const JET_MAX := 12.0
-const FUEL_DRAIN := 16.0
+const ROPE_MAX := 45.0
+const REEL_SPEED := 9.0  # m/s the winch pulls you in
+const JET_ACCEL := 12.0
+const JET_MAX := 9.0
+const JET_TURN := 2.2  # rad/s, A and D
+const FUEL_DRAIN := 5.0
 const FUEL_REGEN := 45.0
 const SHIP_HULL := Color("4fd6a8")
 const SHIP_HULL_LIGHT := Color("b8ffe6")
@@ -143,14 +140,6 @@ func _ready() -> void:
 	_crosshair.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.add_child(_crosshair)
-	_ship_panel = VBoxContainer.new()
-	_ship_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	_ship_panel.position = Vector2(24, 120)
-	_ship_panel.custom_minimum_size = Vector2(300, 0)
-	_overlay.add_child(_ship_panel)
-	_ship_info = UIStyle.label("", 16, UIStyle.TEXT)
-	_ship_panel.add_child(_ship_info)
-	_ship_panel.hide()
 	_rope = MeshInstance3D.new()
 	_rope.mesh = _rope_mesh
 	var cord := StandardMaterial3D.new()
@@ -216,6 +205,7 @@ func _process(delta: float) -> void:
 			player.velocity = Vector3.ZERO
 	if seat!=was:
 		_pilot_look = Vector2.ZERO
+		_turret_yaw = 0.0
 		_locked_targets.clear()
 		_lock_timer = 0.0
 		_seat_interior = seat.begins_with("chair")
@@ -228,15 +218,9 @@ func _process(delta: float) -> void:
 	_notice.modulate.a = clampf(_notice_time, 0.0, 1.0)
 	var zone := world.zone_at(player.global_position)
 	_title.text = ""  # no place titles on screen
-	_ship_panel.visible = _ship!=null
-	if _ship:
-		var place := SpaceLayout.region_name(SpaceLayout.region_at(_ship.xform.origin))
-		_ship_info.text = "%s  -  %s\nHull %d / %d%s\n%s  -  %d m/s%s" % [_ship.name, _seat_title(seat), _ship.hp, SpaceShip.MAX_HP,
-			"  -  CRIPPLED" if _ship.broken else "", place if _ship.mode=="flying" else _ship.mode.capitalize(), roundi(_ship.speed),
-			"  -  PULSE DRIVE" if _ship.pulse else ""]
-		if _ship.turned_back: _notice_edge()
-		_ship_info.add_theme_color_override("font_color", UIStyle.HP_LIGHT if _ship.hp<SpaceShip.MAX_HP/3 or _ship.broken else UIStyle.TEXT)
+	if _ship and _ship.turned_back: _notice_edge()
 	_update_bars(zone)
+	_update_ports()
 	_update_hint()
 	_pin_to_hull()
 	if seat!="":
@@ -281,9 +265,6 @@ func _update_air() -> void:
 	world.backdrop.set_air(air, amount, up)
 	if SpaceLayout.pocket_at(eye)>=0: world.backdrop.set_indoor()
 
-func _seat_title(id: String) -> String:
-	return SpaceInteraction.SEAT_TITLES.get(id, "Aboard")
-
 ## Cull exterior geometry only from the room's main camera. Live windows
 ## keep their own full mask and continue to show the world outside.
 func _cull_outside() -> void:
@@ -308,7 +289,8 @@ func _update_hint() -> void:
 				rows.append([["@ship_pulse"], "Pulse drive"])
 				rows.append([["@ship_fire"], "Fire cannons"])
 				var land := _ship.landable()
-				if not land.is_empty(): rows.append([["@ship_land"], "Land"])
+				if not _ship.queue.is_empty(): rows.append([["@ship_land"], "Waiting to land"])
+				elif not land.is_empty(): rows.append([["@ship_land"], "Land here?"])
 				elif SpaceLayout.can_descend(_ship.xform.origin): rows.append([["@ship_land"], "Descend"])
 				elif _ship.xform.origin.distance_to(SpaceLayout.NEXUS)<SpaceWorld.DOCK_RANGE: rows.append([["@ship_land"], "Dock"])
 		"turret_top", "turret_left", "turret_right":
@@ -321,12 +303,14 @@ func _update_hint() -> void:
 		rows.append([["@seat_camera"], "Change camera"])
 		rows.append([["@seat_stand"], "Stand up"])
 	elif spacewalk:
-		if deck: rows.append([["Space"], "Jump off"])
+		if deck: rows.append([["Space"], "Fly"])
 		else:
-			rows.append([["Space"], "Jetpack"])
-			rows.append([["Ctrl"], "Brake"])
-		rows.append([["@interact"], "Unhook" if not tether.is_empty() else "Clip on"])
-		if not tether.is_empty(): rows.append([["@zoom_in", "@zoom_out"], "Reel"])
+			rows.append([["Space", "Shift"], "Up / Down"])
+			rows.append([["W", "S"], "Forward / Back"])
+			rows.append([["A", "D"], "Turn"])
+			if not outside.is_empty():
+				rows.append([["Ctrl"], "Reel in"])
+				rows.append([["@interact"], "Unhook line"])
 	if city_seat!="":
 		rows.append([["@interact"], "Sip"])
 		rows.append([["C"], "Order"])
@@ -361,11 +345,12 @@ func on_world_message(event: Array) -> void:
 			_flash_fade()
 			match str(event[1]):
 				"home": notice("Back at the Nexus.")
-				"airlock_out", "adrift": _out_on_purpose = true
-			if str(event[1])=="airlock_out": _safety_line = true
+				"deck", "adrift": _out_on_purpose = true
 			match str(event[1]):
-				"airlock_out": notice("Out on the hull, your line clipped by the airlock. X unhooks it.")
-				"airlock_in": notice("Back inside. The airlock hisses shut.")
+				"deck":
+					outside = {}
+					_deck_arrival = true
+					notice("Up on deck. Space to fly with your jetpack.")
 				"adrift": notice("Your ship is gone! You float on your jetpack. Another crew can pick you up, or press R to call Orin's rescue skiff.")
 				"planet": pass
 
@@ -422,6 +407,8 @@ func _input(event: InputEvent) -> void:
 				_pilot_look.y = clampf(_pilot_look.y-motion.y, -1.2, 1.2)
 			"turret_top", "turret_left", "turret_right":
 				_turret_yaw -= motion.x
+				# Side cannons sweep their own side only, never back across the hull.
+				if seat!="turret_top": _turret_yaw = clampf(_turret_yaw, -SIDE_TURRET_SWEEP, SIDE_TURRET_SWEEP)
 				_turret_pitch = clampf(_turret_pitch-motion.y, -0.35, 1.25)
 			_:
 				player.camera_yaw -= motion.x
@@ -445,7 +432,8 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.physical_keycode==KEY_V and seat=="":
 		if _lift>=0: notice("The elevator uses first person. Your camera returns when you step out.")
 		else:
-			camera_mode = (camera_mode+1) % 3
+			camera_mode = (view_mode()+1) % 3
+			if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position)=="station": camera_mode = CameraMode.SHOULDER
 			AppSettings.video.space_camera = camera_mode
 			AppSettings.save_preferences()
 		get_viewport().set_input_as_handled()
@@ -462,10 +450,17 @@ func _input(event: InputEvent) -> void:
 		if button>=0: world.request(["city", "call", _lift, button])
 		get_viewport().set_input_as_handled()
 		return
-	if spacewalk and event.is_action_pressed("interact") and not _interaction_near():
-		_toggle_tether()
-		get_viewport().set_input_as_handled()
-		return
+	if spacewalk and not outside.is_empty() and outside.flying and event.is_action_pressed("interact"):
+		var root := world.game_root()
+		var overlay: Variant = root.get("hud") if root else null
+		if overlay==null or overlay.interaction.target==null:
+			_jet = _hull(int(outside.ship)).basis*(outside.vel as Vector3)
+			outside = {}
+			_rope.visible = false
+			_rehook_after = Time.get_ticks_msec()+2500
+			notice("Line unhooked. Jetpack down to a planet, or fly back to her deck.")
+			get_viewport().set_input_as_handled()
+			return
 	if seat=="pilot" and _ship!=null:
 		if event.is_action_pressed("ship_launch") and _ship.mode in ["berth", "landed"]:
 			world.request(["takeoff"])
@@ -489,91 +484,13 @@ func _lift_button() -> int:
 	return -1
 
 func free_look() -> bool:
-	return camera_mode!=CameraMode.ANGLED or world.first_person_at(player.global_position)
+	return view_mode()!=CameraMode.ANGLED or world.first_person_at(player.global_position)
 
-func _interaction_near() -> bool:
-	var game := world.game_root()
-	var hud: Variant = game.get("hud") if game else null
-	return hud!=null and hud.interaction.target!=null
-
-## X on a spacewalk: clip the line onto the hull of a ship in reach, at the
-## point nearest you. On the line: close to the hull, move the clip there;
-## else unhook.
-func _toggle_tether() -> void:
-	if not tether.is_empty():
-		var view: Node3D = world.ship_views.get(int(tether.ship))
-		if view:
-			var local := view.global_transform.affine_inverse()*player.global_position
-			var spot := ShipHull.surface_point(local)
-			if spot.distance_to(local)<CLIP_REACH and spot.distance_to(tether.anchor)>2.0:
-				_clip(int(tether.ship), spot, local)
-				notice("Line clipped on here.")
-				return
-		tether = {}
-		notice("Line unhooked. Careful out there.")
-		return
-	for ship: SpaceShip in world.ships.values():
-		var view: SpaceShipView = world.ship_views.get(ship.id)
-		if view==null: continue
-		var local := view.global_transform.affine_inverse()*player.global_position
-		var spot := ShipHull.surface_point(local)
-		if spot.distance_to(local)<12.0:
-			_clip(ship.id, spot, local)
-			notice("Line clipped to %s. Zoom in and out to reel it." % ship.name)
-			return
-	notice("Get closer to a ship's hull to clip your line on.")
-
-## The airlock you just came out of (the server put you there by her true
-## pose, so the ship is the one whose airlock is nearest): clip on right by it,
-## before she flies on without you.
-func _clip_at_airlock() -> void:
-	var best: SpaceShip = null
-	for ship: SpaceShip in world.ships.values():
-		if not world.ship_views.has(ship.id): continue
-		if best==null or (ship.xform*SpaceWorld.AIRLOCK_OUTSIDE).distance_to(player.global_position)<(best.xform*SpaceWorld.AIRLOCK_OUTSIDE).distance_to(player.global_position):
-			best = ship
-	if best==null or (best.xform*SpaceWorld.AIRLOCK_OUTSIDE).distance_to(player.global_position)>120.0: return
-	_clip(best.id, ShipHull.surface_point(SpaceWorld.AIRLOCK_OUTSIDE), SpaceWorld.AIRLOCK_OUTSIDE)
-	player.global_position = _hull(best.id)*SpaceWorld.AIRLOCK_OUTSIDE
-
-## A fresh line from `anchor` (on the hull) to `at`, both hull space.
-func _clip(ship_id: int, anchor: Vector3, at: Vector3) -> void:
-	rope_length = clampf(anchor.distance_to(at)+1.5, ROPE_MIN+1.0, ROPE_MAX)
-	var points: Array[Vector3] = []
-	for k in ROPE_POINTS: points.append(anchor.lerp(at, float(k)/(ROPE_POINTS-1)))
-	tether = {ship = ship_id, anchor = anchor, at = at, rope = points, prev = points.duplicate()}
-
-## Steps the line (verlet, hull space): the clip holds, the points drift and
-## keep their spacing, never pass through the hull, and a taut line pulls you
-## back. Returns where you can be with `want` as your aim.
-func _simulate_rope(want: Vector3) -> Vector3:
-	var points: Array = tether.rope
-	var prev: Array = tether.prev
-	var n := points.size()
-	var spacing := rope_length/(n-1)
-	points[0] = tether.anchor
-	points[n-1] = want
-	for i in range(1, n-1):
-		var step: Vector3 = ((points[i] as Vector3)-(prev[i] as Vector3))*0.94
-		prev[i] = points[i]
-		points[i] = (points[i] as Vector3)+step
-	prev[n-1] = want
-	for iteration in 18:
-		for i in n-1:
-			var a: Vector3 = points[i]
-			var b: Vector3 = points[i+1]
-			var d := b-a
-			var length := d.length()
-			if length<=spacing: continue  # a line goes slack, it never pushes
-			var wa := 0.0 if i==0 else 1.0
-			var wb := 0.55 if i+1==n-1 else 1.0  # you are heavier than the line
-			var fix := d*(1.0-spacing/length)/(wa+wb)
-			points[i] = a+fix*wa
-			points[i+1] = b-fix*wb
-		for i in range(1, n):
-			var hit: Array = ShipHull.inside(points[i])
-			if float(hit[0])>0.0: points[i] = (points[i] as Vector3)+(hit[1] as Vector3)*(float(hit[0])+0.08)
-	return points[n-1]
+## The camera in use: the Nexus has no angled view, so there it is the
+## shoulder view unless first person was chosen.
+func view_mode() -> CameraMode:
+	if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position)=="station": return CameraMode.SHOULDER
+	return camera_mode
 
 func _was_seated() -> bool:
 	return seat!=""
@@ -712,19 +629,32 @@ func physics_step(delta: float) -> void:
 		player.velocity = Vector3.ZERO
 		return
 	var state := world.sample_gravity(player.global_position)
-	# From a ship room straight into open space is the airlock or a lost ship.
+	# Off the line on the jetpack into a planet's air: fly down to its ground.
+	if spacewalk and outside.is_empty() and str(state.zone).begins_with("planet:"): _descent = true
+	if _descent:
+		spacewalk = false
+		_out_on_purpose = false
+		_last_zone = str(state.zone)
+		if str(state.zone).begins_with("planet:"):
+			_jet_descent(delta, state)
+			return
+		_descent = false
+	# From a ship room straight into open space is the ladder or a lost ship.
+	# Up through the hatch: stand on her deck even low in a planet's air.
+	if _deck_arrival and SpaceLayout.pocket_at(player.global_position)<0:
+		_deck_arrival = false
+		_out_on_purpose = true
+		_find_deck()
+	if state.zone=="ship": outside = {}
 	if state.zone=="void" and _last_zone=="ship": _out_on_purpose = true
-	if state.zone!="void": _out_on_purpose = false
+	if state.zone!="void" and outside.is_empty(): _out_on_purpose = false
 	_last_zone = str(state.zone)
-	spacewalk = state.zone=="void" and _out_on_purpose
-	if spacewalk and _safety_line:
-		_safety_line = false
-		_clip_at_airlock()
+	spacewalk = _out_on_purpose and (state.zone=="void" or not outside.is_empty())
 	if spacewalk:
 		_spacewalk(delta)
 		return
 	_jet = Vector3.ZERO
-	tether = {}
+	outside = {}
 	_rope.visible = false
 	fuel = minf(100.0, fuel+FUEL_REGEN*delta)
 	var frame: Transform3D = state.frame
@@ -773,105 +703,215 @@ func physics_step(delta: float) -> void:
 		player.model.animate(dir.length(), delta)
 	player.aim_marker.hide()
 
-# --- Spacewalk ----------------------------------------------------------------------------
+# --- Outside on the jetpack ------------------------------------------------------------
 
-## Zero-g on the jetpack: hold Space to fire it along the view (WASD steers
-## the burst, Shift harder), Ctrl brakes, let go and you drift. Fuel drains
-## while firing and refills quickly. Clipped to a ship you move in its frame
-## and ride along within the line's length; over the deck the boots hold you
-## and you walk on it like on any floor.
+## Walking her deck (WASD), or flying beside her on the jetpack. Space takes
+## off and climbs, Shift sinks, W and S lean you forward and back, A and D
+## turn; set down on the deck to walk again (the deck is the only place to
+## land). Flying, you live in the ship's frame, so she carries you along.
+## Without a ship (she was lost) you float free in space.
 func _spacewalk(delta: float) -> void:
 	player._cancel_weapon_actions()
 	player.up_direction = Vector3.UP
-	var input := Vector2.ZERO if player.controls_locked() else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var locked := player.controls_locked()
+	var input := Vector2.ZERO if locked else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	if player.debug_input!=Vector2.ZERO: input = player.debug_input
-	var firing := not player.controls_locked() and Input.is_key_pressed(KEY_SPACE) and fuel>0.5
-	var braking := not player.controls_locked() and Input.is_key_pressed(KEY_CTRL)
-	var fast := Input.is_key_pressed(KEY_SHIFT)
-	var view := player.camera.global_basis
-	if not tether.is_empty() and world.ship_views.get(int(tether.ship))==null:
-		tether = {}
-		notice("Your line went slack: the ship is gone.")
-	if not boots.is_empty() and world.ship_views.get(int(boots.ship))==null: boots = {}
-	# Reel the line with the zoom keys.
-	if not tether.is_empty() and not player.controls_locked():
-		var reel := Input.get_axis("zoom_in", "zoom_out")
-		if absf(reel)>0.01: rope_length = clampf(rope_length+reel*REEL_SPEED*delta, ROPE_MIN, ROPE_MAX)
-	# Magnetic boots: touching a deck (ours or any ship's) holds you to it.
-	if boots.is_empty() and not firing:
-		for ship: SpaceShip in world.ships.values():
-			var v: SpaceShipView = world.ship_views.get(ship.id)
-			if v==null: continue
-			var local := v.global_transform.affine_inverse()*player.global_position
-			if _on_deck(local):
-				boots = {ship = ship.id, at = local}
-				notice("Magnetic boots: you walk her deck.")
-				break
-	if firing and not boots.is_empty():
-		# Kicking off: carry on in the ship's frame on the line, or float free.
-		if not tether.is_empty() and int(tether.ship)==int(boots.ship): tether.at = boots.at
-		boots = {}
-	if not boots.is_empty():
-		var hull: Transform3D = _hull(int(boots.ship))
-		deck = true
-		_jet = Vector3.ZERO
-		var forward := (hull.basis.inverse()*-view.z)*Vector3(1, 0, 1)
-		var right := (hull.basis.inverse()*view.x)*Vector3(1, 0, 1)
-		var step := (right.normalized()*input.x-forward.normalized()*input.y)*Player.BASE_SPEED*delta
-		var at: Vector3 = (boots.at as Vector3)+step
-		at.y = ShipHull.DECK_Y+0.14
-		var half := ShipHull.beam(at.z)-0.6
-		at.x = clampf(at.x, -half, half)
-		at.z = clampf(at.z, -17.5, 13.0)
-		if not tether.is_empty() and int(tether.ship)==int(boots.ship):
-			at = _simulate_rope(at)
-			at.y = ShipHull.DECK_Y+0.14
-			tether.at = at
-		boots.at = at
-		player.global_position = hull*at
-		player.global_basis = hull.basis
-		if step.length()>0.001: player.model.rotation.y = atan2(-step.x, -step.z)
-		_update_rope(hull)
-		player.set_meta("jet_on", false)
-		fuel = minf(100.0, fuel+FUEL_REGEN*delta)
+	var rise := 0.0 if locked else float(Input.is_key_pressed(KEY_SPACE))-float(Input.is_key_pressed(KEY_SHIFT))
+	if not outside.is_empty() and not world.ship_views.has(int(outside.ship)):
+		outside = {}
+		notice("Your ship is gone! Your jetpack keeps you floating.")
+	if outside.is_empty() and Time.get_ticks_msec()>_rehook_after: _find_deck()
+	if outside.is_empty():
+		_drift(delta, input, rise)
 		return
+	var hull := _hull(int(outside.ship))
+	var at: Vector3 = outside.at
+	if not outside.flying:
+		deck = true
+		fuel = minf(100.0, fuel+FUEL_REGEN*delta)
+		if rise>0.5 and fuel>5.0:
+			outside.flying = true
+			outside.vel = Vector3.UP*3.0
+			notice("Your line clips on at the deck hatch. Hold Ctrl to reel in.")
+		else:
+			var view := player.camera.global_basis
+			var forward := ((hull.basis.inverse()*-view.z)*Vector3(1, 0, 1)).normalized()
+			var right := ((hull.basis.inverse()*view.x)*Vector3(1, 0, 1)).normalized()
+			var step := (right*input.x-forward*input.y)*Player.BASE_SPEED*player.stats.move_speed_multiplier()*delta
+			at = _walk_deck(at+step)
+			outside.at = at
+			player.global_position = hull*at
+			player.global_basis = hull.basis
+			player.model.rotation = Vector3(0, atan2(-step.x, -step.z) if step.length()>0.001 else player.model.rotation.y, 0)
+			player.model.animate(input.length(), delta)
+			player.set_meta("jet_on", false)
+			_rope.visible = false
+			player.velocity = Vector3.ZERO
+			return
 	deck = false
-	player.global_basis = player.global_basis.slerp(Basis.IDENTITY, 1.0-exp(-delta*4.0)).orthonormalized()
-	if firing:
-		var aim := -view.z
-		if input.length()>0.1: aim = (view.x*input.x+view.z*input.y).normalized()
-		_jet += aim*JET_ACCEL*(1.6 if fast else 1.0)*delta
-		fuel = maxf(0.0, fuel-FUEL_DRAIN*(1.8 if fast else 1.0)*delta)
-		_fuel_rest = 0.5
+	if not locked: player.camera_yaw -= input.x*JET_TURN*delta
+	var facing := Basis(Vector3.UP, player.camera_yaw)
+	var want := facing*Vector3(0, rise, input.y)
+	var burning := want.length()>0.1 and fuel>0.5
+	var vel: Vector3 = outside.vel
+	if burning:
+		vel = vel.move_toward(want.limit_length(1.0)*JET_MAX, JET_ACCEL*delta)
+		fuel = maxf(0.0, fuel-FUEL_DRAIN*delta)
+		_fuel_rest = 0.6
 	else:
+		vel = vel.move_toward(Vector3.ZERO, JET_ACCEL*0.35*delta)
 		_fuel_rest -= delta
 		if _fuel_rest<=0.0: fuel = minf(100.0, fuel+FUEL_REGEN*delta)
-	if braking: _jet = _jet.move_toward(Vector3.ZERO, JET_ACCEL*1.5*delta)
-	_jet *= exp(-0.35*delta)
-	_jet = _jet.limit_length(JET_MAX*(1.7 if fast else 1.0))
-	player.set_meta("jet_on", firing)
-	if not tether.is_empty():
-		# On the line you live in the ship's frame: she tows you wherever she goes.
-		var hull: Transform3D = _hull(int(tether.ship))
-		var want: Vector3 = (tether.at as Vector3)+hull.basis.inverse()*_jet*delta
-		var at := _simulate_rope(want)
-		var pulled := at-want
-		if pulled.length()>0.001:
-			# Taut: the line takes away whatever pulls against it.
-			var back := (hull.basis*pulled).normalized()
-			var against := _jet.dot(back)
-			if against<0.0: _jet -= back*against
-		# You don't float through the hull either.
-		var hit: Array = ShipHull.inside(at)
-		if float(hit[0])>0.0: at += (hit[1] as Vector3)*(float(hit[0])+0.3)
-		tether.at = at
-		player.global_position = hull*at
-		_update_rope(hull)
-	else:
-		player.global_position += _jet*delta
-		_rope.visible = false
+	at += vel*delta
+	# The line pays out by itself up to its length; Ctrl winds it back in.
+	var anchor := SpaceWorld.DECK_HATCH+Vector3.UP*0.4
+	if not locked and Input.is_key_pressed(KEY_CTRL):
+		at = at.move_toward(anchor, REEL_SPEED*delta)
+		vel = vel.move_toward(Vector3.ZERO, JET_ACCEL*delta)
+	var line := at-anchor
+	if line.length()>ROPE_MAX:
+		at = anchor+line.normalized()*ROPE_MAX
+		var out := line.normalized()
+		vel -= out*maxf(0.0, vel.dot(out))
+	var pushed := ShipHull.push_out(at)
+	if pushed!=at:
+		var normal := (pushed-at).normalized()
+		vel -= normal*minf(0.0, vel.dot(normal))
+		at = pushed
+	# Touching down on the deck: walk again, the line unclips.
+	if rise<=0.0 and vel.y<=0.5 and _over_deck(at) and at.y<=ShipHull.DECK_TOP+0.3:
+		outside.flying = false
+		at.y = ShipHull.DECK_TOP
+		vel = Vector3.ZERO
+	outside.at = at
+	outside.vel = vel
+	player.global_position = hull*at
+	player.global_basis = hull.basis
+	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, -input.x*0.12)
+	player.set_meta("jet_on", burning)
 	player.velocity = Vector3.ZERO
-	if _jet.length()>0.4: player.model.rotation.y = lerp_angle(player.model.rotation.y, atan2(-_jet.x, -_jet.z), 1.0-exp(-delta*6.0))
+	_update_rope(hull)
+
+## Free in space without a ship: the same controls, in the world's frame.
+func _drift(delta: float, input: Vector2, rise: float) -> void:
+	deck = false
+	_rope.visible = false
+	player.global_basis = player.global_basis.slerp(Basis.IDENTITY, 1.0-exp(-delta*4.0)).orthonormalized()
+	if not player.controls_locked(): player.camera_yaw -= input.x*JET_TURN*delta
+	var want := player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(0, rise, input.y)
+	var burning := want.length()>0.1 and fuel>0.5
+	if burning:
+		_jet = _jet.move_toward(want.limit_length(1.0)*JET_MAX, JET_ACCEL*delta)
+		fuel = maxf(0.0, fuel-FUEL_DRAIN*delta)
+		_fuel_rest = 0.6
+	else:
+		_jet = _jet.move_toward(Vector3.ZERO, JET_ACCEL*0.35*delta)
+		_fuel_rest -= delta
+		if _fuel_rest<=0.0: fuel = minf(100.0, fuel+FUEL_REGEN*delta)
+	player.global_position += _jet*delta
+	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, 0)
+	player.set_meta("jet_on", burning)
+	player.velocity = Vector3.ZERO
+
+## Down through a planet's air on the jetpack (the same keys, the planet's
+## pull adding to Shift): the moment you touch the ground the jetpack is spent.
+func _jet_descent(delta: float, state: Dictionary) -> void:
+	player._cancel_weapon_actions()
+	_rope.visible = false
+	var frame: Transform3D = state.frame
+	player.global_basis = player.global_basis.slerp(frame.basis, 1.0-exp(-delta*4.0)).orthonormalized()
+	player.up_direction = player.global_basis.y
+	var up := player.global_basis.y
+	var locked := player.controls_locked()
+	var input := Vector2.ZERO if locked else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var rise := 0.0 if locked else float(Input.is_key_pressed(KEY_SPACE))-float(Input.is_key_pressed(KEY_SHIFT))
+	if not locked: player.camera_yaw -= input.x*JET_TURN*delta
+	var want := player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(0, rise if fuel>0.5 else 0.0, input.y)
+	_jet = _jet.move_toward(want.limit_length(1.0)*JET_MAX*1.4, JET_ACCEL*delta)
+	_jet -= up*6.0*delta  # the planet pulls you down
+	_jet = _jet.limit_length(26.0)
+	if want.length()>0.1: fuel = maxf(0.0, fuel-FUEL_DRAIN*delta)
+	var from := player.global_position
+	var to := from+_jet*delta
+	var query := PhysicsRayQueryParameters3D.create(from+up*1.0, to-up*0.15, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
+	query.exclude = [player.get_rid()]
+	var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty() and (hit.normal as Vector3).dot(up)>0.4:
+		player.global_position = hit.position
+		player.velocity = Vector3.ZERO
+		_jet = Vector3.ZERO
+		_descent = false
+		fuel = 0.0
+		player.set_meta("jet_on", false)
+		notice("Touched down. Your jetpack is spent until you are back aboard.")
+		return
+	player.global_position = to
+	player.velocity = Vector3.ZERO
+	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, 0)
+	player.set_meta("jet_on", want.length()>0.1)
+
+## The ports' red ship badges, seen from aboard a ship near a planet (the
+## planet hides those round its far side). A tale's yellow mark replaces the
+## badge of the port it asks you to land at. Also the landing line's toast.
+func _update_ports() -> void:
+	var slot := SpaceLayout.pocket_at(player.global_position)
+	var ship: SpaceShip = _ship if _ship else world.ship_in_slot(slot) if slot>=0 else null
+	var targets: Array = world.my_marks().filter(func(m: Dictionary) -> bool: return m.kind=="target").map(func(m: Dictionary) -> Vector3: return m.pos)
+	for p: Dictionary in SpaceLayout.PLANETS:
+		var near := ship!=null and ship.xform.origin.distance_to(p.center)<float(p.radius)+6000.0
+		var planet: Node3D = world.planets.get(p.id)
+		for entry: Dictionary in SpaceLayout.ports(p):
+			var key := str(entry.key)
+			var pose: Transform3D = entry.pose
+			if not _port_marks.has(key):
+				if not near or not is_instance_valid(planet): continue
+				var holder := Node3D.new()
+				planet.add_child(holder)
+				holder.global_transform = Transform3D(pose.basis, pose.origin+pose.basis.y*34.0)
+				var badge := QuestMarker.new("port")
+				holder.add_child(badge)
+				badge.scale = Vector3.ONE*1.6
+				badge._material.disable_fog = true
+				_port_marks[key] = holder
+			var mark: Node3D = _port_marks[key]
+			if is_instance_valid(mark): mark.visible = near and not targets.any(func(t: Vector3) -> bool: return t.distance_to(pose.origin)<80.0)
+	var text := "" if ship==null or ship.queue.is_empty() else "Waiting to land at %s - number %d in line" % [str(ship.queue[0]), int(ship.queue[1])]
+	if text==_queue_text: return
+	_queue_text = text
+	var game := world.game_root()
+	var hud: Variant = game.get("hud") if game else null
+	if hud==null: return
+	if text=="": hud.toasts.unpin("landing_queue")
+	else: hud.toasts.pin("landing_queue", text, UIStyle.GOLD)
+
+## Just came up through a deck hatch (or the ship found us near her deck):
+## stand on the deck of the nearest ship.
+func _find_deck() -> void:
+	var best := {}
+	var best_d := 6.0
+	for ship: SpaceShip in world.ships.values():
+		var view: SpaceShipView = world.ship_views.get(ship.id)
+		if view==null: continue
+		var local := view.pose().affine_inverse()*player.global_position
+		var d := absf(local.y-ShipHull.DECK_TOP)
+		if d<best_d and absf(local.x)<ShipHull.beam(local.z)+2.0 and local.z>ShipHull.BRIDGE_Z-1.0 and local.z<ShipHull.STERN_Z:
+			best_d = d
+			best = {ship = ship.id, at = _walk_deck(Vector3(local.x, ShipHull.DECK_TOP, local.z)), flying = false, vel = Vector3.ZERO}
+	outside = best
+
+## A step on the deck: inside the rail, around the wheelhouse, masts and castle.
+func _walk_deck(at: Vector3) -> Vector3:
+	at.y = ShipHull.DECK_TOP
+	at.z = clampf(at.z, ShipHull.BRIDGE_Z+0.6, 13.0)
+	var half := ShipHull.beam(at.z)-0.9
+	at.x = clampf(at.x, -half, half)
+	at = ShipHull.push_out(at+Vector3.UP*0.9)-Vector3.UP*0.9
+	at.y = ShipHull.DECK_TOP
+	return at
+
+## Over the open main deck, where the crew can set down.
+func _over_deck(at: Vector3) -> bool:
+	return at.z>ShipHull.BRIDGE_Z+0.6 and at.z<13.0 and absf(at.x)<ShipHull.beam(at.z)-0.9 and at.y>ShipHull.DECK_TOP-0.5
 
 ## Where a ship's hull is this very frame (its view's pose, not last
 ## physics tick's transform: at full speed that is metres apart).
@@ -879,33 +919,29 @@ func _hull(ship_id: int) -> Transform3D:
 	var view: SpaceShipView = world.ship_views.get(ship_id)
 	return view.pose() if view else Transform3D.IDENTITY
 
-## Every rendered frame, booted or roped: stay where you are in her frame, so
-## she never slides past you between physics ticks.
+## Every rendered frame, outside: stay where you are in her frame, so she
+## never slides past you between physics ticks.
 func _pin_to_hull() -> void:
-	if not spacewalk: return
-	if not boots.is_empty() and world.ship_views.has(int(boots.ship)):
-		var hull := _hull(int(boots.ship))
-		player.global_position = hull*(boots.at as Vector3)
-		player.global_basis = hull.basis
-		_update_rope(hull)
-	elif not tether.is_empty() and world.ship_views.has(int(tether.ship)):
-		var hull := _hull(int(tether.ship))
-		player.global_position = hull*(tether.at as Vector3)
-		_update_rope(hull)
+	if not spacewalk or outside.is_empty() or not world.ship_views.has(int(outside.ship)): return
+	var hull := _hull(int(outside.ship))
+	player.global_position = hull*(outside.at as Vector3)
+	player.global_basis = hull.basis
+	_update_rope(hull)
 
-## The line from the hull to your belt, through its simulated points.
+## The line from the deck hatch to your belt, hanging in a gentle curve.
 func _update_rope(hull: Transform3D) -> void:
-	if tether.is_empty() or not world.ship_views.has(int(tether.ship)):
+	if outside.is_empty() or not outside.flying:
 		_rope.visible = false
 		return
+	var a := hull*(SpaceWorld.DECK_HATCH+Vector3.UP*0.4)
+	var b := player.global_position+player.global_basis.y*0.95
+	var sag := clampf(a.distance_to(b)*0.08, 0.15, 2.5)
+	var bend := (a+b)*0.5-hull.basis.y*sag
 	var points: Array[Vector3] = []
-	for p: Vector3 in tether.rope: points.append(hull*p)
-	points[points.size()-1] = player.global_position+player.global_basis.y*0.95
+	for k in 17:
+		var t := float(k)/16.0
+		points.append(a.lerp(bend, t).lerp(bend.lerp(b, t), t))
 	_draw_rope(points)
-
-## Over the main deck and low enough for the boots to hold (hull space).
-func _on_deck(at: Vector3) -> bool:
-	return at.z> -17.5 and at.z<13.0 and absf(at.x)<ShipHull.beam(at.z)-0.3 and at.y>ShipHull.DECK_Y-0.5 and at.y<ShipHull.DECK_Y+1.6
 
 func _draw_rope(points: Array[Vector3]) -> void:
 	_rope.visible = true
@@ -935,9 +971,10 @@ func _shake_camera() -> void:
 
 func update_camera(delta: float) -> void:
 	var in_chair := seat.begins_with("chair") or city_seat!="" or _lounge_seat!=""
-	var want_fp := _cockpit if seat=="pilot" else _seat_interior if seat!="" or _lounge_seat!="" else camera_mode==CameraMode.FIRST_PERSON or world.first_person_at(player.global_position)
+	var mode := view_mode()
+	var want_fp := _cockpit if seat=="pilot" else _seat_interior if seat!="" or _lounge_seat!="" else mode==CameraMode.FIRST_PERSON or world.first_person_at(player.global_position)
 	first_person = move_toward(first_person, 1.0 if want_fp else 0.0, delta/0.25)
-	var shoulder := camera_mode==CameraMode.SHOULDER and not want_fp
+	var shoulder := mode==CameraMode.SHOULDER and not want_fp
 	var allow_capture := (want_fp or shoulder or spacewalk or seat!="" or _lounge_seat!="") and not player.controls_locked() \
 		and not player.ui_blocked and not player.interacting() and not map.visible and not cinematic
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if allow_capture else Input.MOUSE_MODE_VISIBLE
@@ -962,7 +999,7 @@ func update_camera(delta: float) -> void:
 	var orbit := player.global_basis*Basis(Vector3.UP, player.camera_yaw)
 	var head := player.global_position+up*1.57
 	var view := orbit*Basis(Vector3.RIGHT, look_pitch)
-	if want_fp or shoulder or (spacewalk and camera_mode==CameraMode.ANGLED):
+	if want_fp or shoulder or (spacewalk and mode==CameraMode.ANGLED):
 		var at := head
 		if not want_fp:
 			at += view*Vector3(0.65, 0.25, 3.4 if shoulder else 6.5)
@@ -976,7 +1013,7 @@ func update_camera(delta: float) -> void:
 		_shake_camera()
 		return
 	var target := player.global_position+up
-	var pitch := Player.OVERHEAD_PITCH if AppSettings.video.get("camera_angle", "standard")=="overhead" else Player.CAMERA_PITCH
+	var pitch := Player.CAMERA_PITCH
 	var at := target+orbit*Vector3(0, sin(pitch), cos(pitch))*player.camera_distance
 	# City rooms have solid ceilings; pull the angled camera inside when needed.
 	if world.zone_at(player.global_position) in ["planet:"+CityLayout.ID, "station"]:
@@ -1022,8 +1059,8 @@ func _seat_camera(delta: float) -> void:
 			player.camera.fov = 72.0 if not _cockpit else 80.0
 		"turret_top", "turret_left", "turret_right":
 			var dir := _turret_direction()
-			# Just past the barrels: the gunner sees space, not the deck.
-			var eye := view.muzzle(seat)+dir*3.0+pose.basis.y*0.9
+			# Inside the cannon's glass dome, just above its turning barrels.
+			var eye := view.turret_pivot(seat)+pose.basis.y*0.85
 			want = Transform3D(Basis.IDENTITY, eye).looking_at(eye+dir, pose.basis.y)
 			player.camera.fov = 70.0
 		_:
@@ -1206,9 +1243,13 @@ func _exit_tree() -> void:
 		_outside_culled = false
 		for node: Variant in world.planets.values()+world.ship_views.values()+[world.station, world.foes]:
 			if is_instance_valid(node) and node is Node3D: (node as Node3D).visible = true
+	for mark: Variant in _port_marks.values():
+		if is_instance_valid(mark): (mark as Node).queue_free()
 	var game := world.game_root() if is_instance_valid(world) else null
 	var hud: Variant = game.get("hud") if game else null
-	if hud: hud.key_help.set_rows([])
+	if hud:
+		hud.key_help.set_rows([])
+		hud.toasts.unpin("landing_queue")
 	if not is_instance_valid(player): return
 	player.cinematic_locked = false
 	player.global_basis = Basis.IDENTITY

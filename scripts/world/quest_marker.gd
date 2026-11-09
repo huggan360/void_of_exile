@@ -39,12 +39,13 @@ func _ready() -> void:
 
 
 func set_kind(kind: String) -> void:
-	_kind = kind if kind in ["main", "side", "turn_in"] else "main"
+	_kind = kind if kind in ["main", "side", "turn_in", "port"] else "main"
 	if not is_instance_valid(_sprite):
 		return
 	if not _textures.has(_kind):
 		_textures[_kind] = _make_texture(_kind)
 	_sprite.texture = _textures[_kind]
+	_material.emission = Color(1.0, 0.62, 0.56) if _kind == "port" else Color(1.0, 0.84, 0.45)
 	_material.albedo_texture = _sprite.texture
 	_material.emission_texture = _sprite.texture
 
@@ -59,7 +60,9 @@ func _process(delta: float) -> void:
 static func _make_texture(kind: String) -> ImageTexture:
 	var image := Image.create(24, 24, false, Image.FORMAT_RGBA8)
 	image.fill(Color.TRANSPARENT)
-	var edge := Color("49301d")
+	# A port in Space is the same badge in red, with a little ship in it.
+	var port := kind == "port"
+	var edge := Color("4a1616") if port else Color("49301d")
 	if kind != "side":
 		for y in range(24):
 			for x in range(24):
@@ -67,11 +70,14 @@ static func _make_texture(kind: String) -> ImageTexture:
 				if distance <= 11.5:
 					var color := edge
 					if distance < 10.0:
-						color = Color("f3be3c") if y > 11 else Color("ffe078")
+						if port: color = Color("d8453c") if y > 11 else Color("ff7a68")
+						else: color = Color("f3be3c") if y > 11 else Color("ffe078")
 					image.set_pixel(x, y, color)
 	var glyph := ["01110", "01110", "01110", "01110", "01110", "00100", "00000", "01110", "01110"]
 	if kind == "turn_in":
 		glyph = ["01110", "11011", "00011", "00110", "01100", "01100", "00000", "01100", "01100"]
+	elif port:
+		glyph = ["00100", "00110", "00111", "00110", "00100", "00100", "11111", "11111", "01110"]
 	var points: Array[Vector2i] = []
 	for y in range(glyph.size()):
 		for x in range(5):
@@ -83,7 +89,7 @@ static func _make_texture(kind: String) -> ImageTexture:
 		for offset in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
 			image.set_pixelv(point + offset, edge)
 	for point in points:
-		image.set_pixelv(point, Color("fff4cf") if kind == "side" else Color("fff1a0"))
+		image.set_pixelv(point, Color("fff4cf") if kind == "side" else Color("fff0e6") if port else Color("fff1a0"))
 	return ImageTexture.create_from_image(image)
 
 

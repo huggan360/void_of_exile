@@ -11,8 +11,9 @@ const NEXUS := Vector3.ZERO
 ## Station deck: flat gravity inside this cylinder, deck at y = 0.
 const STATION_RADIUS := 62.0
 const STATION_HALF_HEIGHT := 14.0
-## Ships wait at these berths around the station (ship origin, facing outward).
-const BERTH_RADIUS := 170.0
+## Ships wait at these berths around the station: moored alongside the end of
+## a boarding walk (NexusStation), starboard hatch against it.
+const GANGWAY_END := 59.4
 const BERTHS := 6
 ## Region borders along +Z.
 const SHARDFIELD_START := 16200.0
@@ -79,7 +80,7 @@ const PLANETS := [
 	{id = "vesperis", name = "Vesperis", region = "haven", center = Vector3(-2400, 700, -6600), radius = 1000.0,
 		pad = Vector3.UP, danger = 0, palette = ["2c2638", "ffb86a", "1a1626", "ff6eb4", "6af0e0", "594362"],
 		terrain = {style = "city", height = 0.0, size = 200.0}, city = true,
-		about = "The Lantern City: one city around the whole world, at eternal dusk. Three spaceports, peaceful."},
+		about = "The Lantern City: three city cores with spaceports, set in farmland of wheat fields, red barns and grazing cows."},
 ]
 
 ## Named story places on each planet (campaign search spots and npcs), as
@@ -142,6 +143,38 @@ const FLAT_BLEND := 60.0
 
 static var _noises := {}
 static var _flats := {}
+static var _ports := {}
+
+## Where ships set down on a planet: every world has its landing pad and its
+## town's shipyard pad; the Lantern City has the pads of its spaceports.
+## Each {key, name, pose (a landed ship's pose, world space)}.
+static func ports(p: Dictionary) -> Array:
+	var id := str(p.id)
+	if _ports.has(id): return _ports[id]
+	var out: Array = []
+	var lift := 6.5  # SpaceShip.LANDED_HEIGHT
+	var center: Vector3 = p.center
+	if p.get("city", false):
+		for pad: Dictionary in CityLayout.all_pads():
+			var frame: Transform3D = pad.frame
+			var district: Dictionary = CityLayout.DISTRICTS.filter(func(d: Dictionary) -> bool: return d.id==pad.district)[0]
+			out.append({key = "%s:%s:%d" % [id, pad.district, pad.index], name = "%s, pad %d" % [district.port, int(pad.index)+1],
+				pose = Transform3D(frame.basis, center+frame.origin+frame.basis.y*lift)})
+	else:
+		var pad := pad_frame(p)
+		out.append({key = id+":pad", name = "%s landing pad" % p.name, pose = Transform3D(pad.basis, pad.origin+pad.basis.y*lift)})
+		var dock := town_frame(p, "dock")
+		out.append({key = id+":dock", name = "%s shipyard" % TOWNS.get(id, {}).get("name", p.name), pose = Transform3D(dock.basis, center+dock.origin+dock.basis.y*lift)})
+	_ports[id] = out
+	return out
+
+## A port by its key: {planet, port}, or {}.
+static func port(key: String) -> Dictionary:
+	var p := planet(key.get_slice(":", 0))
+	if p.is_empty(): return {}
+	for entry: Dictionary in ports(p):
+		if entry.key==key: return {planet = p, port = entry}
+	return {}
 
 static func planet(id: String) -> Dictionary:
 	for p: Dictionary in PLANETS:
@@ -344,7 +377,11 @@ static func town_frame(p: Dictionary, which: String) -> Transform3D:
 static func berth_frame(index: int) -> Transform3D:
 	var angle := TAU*index/BERTHS
 	var out := Vector3(sin(angle), 0, cos(angle))
-	return Transform3D(Basis.looking_at(out, Vector3.UP), NEXUS+out*BERTH_RADIUS+Vector3.UP*-6.0)
+	var side := -out
+	var basis := Basis(side, Vector3.UP, side.cross(Vector3.UP))
+	# ShipHull's hatch (starboard, low) meets the walk's end at deck height.
+	var hatch := Vector3(11.5, -5.6, 6.0)
+	return Transform3D(basis, NEXUS+out*(GANGWAY_END+0.6)-basis*hatch)
 
 static func pocket_origin(slot: int) -> Vector3:
 	return POCKET_ORIGIN+Vector3(slot*POCKET_SPACING, 0, 0)

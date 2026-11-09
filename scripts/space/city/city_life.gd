@@ -8,9 +8,12 @@ var _districts := {}
 var _traffic := {}
 var _scan := 0.0
 var _cups := {}
+var _cows: Array[Dictionary] = []  # {farm, cow, node}: the farmsteads' grazing cows
 const CHAT := ["The sky garden is lovely tonight.", "Three moons and still late for work!", "Coffee first, galaxies later.", "Have you found the Hidden Valve?"]
 
 func _ready() -> void:
+	for farm in CityCountry.FARMS.size():
+		for cow in 5: _cows.append({farm = farm, cow = cow, node = null})
 	for lane: Dictionary in CityLayout.lanes():
 		for k in int(lane.count):
 			var id: String = lane.models[(k+int(lane.seed)) % lane.models.size()]
@@ -33,6 +36,30 @@ func _ready() -> void:
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(node)
 			entry.batches.append([multi, float(meshes[2]), offset])
+
+## Cows near the camera get a model and stroll their pasture on the shared clock.
+func _graze(eye: Vector3, t: float, delta: float, scan: bool) -> void:
+	var center: Vector3 = CityLayout.planet().center
+	for cow: Dictionary in _cows:
+		var near_farm := eye.distance_to(center+CityCountry.farm_frame(int(cow.farm)).origin)<160.0
+		if not near_farm and not is_instance_valid(cow.node): continue
+		var pose := CityCountryArt.cow_pose(int(cow.farm), int(cow.cow), t)
+		pose.origin += center
+		if scan:
+			var near := eye.distance_to(pose.origin)<110.0
+			if near and not is_instance_valid(cow.node):
+				var model := CreatureModel.new("farm_cow")
+				add_child(model)
+				cow.node = model
+			elif not near and is_instance_valid(cow.node):
+				(cow.node as Node).queue_free()
+				cow.node = null
+		if not is_instance_valid(cow.node): continue
+		var model: CreatureModel = cow.node
+		model.global_transform = pose
+		model._phase = fposmod(t*CreatureModel.STRIDE_SPEED*0.35, TAU)
+		model._time = t
+		model.animate(0.25, delta)
 
 func add_district(d: Dictionary) -> void:
 	if _districts.has(d.id): return
@@ -144,6 +171,7 @@ func _process(delta: float) -> void:
 				entry.bubble = cycle
 				var lines: Array = entry.get("lines", CHAT)
 				SpeechBubble.say(person, str(lines[cycle % lines.size()]), "say", 2.2)
+	_graze(eye, t, delta, scan)
 	for id: String in _traffic:
 		var entry: Dictionary = _traffic[id]
 		for i in entry.entries.size():

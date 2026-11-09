@@ -32,7 +32,7 @@ func desktop_available() -> bool:
 	return DisplayServer.get_name()!="headless"
 
 func defaults() -> Dictionary:
-	return {mode="windowed",window_size=Vector2i(1600,900),fullscreen_resolution=Vector2i.ZERO,screen=0,vsync=true,max_fps=0,gui_scale="medium",resizable=true,show_fps=false,camera_angle="standard",space_camera=0}
+	return {mode="windowed",window_size=Vector2i(1600,900),fullscreen_resolution=Vector2i.ZERO,screen=0,vsync=true,max_fps=0,gui_scale="medium",resizable=true,show_fps=false,space_camera=0}
 
 func sanitize(value: Dictionary) -> Dictionary:
 	var result := defaults()
@@ -40,7 +40,6 @@ func sanitize(value: Dictionary) -> Dictionary:
 		if value.has(key) and typeof(value[key])==typeof(result[key]): result[key] = value[key]
 	if result.mode not in ["windowed","fullscreen"]: result.mode = "windowed"
 	if not GUI_FACTORS.has(result.gui_scale): result.gui_scale = "medium"
-	if result.camera_angle not in ["standard", "overhead"]: result.camera_angle = "standard"
 	result.space_camera = clampi(int(result.space_camera), 0, 2)
 	result.window_size = Vector2i(clampi(result.window_size.x,640,7680),clampi(result.window_size.y,360,4320))
 	if result.fullscreen_resolution!=Vector2i.ZERO:

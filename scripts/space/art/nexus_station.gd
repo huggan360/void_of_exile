@@ -184,7 +184,13 @@ func build(server: bool) -> void:
 		for side in [-1.0, 1.0]:
 			art.part("box", frame.translated_local(Vector3(side * 2.9, 1.1, 0)), Vector3(0.2, 2.2, 10), BRASS, true)
 			art.lantern(frame * Vector3(side * 2.8, 0, 3.5), 3.3)
-		anchors.gangways.append(radial * 59.4)
+			# The deck rail closes in on the walk, so nobody steps off beside it.
+			var mouth := Transform3D(Basis(Vector3.UP, angle), radial * 51.0)
+			art.part("box", mouth.translated_local(Vector3(side * 5.0, 1.2, 0)), Vector3(0.24, 2.4, 0.24), BRASS, true)
+			for height in [0.65, 2.2]:
+				art.part("box", mouth.translated_local(Vector3(side * 4.0, height, 0)), Vector3(2.2, 0.16, 0.18), WOOD, true)
+		_berth_gate(art, frame.translated_local(Vector3(0, 0, 4.75)))
+		anchors.gangways.append(radial * 56.8)
 	_tavern(art)
 	_plaza(art, server)
 	if not server: _floating_rock()
@@ -245,6 +251,24 @@ func build(server: bool) -> void:
 			light.distance_fade_begin = 150
 			light.distance_fade_length = 60
 			add_child(light)
+
+## A timber gate across the end of a boarding walk: the moored ship's ramp is
+## just beyond it (SpaceShipView), so boarding happens over the gate.
+func _berth_gate(art: Brush, frame: Transform3D) -> void:
+	for side: float in [-1.0, 1.0]:
+		art.part("box", frame.translated_local(Vector3(side * 2.65, 1.35, 0)), Vector3(0.36, 2.7, 0.36), WOOD.darkened(0.15), true)
+		art.part("box", frame.translated_local(Vector3(side * 2.65, 2.78, 0)), Vector3(0.5, 0.16, 0.5), BRASS)
+		art.part("box", frame.translated_local(Vector3(side * 2.65, 2.92, 0)), Vector3(0.3, 0.12, 0.3), BRASS)
+	for height: float in [0.45, 1.15, 1.85]:
+		art.part("box", frame.translated_local(Vector3(0, height, 0)), Vector3(4.95, 0.18, 0.16), WOOD.lightened(0.05), true)
+	for i in 9:
+		var x := -2.0 + i * 0.5
+		art.part("box", frame.translated_local(Vector3(x, 1.05, 0.1)), Vector3(0.12, 1.9, 0.08), WOOD.lightened(0.1 + float(i % 3) * 0.04))
+		art.part("box", frame.translated_local(Vector3(x, 2.06, 0.1)), Vector3(0.08, 0.12, 0.08), BRASS)
+	# An arch over the gate with a lantern for the crew coming home.
+	art.part("box", frame.translated_local(Vector3(0, 3.35, 0)), Vector3(5.9, 0.28, 0.4), WOOD.darkened(0.1))
+	art.part("box", frame.translated_local(Vector3(0, 3.55, 0)), Vector3(3.2, 0.16, 0.3), BRASS)
+	art.hanging_lantern(frame * Vector3(0, 2.75, 0))
 
 func _facing(at: Vector3, toward: Vector3) -> Transform3D:
 	return Transform3D(Basis.looking_at((toward - at).normalized(), Vector3.UP), at)

@@ -47,6 +47,19 @@ func setup(p: Dictionary) -> void:
 	# Warm the shared noise and flat-spot caches before threads read them.
 	SpaceLayout.surface_height(p, Vector3.UP)
 	_material = material_for(p)
+	if p.get("city", false):
+		# The Lantern City's ground is a perfect sphere: one smooth collider, not
+		# chunk meshes whose seams and skirts catch the feet on every street.
+		var ground := StaticBody3D.new()
+		ground.name = "Ground"
+		ground.collision_layer = Player.TERRAIN_LAYER
+		ground.collision_mask = 0
+		var ball := SphereShape3D.new()
+		ball.radius = radius
+		var shape := CollisionShape3D.new()
+		shape.shape = ball
+		ground.add_child(shape)
+		add_child(ground)
 	for f in 6:
 		var root := _make(f, 0, 0, 0)
 		_build(root)
@@ -70,6 +83,7 @@ static func material_for(p: Dictionary) -> ShaderMaterial:
 		mat.set_shader_parameter("kerb_tex", CityTextures.kerb())
 		mat.set_shader_parameter("cobble_tex", CityTextures.cobbles())
 		mat.set_shader_parameter("grass_tex", CityTextures.grass())
+		mat.set_shader_parameter("cells_tex", CityCountry.cell_texture())
 	mat.set_shader_parameter("magic", Color(str(p.palette[3])))
 	mat.set_shader_parameter("detail_scale", 1.0/maxf(6.0, float(p.terrain.size)*0.04))
 	_material_cache[p.id] = mat
@@ -154,6 +168,7 @@ func _show(c: Chunk, on: bool) -> void:
 		c.body = null
 
 func _collide(c: Chunk, body: Vector3) -> void:
+	if planet.get("city", false): return
 	var near := c.level==max_level and body.is_finite() and body.distance_to(c.center)<COLLIDE_RANGE+c.arc
 	if near and c.body==null and not c.faces.is_empty():
 		c.body = StaticBody3D.new()

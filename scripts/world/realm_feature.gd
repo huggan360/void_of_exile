@@ -145,7 +145,10 @@ func shape(x: int, z: int, col: Array) -> bool:
 			col[1] = Blocks.PAVING
 			col[2] = Blocks.STONE
 			var north := p.y < c.y and absf(p.x - c.x) < 4.0
-			if d > radius - 1.4 and not north:
+			# The moored battleship lies east-west and runs out over the west
+			# rim (SurfaceLaunchpad), so the wall opens for her there.
+			var under_ship := p.x - c.x < -8.0 and p.y - c.y > -10.5
+			if d > radius - 1.4 and not north and not under_ship:
 				col.append_array([h + 1, h + 2, Blocks.RUIN_BRICK])
 			elif absf(d - 14.0) < 0.6 or absf(d - 6.0) < 0.5:
 				col[1] = Blocks.RUNE_BLUE
