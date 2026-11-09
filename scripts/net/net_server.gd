@@ -511,6 +511,7 @@ func on_enter(peer_id: int, destination: String) -> void:
 	p.known_effects = {}
 	p.known_enemy_effects = {}
 	p.awaiting_arrival = true
+	p.spawn_fix = true
 	p.grace = SNAP_BACK_GRACE * 8.0
 	p.moved_at = 0.0
 	GameServer.enter_realm(p.player_id, record.id)
@@ -663,6 +664,8 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		spatial = active_realm.world.surface_ships
 	if spatial:
 		if not pos.is_finite(): return
+		# Still in a lost ship's room: the client hasn't heard yet. Wait for it.
+		if spatial is SpaceWorld and (spatial as SpaceWorld).stale_pocket(pos): return
 		var barrier: Dictionary = spatial.barrier_between(p.pos,pos)
 		if not barrier.is_empty():
 			p.pos = barrier.point
@@ -767,6 +770,8 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 				_to_realm(p.realm, p.pos, ["ring", pid, stats.gear.spell.id, p.pos, stats.spell_multiplier(stats.gear.spell)], 0, peer_id)
 		"shield":
 			GameServer.set_shield(pid, bool(args[0]))
+		"unstuck":  # [pos]: the game menu's Unstuck, a short hop to a free spot
+			if args.size() >= 1 and args[0] is Vector3: _unstuck(peer_id, p, args[0], args.size() > 1 and bool(args[1]))
 		"shield_contact":
 			if GameServer.shield_up(pid):
 				_to_realm(p.realm, p.pos, ["sfx", "magic_shield_hit", p.pos + Vector3.UP * .9,
@@ -833,6 +838,36 @@ func on_shot(peer_id: int, origin: Vector3, direction: Vector3, weapon_id: Strin
 func on_pong(peer_id: int, t: float) -> void:
 	if peers.has(peer_id):
 		peers[peer_id].rtt = lerpf(peers[peer_id].rtt, Net.now() - t, 0.5 if peers[peer_id].rtt > 0.0 else 1.0)
+
+
+## The game menu's Unstuck: a short hop to the free spot the client found
+## (Unstuck.find_spot). Never through a gate or barrier, never off the map.
+## `spawn`: the automatic hop out of something right after arriving (once
+## per arrival, no cooldown, see Player.clear_spawn).
+func _unstuck(peer_id: int, p: Dictionary, pos: Vector3, spawn := false) -> void:
+	var t := Net.now()
+	var realm: RealmInstance = realms.get(p.realm)
+	var allowed: bool = p.get("spawn_fix", false) if spawn else t - float(p.get("unstuck_at", -100.0)) >= Unstuck.COOLDOWN - 0.5
+	if spawn: p.spawn_fix = false
+	var ok := realm != null and allowed and pos.is_finite() and pos.distance_to(p.pos) <= Unstuck.MAX_DISTANCE + 3.0 \
+			and (spawn or not GameServer.intro_locked(p.player_id))
+	if ok:
+		var place: GameWorld = realm.world
+		if place is IslandWorld and SpaceLayout.pocket_at(p.pos) >= 0: place = (place as IslandWorld).surface_ships
+		if place is SpatialWorld:
+			ok = (place as SpatialWorld).barrier_between(p.pos, pos).is_empty() and place.is_walkable(pos)
+		else:
+			ok = place.is_walkable(pos) and not (place is IslandWorld and (place as IslandWorld).gates.blocks_segment(p.pos, pos))
+	if not ok:
+		Net.c_correct.rpc_id(peer_id, p.pos)
+		return
+	if not spawn: p.unstuck_at = t
+	p.pos = pos
+	p.grace = SNAP_BACK_GRACE * 4.0
+	p.moved_at = t
+	if realm.proxies.has(p.player_id): realm.proxies[p.player_id].global_position = pos
+	GameServer.report_position(p.player_id, p.realm, pos)
+	Net.c_correct.rpc_id(peer_id, pos)
 
 
 ## Checks a hit a player reports on an enemy, then applies it.

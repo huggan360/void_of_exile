@@ -1,12 +1,15 @@
 class_name ShipDamage
 extends Node3D
 ## What a hurt ship shows outside: smoke from parts below half, fire and
-## sparks once they are nearly gone (engines trail it behind the ship).
+## sparks once they are nearly gone (engines trail it behind the ship), and
+## a blaze of voxel flames on a part that is destroyed.
 var _fx := {}  # part id -> {smoke, fire}
+var _burning := {}  # part id -> VoxelFire, while the part is destroyed
 
 func show_parts(parts: Dictionary) -> void:
 	for id: String in SpaceShip.PARTS:
 		var k := clampf(float(parts.get(id, 100.0))/100.0, 0.0, 1.0)
+		_burn(id, float(parts.get(id, 100.0))<=0.5)
 		var smoke := k<0.5
 		var fire := k<0.25
 		if not _fx.has(id):
@@ -58,3 +61,27 @@ func _emitter(at: Vector3, fire: bool) -> GPUParticles3D:
 	p.draw_pass_1 = quad
 	add_child(p)
 	return p
+
+## Voxel flames on a destroyed part, seen from well away (the hull is big).
+static func blaze(size: float) -> VoxelFire:
+	var fire := VoxelFire.new(size)
+	fire.contact_burn = false
+	return fire
+
+static func widen(fire: VoxelFire, distance: float) -> void:
+	for child in fire.get_children():
+		if child is GPUParticles3D: (child as GPUParticles3D).visibility_range_end = distance
+		elif child is OmniLight3D:
+			(child as OmniLight3D).distance_fade_begin = distance-40.0
+
+func _burn(id: String, on: bool) -> void:
+	if on==_burning.has(id): return
+	if not on:
+		(_burning[id] as Node).queue_free()
+		_burning.erase(id)
+		return
+	var fire := blaze(4.0)
+	fire.position = SpaceShip.PARTS[id].hull
+	add_child(fire)
+	widen(fire, 600.0)
+	_burning[id] = fire

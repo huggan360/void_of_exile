@@ -11,7 +11,6 @@ var hull: ShipHull
 var _samples: Array = []  # [time, Transform3D, speed]
 var _label: Label3D
 var _ramp: SpaceInteraction
-var _recall: FleetRecallTarget
 var _ship: SpaceShip
 var arrival_started := -1
 var _damage: ShipDamage
@@ -36,10 +35,6 @@ func setup(ship: SpaceShip) -> void:
 	_ramp.kind = "outside"
 	_ramp.ship_id = ship.id
 	add_child(_ramp)
-	_recall = FleetRecallTarget.new()
-	_recall.world = world
-	_recall.ship_id = ship.id
-	add_child(_recall)
 	# Outside: the deck hatch down to the room and the parts mended out here.
 	var hatch := SpaceInteraction.new()
 	hatch.world = world
@@ -75,11 +70,15 @@ func push(ship: SpaceShip, stamp := -1.0) -> void:
 	_label.text = ship.name
 	_ramp.enabled = ship.mode in ["landed", "berth"]
 	var hatch: Transform3D = hull.anchors.get("hatch", Transform3D(Basis.IDENTITY, Vector3(9, -3, 4)))
-	_ramp.position = hatch.origin
-	_recall.position = hatch.origin+Vector3(0, 0.8, 2.0)
+	if ship.mode!="landed": _ramp.position = hatch.origin  # landed: it follows you (SpaceInteraction)
 
-var _clock := 0.0
-var _clock_frame := -1
+## One smooth clock for every ship: it runs at real speed and only eases
+## toward the server clock, so clock corrections (a few ms each) don't
+## jolt a fast hull back and forth.
+static var _clock := -1.0
+static var _clock_frame := -1
+static var _clock_usec := 0
+const CLOCK_SLEW := 0.04  # at most 4% faster or slower while catching up
 
 ## The interpolated pose `DELAY` seconds ago.
 func pose() -> Transform3D:
@@ -88,7 +87,14 @@ func pose() -> Transform3D:
 	var frame := Engine.get_process_frames()
 	if frame!=_clock_frame:
 		_clock_frame = frame
-		_clock = Net.client.server_time() if Net.is_client() else Net.now()
+		var target := Net.client.server_time() if Net.is_client() else Net.now()
+		var usec := Time.get_ticks_usec()
+		var step := float(usec-_clock_usec)/1000000.0
+		_clock_usec = usec
+		if _clock<0.0 or absf(target-_clock)>0.25 or step>0.25: _clock = target
+		else:
+			_clock += step
+			_clock += clampf(target-_clock, -step*CLOCK_SLEW, step*CLOCK_SLEW)
 	var at := _clock-DELAY
 	if at<=float(_samples[0][0]): return _samples[0][1]
 	for i in range(_samples.size()-1):

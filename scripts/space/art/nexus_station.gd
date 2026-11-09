@@ -34,6 +34,15 @@ class Brush extends RefCounted:
 				sphere.radial_segments = 20
 				sphere.rings = 10
 				result = sphere
+			"apron":
+				var skirt := CylinderMesh.new()
+				skirt.top_radius = 0.4
+				skirt.bottom_radius = 0.5
+				skirt.height = 1.0
+				skirt.radial_segments = 48
+				skirt.cap_top = false
+				skirt.cap_bottom = false
+				result = skirt
 			_:
 				var cylinder := CylinderMesh.new()
 				cylinder.top_radius = 0.0 if kind == "cone" else 0.5
@@ -57,6 +66,15 @@ class Brush extends RefCounted:
 				var sphere := SphereShape3D.new()
 				sphere.radius = size.x * 0.5
 				shape = sphere
+			elif kind == "apron":
+				var hull := ConvexPolygonShape3D.new()
+				var points := PackedVector3Array()
+				for i in 48:
+					var ring := Vector3(cos(TAU*i/48.0), 0, sin(TAU*i/48.0))
+					points.append(ring*size.x*0.4+Vector3.UP*size.y*0.5)
+					points.append(ring*size.x*0.5-Vector3.UP*size.y*0.5)
+				hull.points = points
+				shape = hull
 			elif kind == "cylinder":
 				var cylinder := CylinderShape3D.new()
 				cylinder.radius = size.x * 0.5
@@ -78,6 +96,12 @@ class Brush extends RefCounted:
 
 	func round_part(at: Vector3, radius: float, height: float, color: Color, solid := false, glow := 0.0) -> void:
 		part("cylinder", Transform3D(Basis.IDENTITY, at), Vector3(radius * 2, height, radius * 2), color, solid, glow)
+
+	## A solid sloped skirt from a round pad's rim (top centre `at`) down
+	## `drop` metres into the ground, so the pad can be walked onto from
+	## anywhere the curved ground falls away below its flat edge.
+	func apron(at: Vector3, radius: float, drop: float, color: Color) -> void:
+		part("apron", Transform3D(Basis.IDENTITY, at-Vector3.UP*drop*0.5), Vector3(radius*2.5, drop, radius*2.5), color, true)
 
 	func crystal(at: Vector3, height: float, color: Color, solid := false) -> void:
 		part("cone", Transform3D(Basis.IDENTITY, at + Vector3.UP * height * 0.5), Vector3(height * 0.5, height, height * 0.5), color, false, 1.2)

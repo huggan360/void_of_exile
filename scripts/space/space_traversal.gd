@@ -47,7 +47,14 @@ const SIDE_TURRET_SWEEP := 1.3
 var _chase := Transform3D.IDENTITY
 var _cockpit := true
 var _rocket_flight := false
-var _pulse := false
+## Pilot throttle (-1..1): Speed up and Speed down move it, and it holds
+## when you let go.
+var throttle := 0.0
+## Kerbs and pad rims are stepped onto; tables and crates (higher) are not.
+const STEP_UP := 0.55
+const LAUNCH_THROTTLE := SpaceShip.LAUNCH_THRUST
+var _launching := false
+const THROTTLE_RATE := 0.6  # throttle per second while a key is held
 ## Outside the ship on the jetpack: walking her deck or flying beside her.
 var spacewalk := false
 ## Open space is only for those who went out on purpose (up the ladder, a
@@ -69,13 +76,16 @@ var _deck_arrival := false
 var _rehook_after := 0
 ## Red port badges over the planets' ports (key -> holder node).
 var _port_marks := {}
+var _nexus_mark: Node3D
+var _landing_prompt: LandingPrompt
+const NEXUS_MARK_HEIGHT := 90.0
 var _queue_text := ""
 var _rope: MeshInstance3D
 var _rope_mesh := ImmediateMesh.new()
 const ROPE_MAX := 45.0
 const REEL_SPEED := 9.0  # m/s the winch pulls you in
-const JET_ACCEL := 12.0
-const JET_MAX := 9.0
+const JET_ACCEL := 24.0
+const JET_MAX := 18.0
 const JET_TURN := 2.2  # rad/s, A and D
 const FUEL_DRAIN := 5.0
 const FUEL_REGEN := 45.0
@@ -111,6 +121,11 @@ func _ready() -> void:
 	_hud.layer = 32
 	add_child(_hud)
 	_overlay = _hud.make_ui_root()
+	_build_first_person_shield()
+	var prompt := LandingPrompt.new()
+	prompt.traversal = self
+	world.add_child.call_deferred(prompt)
+	_landing_prompt = prompt
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title = UIStyle.label("", 26, UIStyle.GOLD)
 	_title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -204,6 +219,9 @@ func _process(delta: float) -> void:
 			player.global_position = spot+Vector3.UP*0.05
 			player.velocity = Vector3.ZERO
 	if seat!=was:
+		# Taking the wheel: carry on at the speed she holds.
+		throttle = _ship.cruise() if seat=="pilot" and _ship else 0.0
+		_launching = false
 		_pilot_look = Vector2.ZERO
 		_turret_yaw = 0.0
 		_locked_targets.clear()
@@ -240,7 +258,7 @@ func _update_bars(zone: String) -> void:
 	var aboard: SpaceShip = _ship if _ship else world.ship_in_slot(SpaceLayout.pocket_at(player.global_position)) if zone=="ship" else null
 	if aboard:
 		hud.bar_override = {hp = [aboard.hp, SpaceShip.MAX_HP, "", SHIP_HULL, SHIP_HULL_LIGHT, "ship"],
-			mp = [aboard.boost, 100.0, "", SHIP_BOOST, SHIP_BOOST_LIGHT, "flame"]}
+			mp = [aboard.boost, 100.0, "", SHIP_BOOST, SHIP_BOOST_LIGHT, "flame"], parts = aboard.parts}
 	elif spacewalk:
 		hud.bar_override = {hp = [player.stats.hp, player.stats.max_hp, "", UIStyle.HP, UIStyle.HP_LIGHT, "heart"],
 			mp = [fuel, 100.0, "", JETPACK, JETPACK_LIGHT, "flame"]}
@@ -279,14 +297,15 @@ func _update_hint() -> void:
 	match seat:
 		"pilot":
 			if _ship.mode in ["berth", "landed"]:
-				rows.append([["@ship_launch"], "Launch"])
+				rows.append([["@ship_boost"], "Launch"])
 			elif _ship.mode=="flying":
-				rows.append([["@ship_forward", "@ship_reverse"], "Thrust"])
+				rows.append([["@ship_forward", "@ship_reverse"], "Throttle %d%%" % roundi(throttle*100.0)])
+				if _ship.climbing!="": rows.append([["@ship_forward"], "Climbing to orbit"])
+				elif _ship.orbit!="": rows.append([["Steer"], "In orbit: %s - steer to leave" % str(SpaceLayout.planet(_ship.orbit).get("name", ""))])
 				rows.append([["@ship_left", "@ship_right"], "Turn"])
-				rows.append([["@ship_pitch_up", "@ship_pitch_down"], "Pitch"])
+				rows.append([["@ship_pitch_down", "@ship_pitch_up"], "Nose down / up"])
 				rows.append([["@ship_roll_left", "@ship_roll_right"], "Roll"])
 				rows.append([["@ship_boost"], "Boost"])
-				rows.append([["@ship_pulse"], "Pulse drive"])
 				rows.append([["@ship_fire"], "Fire cannons"])
 				var land := _ship.landable()
 				if not _ship.queue.is_empty(): rows.append([["@ship_land"], "Waiting to land"])
@@ -351,7 +370,13 @@ func on_world_message(event: Array) -> void:
 					outside = {}
 					_deck_arrival = true
 					notice("Up on deck. Space to fly with your jetpack.")
-				"adrift": notice("Your ship is gone! You float on your jetpack. Another crew can pick you up, or press R to call Orin's rescue skiff.")
+				"adrift":
+					# The wreck news can come after the server already moved us
+					# while our seat still held us in the room: go now.
+					if event.size()>2 and event[2] is Vector3:
+						player.global_position = event[2]
+						player.velocity = Vector3.ZERO
+					notice("Your ship is gone! You float on your jetpack. Another crew can pick you up, or press R to call Orin's rescue skiff.")
 				"planet": pass
 
 func _flash_fade() -> void:
@@ -361,6 +386,7 @@ func _flash_fade() -> void:
 
 func hide_overlay() -> void:
 	if is_instance_valid(_overlay): _overlay.hide()
+	if is_instance_valid(_fp_shield): _fp_shield.hide()
 	var game := world.game_root() if is_instance_valid(world) else null
 	var hud: Variant = game.get("hud") if game else null
 	if hud: hud.key_help.set_rows([])
@@ -376,9 +402,9 @@ func active_ship_actions() -> Array[String]:
 	if seat=="" and _lounge_seat=="": return actions
 	actions.assign(["seat_camera", "seat_stand"])
 	if seat=="pilot" and _ship!=null:
-		if _ship.mode in ["berth", "landed"]: actions.append("ship_launch")
+		if _ship.mode in ["berth", "landed"]: actions.append("ship_boost")
 		elif _ship.mode=="flying":
-			actions.append_array(["ship_forward", "ship_reverse", "ship_left", "ship_right", "ship_pitch_up", "ship_pitch_down", "ship_roll_left", "ship_roll_right", "ship_boost", "ship_pulse", "ship_land", "ship_fire"])
+			actions.append_array(["ship_forward", "ship_reverse", "ship_left", "ship_right", "ship_pitch_up", "ship_pitch_down", "ship_roll_left", "ship_roll_right", "ship_boost", "ship_land", "ship_fire"])
 	elif seat.begins_with("turret") and _ship!=null and _ship.mode=="flying": actions.append("ship_fire")
 	return actions
 
@@ -462,16 +488,18 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if seat=="pilot" and _ship!=null:
-		if event.is_action_pressed("ship_launch") and _ship.mode in ["berth", "landed"]:
+		if event.is_action_pressed("ship_boost") and _ship.mode in ["berth", "landed"]:
 			world.request(["takeoff"])
-		elif _ship.mode=="flying" and event.is_action_pressed("ship_pulse"):
-			_pulse = not _pulse
-			notice("Pulse drive engaged." if _pulse else "Pulse drive off.")
 		elif _ship.mode=="flying" and event.is_action_pressed("ship_land"):
-			if SpaceLayout.can_descend(_ship.xform.origin): world.request(["descend"])
-			else: world.request(["land"] if not _ship.landable().is_empty() else ["dock"])
+			land()
 		elif not consumes_event(event): return
 		get_viewport().set_input_as_handled()
+
+## The helm's land key: down to the Surface, onto a pad, or into a berth.
+func land() -> void:
+	if _ship==null or _ship.mode!="flying": return
+	if SpaceLayout.can_descend(_ship.xform.origin): world.request(["descend"])
+	else: world.request(["land"] if not _ship.landable().is_empty() else ["dock"])
 
 func _lift_button() -> int:
 	var planet: SpacePlanet = world.planets.get(CityLayout.ID)
@@ -509,17 +537,27 @@ func _seated(delta: float) -> void:
 	match seat:
 		"pilot":
 			var enabled := _ship.mode=="flying" and not player.controls_locked() and not player.ui_blocked and not player.interacting() and not map.visible and not cinematic
+			if _ship.mode!="flying":
+				throttle = 0.0
+				_launching = true
+			elif _launching:
+				# Just launched: an easy speed, and she climbs into orbit by herself.
+				_launching = false
+				throttle = LAUNCH_THROTTLE
+			elif enabled: throttle = clampf(throttle+Input.get_axis("ship_reverse", "ship_forward")*THROTTLE_RATE*delta, -1.0, 1.0)
+			# Climbing out after a launch: no slower than launch speed (the server holds her there too).
+			if _ship.climbing!="": throttle = maxf(throttle, SpaceShip.LAUNCH_THRUST)
 			_input_timer -= delta
 			if _input_timer<=0.0:
 				_input_timer = INPUT_RATE
-				var thrust := Input.get_axis("ship_reverse", "ship_forward") if enabled else 0.0
+				var thrust := throttle if enabled else 0.0
 				var yaw := Input.get_axis("ship_left", "ship_right") if enabled else 0.0
 				if enabled and player.debug_input!=Vector2.ZERO:
 					thrust = -player.debug_input.y
 					yaw = player.debug_input.x
 				var pitch := Input.get_axis("ship_pitch_down", "ship_pitch_up") if enabled else 0.0
 				var roll := Input.get_axis("ship_roll_left", "ship_roll_right") if enabled else 0.0
-				world.request(["pilot", [thrust, yaw, pitch, roll, enabled and Input.is_action_pressed("ship_boost"), enabled and _pulse]])
+				world.request(["pilot", [thrust, yaw, pitch, roll, enabled and Input.is_action_pressed("ship_boost"), false]])
 			_fire_timer -= delta
 			if enabled and not Leisure.hands_busy(player.player_id) and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 				_fire_timer = 0.2
@@ -598,6 +636,7 @@ func physics_step(delta: float) -> void:
 	if not is_instance_valid(world): return
 	if player.frozen:
 		player.frozen = not world.is_presentation_ready()
+		if not player.frozen and seat=="" and world.city.seat_of(player.player_id)=="": player.clear_spawn(world)
 		return
 	city_seat = world.city.seat_of(player.player_id)
 	if city_seat!="":
@@ -684,7 +723,18 @@ func physics_step(delta: float) -> void:
 	var fall := minf(0.0, player.velocity.dot(up))-Player.GRAVITY*delta
 	player.velocity = dir*speed+player._knock.slide(up)+up*(-2.0 if player.is_on_floor() else fall)
 	player._knock = player._knock.lerp(Vector3.ZERO, 1.0-exp(-Player.KNOCKBACK_DRAG*delta))
+	var before := player.global_position
 	player.move_and_slide()
+	# Step up only when a ledge really stopped us (not on every steep bit of hill).
+	var made := (player.global_position-before).slide(up).length()
+	if not dir.is_zero_approx() and player.is_on_floor() and player.is_on_wall() and made<speed*delta*0.5:
+		player._try_step_up(dir, up, STEP_UP)
+	# Steps, floor snaps and little catches on hilly ground move the body in
+	# jumps; the model (and the camera with it) glide to the new height.
+	var rise := (player.global_position-before).dot(up)
+	if absf(rise)>0.12: player._visual_offset -= rise
+	player._visual_offset = clampf(lerpf(player._visual_offset, 0.0, minf(1.0, delta*Player.STEP_SMOOTHING)), -1.5, 1.5)
+	player.model.position.y = player._visual_offset
 	var query := PhysicsRayQueryParameters3D.create(player.global_position+up*0.5, player.global_position-up*1.2, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 	query.exclude = [player.get_rid()]
 	var ground := player.get_world_3d().direct_space_state.intersect_ray(query)
@@ -857,8 +907,18 @@ func _update_ports() -> void:
 	var slot := SpaceLayout.pocket_at(player.global_position)
 	var ship: SpaceShip = _ship if _ship else world.ship_in_slot(slot) if slot>=0 else null
 	var targets: Array = world.my_marks().filter(func(m: Dictionary) -> bool: return m.kind=="target").map(func(m: Dictionary) -> Vector3: return m.pos)
+	# Ports show on the two planets nearest the ship (or you, on foot at a
+	# planet), always including the one you are at.
+	var nearest: Array = []
+	if ship!=null or SpaceLayout.pocket_at(player.global_position)<0:
+		var from := ship.xform.origin if ship!=null else player.global_position
+		nearest = SpaceLayout.PLANETS.duplicate()
+		nearest.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return from.distance_to(a.center)-float(a.radius)<from.distance_to(b.center)-float(b.radius))
+		nearest = nearest.slice(0, 2).map(func(p: Dictionary) -> String: return str(p.id))
+	_update_nexus_mark(ship)
 	for p: Dictionary in SpaceLayout.PLANETS:
-		var near := ship!=null and ship.xform.origin.distance_to(p.center)<float(p.radius)+6000.0
+		var near := str(p.id) in nearest
 		var planet: Node3D = world.planets.get(p.id)
 		for entry: Dictionary in SpaceLayout.ports(p):
 			var key := str(entry.key)
@@ -883,6 +943,20 @@ func _update_ports() -> void:
 	if hud==null: return
 	if text=="": hud.toasts.unpin("landing_queue")
 	else: hud.toasts.pin("landing_queue", text, UIStyle.GOLD)
+
+## The pink Nexus badge: seen from anywhere out in open space (flying or on
+## the jetpack), not on a planet or at the Nexus itself.
+func _update_nexus_mark(ship: SpaceShip) -> void:
+	if not is_instance_valid(_nexus_mark):
+		_nexus_mark = Node3D.new()
+		world.add_child(_nexus_mark)
+		_nexus_mark.global_position = SpaceLayout.NEXUS+Vector3.UP*NEXUS_MARK_HEIGHT
+		var badge := QuestMarker.new("nexus")
+		_nexus_mark.add_child(badge)
+		badge.scale = Vector3.ONE*1.6
+		badge._material.disable_fog = true
+	var at := ship.xform.origin if ship!=null and ship.mode=="flying" else player.global_position if spacewalk else Vector3.INF
+	_nexus_mark.visible = at.is_finite() and world.zone_at(at)=="void" and at.distance_to(SpaceLayout.NEXUS)>SpaceWorld.DOCK_RANGE
 
 ## Just came up through a deck hatch (or the ship found us near her deck):
 ## stand on the deck of the nearest ship.
@@ -923,6 +997,10 @@ func _hull(ship_id: int) -> Transform3D:
 ## never slides past you between physics ticks.
 func _pin_to_hull() -> void:
 	if not spacewalk or outside.is_empty() or not world.ship_views.has(int(outside.ship)): return
+	# Sent down through the deck hatch: we are in her room now, not on the hull.
+	if SpaceLayout.pocket_at(player.global_position)>=0:
+		outside = {}
+		return
 	var hull := _hull(int(outside.ship))
 	player.global_position = hull*(outside.at as Vector3)
 	player.global_basis = hull.basis
@@ -970,6 +1048,9 @@ func _shake_camera() -> void:
 	player.camera.position += Vector3(sin(t*51.0), cos(t*63.0), 0.0)*0.045*remaining
 
 func update_camera(delta: float) -> void:
+	if seat!="" or city_seat!="" or spacewalk or _descent or cinematic or player.frozen:
+		player._visual_offset = 0.0  # the walking glide only (physics_step)
+		player.model.position.y = 0.0
 	var in_chair := seat.begins_with("chair") or city_seat!="" or _lounge_seat!=""
 	var mode := view_mode()
 	var want_fp := _cockpit if seat=="pilot" else _seat_interior if seat!="" or _lounge_seat!="" else mode==CameraMode.FIRST_PERSON or world.first_person_at(player.global_position)
@@ -990,6 +1071,7 @@ func update_camera(delta: float) -> void:
 	player.model.visible = first_person<0.88 and alive
 	player.status_visuals.visible = first_person<0.8 and alive
 	player.aura.visible = first_person<0.8 and alive
+	_update_first_person_shield()
 	if cinematic: return
 	if seat!="" and not seat.begins_with("chair") and _ship!=null and world.ship_views.has(_ship.id):
 		_seat_camera(delta)
@@ -997,7 +1079,7 @@ func update_camera(delta: float) -> void:
 		return
 	var up := player.global_basis.y
 	var orbit := player.global_basis*Basis(Vector3.UP, player.camera_yaw)
-	var head := player.global_position+up*1.57
+	var head := player.global_position+up*(1.57+player._visual_offset)
 	var view := orbit*Basis(Vector3.RIGHT, look_pitch)
 	if want_fp or shoulder or (spacewalk and mode==CameraMode.ANGLED):
 		var at := head
@@ -1012,7 +1094,7 @@ func update_camera(delta: float) -> void:
 		player.camera.fov = 78.0 if want_fp else 72.0
 		_shake_camera()
 		return
-	var target := player.global_position+up
+	var target := player.global_position+up*(1.0+player._visual_offset)
 	var pitch := Player.CAMERA_PITCH
 	var at := target+orbit*Vector3(0, sin(pitch), cos(pitch))*player.camera_distance
 	# City rooms have solid ceilings; pull the angled camera inside when needed.
@@ -1243,13 +1325,14 @@ func _exit_tree() -> void:
 		_outside_culled = false
 		for node: Variant in world.planets.values()+world.ship_views.values()+[world.station, world.foes]:
 			if is_instance_valid(node) and node is Node3D: (node as Node3D).visible = true
-	for mark: Variant in _port_marks.values():
+	for mark: Variant in _port_marks.values()+[_nexus_mark, _landing_prompt]:
 		if is_instance_valid(mark): (mark as Node).queue_free()
 	var game := world.game_root() if is_instance_valid(world) else null
 	var hud: Variant = game.get("hud") if game else null
 	if hud:
 		hud.key_help.set_rows([])
 		hud.toasts.unpin("landing_queue")
+	if is_instance_valid(_fp_shield): _fp_shield.queue_free()
 	if not is_instance_valid(player): return
 	player.cinematic_locked = false
 	player.global_basis = Basis.IDENTITY
@@ -1265,3 +1348,5 @@ func _exit_tree() -> void:
 	player.camera.far = _old_far
 	player.camera.cull_mask = _old_cull_mask
 	player.camera.fov = Player.CAMERA_FOV
+	player._visual_offset = 0.0
+	player.model.position.y = 0.0

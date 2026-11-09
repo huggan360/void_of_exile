@@ -133,7 +133,7 @@ func _render() -> void:
 	var dots_hex := Dots.COLOR.to_html(false)
 	_dots.text = "[right][b][color=#%s]%s[/color][/b] [color=#%s]Dots[/color][/right]" % [dots_hex, Dots.format(_dots_now()), UIStyle.TEXT_DIM.to_html(false)]
 	_price.text = "[b][color=#%s]%s[/color][/b] [color=#%s]Dots[/color]" % [dots_hex, Dots.format(SpaceWorld.SHIP_PRICE), UIStyle.TEXT_DIM.to_html(false)]
-	_note.text = "" if clear else "The pad is in use: store that ship first."
+	_note.text = "" if clear else "The pad is in use: fly that ship off, or store it at a shipwright."
 	_note.visible = _note.text!=""
 	_buy.disabled = _waiting or _dots_now()<SpaceWorld.SHIP_PRICE or not clear
 	var ships: Array = _data.get("ships", [])

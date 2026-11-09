@@ -155,24 +155,7 @@ func _landing() -> void:
 	landing.name = "LandingPad"
 	landing.transform = _pad
 	add_child(landing)
-	var art := NexusStation.Brush.new(landing, false, 1500.0)
-	var timber := Color("785137")
-	var brass := Color("d6ad67")
-	# Broad timber pad on the flattened ground, ringed in brass and lanterns.
-	art.round_part(Vector3(0, -0.4, 0), 27, 0.9, timber, true)
-	art.round_part(Vector3(0, 0.06, 0), 27.6, 0.06, brass)
-	art.round_part(Vector3(0, 0.08, 0), 26.4, 0.04, timber.lightened(0.06))
-	for i in 64:
-		var angle := i*TAU/64
-		art.box(Vector3(sin(angle)*25.6, 0.12, cos(angle)*25.6), Vector3(0.6, 0.08, 0.6), brass, false, 0.9)
-	for i in 13:
-		art.box(Vector3(-6+i, 0.11, 0), Vector3(0.12, 0.05, 12), brass)
-	for i in 8:
-		var angle := i*TAU/8+0.2
-		art.lantern(Vector3(sin(angle)*23, 0, cos(angle)*23), 4.2)
-	art.round_part(Vector3(0, 0.6, -21), 1.2, 1.2, brass, true)
-	art.crystal(Vector3(0, 1.2, -21), 3.2, _colors[3].lerp(Color("85efb0"), 0.5))
-	art.finish()
+	build_pad(landing, _planet, get_parent() as SpaceWorld, "%s pad crystal" % _planet.name)
 	var light := OmniLight3D.new()
 	light.position = Vector3(0, 6, -10)
 	light.light_color = Color("ffd6a0")
@@ -183,6 +166,39 @@ func _landing() -> void:
 	light.distance_fade_length = 80
 	light.shadow_enabled = false
 	landing.add_child(light)
+
+## A planet's timber landing pad, ringed in brass and lanterns, with the
+## shipwright's crystal terminal (buy a ship, or bring one out onto this
+## pad). Every port on a planet looks like this: the landing pad and the
+## town's shipyard. One solid sloped body (top and skirt together), so the
+## rim has no seam to catch on and the curved ground meets it everywhere.
+static func build_pad(holder: Node3D, planet: Dictionary, world: SpaceWorld, terminal: String) -> void:
+	var art := NexusStation.Brush.new(holder, false, 1500.0)
+	var timber := Color("785137")
+	var brass := Color("d6ad67")
+	art.round_part(Vector3(0, -0.4, 0), 27, 0.9, timber)
+	art.apron(Vector3(0, 0.05, 0), 27, 4.0, timber.darkened(0.15))
+	art.round_part(Vector3(0, 0.06, 0), 27.6, 0.06, brass)
+	art.round_part(Vector3(0, 0.08, 0), 26.4, 0.04, timber.lightened(0.06))
+	for i in 64:
+		var angle := i*TAU/64
+		art.box(Vector3(sin(angle)*25.6, 0.12, cos(angle)*25.6), Vector3(0.6, 0.08, 0.6), brass, false, 0.9)
+	for i in 13:
+		art.box(Vector3(-6+i, 0.11, 0), Vector3(0.12, 0.05, 12), brass)
+	for i in 8:
+		var angle := i*TAU/8+0.2
+		art.lantern(Vector3(sin(angle)*23, 0, cos(angle)*23), 4.2)
+	art.round_part(SpaceLayout.PAD_CRYSTAL+Vector3(0, 0.6, 0), 1.2, 1.2, brass, true)
+	art.crystal(SpaceLayout.PAD_CRYSTAL+Vector3(0, 1.2, 0), 3.2, Color(str(planet.palette[3])).lerp(Color("85efb0"), 0.5))
+	art.finish()
+	var shop := SpaceInteraction.new()
+	shop.world = world
+	shop.kind = "wright"
+	shop.part = str(planet.id)
+	shop.title = terminal
+	shop.description = "A shipwright's terminal. Buy a ship or call one from your fleet onto this pad."
+	shop.position = SpaceLayout.PAD_CRYSTAL+Vector3(0, 1.0, 1.6)
+	holder.add_child(shop)
 
 func _landmark(art: NexusStation.Brush, index: int) -> void:
 	var timber := Color("75503d")

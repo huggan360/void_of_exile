@@ -17,6 +17,8 @@ var confirm_text := ""
 var cancel_text := "No"
 ## Devices may receive an authoritative result while their card is open.
 var live_response := false
+## The key the card shows (and the action that answers it).
+var key_action := "interact"
 ## Optional 1-10 dungeon rating.
 var difficulty := -1.0
 

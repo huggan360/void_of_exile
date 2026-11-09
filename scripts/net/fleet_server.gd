@@ -34,7 +34,12 @@ func _context(p: Dictionary) -> Dictionary:
 				if not _occupied(space, pose.origin) and not _pads.has(realm.realm_id+":berth:"+str(berth)): return {world = space, pose = pose, key = realm.realm_id+":berth:"+str(berth), planet = "", berth = berth, label = "Nexus berth %d" % (berth+1)}
 			return {world = space, pose = SpaceLayout.berth_frame(0), key = realm.realm_id+":berth:0", planet = "", berth = 0, label = "Nexus berth 1"}
 		for spec: Dictionary in SpaceLayout.PLANETS:
-			if at.distance_to(space.trader_position(str(spec.id), "wright"))>SpaceWorld.TRADER_REACH: continue
+			# The landing pad's crystal: ships come out onto that pad.
+			if not spec.get("city", false) and at.distance_to(SpaceLayout.pad_crystal(spec))<=SpaceWorld.TRADER_REACH:
+				var port: Dictionary = SpaceLayout.ports(spec)[0]
+				return {world = space, pose = port.pose, key = realm.realm_id+":"+str(spec.id)+":pad", planet = str(spec.id), port = str(port.key), label = str(port.name), store = false}
+			if at.distance_to(space.trader_position(str(spec.id), "wright"))>SpaceWorld.TRADER_REACH \
+					and (spec.get("city", false) or at.distance_to(SpaceLayout.dock_crystal(spec))>SpaceWorld.TRADER_REACH): continue
 			var frame := SpaceLayout.town_frame(spec, "dock")
 			var pose := Transform3D(frame.basis, (spec.center as Vector3)+frame.origin+frame.basis.y*SpaceShip.LANDED_HEIGHT)
 			return {world = space, pose = pose, key = realm.realm_id+":"+str(spec.id), planet = str(spec.id), label = str(spec.name)+" shipyard"}
@@ -53,13 +58,6 @@ func on_action(p: Dictionary, args: Array) -> void:
 	var pid := int(p.player_id)
 	if _players_busy.has(pid): return
 	var context := _context(p)
-	if context.is_empty() and str(args[0])=="recall" and args.size()>1:
-		var entry: Dictionary = active.get(int(args[1]), {})
-		if not entry.is_empty():
-			var world := (entry.world as WeakRef).get_ref() as SpaceWorld
-			var ship := entry.ship as SpaceShip
-			if is_instance_valid(world) and str(p.realm)==world.realm_id and ship.account_id==int(p.account_id) and SpaceLayout.pocket_at(p.pos)<0 and (p.pos as Vector3).distance_to(world.hatch_position(ship))<12.0:
-				context = {world = world, pose = ship.xform, key = "recall-only", planet = ship.planet}
 	if context.is_empty():
 		_error(p, "Visit a shipwright to manage your fleet.")
 		return
@@ -70,6 +68,10 @@ func on_action(p: Dictionary, args: Array) -> void:
 func _action(p: Dictionary, args: Array, context: Dictionary) -> void:
 	var op := str(args[0])
 	if op=="recall":
+		# Ships are stored only at a shipwright (not at a pad crystal).
+		if not bool(context.get("store", true)):
+			_error(p, "Ships are stored at a shipwright.")
+			return
 		var id := int(args[1]) if args.size()>1 else 0
 		var entry: Dictionary = active.get(id, {})
 		if entry.is_empty() or int((entry.ship as SpaceShip).account_id)!=int(p.account_id):
@@ -135,7 +137,7 @@ func _view(data: Dictionary, context: Dictionary) -> Dictionary:
 	for row: Dictionary in result.get("ships", []):
 		var entry: Dictionary = active.get(int(row.id), {})
 		var world := (entry.world as WeakRef).get_ref() as SpaceWorld if not entry.is_empty() else null
-		row.can_recall = is_instance_valid(world) and (entry.ship as SpaceShip).mode in ["landed", "berth"] and world._aboard(entry.ship).is_empty()
+		row.can_recall = bool(context.get("store", true)) and is_instance_valid(world) and (entry.ship as SpaceShip).mode in ["landed", "berth"] and world._aboard(entry.ship).is_empty()
 	return result
 
 func adopt(world: SpaceWorld, ship: SpaceShip) -> void:

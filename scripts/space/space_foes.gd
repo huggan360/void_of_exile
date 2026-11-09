@@ -14,10 +14,10 @@ extends Node3D
 ## Everyone steers around planets, the Nexus and the Shardfield's rocks.
 signal foe_killed(kind: String, ship_id: int, at: Vector3)
 const KINDS := {
-	brood_skiff = {hp = 320, speed = 270.0, turn = 2.4, radius = 10.0, damage = 34, burst = 3, cooldown = 2.2, range = 650.0, bolt = 400.0},
-	void_eel = {hp = 1500, speed = 175.0, turn = 1.3, radius = 18.0, damage = 52, burst = 5, cooldown = 3.4, range = 900.0, bolt = 340.0},
-	brood_carrier = {hp = 5200, speed = 80.0, turn = 0.45, radius = 46.0, damage = 160, burst = 1, cooldown = 5.0, range = 1600.0, bolt = 210.0},
-	brood_mother = {hp = 9800, speed = 70.0, turn = 0.35, radius = 70.0, damage = 220, burst = 2, cooldown = 4.0, range = 1800.0, bolt = 220.0},
+	brood_skiff = {hp = 320, speed = 162.0, turn = 2.4, radius = 10.0, damage = 17, burst = 3, cooldown = 2.2, range = 650.0, bolt = 400.0},
+	void_eel = {hp = 1500, speed = 105.0, turn = 1.3, radius = 18.0, damage = 26, burst = 5, cooldown = 3.4, range = 900.0, bolt = 340.0},
+	brood_carrier = {hp = 5200, speed = 48.0, turn = 0.45, radius = 46.0, damage = 80, burst = 1, cooldown = 5.0, range = 1600.0, bolt = 210.0},
+	brood_mother = {hp = 9800, speed = 42.0, turn = 0.35, radius = 70.0, damage = 110, burst = 2, cooldown = 4.0, range = 1800.0, bolt = 220.0},
 }
 ## Brood near a flying ship per region (a wing at a time); ambushes add more.
 const CAP := {haven = 0, shardfield = 4, gloam = 7}

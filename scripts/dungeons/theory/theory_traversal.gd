@@ -19,8 +19,6 @@ var _bars: Control
 var _walk_speed := 0.0
 var _bob_phase := 0.0
 var _bob_weight := 0.0
-var _fp_shield: MeshInstance3D
-var _fp_shield_material: ShaderMaterial
 var _flashlight_rng := RandomNumberGenerator.new()
 var _flashlight_pause := 1.8
 var _flashlight_fault := 0.0
@@ -105,20 +103,7 @@ func _ready() -> void:
 	_flashlight.shadow_enabled = true
 	_flashlight.position = Vector3(0.16,-0.12,-0.15)
 	player.camera.add_child(_flashlight)
-	# Render the inside of the actual shield bubble. It surrounds the body,
-	# follows local gravity and stays in place as the player turns their head.
-	_fp_shield = MeshInstance3D.new()
-	_fp_shield.name = "FirstPersonShield"
-	_fp_shield.set_meta("portal_ignore",true)
-	var shield_shape := player.shield._mesh.mesh.duplicate() as SphereMesh
-	shield_shape.flip_faces = true
-	_fp_shield.mesh = shield_shape
-	_fp_shield_material = ShaderMaterial.new()
-	_fp_shield_material.shader = preload("res://shaders/warp_shield.gdshader")
-	_fp_shield.material_override = _fp_shield_material
-	_fp_shield.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_fp_shield.hide()
-	player.shield._mesh.add_child(_fp_shield)
+	_build_first_person_shield()
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(player) or not is_instance_valid(world): return
@@ -159,6 +144,7 @@ func physics_step(delta: float) -> void:
 	if player.frozen:
 		_walk_speed = 0.0
 		player.frozen = not world.is_presentation_ready()
+		if not player.frozen: player.clear_spawn(world)
 		update_camera(delta)
 		return
 	if cinematic:
@@ -283,19 +269,6 @@ func update_camera(delta: float) -> void:
 			_objective.text += "\n%s - %s wall on the main deck, %d m away." % [TheoryLayout.ELECTRICAL_NAMES[nearest],"left" if TheoryLayout.ELECTRICAL_POSITIONS[nearest].x<0 else "right",roundi(distance)]
 	if world.zone_at(player.global_position)=="wreck": _objective.text = "Escape airlock open" if world.repaired_boxes.size()==5 else "Repair the five sparking electrical boxes. %d/5 repaired. Follow the marked service bays beside the main passage." % world.repaired_boxes.size()
 
-
-func _update_first_person_shield() -> void:
-	var shield := player.shield
-	var intensity := shield._intensity*smoothstep(0.75,1.0,first_person)
-	_fp_shield.visible = intensity>0.01 and player.stats.hp>0.0 and not player.input_locked and not cinematic and not player.frozen
-	if not _fp_shield.visible: return
-	for parameter: String in ["tint","arc_color","rainbow","warp"]:
-		var value: Variant = shield._material.get_shader_parameter(parameter)
-		if value!=null: _fp_shield_material.set_shader_parameter(parameter,value)
-	_fp_shield_material.set_shader_parameter("intensity",intensity)
-	_fp_shield_material.set_shader_parameter("pulse",shield._pulse)
-	_fp_shield_material.set_shader_parameter("brace",shield._brace*intensity)
-	_fp_shield_material.set_shader_parameter("brace_dir",(_fp_shield.global_basis.inverse()*shield._brace_dir).normalized())
 
 func mouse_point() -> Vector3:
 	var mouse := player.get_viewport().get_visible_rect().size*0.5 if first_person>0.8 else player.get_viewport().get_mouse_position()

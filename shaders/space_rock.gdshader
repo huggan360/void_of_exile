@@ -19,7 +19,11 @@ void fragment() {
 	float bands = floor((rock_pos.y + sin(rock_pos.x * 3.0) * 0.2) * 6.0);
 	vec3 stone = COLOR.rgb * (0.42 + hash(vec3(bands)) * 0.16);
 	vec3 crystal = mix(vec3(0.45, 0.95, 0.82), vec3(0.95, 0.6, 0.85), step(0.5, pick));
-	ALBEDO = mix(stone, crystal, seam * 0.7);
-	ROUGHNESS = mix(0.95, 0.3, seam);
-	EMISSION = crystal * seam * 0.8;
+	// Far away a rock is a few pixels: glowing seams there only flicker into
+	// a bright shimmer, so they fade to plain stone with distance.
+	float near_glow = 1.0 - smoothstep(1200.0, 3500.0, length(VERTEX));
+	float lit = seam * near_glow;
+	ALBEDO = mix(stone, crystal, lit * 0.7);
+	ROUGHNESS = mix(0.95, 0.3, lit);
+	EMISSION = crystal * lit * 0.8;
 }

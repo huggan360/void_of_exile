@@ -5,7 +5,7 @@ extends SpatialWorld
 ## (dedicated server, or the local game offline) flies the ships, seats the
 ## crew and moves players between station, ship rooms and planet pads.
 const REALM := "astral"
-const SNAPSHOT_INTERVAL := 0.1
+const SNAPSHOT_INTERVAL := 0.05
 const DOCK_RANGE := 1200.0
 const RESCUE_TIME := 15.0
 ## A new battleship from the Nexus fleet or a town's shipwright.
@@ -247,6 +247,7 @@ func _place_planet_packs(p: Dictionary) -> void:
 		rng.seed = absi(String(p.id).hash())+977
 		var r := float(p.radius)
 		var used: Array[Vector3] = []
+		var scale := _pack_scale(p)
 		for spec: Array in SpaceEnemies.PLANET_PACKS.get(p.id, []):
 			var near := str(spec[5])
 			var spots: Array = []
@@ -255,7 +256,8 @@ func _place_planet_packs(p: Dictionary) -> void:
 					if item.decor or str(item.name)!=near: continue
 					var dir: Vector3 = item.dir
 					if acos(clampf(dir.y, -1.0, 1.0))<SpaceLayout.COMBAT_CAP*0.9: spots.append(dir)
-			for i in int(spec[3]):
+			var count := int(spec[3]) if str(spec[0])=="god" else maxi(1, roundi(int(spec[3])*scale))
+			for i in count:
 				var dir := Vector3.ZERO
 				for attempt in 40:
 					if not spots.is_empty():
@@ -268,13 +270,31 @@ func _place_planet_packs(p: Dictionary) -> void:
 						dir = Vector3(sin(arc/r)*cos(angle), cos(arc/r), sin(arc/r)*sin(angle))
 					var at := SpaceLayout.surface_point(p, (p.center as Vector3)+dir)
 					if enemy_blocked(at+Vector3(0.01, 0, 0)) and spots.is_empty(): continue
-					if used.any(func(u: Vector3) -> bool: return u.distance_to(at)<34.0): continue
+					if used.any(func(u: Vector3) -> bool: return u.distance_to(at)<24.0): continue
 					if SpaceLayout.FORTS.has(p.id) and at.distance_to(PlanetStrongholds.floor_center(p.id))<80.0: continue
 					used.append(at)
 					_planet_site(p, "%s_%d" % [spec[0], i], spec, at)
 					break
 
 		if SpaceLayout.FORTS.has(p.id): _fort_sites(p)
+
+## Enemies a planet holds at once: 40 on the gentlest worlds up to 100 on
+## the most dangerous (danger 0..3).
+const PLANET_ENEMIES := [40, 60, 80, 100]
+
+## How many times the table's pack counts (SpaceEnemies.PLANET_PACKS) to
+## place so planet `p` holds about its PLANET_ENEMIES (the god's pack once).
+static func _pack_scale(p: Dictionary) -> float:
+	var base := 0.0
+	var god := 0.0
+	for spec: Array in SpaceEnemies.PLANET_PACKS.get(p.id, []):
+		var size := 1.0 if str(spec[2])!="" else 0.0
+		for m: Array in spec[1]: size += (float(m[1])+float(m[2]))*0.5
+		if str(spec[0])=="god": god += size
+		else: base += size*int(spec[3])
+	if base<=0.0: return 1.0
+	var target := float(PLANET_ENEMIES[clampi(int(p.get("danger", 0)), 0, 3)])
+	return maxf(1.0, (target-god)/base)
 
 ## The fortress's boss in the middle and its guards inside the walls (they
 ## wake only once someone is in). Both come back a while after they fall.
@@ -300,7 +320,7 @@ func _planet_site(p: Dictionary, name: String, spec: Array, at: Vector3) -> void
 	var key := "%s_%s_%s" % [realm_id, p.id, name]
 	var members: Array = []
 	for m: Array in spec[1]: members.append({enemy = m[0], min = m[1], max = m[2]})
-	var pack := {members = members, respawn_time = float(spec[4]), activate_radius = 42.0}
+	var pack := {members = members, respawn_time = float(spec[4]), activate_radius = 90.0}
 	if str(spec[2])!="": pack.leader = {enemy = spec[2], min_members = 0}
 	Enemies.pack_overrides[key] = pack
 	enemy_director.add_quest_site({id = key, pack = key, pos = at, seed = absi(key.hash()) % 99991})
@@ -364,7 +384,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or not _may_board(ship, pid):
 				_tell(p, "That ship belongs to another crew.")
 				return
-			var near := zone_at(pos)=="station" if ship.mode=="berth" else pos.distance_to(hatch_position(ship))<9.0 if ship.mode=="landed" else false
+			var near := zone_at(pos)=="station" if ship.mode=="berth" else _beside_landed(ship, pos) if ship.mode=="landed" else false
 			if not near:
 				_tell(p, "You can only board at the Nexus or beside the landed ship.")
 				return
@@ -381,6 +401,9 @@ func server_action(p: Dictionary, args: Array) -> void:
 			var ship := ship_in_slot(SpaceLayout.pocket_at(pos))
 			var seat := str(args[1]) if args.size()>1 else ""
 			if ship==null or not seat in SpaceShip.SEATS: return
+			if ship.grounded() and seat!="pilot":
+				_tell(p, "Only the helm and the boarding hatch work while she is grounded. Launch first.")
+				return
 			var taken := int(ship.crew.get(seat, 0))
 			if taken!=0 and taken!=pid:
 				_tell(p, "Someone already sits there.")
@@ -400,11 +423,13 @@ func server_action(p: Dictionary, args: Array) -> void:
 		"takeoff":
 			var ship := ship_of(pid)
 			if ship==null or ship.pilot()!=pid or not ship.mode in ["landed", "berth"] or ship.broken: return
+			var from := ship.planet if ship.mode=="landed" else ""
 			ship.mode = "flying"
 			ship.planet = ""
 			ship.port = ""
 			ship.velocity = ship.xform.basis.y*30.0
 			ship.speed = 0.0
+			ship.settle_orbit(from)  # off a planet's pad she climbs straight into orbit
 			_broadcast_ship(ship)
 			var launch_event: Array = ["launch_shake", ship.id]
 			handle_event(launch_event)
@@ -478,6 +503,9 @@ func server_action(p: Dictionary, args: Array) -> void:
 			var ship: SpaceShip = (ships.get(int(args[1])) if args.size()>2 else ship_in_slot(SpaceLayout.pocket_at(pos)))
 			var id := str(args[-1])
 			if ship==null or not SpaceShip.PARTS.has(id) or not _may_board(ship, pid): return
+			if args.size()<=2 and ship.grounded():
+				_tell(p, "Only the helm and the boarding hatch work while she is grounded. Launch first.")
+				return
 			if float(ship.parts[id])>=100.0:
 				_tell(p, "The %s need no mending." % str(SpaceShip.PARTS[id].name).to_lower())
 				return
@@ -490,7 +518,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			Leisure.action(p, ["sip"], self)
 		"pour":
 			var vessel := ship_in_slot(SpaceLayout.pocket_at(pos))
-			if vessel: Leisure.action(p, ["use", "ship:%d:beer" % (vessel.fleet_id if vessel.fleet_id>0 else vessel.id)], self)
+			if vessel and not vessel.grounded(): Leisure.action(p, ["use", "ship:%d:beer" % (vessel.fleet_id if vessel.fleet_id>0 else vessel.id)], self)
 		"cigar":
 			Leisure.action(p, ["cigar"], self)
 		"deck":
@@ -499,14 +527,23 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if slot>=0:
 				var ship := ship_in_slot(slot)
 				if ship==null or pos.distance_to(pocket_point(slot, interior_anchors.get("ladder", Vector3.ZERO)))>3.5: return
-				if not ship.mode in ["flying", "berth"]:
-					_tell(p, "The deck hatch stays shut while she is landed. Go out through the boarding hatch.")
+				if ship.grounded():
+					_tell(p, "The deck hatch stays shut while she is grounded. Go out through the boarding hatch.")
 					return
 				_stand(ship, pid)
 				teleport(p, ship.xform*DECK_ARRIVAL, "deck")
 			else:
+				# [deck, ship id, where they stand in her frame]: checked in her
+				# frame, since the client sees her a moment in the past.
+				if args.size()>2 and args[2] is Vector3:
+					var ship: SpaceShip = ships.get(int(args[1]))
+					var slack := maxf(absf(ship.speed), ship.velocity.length())*1.0 if ship else 0.0
+					if ship and _may_board(ship, pid) and (args[2] as Vector3).distance_to(DECK_HATCH)<5.0 and pos.distance_to(ship.xform*DECK_HATCH)<40.0+slack:
+						teleport(p, pocket_point(ship.slot, (interior_anchors.get("ladder", Vector3.ZERO) as Vector3)+Vector3(1.2, 0.1, 0)), "below")
+					return
 				for ship: SpaceShip in ships.values():
-					if _may_board(ship, pid) and pos.distance_to(ship.xform*DECK_HATCH)<5.0:
+					var slack := maxf(absf(ship.speed), ship.velocity.length())*(SpaceShipView.DELAY+0.25)
+					if _may_board(ship, pid) and pos.distance_to(ship.xform*DECK_HATCH)<5.0+slack:
 						teleport(p, pocket_point(ship.slot, (interior_anchors.get("ladder", Vector3.ZERO) as Vector3)+Vector3(1.2, 0.1, 0)), "below")
 						return
 		"rescue":
@@ -772,7 +809,7 @@ func teleport(p: Dictionary, to: Vector3, reason := "") -> void:
 		if realm and realm.proxies.has(int(p.player_id)): realm.proxies[int(p.player_id)].global_position = to
 		if peer!=0:
 			Net.c_correct.rpc_id(peer, to)
-			Net.server._to_peer(peer, ["theory", ["moved", reason]])
+			Net.server._to_peer(peer, ["theory", ["moved", reason, to]])
 	elif is_instance_valid(local_player):
 		local_player.global_position = to
 		local_player.velocity = Vector3.ZERO
@@ -783,8 +820,22 @@ func _tell(p: Dictionary, text: String) -> void:
 		if int(p.get("peer_id", 0))!=0: Net.server._to_peer(int(p.peer_id), ["theory", ["say", text]])
 	else: handle_event(["say", text])
 
+## A ship room whose ship is gone (lost or stored): nobody belongs there.
+func stale_pocket(pos: Vector3) -> bool:
+	var slot := SpaceLayout.pocket_at(pos)
+	return slot>=0 and ship_in_slot(slot)==null
+
 func pocket_point(slot: int, local: Vector3) -> Vector3:
 	return SpaceLayout.pocket_origin(slot)+local
+
+## Whether `pos` stands beside landed `ship` (anywhere around her hull, as
+## SpaceInteraction offers boarding), with a little slack for lag.
+func _beside_landed(ship: SpaceShip, pos: Vector3) -> bool:
+	if pos.distance_to(hatch_position(ship))<9.0: return true
+	var local := ship.xform.affine_inverse()*pos
+	var half := ShipHull.beam(clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
+	var near := Vector2(clampf(local.x, -half, half), clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
+	return near.distance_to(Vector2(local.x, local.z))<=SpaceInteraction.LANDED_REACH+3.0 and absf(local.y+SpaceShip.LANDED_HEIGHT)<8.0
 
 ## Where the crew steps out of a landed ship.
 func hatch_position(ship: SpaceShip) -> Vector3:
@@ -800,6 +851,20 @@ func turret_muzzle(ship: SpaceShip, seat: String) -> Vector3:
 	# Muzzles of the hull's turret mounts (ShipHull), roughly where the barrels end.
 	var offsets := {pilot = Vector3(0, 0.45, ShipHull.BOW_Z-7.0), turret_top = Vector3(0, ShipHull.DECK_TOP+2.1, -17.9), turret_left = Vector3(-10.2, 2.42, -4.9), turret_right = Vector3(10.2, 2.42, -4.9)}
 	return ship.xform*(offsets.get(seat, Vector3.ZERO) as Vector3)
+
+## Flames on the heart crystal in the ship's room while it is destroyed.
+func _burn_heart(ship: SpaceShip) -> void:
+	var room: Node3D = interiors.get(ship.slot)
+	if room==null: return
+	var fire := room.get_node_or_null("HeartFire")
+	var on := ship.part_destroyed("heart")
+	if on and fire==null:
+		var blaze := ShipDamage.blaze(1.4)
+		blaze.name = "HeartFire"
+		blaze.position = (interior_anchors.get("heart", Vector3(6.8, 0, -2.6)) as Vector3)+Vector3.UP*0.7
+		room.add_child(blaze)
+	elif not on and fire!=null:
+		fire.queue_free()
 
 func _ensure_interior(slot: int) -> void:
 	var vessel := ship_in_slot(slot)
@@ -844,7 +909,10 @@ func _physics_process(delta: float) -> void:
 	_snapshot_timer -= delta
 	if _snapshot_timer<=0.0 and not ships.is_empty():
 		_snapshot_timer = SNAPSHOT_INTERVAL
-		var event: Array = ["ships", ships.values().map(func(s: SpaceShip) -> Array: return s.wire())]
+		# Stamped with server time: clients place each sample on the server's
+		# clock, not on when it happened to arrive (at full speed a few
+		# milliseconds of arrival jitter is metres of back-and-forth).
+		var event: Array = ["ships", ships.values().map(func(s: SpaceShip) -> Array: return s.wire()), Net.now()]
 		handle_event(event)
 		world_event.emit(event)
 
@@ -983,7 +1051,9 @@ func handle_event(event: Array) -> void:
 					ship = SpaceShip.from_wire(data, ship if Net.is_client() else null)
 					ships[id] = ship
 				_ensure_interior(ship.slot)
-				if not (server_build or Net.is_server()): _view_for(ship).push(ship, float(event[2]) if event.size()>2 else -1.0)
+				if not (server_build or Net.is_server()):
+					_view_for(ship).push(ship, float(event[2]) if event.size()>2 else -1.0)
+					_burn_heart(ship)
 		"ship-":
 			var id := int(event[1])
 			if Net.is_client(): ships.erase(id)
@@ -1269,7 +1339,7 @@ func create_fleet_ship(p: Dictionary, deployment: Dictionary, context: Dictionar
 	ship.mode = "berth" if context.has("berth") else "landed"
 	ship.berth = int(context.get("berth", 0))
 	ship.planet = str(context.planet)
-	if ship.planet!="": ship.port = ship.planet+":dock"
+	if ship.planet!="": ship.port = str(context.get("port", ship.planet+":dock"))
 	ships[ship.id] = ship
 	_ensure_interior(ship.slot)
 	return ship

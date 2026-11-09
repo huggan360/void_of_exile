@@ -229,6 +229,17 @@ static func planet_near(position: Vector3, margin := 60.0) -> Dictionary:
 		if position.distance_to(p.center)<float(p.radius)+maxf(max_height(p), 260.0 if p.get("city", false) else 0.0)+margin: return p
 	return {}
 
+## The landing pad's crystal (pad space): the shipwright's terminal there.
+const PAD_CRYSTAL := Vector3(0, 0, -21)
+
+## Where planet `p`'s landing pad crystal stands (world space).
+static func pad_crystal(p: Dictionary) -> Vector3:
+	return pad_frame(p)*PAD_CRYSTAL
+
+## Where the crystal on the town's shipyard pad stands (world space).
+static func dock_crystal(p: Dictionary) -> Vector3:
+	return (p.center as Vector3)+town_frame(p, "dock")*PAD_CRYSTAL
+
 ## Ground frame on a planet's pad (origin on the surface, basis.y = up).
 static func pad_frame(p: Dictionary) -> Transform3D:
 	var up: Vector3 = (p.pad as Vector3).normalized()

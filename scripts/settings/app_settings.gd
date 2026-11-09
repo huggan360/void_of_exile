@@ -67,7 +67,12 @@ func load_preferences() -> void:
 	bindings.clear()
 	for entry: Dictionary in ControlBindings.ACTIONS: bindings[entry.id] = ControlBindings.default_binding(entry.id)
 	if exists:
+		var version := int(config.get_value("interface","controls_version",1))
+		var reset: Array = []
+		for v: int in ControlBindings.MIGRATED:
+			if v>version: reset.append_array(ControlBindings.MIGRATED[v])
 		for entry: Dictionary in ControlBindings.ACTIONS:
+			if entry.id in reset: continue
 			var binding := ControlBindings.normalized(config.get_value("controls",entry.id,{}))
 			# Enter used to interact; it opens the chat now.
 			if entry.id=="interact" and binding.get("code",0)==KEY_ENTER and binding.get("kind","")=="key": continue
@@ -81,6 +86,7 @@ func save_preferences() -> Error:
 	for key in graphics: config.set_value("graphics",key,graphics[key])
 	for key in audio: config.set_value("audio",key,audio[key])
 	config.set_value("interface","reference_size",reference_size)
+	config.set_value("interface","controls_version",ControlBindings.VERSION)
 	for action in bindings: config.set_value("controls",action,bindings[action])
 	return config.save(PATH)
 

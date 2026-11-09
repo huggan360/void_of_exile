@@ -24,17 +24,15 @@ const ACTIONS := [
 	{id="interact",title="Interact / leave conversation",category="Interface",key=KEY_X},
 	{context="global",id="chat",title="Open chat / send message",category="Interface",key=KEY_ENTER},
 	{context="global",id="menu",title="Pause menu",category="Interface",key=KEY_ESCAPE},
-	{context="ship",id="ship_forward",title="Forward thrust",category="Spaceship flight",key=KEY_W},
-	{context="ship",id="ship_reverse",title="Reverse thrust",category="Spaceship flight",key=KEY_S},
+	{context="ship",id="ship_forward",title="Speed up",category="Spaceship flight",key=KEY_SHIFT},
+	{context="ship",id="ship_reverse",title="Speed down",category="Spaceship flight",key=KEY_CTRL},
 	{context="ship",id="ship_left",title="Turn left",category="Spaceship flight",key=KEY_A},
 	{context="ship",id="ship_right",title="Turn right",category="Spaceship flight",key=KEY_D},
-	{context="ship",id="ship_pitch_up",title="Pitch up",category="Spaceship flight",key=KEY_UP},
-	{context="ship",id="ship_pitch_down",title="Pitch down",category="Spaceship flight",key=KEY_DOWN},
+	{context="ship",id="ship_pitch_up",title="Nose up",category="Spaceship flight",key=KEY_S},
+	{context="ship",id="ship_pitch_down",title="Nose down",category="Spaceship flight",key=KEY_W},
 	{context="ship",id="ship_roll_left",title="Roll left",category="Spaceship flight",key=KEY_Q},
 	{context="ship",id="ship_roll_right",title="Roll right",category="Spaceship flight",key=KEY_E},
-	{context="ship",id="ship_boost",title="Boost",category="Spaceship flight",key=KEY_SHIFT},
-	{context="ship",id="ship_pulse",title="Toggle pulse drive",category="Spaceship flight",key=KEY_C},
-	{context="ship",id="ship_launch",title="Launch",category="Spaceship flight",key=KEY_SPACE},
+	{context="ship",id="ship_boost",title="Launch / hold to boost",category="Spaceship flight",key=KEY_SPACE},
 	{context="ship",id="ship_land",title="Land / dock / descend",category="Spaceship flight",key=KEY_X},
 	{context="ship",id="ship_fire",title="Fire cannons",category="Spaceship weapons",mouse=MOUSE_BUTTON_LEFT},
 	{context="ship",id="seat_camera",title="Change camera",category="Ship seats",key=KEY_V},
@@ -44,6 +42,10 @@ const ACTIONS := [
 	{context="leisure",id="leisure_smoke",title="Smoke / put away cigar",category="Drinks and cigars",key=KEY_C},
 
 ]
+## Bumped when default flight keys change: saved bindings from an older
+## version get the new defaults for those actions (see AppSettings).
+const VERSION := 3
+const MIGRATED := {2: ["ship_forward","ship_reverse","ship_pitch_up","ship_pitch_down","ship_boost"], 3: ["ship_boost"]}
 const RESERVED := [KEY_F3,KEY_F4,KEY_F6,KEY_F7,KEY_F9]
 
 static func spec(action: String) -> Dictionary:

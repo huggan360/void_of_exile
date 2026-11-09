@@ -309,6 +309,7 @@ func _physics_process(delta: float) -> void:
 		var area := AABB(global_position - Vector3(8, 8, 8), Vector3(16, 16, 16))
 		if terrain and terrain.is_area_meshed(area):
 			frozen = false
+			clear_spawn(null)
 		_update_camera(delta)
 		return
 
@@ -674,9 +675,22 @@ func _mouse_point() -> Vector3:
 	return on_plane if on_plane != null else global_position
 
 
-## Lifts the player onto a 1-block ledge if there's room above it.
-func _try_step_up(dir: Vector3) -> void:
-	var up := Vector3(0, STEP_HEIGHT, 0)
+## Just arrived in a world: if the body is inside something, step to the
+## nearest free spot (or rise above it and fall). The server allows this one
+## hop per arrival.
+func clear_spawn(place: GameWorld) -> void:
+	if not Leisure.seat_spec(player_id).is_empty(): return
+	var spot := Unstuck.spawn_spot(self, place)
+	if not spot.is_finite(): return
+	global_position = spot
+	velocity = Vector3.ZERO
+	if Net.is_client(): Net.client.send_action("unstuck", [spot, true])
+
+
+## Lifts the player onto a ledge up to `height` tall (along `normal`, the
+## local up) if there's room above it.
+func _try_step_up(dir: Vector3, normal := Vector3.UP, height := STEP_HEIGHT) -> void:
+	var up := normal*height
 	if test_move(global_transform, up):
 		return  # no headroom
 	if test_move(global_transform.translated(up), dir.normalized() * 0.3):

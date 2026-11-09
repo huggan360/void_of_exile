@@ -177,7 +177,9 @@ func attach_world(p_world: GameWorld, p_bullets: EnemyBullets, p_arrows: Arrows,
 	bullets = p_bullets
 	arrows = p_arrows
 	player = p_player
-	director = world.enemy_director if world is IslandWorld or world is DungeonWorld else null
+	# Every world with enemies mirrors them: realms, dungeons, Space and the
+	# Theory of Everything (the castle sets its own once built).
+	director = world.get("enemy_director") as EnemyDirector
 	if director:
 		director.remote = true
 
@@ -259,7 +261,16 @@ func on_snapshot(t: float, enemies: PackedFloat32Array, bosses: Array, players: 
 
 
 func on_events(events: Array) -> void:
-	_events.append_array(events)
+	for ev: Array in events:
+		# Ship poses carry their own server stamp and SpaceShipView shows them
+		# in the past already: use them at once, so the newest pose is always
+		# there to fly toward (waiting INTERP_DELAY too left it guessing ahead
+		# and snapping back).
+		if ev.size()>2 and str(ev[1])=="theory" and ev[2] is Array and not (ev[2] as Array).is_empty() \
+				and str(ev[2][0])=="ships" and (ev[2] as Array).size()>2 and is_instance_valid(world) and world is SpaceWorld:
+			world.handle_event(ev[2])
+		else:
+			_events.append(ev)
 
 
 func _sync_clock(t: float) -> void:

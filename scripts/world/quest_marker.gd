@@ -39,13 +39,13 @@ func _ready() -> void:
 
 
 func set_kind(kind: String) -> void:
-	_kind = kind if kind in ["main", "side", "turn_in", "port"] else "main"
+	_kind = kind if kind in ["main", "side", "turn_in", "port", "nexus"] else "main"
 	if not is_instance_valid(_sprite):
 		return
 	if not _textures.has(_kind):
 		_textures[_kind] = _make_texture(_kind)
 	_sprite.texture = _textures[_kind]
-	_material.emission = Color(1.0, 0.62, 0.56) if _kind == "port" else Color(1.0, 0.84, 0.45)
+	_material.emission = Color(1.0, 0.62, 0.56) if _kind == "port" else Color(1.0, 0.6, 0.9) if _kind == "nexus" else Color(1.0, 0.84, 0.45)
 	_material.albedo_texture = _sprite.texture
 	_material.emission_texture = _sprite.texture
 
@@ -60,9 +60,11 @@ func _process(delta: float) -> void:
 static func _make_texture(kind: String) -> ImageTexture:
 	var image := Image.create(24, 24, false, Image.FORMAT_RGBA8)
 	image.fill(Color.TRANSPARENT)
-	# A port in Space is the same badge in red, with a little ship in it.
-	var port := kind == "port"
-	var edge := Color("4a1616") if port else Color("49301d")
+	# A port in Space is the same badge in red, with a little ship in it;
+	# the Nexus is the same in pink.
+	var nexus := kind == "nexus"
+	var port := kind == "port" or nexus
+	var edge := Color("4a1640") if nexus else Color("4a1616") if port else Color("49301d")
 	if kind != "side":
 		for y in range(24):
 			for x in range(24):
@@ -70,7 +72,8 @@ static func _make_texture(kind: String) -> ImageTexture:
 				if distance <= 11.5:
 					var color := edge
 					if distance < 10.0:
-						if port: color = Color("d8453c") if y > 11 else Color("ff7a68")
+						if nexus: color = Color("e04aa8") if y > 11 else Color("ff8ad4")
+						elif port: color = Color("d8453c") if y > 11 else Color("ff7a68")
 						else: color = Color("f3be3c") if y > 11 else Color("ffe078")
 					image.set_pixel(x, y, color)
 	var glyph := ["01110", "01110", "01110", "01110", "01110", "00100", "00000", "01110", "01110"]

@@ -56,7 +56,7 @@ func _ready() -> void:
 			action_text = "Go out"
 		"outside":
 			title = "Ship's ramp"
-			description = "Climb back aboard."
+			description = "Climb aboard."
 			action_text = "Board"
 		"mark":
 			description = "Part of your tale."
@@ -71,7 +71,26 @@ func available(actor: Node3D) -> bool:
 		var ship := _repair_ship(actor)
 		if ship==null or ship.part(part)>=1.0: return false
 	if actor is Player and is_instance_valid(world) and world.ship_of((actor as Player).player_id)!=null: return false
+	# Grounded, only the helm and the boarding hatch work inside.
+	if kind in ["seat", "ladder", "repair", "tap"] and not (kind=="seat" and seat=="pilot") and is_instance_valid(world):
+		var room := world.ship_in_slot(SpaceLayout.pocket_at(actor.global_position))
+		if room!=null and room.grounded(): return false
+	if kind=="outside" and is_instance_valid(world):
+		var ship: SpaceShip = world.ships.get(ship_id)
+		if ship!=null and ship.mode=="landed": return enabled and is_inside_tree() and _beside_landed(actor)
 	return super.available(actor)
+
+## A landed ship is boarded from anywhere beside her, as at the Surface's
+## fence: the card follows the nearest point of her hull.
+const LANDED_REACH := 9.0
+func _beside_landed(actor: Node3D) -> bool:
+	var hull := get_parent() as Node3D
+	if hull==null: return false
+	var local := hull.to_local(actor.global_position)
+	var half := ShipHull.beam(clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
+	var near := Vector3(clampf(local.x, -half, half), local.y+1.0, clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
+	position = near
+	return Vector2(local.x-near.x, local.z-near.z).length()<=LANDED_REACH and absf(local.y+SpaceShip.LANDED_HEIGHT)<6.0
 
 func refresh(actor: Node3D) -> void:
 	if kind in ["repair", "repair_out"]:
@@ -114,8 +133,13 @@ func activate(actor: Node3D) -> bool:
 			world.request(["repair", part])
 		"repair_out":
 			world.request(["repair", ship_id, part])
-		"ladder", "deck_hatch":
+		"ladder":
 			_through_black(["deck"])
+		"deck_hatch":
+			# Where we stand on her deck as we see her (the server's copy of her
+			# is a moment ahead of ours, metres apart at speed).
+			var hull := get_parent() as Node3D
+			_through_black(["deck", ship_id, hull.global_transform.affine_inverse()*actor.global_position])
 		"tap":
 			world.request(["pour"])
 		"wright":

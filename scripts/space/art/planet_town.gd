@@ -126,21 +126,16 @@ func _shipyard(p: Dictionary) -> void:
 	var dock := Node3D.new()
 	dock.transform = SpaceLayout.town_frame(p, "dock")
 	add_child(dock)
+	SpacePlanet.build_pad(dock, p, world, "%s shipyard crystal" % str(SpaceLayout.TOWNS[p.id].name))
 	var art := NexusStation.Brush.new(dock, false, 1400.0)
-	var stone := Color(str(PlanetFlora.SETS[p.id].colors[1]))
-	art.round_part(Vector3(0, -0.2, 0), 27.0, 0.5, stone, true)
-	art.round_part(Vector3(0, 0.07, 0), 27.6, 0.04, Color("d3a34e"))
-	for i in 24:
-		var a := TAU*i/24.0
-		art.box(Vector3(cos(a)*25.8, 0.12, sin(a)*25.8), Vector3(0.6, 0.08, 0.6), Color("85efac"), false, 1.2)
 	for side in [-1.0, 1.0]:
-		art.box(Vector3(-22.0, 2.5, side*3.0), Vector3(0.4, 5.0, 0.4), Color("6d4839"), true)
-	art.box(Vector3(-22.0, 4.6, 0), Vector3(0.3, 1.4, 6.8), Color("e8c48a"))
+		art.box(Vector3(-24.5, 2.5, side*3.0), Vector3(0.4, 5.0, 0.4), Color("6d4839"), true)
+	art.box(Vector3(-24.5, 4.6, 0), Vector3(0.3, 1.4, 6.8), Color("e8c48a"))
 	art.finish()
 	# Painted on the board between the two posts, both faces.
 	for k in 2:
 		var sign := SignBoard.make("SHIPYARD", "paint", "", Color("4a3024"), 1.6)
-		sign.position = Vector3(-22.0+(0.16 if k==0 else -0.16), 4.6, 0)
+		sign.position = Vector3(-24.5+(0.16 if k==0 else -0.16), 4.6, 0)
 		sign.rotation.y = PI*0.5 if k==0 else -PI*0.5
 		dock.add_child(sign)
 

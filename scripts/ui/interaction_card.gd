@@ -159,7 +159,7 @@ func update_prompt(player: Player, blocked: bool) -> void:
 		for index in 10:
 			(_difficulty.get_child(index) as TextureProgressBar).value = clampf(target.difficulty - index, 0.0, 1.0) * 100.0
 		_message.text = TextMarkup.to_bbcode(target.description)
-		_accept.text = ("Talk" if person else target.action_text) + " ["+AppSettings.binding_text("interact")+"]"
+		_accept.text = ("Talk" if person else target.action_text) + " ["+AppSettings.binding_text(target.key_action)+"]"
 
 func accept() -> void:
 	if opened:

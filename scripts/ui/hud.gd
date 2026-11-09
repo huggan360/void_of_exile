@@ -52,6 +52,8 @@ var _home := ""
 var picker: CharacterPicker
 var _where := ""
 var _hp_bar := StatBar.new(UIStyle.HP, UIStyle.HP_LIGHT, 7)
+## Aboard: the ship's four breakable parts, over the hull bar.
+var _ship_parts := ShipPartIcons.new()
 var _mp_bar := StatBar.new(UIStyle.MAGIC, UIStyle.MAGIC_LIGHT, 5)
 var _xp_ring := XpRing.new()
 var _stats_panel: StatsPanel
@@ -154,6 +156,16 @@ func _ready() -> void:
 	bars.add_child(_hp_bar)
 	bars.add_child(_mp_bar)
 	root.add_child(bars)
+	_ship_parts.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_ship_parts.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_ship_parts.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	var parts_size := _ship_parts.custom_minimum_size
+	_ship_parts.offset_bottom = bars.offset_top-8
+	_ship_parts.offset_top = _ship_parts.offset_bottom-parts_size.y
+	_ship_parts.offset_left = -parts_size.x*0.5
+	_ship_parts.offset_right = parts_size.x*0.5
+	_ship_parts.hide()
+	root.add_child(_ship_parts)
 	UIStyle.add_shadow(_hp_bar)
 	UIStyle.add_shadow(_mp_bar)
 
@@ -459,6 +471,8 @@ func add_centered(panel: Control) -> void:
 
 ## Where you are (kept for debugging; the top of the screen shows the account bar).
 func _update_bars() -> void:
+	_ship_parts.visible = bar_override.has("parts")
+	if _ship_parts.visible: _ship_parts.set_parts(bar_override.parts)
 	if bar_override.is_empty():
 		if _bars_restyled:
 			_bars_restyled = false

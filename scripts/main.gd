@@ -75,6 +75,7 @@ var _async_world_build := false
 var low_health := LowHealthOverlay.new()
 var menus := Menus.new()
 var _traveling := false
+var _unstuck_at := -100.0
 var _dead := false  # online: our character died, waiting for the next one
 var _switching := false
 var _creating_character := false
@@ -157,6 +158,7 @@ func _ready() -> void:
 	menus.join_requested.connect(_join_server)
 	menus.leave_pressed.connect(func() -> void: _return_offline("You left."))
 	menus.quit_pressed.connect(_quit)
+	menus.unstuck_pressed.connect(_unstuck)
 	menus.closed.connect(func() -> void: player.input_locked = _traveling or _dead)
 	get_tree().auto_accept_quit = false
 	hud.picker.switch_requested.connect(_switch_character)
@@ -972,6 +974,32 @@ func _return_offline(message: String, color := UIStyle.TEXT_DIM) -> void:
 		menus.show_start()
 	else:
 		menus.show_servers(message, color)
+
+
+## Unstuck (game menu): hop to the nearest free spot. Not while seated,
+## travelling, dead or out on the jetpack.
+func _unstuck() -> void:
+	var controller := player.spatial_controller
+	var place: GameWorld = controller.get("world") if is_instance_valid(controller) and controller.get("world") is GameWorld else world
+	var busy := _traveling or _dead or player.frozen or player.stats.hp<=0.0 or place==null
+	if controller is SpaceTraversal:
+		var space := controller as SpaceTraversal
+		busy = busy or space.seat!="" or space.city_seat!="" or space.spacewalk or space.cinematic
+	if busy or not Leisure.seat_spec(player.player_id).is_empty():
+		hud.toasts.push("You can't use Unstuck right now.", UIStyle.BAD, 4.0)
+		return
+	if Time.get_ticks_msec()/1000.0-_unstuck_at<Unstuck.COOLDOWN:
+		hud.toasts.push("Unstuck is cooling down. Try again in a few seconds.", UIStyle.BAD, 4.0)
+		return
+	var spot := Unstuck.find_spot(player, place)
+	if not spot.is_finite():
+		hud.toasts.push("No free spot nearby. Try Escape to the Tavern.", UIStyle.BAD, 5.0)
+		return
+	_unstuck_at = Time.get_ticks_msec()/1000.0
+	player.global_position = spot
+	player.velocity = Vector3.ZERO
+	if Net.is_client(): Net.client.send_action("unstuck", [spot])
+	menus.close()
 
 
 ## Quit Game: say goodbye to the server first (so it saves at once).

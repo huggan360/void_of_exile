@@ -6,8 +6,8 @@ extends ResponsiveUILayer
 ##                 Options and Quit Game under it, while the world turns
 ##                 slowly behind; bottom left the account (AccountWidget).
 ##                 Nothing can be played without logging in.
-##   game menu     (Escape) the logo in the top left, with Resume, Options,
-##                 Leave and Quit Game in the middle
+##   game menu     (Escape) the logo in the top left, with Resume, Unstuck,
+##                 Options, Leave and Quit Game in the middle
 ##   servers       the server list (ServerPanel)
 ## Options uses the same scaled canvas. Neither menu pauses anything: the world
 ## (and the server) keep going, only your character's input is locked.
@@ -16,6 +16,7 @@ signal singleplayer_pressed
 signal closed
 signal join_requested(address: String, port: int)
 signal leave_pressed
+signal unstuck_pressed
 signal quit_pressed
 
 const LOGO := preload("res://assets/branding/launch_logo.png")
@@ -80,6 +81,7 @@ func _ready() -> void:
 	_pause.add_child(corner)
 	var pause_box := _column(_pause)
 	pause_box.add_child(_button("Resume", close))
+	pause_box.add_child(_button("Unstuck", func() -> void: unstuck_pressed.emit()))
 	pause_box.add_child(_button("Options", show_options))
 	_leave = _button("Leave Server", func() -> void: leave_pressed.emit())
 	pause_box.add_child(_leave)

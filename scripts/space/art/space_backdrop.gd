@@ -236,7 +236,8 @@ func _asteroids() -> void:
 			if not crystal_cells.has(ckey):
 				var holder := Node3D.new()
 				add_child(holder)
-				crystal_cells[ckey] = NexusStation.Brush.new(holder, false, 9000.0)
+				# Glowing spikes only up close: far off they sparkle into a blur.
+				crystal_cells[ckey] = NexusStation.Brush.new(holder, false, 3000.0)
 			for j in 4:
 				var size := Vector3(radius*0.24, radius*rng.randf_range(0.6, 1.3), radius*0.24)
 				var frame := Transform3D(rotation, at).translated_local(Vector3((j-1.5)*radius*0.22, radius*0.62, 0))
