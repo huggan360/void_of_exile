@@ -39,7 +39,9 @@ func setup(p_id: String, p_prefab: ObstacleLibrary.Prefab, p_biome: BiomeDef,
 func _ready() -> void:
 	collision_layer = Player.OBSTACLE_LAYER  # so the camera doesn't dodge trees
 	add_child(_visual)
-	var meshes := prefab.meshes_for(biome)
+	# The dedicated server never draws: collision only, no meshes or lights.
+	var drawn := not Net.is_server()
+	var meshes: Array = prefab.meshes_for(biome) if drawn else [null, null]
 	for i in 2:
 		if meshes[i] == null:
 			continue
@@ -51,7 +53,7 @@ func _ready() -> void:
 		mi.visibility_range_end = DRAW_DISTANCE
 		mi.gi_mode = GeometryInstance3D.GI_MODE_DYNAMIC
 		_visual.add_child(mi)
-	if prefab.has_glow:
+	if prefab.has_glow and drawn:
 		var light := OmniLight3D.new()
 		light.light_color = biome.obstacle_colors[ObstacleLibrary.GLOW_SLOT]
 		light.light_energy = 1.6

@@ -16,7 +16,9 @@ static func warm_asset(folder: String) -> void:
 		var rig: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(folder + "/rig.json"))
 		var meshes: Array = []
 		for suffix in ["", "_glow"]:
-			meshes.append(VoxModel.load_mesh(folder + "/body" + suffix + ".vox") if FileAccess.file_exists(folder + "/body" + suffix + ".vox") else null)
+			# Meshing is for eyes: the dedicated server only needs the rig (collision).
+			var path: String = folder + "/body" + str(suffix) + ".vox"
+			meshes.append(VoxModel.load_mesh(path) if FileAccess.file_exists(path) and not Net.is_server() else null)
 		_cache[folder] = {rig = rig, meshes = meshes}
 
 func _ready() -> void:
@@ -26,7 +28,8 @@ func _ready() -> void:
 	var frame: Array = data.rig.parts.body.frame_min
 	var voxel_size: float = data.rig.voxel_size
 	for i in 2:
-		if data.meshes[i] == null:
+		# The dedicated server never draws: the house is only its collision there.
+		if data.meshes[i] == null or Net.is_server():
 			continue
 		var mesh := MeshInstance3D.new()
 		mesh.mesh = data.meshes[i]

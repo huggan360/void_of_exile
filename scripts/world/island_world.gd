@@ -150,6 +150,7 @@ func _warm_stream_assets() -> void:
 		for building in buildings: VillageHouse.warm_asset(str(building.asset))
 	for id in range(2,Biomes.COUNT):
 		var biome := Biomes.get_biome(id)
+		if server_build or Net.is_server(): continue  # nothing is drawn there: no meshes to warm
 		for prefab in biome.obstacles: ObstacleLibrary.get_prefab(str(prefab)).meshes_for(biome)
 		if not server_build:
 			for prefab in biome.decor: ObstacleLibrary.get_prefab(str(prefab)).meshes_for(biome)

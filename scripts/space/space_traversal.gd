@@ -13,7 +13,8 @@ enum CameraMode { ANGLED, SHOULDER, FIRST_PERSON }
 var camera_mode := CameraMode.ANGLED
 var city_seat := ""
 var _lift := -1
-var _ship_slot := -1  # the room of the ship we sat in, to stand up beside the chair
+var _ship_slot := -1
+var _outside_culled := false  # the outside hidden while we're in a ship room  # the room of the ship we sat in, to stand up beside the chair
 var _lift_height := 0.0
 var seat := ""
 var _ship: SpaceShip
@@ -211,6 +212,7 @@ func _process(delta: float) -> void:
 		_ship_info.add_theme_color_override("font_color", UIStyle.HP_LIGHT if _ship.hp<SpaceShip.MAX_HP/3 or _ship.broken else UIStyle.TEXT)
 	_update_bars(zone)
 	_update_hint()
+	_cull_outside()
 	_pin_to_hull()
 	if seat!="":
 		_seated(delta)
@@ -251,6 +253,21 @@ func _update_air() -> void:
 
 func _seat_title(id: String) -> String:
 	return SpaceInteraction.SEAT_TITLES.get(id, "Aboard")
+
+## In a ship's room (camera too) nothing outside can be seen: its windows show
+## their own stars. So planets, the Nexus, the brood and the other hulls are not
+## drawn meanwhile (they go on simulating); the moment the view leaves the
+## room they are back.
+func _cull_outside() -> void:
+	var camera := player.get_viewport().get_camera_3d()
+	var inside := camera!=null and SpaceLayout.pocket_at(camera.global_position)>=0 and SpaceLayout.pocket_at(player.global_position)>=0
+	if inside==_outside_culled: return
+	_outside_culled = inside
+	var nodes: Array = world.planets.values()+world.ship_views.values()
+	nodes.append(world.station)
+	nodes.append(world.foes)
+	for node: Variant in nodes:
+		if is_instance_valid(node) and node is Node3D: (node as Node3D).visible = not inside
 
 ## The keys for what you are doing now, in the HUD's key help above the
 ## minimap (only while seated, out on the hull, in a lift or at a city table).
@@ -1087,6 +1104,10 @@ func _hide_hud(hidden: bool) -> void:
 
 func _exit_tree() -> void:
 	Input.mouse_mode = _old_mouse
+	if _outside_culled and is_instance_valid(world):
+		_outside_culled = false
+		for node: Variant in world.planets.values()+world.ship_views.values()+[world.station, world.foes]:
+			if is_instance_valid(node) and node is Node3D: (node as Node3D).visible = true
 	var game := world.game_root() if is_instance_valid(world) else null
 	var hud: Variant = game.get("hud") if game else null
 	if hud: hud.key_help.set_rows([])

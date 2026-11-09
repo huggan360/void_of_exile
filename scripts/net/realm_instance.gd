@@ -68,6 +68,7 @@ func add_player(player_id: int, peer_id: int) -> NetPlayerProxy:
 	world.enemy_director.players.append(proxy)
 	world.update_streaming_multi(_positions(), true)
 	empty_for = 0.0
+	_wake()
 	return proxy
 
 
@@ -77,6 +78,18 @@ func remove_player(player_id: int) -> void:
 		world.enemy_director.players.erase(proxy)
 		proxy.queue_free()
 	proxies.erase(player_id)
+	if proxies.is_empty(): _sleep()
+
+
+## Nobody here: the whole world (ships, brood, city, enemies, timers in it)
+## stops ticking until someone comes back; it still unloads when empty long
+## enough. A world a running dungeon keeps open stays awake for it.
+func _sleep() -> void:
+	if not is_instance_valid(world) or (Net.server and Net.server.dungeons.keeps_origin_open(name)): return
+	world.process_mode = Node.PROCESS_MODE_DISABLED
+
+func _wake() -> void:
+	if is_instance_valid(world): world.process_mode = Node.PROCESS_MODE_INHERIT
 
 
 func _physics_process(delta: float) -> void:
