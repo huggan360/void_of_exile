@@ -83,11 +83,32 @@ class Brush extends RefCounted:
 		part("cone", Transform3D(Basis.IDENTITY, at + Vector3.UP * height * 0.5), Vector3(height * 0.5, height, height * 0.5), color, false, 1.2)
 		if solid: box(at + Vector3.UP * height * 0.28, Vector3(height * 0.22, height * 0.55, height * 0.22), color, true)
 
+	## A small amber glass lantern in a copper cage, hung from a stepped bracket.
+	func hanging_lantern(at: Vector3) -> void:
+		var copper := Color("94704a")
+		var iron := Color("343744")
+		box(at, Vector3(0.32, 0.46, 0.32), Color("bc8246"), false, 0.35)
+		box(at+Vector3(0, -0.02, 0), Vector3(0.16, 0.28, 0.16), Color("ffcf83"), false, 1.3)
+		for y: float in [-0.28, 0.28]: box(at+Vector3.UP*y, Vector3(0.46, 0.08, 0.46), copper)
+		for x: float in [-0.19, 0.19]:
+			for z: float in [-0.19, 0.19]: box(at+Vector3(x, 0, z), Vector3(0.045, 0.54, 0.045), iron)
+		for y: float in [-0.12, 0.12]:
+			box(at+Vector3(0, y, 0.2), Vector3(0.42, 0.035, 0.035), copper)
+			box(at+Vector3(0, y, -0.2), Vector3(0.42, 0.035, 0.035), copper)
+		for tier in 3:
+			var width := 0.54-float(tier)*0.12
+			box(at+Vector3.UP*(0.34+tier*0.055), Vector3(width, 0.06, width), Color("43605b").lightened(tier*0.04))
+		box(at+Vector3.UP*0.5, Vector3(0.08, 0.16, 0.08), copper)
+
 	func lantern(at: Vector3, tall := 4.0) -> void:
-		box(at + Vector3.UP * tall * 0.5, Vector3(0.22, tall, 0.22), Color("94683f"))
-		box(at + Vector3.UP * tall, Vector3(0.85, 1.0, 0.85), Color("ffd28b"), false, 2.4)
-		for offset in [-0.55, 0.55]:
-			box(at + Vector3.UP * (tall + offset), Vector3(1.05, 0.14, 1.05), Color("b18b49"))
+		var height := clampf(tall*0.7, 2.2, 3.2)
+		box(at+Vector3.UP*0.09, Vector3(0.4, 0.18, 0.4), Color("3e4148"))
+		box(at+Vector3.UP*(height*0.5), Vector3(0.15, height, 0.15), Color("694b37"))
+		for y: float in [0.22, height*0.6, height-0.1]:
+			box(at+Vector3.UP*y, Vector3(0.22, 0.09, 0.22), Color("94704a"))
+		box(at+Vector3(0.28, height, 0), Vector3(0.68, 0.09, 0.13), Color("343744"))
+		box(at+Vector3(0.57, height-0.12, 0), Vector3(0.08, 0.3, 0.08), Color("94704a"))
+		hanging_lantern(at+Vector3(0.57, height-0.8, 0))
 
 	func finish() -> void:
 		if server_only: return
@@ -131,7 +152,7 @@ func build(server: bool) -> void:
 		command_table = Vector3(-13, 0, 2),
 		campaign_board = Vector3(-27, 0, -12),
 		npc_captain = _facing(Vector3(-25, 0, -8), Vector3(-23, 0, 0)),
-		npc_quartermaster = _facing(Vector3(-17, 0, 5), Vector3(-10, 0, 6)),
+		npc_quartermaster = _facing(Vector3(-13, 0, -0.25), Vector3(-13, 0, 5)),
 		npc_mechanic = _facing(Vector3(25, 0, 19), Vector3(31, 0, 17)),
 		gangways = [],
 	}
@@ -167,16 +188,27 @@ func build(server: bool) -> void:
 	_tavern(art)
 	_plaza(art, server)
 	if not server: _floating_rock()
-	# Brass observatory table and an unobstructed landing mark, without a rocket.
+	# A standing-height shipwright's chart table, reachable from its front edge.
 	var table: Vector3 = anchors.command_table
-	art.round_part(table + Vector3.UP * 0.8, 0.6, 1.6, DARK, true)
-	art.round_part(table + Vector3.UP * 1.75, 3.7, 0.35, WOOD, true)
-	art.round_part(table + Vector3.UP * 1.95, 3.25, 0.05, Color("253f4c"), false, 0.3)
+	art.round_part(table+Vector3.UP*0.46, 0.27, 0.92, DARK, true)
+	art.round_part(table+Vector3.UP*0.08, 0.68, 0.16, DARK, true)
+	art.round_part(table+Vector3.UP*1.0, 1.35, 0.16, WOOD, true)
+	art.round_part(table+Vector3.UP*1.09, 1.2, 0.025, Color("253f4c"), false, 0.15)
 	if not server:
-		for i in 22:
-			var angle := i * 2.39996
-			var at := table + Vector3(cos(angle), 0, sin(angle)) * sqrt(float(i) / 22.0) * 2.9
-			art.box(at + Vector3.UP * 2.0, Vector3(0.13, 0.06, 0.13), GREEN if i % 3 else PINK, false, 2.4)
+		for i in 16:
+			var angle := i*2.39996
+			var at := table+Vector3(cos(angle), 0, sin(angle))*sqrt(float(i)/16.0)*1.05
+			art.box(at+Vector3.UP*1.12, Vector3(0.055, 0.025, 0.055), GREEN if i%3 else PINK, false, 0.8)
+		var sign := SignBoard.make("SHIPWRIGHT", "brass", "helm", Color("ffe0a0"), 0.65)
+		sign.position = table+Vector3(-2.6, 1.65, 0)
+		add_child(sign)
+		art.box(table+Vector3(-2.6, 0.75, 0), Vector3(0.14, 1.5, 0.14), DARK)
+		for i in 6:
+			var angle := TAU*i/6.0
+			var radial := Vector3(sin(angle), 0, cos(angle))
+			var label := SignBoard.make("BERTH %d" % (i+1), "plank", "", Color("ffe0a0"), 0.55)
+			label.transform = Transform3D(Basis(Vector3.UP, angle+PI), radial*49.0+Vector3(cos(angle), 0, -sin(angle))*2.9+Vector3.UP*1.65)
+			add_child(label)
 	var pad: Vector3 = anchors.rocket_pad.origin
 	art.round_part(pad + Vector3.UP * 0.04, 5.1, 0.08, BRASS)
 	art.round_part(pad + Vector3.UP * 0.09, 4.65, 0.02, DARK)
@@ -186,12 +218,15 @@ func build(server: bool) -> void:
 	_board(art, anchors.campaign_board)
 	for i in 3:
 		_stall(art, stall_at(i), PINK if i % 2 else GREEN)
+	# Framed lantern trees replace the giant luminous cones on bare poles.
 	for at: Vector3 in [Vector3(-33, 0, 19), Vector3(-10, 0, 35), Vector3(15, 0, 35), Vector3(39, 0, -3), Vector3(-40, 0, -4)]:
-		art.round_part(at + Vector3.UP * 0.55, 2.6, 1.1, DARK, true)
-		art.box(at + Vector3.UP * 3, Vector3(0.8, 5, 0.8), WOOD, true)
-		for j in 7:
-			var angle := j * 2.4
-			art.crystal(at + Vector3(sin(angle) * 2.0, 4 + j % 3, cos(angle) * 2.0), 2.4, GREEN if j % 2 else PINK)
+		art.round_part(at+Vector3.UP*0.13, 0.6, 0.26, DARK, true)
+		art.box(at+Vector3.UP*1.55, Vector3(0.22, 3.1, 0.22), WOOD, true)
+		for side: float in [-1.0, 1.0]:
+			art.box(at+Vector3(side*0.45, 3.0, 0), Vector3(1.0, 0.12, 0.16), BRASS)
+			art.box(at+Vector3(side*0.85, 2.87, 0), Vector3(0.08, 0.3, 0.08), DARK)
+			art.hanging_lantern(at+Vector3(side*0.85, 2.15, 0))
+		art.box(at+Vector3.UP*3.15, Vector3(0.35, 0.13, 0.35), BRASS)
 	for i in 16:
 		var angle := TAU * (i + 0.5) / 16
 		art.lantern(Vector3(sin(angle), 0, cos(angle)) * 44, 4.6)
@@ -223,15 +258,15 @@ func _tavern(art: Brush) -> void:
 			art.box(Vector3(side * 14.5, 4.3, z), Vector3(0.9, 8.6, 0.9), DARK, true)
 			art.lantern(Vector3(side * 13.4, 0, z), 4.3)
 	art.box(Vector3(0, 7.5, -35), Vector3(30, 0.65, 0.9), BRASS)
-	art.box(Vector3(-4, 1.2, -29), Vector3(15, 2.4, 1.8), WOOD, true)
-	art.box(Vector3(-4, 2.5, -29), Vector3(16, 0.25, 2.3), BRASS)
+	art.box(Vector3(-4, 0.55, -29), Vector3(15, 1.1, 1.8), WOOD, true)
+	art.box(Vector3(-4, 1.15, -29), Vector3(16, 0.15, 2.0), BRASS)
 	for i in 9:
 		art.box(Vector3(-10 + i * 1.5, 3.3, -34.4), Vector3(0.5, 0.8 + (i % 3) * 0.3, 0.5), GREEN if i % 2 else PINK, false, 0.4)
 	for at: Vector3 in [Vector3(-7, 0, -20), Vector3(5, 0, -21)]:
-		art.round_part(at + Vector3.UP * 1.4, 2.1, 0.35, WOOD, true)
-		art.round_part(at + Vector3.UP * 0.65, 0.4, 1.3, DARK, true)
+		art.round_part(at + Vector3.UP * 0.9, 1.1, 0.16, WOOD, true)
+		art.round_part(at + Vector3.UP * 0.41, 0.25, 0.82, DARK, true)
 		for side in [-1.0, 1.0]:
-			art.box(at + Vector3(side * 3.1, 0.6, 0), Vector3(1.1, 1.2, 3.5), WOOD, true)
+			art.box(at + Vector3(side * 1.9, 0.3, 0), Vector3(0.7, 0.6, 2.2), WOOD, true)
 	art.box(Vector3(9, 0.55, -32), Vector3(5, 1.1, 3.4), Color("695864"), true)
 	for side in [-1.0, 1.0]:
 		art.box(Vector3(9 + side * 2, 2.6, -32.5), Vector3(0.8, 4.2, 2.7), DARK, true)
@@ -433,8 +468,8 @@ func _plaza(art: Brush, server: bool) -> void:
 		for k in int(size.z / 2.0):
 			art.box(at + Vector3(0, 0.07, -size.z * 0.5 + 1.0 + k * 2.0), Vector3(size.x - 1.6, 0.012, 0.18), BRASS)
 	# One layer higher than the hearth circle, which it overlaps at its edge.
-	art.round_part(anchors.command_table + Vector3.UP * 0.085, 6.6, 0.03, BRASS)
-	art.round_part(anchors.command_table + Vector3.UP * 0.1, 6.2, 0.03, Color("244c55"))
+	art.round_part(anchors.command_table + Vector3.UP * 0.085, 3.3, 0.03, BRASS)
+	art.round_part(anchors.command_table + Vector3.UP * 0.1, 3.0, 0.03, Color("244c55"))
 	art.box(Vector3(27, 0.035, -15), Vector3(28, 0.03, 13), BRASS)
 	art.box(Vector3(27, 0.05, -15), Vector3(27.2, 0.03, 12.2), Color("8a4c62"))
 	# Arrival compass rose under the spawn point, laid on top of the runner.
@@ -484,11 +519,11 @@ func _plaza(art: Brush, server: bool) -> void:
 			art.part("sphere", Transform3D(Basis.IDENTITY, bloom), Vector3.ONE * (0.42 + (j % 2) * 0.12), PINK if j % 2 else Color("ffe08f"), false, 0.5)
 			art.part("sphere", Transform3D(Basis.IDENTITY, bloom + Vector3(0.1, -0.2, 0.25)), Vector3.ONE * 0.36, Color("5fae6e"))
 	for at: Vector3 in [Vector3(8.5, 0, -12), Vector3(-8.5, 0, -12), Vector3(-19, 0, -2), Vector3(19, 0, 11)]:
-		art.round_part(at + Vector3.UP * 0.5, 0.8, 1.0, STONE, true)
-		art.box(at + Vector3.UP * 1.9, Vector3(0.28, 2.0, 0.28), Color("6b4a32"))
-		for j in 5:
-			var angle := j * 2.4
-			art.crystal(at + Vector3(sin(angle) * 0.5, 2.3 + (j % 3) * 0.35, cos(angle) * 0.5), 1.1, GREEN if j % 2 else PINK)
+		art.round_part(at+Vector3.UP*0.14, 0.55, 0.28, STONE, true)
+		art.lantern(at, 4.0)
+		for j in 4:
+			var angle := j*PI*0.5
+			art.box(at+Vector3(sin(angle)*0.37, 0.36, cos(angle)*0.37), Vector3(0.28, 0.24, 0.28), Color("5b805c").lightened((j%2)*0.06))
 	# Lantern posts around the plaza with fairy lights sagging between them.
 	# A ring around the hearth, pulled in on the west to clear the command table.
 	var posts: Array[Vector3] = [Vector3(4.8, 0, 9.5), Vector3(11.5, 0, 2.8), Vector3(11.5, 0, -6.8), Vector3(4.8, 0, -13.5),
@@ -496,8 +531,8 @@ func _plaza(art: Brush, server: bool) -> void:
 	for at in posts: art.lantern(at, 4.2)
 	if server: return
 	for i in posts.size():
-		var a := posts[i] + Vector3.UP * 4.1
-		var b := posts[(i + 1) % posts.size()] + Vector3.UP * 4.1
+		var a := posts[i] + Vector3.UP * 2.94
+		var b := posts[(i + 1) % posts.size()] + Vector3.UP * 2.94
 		for k in range(1, 12):
 			var t := k / 12.0
 			var at := a.lerp(b, t) + Vector3.DOWN * sin(t * PI) * 1.3
@@ -533,7 +568,7 @@ func _signpost(at: Vector3) -> void:
 	var art := Brush.new(self, false)
 	art.box(at + Vector3.UP * 2.0, Vector3(0.3, 4.0, 0.3), Color("6b4a32"))
 	art.box(at + Vector3.UP * 4.1, Vector3(0.5, 0.25, 0.5), BRASS)
-	var targets := [["Tavern Inn", Vector3(0, 0, -30), 3.7], ["Ship command", anchors.command_table, 2.9], ["Rocket home", anchors.rocket_pad.origin, 2.1], ["Berths", Vector3(0, 0, 54), 1.3]]
+	var targets := [["Tavern Inn", Vector3(0, 0, -30), 3.7], ["Shipwright", anchors.command_table, 2.9], ["Surface shuttle", anchors.rocket_pad.origin, 2.1], ["Berths", Vector3(0, 0, 54), 1.3]]
 	for entry: Array in targets:
 		var dir: Vector3 = ((entry[1] as Vector3) - at) * Vector3(1, 0, 1)
 		# Board along local X toward the target, thin along Z. The label sits at the tip so

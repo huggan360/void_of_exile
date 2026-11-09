@@ -31,7 +31,7 @@ const NPCS := {
 	bell = {name = "Quartermaster Bell", world = "astral", at = {nexus = "npc_quartermaster"}, model = "npc_baker",
 		greeting = "Every ship leaves my berths with full lanterns and an empty biscuit tin. Somehow."},
 	orin_nexus = {name = "Orin the Starwright", world = "astral", at = {nexus = "npc_mechanic"}, model = "npc_smith",
-		greeting = "The rocket's warm if you ever miss the Tavern. I miss the trees, a little."},
+		greeting = "The shuttle's warm if you miss the Surface. It lands by Hearthwick's launch pad."},
 	moss = {name = "Elder Moss", world = "astral", at = {planet = "verdance", spot = "treehouse_village"}, model = "npc_gardener",
 		greeting = "Mind the glowcaps. They sulk when you step on them."},
 	lys = {name = "Keeper Lys", world = "astral", at = {planet = "rosamund", spot = "petal_shrine"}, model = "npc_magician",

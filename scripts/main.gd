@@ -380,14 +380,14 @@ func set_port_arrival(kind: String) -> void:
 			_offline_ship_transfer = {wire = vessel.wire().duplicate(true), smoking = vessel.smoking.duplicate(),
 				imported = {}, passengers = {player.player_id: player.global_position-SpaceLayout.pocket_origin(vessel.slot)}}
 
-func travel(destination: String, at := Vector3.INF) -> void:
+func travel(destination: String, at := Vector3.INF, cinematic_departure := false) -> void:
 	if _traveling or _dead:
 		return
 	if ChambersWorld.is_chambers(destination) and not Net.is_client():
 		hud.toasts.push("The Chambers open when you play online or in Singleplayer.", UIStyle.HP_LIGHT, 3.0)
 		return
 	_traveling = true
-	_ship_travel = _port_arrival in ["launch", "descend"]
+	_ship_travel = cinematic_departure or _port_arrival in ["launch", "descend"]
 	boss_introduction.cancel()
 	if world is CastleWorld and is_instance_valid(world.encounter): world.encounter._restore_camera()
 	player.input_locked = true
@@ -395,7 +395,9 @@ func travel(destination: String, at := Vector3.INF) -> void:
 	hud.visible = false
 	var original_client := Net.client
 	var original_generation := _world_generation
-	if _ship_travel: await transition.fade_in(place_name(destination))
+	if _ship_travel:
+		await transition.fade_in(place_name(destination))
+		if cinematic_departure: await transition.fade_from_black(0.2)
 	elif not _args.has("qa-quick"): await transition.jump_in(place_name(destination))
 	if original_client!=Net.client or original_generation!=_world_generation: return
 	var record := {}
@@ -424,6 +426,7 @@ func travel(destination: String, at := Vector3.INF) -> void:
 		_port_arrival = ""
 		return
 	var port := str(record.get("port", _port_arrival))
+	if cinematic_departure and not Net.is_client(): port = "rocket"
 	_port_arrival = ""
 	if not Net.is_client() and not _offline_ship_transfer.is_empty():
 		var target: SpaceWorld = world if world is SpaceWorld else world.surface_ships if world is IslandWorld else null
@@ -432,6 +435,7 @@ func travel(destination: String, at := Vector3.INF) -> void:
 			if vessel: record.arrival_pos = target.pocket_point(vessel.slot, _offline_ship_transfer.passengers[player.player_id])
 		_offline_ship_transfer = {}
 	if record.has("arrival_pos"): at = record.arrival_pos
+	elif port=="rocket" and world is IslandWorld: at = (world as IslandWorld).launchpad_arrival()
 	if world is IslandWorld and SpaceLayout.pocket_at(at)>=0 and is_instance_valid(world.surface_ships):
 		player.set_spatial_world(world.surface_ships)
 	if at != Vector3.INF and (world.is_walkable(at) or (world is IslandWorld and SpaceLayout.pocket_at(at)>=0)):

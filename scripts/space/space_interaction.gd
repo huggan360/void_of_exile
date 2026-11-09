@@ -1,7 +1,7 @@
 class_name SpaceInteraction
 extends InteractionTarget
 ## Station and ship devices: the command table (launch or board a ship), the
-## rocket home to the Tavern, a ship's seats and its hatch, and boarding a
+## rocket down to the Surface, a ship's seats and its hatch, and boarding a
 ## landed ship from outside. Each sends one request to the authority.
 var world: SpaceWorld
 var kind := "table"  # table, rocket, seat, hatch, outside, repair, airlock, tap
@@ -18,16 +18,16 @@ func _ready() -> void:
 	reach = 3.0 if kind in ["seat", "hatch", "tap", "airlock", "repair"] else 9.0 if kind in ["outside", "repair_out", "airlock_out"] else 4.0
 	match kind:
 		"table":
-			title = "Command table"
-			description = "A glowing star map of the Reach. Ships of the Nexus fleet answer to it."
+			title = "Bell's shipwright"
+			description = "Battleships for 500 Dots. Buy one, then take it out to a Nexus berth."
 		"board":
 			title = "Campaign board"
 			description = "Captain Isolde pins the tales of the Reach here."
 			action_text = "Read"
 		"rocket":
-			title = "Rocket to the Tavern"
-			description = "Orin's little rocket flies straight home to the Tavern."
-			action_text = "Fly home"
+			title = "Rocket to the Surface"
+			description = "Orin's shuttle lands at the Surface launch pad."
+			action_text = "Fly to the Surface"
 		"seat":
 			title = SEAT_TITLES.get(seat, "Seat")
 			description = "Sink into it. X for a sip, C for a cigar, Z to stand." if seat.begins_with("chair") else "Take the seat. Z stands up again."
@@ -77,8 +77,8 @@ func refresh(actor: Node3D) -> void:
 		description = "%s: %d%%. Mending it restores some of the hull." % [title, roundi(ship.part(part)*100.0)] if ship else ""
 		return
 	if kind=="table":
-		action_text = "Manage fleet"
-		response = "Choose a ship from your fleet."
+		action_text = "Buy / manage ships"
+		response = "Battleships and your fleet."
 		extra_text = ""
 
 func _ships_for(actor: Node3D) -> Array:
@@ -99,7 +99,7 @@ func activate(actor: Node3D) -> bool:
 			if game!=null and game.get("campaign") is CampaignClient: (game.get("campaign") as CampaignClient).open_book()
 		"rocket":
 			if (actor as Player).spatial_controller is SpaceTraversal:
-				((actor as Player).spatial_controller as SpaceTraversal).fly_rocket_home()
+				((actor as Player).spatial_controller as SpaceTraversal).fly_rocket_surface()
 		"seat":
 			world.request(["sit", seat])
 		"hatch":
