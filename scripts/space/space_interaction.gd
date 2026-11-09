@@ -11,7 +11,7 @@ var ship_id := 0
 var mark_id := ""
 
 const SEAT_TITLES := {pilot = "Pilot's helm", turret_top = "Top cannon", turret_left = "Port cannon",
-	turret_right = "Starboard cannon", map = "Star map table", chair_0 = "Armchair", chair_1 = "Armchair", chair_2 = "Armchair", chair_3 = "Armchair"}
+	turret_right = "Starboard cannon", map = "Star map table", chair_0 = "Chair", chair_1 = "Chair", chair_2 = "Chair", chair_3 = "Chair"}
 
 func _ready() -> void:
 	super._ready()
@@ -30,7 +30,7 @@ func _ready() -> void:
 			action_text = "Fly to the Surface"
 		"seat":
 			title = SEAT_TITLES.get(seat, "Seat")
-			description = "Sink into it. X for a sip, C for a cigar, Z to stand." if seat.begins_with("chair") else "Take the seat. Z stands up again."
+			description = "Bring a drink from the galley. Right-click to sip, C for a cigar, Z to stand." if seat.begins_with("chair") else "Take the seat. Z stands up again."
 			action_text = "Sit"
 		"repair", "repair_out":
 			title = str(SpaceShip.PARTS.get(part, {}).get("name", "Part"))

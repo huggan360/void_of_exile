@@ -37,6 +37,9 @@ func _ready() -> void:
 		shape.position.y = 0.9
 		add_child(shape)
 	add_child(model)
+	var leisure := LeisurePresentation.new()
+	leisure.actor = self
+	add_child(leisure)
 	add_child(shield)
 	add_child(aura)
 	status_visuals.effects = buffs
@@ -109,4 +112,9 @@ func _process(delta: float) -> void:
 				global_position = spec.pos
 				model.rotation.y = float(spec.get("yaw", 0.0))
 				CityState.seated_pose(model)
+	var seat := Leisure.seat_spec(player_id)
+	if not seat.is_empty():
+		global_transform = Transform3D(seat.get("basis", Basis.IDENTITY), seat.pos)
+		model.rotation.y = float(seat.get("yaw", 0.0))
+		CityState.seated_pose(model)
 	shield.active = (int(s[3]) & 1) != 0

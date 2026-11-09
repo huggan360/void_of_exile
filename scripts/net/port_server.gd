@@ -153,7 +153,7 @@ func leaving(p: Dictionary, realm: RealmInstance) -> void:
 ## Capture one shared hull and every occupant before anybody leaves the source.
 func prepare_transfer(source: SpaceWorld, ship: SpaceShip, destination: String, kind: String, crew: Array) -> void:
 	_flight_id += 1
-	var transfer := {flight = _flight_id, wire = ship.wire().duplicate(true), smoking = ship.smoking.duplicate(),
+	var transfer := {cups = Leisure.ship_tables(source.realm_id, ship), flight = _flight_id, wire = ship.wire().duplicate(true), smoking = ship.smoking.duplicate(),
 		passengers = {}, imported = {}, account = int(ship.get_meta("account", 0)), cooldowns = ship.cooldowns.duplicate()}
 	for pid: int in crew:
 		var p := server.social.record(pid)

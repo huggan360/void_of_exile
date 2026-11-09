@@ -376,6 +376,7 @@ func _sample(buffer: Array) -> Array:
 
 func _apply(ev: Array) -> void:
 	match str(ev[1]):
+		"leisure": Leisure.receive(ev[2])
 		"theory":
 			if world is SpatialWorld: world.handle_event(ev[2])
 			elif world is IslandWorld and is_instance_valid(world.surface_ships): world.surface_ships.handle_event(ev[2])

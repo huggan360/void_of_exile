@@ -157,6 +157,6 @@ func _process(delta: float) -> void:
 	if scan:
 		for id: String in _cups:
 			var cup: Dictionary = _cups[id]
-			var fill := 1.0 if CityState.npc_seat(id) else float(city.world.city.cups.get(id, 0.0))
+			var fill := 1.0 if CityState.npc_seat(id) else 0.0
 			(cup.node as Node3D).visible = fill>0.0
 			(cup.material as ShaderMaterial).set_shader_parameter("fill", fill*0.9)

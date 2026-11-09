@@ -325,6 +325,7 @@ func _switch_character(peer_id: int, p: Dictionary, token: String, character_id:
 		Net.c_events.rpc_id(peer_id, [[Net.now(), "switch_fail", r.error]])
 		return
 	var stats := GameServer.character(p.player_id)
+	Leisure.forget_player(p.player_id)
 	p.character_id = character_id
 	p.dead = false
 	_take_character(p, stats, r.data)
@@ -357,6 +358,7 @@ func _on_peer_left(peer_id: int) -> void:
 	if not p.dead and not p.switching:
 		await _save_record(p)
 		await api.call_api("POST", "/server/release", {character_id = p.character_id})
+	Leisure.forget_player(int(p.player_id))
 	GameServer.remove_player(p.player_id)
 	by_player.erase(p.player_id)
 	print("[server] %s left (%d online)" % [p.name, player_count()])
@@ -516,6 +518,8 @@ func on_enter(peer_id: int, destination: String) -> void:
 		economy.spawn_chests(p)
 	if Campaigns.is_tavern(str(record.get("id", destination))) or record.get("id", destination) == "hall":
 		record.astral_unlocked = _astral_unlocked(p)
+	Leisure.enter_player(p)
+	record.leisure_state = Leisure.snapshot(str(record.id))
 	Net.c_entered.rpc_id(peer_id, record)
 	for bag_record in GameServer.bags_in(record.id, p.player_id):
 		_to_peer(peer_id, ["bag+", _bag_wire(bag_record)])
@@ -534,6 +538,7 @@ func on_enter(peer_id: int, destination: String) -> void:
 
 
 func _leave_realm(p: Dictionary) -> void:
+	Leisure.before_travel(p)
 	if ChambersWorld.is_chambers(p.realm):
 		economy.leave(p)
 	var realm: RealmInstance = realms.get(p.realm)
@@ -623,6 +628,7 @@ func _unload_empty_realms(_delta: float) -> void:
 		# Kept worlds stay (asleep) unless memory runs short; others go when empty long enough.
 		var due := realm.empty_for > (2.0 if squeezed else after)
 		if due and (not id in kept or squeezed):
+			Leisure.tables.erase(str(id))
 			realms.erase(id)
 			realm.queue_free()
 			print("[server] closed %s (empty)" % id)
@@ -642,6 +648,10 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		speed = 0.0
 		if GameServer.intro_locked(p.player_id): flags = flags & ~1
 	var active_realm: RealmInstance = realms.get(p.realm)
+	var lounge_seat := Leisure.seat_spec(int(p.player_id), active_realm.world if active_realm else null)
+	if not lounge_seat.is_empty():
+		pos = lounge_seat.pos
+		speed = 0.0
 	if active_realm and active_realm.world is SpaceWorld:
 		var seat := (active_realm.world as SpaceWorld).city.seat_of(int(p.player_id))
 		if seat!="":
@@ -715,6 +725,13 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 	if p.dead or p.switching:
 		return
 	var pid: int = p.player_id
+	if Leisure.hands_busy(pid):
+		if kind in ["hit", "ring", "obstacle", "obstacle_hit"]: return
+		if kind=="shield" and (args.is_empty() or bool(args[0])): return
+	if kind=="leisure":
+		var lounge: RealmInstance = realms.get(str(p.realm))
+		Leisure.action(p, args, lounge.world if lounge else null)
+		return
 	if GameServer.interacting(pid) and kind in ["hit", "ring", "shield", "obstacle", "obstacle_hit"]: return
 	if GameServer.intro_locked(pid) and kind in ["hit","ring","shield","obstacle","obstacle_hit"]: return
 	match kind:
@@ -886,6 +903,7 @@ func _on_player_died(player_id: int, lost: int) -> void:
 	if p.is_empty() or p.dead:
 		return
 	p.dead = true
+	Leisure.forget_player(player_id)
 	var stats := GameServer.character(player_id)
 	var killed_by: String = p.get("last_hit_by", "")
 	if GameServer.last_damage_source(player_id)!="": killed_by = GameServer.last_damage_source(player_id)

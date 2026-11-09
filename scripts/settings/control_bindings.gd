@@ -40,6 +40,9 @@ const ACTIONS := [
 	{context="ship",id="seat_camera",title="Change camera",category="Ship seats",key=KEY_V},
 	{context="ship",id="seat_stand",title="Stand up",category="Ship seats",key=KEY_Z},
 
+	{context="leisure",id="leisure_sip",title="Sip drink / puff cigar",category="Drinks and cigars",mouse=MOUSE_BUTTON_RIGHT},
+	{context="leisure",id="leisure_smoke",title="Smoke / put away cigar",category="Drinks and cigars",key=KEY_C},
+
 ]
 const RESERVED := [KEY_F3,KEY_F4,KEY_F6,KEY_F7,KEY_F9]
 

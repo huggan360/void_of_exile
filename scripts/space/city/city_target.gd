@@ -9,7 +9,7 @@ var floor := 0
 
 func available(actor: Node3D) -> bool:
 	if not super.available(actor): return false
-	if kind=="seat" and world.city.taken(seat): return false
+	if kind=="seat" and (world.city.taken(seat) or Leisure.occupied(world.realm_id, seat)): return false
 	return true
 
 func refresh(_actor: Node3D) -> void:
@@ -17,7 +17,7 @@ func refresh(_actor: Node3D) -> void:
 
 func activate(actor: Node3D) -> bool:
 	if not available(actor): return false
-	if kind=="seat": world.request(["city", "sit", seat])
+	if kind=="seat": Leisure.request(actor as Player, ["use", seat])
 	else: world.request(["city", "call", elevator, floor])
 	activated.emit(actor)
 	return false

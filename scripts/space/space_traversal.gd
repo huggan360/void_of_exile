@@ -12,6 +12,7 @@ var world: SpaceWorld
 enum CameraMode { ANGLED, SHOULDER, FIRST_PERSON }
 var camera_mode := CameraMode.ANGLED
 var city_seat := ""
+var _lounge_seat := ""
 var _lift := -1
 var _ship_slot := -1
 var _outside_culled := false  # the outside hidden while we're in a ship room  # the room of the ship we sat in, to stand up beside the chair
@@ -190,6 +191,14 @@ func _process(delta: float) -> void:
 		player.camera.environment = world.backdrop.environment()
 	_update_air()
 	_ship = world.ship_of(player.player_id)
+	var lounge := Leisure.seat_spec(player.player_id)
+	var lounge_id := str(lounge.get("key", lounge.get("id", "")))
+	if lounge_id!=_lounge_seat:
+		_lounge_seat = lounge_id
+		if not lounge.is_empty():
+			_seat_interior = true
+			player.camera_yaw = float(lounge.get("yaw", 0.0))
+			look_pitch = -0.12
 	var old_city_seat := city_seat
 	city_seat = world.city.seat_of(player.player_id)
 	if city_seat!=old_city_seat and city_seat!="":
@@ -307,8 +316,7 @@ func _update_hint() -> void:
 				rows.append([["Mouse"], "Aim"])
 				rows.append([["@ship_fire"], "Fire"])
 		"chair_0", "chair_1", "chair_2", "chair_3":
-			rows.append([["@interact"], "Drink"])
-			rows.append([["C"], "Cigar"])
+			rows.append([["@leisure_smoke"], "Cigar"])
 	if seat!="":
 		rows.append([["@seat_camera"], "Change camera"])
 		rows.append([["@seat_stand"], "Stand up"])
@@ -327,6 +335,8 @@ func _update_hint() -> void:
 	_hint.text = ""
 	var game := world.game_root()
 	var hud: Variant = game.get("hud") if game else null
+	rows.append_array(Leisure.hint_rows(player.player_id))
+	if _lounge_seat!="": rows.append([["@seat_camera"], "Change camera"])
 	if hud: hud.key_help.set_rows(rows)
 
 func _notice_edge() -> void:
@@ -378,7 +388,7 @@ func toggle_map() -> void:
 
 func active_ship_actions() -> Array[String]:
 	var actions: Array[String] = []
-	if seat=="": return actions
+	if seat=="" and _lounge_seat=="": return actions
 	actions.assign(["seat_camera", "seat_stand"])
 	if seat=="pilot" and _ship!=null:
 		if _ship.mode in ["berth", "landed"]: actions.append("ship_launch")
@@ -402,6 +412,8 @@ func blocks_action(action: String) -> bool:
 func _input(event: InputEvent) -> void:
 	if cinematic or player.controls_locked() or player.ui_blocked or player.interacting(): return
 	if map.visible and not (event.is_action("seat_camera") or event.is_action("seat_stand")): return
+	var game := world.game_root()
+	if game and game.get("hud") and Leisure.handle_input(player, event, game.hud.interaction): return
 	if event is InputEventMouseMotion and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 		var motion: Vector2 = event.relative*MOUSE_SENSITIVITY
 		match seat:
@@ -418,15 +430,16 @@ func _input(event: InputEvent) -> void:
 		return
 	if not (event is InputEventKey or event is InputEventMouseButton) or not event.is_pressed(): return
 	if event is InputEventKey and event.echo: return
-	if seat!="" and event.is_action_pressed("seat_camera"):
+	if (seat!="" or _lounge_seat!="") and event.is_action_pressed("seat_camera"):
 		map.hide()
 		if seat=="pilot": _cockpit = not _cockpit
 		else: _seat_interior = not _seat_interior
 		_chase = Transform3D.IDENTITY
 		get_viewport().set_input_as_handled()
 		return
-	if seat!="" and event.is_action_pressed("seat_stand"):
-		world.request(["stand"])
+	if (seat!="" or _lounge_seat!="") and event.is_action_pressed("seat_stand"):
+		if _lounge_seat!="": Leisure.request(player, ["stand"])
+		else: world.request(["stand"])
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.physical_keycode==KEY_V and seat=="":
@@ -447,12 +460,6 @@ func _input(event: InputEvent) -> void:
 	if _lift>=0 and (event.is_action_pressed("interact") or event.is_action_pressed("shoot")):
 		var button := _lift_button()
 		if button>=0: world.request(["city", "call", _lift, button])
-		get_viewport().set_input_as_handled()
-		return
-	if seat.begins_with("chair"):
-		if event.is_action_pressed("interact"): world.request(["drink"])
-		elif event is InputEventKey and event.physical_keycode==KEY_C: world.request(["cigar"])
-		else: return
 		get_viewport().set_input_as_handled()
 		return
 	if spacewalk and event.is_action_pressed("interact") and not _interaction_near():
@@ -597,7 +604,7 @@ func _seated(delta: float) -> void:
 				var roll := Input.get_axis("ship_roll_left", "ship_roll_right") if enabled else 0.0
 				world.request(["pilot", [thrust, yaw, pitch, roll, enabled and Input.is_action_pressed("ship_boost"), enabled and _pulse]])
 			_fire_timer -= delta
-			if enabled and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
+			if enabled and not Leisure.hands_busy(player.player_id) and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 				_fire_timer = 0.2
 				world.request(["fire", _pilot_direction()])
 		"turret_top", "turret_left", "turret_right":
@@ -607,7 +614,7 @@ func _seated(delta: float) -> void:
 				_aim_timer = AIM_RATE
 				world.request(["aim", dir])
 			_fire_timer -= delta
-			if _ship.mode=="flying" and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and not player.controls_locked() and not player.ui_blocked and not player.interacting() and not map.visible and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
+			if _ship.mode=="flying" and not Leisure.hands_busy(player.player_id) and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and not player.controls_locked() and not player.ui_blocked and not player.interacting() and not map.visible and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 				_fire_timer = 0.2
 				world.request(["fire", dir])
 				GameAudio.play("enemy_shot", player.camera.global_position)
@@ -927,11 +934,11 @@ func _shake_camera() -> void:
 	player.camera.position += Vector3(sin(t*51.0), cos(t*63.0), 0.0)*0.045*remaining
 
 func update_camera(delta: float) -> void:
-	var in_chair := seat.begins_with("chair") or city_seat!=""
-	var want_fp := _cockpit if seat=="pilot" else _seat_interior if seat!="" else camera_mode==CameraMode.FIRST_PERSON or world.first_person_at(player.global_position)
+	var in_chair := seat.begins_with("chair") or city_seat!="" or _lounge_seat!=""
+	var want_fp := _cockpit if seat=="pilot" else _seat_interior if seat!="" or _lounge_seat!="" else camera_mode==CameraMode.FIRST_PERSON or world.first_person_at(player.global_position)
 	first_person = move_toward(first_person, 1.0 if want_fp else 0.0, delta/0.25)
 	var shoulder := camera_mode==CameraMode.SHOULDER and not want_fp
-	var allow_capture := (want_fp or shoulder or spacewalk or seat!="") and not player.controls_locked() \
+	var allow_capture := (want_fp or shoulder or spacewalk or seat!="" or _lounge_seat!="") and not player.controls_locked() \
 		and not player.ui_blocked and not player.interacting() and not map.visible and not cinematic
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if allow_capture else Input.MOUSE_MODE_VISIBLE
 	var sight := _crosshair as SpaceCrosshair
@@ -953,7 +960,7 @@ func update_camera(delta: float) -> void:
 		return
 	var up := player.global_basis.y
 	var orbit := player.global_basis*Basis(Vector3.UP, player.camera_yaw)
-	var head := player.global_position+up*(1.15 if in_chair else 1.57)
+	var head := player.global_position+up*1.57
 	var view := orbit*Basis(Vector3.RIGHT, look_pitch)
 	if want_fp or shoulder or (spacewalk and camera_mode==CameraMode.ANGLED):
 		var at := head
@@ -972,7 +979,7 @@ func update_camera(delta: float) -> void:
 	var pitch := Player.OVERHEAD_PITCH if AppSettings.video.get("camera_angle", "standard")=="overhead" else Player.CAMERA_PITCH
 	var at := target+orbit*Vector3(0, sin(pitch), cos(pitch))*player.camera_distance
 	# City rooms have solid ceilings; pull the angled camera inside when needed.
-	if world.zone_at(player.global_position)=="planet:"+CityLayout.ID:
+	if world.zone_at(player.global_position) in ["planet:"+CityLayout.ID, "station"]:
 		var query := PhysicsRayQueryParameters3D.create(head, at, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 		query.exclude = [player.get_rid()]
 		var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
