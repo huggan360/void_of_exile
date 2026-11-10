@@ -6,12 +6,13 @@ extends RefCounted
 ## kills, and searches at planet spots or repairs aboard (published as marks).
 var campaigns: CampaignServer
 var missing_parts := ShardfieldCampaign.new()
+var last_light := RestaurantCampaign.new()
 var _hooked_worlds := {}  # realm id -> instance id, so each private Reach is hooked only once
 
-## Missions 2 and 3 use party-owned private Space instances. Later Reach
-## adventures continue in the shared world until they are reworked.
+## Reworked Reach missions 2-5 use party-owned private Space instances.
+## Remaining Reach tales continue in the shared world until reworked.
 static func space_realm(party: Dictionary) -> String:
-	if party.get("campaign", {}).get("id", "") in ["first_light", "lantern_road", "shardfield"]:
+	if party.get("campaign", {}).get("id", "") in ["first_light", "lantern_road", "shardfield", "hollowmoon"]:
 		return PortServer.space_for(str(party.campaign.realm))
 	return SpaceWorld.REALM
 
@@ -75,6 +76,9 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 		missing_parts.campaigns = campaigns
 		if missing_parts.tick(party, run, step, world): return
 	var ships := _ships(party, world)
+	if run.id=="hollowmoon":
+		last_light.campaigns = campaigns
+		if last_light.tick(party, run, step, world, ships): return
 	var fresh := int(run.get("reach_step", -1))!=int(run.step)
 	if fresh:
 		run.reach_step = int(run.step)
@@ -246,6 +250,7 @@ func _crewed(party: Dictionary, ships: Array) -> SpaceShip:
 func _publish(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceWorld, ships: Array) -> void:
 	var marks: Array = []
 	if run.id=="shardfield": marks.append_array(missing_parts.markers(party, run, step, world))
+	if run.id=="hollowmoon": marks.append_array(last_light.markers(step))
 	match str(step.kind):
 		"reach_vesperis_port":
 			for pad: Dictionary in CityLayout.all_pads():
@@ -406,6 +411,9 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 	if run.id=="shardfield":
 		missing_parts.campaigns = campaigns
 		if missing_parts.action(party, run, p, objective, world, step): return true
+	if run.id=="hollowmoon":
+		last_light.campaigns = campaigns
+		if last_light.action(party, run, p, objective, world, step): return true
 	if objective.begins_with("npc:") and step.kind=="talk" and objective=="npc:"+str(step.npc):
 		var at := world.npc_position(str(step.npc))
 		if at.is_finite() and at.distance_to(pos)<6.0:
@@ -469,6 +477,12 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 				campaigns.server.social.broadcast(party)
 				return true
 	return true
+
+## Mission 5 counts beer only from the real Last Light Diner counter.
+func diner_sip(p: Dictionary, source: String, mug_id: String, remaining: int) -> void:
+	last_light.campaigns = campaigns
+	last_light.sip(p, source, mug_id, remaining)
+
 
 ## The server validates genuine city pub orders. Each member has to finish
 ## TWO whole mugs of four sips apiece. A unique order id means discarding a
