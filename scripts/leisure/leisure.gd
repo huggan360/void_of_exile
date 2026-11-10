@@ -125,6 +125,12 @@ func action(p: Dictionary, args: Array, place: GameWorld = null) -> void:
 				s.use = "sip"
 				var stats := GameServer.character(pid)
 				if str(s.cup.kind)=="beer":
+					# Tell the campaign only about a successful server-validated
+					# sip from a uniquely ordered city-pub mug. Ship beer and
+					# drinks from elsewhere cannot count toward Mission 3.
+					if Net.is_server() and Net.server:
+						Net.server.campaigns.reach.vesperis_sip(p, str(s.cup.get("source", "")),
+							str(s.cup.get("order", "")), int(s.cup.sips))
 					s.beer = (s.beer as Array).filter(func(t: float) -> bool: return time-t<=60.0)
 					s.beer.append(time)
 					if s.beer.size()>8: s.beer.pop_front()
@@ -160,7 +166,8 @@ func action(p: Dictionary, args: Array, place: GameWorld = null) -> void:
 					_correct(p, spec.pos)
 				"tap":
 					if smoking(pid): return
-					s.cup = {kind = str(spec.drink), sips = 4}
+					s.cup = {kind = str(spec.drink), sips = 4, source = id,
+						order = "%d:%d" % [pid, Time.get_ticks_usec()]}
 				"table":
 					if smoking(pid): return
 					var cups: Dictionary = tables.get(str(p.realm), {})
