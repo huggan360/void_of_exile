@@ -79,7 +79,7 @@ func _action(p: Dictionary, args: Array, context: Dictionary) -> void:
 			return
 		var ship := entry.ship as SpaceShip
 		var world := (entry.world as WeakRef).get_ref() as SpaceWorld
-		if not is_instance_valid(world) or not ship.mode in ["landed", "berth"] or not world._aboard(ship).is_empty():
+		if not is_instance_valid(world) or world.protected_campaign_ship(ship) or not ship.mode in ["landed", "berth"] or not world._aboard(ship).is_empty():
 			_error(p, "Land the ship and have everyone disembark before storing it.")
 			return
 		if not await store(id):
@@ -179,7 +179,10 @@ func _process(delta: float) -> void:
 		if realm:
 			for proxy in realm.proxies.values():
 				if proxy.global_position.distance_to(ship.xform.origin)<=NEAR_DISTANCE: nearby = true
-		if ship.mode in ["landed", "berth"] and not nearby: entry.idle = float(entry.idle)+1.0
+		# An active campaign's private-world ships are reserved even if all
+		# players land, explore the town, or abandon them in orbit.
+		if world.protected_campaign_ship(ship): entry.idle = 0.0
+		elif ship.mode in ["landed", "berth"] and not nearby: entry.idle = float(entry.idle)+1.0
 		else: entry.idle = 0.0
 		if float(entry.idle)>=IDLE_SECONDS and not entry.saving: store(id)
 		elif Net.now()>=float(entry.next) and not entry.saving: _save(id, "heartbeat")
