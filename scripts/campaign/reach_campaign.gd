@@ -445,6 +445,119 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 				return true
 	return true
 
+## The server validates genuine city pub orders. Each member has to finish
+## TWO whole mugs of four sips apiece. A unique order id means discarding a
+## half-empty cup or passing someone else's leftovers cannot cheat progress.
+func vesperis_sip(p: Dictionary, source: String, mug_id: String, remaining: int) -> void:
+	if not Net.is_server() or source=="" or mug_id=="" or not source.begins_with("citytap|"): return
+	var venue: Dictionary = CityLayout.venue(source.trim_prefix("citytap|"))
+	if venue.is_empty() or str(venue.get("district", ""))!="lanternheart" or not str(venue.kind) in ["bar", "speakeasy"]: return
+	var party: Dictionary = campaigns.server.social.party_for(int(p.player_id))
+	if party.is_empty() or str(p.get("realm", ""))!=space_realm(party): return
+	var run: Dictionary = campaigns._run_of(party)
+	if run.is_empty() or run.status!="active" or run.id!="lantern_road" or campaigns._step(run).kind!="reach_vesperis_beers": return
+	var key := _vesperis_member_key(p)
+	var completed: Dictionary = run.get("vesperis_beers", {})
+	if int(completed.get(key, 0))>=2: return
+	var mugs: Dictionary = run.get("vesperis_mugs", {})
+	var entry: Dictionary = mugs.get(key, {})
+	if str(entry.get("id", ""))!=mug_id: entry = {id = mug_id, sips = 0}
+	entry.sips = int(entry.sips)+1
+	if remaining==0:
+		if int(entry.sips)==4:
+			completed[key] = mini(2, int(completed.get(key, 0))+1)
+			run.vesperis_beers = completed
+			campaigns.server.social.system(int(p.player_id), "Full mugs enjoyed: %d / 2." % int(completed[key]))
+		mugs.erase(key)
+	else:
+		mugs[key] = entry
+	run.vesperis_mugs = mugs
+	campaigns._touch(party.campaign.account)
+	_vesperis_check_beers(party, run)
+
+func _vesperis_check_beers(party: Dictionary, run: Dictionary) -> bool:
+	var completed: Dictionary = run.get("vesperis_beers", {})
+	var ready := 0
+	for pid: int in party.members:
+		var p: Dictionary = campaigns.server.social.record(pid)
+		if p.is_empty(): continue
+		if int(completed.get(_vesperis_member_key(p), 0))>=2: ready += 1
+	if ready!=int(run.get("count", 0)):
+		run.count = ready
+		campaigns.server.social.broadcast(party)
+	if ready==party.members.size() and ready>0:
+		for pid: int in party.members:
+			campaigns.server.social.system(pid, "Every party member has finished two beers. Follow the country road to the farm.")
+		campaigns._advance(party, {})
+		return true
+	return false
+
+## A finite quest-owned Mad Farmer on the gravel approach to an existing
+## red barn in Vesperis's countryside, away from the city core. The site key
+## includes the attempt so an earlier party's kill cannot advance this one.
+func _vesperis_ensure_farmer(run: Dictionary, world: SpaceWorld) -> void:
+	var site := "quest_%s_%s_farmer" % [run.id, run.get("attempt", "legacy")]
+	world.enemy_director.add_quest_site({id = site, pack = "mad_farmer",
+		pos = vesperis_farm_position(), seed = absi(site.hash())})
+
+## The real story chest is persistent; it appears after the boss actually
+## dies, and a lost/expired ball can be recovered on a later visit.
+func _vesperis_ball_step(party: Dictionary, run: Dictionary, world: SpaceWorld) -> bool:
+	for pid: int in party.members:
+		var stats := GameServer.character(pid)
+		if stats and not stats.find_item(STARBALL).is_empty():
+			campaigns._advance(party, {})
+			return true
+	var record: Dictionary = GameServer.bag(int(run.get("vesperis_chest", 0)))
+	if not record.is_empty() and _contains_item(record, STARBALL): return false
+	run.vesperis_chest = GameServer.spawn_bag(world.realm_id,
+		[Items.make(STARBALL)], vesperis_farm_position(), GameServer.PUBLIC, "story")
+	campaigns._touch(party.campaign.account)
+	for pid: int in party.members:
+		campaigns.server.social.system(pid, "The Mad Farmer is down! Find the golden Story Chest in his yard and take the stolen starball.")
+	return false
+
+## Each member gets exactly one player-owned Blue Chest with a guaranteed
+## G5 wand. A depleted chest counts only for its designated recipient; expired
+## chests are replenished and already claimed rewards never spawn twice.
+func _vesperis_wands_step(party: Dictionary, run: Dictionary, world: SpaceWorld) -> bool:
+	var venue := CityLayout.story_wizard_venue()
+	if venue.is_empty(): return false
+	var frame: Transform3D = venue.frame
+	var door := CityLayout.story_venue_door(venue)
+	var bags: Dictionary = run.get("vesperis_wand_bags", {})
+	var claimed: Dictionary = run.get("vesperis_wand_claimed", {})
+	var ready := 0
+	for i in party.members.size():
+		var pid := int(party.members[i])
+		var p: Dictionary = campaigns.server.social.record(pid)
+		if p.is_empty(): continue
+		var key := _vesperis_member_key(p)
+		if bool(claimed.get(key, false)):
+			ready += 1
+			continue
+		var record: Dictionary = GameServer.bag(int(bags.get(key, 0)))
+		if not record.is_empty() and not _contains_item(record, WAND):
+			claimed[key] = true
+			ready += 1
+			campaigns.server.social.system(pid, "You claimed your Tier 5 wand. Wait for the others to collect theirs.")
+			continue
+		if record.is_empty() and str(p.get("realm", ""))==world.realm_id:
+			var offset := frame.basis.x*(float(i)-(float(party.members.size())-1.0)*0.5)*2.8
+			var bag_id := GameServer.spawn_bag(world.realm_id, [Items.make(WAND)], door+offset, pid, "blue")
+			if bag_id>0:
+				bags[key] = bag_id
+				campaigns.server.social.system(pid, "A personal Blue Chest with your Tier 5 wand is waiting outside Wizard Aldren's shop.")
+	run.vesperis_wand_bags = bags
+	run.vesperis_wand_claimed = claimed
+	if ready!=int(run.get("count", 0)):
+		run.count = ready
+		campaigns.server.social.broadcast(party)
+	if ready==party.members.size() and ready>0:
+		campaigns._advance(party, {})
+		return true
+	return false
+
 ## The step ended: clear what it put in the world.
 func step_ended(party: Dictionary) -> void:
 	var world := _world(party)
