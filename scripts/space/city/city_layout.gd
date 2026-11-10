@@ -356,6 +356,15 @@ static func venue(key: String) -> Dictionary:
 
 ## Mission 3 uses real existing venues in Lanternheart; these helpers
 ## derive the positions from the same authored street layout as the renderer.
+## The starship-parts merchant stands outside a real general-goods shop,
+## so its location follows Lanternheart's actual generated street layout.
+static func story_parts_venue() -> Dictionary:
+	for v: Dictionary in venues(DISTRICTS[0]):
+		if str(v.get("shop", ""))=="general": return v
+	for v: Dictionary in venues(DISTRICTS[0]):
+		if v.kind=="shop_budget": return v
+	return {}
+
 static func story_wizard_venue() -> Dictionary:
 	for v: Dictionary in venues(DISTRICTS[0]):
 		if str(v.get("shop", ""))=="wizard": return v
