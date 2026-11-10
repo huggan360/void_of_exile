@@ -131,6 +131,8 @@ func action(p: Dictionary, args: Array, place: GameWorld = null) -> void:
 					if Net.is_server() and Net.server:
 						Net.server.campaigns.reach.vesperis_sip(p, str(s.cup.get("source", "")),
 							str(s.cup.get("order", "")), int(s.cup.sips))
+						Net.server.campaigns.reach.diner_sip(p, str(s.cup.get("source", "")),
+							str(s.cup.get("order", "")), int(s.cup.sips))
 					s.beer = (s.beer as Array).filter(func(t: float) -> bool: return time-t<=60.0)
 					s.beer.append(time)
 					if s.beer.size()>8: s.beer.pop_front()
