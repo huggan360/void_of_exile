@@ -1176,6 +1176,7 @@ func npc_position(id: String) -> Vector3:
 		# Vesperis shops are generated from deterministic CityLayout venue data.
 		# Stand on the sidewalk outside the wizard's real shop door.
 		if str(at.city_venue)=="wizard": return CityLayout.story_venue_door(CityLayout.story_wizard_venue())
+		if str(at.city_venue)=="parts": return CityLayout.story_venue_door(CityLayout.story_parts_venue())
 		return Vector3.INF
 	if at.has("town"):
 		var p: Dictionary = SpaceLayout.planet(str(at.planet))
