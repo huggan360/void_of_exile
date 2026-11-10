@@ -292,6 +292,9 @@ func _remove(foe: Dictionary, killed: bool, by_ship: int) -> void:
 ## Wings gather around ships flying in the Shardfield and the Gloam; ambushes
 ## (campaigns) come where asked, but always out in open space.
 func _populate() -> void:
+	# Mission 2 controls its own tutorial skiffs. No ambient waves may
+	# interrupt repairs, planetary exploration or the return voyage.
+	if ReachCampaign.tutorial_active(world): return
 	for ship: SpaceShip in world.ships.values():
 		if not huntable(ship): continue
 		var region := SpaceLayout.region_at(ship.xform.origin)
