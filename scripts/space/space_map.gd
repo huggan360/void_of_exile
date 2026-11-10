@@ -120,9 +120,19 @@ func _draw() -> void:
 	draw_line(_point(SpaceLayout.ASCENT,center),surface_at,Color("72a9b3"),1.5)
 	draw_string(bold,surface_at+Vector2(14,4),"THE SURFACE",HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("a4d6ce"))
 	draw_string(font,surface_at+Vector2(14,21),"Descend to return",HORIZONTAL_ALIGNMENT_LEFT,-1,12,INK)
-	# Campaign targets.
+	# Campaign targets. A search-zone is an uncertain, yellow *sphere*,
+	# drawn with an equal projected radius on the chart. Unlike a normal
+	# quest pin, it never identifies the diner or draws a world-space badge.
 	for mark: Dictionary in world.my_marks():
 		var at := _point(mark.pos, center)
+		if str(mark.kind)=="zone":
+			var radius := maxf(6.0, float(mark.get("radius", 0.0))*zoom)
+			draw_circle(at, radius, Color(1.0, 0.78, 0.18, 0.11))
+			draw_arc(at, radius, 0, TAU, 120, Color(1.0, 0.84, 0.20, 0.92), 3.0)
+			draw_arc(at, radius*0.7, 0, TAU, 96, Color(1.0, 0.85, 0.3, 0.25), 1.0)
+			draw_string(bold, at+Vector2(-radius*0.65, 0), "YELLOW SEARCH ZONE", HORIZONTAL_ALIGNMENT_LEFT,
+				-1, 14, Color(1.0, 0.87, 0.30, 0.92))
+			continue
 		var pulse := 1.0+sin(Time.get_ticks_msec()/250.0)*0.15
 		draw_arc(at, 12.0*pulse, 0, TAU, 28, Color(1, 0.85, 0.35), 2.5)
 		draw_arc(at, 20.0*pulse, 0, TAU, 28, Color(1, 0.85, 0.35, 0.4), 1.5)
