@@ -631,6 +631,9 @@ func _unload_empty_realms(_delta: float) -> void:
 		if realm.world is SpaceWorld:
 			var space := realm.world as SpaceWorld
 			if space.ships.values().any(func(ship: SpaceShip) -> bool: return space.protected_campaign_ship(ship)): continue
+		elif realm.world is IslandWorld and is_instance_valid(realm.world.surface_ships):
+			var dock := realm.world.surface_ships as SpaceWorld
+			if dock.ships.values().any(func(ship: SpaceShip) -> bool: return dock.protected_campaign_ship(ship)): continue
 		# Kept worlds stay (asleep) unless memory runs short; others go when empty long enough.
 		var due := realm.empty_for > (2.0 if squeezed else after)
 		if due and (not id in kept or squeezed):
