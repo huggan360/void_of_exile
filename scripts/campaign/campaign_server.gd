@@ -239,6 +239,15 @@ func _fresh_run(id: String) -> Dictionary:
 func _migrate_run(run: Dictionary) -> void:
 	var revision := int(Campaigns.get_def(run.id).get("revision", 1))
 	if int(run.get("revision", 1)) >= revision: return
+	if run.id=="hollowmoon" and str(run.get("status", ""))!="done":
+		# The old Hollow Moon quest used unrelated numeric objectives.
+		# Existing completed campaigns are never reset.
+		run.step = 0
+		run.count = 0
+		run.done_objects = []
+		run.erase("reach_step")
+		run.erase("lastlight_beers")
+		run.erase("lastlight_mugs")
 	if run.id=="shardfield" and str(run.get("status", ""))!="done":
 		# The old asteroid-pass mission has different step meanings; restart
 		# unfinished runs at the new Starwright commission, preserving stars.
@@ -377,7 +386,7 @@ func start(p: Dictionary, id: String, restart := false) -> void:
 			if fresh and def.has("intro"):
 				server.social.send(pid, ["camp_intro", def.intro])
 		elif _step(run).get("world", "") == SpaceWorld.REALM:
-			if id in ["first_light", "lantern_road", "shardfield"]:
+			if id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]:
 				# Both stories run in party-owned private Space worlds:
 				# individual bosses, loot and ships cannot leak between parties.
 				server.social.send_to(pid, PortServer.space_for(party.campaign.realm))
@@ -417,7 +426,7 @@ func _end(party: Dictionary, reason: String) -> void:
 	astral.ending(party,run)
 	if reach.matches(run): reach.step_ended(party)
 	var places := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
-	if party.campaign.id in ["first_light", "lantern_road", "shardfield"]: places.append(PortServer.space_for(str(party.campaign.realm)))
+	if party.campaign.id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]: places.append(PortServer.space_for(str(party.campaign.realm)))
 	_scenes.erase(party.id)
 	_to_party(party, ["camp_scene_end"])
 	if book(party.campaign.account).active == party.campaign.id:
@@ -458,7 +467,7 @@ func left_party(p: Dictionary, party: Dictionary) -> void:
 	var run := _run_of(party)
 	if party.campaign.is_empty(): return
 	var occupied := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
-	if not party.campaign.is_empty() and party.campaign.id in ["first_light", "lantern_road", "shardfield"]: occupied.append(PortServer.space_for(str(party.campaign.realm)))
+	if not party.campaign.is_empty() and party.campaign.id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]: occupied.append(PortServer.space_for(str(party.campaign.realm)))
 	if not party.campaign.is_empty() and p.realm in occupied:
 		server.social.send_to(p.player_id, "hall")
 
@@ -466,7 +475,7 @@ func left_party(p: Dictionary, party: Dictionary) -> void:
 func joined_party(p: Dictionary, party: Dictionary) -> void:
 	_restore_items(p, _run_of(party))
 	if home_for(p) != "":
-		if party.campaign.id in ["first_light", "lantern_road", "shardfield"]:
+		if party.campaign.id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]:
 			server.social.send_to(p.player_id, PortServer.space_for(str(party.campaign.realm)))
 		else:
 			server.social.send_to(p.player_id, party.campaign.tavern)
