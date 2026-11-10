@@ -1164,6 +1164,11 @@ func npc_position(id: String) -> Vector3:
 		var anchor: Variant = station.anchors.get(str(at.nexus))
 		return (anchor as Transform3D).origin if anchor is Transform3D else anchor if anchor is Vector3 else Vector3.INF
 	var spot: Vector3
+	if at.has("city_venue"):
+		# Vesperis shops are generated from deterministic CityLayout venue data.
+		# Stand on the sidewalk outside the wizard's real shop door.
+		if str(at.city_venue)=="wizard": return CityLayout.story_venue_door(CityLayout.story_wizard_venue())
+		return Vector3.INF
 	if at.has("town"):
 		var p: Dictionary = SpaceLayout.planet(str(at.planet))
 		if p.is_empty(): return Vector3.INF
