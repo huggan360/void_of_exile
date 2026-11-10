@@ -35,7 +35,7 @@ func _ships(party: Dictionary, world: SpaceWorld) -> Array:
 
 ## One existing farmyard in the countryside around Lanternheart; its gravel
 ## approach is clear of the barn and farmhouse. Boss and story chest share it.
-const VESPERIS_FARM := 1
+const VESPERIS_FARM := 0
 const STARBALL := "story_wizard_starball"
 const WAND := "G5_wand"
 
@@ -451,7 +451,7 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 func vesperis_sip(p: Dictionary, source: String, mug_id: String, remaining: int) -> void:
 	if not Net.is_server() or source=="" or mug_id=="" or not source.begins_with("citytap|"): return
 	var venue: Dictionary = CityLayout.venue(source.trim_prefix("citytap|"))
-	if venue.is_empty() or str(venue.get("district", ""))!="lanternheart" or not str(venue.kind) in ["bar", "speakeasy"]: return
+	if venue.is_empty() or str(venue.get("district", ""))!="lanternheart" or not (str(venue.kind) in ["bar", "speakeasy"]): return
 	var party: Dictionary = campaigns.server.social.party_for(int(p.player_id))
 	if party.is_empty() or str(p.get("realm", ""))!=space_realm(party): return
 	var run: Dictionary = campaigns._run_of(party)
