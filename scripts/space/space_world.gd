@@ -1189,6 +1189,10 @@ func npc_position(id: String) -> Vector3:
 	var info: Dictionary = Campaigns.NPCS.get(id, {})
 	if info.get("world", "")!=REALM: return Vector3.INF
 	var at: Dictionary = info.at
+	if at.has("diner"):
+		# The visual host is already in LastLightDiner; do not add a second
+		# character model or alter the pre-existing neon building.
+		return SpaceLayout.DINER+Vector3(0, 0, -9)
 	if at.has("nexus"):
 		if station==null: return Vector3.INF
 		var anchor: Variant = station.anchors.get(str(at.nexus))
@@ -1232,6 +1236,9 @@ func _show_marks() -> void:
 		if is_instance_valid(node): node.queue_free()
 	_mark_nodes.clear()
 	for mark: Dictionary in my_marks():
+		# A search sphere exists only on the star chart. Spawning a normal
+		# world-space quest badge at its centre would spoil the mystery.
+		if mark.kind=="zone": continue
 		if mark.kind in ["search", "repair"]:
 			var spot := SpaceInteraction.new()
 			spot.world = self
@@ -1270,7 +1277,7 @@ func _build_npcs() -> void:
 	_npcs_built = true
 	for id: String in Campaigns.NPCS:
 		var info: Dictionary = Campaigns.NPCS[id]
-		if info.get("world", "")!=REALM: continue
+		if info.get("world", "")!=REALM or id=="lastlight_host": continue
 		var at := npc_position(id)
 		if not at.is_finite(): continue
 		var npc := SpaceNPC.new()
