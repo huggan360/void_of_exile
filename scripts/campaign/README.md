@@ -268,10 +268,15 @@ The existing hold-Space-to-skip cinematic control continues to work.
 **Vesperis**: Scrapper Nix stands on the sidewalk outside the existing
 general shop in Lanternheart. Interacting with him during the purchase
 objective charges the purchasing player 500 Dots through
-`EconomyServer.spend` and gives the real `story_nav_core` to that
-character. The server checks the player's distance to the shop, ability
-to pay, and backpack room. The party buys one core, not one per member.
-If the core is lost before turn-in, it can be bought again from Nix.
+`EconomyServer.spend`. This authorises a **gold Story Chest** beside
+his shop containing the real `story_nav_core`. The merchant does not
+directly give an item. The quest advances only when a party member
+takes the core out of the chest. The server verifies proximity, payment,
+and real story-item inventory. Only one 500-Dot purchase is required
+per party; the saved `shard_nav_paid` receipt lets an absent, expired,
+or emptied chest respawn without another charge if the part is lost.
+A full backpack does not consume the purchased core; the chest remains
+waiting until the player can make room.
 
 **Amberfall**: Warden Saffron is in Honeymarket's plaza and gives the
 real `key_amber_ziggurat` after her story conversation. The party must
@@ -290,9 +295,10 @@ The chest and marker are not revealed in earlier mission steps.
 party members does Fen's final dialogue start. Its completion consumes
 all three after a full inventory recheck, then awards normal mission XP
 and progression to the next campaign. The purchased part cannot be
-faked with a UI marker; both found items come from persistent
-server-authoritative Story Chests. Lost found items can be reacquired
-at their original source after the appropriate quest step.
+faked with a UI marker; **all three components come from persistent,
+server-authoritative golden Story Chests**. The two found items can be
+reacquired at their original sources after the appropriate quest step;
+the Vesperis chest remains recoverable using the original payment.
 
 For a headless contract test with the project's custom voxel Godot build:
 
@@ -301,6 +307,8 @@ For a headless contract test with the project's custom voxel Godot build:
 The test checks definitions, NPCs, actual planets, the three shots,
 key/boss pairing, price, story items and final objective. It is not a
 substitute for a multiplayer playthrough. Test the 500-Dot sale (including
-insufficient funds and a full backpack), key reissue, Aurum defeat and
-gold Story Chest, Tidewell conversations, party-shared handover and
-cinematic replay after returning to Verdance.
+insufficient funds), that a gold Story Chest appears instead of a direct
+item, collecting the core from that chest, re-opening the chest without
+paying again, and leaving the item waiting when the backpack is full.
+Also test key reissue, Aurum defeat and his gold Story Chest, Tidewell
+conversations, party-shared handover and the cinematic.
