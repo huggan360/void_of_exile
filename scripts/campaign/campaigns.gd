@@ -47,7 +47,7 @@ const NPCS := {
 	verdance_starwright = {name = "Starwright Fen", world = "astral", at = {planet = "verdance", town = "wright", side = 11.0}, model = "npc_smith",
 		greeting = "The starship will not fly until I find those three missing parts."},
 	vesperis_partsmith = {name = "Scrapper Nix", world = "astral", at = {planet = "vesperis", city_venue = "parts"}, model = "npc_traveler",
-		greeting = "Ship parts, fresh from the salvage yard. Navigation core: 500 Dots."},
+		greeting = "Ship parts, fresh from the salvage yard. Navigation Core: 500 Dots, delivered in a gold Story Chest."},
 	amberfall_warden = {name = "Warden Saffron", world = "astral", at = {planet = "amberfall", town = "center"}, model = "npc_traveler",
 		greeting = "The Amber Ziggurat has been quiet. Far too quiet."},
 	tidewell_fisher = {name = "Fisher Mira", world = "astral", at = {planet = "tidewell", town = "center"}, model = "npc_villager",
