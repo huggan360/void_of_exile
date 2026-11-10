@@ -312,3 +312,51 @@ item, collecting the core from that chest, re-opening the chest without
 paying again, and leaving the item waiting when the backpack is full.
 Also test key reissue, Aurum defeat and his gold Story Chest, Tidewell
 conversations, party-shared handover and the cinematic.
+
+## The Restaurant at the End of the Universe (mission 5: hollowmoon, revision 2)
+
+The fifth Astral Frontier mission keeps the internal ID `hollowmoon` and
+`requires = shardfield` to preserve campaign unlocks. Completed records
+remain completed. Unfinished revision-1 runs restart at step 0, because the
+new story does not share the old step indices. Only this mission is changed.
+
+**Reuse the existing restaurant:** `LastLightDiner` already lives permanently
+in every SpaceWorld at `SpaceLayout.DINER`, far past the Shardfield. Its
+chrome/neon 1950s voxel art, beer tap (`lastlight:beer`) and existing
+berths 6 and 7 are unchanged. Only an `InteractionTarget` was attached to
+its existing baker host model, Dot. The game does not create another diner
+or duplicate the host. The quest uses a party-private Space instance, the
+same way the other reworked Reach tales do.
+
+**Route:** Travel to Hollowmoon in the Gloam and talk with mystical Seer Nyx
+beside the observatory. Her dialogue plays `last_light_reveal`, three real
+camera flyovers of the permanent neon diner. After the cinematic the star
+chart shows just a large yellow spherical search region (3.5 km radius)
+whose centre intentionally does *not* identify the diner location. The
+quest advances when an owned party ship discovers the real diner within
+520 m, not merely by crossing the broad search region. The map then marks
+the two existing docking gangways.
+
+Dock an owned party ship at one of the two original Last Light berths
+(6 or 7), disembark onto the diner, and each member must order and drink
+**one complete beer** from the permanent restaurant tap. Four consecutive
+successful sips of the same server-generated beer order are necessary,
+all while within the diner. Ship beers and cups from other bars cannot
+satisfy this objective. Progress is saved per character, checked against
+the current party, and the quest updates only when everybody finishes.
+
+Talk to Dot, the existing diner host, to receive a genuine
+`key_rotting_hive`. Use this to open the existing `mawgrave` fortress
+and kill its original `brood_matriarch` boss. Dot can replace a key
+consumed by a resealed gate if the party wipes. Return to the diner,
+dock at one of its two ports again, disembark, and talk with the **same
+host**, Dot, to complete the quest. Mission 6 (`pale_eye`) is unchanged.
+
+Contract check with the project's custom voxel-enabled Godot build:
+
+`godot --headless --path . --script res://tools/check_lastlight_restaurant_campaign.gd`
+
+A full multiplayer playthrough is still required: verify the seer and
+cutscene, yellow search sphere with no precise point, real discovery,
+both berth positions, four server-validated sips per player, key handover
+and replacement, Mawgrave boss death, and final return to Dot.
