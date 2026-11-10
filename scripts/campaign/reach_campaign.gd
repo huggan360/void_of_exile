@@ -452,6 +452,11 @@ func vesperis_sip(p: Dictionary, source: String, mug_id: String, remaining: int)
 	if not Net.is_server() or source=="" or mug_id=="" or not source.begins_with("citytap|"): return
 	var venue: Dictionary = CityLayout.venue(source.trim_prefix("citytap|"))
 	if venue.is_empty() or str(venue.get("district", ""))!="lanternheart" or not (str(venue.kind) in ["bar", "speakeasy"]): return
+	# Beer must also be drunk in the actual pub. Simply carrying a mug
+	# onto a battleship is not enough for the sightseeing objective.
+	var frame: Transform3D = venue.frame
+	var tap: Vector3 = (CityLayout.planet().center as Vector3)+frame*Vector3(-2.5, 1.3, 4.1)
+	if (p.get("pos", Vector3.INF) as Vector3).distance_to(tap)>24.0: return
 	var party: Dictionary = campaigns.server.social.party_for(int(p.player_id))
 	if party.is_empty() or str(p.get("realm", ""))!=space_realm(party): return
 	var run: Dictionary = campaigns._run_of(party)
@@ -527,6 +532,7 @@ func _vesperis_wands_step(party: Dictionary, run: Dictionary, world: SpaceWorld)
 	var door := CityLayout.story_venue_door(venue)
 	var bags: Dictionary = run.get("vesperis_wand_bags", {})
 	var claimed: Dictionary = run.get("vesperis_wand_claimed", {})
+	var changed := false
 	var ready := 0
 	for i in party.members.size():
 		var pid := int(party.members[i])
@@ -539,6 +545,7 @@ func _vesperis_wands_step(party: Dictionary, run: Dictionary, world: SpaceWorld)
 		var record: Dictionary = GameServer.bag(int(bags.get(key, 0)))
 		if not record.is_empty() and not _contains_item(record, WAND):
 			claimed[key] = true
+			changed = true
 			ready += 1
 			campaigns.server.social.system(pid, "You claimed your Tier 5 wand. Wait for the others to collect theirs.")
 			continue
@@ -547,9 +554,11 @@ func _vesperis_wands_step(party: Dictionary, run: Dictionary, world: SpaceWorld)
 			var bag_id := GameServer.spawn_bag(world.realm_id, [Items.make(WAND)], door+offset, pid, "blue")
 			if bag_id>0:
 				bags[key] = bag_id
+				changed = true
 				campaigns.server.social.system(pid, "A personal Blue Chest with your Tier 5 wand is waiting outside Wizard Aldren's shop.")
 	run.vesperis_wand_bags = bags
 	run.vesperis_wand_claimed = claimed
+	if changed: campaigns._touch(party.campaign.account)
 	if ready!=int(run.get("count", 0)):
 		run.count = ready
 		campaigns.server.social.broadcast(party)
