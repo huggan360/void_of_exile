@@ -1187,7 +1187,7 @@ func npc_position(id: String) -> Vector3:
 	if not spot.is_finite(): return spot
 	# Beside the spot rather than on it, so its search mark stays clear.
 	var frame := surface_frame(spot)
-	return frame.origin+frame.basis.x*3.0
+	return frame.origin+frame.basis.x*float(at.get("side", 3.0))
 
 ## Authority: a party's marks changed.
 func set_marks(party_id: int, list: Array) -> void:
