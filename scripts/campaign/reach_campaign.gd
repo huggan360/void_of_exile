@@ -322,7 +322,30 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 	var pos: Vector3 = p.get("pos", Vector3.ZERO)
 	if objective.begins_with("npc:") and step.kind=="talk" and objective=="npc:"+str(step.npc):
 		var at := world.npc_position(str(step.npc))
-		if at.is_finite() and at.distance_to(pos)<6.0: campaigns._start_scene(party, p, step, at)
+		if at.is_finite() and at.distance_to(pos)<6.0:
+			if step.has("grant_key"): run.key_receiver = int(p.player_id)
+			campaigns._start_scene(party, p, step, at)
+		return true
+	# The fortress closes again after a defeated party abandons an attempt.
+	# Elowen replaces a consumed key so the tutorial can never softlock.
+	if step.kind=="reach_boss" and objective=="npc:petalgate_warden":
+		var at := world.npc_position("petalgate_warden")
+		if not at.is_finite() or at.distance_to(pos)>6.0: return true
+		var entry: Dictionary = world.gates.entries.get(PlanetStrongholds.center_of(str(step.planet)), {}) if is_instance_valid(world.gates) else {}
+		if not entry.is_empty() and not bool(entry.get("sealed", true)):
+			campaigns.server.social.system(int(p.player_id), "The Rose Bastion is open. Defeat Queen Briarrose inside.")
+			return true
+		var carried := false
+		for pid: int in party.members:
+			var member := GameServer.character(pid)
+			if member and not member.find_item("key_rose_bastion").is_empty(): carried = true
+		if carried:
+			campaigns.server.social.system(int(p.player_id), "Someone in your party already carries the Rose Bastion key.")
+		else:
+			var stats := GameServer.character(int(p.player_id))
+			if stats:
+				stats.give([Items.make("key_rose_bastion")])
+				campaigns.server.social.system(int(p.player_id), "Warden Elowen replaces your Rose Bastion key. Use it at the fortress gate.")
 		return true
 	if not objective.begins_with("obj:"): return false
 	var id := objective.substr(4)
