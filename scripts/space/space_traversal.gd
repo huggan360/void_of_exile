@@ -1401,6 +1401,37 @@ func fly_rocket_surface() -> void:
 	_rocket_flight = false
 	_hide_hud(false)
 
+## The private Space Travels tutorial uses a separate camera so the crew's
+## actual view and position are restored exactly after the story shot.
+func tutorial_cinematic(kind: String, ship_id: int, foe_id: int) -> void:
+	if cinematic or not is_instance_valid(world) or not is_inside_tree(): return
+	if not world.ships.has(ship_id): return
+	cinematic = true
+	player.cinematic_locked = true
+	_hide_hud(true)
+	var previous := get_viewport().get_camera_3d()
+	var camera := Camera3D.new()
+	camera.far = player.camera.far
+	camera.fov = player.camera.fov
+	camera.environment = player.camera.environment
+	add_child(camera)
+	camera.global_transform = player.camera.global_transform
+	camera.make_current()
+	var shots := SpaceCinematic.new()
+	add_child(shots)
+	if kind=="ambush":
+		await shots.tutorial_ambush(camera, world, ship_id, foe_id)
+	elif kind=="repair":
+		await shots.tutorial_repairs(camera, world, ship_id)
+	if not is_inside_tree(): return
+	shots.queue_free()
+	camera.queue_free()
+	if is_instance_valid(previous): previous.make_current()
+	else: player.camera.make_current()
+	_hide_hud(false)
+	player.cinematic_locked = false
+	cinematic = false
+
 ## First arrival: a short tour of the Nexus.
 func play_intro() -> void:
 	while player.frozen or not world.is_presentation_ready() or not is_instance_valid(world.station):

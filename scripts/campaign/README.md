@@ -139,3 +139,58 @@ brood never go), `reach_repair` and `reach_search`. Talk steps with world
 Search spots and npcs stand at the planet's story places (`SpaceLayout.PLACES`),
 which the terrain keeps flat. `tools/test_reach_online.tscn` plays First Light
 end to end against a `--test` server.
+
+## Space Travels (mission 2: first_light, revision 2)
+
+The first Reach tale after Theory of Everything is now titled **Space Travels**.
+Its internal id stays `first_light`, so the Astral pack, completion records and
+`lantern_road.requires` remain compatible; unfinished revision-1 runs restart
+at the tutorial's ship-order step.
+
+The server sends the party to a **private** `astral_camp_<account>_astral_frontier`
+world using `PortServer.space_for(party.campaign.realm)`. The existing private
+world access checks apply. Other Reach tales still use the shared `astral`.
+All native ship/fortress logic continues to work in either kind of world.
+
+Tutorial sequence:
+1. `reach_order`: one party member deploys a fleet ship at Bell's command table.
+2. `reach_ship`: board it. If the ship disappears before the city stage,
+   the first tutorial objectives return to `reach_order`.
+3. `reach_tutorial_fly`: launch towards Rosamund; after about halfway a
+   brood skiff spawns astern. A camera shot shows the attacker and a
+   moving objective badge follows that specific skiff.
+4. `reach_tutorial_ambush`: destroy the skiff. A second comes if necessary.
+   The tutorial advances after a kill and 50% hull damage, or two kills;
+   the ship is deliberately stopped and all four native parts broken.
+   During the ambush and repair stages the hull cannot fall below 50%.
+5. `reach_tutorial_repair`: a second camera tour shows the ladder, sails,
+   engines, top cannon and interior heart crystal. Repair all four using
+   the native `repair` interaction and four-second mend timer. There are
+   no ambient brood attackers while this private tutorial is active.
+6. `reach_port`: land specifically at `rosamund:dock`, the Petalgate
+   shipyard, not just anywhere on the planet.
+7. Talk with Warden Elowen in Petalgate's town centre to receive the Rose
+   Bastion key. Opening the existing fortress gate consumes the key.
+8. `reach_boss`: Queen Briarrose's **server-confirmed** death in that
+   private instance advances the quest.
+9. `reach_dock`: take a ship back to the Nexus and really dock it.
+   A ship that was already docked when this objective began doesn't count.
+10. `reach_party_nexus`: every connected, alive party member must be
+    physically in the Nexus station zone for campaign completion.
+
+**Private campaign ship persistence rule:** while any private-world campaign
+run is active, its party's ships must not be automatically stored for fleet
+idleness, even if the party has left them parked on a planet or in orbit.
+The private instance must also remain loaded while it holds such protected
+ships, even if temporarily empty. Once a tale is paused, ended or abandoned,
+normal fleet lease, storage and world unloading rules apply. The account
+service's lease still requires successful heartbeats; it cannot be extended
+locally without the account service.
+
+Static contract check (needs the project's voxel-enabled Godot build):
+`godot --headless --path . --script res://tools/check_space_travels.gd`.
+For end-to-end verification, use a test account on a `--test` server and
+check fleet deployment, the moving skiff marker, both cinematic shots, native
+repairs, Petalgate-only landing, the key, the fortress victory, and the full
+party's return. The old `tools/test_reach_online.tscn` was authored for
+revision-1 First Light and should be revised before using it for mission 2.
