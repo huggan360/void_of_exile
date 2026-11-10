@@ -568,7 +568,11 @@ func repair_mark(ship: SpaceShip, id: String) -> Vector3:
 func protected_campaign_ship(ship: SpaceShip) -> bool:
 	if realm_id==REALM or not Net.is_server(): return false
 	for party: Dictionary in Net.server.social.parties.values():
-		if party.get("campaign", {}).is_empty() or PortServer.space_for(str(party.campaign.realm))!=realm_id: continue
+		if party.get("campaign", {}).is_empty(): continue
+		# The same fleet protection applies when the ship has temporarily
+		# descended to the private Surface world of the campaign.
+		var surface := str(party.campaign.realm)
+		if realm_id!=surface and realm_id!=PortServer.space_for(surface): continue
 		var run: Dictionary = Net.server.campaigns._run_of(party)
 		if run.get("status", "")=="active" and (ship.party==int(party.id) or int(ship.owner) in party.members): return true
 	return false
