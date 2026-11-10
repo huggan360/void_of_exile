@@ -110,6 +110,7 @@ func _ready() -> void:
 			local_player.global_position = spawn_point)
 	queue_load_step(func() -> void:
 		var diner := LastLightDiner.new()
+		diner.name = "LastLightDiner"
 		add_child(diner)
 		diner.build(not visual))
 	for p: Dictionary in SpaceLayout.PLANETS:

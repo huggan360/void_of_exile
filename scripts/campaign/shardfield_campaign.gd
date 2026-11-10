@@ -103,10 +103,24 @@ func tick(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceWorl
 				ensure_chest(party, run, world, STABILIZER)
 	return false
 
+## Recovery remains available after the boss step, including after a reload.
+static func _regulator_recovery(party: Dictionary, step: Dictionary) -> bool:
+	return (step.get("item", "")==REGULATOR or step.has("return_items")) and not has_part(party, REGULATOR)
+
+static func _needs_recovery_key(party: Dictionary, step: Dictionary, world: SpaceWorld) -> bool:
+	if not _regulator_recovery(party, step) or has_part(party, "key_amber_ziggurat"): return false
+	if not is_instance_valid(world.gates): return false
+	var gate: Dictionary = world.gates.entries.get(PlanetStrongholds.center_of("amberfall"), {})
+	return not gate.is_empty() and bool(gate.get("sealed", true))
+
 ## Quest badges include the true shop door, actual story-bag locations,
 ## and, during final handover, whichever of the parts are still missing.
 func markers(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceWorld) -> Array:
 	var marks := []
+	if _needs_recovery_key(party, step, world):
+		var warden: Vector3 = world.npc_position("amberfall_warden")
+		if warden.is_finite():
+			marks.append({id = "recovery_key", name = "Ask Warden Saffron for a replacement Ziggurat key", pos = warden, kind = "target"})
 	match str(step.kind):
 		"reach_buy_part":
 			var paid := bool(run.get("shard_nav_paid", false))
@@ -180,12 +194,12 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 		return true
 	# The key is consumed at the fortress gate; if Aurum's arena resets,
 	# the warden can issue a replacement so a party never becomes trapped.
-	if objective=="npc:amberfall_warden" and step.kind=="reach_boss" and step.get("planet", "")=="amberfall":
+	if objective=="npc:amberfall_warden" and ((step.kind=="reach_boss" and step.get("planet", "")=="amberfall") or _regulator_recovery(party, step)):
 		var at := world.npc_position("amberfall_warden")
 		if not at.is_finite() or pos.distance_to(at)>6.0: return true
 		var gate: Dictionary = world.gates.entries.get(PlanetStrongholds.center_of("amberfall"), {}) if is_instance_valid(world.gates) else {}
 		if not gate.is_empty() and not bool(gate.get("sealed", true)):
-			campaigns.server.social.system(int(p.player_id), "The Amber Ziggurat is open. Face Aurum within.")
+			campaigns.server.social.system(int(p.player_id), "The Amber Ziggurat is open. Recover the regulator from its Story Chest." if _regulator_recovery(party, step) else "The Amber Ziggurat is open. Face Aurum within.")
 		elif has_part(party, "key_amber_ziggurat"):
 			campaigns.server.social.system(int(p.player_id), "Someone in the crew already holds the Amber Ziggurat key.")
 		else:

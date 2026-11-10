@@ -188,3 +188,10 @@ func _paint(pos: Vector3) -> void:
 			if v > _image.get_pixel(x, y).r:
 				_image.set_pixel(x, y, Color(v, v, v))
 	_dirty = true
+
+
+## CPU discovery lookup for minimap contacts; never reveals unexplored enemies.
+func explored_at(position: Vector3) -> bool:
+	if _image==null: return false
+	var cell := Vector2i(floori(position.x-_origin.x), floori(position.z-_origin.y))
+	return cell.x>=0 and cell.y>=0 and cell.x<_size and cell.y<_size and _image.get_pixelv(cell).r>0.0

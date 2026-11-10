@@ -22,6 +22,9 @@ const MAP_EDGE := 1.0 - 8.0 / ART_PIXELS  # carved stone, brass and inner outlin
 const MAX_JOBS := 4  # patches being painted in the background at once
 const UPLOAD_INTERVAL := 0.2  # seconds between sending newly painted map to the GPU
 
+var contacts := MinimapContacts.new()
+var live_markers: Array[Dictionary] = []
+var social: SocialClient
 var _space_local: LocalMapScript
 var world: GameWorld
 var player: Player
@@ -185,7 +188,11 @@ func _process(delta: float) -> void:
 	FrameTrace.record("ui/minimap",started)
 
 func _profile_process(delta: float) -> void:
+	live_markers = contacts.update(world, player, social, delta, fog_of_war)
 	if is_instance_valid(_space_local):
+		_space_local.player = player
+		_space_local.contacts = live_markers
+		_space_local.extra_markers = markers
 		visible = _space_local.update_view(view_radius)
 		return
 	if world == null or player == null:
@@ -319,16 +326,20 @@ func _draw() -> void:
 	_draw_routes()
 	var map_radius_art := _art_pixels * 0.5 * _map_edge - 2.0
 	var ordered := markers.duplicate()
+	ordered.append_array(live_markers)
 	ordered.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return int(a.get("kind", "") == "quest") < int(b.get("kind", "") == "quest"))
 	for m in ordered:
 		var a := _to_art(Vector2(m.pos.x - _center.x, m.pos.z - _center.y))
 		var kind: String = m.get("kind", "")
-		if is_instance_valid(world) and Dungeons.is_dungeon(world.realm_id) and kind in ["quest", "side"]: continue
-		if kind != "" and a.length() >= map_radius_art - 3.0:
+		if kind not in ["", "contact"] and a.length() >= map_radius_art - 3.0:
 			a = a.normalized() * (map_radius_art - 3.0)  # towns stay on the rim, pointing the way
-		if a.length() < map_radius_art - 1.0 or kind != "":
+		if a.length() < map_radius_art - 1.0 or kind not in ["", "contact"]:
 			match kind:
+				"contact":
+					var point: Vector2 = size*0.5+a*PixelArt.SCALE
+					draw_circle(point, 4.0, Color("101522"))
+					draw_circle(point, 2.8, m.color)
 				"home":  # a little house
 					for px: Vector2 in [Vector2(0, -3), Vector2(-1, -2), Vector2(0, -2), Vector2(1, -2), Vector2(-2, -1),
 							Vector2(-1, -1), Vector2(0, -1), Vector2(1, -1), Vector2(2, -1), Vector2(-1, 0), Vector2(1, 0),
@@ -381,3 +392,4 @@ func _draw_facing_arrow() -> void:
 		inner.append(mid + (p - mid) * 0.78 - Vector2(0, 1))
 	draw_polyline(shape + PackedVector2Array([shape[0]]), Color(0.02, 0.02, 0.05), 3.0, true)
 	draw_colored_polygon(inner, Color.WHITE)
+	draw_circle(mid, 2.5, Color.WHITE)

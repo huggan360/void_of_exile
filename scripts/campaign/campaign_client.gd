@@ -124,7 +124,6 @@ func refresh() -> void:
 ## Minimap markers for the objectives here: {pos, color, kind}.
 func markers() -> Array:
 	var out := []
-	if is_instance_valid(_world) and Dungeons.is_dungeon(_world.realm_id): return out
 	var camp := social.campaign_state()
 	if camp.is_empty() or camp.get("status", "") != "active" or not is_instance_valid(_world) or not _world.is_inside_tree():
 		return out  # (the old world, while a new one loads)

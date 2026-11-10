@@ -448,6 +448,7 @@ func add_social(social: SocialClient, body_of: Callable) -> void:
 
 ## Portals, the towns (each in its own color) and your home.
 func refresh_markers() -> void:
+	minimap.social = social
 	minimap.markers.clear()
 	if not is_instance_valid(_world):
 		return

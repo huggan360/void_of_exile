@@ -1,6 +1,9 @@
 class_name SpaceLocalMap
 extends Control
 ## A camera-aligned geodesic patch: no longitude seam or polar boundary.
+var contacts: Array[Dictionary] = []
+var extra_markers: Array[Dictionary] = []
+var diner := false
 var world: SpaceWorld
 var player: Player
 var radius := 120.0
@@ -9,6 +12,9 @@ var reference := Vector3.ZERO
 var right := Vector3.RIGHT
 var back := Vector3.BACK
 var up := Vector3.UP
+var _detail_shapes: Array[WeakRef] = []
+var _detail_root: Node3D
+var _detail_refresh := 0
 var _task := -1
 var _result := {}
 var _painted_planet := ""
@@ -23,6 +29,7 @@ func _ready() -> void:
 	_image.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_image.show_behind_parent = true
 	_image.material = _skin
 	_image.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var blank := Image.create_empty(1,1,false,Image.FORMAT_RGB8)
@@ -47,7 +54,8 @@ func update_view(view_radius: float) -> bool:
 	var ship := world.ship_in_slot(SpaceLayout.pocket_at(reference))
 	if ship!=null: reference = ship.xform.origin
 	planet = SpaceLayout.planet_near(reference,120.0)
-	var nexus := planet.is_empty() and reference.distance_to(SpaceLayout.NEXUS)<250.0
+	diner = planet.is_empty() and reference.distance_to(SpaceLayout.DINER)<180.0
+	var nexus: bool = planet.is_empty() and (reference.distance_to(SpaceLayout.NEXUS)<250.0 or diner)
 	if planet.is_empty() and not nexus: return false
 	radius = maxf(48.0,view_radius*3.0) if not nexus else maxf(48.0,view_radius*2.0)
 	var orbit := player.global_basis*Basis(Vector3.UP,player.camera_yaw)
@@ -62,7 +70,7 @@ func update_view(view_radius: float) -> bool:
 	_skin.set_shader_parameter("nexus_right",Vector2(right.x,right.z))
 	_skin.set_shader_parameter("nexus_back",Vector2(back.x,back.z))
 	_skin.set_shader_parameter("view_radius",radius)
-	_skin.set_shader_parameter("nexus_offset",Vector2((SpaceLayout.NEXUS-reference).dot(right),(SpaceLayout.NEXUS-reference).dot(back)))
+	_skin.set_shader_parameter("nexus_offset",Vector2(((SpaceLayout.DINER if diner else SpaceLayout.NEXUS)-reference).dot(right),((SpaceLayout.DINER if diner else SpaceLayout.NEXUS)-reference).dot(back)))
 	_skin.set_shader_parameter("map_ready",not nexus and _painted_planet==str(planet.get("id","")))
 	if not nexus:
 		var r := float(planet.radius)
@@ -78,15 +86,28 @@ func update_view(view_radius: float) -> bool:
 			var south := back
 			var span := radius*1.8
 			_task = WorkerThreadPool.add_task(func() -> void: _result = _paint(snapshot,heading,east,south,span))
+	var detail_root: Node3D = world.planets.get(str(planet.get("id", ""))) if not planet.is_empty() else world.get_node_or_null("LastLightDiner") if diner else world.station
+	if detail_root!=_detail_root or Time.get_ticks_msec()>_detail_refresh:
+		_detail_root = detail_root
+		_detail_refresh = Time.get_ticks_msec()+5000
+		_detail_shapes.clear()
+		if is_instance_valid(detail_root):
+			for shape: Node in detail_root.find_children("*", "CollisionShape3D", true, false):
+				_detail_shapes.append(weakref(shape))
+		if not planet.is_empty() and is_instance_valid(world.gates):
+			for entry: Dictionary in world.gates.entries.values():
+				if str(entry.fort.get("planet", ""))!=str(planet.id): continue
+				for shape: Node in (entry.root as Node3D).find_children("*", "CollisionShape3D", true, false):
+					_detail_shapes.append(weakref(shape))
 	queue_redraw()
 	return true
 
 static func _paint(p: Dictionary, anchor: Vector3, east: Vector3, south: Vector3, span: float) -> Dictionary:
-	var image := Image.create_empty(128,128,false,Image.FORMAT_RGB8)
+	var image := Image.create_empty(256,256,false,Image.FORMAT_RGB8)
 	var r := float(p.radius)
-	for y in 128:
-		for x in 128:
-			var offset := (Vector2(x+0.5,y+0.5)/128.0*2.0-Vector2.ONE)*span
+	for y in 256:
+		for x in 256:
+			var offset := (Vector2(x+0.5,y+0.5)/256.0*2.0-Vector2.ONE)*span
 			var angle := offset.length()/r
 			var tangent := (east*offset.x+south*offset.y).normalized()
 			var direction := (anchor*cos(angle)+tangent*sin(angle)).normalized()
@@ -125,9 +146,18 @@ func _mark(at: Vector3, color: Color, label := "") -> void:
 	if not planet.is_empty() and at.distance_to(planet.center)>float(planet.radius)+500.0: return
 	var point := _point(at)
 	if point.distance_to(size*0.5)>size.x*0.42: return
-	draw_circle(point,3.0,Color("15191d"))
-	draw_circle(point,2.0,color)
+	draw_circle(point,4.0,Color("15191d"))
+	draw_circle(point,2.8,color)
 	if label!="": draw_string(UIStyle.font(),point+Vector2(5,-3),label,HORIZONTAL_ALIGNMENT_LEFT,-1,11,color)
+
+func _quest(at: Vector3) -> void:
+	if not planet.is_empty() and at.distance_to(planet.center)>float(planet.radius)+500.0: return
+	var point: Vector2 = _point(at)
+	var offset: Vector2 = point-size*0.5
+	point = size*0.5+offset.limit_length(size.x*0.39)
+	var diamond := PackedVector2Array([point+Vector2(0,-6),point+Vector2(6,0),point+Vector2(0,6),point+Vector2(-6,0)])
+	draw_colored_polygon(diamond,Color("ffdb56"))
+	draw_circle(point,2.0,Color.WHITE)
 
 func _draw() -> void:
 	if not is_instance_valid(world) or not is_instance_valid(player): return
@@ -135,10 +165,11 @@ func _draw() -> void:
 	var edge := size.x*0.46
 	draw_arc(mid,edge,0,TAU,96,UIStyle.OUTLINE,8.0)
 	draw_arc(mid,edge,0,TAU,96,UIStyle.GOLD,2.0)
+	_draw_structures()
 	if planet.is_empty():
-		for k in SpaceLayout.BERTHS:
+		for k in range(6,8) if diner else range(SpaceLayout.BERTHS):
 			_mark(SpaceLayout.berth_frame(k).origin,UIStyle.GOLD,str(k+1))
-		if is_instance_valid(world.station):
+		if not diner and is_instance_valid(world.station):
 			_mark(world.station.anchors.command_table,UIStyle.GOLD,"Shipwright")
 			_mark(world.station.anchors.rocket_pad.origin,Color("82c5ca"),"Surface")
 			_mark(Vector3(0,0,-30),Color("c9ad80"),"Inn")
@@ -149,16 +180,42 @@ func _draw() -> void:
 		if SpaceLayout.FORTS.has(str(planet.id)):
 			_mark((planet.center as Vector3)+SpaceLayout.fort_frame(planet).origin,UIStyle.BAD,"Fort")
 		if planet.get("city",false): _draw_streets()
-	for mark: Dictionary in world.my_marks(): _mark(mark.pos,UIStyle.GOLD)
-	for actor: Node in world.enemy_director.get_children():
-		if actor is Enemy and actor.is_alive(): _mark(actor.global_position,UIStyle.BAD)
-	for ship: SpaceShip in world.ships.values(): _mark(ship.xform.origin,ship.tint)
+	for contact: Dictionary in contacts: _mark(contact.pos,contact.color)
+	for ship: SpaceShip in world.ships.values(): _mark(ship.xform.origin,MinimapContacts.INTERACT)
+	for mark: Dictionary in world.my_marks():
+		if str(mark.get("kind", ""))!="zone": _quest(mark.pos)
+	for mark: Dictionary in extra_markers:
+		if str(mark.get("kind", "")) in ["quest", "side"]: _quest(mark.pos)
 	var forward := -player.global_basis.z.rotated(player.up_direction,player.facing)
 	var facing := Vector2(forward.dot(right),forward.dot(back)).normalized()
 	if facing.length_squared()<0.01: facing = Vector2.UP
 	draw_colored_polygon(PackedVector2Array([mid+facing*8,mid-facing*5+facing.orthogonal()*4,mid-facing*5-facing.orthogonal()*4]),Color.WHITE)
-	var title := "The Nexus" if planet.is_empty() else str(planet.name)
+	draw_circle(mid, 4.0, Color("101522"))
+	draw_circle(mid, 2.5, Color.WHITE)
+	var title: String = ("Last Light Diner" if diner else "The Nexus") if planet.is_empty() else str(planet.name)
 	draw_string(UIStyle.bold(),Vector2(0,size.y-3),title,HORIZONTAL_ALIGNMENT_CENTER,size.x,14,UIStyle.GOLD)
+
+## Actual collision footprints show buildings, furniture, walls and walks.
+## All scene access stays on the main thread; terrain painting stays in its worker.
+func _draw_structures() -> void:
+	for ref: WeakRef in _detail_shapes:
+		var collider := ref.get_ref() as CollisionShape3D
+		if not is_instance_valid(collider) or collider.disabled or not collider.shape is BoxShape3D: continue
+		var box := collider.shape as BoxShape3D
+		if box.size.x<0.25 or box.size.z<0.25: continue
+		var at: Vector3 = collider.global_position
+		if at.distance_to(reference)>radius+box.size.length()*0.5: continue
+		if absf((at-reference).dot(up))>30.0: continue
+		var points := PackedVector2Array()
+		var inside := true
+		for corner: Vector2 in [Vector2(-1,-1),Vector2(1,-1),Vector2(1,1),Vector2(-1,1)]:
+			var point: Vector2 = _point(collider.global_transform*Vector3(corner.x*box.size.x*0.5,box.size.y*0.5,corner.y*box.size.z*0.5))
+			if point.distance_to(size*0.5)>size.x*0.405: inside = false
+			points.append(point)
+		if not inside: continue
+		if absf((points[1]-points[0]).cross(points[3]-points[0]))<0.2: continue
+		draw_colored_polygon(points,Color("7b8588") if box.size.y>1.5 else Color("586b65"))
+		draw_polyline(points+PackedVector2Array([points[0]]),Color("26343e"),1.0)
 
 func _draw_streets() -> void:
 	var uv := CityLayout.face_uv(up)
