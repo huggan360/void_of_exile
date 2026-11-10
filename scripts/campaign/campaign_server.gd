@@ -936,7 +936,9 @@ func _advance(party: Dictionary, p: Dictionary, side := false) -> void:
 				str(step.say).replace("|", " "), ""])
 	# Story keys are granted only when the NPC conversation actually ends.
 	if step.has("grant_key"):
-		var receiver := int(p.get("player_id", party.leader))
+		var receiver := int(run.get("key_receiver", party.leader))
+		if GameServer.character(receiver)==null: receiver = int(party.leader)
+		run.erase("key_receiver")
 		var stats := GameServer.character(receiver)
 		if stats and stats.find_item(str(step.grant_key)).is_empty():
 			stats.give([Items.make(str(step.grant_key))])
