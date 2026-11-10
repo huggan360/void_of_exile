@@ -166,6 +166,14 @@ func sample_gravity(position: Vector3) -> Dictionary:
 	var p := SpaceLayout.planet_near(position)
 	if not p.is_empty():
 		var up: Vector3 = (position-p.center).normalized()
+		# The arena is one flat plane, with gravity aligned at its centre.
+		if SpaceLayout.FORTS.has(p.id):
+			var fort: Transform3D = SpaceLayout.fort_frame(p)
+			var relative: Vector3 = position-(p.center as Vector3)
+			var local: Vector3 = fort.affine_inverse()*relative
+			if Vector2(local.x, local.z).length()<SpaceLayout.FORT_FLAT and relative.dot(fort.basis.y)>0.0:
+				var ground: Vector3 = (p.center as Vector3)+fort*Vector3(local.x, 0.0, local.z)
+				return {frame = Transform3D(fort.basis, ground), zone = "planet:"+str(p.id), distance = position.distance_to(ground)}
 		var right := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD))<0.95 else Vector3.RIGHT).normalized()
 		var surface: Vector3 = p.center+up*(float(p.radius)+SpaceLayout.surface_height(p, up))
 		return {frame = Transform3D(Basis(right, up, right.cross(up)), surface), zone = "planet:"+str(p.id), distance = position.distance_to(surface)}

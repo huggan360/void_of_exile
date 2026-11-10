@@ -80,6 +80,8 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 	if run.id=="first_light" and str(step.id) in ["board", "travel", "ambush", "repairs", "port"] and ships.is_empty():
 		_reset_to_order(party, run, world)
 		return
+	if run.id=="lantern_road" and step.get("return_item", "")==STARBALL:
+		_vesperis_ball_step(party, run, world, false)
 	match str(step.kind):
 		"reach_vesperis_port":
 			for ship: SpaceShip in ships:
@@ -301,6 +303,10 @@ func _publish(party: Dictionary, run: Dictionary, step: Dictionary, world: Space
 		"reach_dock":
 			marks.append({id = "target", name = str(step.text), pos = SpaceLayout.NEXUS, kind = "target"})
 		"talk":
+			if run.id=="lantern_road" and step.get("return_item", "")==STARBALL:
+				var recovery: Dictionary = GameServer.bag(int(run.get("vesperis_chest", 0)))
+				if not recovery.is_empty() and _contains_item(recovery, STARBALL):
+					marks.append({id = "ball", name = "Recover the stolen starball - Story Chest", pos = recovery.pos, kind = "target"})
 			var at := world.npc_position(str(step.get("npc", "")))
 			if at.is_finite(): marks.append({id = "npc", name = str(step.text), pos = at, kind = "target"})
 	world.set_marks(int(party.id), marks)
@@ -518,12 +524,12 @@ func _vesperis_ensure_farmer(run: Dictionary, world: SpaceWorld) -> void:
 
 ## The real story chest is persistent; it appears after the boss actually
 ## dies, and a lost/expired ball can be recovered on a later visit.
-func _vesperis_ball_step(party: Dictionary, run: Dictionary, world: SpaceWorld) -> bool:
+func _vesperis_ball_step(party: Dictionary, run: Dictionary, world: SpaceWorld, advance_on_pickup: bool = true) -> bool:
 	for pid: int in party.members:
 		var stats := GameServer.character(pid)
 		if stats and not stats.find_item(STARBALL).is_empty():
-			campaigns._advance(party, {})
-			return true
+			if advance_on_pickup: campaigns._advance(party, {})
+			return advance_on_pickup
 	var record: Dictionary = GameServer.bag(int(run.get("vesperis_chest", 0)))
 	if not record.is_empty() and _contains_item(record, STARBALL): return false
 	run.vesperis_chest = GameServer.spawn_bag(world.realm_id,
@@ -560,6 +566,11 @@ func _vesperis_wands_step(party: Dictionary, run: Dictionary, world: SpaceWorld)
 			ready += 1
 			campaigns.server.social.system(pid, "You claimed your Tier 5 wand. Wait for the others to collect theirs.")
 			continue
+		# Replace only an unclaimed chest belonging to an older session.
+		# Remove it through GameServer so connected clients lose the old chest.
+		if not record.is_empty() and int(record.get("viewer", 0))!=pid and str(p.get("realm", ""))==world.realm_id:
+			GameServer.remove_bag(int(record.id))
+			record = {}
 		if record.is_empty() and str(p.get("realm", ""))==world.realm_id:
 			var offset := frame.basis.x*(float(i)-(float(party.members.size())-1.0)*0.5)*2.8
 			var bag_id := GameServer.spawn_bag(world.realm_id, [Items.make(WAND)], door+offset, pid, "blue")

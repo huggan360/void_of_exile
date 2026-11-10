@@ -274,7 +274,7 @@ static func _flat_spots(p: Dictionary) -> Array:
 	if FORTS.has(id):
 		# Level (not following the sphere): [direction, radius, plane height above the centre].
 		var fort := place_frame_raw(p, FORT_OFFSET)
-		out.append([fort, FORT_FLAT, radius*fort.y])
+		out.append([fort, FORT_FLAT, radius])
 	_flats[id] = out
 	return out
 
@@ -287,14 +287,15 @@ static func place_frame_raw(p: Dictionary, offset: Vector2) -> Vector3:
 	var tangent := (pad.basis.x*offset.x+pad.basis.z*offset.y).normalized()
 	return pad.basis.y*cos(distance/radius)+tangent*sin(distance/radius)
 
-## The planet's fortress frame (relative to the planet centre): level, Y up,
+## The planet's fortress frame: tangent to the sphere at its own centre,
 ## its main gate (-Z) facing the pad. Identity when it has none.
 static func fort_frame(p: Dictionary) -> Transform3D:
 	if not FORTS.has(p.id): return Transform3D()
 	var dir := place_frame_raw(p, FORT_OFFSET)
-	var toward := -Vector3(dir.x, 0, dir.z)
-	if toward.length()<0.001: toward = Vector3.FORWARD
-	return Transform3D(Basis.looking_at(toward.normalized(), Vector3.UP), dir*float(p.radius))
+	var to_pad: Vector3 = pad_frame(p).basis.y-dir
+	var toward: Vector3 = to_pad-dir*to_pad.dot(dir)
+	if toward.length()<0.001: toward = place_frame(p, FORT_OFFSET).basis.z
+	return Transform3D(Basis.looking_at(toward.normalized(), dir), dir*float(p.radius))
 
 static func _noise(p: Dictionary, layer: int) -> FastNoiseLite:
 	var key := "%s:%d" % [p.id, layer]
@@ -368,8 +369,9 @@ static func surface_height(p: Dictionary, dir: Vector3) -> float:
 		if flat.size()<3: continue
 		# A fortress terrace: a level plane, cut into the slope and built up below it.
 		var arc := acos(clampf(dir.dot(flat[0]), -1.0, 1.0))*radius
-		if arc>=float(flat[1])+FORT_BLEND or dir.y<0.2: continue
-		var level := float(flat[2])/dir.y-radius
+		var alignment: float = dir.dot(flat[0])
+		if arc>=float(flat[1])+FORT_BLEND or alignment<0.2: continue
+		var level := float(flat[2])/alignment-radius
 		h = lerpf(level, h, smoothstep(float(flat[1]), float(flat[1])+FORT_BLEND, arc))
 	return h
 
