@@ -974,7 +974,7 @@ func _advance(party: Dictionary, p: Dictionary, side := false) -> void:
 			if key_item and stats.give([key_item])>0:
 				server.social.system(receiver, "Received [b]%s[/b]. Use it at the fortress gate." % key_item.item_name)
 			else:
-				server.social.system(receiver, "Your backpack is full. Ask the warden again at the fortress step for another key.")
+				server.social.system(receiver, "Your backpack is full. Return to Dot at the Last Light Diner for another key." if run.id=="hollowmoon" else "Your backpack is full. Ask the warden again at the fortress step for another key.")
 	# Only complete a multi-planet commission when all three *actual* story
 	# items are in the party's backpacks. Verify everything before consuming
 	# anything; no partial handover can swallow a single required component.
