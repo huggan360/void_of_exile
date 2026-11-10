@@ -29,7 +29,7 @@ func _run() -> void:
 	for planet_id: String in ["vesperis", "amberfall", "tidewell"]:
 		check(not SpaceLayout.planet(planet_id).is_empty(), "destination exists: "+planet_id)
 	var venue: Dictionary = CityLayout.story_parts_venue()
-	check(not venue.is_empty() and str(venue.get("district", ""))=="lanternheart" and str(venue.get("shop", "")) in ["general", "wizard", ""],
+	check(not venue.is_empty() and str(venue.get("district", ""))=="lanternheart" and str(venue.get("kind", "")).begins_with("shop"),
 		"navigation core vendor placed at an existing Lanternheart shop")
 	check(not venue.is_empty() and CityLayout.story_venue_door(venue).is_finite(), "shop has an actual accessible sidewalk door")
 	check(steps[1].kind=="reach_buy_part" and int(steps[1].price)==500 and steps[1].item=="story_nav_core",
