@@ -44,7 +44,7 @@ const NPCS := {
 		greeting = "Petalgate keeps her gates open for friends, though the Bastion does not."},
 	vesperis_wizard = {name = "Wizard Aldren", world = "astral", at = {planet = "vesperis", city_venue = "wizard"}, model = "npc_magician",
 		greeting = "Wands, charms, enchanted trinkets - and the best pubs in the Reach!"},
-	verdance_starwright = {name = "Starwright Fen", world = "astral", at = {planet = "verdance", town = "wright"}, model = "npc_smith",
+	verdance_starwright = {name = "Starwright Fen", world = "astral", at = {planet = "verdance", town = "wright", side = 11.0}, model = "npc_smith",
 		greeting = "The starship will not fly until I find those three missing parts."},
 	vesperis_partsmith = {name = "Scrapper Nix", world = "astral", at = {planet = "vesperis", city_venue = "parts"}, model = "npc_traveler",
 		greeting = "Ship parts, fresh from the salvage yard. Navigation core: 500 Dots."},
