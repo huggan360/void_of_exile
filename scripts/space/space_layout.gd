@@ -8,6 +8,9 @@ extends RefCounted
 ## used by the server (gravity, hull collisions) and the art (terrain meshes).
 
 const NEXUS := Vector3.ZERO
+## Hidden outer-Gloam restaurant, safely inside the boundary steering zone.
+const DINER := Vector3(16000, 0, 34500)
+const DINER_RADIUS := 38.0
 ## Station deck: flat gravity inside this cylinder, deck at y = 0.
 const STATION_RADIUS := 62.0
 const STATION_HALF_HEIGHT := 14.0
@@ -388,6 +391,11 @@ static func town_frame(p: Dictionary, which: String) -> Transform3D:
 	return place_frame(p, TOWN_OFFSET+(TOWN_SPOTS.get(which, Vector2.ZERO) as Vector2))
 
 static func berth_frame(index: int) -> Transform3D:
+	if index>=BERTHS:
+		var out := Vector3.LEFT if index==BERTHS else Vector3.RIGHT
+		var side := -out
+		var basis := Basis(side, Vector3.UP, side.cross(Vector3.UP))
+		return Transform3D(basis, DINER+out*36.6-basis*Vector3(11.5, -5.6, 6.0))
 	var angle := TAU*index/BERTHS
 	var out := Vector3(sin(angle), 0, cos(angle))
 	var side := -out

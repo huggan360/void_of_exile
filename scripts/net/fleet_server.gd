@@ -28,6 +28,13 @@ func _context(p: Dictionary) -> Dictionary:
 		return {world = dock, pose = dock.pad_pose(), key = realm.realm_id+":surface", planet = "surface", label = "Surface launch pad"}
 	if realm.world is SpaceWorld:
 		var space := realm.world as SpaceWorld
+		if space.zone_at(at)=="diner":
+			for berth in range(6,8):
+				var pose: Transform3D = SpaceLayout.berth_frame(berth)
+				var key: String = realm.realm_id+":berth:"+str(berth)
+				if not _occupied(space, pose.origin) and not _pads.has(key):
+					return {world = space, pose = pose, key = key, planet = "", berth = berth, label = "Last Light Diner port %d" % (berth-5)}
+			return {}
 		if space.zone_at(at)=="station":
 			for berth in SpaceLayout.BERTHS:
 				var pose := SpaceLayout.berth_frame(berth)

@@ -184,12 +184,12 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 					campaigns._advance(party, {})
 					return
 				for ship: SpaceShip in ships:
-					if ship.mode=="berth" and ship.id in departed:
+					if ship.mode=="berth" and ship.berth<SpaceLayout.BERTHS and ship.id in departed:
 						campaigns._advance(party, {})
 						return
 			else:
 				for ship: SpaceShip in ships:
-					if ship.mode=="berth":
+					if ship.mode=="berth" and ship.berth<SpaceLayout.BERTHS:
 						campaigns._advance(party, {})
 						return
 		"reach_repair":

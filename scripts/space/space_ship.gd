@@ -338,7 +338,7 @@ static func part_at(local: Vector3) -> String:
 ## Whether the pulse drive may run here: clear of planets, the Nexus, the
 ## Shardfield and the edge of the Reach.
 static func pulse_clear(at: Vector3) -> bool:
-	if at.distance_to(SpaceLayout.NEXUS)<PULSE_CLEARANCE: return false
+	if minf(at.distance_to(SpaceLayout.NEXUS), at.distance_to(SpaceLayout.DINER))<PULSE_CLEARANCE: return false
 	if at.length()>SpaceLayout.WORLD_RADIUS-SpaceLayout.BOUNDARY_WARN: return false
 	if absf(at.z-SpaceLayout.SHARDFIELD.center.z)<SpaceLayout.SHARDFIELD.extents.z+600.0 and absf(at.x)<SpaceLayout.SHARDFIELD.extents.x+600.0: return false
 	for p: Dictionary in SpaceLayout.PLANETS:

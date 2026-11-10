@@ -108,6 +108,10 @@ func _ready() -> void:
 		if visual: _station_props()
 		if is_instance_valid(local_player) and local_player.global_position.distance_to(Vector3(0, 0.1, 18))<3.0:
 			local_player.global_position = spawn_point)
+	queue_load_step(func() -> void:
+		var diner := LastLightDiner.new()
+		add_child(diner)
+		diner.build(not visual))
 	for p: Dictionary in SpaceLayout.PLANETS:
 		queue_load_step(func() -> void:
 			var body := SpacePlanet.new()
@@ -144,6 +148,7 @@ func _ready() -> void:
 ## Biome-like zone names for the HUD and lighting.
 func biome_at(position: Vector3) -> BiomeDef:
 	var zone := zone_at(position)
+	if zone=="diner": return _biomes["station"]
 	if zone in ["station", "ship"]: return _biomes[zone]
 	return _biomes[SpaceLayout.region_at(position)]
 
@@ -160,6 +165,9 @@ func sample_gravity(position: Vector3) -> Dictionary:
 	var slot := SpaceLayout.pocket_at(position)
 	if slot>=0:
 		return {frame = Transform3D(Basis.IDENTITY, Vector3(position.x, SpaceLayout.POCKET_ORIGIN.y, position.z)), zone = "ship", distance = 0.0, slot = slot}
+	var diner_offset: Vector3 = position-SpaceLayout.DINER
+	if absf(diner_offset.x)<39.0 and absf(diner_offset.z)<24.0 and absf(diner_offset.y)<14.0:
+		return {frame = Transform3D(Basis.IDENTITY, Vector3(position.x, SpaceLayout.DINER.y, position.z)), zone = "diner", distance = absf(diner_offset.y)}
 	var flat := Vector2(position.x-SpaceLayout.NEXUS.x, position.z-SpaceLayout.NEXUS.z).length()
 	if flat<SpaceLayout.STATION_RADIUS+6.0 and absf(position.y-SpaceLayout.NEXUS.y)<SpaceLayout.STATION_HALF_HEIGHT:
 		return {frame = Transform3D(Basis.IDENTITY, Vector3(position.x, SpaceLayout.NEXUS.y, position.z)), zone = "station", distance = absf(position.y)}
@@ -393,9 +401,9 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or not _may_board(ship, pid):
 				_tell(p, "That ship belongs to another crew.")
 				return
-			var near := zone_at(pos)=="station" if ship.mode=="berth" else _beside_landed(ship, pos) if ship.mode=="landed" else false
+			var near := (zone_at(pos)==("diner" if ship.berth>=SpaceLayout.BERTHS else "station")) if ship.mode=="berth" else _beside_landed(ship, pos) if ship.mode=="landed" else false
 			if not near:
-				_tell(p, "You can only board at the Nexus or beside the landed ship.")
+				_tell(p, "You can only board at a station port or beside the landed ship.")
 				return
 			teleport(p, pocket_point(ship.slot, interior_anchors.get("spawn", Vector3(0, 0.1, 14))), "board")
 		"hatch":
@@ -403,9 +411,13 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null: return
 			_stand(ship, pid)
 			match ship.mode:
-				"berth": teleport(p, station.anchors.get("gangways", [spawn_point])[ship.berth % 6]+Vector3.UP*0.1 if station else spawn_point, "station")
+				"berth":
+					if ship.berth>=SpaceLayout.BERTHS:
+						teleport(p, SpaceLayout.DINER+Vector3(-34 if ship.berth==6 else 34,0.1,0), "diner")
+					else:
+						teleport(p, station.anchors.get("gangways", [spawn_point])[ship.berth % 6]+Vector3.UP*0.1 if station else spawn_point, "station")
 				"landed": teleport(p, hatch_position(ship), "planet")
-				_: _tell(p, "The hatch stays sealed in flight. Land on a planet or dock at the Nexus.")
+				_: _tell(p, "The hatch stays sealed in flight. Land on a planet or dock at a station.")
 		"sit":
 			var ship := ship_in_slot(SpaceLayout.pocket_at(pos))
 			var seat := str(args[1]) if args.size()>1 else ""
@@ -459,10 +471,20 @@ func server_action(p: Dictionary, args: Array) -> void:
 		"dock":
 			var ship := ship_of(pid)
 			if ship==null or ship.pilot()!=pid or ship.mode!="flying": return
-			if ship.xform.origin.distance_to(SpaceLayout.NEXUS)>DOCK_RANGE:
-				_tell(p, "Fly closer to the Nexus to dock.")
+			var diner: bool = ship.xform.origin.distance_to(SpaceLayout.DINER)<DOCK_RANGE
+			if not diner and ship.xform.origin.distance_to(SpaceLayout.NEXUS)>DOCK_RANGE:
+				_tell(p, "Fly closer to a station to dock.")
 				return
-			ship.dock(ship.berth)
+			var free_berth: int = -1
+			for index in range(6,8) if diner else range(6):
+				if ships.values().any(func(other: SpaceShip) -> bool: return other.id!=ship.id and other.mode=="berth" and other.berth==index): continue
+				if _fleet_pad_reserved("berth:"+str(index)): continue
+				free_berth = index
+				break
+			if free_berth<0:
+				_tell(p, "Both diner ports are occupied." if diner else "All Nexus ports are occupied.")
+				return
+			ship.dock(free_berth)
 			_broadcast_ship(ship)
 		"descend":  # the pilot takes the ship down to the Surface
 			var ship := ship_of(pid)

@@ -319,7 +319,7 @@ func _update_hint() -> void:
 				if not _ship.queue.is_empty(): rows.append([["@ship_land"], "Waiting to land"])
 				elif not land.is_empty(): rows.append([["@ship_land"], "Land here?"])
 				elif SpaceLayout.can_descend(_ship.xform.origin): rows.append([["@ship_land"], "Descend"])
-				elif _ship.xform.origin.distance_to(SpaceLayout.NEXUS)<SpaceWorld.DOCK_RANGE: rows.append([["@ship_land"], "Dock"])
+				elif minf(_ship.xform.origin.distance_to(SpaceLayout.NEXUS), _ship.xform.origin.distance_to(SpaceLayout.DINER))<SpaceWorld.DOCK_RANGE: rows.append([["@ship_land"], "Dock"])
 		"turret_top", "turret_left", "turret_right":
 			if _ship!=null and _ship.mode=="flying":
 				rows.append([["Mouse"], "Aim"])
@@ -476,7 +476,7 @@ func _input(event: InputEvent) -> void:
 		if _lift>=0: notice("The elevator uses first person. Your camera returns when you step out.")
 		else:
 			camera_mode = (view_mode()+1) % 3
-			if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position)=="station": camera_mode = CameraMode.SHOULDER
+			if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position) in ["station", "diner"]: camera_mode = CameraMode.SHOULDER
 			AppSettings.video.space_camera = camera_mode
 			AppSettings.save_preferences()
 		get_viewport().set_input_as_handled()
@@ -542,7 +542,7 @@ func free_look() -> bool:
 ## The camera in use: the Nexus has no angled view, so there it is the
 ## shoulder view unless first person was chosen.
 func view_mode() -> CameraMode:
-	if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position)=="station": return CameraMode.SHOULDER
+	if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position) in ["station", "diner"]: return CameraMode.SHOULDER
 	return camera_mode
 
 func _was_seated() -> bool:
@@ -713,12 +713,12 @@ func physics_step(delta: float) -> void:
 		spacewalk = false
 		_out_on_purpose = true
 		_last_zone = str(state.zone)
-		if str(state.zone).begins_with("planet:") or state.zone=="station":
+		if str(state.zone).begins_with("planet:") or state.zone in ["station", "diner"]:
 			_jet_descent(delta,state)
 			return
 		_descent = false  # Outside the atmosphere, continue in free flight.
 		_planet_fall = false
-	if jetpack_attached and (str(state.zone).begins_with("planet:") or state.zone=="station") and not player.controls_locked() and not player.ui_blocked and not player.interacting() and _lift<0 and Input.is_action_just_pressed("jetpack_thrust") and fuel>5.0:
+	if jetpack_attached and (str(state.zone).begins_with("planet:") or state.zone in ["station", "diner"]) and not player.controls_locked() and not player.ui_blocked and not player.interacting() and _lift<0 and Input.is_action_just_pressed("jetpack_thrust") and fuel>5.0:
 		_descent = true
 		_planet_fall = false
 		spacewalk = false
@@ -764,7 +764,7 @@ func physics_step(delta: float) -> void:
 	fuel = minf(100.0, fuel+FUEL_REGEN*delta)
 	var frame: Transform3D = state.frame
 	# Dropped into the deck (arriving before its collision was ready): back on top.
-	if state.zone=="station" and player.global_position.y< -0.6:
+	if state.zone in ["station", "diner"] and player.global_position.y< -0.6:
 		player.global_position = world.recovery_point(player.global_position)
 		player.velocity = Vector3.ZERO
 	if state.zone=="planet:"+CityLayout.ID and player.global_position.distance_to(CityLayout.planet().center)<CityLayout.radius()-8.0:
