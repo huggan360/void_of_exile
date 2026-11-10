@@ -39,7 +39,7 @@ func refresh(actor: Node3D) -> void:
 		"seat": title = "Bench" if bench else "Chair"; action_text = "Sit"
 		"tap":
 			title = "Coffee pot" if drink=="coffee" else "Beer tap"
-			action_text = "Refill" if not s.get("cup", {}).is_empty() and s.cup.kind==drink else "Pour"
+			action_text = "Refill" if not s.get("cup", {}).is_empty() and s.cup.kind==drink else "Order beer" if drink=="beer" and key.begins_with("citytap|") else "Pour"
 		"table":
 			var occupied: bool = Leisure.tables.get(place.realm_id, {}).has(key)
 			title = "Tabletop"
