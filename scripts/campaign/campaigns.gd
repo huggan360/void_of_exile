@@ -52,7 +52,7 @@ const NPCS := {
 		greeting = "The Amber Ziggurat has been quiet. Far too quiet."},
 	tidewell_fisher = {name = "Fisher Mira", world = "astral", at = {planet = "tidewell", town = "center"}, model = "npc_villager",
 		greeting = "The tides brought in something stranger than fish."},
-	tidewell_keeper = {name = "Keeper Brine", world = "astral", at = {planet = "tidewell", spot = "lighthouse"}, model = "npc_traveler",
+	tidewell_keeper = {name = "Keeper Brine", world = "astral", at = {planet = "tidewell", spot = "lighthouse", side = 11.0}, model = "npc_traveler",
 		greeting = "The lighthouse sees everything the tides are trying to hide."},
 	astral_mechanic = {name="Orin the Starwright",world="campaign",campaign="theory_of_everything",
 		at={astral="mechanic"},model="npc_smith",
