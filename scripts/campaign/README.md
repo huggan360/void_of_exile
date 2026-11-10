@@ -194,3 +194,53 @@ check fleet deployment, the moving skiff marker, both cinematic shots, native
 repairs, Petalgate-only landing, the key, the fortress victory, and the full
 party's return. The old `tools/test_reach_online.tscn` was authored for
 revision-1 First Light and should be revised before using it for mission 2.
+
+## Vesperis (mission 3: lantern_road, revision 2)
+
+This is the third Astral Frontier campaign, now titled **Vesperis**. Its saved
+identifier stays `lantern_road` so `shardfield.requires` and finished tales
+remain compatible. Active revision-1 Lantern Road runs restart at the new
+arrival objective when migrated.
+
+Like Space Travels, Vesperis uses a party-private Reach through
+`PortServer.space_for(party.campaign.realm)`. Fleet persistence in private
+campaign worlds is unchanged. The remaining Reach tales use the shared Reach.
+
+### Seven mission objectives
+
+1. Land at any **Lanternheart Spaceport** pad on Vesperis.
+2. Speak to **Wizard Aldren**, standing outside the existing wizard shop.
+   The existing shop remains usable for buying wands and magic.
+3. Visit a Lanternheart pub, order beer from the bar's actual tap and drink
+   two **complete four-sip mugs per party member**. The authority checks the
+   true city venue, each ordered mug's unique id, the drinking location and
+   the individual member's progress. Beer from the ship and coffee do not
+   count. The quest mark points to a real nearby Lanternheart bar.
+4. Follow the country road to an existing red-barn farmstead on Vesperis
+   (index `CityCountry.FARMS[0]`, within the playable planet combat cap)
+   and defeat the user's existing `mad_farmer` three-phase shotgun boss.
+   The private realm owns a finite `quest_lantern_road_<attempt>_farmer`
+   site and the server confirms that specific boss's death.
+5. Open the persistent gold **Story Chest** in the farmyard to collect
+   `story_wizard_starball`, the magical sphere stolen from the wizard.
+   The quest waits for a real party member to possess it, and can recreate
+   the chest if the ball is lost.
+6. Return to Aldren at the wizard shop. The story dialogue requires a party
+   member to have the starball and takes it once the conversation ends.
+7. Every party member collects their own guaranteed **G5_wand** from a
+   **personal blue chest** spawned outside Aldren's shop. The mission
+   completes only after the contents have been claimed by everyone.
+   Expired unclaimed chests are recreated; claimed ones are not duplicated.
+
+### Check
+
+After importing with the project's voxel-enabled Godot build, run:
+
+`/home/hugo/godot/engine/godot_voxel_editor --headless --path . --script res://tools/check_vesperis_campaign.gd`
+
+This script validates the authored assets, real shop/pub and farm positions,
+the boss definition, private realm selection, quest steps and rewards.
+It is a **contract check, not an online end-to-end playthrough**. An online
+test using the documented test account should also verify a two-player party,
+actual beer ordering/sipping, the boss's combat and death, picking up the
+starball, the wizard's handover and both personal Blue Chests.
