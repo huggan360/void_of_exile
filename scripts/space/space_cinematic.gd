@@ -75,6 +75,57 @@ func nexus_intro(camera: Camera3D, world: SpaceWorld) -> void:
 		"Planets wait in the Haven. Beyond the Shardfield lies the Gloam. M opens the star map.")
 	_caption.text = ""
 
+## A camera-only sequence: the actual pursuing enemy continues flying and
+## its objective marker stays attached to the same replicated ship.
+func tutorial_ambush(camera: Camera3D, world: SpaceWorld, ship_id: int, foe_id: int) -> void:
+	var ship: SpaceShip = world.ships.get(ship_id)
+	if ship==null: return
+	var back := ship.xform.basis.z
+	var side := ship.xform.basis.x
+	var up := ship.xform.basis.y
+	var at := ship.xform.origin
+	var foe_look := func() -> Vector3:
+		var view: Dictionary = world.foes._views.get(foe_id, {})
+		if not view.is_empty() and is_instance_valid(view.get("node")):
+			return (view.node as Node3D).global_position
+		return at+back*210.0
+	await _shot(camera, at+back*85.0+side*120.0+up*35.0,
+		at+back*62.0+side*65.0+up*23.0, foe_look, 4.0,
+		"Something is coming in behind us. A brood skiff! To the cannons!")
+	var ship_look := func() -> Vector3:
+		var view: SpaceShipView = world.ship_views.get(ship_id)
+		return view.global_position if is_instance_valid(view) else at
+	await _shot(camera, at+back*85.0+up*38.0, at+back*48.0+up*25.0, ship_look, 2.4,
+		"Keep the ship in your sights. Fight off the pursuer!")
+	_caption.text = ""
+
+## Show the ladder first, then the three exterior repair spots and finally
+## the heart inside. Real repair interactions happen after this shot ends.
+func tutorial_repairs(camera: Camera3D, world: SpaceWorld, ship_id: int) -> void:
+	var ship: SpaceShip = world.ships.get(ship_id)
+	if ship==null: return
+	var ladder: Vector3 = world.pocket_point(ship.slot, world.interior_anchors.get("ladder", Vector3.ZERO))
+	await _shot(camera, ladder+Vector3(5.0, 2.5, 8.0), ladder+Vector3(3.0, 2.2, 5.0),
+		func() -> Vector3: return ladder+Vector3.UP, 3.5,
+		"Your hull is damaged! Use the ladder to reach the deck, then mend the exterior parts.")
+	var captions := {
+		sails = "1 / 4: The sails steer the ship. Mend them on the deck.",
+		engines = "2 / 4: The engines drive us forward. Use the jetpack to reach the stern.",
+		turret = "3 / 4: The top cannon is jammed. Mend it on deck."
+	}
+	for part: String in ["sails", "engines", "turret"]:
+		var spot := world.repair_mark(ship, part)
+		var outward := (spot-ship.xform.origin).normalized()
+		var side := ship.xform.basis.x
+		await _shot(camera, spot+outward*26.0+side*22.0+ship.xform.basis.y*12.0,
+			spot+outward*17.0+side*11.0+ship.xform.basis.y*7.0,
+			func() -> Vector3: return world.repair_mark(ship, part), 2.6, str(captions[part]))
+	var heart := world.repair_mark(ship, "heart")
+	await _shot(camera, heart+Vector3(5.0, 3.0, 7.0), heart+Vector3(3.0, 2.0, 4.0),
+		func() -> Vector3: return heart, 3.4,
+		"4 / 4: The heart crystal is inside the ship. Mend all four parts before flying on.")
+	_caption.text = ""
+
 ## The battleship rises off its Surface pad, tips its nose up and races into
 ## the sky (the portal zoom follows, see SurfaceLaunchpad).
 func battleship_launch(camera: Camera3D, ship: ShipHull, _caption_text: String) -> void:
