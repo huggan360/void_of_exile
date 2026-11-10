@@ -448,6 +448,7 @@ func left_party(p: Dictionary, party: Dictionary) -> void:
 	server.social.send(p.player_id, ["camp_scene_end"])
 	server.dungeons.grants.erase(p.player_id)
 	var run := _run_of(party)
+	if party.campaign.is_empty(): return
 	var occupied := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
 	if not party.campaign.is_empty() and party.campaign.id in ["first_light", "lantern_road"]: occupied.append(PortServer.space_for(str(party.campaign.realm)))
 	if not party.campaign.is_empty() and p.realm in occupied:
