@@ -170,6 +170,17 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 				for ship: SpaceShip in ships:
 					if ship.mode!="berth" and not ship.id in departed: departed.append(ship.id)
 				run.return_seen = departed
+				# If the old tutorial ship was lost, the party can still
+				# finish once everyone reaches the Nexus safely.
+				var all_home: bool = not party.members.is_empty()
+				for pid: int in party.members:
+					var member := campaigns.server.social.record(pid)
+					if member.is_empty() or member.get("realm", "")!=world.realm_id or not member.get("joined", false) or member.get("dead", true) or world.zone_at(member.get("pos", Vector3.INF))!="station":
+						all_home = false
+						break
+				if all_home:
+					campaigns._advance(party, {})
+					return
 				for ship: SpaceShip in ships:
 					if ship.mode=="berth" and ship.id in departed:
 						campaigns._advance(party, {})
