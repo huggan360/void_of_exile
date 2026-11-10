@@ -5,12 +5,13 @@ extends RefCounted
 ## Progress comes from the shared SpaceWorld: party ships, landings, cannon
 ## kills, and searches at planet spots or repairs aboard (published as marks).
 var campaigns: CampaignServer
+var missing_parts := ShardfieldCampaign.new()
 var _hooked_worlds := {}  # realm id -> instance id, so each private Reach is hooked only once
 
 ## Missions 2 and 3 use party-owned private Space instances. Later Reach
 ## adventures continue in the shared world until they are reworked.
 static func space_realm(party: Dictionary) -> String:
-	if party.get("campaign", {}).get("id", "") in ["first_light", "lantern_road"]:
+	if party.get("campaign", {}).get("id", "") in ["first_light", "lantern_road", "shardfield"]:
 		return PortServer.space_for(str(party.campaign.realm))
 	return SpaceWorld.REALM
 
@@ -70,6 +71,9 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 		world.foes.foe_killed.connect(_on_foe_killed.bind(world))
 		world.enemy_director.enemy_killed.connect(_on_enemy_killed.bind(world))
 	var step := campaigns._step(run)
+	if run.id=="shardfield":
+		missing_parts.campaigns = campaigns
+		if missing_parts.tick(party, run, step, world): return
 	var ships := _ships(party, world)
 	var fresh := int(run.get("reach_step", -1))!=int(run.step)
 	if fresh:
@@ -241,6 +245,7 @@ func _crewed(party: Dictionary, ships: Array) -> SpaceShip:
 ## Marks this party sees: search spots, repairs aboard and flight targets.
 func _publish(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceWorld, ships: Array) -> void:
 	var marks: Array = []
+	if run.id=="shardfield": marks.append_array(missing_parts.markers(party, run, step, world))
 	match str(step.kind):
 		"reach_vesperis_port":
 			for pad: Dictionary in CityLayout.all_pads():
@@ -398,6 +403,9 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 	if world==null: return true
 	var step := campaigns._step(run)
 	var pos: Vector3 = p.get("pos", Vector3.ZERO)
+	if run.id=="shardfield":
+		missing_parts.campaigns = campaigns
+		if missing_parts.action(party, run, p, objective, world, step): return true
 	if objective.begins_with("npc:") and step.kind=="talk" and objective=="npc:"+str(step.npc):
 		var at := world.npc_position(str(step.npc))
 		if at.is_finite() and at.distance_to(pos)<6.0:
