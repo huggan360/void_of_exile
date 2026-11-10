@@ -194,7 +194,7 @@ const LIST := {
 				say = "Finally, a crew that knows one end of a battleship from the other! I'm Fen. I'm rebuilding a starship here in [place]Mossbrook[/place].|Three pieces have gone missing: a [b]navigation core[/b] sold by a parts shop in [place]Vesperis[/place], an [b]amber power regulator[/b] sealed in Aurum's fortress on [place]Amberfall[/place], and a [b]tidal stabilizer[/b] somewhere on [place]Tidewell[/place].|The core will cost [b]500 Dots[/b]. Honeymarket's warden keeps the Amber Ziggurat key. On Tidewell, ask the locals: they'll know where the last part washed up.|Let me show you the three worlds on your star chart. When all three parts are in your hands, bring them here and I'll fit the new drive.",
 				cutscene = "starwright_three_worlds"},
 			{id = "buy_core", kind = "reach_buy_part", world = "astral", npc = "vesperis_partsmith", item = "story_nav_core", price = 500,
-				text = "Buy the ship's Navigation Core from the parts merchant in Lanternheart, Vesperis (500 Dots)"},
+				text = "Pay Scrapper Nix 500 Dots in Lanternheart, then open the gold Story Chest to collect the Navigation Core"},
 			{id = "amber_key", kind = "talk", world = "astral", npc = "amberfall_warden", shared = true,
 				grant_key = "key_amber_ziggurat",
 				text = "Find the warden in Honeymarket on Amberfall and ask for the Amber Ziggurat key",
