@@ -7,7 +7,7 @@ const SUPPORT_AGGRO := 60.0
 
 
 static func build(defs: Dictionary) -> void:
-	for d in [_tower(), _shardling(), _sentinel(), _pact_mite(), _dawn_scarab(), _mirror_shade(), _thornmaw(),
+	for d in [_tower(), _shardling(), _sentinel(), _pact_mite(), _dawn_scarab(), _mirror_shade(), _thornmaw(), _mad_farmer(),
 			_rimeheart(), _vharok(), _scarab(), _hollow_crown()]:
 		defs[d.id] = d
 
@@ -261,4 +261,25 @@ static func _hollow_crown() -> BossDef:
 	])
 	b.loot.assign(boss_loot(b.id, {attack = 0.15, defense = 0.15, speed = 0.5, dexterity = 0.15,
 			magic = 0.25, hp = 0.15, mp = 0.75}))
+	return b
+
+
+static func _mad_farmer() -> BossDef:
+	var b := _boss("mad_farmer", "Mad Farmer", "mad_farmer", "", "mad_farmer")
+	b.wake_on = "near"
+	b.hp = 15000
+	b.defense = 4
+	b.xp = 250
+	b.body_height = 3.0
+	b.hit_radius = 0.9
+	b.aggro_radius = 16.0
+	b.bar_radius = 32.0
+	b.abandon_radius = 35.0
+	b.keep_distance = 8.0
+	b.leash = 22.0
+	b.burst_color = Color(1.0, 0.55, 0.2)
+	b.phases.assign([{until = 0.65, defense = 4}, {until = 0.3, defense = 3}, {until = 0.0, defense = 2}])
+	b.loot.assign([{item = "elixir_hp", chance = 1.0}, {item = "elixir_mp", chance = 0.5},
+		{pool = {tier = 2}, chance = 0.75}, {pool = {tier = 3}, chance = 0.2},
+		{item = "elixir_of_dexterity", chance = 0.15, personal = true}])
 	return b

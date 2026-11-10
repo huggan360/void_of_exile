@@ -1,0 +1,74 @@
+{
+  "voxel_size": 0.1,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -7,
+        9,
+        -6
+      ]
+    },
+    "arm": {
+      "frame_min": [
+        -2,
+        -9,
+        -2
+      ]
+    },
+    "gun": {
+      "frame_min": [
+        -2,
+        -3,
+        -13
+      ]
+    },
+    "leg": {
+      "frame_min": [
+        -2,
+        -9,
+        -4
+      ]
+    }
+  },
+  "limbs": {
+    "arm_l": {
+      "part": "arm",
+      "pivot": [
+        -8,
+        19,
+        0
+      ]
+    },
+    "arm_r": {
+      "part": "gun",
+      "pivot": [
+        8,
+        17,
+        -2
+      ],
+      "role": "arm",
+      "amount": 0.15
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -4,
+        9,
+        0
+      ]
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        4,
+        9,
+        0
+      ]
+    }
+  },
+  "hand": [
+    8,
+    16,
+    -15
+  ]
+}
