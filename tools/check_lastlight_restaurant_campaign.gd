@@ -30,8 +30,10 @@ func _run() -> void:
 		"mission uses the existing permanent Last Light host model")
 	check(SpaceLayout.DINER==Vector3(16000, 0, 34500) and SpaceLayout.DINER_RADIUS>30,
 		"permanent diner location is unchanged")
-	check(SpaceLayout.BERTHS==6 and LastLightDiner!=null,
+	var diner := LastLightDiner.new()
+	check(SpaceLayout.BERTHS==6 and diner is LastLightDiner,
 		"Last Light uses the two existing extra diner ports, indices 6-7")
+	diner.free()
 	var quest := RestaurantCampaign.new()
 	var marks: Array = quest.markers(steps[2])
 	check(marks.size()==1 and marks[0].kind=="zone" and marks[0].radius>=3000,
