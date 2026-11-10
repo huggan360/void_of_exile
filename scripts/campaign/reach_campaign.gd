@@ -138,6 +138,17 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 				for ship: SpaceShip in ships:
 					if ship.mode!="berth" and not ship.id in departed: departed.append(ship.id)
 				run.return_seen = departed
+				# A lost ship need not be replaced and flown out again when
+				# the entire crew has already made it safely back to the Nexus.
+				var all_home := not party.members.is_empty()
+				for pid: int in party.members:
+					var member := campaigns.server.social.record(pid)
+					if member.is_empty() or member.get("realm", "")!=world.realm_id or not member.get("joined", false) or member.get("dead", true) or world.zone_at(member.get("pos", Vector3.INF))!="station":
+						all_home = false
+						break
+				if all_home:
+					campaigns._advance(party, {})
+					return
 				for ship: SpaceShip in ships:
 					if ship.mode=="berth" and ship.id in departed:
 						campaigns._advance(party, {})
