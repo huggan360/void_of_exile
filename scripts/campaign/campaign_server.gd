@@ -349,7 +349,12 @@ func start(p: Dictionary, id: String, restart := false) -> void:
 			if fresh and def.has("intro"):
 				server.social.send(pid, ["camp_intro", def.intro])
 		elif _step(run).get("world", "") == SpaceWorld.REALM:
-			server.social.system(pid, "The tale begins at the [place]Nexus[/place] in Space. Launch a battleship from the Skyward Launch Pad south of Hearthwick.")
+			if id=="first_light":
+				# Mission 2 is a protected private Reach: other parties and their
+				# enemies cannot interfere with the introductory flight.
+				server.social.send_to(pid, PortServer.space_for(party.campaign.realm))
+			else:
+				server.social.system(pid, "The tale begins at the [place]Nexus[/place] in Space. Launch a battleship from the Skyward Launch Pad south of Hearthwick.")
 		else:
 			server.social.system(pid, "The [place]Chronicle Gate[/place] south of the fountain is open to your party.")
 
@@ -915,6 +920,13 @@ func _advance(party: Dictionary, p: Dictionary, side := false) -> void:
 	if step.has("say") and not step.get("shared", false) and not p.is_empty():
 		_to_party(party, ["chat", "npc", Campaigns.NPCS.get(step.get("npc", ""), {}).get("name", ""), 0,
 				str(step.say).replace("|", " "), ""])
+	# Story keys are granted only when the NPC conversation actually ends.
+	if step.has("grant_key"):
+		var receiver := int(p.get("player_id", party.leader))
+		var stats := GameServer.character(receiver)
+		if stats and stats.find_item(str(step.grant_key)).is_empty():
+			stats.give([Items.make(str(step.grant_key))])
+			server.social.system(receiver, "Received the [b]Rose Bastion key[/b]. Use it at the fortress gate.")
 	_reward(party, step)
 	if side:
 		run.side_step = int(run.side_step) + 1
