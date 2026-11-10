@@ -230,6 +230,8 @@ static func gate_key(id: String) -> Item:
 
 ## Campaign story items. [name, kind, lore, readable text ("" = not readable)]
 const STORY_ITEMS := {
+	story_wizard_starball = ["Aldren's Stolen Starball", "Story item - magical sphere",
+		"A little blue star turns inside the glass. The farmer swore it could levitate his turnips; Wizard Aldren needs it back.", ""],
 	story_starcoil = ["Starcoil", "Rocket part", "A copper winding that folds a spark of starlight into lift. Bring it to Orin at Starfall Launchworks.", ""],
 	story_spellsteel_nozzle = ["Spellsteel Nozzle", "Rocket part", "A rune-lined engine throat, cast to survive impossible heat. Orin needs this for his magic ship.", ""],
 	story_aether_heart = ["Aether Heart", "Rocket part", "A small prism holding a calm blue star. The last piece of Orin's rocket.", ""],
