@@ -93,7 +93,8 @@ func markers(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceW
 			var item_id := str(step.item)
 			var at := source(world, item_id)
 			var spec := _chest_spec(item_id)
-			var bag: Dictionary = GameServer.bag(int(run.get("shard_chests", {}).get(str(spec.get("id", "")), 0)))
+			var keys: Dictionary = run.get("shard_chests", {})
+			var bag: Dictionary = GameServer.bag(int(keys.get(str(spec.get("id", "")), 0)))
 			if not bag.is_empty(): at = bag.pos
 			if at.is_finite(): marks.append({id = "part", name = str(step.text), pos = at, kind = "target"})
 		"talk":
