@@ -87,8 +87,7 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 					campaigns._advance(party, {})
 					return
 		"reach_vesperis_beers":
-			_vesperis_check_beers(party, run)
-			if int(run.step)!=int(step.get("story_index", run.step)) and run.status=="done": return
+			if _vesperis_check_beers(party, run): return
 		"reach_vesperis_boss":
 			_vesperis_ensure_farmer(run, world)
 		"reach_vesperis_ball":
@@ -193,6 +192,11 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 func _begin(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceWorld, ships: Array) -> void:
 	run.count = 0
 	match str(step.kind):
+		"reach_vesperis_boss":
+			_vesperis_ensure_farmer(run, world)
+		"reach_vesperis_beers":
+			if not run.has("vesperis_beers"): run.vesperis_beers = {}
+			if not run.has("vesperis_mugs"): run.vesperis_mugs = {}
 		"reach_kill":
 			if int(step.get("ambush", 0))>0:
 				world.foes.ambushes.append({at = target_point(str(step.get("target", "nexus"))), kind = str(step.get("foe", "brood_skiff")) if step.has("foe") else "brood_skiff", count = int(step.ambush)})
@@ -225,6 +229,26 @@ func _crewed(party: Dictionary, ships: Array) -> SpaceShip:
 func _publish(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceWorld, ships: Array) -> void:
 	var marks: Array = []
 	match str(step.kind):
+		"reach_vesperis_port":
+			for pad: Dictionary in CityLayout.all_pads():
+				if str(pad.district)=="lanternheart" and int(pad.index)==0:
+					var at: Vector3 = (CityLayout.planet().center as Vector3)+(pad.frame as Transform3D).origin
+					marks.append({id = "port", name = "Land at Lanternheart Spaceport", pos = at, kind = "target"})
+					break
+		"reach_vesperis_beers":
+			var pub := CityLayout.story_pub_venue()
+			var at := CityLayout.story_pub_tap()
+			if at.is_finite():
+				marks.append({id = "pub", name = "Order beer at "+str(pub.name), pos = at, kind = "target"})
+		"reach_vesperis_boss":
+			marks.append({id = "farm", name = "Mad Farmer's farm", pos = vesperis_farm_position(), kind = "target"})
+		"reach_vesperis_ball":
+			var record: Dictionary = GameServer.bag(int(run.get("vesperis_chest", 0)))
+			var at: Vector3 = record.get("pos", vesperis_farm_position())
+			marks.append({id = "ball", name = "Stolen starball - Story Chest", pos = at, kind = "target"})
+		"reach_vesperis_wands":
+			var at := CityLayout.story_venue_door(CityLayout.story_wizard_venue())
+			if at.is_finite(): marks.append({id = "reward", name = "Collect your Tier 5 wand - Blue Chest", pos = at, kind = "target"})
 		"reach_search":
 			for o: Dictionary in step.objects:
 				if o.id in run.done_objects: continue
@@ -307,6 +331,10 @@ func _on_enemy_killed(enemy: Enemy, world: SpaceWorld) -> void:
 		var step := campaigns._step(run)
 		if step.kind=="reach_boss" and enemy.def.id==str(step.boss):
 			campaigns._advance(party, {})
+		elif step.kind=="reach_vesperis_boss" and enemy.def.id=="mad_farmer" and enemy.pack!=null:
+			var expected := "quest_%s_%s_farmer" % [run.id, run.get("attempt", "legacy")]
+			if str(enemy.pack.site.get("id", ""))!=expected: continue
+			campaigns._advance(party, {})
 
 func _reset_to_order(party: Dictionary, run: Dictionary, world: SpaceWorld) -> void:
 	if world.foes.foes.has(int(run.get("tutorial_foe", 0))):
@@ -356,6 +384,16 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 	if objective.begins_with("npc:") and step.kind=="talk" and objective=="npc:"+str(step.npc):
 		var at := world.npc_position(str(step.npc))
 		if at.is_finite() and at.distance_to(pos)<6.0:
+			if step.has("return_item"):
+				var carried := false
+				for pid: int in party.members:
+					var stats := GameServer.character(pid)
+					if stats and not stats.find_item(str(step.return_item)).is_empty():
+						carried = true
+						break
+				if not carried:
+					campaigns.server.social.system(int(p.player_id), "The wizard needs his stolen starball. Open the Story Chest at the farm.")
+					return true
 			if step.has("grant_key"): run.key_receiver = int(p.player_id)
 			campaigns._start_scene(party, p, step, at)
 		return true
