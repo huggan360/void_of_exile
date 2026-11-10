@@ -230,6 +230,12 @@ static func gate_key(id: String) -> Item:
 
 ## Campaign story items. [name, kind, lore, readable text ("" = not readable)]
 const STORY_ITEMS := {
+	story_nav_core = ["Salvaged Navigation Core", "Story item - starship component",
+		"An immaculate Vesperis navigation unit, bought for 500 Dots. Starwright Fen needs its guided stars to steer his rebuild.", ""],
+	story_amber_regulator = ["Amber Power Regulator", "Story item - starship component",
+		"A heavy golden pressure ring once guarded by Aurum, the Amber Colossus. It holds steady even when it hums.", ""],
+	story_tidal_stabilizer = ["Tidal Stabilizer", "Story item - starship component",
+		"A brass device found in Tidewell's shallows. Tiny waves turn beneath its glass.", ""],
 	story_wizard_starball = ["Aldren's Stolen Starball", "Story item - magical sphere",
 		"A little blue star turns inside the glass. The farmer swore it could levitate his turnips; Wizard Aldren needs it back.", ""],
 	story_starcoil = ["Starcoil", "Rocket part", "A copper winding that folds a spark of starlight into lift. Bring it to Orin at Starfall Launchworks.", ""],
