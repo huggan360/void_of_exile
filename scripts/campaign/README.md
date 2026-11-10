@@ -244,3 +244,63 @@ It is a **contract check, not an online end-to-end playthrough**. An online
 test using the documented test account should also verify a two-player party,
 actual beer ordering/sipping, the boss's combat and death, picking up the
 starball, the wizard's handover and both personal Blue Chests.
+
+## The Starwright's Missing Parts (mission 4: shardfield, revision 2)
+
+The fourth Astral Frontier mission is reworked from the original asteroid
+pass into a three-planet retrieval adventure, while its internal id remains
+`shardfield`. Already-finished campaign records and
+`hollowmoon.requires = shardfield` remain intact. Unfinished revision-1
+campaigns restart at the new first quest objective.
+
+This mission uses its own private `astral_<campaign realm>` SpaceWorld, as
+missions 2 and 3 do. It keeps the native ship persistence rules, fleet
+behavior, boss scripts, rewards and story-item inventory model.
+
+**The commission**: Starwright Fen is in the shipwright yard of
+Mossbrook, on Verdance. Completing his shared conversation immediately
+plays the real three-shot `starwright_three_worlds` CampaignCinematic:
+a flyover of Vesperis (navigation core), Amberfall (Aurum and amber power
+regulator), and Tidewell (NPC clues and tidal stabilizer). The normal Space
+scene stays visible; each shot includes a caption with the next objective.
+The existing hold-Space-to-skip cinematic control continues to work.
+
+**Vesperis**: Scrapper Nix stands on the sidewalk outside the existing
+general shop in Lanternheart. Interacting with him during the purchase
+objective charges the purchasing player 500 Dots through
+`EconomyServer.spend` and gives the real `story_nav_core` to that
+character. The server checks the player's distance to the shop, ability
+to pay, and backpack room. The party buys one core, not one per member.
+If the core is lost before turn-in, it can be bought again from Nix.
+
+**Amberfall**: Warden Saffron is in Honeymarket's plaza and gives the
+real `key_amber_ziggurat` after her story conversation. The party must
+unlock the existing Ziggurat gate and defeat the original
+`amber_colossus` Boss, Aurum; only the server's actual boss-death
+callback advances the step. The warden reissues a key after a reset when
+necessary. The Amber Power Regulator appears in a persistent golden
+Story Chest near the fortress arena after victory.
+
+**Tidewell**: two sequential NPC conversations lead from Fisher Mira
+in Saltstilts to Keeper Brine at the lighthouse. He reveals the Shell
+Shrine, where a separate golden Story Chest contains the Tidal Stabilizer.
+The chest and marker are not revealed in earlier mission steps.
+
+**Return to Verdance**: Only after all three actual items are held by
+party members does Fen's final dialogue start. Its completion consumes
+all three after a full inventory recheck, then awards normal mission XP
+and progression to the next campaign. The purchased part cannot be
+faked with a UI marker; both found items come from persistent
+server-authoritative Story Chests. Lost found items can be reacquired
+at their original source after the appropriate quest step.
+
+For a headless contract test with the project's custom voxel Godot build:
+
+`godot --headless --path . --script res://tools/check_shardfield_parts_campaign.gd`
+
+The test checks definitions, NPCs, actual planets, the three shots,
+key/boss pairing, price, story items and final objective. It is not a
+substitute for a multiplayer playthrough. Test the 500-Dot sale (including
+insufficient funds and a full backpack), key reissue, Aurum defeat and
+gold Story Chest, Tidewell conversations, party-shared handover and
+cinematic replay after returning to Verdance.
