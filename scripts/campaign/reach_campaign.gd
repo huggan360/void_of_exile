@@ -140,7 +140,7 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 				run.return_seen = departed
 				# A lost ship need not be replaced and flown out again when
 				# the entire crew has already made it safely back to the Nexus.
-				var all_home := not party.members.is_empty()
+				var all_home: bool = not party.members.is_empty()
 				for pid: int in party.members:
 					var member := campaigns.server.social.record(pid)
 					if member.is_empty() or member.get("realm", "")!=world.realm_id or not member.get("joined", false) or member.get("dead", true) or world.zone_at(member.get("pos", Vector3.INF))!="station":
