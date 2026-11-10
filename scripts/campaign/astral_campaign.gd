@@ -3,6 +3,7 @@ extends RefCounted
 ## Server-owned campaign extension. Parts, route checkpoints and ship repairs
 ## live in the account book; boarding and the launch clock are ephemeral.
 const ID := "theory_of_everything"
+const PACK := "astral_frontier"  # Campaigns: the pack the Theory opens
 const FLIGHT_SECONDS := 10.5
 var campaigns: CampaignServer
 

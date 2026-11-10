@@ -1,7 +1,8 @@
 class_name TheoryWorld
 extends SpatialWorld
-## Theory of Everything: two enormous vessels joined by a gravity ribbon in
-## deep space. The brood (TheoryEnemies) haunts the ships; the Hollow Empress
+## Theory of Everything: an observation vessel, gravity bridges, and two
+## compact hostile ships joined by a randomized ventilation labyrinth.
+## The brood haunts the ships; the Hollow Empress
 ## waits in the Convergence and drops its rings as her phases change.
 var record: Dictionary
 var definition: Dictionary
@@ -11,20 +12,6 @@ var surfaces := {}
 var broken_vents: Array[String] = []
 var arena_stage := 0
 var boss_defeated := false
-## Authored packs: [position, members]. The wreck has both decks (upper at y 8).
-const PACKS := [
-	[Vector3(0,0,-96),["hull_skitter","hull_skitter","hull_skitter"]],
-	[Vector3(0,8,-70),["hull_skitter","hull_skitter","vent_stalker"]],
-	[Vector3(0,0,-498),["hull_skitter","hull_skitter","gloom_spitter"]],
-	[Vector3(0,0,-528),["vent_stalker","hull_skitter","hull_skitter","hull_skitter"]],
-	[Vector3(0,0,-562),["gloom_spitter","gloom_spitter","void_lamprey"]],
-	[Vector3(0,0,-598),["crest_brute","hull_skitter","hull_skitter"]],
-	[Vector3(0,0,-632),["vent_stalker","vent_stalker","gloom_spitter"]],
-	[Vector3(0,8,-512),["void_lamprey","void_lamprey","hull_skitter"]],
-	[Vector3(0,8,-578),["crest_brute","gloom_spitter","hull_skitter"]],
-	[Vector3(0,8,-640),["vent_stalker","void_lamprey","void_lamprey"]],
-	[Vector3(0,0,-1098),["void_lamprey","gloom_spitter","hull_skitter","hull_skitter"]],
-]
 var inspected_boxes: Array[int] = []
 var repaired_boxes: Array[int] = []
 var ship_airlock_open := false
@@ -55,7 +42,14 @@ func _init(data: Dictionary) -> void:
 	realm_id = str(data.id)
 	display_name = "Theory of Everything"
 	definition = Dungeons.definition("theory_of_everything")
-	layout = TheoryLayout.new(int(data.get("seed",4217)))
+	var saved: Dictionary = data.get("theory_state", {})
+	var run_seed := int(saved.get("layout_seed", data.get("seed",4217)))
+	if not Net.is_client() and saved.is_empty():
+		var route_rng := RandomNumberGenerator.new()
+		route_rng.randomize()
+		run_seed = route_rng.randi_range(1, 2147483646)
+	record.seed = run_seed
+	layout = TheoryLayout.new(run_seed)
 	if not Net.is_client():
 		# A new run chooses a new relay, including fixed-seed local previews.
 		var relay_rng := RandomNumberGenerator.new()
@@ -121,9 +115,29 @@ func _ready() -> void:
 	else: queue_load_step(_finish_world)
 
 func _place_enemies() -> void:
-	for i in PACKS.size():
-		var members: Array = PACKS[i][1]
-		_enemy_site("pack_%d" % i, PACKS[i][0], members)
+	_enemy_site("aurora_patrol", Vector3(0,0,-96), ["hull_skitter","hull_skitter"])
+	# Dense encounters along both gravity ribbons, with positions on their actual frames.
+	for path in layout.paths.size():
+		for group in (15 if path==0 else 18):
+			var t := (group+1.0)/(16.0 if path==0 else 19.0)
+			var frame := layout.frame_on_path(path,t)
+			_enemy_site("bridge_%d_%d" % [path,group],frame.origin+frame.basis.y*0.08,
+				["hull_skitter","gloom_spitter"] if group % 3 else ["vent_stalker","hull_skitter","void_lamprey"])
+	for index in 4:
+		_enemy_site("hostile_room_%d" % index,Vector3(-8 if index % 2==0 else 8,0,[-490,-511,-630,-650][index]),["hull_skitter","gloom_spitter"])
+	# Small creatures occupy turns and dead ends inside the mandatory vent network.
+	var vent_index := 0
+	var occupied_vents := {}
+	for step in range(3,layout.vent_route.size()-3,6):
+		var cell: Vector2i = layout.vent_route[step]
+		occupied_vents[cell] = true
+		_enemy_site("vent_route_%d" % step,TheoryLayout.vent_point(cell)+Vector3.UP*0.08,["hull_skitter"])
+	for cell: Vector2i in layout.vent_cells:
+		if cell.x % 2==0 or cell.y % 2==0: continue
+		if cell.y in [1,TheoryLayout.VENT_ROWS*2-1]: continue
+		if occupied_vents.has(cell) or (cell.x*13+cell.y*11+layout.seed_value) % 7!=0: continue
+		_enemy_site("vent_patrol_%d" % vent_index,TheoryLayout.vent_point(cell)+Vector3.UP*0.08,["hull_skitter"])
+		vent_index += 1
 	if not boss_defeated: _enemy_site("boss", TheoryLayout.ARENA, [definition.boss])
 	enemy_director.enemy_killed.connect(func(enemy: Enemy) -> void:
 		if enemy.def.id != definition.boss: return
@@ -606,6 +620,7 @@ func _electrical_feedback(actor_id: int,index: int) -> void:
 	hud.toasts.push(message,UIStyle.GOOD if index>=5 or found else UIStyle.TEXT,3.5)
 
 func impact(key: String,at: Vector3) -> void:
+	if key.begins_with("ribbon_") or key=="transit_platform": return
 	if not surfaces.has(key): return
 	var surface: TheorySurface = surfaces[key]
 	surface.flash(at)
@@ -671,7 +686,7 @@ func handle_event(event: Array) -> void:
 			_open_star_portal()
 
 func state_wire() -> Dictionary:
-	return {gates=gate_scenes.duplicate(true),electrical=_electrical_state(),puzzles=layout.puzzles.map(func(p: TheoryPuzzle) -> Dictionary: return p.state()),vents=broken_vents.duplicate(),arena=arena_stage,boss=boss_defeated}
+	return {layout_seed=layout.seed_value,gates=gate_scenes.duplicate(true),electrical=_electrical_state(),puzzles=layout.puzzles.map(func(p: TheoryPuzzle) -> Dictionary: return p.state()),vents=broken_vents.duplicate(),arena=arena_stage,boss=boss_defeated}
 
 func apply_state(data: Dictionary) -> void:
 	gate_scenes = data.get("gates",{}).duplicate(true)
@@ -730,6 +745,8 @@ func barrier_between(from: Vector3,to: Vector3) -> Dictionary:
 func recovery_point(position: Vector3) -> Vector3:
 	var frame := surface_frame(position)
 	var point := frame.origin
+	if position.z<TheoryLayout.VENT_TOP and position.z>TheoryLayout.VENT_BOTTOM:
+		return layout.nearest_vent(position)+Vector3.UP*0.12
 	if zone_at(position)=="arena":
 		var offset := Vector2(point.x-TheoryLayout.ARENA.x,point.z-TheoryLayout.ARENA.z)
 		offset = offset.limit_length(25.0-arena_stage*5.5)
@@ -785,3 +802,40 @@ func is_walkable(position: Vector3) -> bool: return layout.validate_position(pos
 func map_color(_x: int,_z: int) -> Color: return Color("060713")
 func obstacles_near(_at: Vector3,_radius: float) -> Array[String]: return []
 func remove_obstacle(_id: String) -> void: pass
+
+## Spawn and movement use the same magnetic frame as the player.
+func enemy_spawn_point(at: Vector3) -> Vector3:
+	var state := sample_gravity(at)
+	var frame: Transform3D = state.frame
+	if state.zone in ["space","fracture"]:
+		var across := clampf((at-frame.origin).dot(frame.basis.x),-4.4,4.4)
+		return frame.origin+frame.basis.x*across+frame.basis.y*0.08
+	return Vector3(at.x,frame.origin.y+0.08,at.z)
+
+func enemy_spawn_clear(pos: Vector3, radius: float, height: float) -> bool:
+	if not is_walkable(pos): return false
+	var frame := surface_frame(pos)
+	var shape := CapsuleShape3D.new()
+	shape.radius = radius
+	shape.height = maxf(height,radius*2.0)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(frame.basis,pos+frame.basis.y*(shape.height*0.5+0.02))
+	query.collision_mask = Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER
+	return get_world_3d().direct_space_state.intersect_shape(query,1).is_empty()
+
+func move_theory_enemy(enemy: Enemy, local_move: Vector3, speed: float, delta: float) -> void:
+	var frame := surface_frame(enemy.global_position)
+	enemy.global_basis = frame.basis
+	enemy.up_direction = frame.basis.y
+	var up := enemy.up_direction
+	var move := frame.basis*local_move
+	var next := enemy.global_position+move.normalized()*0.7
+	var state := sample_gravity(next)
+	if state.zone in ["space","fracture"] and absf((next-(state.frame as Transform3D).origin).dot((state.frame as Transform3D).basis.x))>4.8:
+		move = Vector3.ZERO
+	if not is_walkable(next): move = Vector3.ZERO
+	var fall := minf(0.0,enemy.velocity.dot(up))-Enemy.GRAVITY*delta
+	enemy.velocity = move*speed+up*(-2.0 if enemy.is_on_floor() else fall)
+	enemy.move_and_slide()
+

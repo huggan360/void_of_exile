@@ -18,8 +18,8 @@ func _ready() -> void:
 	reach = 3.0 if kind in ["seat", "hatch", "tap", "ladder", "repair", "deck_hatch"] else 3.5 if kind=="repair_out" else 6.0 if kind=="outside" else 4.0
 	match kind:
 		"table":
-			title = "Bell's shipwright"
-			description = "Battleships for 500 Dots. Buy one, then take it out to a Nexus berth."
+			title = "Bell's ships"
+			description = "Battleships for 500 Dots. Buy one, then take it out to a Nexus port"
 		"board":
 			title = "Campaign board"
 			description = "Captain Isolde pins the tales of the Reach here."
@@ -27,31 +27,31 @@ func _ready() -> void:
 		"rocket":
 			title = "Rocket to the Surface"
 			description = "Orin's shuttle lands at the Surface launch pad."
-			action_text = "Fly to the Surface"
+			action_text = "Go"
 		"seat":
 			title = SEAT_TITLES.get(seat, "Seat")
-			description = "Bring a drink from the galley. Right-click to sip, C for a cigar, Z to stand." if seat.begins_with("chair") else "Take the seat. Z stands up again."
+			description = "Sit down for a while" if seat.begins_with("chair") else "Take a seat."
 			action_text = "Sit"
 		"repair", "repair_out":
 			title = str(SpaceShip.PARTS.get(part, {}).get("name", "Part"))
 			action_text = "Mend"
 		"ladder":
-			title = "Ladder to the deck"
-			description = "Up through the deck hatch, jetpack on."
+			title = "Ladder"
+			description = "Go up on the deack"
 			action_text = "Climb up"
 		"deck_hatch":
 			title = "Deck hatch"
-			description = "The ladder down into the ship."
+			description = "Back into the ship"
 			action_text = "Climb down"
 		"wright":
 			action_text = "Ships"
 			response = "Need a ship, captain?"
 		"tap":
 			title = "Beer tap"
-			description = "Nexus amber, brewed in the station's own cellar."
-			action_text = "Pour a beer"
+			description = "A big boy just for you"
+			action_text = "Pour"
 		"hatch":
-			title = "Boarding hatch"
+			title = "Boarding"
 			description = "The round door at the stern."
 			action_text = "Go out"
 		"outside":
@@ -98,8 +98,8 @@ func refresh(actor: Node3D) -> void:
 		description = "%s: %d%%. Mending it restores some of the hull." % [title, roundi(ship.part(part)*100.0)] if ship else ""
 		return
 	if kind=="table":
-		action_text = "Buy / manage ships"
-		response = "Battleships and your fleet."
+		action_text = "Ships"
+		response = "Here are your ships."
 		extra_text = ""
 
 func _ships_for(actor: Node3D) -> Array:

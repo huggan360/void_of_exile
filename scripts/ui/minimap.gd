@@ -13,6 +13,7 @@ extends Control
 ## haven't explored stay dark (it reads the fog-of-war map). The mouse wheel
 ## zooms it. The map key (M) opens it large in the middle of the screen.
 
+const LocalMapScript = preload("res://scripts/space/space_local_map.gd")
 const PATCH := 16
 const ZOOM_MIN := 16.0
 const ZOOM_MAX := 160.0
@@ -21,6 +22,7 @@ const MAP_EDGE := 1.0 - 8.0 / ART_PIXELS  # carved stone, brass and inner outlin
 const MAX_JOBS := 4  # patches being painted in the background at once
 const UPLOAD_INTERVAL := 0.2  # seconds between sending newly painted map to the GPU
 
+var _space_local: LocalMapScript
 var world: GameWorld
 var player: Player
 var fog_of_war: FogOfWar
@@ -84,7 +86,22 @@ func setup(p_world: GameWorld) -> void:
 	set_routes(PackedVector3Array(), PackedVector3Array())
 	_finish_tasks()  # workers may still be reading the previous world
 	_done.clear()
+	if is_instance_valid(_space_local):
+		remove_child(_space_local)
+		_space_local.free()
+		_space_local = null
+	_map_rect.show()
 	world = p_world
+	if world is SpaceWorld and not world is SurfaceShipWorld:
+		_space_local = LocalMapScript.new()
+		_space_local.world = world
+		_space_local.player = player
+		_space_local.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		add_child(_space_local)
+		_map_rect.hide()
+		show()
+		set_process(true)
+		return
 	visible = not world is SpatialWorld
 	set_process(visible)
 	if world is SpatialWorld: return
@@ -168,6 +185,9 @@ func _process(delta: float) -> void:
 	FrameTrace.record("ui/minimap",started)
 
 func _profile_process(delta: float) -> void:
+	if is_instance_valid(_space_local):
+		visible = _space_local.update_view(view_radius)
+		return
 	if world == null or player == null:
 		return
 	var pos := player.global_position
@@ -206,6 +226,7 @@ func _profile_process(delta: float) -> void:
 ## Starts background painting for patches near the player (nearest first).
 ## Land a party member explored: paint the map there too.
 func reveal_at(pos: Vector3) -> void:
+	if world is SpatialWorld: return
 	_paint_around(pos)
 
 
@@ -292,6 +313,7 @@ func _art_px(art: Vector2, color: Color) -> void:
 
 
 func _draw() -> void:
+	if is_instance_valid(_space_local): return
 	if player == null:
 		return
 	_draw_routes()

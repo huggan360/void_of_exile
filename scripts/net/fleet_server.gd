@@ -34,6 +34,17 @@ func _context(p: Dictionary) -> Dictionary:
 				if not _occupied(space, pose.origin) and not _pads.has(realm.realm_id+":berth:"+str(berth)): return {world = space, pose = pose, key = realm.realm_id+":berth:"+str(berth), planet = "", berth = berth, label = "Nexus berth %d" % (berth+1)}
 			return {world = space, pose = SpaceLayout.berth_frame(0), key = realm.realm_id+":berth:0", planet = "", berth = 0, label = "Nexus berth 1"}
 		for spec: Dictionary in SpaceLayout.PLANETS:
+			if spec.get("city", false):
+				for district: Dictionary in CityLayout.DISTRICTS:
+					if at.distance_to(CityLayout.shipwright_position(district))>SpaceWorld.TRADER_REACH: continue
+					var fallback := {}
+					for port: Dictionary in SpaceLayout.ports(spec):
+						if not str(port.key).begins_with(CityLayout.ID+":"+str(district.id)+":"): continue
+						var context := {world = space, pose = port.pose, key = realm.realm_id+":"+str(port.key), planet = str(spec.id), port = str(port.key), label = str(port.name)}
+						if fallback.is_empty(): fallback = context
+						if not _pads.has(str(context.key)) and not space.port_taken(str(port.key)) and not _occupied(space, port.pose.origin): return context
+					return fallback  # An occupied first pad keeps the fleet panel usable.
+				continue
 			# The landing pad's crystal: ships come out onto that pad.
 			if not spec.get("city", false) and at.distance_to(SpaceLayout.pad_crystal(spec))<=SpaceWorld.TRADER_REACH:
 				var port: Dictionary = SpaceLayout.ports(spec)[0]
@@ -46,9 +57,20 @@ func _context(p: Dictionary) -> Dictionary:
 	return {}
 
 func _occupied(world: SpaceWorld, at: Vector3, except_id := 0) -> bool:
+	var clearance := 45.0
+	for port: Dictionary in SpaceLayout.ports(CityLayout.planet()):
+		if (port.pose as Transform3D).origin.distance_to(at)<1.0:
+			clearance = 24.0
+			break
 	for ship: SpaceShip in world.ships.values():
-		if ship.id!=except_id and ship.xform.origin.distance_to(at)<45.0: return true
+		if ship.id!=except_id and ship.xform.origin.distance_to(at)<clearance: return true
 	return false
+
+func pad_reserved(realm_id: String, port: String) -> bool:
+	return _pads.has(realm_id+":"+port)
+
+func _port_busy(context: Dictionary) -> bool:
+	return context.has("port") and (context.world as SpaceWorld).port_taken(str(context.port))
 
 func _free_slot(world: SpaceWorld) -> bool:
 	return world.ships.size()<SpaceLayout.POCKET_SLOTS
@@ -91,7 +113,7 @@ func _action(p: Dictionary, args: Array, context: Dictionary) -> void:
 	var key := str(context.key)
 	if op=="deploy":
 		if args.size()<2: return
-		if _pads.has(key) or _occupied(context.world, context.pose.origin) or not _free_slot(context.world):
+		if _pads.has(key) or _port_busy(context) or _occupied(context.world, context.pose.origin) or not _free_slot(context.world):
 			_error(p, "The launch pad is occupied. Wait until it is clear.")
 			return
 		_pads[key] = INF
@@ -111,7 +133,7 @@ func _action(p: Dictionary, args: Array, context: Dictionary) -> void:
 	if op=="deploy":
 		var deployment: Dictionary = response.data.deployment
 		var current := _context(p)
-		if current.is_empty() or current.world!=context.world or _occupied(context.world, context.pose.origin):
+		if current.is_empty() or current.world!=context.world or _port_busy(context) or _occupied(context.world, context.pose.origin):
 			await server.api.call_api("POST", "/server/fleet", {operation = "store", ship_id = deployment.id, token = deployment.token, state = deployment.state})
 			_error(p, "The launch pad changed. Your ship is still in storage.")
 			return
@@ -133,7 +155,7 @@ func _action(p: Dictionary, args: Array, context: Dictionary) -> void:
 func _view(data: Dictionary, context: Dictionary) -> Dictionary:
 	var result := data.duplicate(true)
 	result.erase("deployment")  # Deployment tokens are authority-only, including on a failed re-read.
-	result.pad_clear = not _pads.has(str(context.key)) and not _occupied(context.world, context.pose.origin)
+	result.pad_clear = not _pads.has(str(context.key)) and not _port_busy(context) and not _occupied(context.world, context.pose.origin)
 	for row: Dictionary in result.get("ships", []):
 		var entry: Dictionary = active.get(int(row.id), {})
 		var world := (entry.world as WeakRef).get_ref() as SpaceWorld if not entry.is_empty() else null

@@ -117,6 +117,19 @@ func close() -> void:
 	_extra.hide()
 	hide()
 
+func _chair_target(candidate: InteractionTarget) -> bool:
+	if candidate is LeisureTarget: return candidate.kind=="seat"
+	if candidate is CityTarget: return candidate.kind=="seat"
+	if candidate is SpaceInteraction: return candidate.kind=="seat" and candidate.seat.begins_with("chair")
+	return false
+
+func _seated(player: Player) -> bool:
+	if not Leisure.seat_spec(player.player_id).is_empty(): return true
+	if player.spatial_controller is SpaceTraversal:
+		var space := player.spatial_controller as SpaceTraversal
+		return space.seat!="" or space.city_seat!="" or space._lounge_seat!=""
+	return false
+
 func update_prompt(player: Player, blocked: bool) -> void:
 	if player.spatial_controller is SpaceTraversal:
 		var space := player.spatial_controller as SpaceTraversal
@@ -124,8 +137,9 @@ func update_prompt(player: Player, blocked: bool) -> void:
 	if suppressed or blocked or not is_instance_valid(world) or player.frozen or player.input_locked:
 		close()
 		return
+	var seated := _seated(player)
 	if opened:
-		if not is_instance_valid(target) or not target.available(player) or not world.is_ancestor_of(target):
+		if not is_instance_valid(target) or (seated and _chair_target(target)) or not target.available(player) or not world.is_ancestor_of(target):
 			close()
 			return
 		target.refresh(player)
@@ -140,6 +154,7 @@ func update_prompt(player: Player, blocked: bool) -> void:
 	var distance := INF
 	for candidate in get_tree().get_nodes_in_group("interaction_targets"):
 		if not candidate is InteractionTarget or not world.is_ancestor_of(candidate) or not candidate.available(player): continue
+		if seated and _chair_target(candidate): continue
 		var d: float = candidate.global_position.distance_squared_to(player.global_position)
 		if d < distance:
 			nearest = candidate
@@ -149,7 +164,7 @@ func update_prompt(player: Player, blocked: bool) -> void:
 	if visible:
 		target.refresh(player)
 		var person := target.get_parent() is TownNPC
-		_portrait.visible = not person
+		_portrait.visible = not person and not _chair_target(target)
 		_message.visible = true
 		_message.visible_ratio = 1.0
 		_portrait.texture = target.portrait
@@ -159,7 +174,7 @@ func update_prompt(player: Player, blocked: bool) -> void:
 		for index in 10:
 			(_difficulty.get_child(index) as TextureProgressBar).value = clampf(target.difficulty - index, 0.0, 1.0) * 100.0
 		_message.text = TextMarkup.to_bbcode(target.description)
-		_accept.text = ("Talk" if person else target.action_text) + " ["+AppSettings.binding_text(target.key_action)+"]"
+		_accept.text = "Sit" if _chair_target(target) else ("Talk" if person else target.action_text) + " ["+AppSettings.binding_text(target.key_action)+"]"
 
 func accept() -> void:
 	if opened:

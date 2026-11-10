@@ -4,6 +4,7 @@ extends SpatialController
 ## stays in Player's shared weapon, charge, shield and damage code.
 var world: TheoryWorld
 var _checkpoint := Vector3.ZERO
+var _aim_on_bridge := false
 var _old_far := 4000.0
 var _old_mouse := Input.MOUSE_MODE_VISIBLE
 var _hud: CanvasLayer
@@ -267,17 +268,23 @@ func update_camera(delta: float) -> void:
 				nearest = index
 		if nearest>=0:
 			_objective.text += "\n%s - %s wall on the main deck, %d m away." % [TheoryLayout.ELECTRICAL_NAMES[nearest],"left" if TheoryLayout.ELECTRICAL_POSITIONS[nearest].x<0 else "right",roundi(distance)]
-	if world.zone_at(player.global_position)=="wreck": _objective.text = "Escape airlock open" if world.repaired_boxes.size()==5 else "Repair the five sparking electrical boxes. %d/5 repaired. Follow the marked service bays beside the main passage." % world.repaired_boxes.size()
+	if world.zone_at(player.global_position)=="wreck": _objective.text = "Escape airlock open" if world.repaired_boxes.size()==5 else "Search the rooms in both ships. Repair the five sparking electrical boxes. %d/5 repaired. Check the side rooms and cross the ventilation labyrinth to the other ship." % world.repaired_boxes.size()
 
 
 func mouse_point() -> Vector3:
+	_aim_on_bridge = false
 	var mouse := player.get_viewport().get_visible_rect().size*0.5 if first_person>0.8 else player.get_viewport().get_mouse_position()
 	var origin := player.camera.project_ray_origin(mouse)
 	var direction := player.camera.project_ray_normal(mouse)
 	var query := PhysicsRayQueryParameters3D.create(origin,origin+direction*300,Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER|Player.ENEMY_LAYER)
 	query.exclude = [player.get_rid()]
 	var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
-	if not hit.is_empty(): return hit.position
+	if not hit.is_empty():
+		var surface := hit.collider as TheorySurface
+		if surface!=null and (surface.key.begins_with("ribbon_") or surface.key=="transit_platform"):
+			_aim_on_bridge = true
+			return (hit.position as Vector3)+world.surface_frame(hit.position).basis.y*Player.SHOT_HEIGHT
+		return hit.position
 	if first_person>0.8: return origin+direction*120
 	var plane := Plane(player.up_direction,player.global_position+player.up_direction)
 	var crossing: Variant = plane.intersects_ray(origin,direction)
@@ -299,6 +306,7 @@ func aim_ray() -> Array:
 		var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty(): origin = eye.lerp(hit.position,0.85)
 	var direction := (target-origin).normalized()
+	if _aim_on_bridge and first_person<0.8: direction = direction.slide(player.up_direction).normalized()
 	if direction.is_zero_approx(): direction = -player.camera.global_basis.z
 	return [origin,direction]
 

@@ -18,6 +18,8 @@ var _tint: Color
 static var _glass: StandardMaterial3D
 
 ## Codex props in bulk: one MultiMesh per prop for its base and its glow.
+## Every prop model faces -Z (make_city_props.py): yaw 0 shows its front to -Z,
+## a seat's own yaw (forward -Z turned by it) points a chair the same way.
 class PropBatch extends RefCounted:
 	var items := {}  # id -> Array[Transform3D]
 	func add(id: String, frame: Transform3D, at: Vector3, yaw := 0.0, scale := 1.0) -> void:
@@ -117,9 +119,20 @@ func _solid(frame: Transform3D, at: Vector3, size: Vector3) -> void:
 	shape.transform = frame*Transform3D(Basis.IDENTITY, at)
 	_body.add_child(shape)
 
+## A solid box at a planet space transform (any rotation), collision only.
+func _solid_at(xform: Transform3D, size: Vector3) -> void:
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = size
+	shape.shape = box
+	shape.transform = xform
+	_body.add_child(shape)
+
 ## A tower-shader mass (windows) with collision.
 func _mass(frame: Transform3D, at: Vector3, size: Vector3, color: Color, windows := 0.6, trims := 1.0, solid := true) -> void:
-	_towers.add("box", frame*Transform3D(Basis.from_scale(size), at), color, Color(CityLayout.rnd(at.x+at.z*0.1, 3), windows, 0, trims))
+	var facade := CityArt.new(_towers, frame, [])
+	facade.seed = CityLayout.rnd(at.x+at.z*0.1, 3)
+	facade.part("box", at, Basis.IDENTITY, size, color, CityArt.M_PLASTER, windows, false)
 	if solid: _solid(frame, at, size)
 
 ## A real sign (SignBoard) on a wall or post: neon boxes, plank boards, brass plaques.
@@ -144,72 +157,255 @@ func _light(parent: Node3D, at: Vector3, color: Color, energy := 1.2, reach := 9
 
 # --- Spaceport --------------------------------------------------------------------------------
 
+## The spaceport: one huge building over the port's four cells. A glass
+## terminal hall on the ground with doors on all four streets, offices
+## above, the three landing pads on the flat roof, and a stair core in one
+## corner climbing round an open well from the hall to a stair house on the
+## roof (CityLayout.PORT_*).
 func _port() -> void:
 	var frame := CityLayout.district_frame(data)
 	var port := _holder(frame, "Port")
 	var art := NexusStation.Brush.new(port, false, 1800.0)
-	# The deck over the four port cells, with glowing guide lines.
-	art.box(Vector3(0, 0.1, 0), Vector3(100, 0.3, 100), Color("2a2436"), true)
-	for x in [-48.5, 48.5]: art.box(Vector3(x, 0.32, 0), Vector3(0.6, 0.08, 100), _neon, false, 1.6)
-	for z in [-48.5, 48.5]: art.box(Vector3(0, 0.32, z), Vector3(100, 0.08, 0.6), _neon, false, 1.6)
-	for k in 3:
-		var pad := Vector3((k-1)*32.0, 0.26, 8.0)
-		art.round_part(pad, 13.0, 0.06, Color("3a3248"), false)
-		art.round_part(pad+Vector3.UP*0.03, 12.2, 0.05, _tint, false, 1.4)
-		art.round_part(pad+Vector3.UP*0.06, 11.4, 0.05, Color("3a3248"), false)
-		art.box(pad+Vector3(0, 0.1, 0), Vector3(1.0, 0.05, 12.0), _tint, false, 1.2)
-		art.box(pad+Vector3(0, 0.1, -6.0), Vector3(6.0, 0.05, 1.0), _tint, false, 1.2)
-		for c in 8:
-			var a := TAU*c/8.0
-			art.box(pad+Vector3(cos(a)*13.6, 0.4, sin(a)*13.6), Vector3(0.5, 0.5, 0.5), _neon if c % 2 else _tint, false, 2.2)
-		_sign(port, "PAD %d" % (k+1), pad+Vector3(0, 0.3, 14.5), _tint, 2.0, 0.0, "paint").rotation.x = -PI*0.5
-	# The terminal: a long hall with a glass front to the pads, walk in at either end.
-	# Four broad ramps connect the flat deck to the curved street below.
+	var half := CityLayout.PORT_HALF
+	var roof := CityLayout.PORT_ROOF
+	var hall := CityLayout.PORT_HALL
+	var core := CityLayout.PORT_CORE
+	var ch := CityLayout.CORE_HALF
+	var wall := Color("5a4a6a")
+	var stone := Color("6a5a6e")
+	var brass := Color("d9ac60")
+	# The core with its walls: x from cx0 to the building's edge, z from its edge to cz1.
+	var cx0 := core.x-ch-0.6
+	var cz1 := core.z+ch+0.6
+	var around := func(y0: float, y1: float, color: Color) -> void:
+		art.box(Vector3((cx0-half)*0.5, (y0+y1)*0.5, 0), Vector3(cx0+half, y1-y0, half*2.0), color, true)
+		art.box(Vector3((cx0+half)*0.5, (y0+y1)*0.5, (cz1+half)*0.5), Vector3(half-cx0, y1-y0, half-cz1), color, true)
+	# A stone plinth reaching down into the curved ground; its top is the hall floor.
+	# Recess the terminal entrances: all four ramps stay inside the port lot.
+	art.box(Vector3(0, -4.0, 0), Vector3(half*2.0, 1.0, half*2.0), stone, true)
+	var inner := half-6.0
+	art.box(Vector3(0, -1.75, 0), Vector3(inner*2.0, 3.5, inner*2.0), stone, true)
 	for side in 4:
 		var turn := Basis(Vector3.UP, side*PI*0.5)
-		var a := Vector3(0, 0.25, 48.0)
-		var b := Vector3(0, -2.05, 64.0)
-		var slope := atan2(a.y-b.y, b.z-a.z)
-		art.part("box", Transform3D(turn*Basis(Vector3.RIGHT, slope), turn*((a+b)*0.5-Vector3.UP*0.15)), Vector3(9, 0.3, a.distance_to(b)+0.5), Color("5a4a5a"), true)
-	var hall := Vector3(80, 12, 18)
-	var hz := -38.0
-	art.box(Vector3(0, 12.2, hz), Vector3(hall.x+2.0, 0.6, hall.z+2.0), Color("4a3a5a"), true)
-	art.box(Vector3(0, 12.8, hz), Vector3(hall.x-6.0, 1.0, hall.z-4.0), _neon.darkened(0.2), false, 1.2)
-	art.box(Vector3(0, 6.0, hz-hall.z*0.5), Vector3(hall.x, 12.0, 0.8), Color("5a4a6a"), true)
-	for side: float in [-1.0, 1.0]:
-		art.box(Vector3(side*hall.x*0.5, 6.0, hz-4.0), Vector3(0.8, 12.0, 10.0), Color("5a4a6a"), true)
-		art.box(Vector3(side*hall.x*0.5, 9.0, hz+6.5), Vector3(0.8, 6.0, 5.0), Color("5a4a6a"), true)
-	# Glass front with brass mullions and doors in the middle.
-	var front := hz+hall.z*0.5
-	for k in 17:
-		var x := -40.0+k*5.0
-		art.box(Vector3(x, 6.0, front), Vector3(0.35, 12.0, 0.4), Color("d9ac60"), absf(x)>3.0)
-	_glass_panel(port, Vector3(-21.5, 6.0, front), Vector3(37.0, 12.0, 0.1), true)
-	_glass_panel(port, Vector3(21.5, 6.0, front), Vector3(37.0, 12.0, 0.1), true)
-	_glass_panel(port, Vector3(0, 9.5, front), Vector3(6.0, 5.0, 0.1), true)
-	art.box(Vector3(0, 0.25, hz), Vector3(hall.x-1.0, 0.2, hall.z-1.0), Color("6a5a6e"), true)
-	for k in 6:
-		_props.add("bench", port.transform, Vector3(-30.0+k*12.0, 0.35, hz-2.0), PI)
-		_props.add("potted_tree", port.transform, Vector3(-36.0+k*14.4, 0.35, hz-7.0))
-	_props.add("vending_machine", port.transform, Vector3(36.0, 0.35, hz-7.5))
-	_props.add("kiosk", port.transform, Vector3(-36.0, 0.35, hz-6.0))
-	_props.add("holo_board", port.transform, Vector3(0, 6.5, hz-8.6))
-	_sign(port, str(data.port).to_upper(), Vector3(0, 14.5, front+0.6), _tint, 3.2)
-	_sign(port, "Arrivals - Departures\nShip parking", Vector3(0, 5.2, hz-8.7), _neon, 0.9, 0.0, "slate", "arrow")
-	for k in 4: _light(port, Vector3(-30.0+k*20.0, 10.0, hz), _tint, 1.6, 16.0)
-	# Control tower with a beacon, landing light masts on the deck's edge.
-	art.round_part(Vector3(44, 18, -44), 3.0, 36.0, Color("4a3a5a"), true)
-	art.round_part(Vector3(44, 37, -44), 6.0, 4.0, Color("2a2a3a"), true)
-	art.round_part(Vector3(44, 37, -44), 6.2, 2.0, _neon, false, 1.8)
-	art.box(Vector3(44, 42, -44), Vector3(0.6, 6, 0.6), Color("d9ac60"))
-	art.box(Vector3(44, 45.5, -44), Vector3.ONE*1.4, Color("ff5a6a"), false, 3.0)
-	for k in 8:
-		var a := TAU*k/8.0+0.2
-		var at := Vector3(cos(a)*52.0, 0, sin(a)*52.0)
-		if at.z<-30.0 and absf(at.x)<42.0: continue
-		art.box(at+Vector3.UP*4.0, Vector3(0.4, 8.0, 0.4), Color("6a5a6e"), true)
-		art.box(at+Vector3.UP*8.3, Vector3(1.0, 0.6, 1.0), _tint, false, 2.5)
+		for sign: float in [-1.0, 1.0]:
+			var at := turn*Vector3(sign*(half+5.0)*0.5, -1.75, half-3.0)
+			art.box(at, (turn*Vector3(half-5.0, 3.5, 6.0)).abs(), stone, true)
+	art.box(Vector3(0, 0.02, 0), Vector3((half-6.0)*2.0, 0.04, (half-6.0)*2.0), Color("8a7a8e"))
+	art.round_part(Vector3(0, 0.10, 0), 9.0, 0.06, _tint, false, 0.8)
+	art.round_part(Vector3(0, 0.20, 0), 8.2, 0.06, Color("3a3248"))
+	var to_core := Vector2(core.x-ch+1.5, core.z+ch+0.6)
+	art.part("box", Transform3D(Basis(Vector3.UP, atan2(to_core.x, to_core.y)), Vector3(to_core.x*0.5, 0.06, to_core.y*0.5)),
+		Vector3(0.4, 0.04, to_core.length()), _neon, false, 1.4)
+	# The hall's ceiling, the offices above it (tower windows) and the roof deck, all round the core.
+	around.call(hall-0.5, hall, Color("3a3046"))
+	var body := roof-0.6-hall
+	_mass(frame, Vector3((cx0-half)*0.5, hall+body*0.5, 0), Vector3(cx0+half, body, half*2.0), Color("4a3a5a"), 0.7)
+	_mass(frame, Vector3((cx0+half)*0.5, hall+body*0.5, (cz1+half)*0.5), Vector3(half-cx0, body, half-cz1), Color("4a3a5a"), 0.7)
+	around.call(roof-0.6, roof, Color("3a3248"))
+	for y: float in [hall, roof-0.6]: around.call(y-0.15, y+0.15, brass)
+	# The hall's glass fronts with a door in the middle of each street side.
+	for side in 4:
+		var b := Basis(Vector3.UP, side*PI*0.5)
+		# Along this front (x in the side's frame); the core's corner has its own walls.
+		var span := Vector2(-half, half)
+		if side==1: span = Vector2(-half, -cz1)  # the +x front (its x runs along -z)
+		if side==2: span = Vector2(-cx0, half)  # the -z front (its x runs along -x)
+		_port_front(port, art, b, span)
+		_sign(port, str(data.port).to_upper(), b*Vector3(0, hall+3.0, half+0.5), _tint, 3.2, side*PI*0.5)
+		# A ramp from the door down to the sidewalk.
+		var a := Vector3(0, 0.0, half-6.0)
+		var e := Vector3(0, CityRoads.drop(Vector2(0, half-0.3))+CityRoads.KERB, half-0.3)
+		var slope := atan2(a.y-e.y, e.z-a.z)
+		art.part("box", Transform3D(b*Basis(Vector3.RIGHT, slope), b*((a+e)*0.5-Vector3.UP*0.15)), Vector3(9, 0.3, a.distance_to(e)), stone, true)
+	# Inside: pillars, the departures board with benches, check-in desks,
+	# a kiosk and a noodle stall, vending machines and plenty of light.
+	for x: float in [-16.0, 16.0]:
+		for z: float in [-16.0, 16.0]:
+			art.round_part(Vector3(x, hall*0.5, z), 1.1, hall, wall, true)
+			art.round_part(Vector3(x, 1.0, z), 1.4, 0.3, brass)
+			_prop("potted_tree", port.transform, Vector3(x+2.4, 0.04, z+2.4))
+	art.box(Vector3(0, 4.5, -24.4), Vector3(16.0, 9.0, 0.6), wall, true)
+	_sign(port, "Departures\nPads 1 - 2 - 3 on the roof", Vector3(0, 6.4, -24.0), _neon, 1.1, 0.0, "slate", "arrow")
+	_prop("holo_board", port.transform, Vector3(0, 2.2, -24.8))
+	for row in 2:
+		for k in 4: _prop("bench", port.transform, Vector3(-9.0+k*6.0, 0.04, -17.0+row*4.0))
+	for x: float in [-22.0, 22.0]:
+		art.box(Vector3(x, 0.55, 30.0), Vector3(12.0, 1.1, 1.2), Color("6a3a2a"), true)
+		art.box(Vector3(x, 1.13, 30.0), Vector3(12.2, 0.08, 1.4), brass)
+		art.box(Vector3(x, 0.3, 29.38), Vector3(12.0, 0.06, 0.06), _neon, false, 1.6)
+		_sign(port, "Check-in", Vector3(x, 4.0, 31.2), _tint, 0.9, PI, "brass")
+		art.box(Vector3(x, 3.0, 31.6), Vector3(10.0, 6.0, 0.4), wall, true)
+	_prop("kiosk", port.transform, Vector3(-32.0, 0.04, 8.0), -PI*0.5)
+	_prop("noodle_stall", port.transform, Vector3(32.0, 0.04, 8.0), PI*0.5)
+	for z: float in [-12.0, -8.0, -4.0]: _prop("vending_machine", port.transform, Vector3(-half+1.2, 0.04, z), -PI*0.5)
+	for x: float in [-30.0, -15.0, 0.0, 15.0]: art.box(Vector3(x, hall-0.56, 0), Vector3(0.4, 0.08, half*2.0-4.0), _tint, false, 1.6)
+	for x: float in [-28.0, 0.0, 28.0]:
+		for z: float in [-28.0, 0.0, 28.0]:
+			if x>0.0 and z<0.0: continue  # the stair core
+			_light(port, Vector3(x, hall-1.5, z), _tint, 1.6, 22.0)
+	_sign(port, "Stairs to the pads", Vector3(core.x-ch+1.5, 4.2, cz1+0.1), _neon, 0.9, 0.0, "slate", "arrow")
+	_port_core(port, art)
+	_port_roof(port, art)
 	art.finish()
+
+## One street front of the hall (in the side's frame: the glass at z = half,
+## x across `span`): glass between brass mullions, an 8 m door in the middle
+## under a glowing canopy.
+func _port_front(port: Node3D, art: NexusStation.Brush, b: Basis, span: Vector2) -> void:
+	var half := CityLayout.PORT_HALF-6.0
+	var hall := CityLayout.PORT_HALL
+	var front_span := Vector2(maxf(span.x, -half), minf(span.y, half))
+	var door := 4.0
+	for piece: Vector2 in [Vector2(front_span.x, minf(front_span.y, -door)), Vector2(maxf(front_span.x, door), front_span.y)]:
+		if piece.y-piece.x<0.5: continue
+		_glass_panel(port, b*Vector3((piece.x+piece.y)*0.5, hall*0.5, half), (b*Vector3(piece.y-piece.x, hall, 0.12)).abs(), true)
+	var x := ceilf(front_span.x/6.0)*6.0
+	while x<=front_span.y:
+		if absf(x)>door+0.5: art.box(b*Vector3(x, hall*0.5, half), (b*Vector3(0.35, hall, 0.5)).abs(), Color("d9ac60"), true)
+		x += 6.0
+	for s: float in [-door, door]: art.box(b*Vector3(s, hall*0.5, half), (b*Vector3(0.5, hall, 0.6)).abs(), Color("d9ac60"), true)
+	_glass_panel(port, b*Vector3(0, (4.4+hall)*0.5, half), (b*Vector3(door*2.0, hall-4.4, 0.12)).abs(), true)
+	art.box(b*Vector3(0, 4.4, half), (b*Vector3(door*2.0, 0.3, 0.5)).abs(), Color("d9ac60"))
+	art.box(b*Vector3(0, 4.9, half+2.0), (b*Vector3(door*2.0+4.0, 0.3, 4.0)).abs(), Color("4a3a5a"))
+	art.box(b*Vector3(0, 4.72, half+3.9), (b*Vector3(door*2.0+4.0, 0.08, 0.2)).abs(), _neon, false, 2.0)
+	_light(port, b*Vector3(0, 4.2, half+2.0), _tint, 1.0, 9.0)
+
+## The stair core: walls from the hall to the stair house on the roof, a door
+## at each end, and flights of steps climbing round the open well with
+## landings in the corners (CityLayout.core_corners), railed on the well side.
+func _port_core(port: Node3D, art: NexusStation.Brush) -> void:
+	var half := CityLayout.PORT_HALF
+	var roof := CityLayout.PORT_ROOF
+	var core := CityLayout.PORT_CORE
+	var ch := CityLayout.CORE_HALF
+	var width := CityLayout.STAIR_WIDTH
+	var rise := CityLayout.FLIGHT_RISE
+	var top := roof+4.5
+	var wall := Color("5a4a6a")
+	var inside := Color("cbb8a8")
+	var cx0 := core.x-ch-0.6
+	var cz1 := core.z+ch+0.6
+	var box := func(x0: float, x1: float, y0: float, y1: float, z0: float, z1: float, color: Color) -> void:
+		art.box(Vector3((x0+x1)*0.5, (y0+y1)*0.5, (z0+z1)*0.5), Vector3(x1-x0, y1-y0, z1-z0), color, true)
+	# Outer walls (the building's corner) and the hall side walls, with the doors.
+	var door_x := Vector2(core.x-ch, core.x-ch+width)  # ground door, onto the first landing
+	var door_z := Vector2(core.z-4.0, core.z)  # roof door, in the stair house
+	box.call(core.x+ch, half, 0.0, top, -half, cz1, wall)
+	box.call(cx0, core.x+ch, 0.0, top, -half, core.z-ch, wall)
+	box.call(door_x.y, half, 0.0, top, cz1-0.6, cz1, wall)
+	box.call(cx0, door_x.x, 0.0, top, cz1-0.6, cz1, wall)
+	box.call(door_x.x, door_x.y, 3.2, top, cz1-0.6, cz1, wall)
+	box.call(cx0, cx0+0.6, 0.0, roof, -half, cz1, wall)
+	box.call(cx0, cx0+0.6, roof, top, -half, door_z.x, wall)
+	box.call(cx0, cx0+0.6, roof, top, door_z.y, cz1, wall)
+	box.call(cx0, cx0+0.6, roof+3.2, top, door_z.x, door_z.y, wall)
+	box.call(cx0-0.2, half+0.2, top, top+0.5, -half-0.2, cz1+0.2, Color("3a3248"))
+	for d: Array in [[Vector3(door_x.x+width*0.5, 3.35, cz1+0.05), Vector3(width+0.4, 0.3, 0.2)], [Vector3(cx0-0.05, roof+3.35, core.z-2.0), Vector3(0.2, 0.3, 4.4)]]:
+		art.box(d[0], d[1], _neon, false, 2.0)
+	# A pale lining inside so the well is light, glowing bands every few metres.
+	for k in 4:
+		var y := 4.0+k*8.0
+		art.box(Vector3(core.x, y, core.z-ch+0.06), Vector3(ch*2.0, 0.12, 0.1), _tint, false, 1.4)
+		art.box(Vector3(core.x+ch-0.06, y, core.z), Vector3(0.1, 0.12, ch*2.0), _tint, false, 1.4)
+		_light(port, Vector3(core.x, y+2.0, core.z), _tint, 1.2, 14.0)
+	art.box(Vector3(core.x, roof*0.5, core.z-ch+0.02), Vector3(ch*2.0, roof, 0.04), inside)
+	art.box(Vector3(core.x+ch-0.02, roof*0.5, core.z), Vector3(0.04, roof, ch*2.0), inside)
+	# The flights: steps to look at, a smooth ramp to walk on, a rail on the well side.
+	var corners := CityLayout.core_corners()
+	var flights := int(roof/rise)
+	var steps := 20
+	for k in flights:
+		var a: Vector2 = corners[k % 4]
+		var c: Vector2 = corners[(k+1) % 4]
+		var dir := (c-a).normalized()
+		var y0 := k*rise
+		var run := a.distance_to(c)-width
+		var tread := run/steps
+		var basis := Basis(Vector3.UP, atan2(dir.x, dir.y))
+		var start := a+dir*width*0.5
+		if k>0: art.box(core+Vector3(a.x, y0-0.2, a.y), Vector3(width, 0.4, width), wall, true)
+		for st in steps:
+			var at := start+dir*(st+0.5)*tread
+			var h := (st+1)*rise/steps
+			art.part("box", Transform3D(basis, core+Vector3(at.x, y0+h-0.16, at.y)), Vector3(width, 0.32, tread), inside if st % 2 else inside.darkened(0.08))
+			art.part("box", Transform3D(basis, core+Vector3(at.x, y0+h-0.005, at.y)-basis*Vector3(0, 0, tread*0.5-0.04)), Vector3(width, 0.02, 0.08), Color("d9ac60"))
+		var pitch := atan2(rise, run)
+		var mid := start+dir*run*0.5
+		var tilt := basis*Basis(Vector3.RIGHT, -pitch)  # climbing along +dir
+		# Under the steps a sloped slab (seen from the well); the walking ramp is collision only.
+		art.part("box", Transform3D(tilt, core+Vector3(mid.x, y0+rise*0.5-0.35, mid.y)), Vector3(width, 0.3, run/cos(pitch)), wall)
+		_solid_at(port.transform*Transform3D(tilt, core+Vector3(mid.x, y0+rise*0.5+rise/steps*0.5-0.2, mid.y)), Vector3(width, 0.4, run/cos(pitch)+0.6))
+		var inner := Vector2(dir.y, -dir.x)
+		if inner.dot(-a)<0.0: inner = -inner
+		var rail := mid+inner*(width*0.5-0.08)
+		art.part("box", Transform3D(tilt, core+Vector3(rail.x, y0+rise*0.5+1.0, rail.y)), Vector3(0.12, 0.1, run/cos(pitch)), Color("d9ac60"), false, 0.4)
+		art.part("box", Transform3D(tilt, core+Vector3(rail.x, y0+rise*0.5+0.5, rail.y)), Vector3(0.06, 1.0, run/cos(pitch)), Color("4a3a5a"), true)
+	# The stair house floor at the roof's height, open over the last flight and its landing.
+	var lane := ch-width
+	var edge := core.x+ch-width
+	art.box(Vector3((cx0+edge)*0.5, roof-0.2, core.z), Vector3(edge-cx0, 0.4, ch*2.0), Color("3a3248"), true)
+	art.box(Vector3(core.x+ch-width*0.5, roof-0.2, core.z-lane-width*0.5), Vector3(width, 0.4, width), Color("3a3248"), true)
+	art.box(Vector3(core.x+lane, roof+0.55, core.z+width*0.5), Vector3(0.12, 1.1, ch*2.0-width), Color("d9ac60"), true)
+	_sign(port, "Terminal - stairs down", Vector3(cx0-0.15, roof+4.0, door_z.x+2.0), _neon, 0.8, -PI*0.5, "slate", "arrow")
+	_light(port, Vector3(core.x, roof+3.5, core.z), _tint, 1.2, 12.0)
+
+## The roof: the three pads with their rings and lights, a parapet, landing
+## light masts and the control tower with its beacon.
+func _port_roof(port: Node3D, art: NexusStation.Brush) -> void:
+	var half := CityLayout.PORT_HALF
+	var roof := CityLayout.PORT_ROOF
+	var core := CityLayout.PORT_CORE
+	var ch := CityLayout.CORE_HALF
+	var cz1 := core.z+ch+0.6
+	var cx0 := core.x-ch-0.6
+	var r := CityLayout.PAD_RADIUS
+	var desk := CityLayout.SHIPWRIGHT
+	art.box(desk+Vector3(0, 0.6, 0), Vector3(5.0, 1.2, 1.5), Color("65513d"), true)
+	art.box(desk+Vector3(0, 1.25, 0), Vector3(5.2, 0.12, 1.7), Color("cfb47e"))
+	_prop("holo_board", port.transform, desk+Vector3(0, 1.4, 0), 0.0, 0.65)
+	_prop("potted_tree", port.transform, desk+Vector3(-4, 0, 0))
+	_sign(port, "SHIPWRIGHT\nFleet orders - Pads 1, 2, 3", desk+Vector3(0, 3.0, -0.7), _tint, 0.9)
+	var wright := SpaceInteraction.new()
+	wright.world = city.world
+	wright.kind = "wright"
+	wright.part = CityLayout.ID
+	wright.title = str(data.name)+" shipwright"
+	wright.description = "Order your ship to the first available pad: 1, then 2, then 3."
+	wright.position = desk+Vector3(0, 1.0, 1.7)
+	port.add_child(wright)
+	for k in CityLayout.PORT_PADS.size():
+		var pad: Vector3 = CityLayout.PORT_PADS[k]+Vector3.UP*roof
+		art.round_part(pad+Vector3.UP*0.04, r+1.0, 0.06, Color("2a2436"), false)
+		art.round_part(pad+Vector3.UP*0.13, r+0.2, 0.06, _tint, false, 1.4)
+		art.round_part(pad+Vector3.UP*0.22, r-0.6, 0.06, Color("3a3248"), false)
+		art.box(pad+Vector3(0, 0.30, 0), Vector3(1.0, 0.04, r), _tint, false, 1.2)
+		art.box(pad+Vector3(0, 0.30, -r*0.5), Vector3(6.0, 0.04, 1.0), _tint, false, 1.2)
+		for c in 8:
+			var a := TAU*c/8.0
+			art.box(pad+Vector3(cos(a)*(r+1.6), 0.3, sin(a)*(r+1.6)), Vector3(0.5, 0.5, 0.5), _neon if c % 2 else _tint, false, 2.2)
+		_sign(port, "PAD %d" % (k+1), pad+Vector3(0, 0.2, r+2.5), _tint, 2.0, 0.0, "paint").rotation.x = -PI*0.5
+		_light(port, pad+Vector3.UP*4.0, _tint, 1.2, 18.0)
+	# Parapet round the edge (the stair house stands in its corner), lights on top.
+	for side in 4:
+		var b := Basis(Vector3.UP, side*PI*0.5)
+		var span := Vector2(-half, half)
+		if side==1: span = Vector2(-half, -cz1)
+		if side==2: span = Vector2(-cx0, half)
+		var mid := (span.x+span.y)*0.5
+		var length := span.y-span.x
+		art.box(b*Vector3(mid, roof+0.5, half-0.25), (b*Vector3(length, 1.0, 0.5)).abs(), Color("4a3a5a"), true)
+		art.box(b*Vector3(mid, roof+1.04, half-0.25), (b*Vector3(length, 0.08, 0.3)).abs(), _neon, false, 1.6)
+	# Landing light masts, and the control tower in the far corner from the stairs.
+	for at: Vector2 in [Vector2(-40, 40), Vector2(40, 40), Vector2(0, 41), Vector2(-41, 0), Vector2(41, 0)]:  # clear of the ships (51 m long)
+		art.box(Vector3(at.x, roof+3.0, at.y), Vector3(0.4, 6.0, 0.4), Color("6a5a6e"), true)
+		art.box(Vector3(at.x, roof+6.3, at.y), Vector3(1.0, 0.6, 1.0), _tint, false, 2.5)
+	var tower := Vector3(-36, roof, -36)
+	art.round_part(tower+Vector3.UP*9.0, 3.0, 18.0, Color("4a3a5a"), true)
+	art.round_part(tower+Vector3.UP*19.0, 6.0, 4.0, Color("2a2a3a"), true)
+	art.round_part(tower+Vector3.UP*19.0, 6.2, 2.0, _neon, false, 1.8)
+	art.box(tower+Vector3.UP*24.0, Vector3(0.6, 6, 0.6), Color("d9ac60"))
+	art.box(tower+Vector3.UP*27.5, Vector3.ONE*1.4, Color("ff5a6a"), false, 3.0)
+	_sign(port, str(data.port).to_upper(), Vector3(core.x, roof+2.6, cz1+0.15), _tint, 1.4)
 
 func _glass_panel(parent: Node3D, at: Vector3, size: Vector3, solid: bool) -> void:
 	var mesh := MeshInstance3D.new()
@@ -247,8 +443,8 @@ func _shopfront(c: Dictionary, venues: Array) -> void:
 		var art := CityArt.new(_towers, block.frame, solids)
 		var feet := CityArt.pack(block, CityLayout.ROAD+CityLayout.WALK+0.8, seed, 4, 3.0, 8.0, avoid)
 		for k in feet.size():
-			var tall := lerpf(40.0, float(data.tower)*0.7, CityLayout.rnd(seed, 9)) if k==0 else lerpf(10.0, 32.0, CityLayout.rnd(seed, 10+k))
-			art.building(feet[k][0], float(feet[k][1]), tall, CityLayout.rnd(seed, 20+k), "", _neon)
+			var tall := lerpf(22.0, float(data.tower)*0.7, CityLayout.rnd(seed, 9)) if k==0 else lerpf(8.0, 32.0*float(data.height_scale), CityLayout.rnd(seed, 10+k))
+			art.building(feet[k][0], float(feet[k][1]), tall, CityLayout.rnd(seed, 20+k), CityLayout.architecture(data, CityLayout.rnd(seed, 20+k)), _neon)
 		art.gardens(block, CityLayout.ROAD+CityLayout.WALK+0.8, seed, feet+avoid.map(func(a: Array) -> Array: return [a[0], (a[1] as Vector2).length()]))
 	for solid: Array in solids: _solid_shape(solid)
 
@@ -313,7 +509,7 @@ func _cottage(v: Dictionary, seed: float) -> void:
 				art.part("box", Vector3(0, wall_h+0.45+k*0.9, 0.35), Basis.IDENTITY, Vector3(size.x+2.2, 0.9, w), roof if k<6 else roof.lightened(0.2), CityArt.M_SHINGLE, 0.0, false)
 		_:
 			# Flat roof garden with a round turret at a front corner.
-			art.part("box", Vector3(0, wall_h+0.1, 0.35), Basis.IDENTITY, Vector3(size.x+1.6, 0.5, depth-0.6), CityArt.STONE[0], CityArt.M_STONE, 0.0, false)
+			art.part("box", Vector3(0, wall_h+0.1, 0.35), Basis.IDENTITY, Vector3(size.x+1.6, 0.5, depth-0.6), Color(str(CityArt.STONE[0])), CityArt.M_STONE, 0.0, false)
 			art.part("box", Vector3(0, wall_h+0.45, 0.35), Basis.IDENTITY, Vector3(size.x, 0.3, depth-2.0), Color("3a6a42"), CityArt.M_GRASS, 0.0, false)
 			var tx := (hx+0.6)*(1.0 if art.r()<0.5 else -1.0)
 			art.part("cyl", Vector3(tx, wall_h+2.5, -hz), Basis.IDENTITY, Vector3(4.4, wall_h+6.0, 4.4), wall.darkened(0.08), mat, 0.5)
@@ -334,8 +530,8 @@ func _room(v: Dictionary) -> void:
 	# Floor (solid), checker or planks by kind, a rug.
 	art.box(Vector3(0, -0.12, 0), Vector3(size.x, 0.28, size.z), look.floor, true)
 	for k in 6:
-		art.box(Vector3(-hx+1.4+k*(size.x-2.8)/5.0, 0.03, 0), Vector3(0.06, 0.02, size.z-0.6), look.floor.darkened(0.2))
-	art.box(Vector3(0, 0.035, -1.0), Vector3(size.x*0.55, 0.02, size.z*0.45), look.rug)
+		art.box(Vector3(-hx+1.4+k*(size.x-2.8)/5.0, 0.08, 0), Vector3(0.06, 0.02, size.z-0.6), look.floor.darkened(0.2))
+	art.box(Vector3(0, 0.12, -1.0), Vector3(size.x*0.55, 0.02, size.z*0.45), look.rug)
 	# Inside finish (covers the podium's own faces), a ceiling with lamp strips.
 	var hidden: bool = v.kind=="speakeasy"
 	art.box(Vector3(0, size.y*0.5, hz-0.1), Vector3(size.x, size.y, 0.2), look.wall)
@@ -374,7 +570,7 @@ func _room(v: Dictionary) -> void:
 	art.box(Vector3(0, 5.6, -hz-1.2), Vector3(size.x*0.7, 0.18, 2.4), look.awning, false, 0.4)
 	var sign_id: String = {cafe = "sign_cafe", teahouse = "sign_cafe", bar = "sign_bar", speakeasy = "sign_bar", noodle = "sign_noodles",
 		arcade = "sign_arcade", shop_budget = "sign_shop", shop_premium = "sign_shop", shop_curio = "sign_shop"}.get(v.kind, "")
-	if sign_id!="" and v.kind!="speakeasy": _props.add(sign_id, frame, Vector3(-hx+2.6, 6.0, -hz-0.4), PI)
+	if sign_id!="" and v.kind!="speakeasy": _prop(sign_id, frame, Vector3(-hx+2.6, 6.0, -hz-0.4))
 	var sign_look: Array = {cafe = ["plank", "coffee"], teahouse = ["plank", "tea"], bar = ["neon", "beer"], noodle = ["neon", "bowl"],
 		arcade = ["neon", "game"], shop_budget = ["brass", "potion"], shop_premium = ["brass", "sword"], shop_curio = ["brass", "gem"]}.get(v.kind, ["plank", ""])
 	_sign(node, str(v.name), Vector3(0, 6.8, -hz-0.75), _neon if v.kind.begins_with("shop") or v.kind=="arcade" else look.lamp, 0.9, PI, sign_look[0], sign_look[1])
@@ -390,38 +586,38 @@ func _furnish(node: Node3D, v: Dictionary, art: NexusStation.Brush, look: Dictio
 			_counter(node, v, art, look, "coffee_machine")
 			for k in 3:
 				var tab := Vector3([-5.0, 0.0, 5.0][k], 0, [-1.5, 0.5, -1.5][k])
-				_props.add("cafe_table", frame, tab)
+				_prop("cafe_table", frame, tab)
 				art.box(tab+Vector3(0, 2.6, 0), Vector3(0.6, 0.4, 0.6), look.lamp, false, 1.8)
-			_props.add("potted_tree", frame, Vector3(hx-1.0, 0.02, -hz+1.2))
-			_props.add("planter", frame, Vector3(-hx+1.0, 0.02, -hz+1.2))
+			_prop("potted_tree", frame, Vector3(hx-1.0, 0.02, -hz+1.2))
+			_prop("planter", frame, Vector3(-hx+1.0, 0.02, -hz+1.2))
 		"bar", "speakeasy":
 			_counter(node, v, art, look, "beer_taps")
 			for side: float in [-1.0, 1.0]:
-				_props.add("booth_sofa", frame, Vector3(side*7.0, 0.02, -1.6), -side*PI*0.5)
+				_prop("booth_sofa", frame, Vector3(side*7.0, 0.02, -1.6), side*PI*0.5)
 				art.box(Vector3(side*5.3, 0.45, -1.6), Vector3(1.4, 0.9, 2.6), Color("6a4a3a"), true)
-			_props.add("arcade_cabinet", frame, Vector3(-hx+1.0, 0.02, hz-2.6), PI*0.5)
-			_props.add("lantern_string", frame, Vector3(0, size.y-0.6, -1.0), 0.0, 0.8)
+			_prop("arcade_cabinet", frame, Vector3(-hx+1.0, 0.02, hz-2.6), -PI*0.5)
+			_prop("lantern_string", frame, Vector3(0, size.y-0.6, -1.0), 0.0, 0.8)
 		"noodle":
 			_counter(node, v, art, look, "noodle_stall")
-			_props.add("lantern_string", frame, Vector3(0, size.y-0.6, 0.0), 0.0, 0.8)
+			_prop("lantern_string", frame, Vector3(0, size.y-0.6, 0.0), 0.0, 0.8)
 		"shop_budget", "shop_premium", "shop_curio":
 			if v.has("shop"):
 				var staff: Dictionary = v.staff[0]
 				ShopKeeper.place(node, str(v.shop), Transform3D(Basis(Vector3.UP, float(staff.yaw)), staff.pos))
 			_counter(node, v, art, look, "")
 			for side: float in [-1.0, 1.0]:
-				for k in 3: _props.add("shelf_goods", frame, Vector3(side*(hx-0.8), 0.02, -3.5+k*2.6), -side*PI*0.5)
-			_props.add("shelf_goods", frame, Vector3(-3.0, 0.02, -0.5), 0.0)
-			_props.add("shelf_goods", frame, Vector3(3.0, 0.02, -0.5), PI)
+				for k in 3: _prop("shelf_goods", frame, Vector3(side*(hx-0.8), 0.02, -3.5+k*2.6), side*PI*0.5)
+			_prop("shelf_goods", frame, Vector3(-3.0, 0.02, -0.5), 0.0)
+			_prop("shelf_goods", frame, Vector3(3.0, 0.02, -0.5), 0.0)
 		"arcade":
-			for k in 3: _props.add("arcade_cabinet", frame, Vector3(-5.0+k*5.0, 0.02, -2.4), 0.0)
-			for k in 4: _props.add("arcade_cabinet", frame, Vector3(-6.0+k*4.0, 0.02, 4.8), PI)
-			_props.add("vending_machine", frame, Vector3(hx-1.0, 0.02, 0.0), -PI*0.5)
+			for k in 3: _prop("arcade_cabinet", frame, Vector3(-5.0+k*5.0, 0.02, -2.4), PI)
+			for k in 4: _prop("arcade_cabinet", frame, Vector3(-6.0+k*4.0, 0.02, 4.8), 0.0)
+			_prop("vending_machine", frame, Vector3(hx-1.0, 0.02, 0.0), PI*0.5)
 	# Seats: chairs or stools at each seat, a target to sit.
 	for s: Dictionary in v.seats:
 		var chair := "bar_stool" if v.kind in ["bar", "noodle", "speakeasy"] and absf(float((s.pos as Vector3).z)-3.0)<0.2 else "cafe_chair"
 		if v.kind in ["bar", "speakeasy"] and chair=="cafe_chair": continue  # booth seats sit on the sofa
-		_props.add(chair, frame, s.pos, float(s.yaw)+PI)
+		_prop(chair, frame, s.pos, float(s.yaw))
 	for k in v.seats.size():
 		var s: Dictionary = v.seats[k]
 		if k in v.patrons: continue
@@ -434,31 +630,31 @@ func _counter(node: Node3D, v: Dictionary, art: NexusStation.Brush, look: Dictio
 	art.box(Vector3(0, 1.12, 4.0), Vector3(9.2, 0.08, 1.15), Color("d9ac60"))
 	art.box(Vector3(0, 0.25, 3.45), Vector3(9.0, 0.06, 0.06), _neon, false, 1.6)
 	if machine!="":
-		_props.add(machine, frame, Vector3(-2.5, 1.16, 4.1), PI)
+		_prop(machine, frame, Vector3(-2.5, 1.16, 4.1))
 		if machine in ["beer_taps", "coffee_machine"]:
 			LeisureFurniture.target(node, "citytap|"+str(v.key), "tap", Transform3D(Basis.IDENTITY, Vector3(-2.5, 1.3, 4.1)), "coffee" if machine=="coffee_machine" else "beer")
-	_props.add("shelf_goods", frame, Vector3(3.5, 0.02, 5.6), PI)
-	_props.add("shelf_goods", frame, Vector3(-3.5, 0.02, 5.6), PI)
+	_prop("shelf_goods", frame, Vector3(3.5, 0.02, 5.6))
+	_prop("shelf_goods", frame, Vector3(-3.5, 0.02, 5.6))
 	art.box(Vector3(0, 3.2, 5.85), Vector3(6.0, 1.6, 0.1), look.lamp.darkened(0.3), false, 0.9)
 
 func _venue_look(kind: String) -> Dictionary:
 	match kind:
-		"cafe": return {floor = Color("8a5a3a"), rug = Color("6a3a4a"), wall = Color("e8c8a8"), lamp = Color("ffc27a"), window = Color("ffd8a0"), awning = Color("c25a6a"), counter = Color("6a3a2a")}
-		"teahouse": return {floor = Color("9a7a4a"), rug = Color("4a6a4a"), wall = Color("d8e0c0"), lamp = Color("c8ff9a"), window = Color("e0ffc0"), awning = Color("4a8a5a"), counter = Color("5a4a2a")}
-		"bar", "speakeasy": return {floor = Color("4a2e24"), rug = Color("5a2a3a"), wall = Color("5a3a3a"), lamp = Color("ff9a5a"), window = Color("ffb070"), awning = Color("8a3a2a"), counter = Color("3a2218")}
-		"noodle": return {floor = Color("7a3a2a"), rug = Color("aa4a3a"), wall = Color("f0d8b0"), lamp = Color("ff7a5a"), window = Color("ffc890"), awning = Color("d84a3a"), counter = Color("6a2a1a")}
-		"arcade": return {floor = Color("2a2440"), rug = Color("4a2a6a"), wall = Color("3a3060"), lamp = Color("9a8aff"), window = Color("c8a8ff"), awning = Color("6a4aaa"), counter = Color("2a2440")}
-		"shop_premium": return {floor = Color("d8d0c0"), rug = Color("3a4a7a"), wall = Color("f0e8d8"), lamp = Color("fff0c8"), window = Color("fff0d0"), awning = Color("3a4a8a"), counter = Color("8a6a3a")}
-		"shop_curio": return {floor = Color("5a3a5a"), rug = Color("7a4a6a"), wall = Color("6a4a6a"), lamp = Color("ff8ad8"), window = Color("ffb8e8"), awning = Color("8a3a7a"), counter = Color("4a2a3a")}
-	return {floor = Color("a08060"), rug = Color("5a6a8a"), wall = Color("e0d0b8"), lamp = Color("ffd890"), window = Color("ffe0b0"), awning = Color("5a7aa0"), counter = Color("6a4a2a")}
+		"cafe": return {floor = Color("8a5a3a"), rug = Color("6a3a4a"), wall = Color("e8c8a8"), lamp = Color("ffc27a"), window = Color("e5d2ad"), awning = Color("c25a6a"), counter = Color("6a3a2a")}
+		"teahouse": return {floor = Color("9a7a4a"), rug = Color("4a6a4a"), wall = Color("d8e0c0"), lamp = Color("c8ff9a"), window = Color("e5d2ad"), awning = Color("4a8a5a"), counter = Color("5a4a2a")}
+		"bar", "speakeasy": return {floor = Color("4a2e24"), rug = Color("5a2a3a"), wall = Color("5a3a3a"), lamp = Color("ff9a5a"), window = Color("e5d2ad"), awning = Color("8a3a2a"), counter = Color("3a2218")}
+		"noodle": return {floor = Color("7a3a2a"), rug = Color("aa4a3a"), wall = Color("f0d8b0"), lamp = Color("ff7a5a"), window = Color("e5d2ad"), awning = Color("d84a3a"), counter = Color("6a2a1a")}
+		"arcade": return {floor = Color("2a2440"), rug = Color("4a2a6a"), wall = Color("3a3060"), lamp = Color("9a8aff"), window = Color("e5d2ad"), awning = Color("6a4aaa"), counter = Color("2a2440")}
+		"shop_premium": return {floor = Color("d8d0c0"), rug = Color("3a4a7a"), wall = Color("f0e8d8"), lamp = Color("fff0c8"), window = Color("e5d2ad"), awning = Color("3a4a8a"), counter = Color("8a6a3a")}
+		"shop_curio": return {floor = Color("5a3a5a"), rug = Color("7a4a6a"), wall = Color("6a4a6a"), lamp = Color("ff8ad8"), window = Color("e5d2ad"), awning = Color("8a3a7a"), counter = Color("4a2a3a")}
+	return {floor = Color("a08060"), rug = Color("5a6a8a"), wall = Color("e0d0b8"), lamp = Color("ffd890"), window = Color("e5d2ad"), awning = Color("5a7aa0"), counter = Color("6a4a2a")}
 
 func _seat_target(parent: Node3D, s: Dictionary, place: String) -> void:
 	var target := CityTarget.new()
 	target.world = city.world
 	target.kind = "seat"
 	target.seat = str(s.id)
-	target.title = place
-	target.description = "Sit down. Bring a %s from the counter. Right-click sips, Z stands." % ("coffee" if s.drink=="coffee" else "beer")
+	target.title = "Chair"
+	target.description = "Sit down for a while"
 	target.position = (s.pos as Vector3)+Vector3.UP*0.8
 	parent.add_child(target)
 	var spec := CityLayout.any_seat(str(s.id))
@@ -589,22 +785,22 @@ func _floor_room(node: Node3D, art: NexusStation.Brush, e: Dictionary, f: int, h
 		"lobby":
 			art.box(Vector3(-7.0, h+0.6, -4.0), Vector3(4.0, 1.2, 1.2), Color("6a3a2a"), true)
 			art.box(Vector3(-7.0, h+1.25, -4.0), Vector3(4.2, 0.1, 1.4), Color("d9ac60"))
-			for k in 4: _props.add("booth_sofa", frame, Vector3(7.0, h, -8.0+k*4.0), -PI*0.5)
-			for k in 4: _props.add("potted_tree", frame, Vector3([-11.0, 11.0, -11.0, 11.0][k], h, [-11.0, -11.0, 11.0, 11.0][k]))
-			_props.add("holo_board", frame, Vector3(0, h+1.0, 11.5), PI)
+			for k in 4: _prop("booth_sofa", frame, Vector3(7.0, h, -8.0+k*4.0), PI*0.5)
+			for k in 4: _prop("potted_tree", frame, Vector3([-11.0, 11.0, -11.0, 11.0][k], h, [-11.0, -11.0, 11.0, 11.0][k]))
+			_prop("holo_board", frame, Vector3(0, h+1.0, 11.5))
 		"garden":
 			for k in 6:
 				var at := Vector3(-10.0+k*4.0, h, -9.0)
-				_props.add("planter", frame, at)
-				_props.add("potted_tree", frame, at+Vector3(0, 0, -2.0))
+				_prop("planter", frame, at)
+				_prop("potted_tree", frame, at+Vector3(0, 0, -2.0))
 			art.round_part(Vector3(-7.0, h+0.4, 2.0), 2.4, 0.8, Color("8a7a8a"), true)
 			art.round_part(Vector3(-7.0, h+0.82, 2.0), 2.1, 0.06, Color("6af0e0"), false, 1.2)
 			for k in 4:
 				var tab := Vector3(-8.0+k*5.3, h, 10.3)
-				_props.add("cafe_table", frame, tab)
+				_prop("cafe_table", frame, tab)
 			for s: Dictionary in CityLayout.tower_seats(e):
 				if absf(float((s.pos as Vector3).y)-h)<0.5:
-					_props.add("cafe_chair", frame, s.pos, float(s.yaw)+PI)
+					_prop("cafe_chair", frame, s.pos, float(s.yaw))
 					_seat_target(node, s, "Sky Garden")
 		"residence":
 			for k in 3:
@@ -612,22 +808,22 @@ func _floor_room(node: Node3D, art: NexusStation.Brush, e: Dictionary, f: int, h
 				art.box(Vector3(x, h+1.6, 8.0), Vector3(0.2, 3.2, 8.0), Color("d8c8b8"), true)
 				art.box(Vector3(x+2.0, h+0.35, 10.0), Vector3(3.0, 0.7, 4.0), Color("8a6a9a"), true)
 				art.box(Vector3(x+2.0, h+0.75, 11.4), Vector3(3.0, 0.3, 1.0), Color("f0e0e8"))
-			for k in 3: _props.add("booth_sofa", frame, Vector3(-6.0+k*6.0, h, -8.0), 0.0)
-			_props.add("arcade_cabinet", frame, Vector3(10.5, h, -2.0), -PI*0.5)
-			_props.add("shelf_goods", frame, Vector3(-11.5, h, -2.0), PI*0.5)
+			for k in 3: _prop("booth_sofa", frame, Vector3(-6.0+k*6.0, h, -8.0), PI)
+			_prop("arcade_cabinet", frame, Vector3(10.5, h, -2.0), PI*0.5)
+			_prop("shelf_goods", frame, Vector3(-11.5, h, -2.0), -PI*0.5)
 		"skybar":
 			art.round_part(Vector3(0, h+0.55, -5.0), 2.5, 1.1, Color("3a2218"), true)
 			art.round_part(Vector3(0, h+1.12, -5.0), 2.7, 0.08, Color("d9ac60"))
-			_props.add("beer_taps", frame, Vector3(0, h+1.16, -5.0), PI)
+			_prop("beer_taps", frame, Vector3(0, h+1.16, -5.0), PI)
 			for s: Dictionary in CityLayout.tower_seats(e):
 				if absf(float((s.pos as Vector3).y)-h)<0.5:
 					var p: Vector3 = s.pos
 					var out := Vector3(p.x, 0, p.z).normalized()
 					art.box(Vector3(p.x, h, p.z)+out*1.1+Vector3.UP*1.05, Vector3(1.4, 0.08, 0.7), Color("d9ac60"))
-					_props.add("bar_stool", frame, p, float(s.yaw)+PI)
+					_prop("bar_stool", frame, p, float(s.yaw))
 					_seat_target(node, s, "Sky Bar")
-			_props.add("lantern_string", frame, Vector3(0, h+4.8, 0), 0.0, 1.2)
-			_props.add("lantern_string", frame, Vector3(0, h+4.8, 0), PI*0.5, 1.2)
+			_prop("lantern_string", frame, Vector3(0, h+4.8, 0), 0.0, 1.2)
+			_prop("lantern_string", frame, Vector3(0, h+4.8, 0), PI*0.5, 1.2)
 
 ## The shaft, its doors on every floor, the call panels and the car.
 func _shaft(node: Node3D, art: NexusStation.Brush, e: Dictionary, half: float) -> void:
@@ -646,7 +842,7 @@ func _shaft(node: Node3D, art: NexusStation.Brush, e: Dictionary, half: float) -
 		art.box(Vector3(0, (h+3.0+next)*0.5, s.z-w), Vector3(w*2.0+0.4, next-h-3.0, 0.3), Color("4a3a5a"), true)
 		for side: float in [-1.0, 1.0]: art.box(Vector3(side*(w-0.15), h+1.5, s.z-w), Vector3(0.3, 3.0, 0.3), Color("4a3a5a"), true)
 		art.box(Vector3(0, h+3.05, s.z-w-0.2), Vector3(w*2.0+0.6, 0.12, 0.12), _neon, false, 2.0)
-		_props.add("elevator_panel", node.transform, Vector3(w+0.8, h, s.z-w-0.4), PI)
+		_prop("elevator_panel", node.transform, Vector3(w+0.8, h, s.z-w-0.4))
 		var call := CityTarget.new()
 		call.world = city.world
 		call.kind = "call"
@@ -864,15 +1060,16 @@ func _plaza(c: Dictionary) -> void:
 	var cell_frame: Transform3D = block.frame
 	var seed: Vector2 = block.seed
 	var room := CityRoads.field(block, seed)-CityLayout.ROAD-CityLayout.WALK-1.0
+	if room<7.0: return
 	var frame := Transform3D(cell_frame.basis, cell_frame*Vector3(seed.x, CityRoads.drop(seed), seed.y))
 	var node := _holder(frame, "Plaza_%d_%d" % [c.i, c.j])
 	var art := NexusStation.Brush.new(node, false, 500.0)
 	var ring := minf(13.4, room*0.75)
 	art.round_part(Vector3(0, 0.08, 0), ring+0.6, 0.12, Color("7a6a7a"))
-	art.round_part(Vector3(0, 0.12, 0), ring, 0.06, _neon, false, 0.6)
+	art.round_part(Vector3(0, 0.20, 0), ring, 0.08, _neon, false, 0.6)
 	if data.theme=="rose":
 		# A canal across the plaza, two arched bridges over it.
-		var span := room*2.0
+		var span := maxf(4.0, room*2.0-3.0)
 		art.box(Vector3(0, 0.4, 0), Vector3(span, 0.6, 6.4), Color("8a6a7a"), true)
 		art.box(Vector3(0, 0.72, 0), Vector3(span, 0.06, 5.6), Color("2a8aa8"), false, 0.5)
 		for s: float in [-1.0, 1.0]: art.box(Vector3(0, 0.75, s*2.9), Vector3(span, 0.08, 0.2), _neon, false, 1.4)
@@ -894,22 +1091,22 @@ func _plaza(c: Dictionary) -> void:
 		art.round_part(Vector3(0, 2.72, 0), 2.1, 0.05, Color("4ac8e0"), false, 1.0)
 		art.crystal(Vector3(0, 2.7, 0), 2.6, _neon)
 		var fountain: Node3D = load("res://scripts/world/voxel_fountain.gd").new()
-		fountain.position = Vector3(0, 0.9, 0)
-		fountain.scale = Vector3.ONE*1.6
+		fountain.position = Vector3(0, 0.25, 0)
+		fountain.scale = Vector3.ONE*minf(0.82, room/8.0)
 		node.add_child(fountain)
 		_light(node, Vector3(0, 3.0, 0), Color("6af0e0"), 1.0, 10.0)
 	var bench := minf(10.0, ring*0.75)
 	for k in 8:
 		var a := TAU*k/8.0+0.39
-		_props.add("bench" if k % 2 else "planter", frame, Vector3(cos(a)*bench, 0.1, sin(a)*bench), -a+PI*0.5)
+		_prop("bench" if k % 2 else "planter", frame, Vector3(cos(a)*bench, 0.1, sin(a)*bench), -a+PI*0.5)
 		var at := Vector2(cos(a), sin(a))*minf(15.5, room*0.92)
-		if CityRoads.field(block, seed+at)>CityLayout.ROAD+CityLayout.WALK+1.0: _props.add("potted_tree", frame, Vector3(at.x, 0.1, at.y))
+		if CityRoads.field(block, seed+at)>CityLayout.ROAD+CityLayout.WALK+1.0: _prop("potted_tree", frame, Vector3(at.x, 0.1, at.y))
 	for k in 4:
 		var a := TAU*k/4.0+PI*0.25
-		_props.add("street_lamp", frame, Vector3(cos(a), 0, sin(a))*room*0.95+Vector3.UP*0.1)
-	_props.add("noodle_stall" if int(c.i) % 2 else "kiosk", frame, Vector3(room*0.8, 0.1, 0), -PI*0.5)
-	_props.add("hydrant_fountain", frame, Vector3(-room*0.8, 0.1, 3.0))
-	_props.add("holo_board", frame, Vector3(-room*0.75, 0.1, -6.0), PI*0.5)
+		_prop("street_lamp", frame, Vector3(cos(a), 0, sin(a))*room*0.95+Vector3.UP*0.1)
+	_prop("noodle_stall" if int(c.i) % 2 else "kiosk", frame, Vector3(room*0.8, 0.1, 0), PI*0.5)
+	_prop("hydrant_fountain", frame, Vector3(-room*0.8, 0.1, 3.0))
+	_prop("holo_board", frame, Vector3(-room*0.75, 0.1, -6.0), -PI*0.5)
 	art.finish()
 
 ## The district's lake and park (the lawns, water and trees are the
@@ -931,12 +1128,12 @@ func _green(c: Dictionary) -> void:
 				var a := TAU*(b+0.5)/benches+k
 				var p := at+Vector2.from_angle(a)*(rr+1.6 if lake else rr*0.85)
 				if CityRoads.field(block, p)<lot+0.5: continue
-				_props.add("bench" if b % 2==0 else "street_lamp", frame, lift.call(p, 0.15), -a-PI*0.5 if lake else -a+PI*0.5)
+				_prop("bench" if b % 2==0 else "street_lamp", frame, lift.call(p, 0.15), -a+PI*0.5 if lake else -a-PI*0.5)
 			if lake and k==0 and rr>11.0:
 				_bridge_over(frame, at, rr-2.6, seed)
 		if not spots.is_empty():
 			var edge: Vector2 = spots[0][0]+Vector2.from_angle(seed*TAU)*(float(spots[0][1])+(5.5 if lake else 0.5))
-			if CityRoads.field(block, edge)>lot+2.0: _props.add("kiosk" if lake else "noodle_stall", frame, lift.call(edge, 0.15), seed*TAU)
+			if CityRoads.field(block, edge)>lot+2.0: _prop("kiosk" if lake else "noodle_stall", frame, lift.call(edge, 0.15), seed*TAU)
 
 ## A humped wooden footbridge across a round pool (in a block frame).
 func _bridge_over(frame: Transform3D, at: Vector2, radius: float, seed: float) -> void:
@@ -958,7 +1155,7 @@ func _bridge_over(frame: Transform3D, at: Vector2, radius: float, seed: float) -
 			art.box(Vector3((x0+x1)*0.5, (y0+y1)*0.5+0.5, s*1.35), Vector3(0.12, 1.0, 0.12), Color("d9ac60"))
 	for s: float in [-1.0, 1.0]:
 		art.box(Vector3(0, 3.1, s*1.35), Vector3(half*1.2, 0.1, 0.1), Color("d9ac60"))
-	_props.add("lantern_string", holder.transform, Vector3(0, 4.2, 0), 0.0, 1.0)
+	_prop("lantern_string", holder.transform, Vector3(0, 4.2, 0), 0.0, 1.0)
 	art.finish()
 
 ## A graffiti on a wall: `basis` turns the picture's face (+Z) outward from it.
@@ -1021,9 +1218,9 @@ func _secret(c: Dictionary, venues: Array) -> void:
 		var z := 3.2+k*0.55
 		conduits.append({a = Vector3(-p, y, z), b = Vector3(-8.0, y, z), radius = 0.11, color = [TheoryArt.TRIM, TheoryArt.STEEL, Color("8a6a4a")][k]})
 	TheoryRoundDetails.attach(node, conduits)
-	_props.add("air_vent", frame, Vector3(-p+0.3, 1.9, 6.2), -PI*0.5, 0.8)
-	_props.add("air_vent", frame, Vector3(-10.0, 0.8, 5.15), PI, 0.6)
-	_props.add("pipe_bundle", frame, Vector3(-11.5, 0.3, 2.9), 0.0, 0.7)
+	_prop("air_vent", frame, Vector3(-p+0.3, 1.9, 6.2), -PI*0.5, 0.8)
+	_prop("air_vent", frame, Vector3(-10.0, 0.8, 5.15), PI, 0.6)
+	_prop("pipe_bundle", frame, Vector3(-11.5, 0.3, 2.9), 0.0, 0.7)
 	art.box(Vector3(-11.5, 2.6, 4.0), Vector3(0.4, 0.3, 0.4), Color("6af0e0"), false, 1.4)
 	_light(node, Vector3(-11.5, 2.3, 4.0), Color("6af0e0"), 0.7, 5.0)
 	# An open service hatch: the tunnel remains visibly walkable.
@@ -1061,54 +1258,37 @@ func _secret(c: Dictionary, venues: Array) -> void:
 ## benches, bins and vending machines now and then, lantern strings across;
 ## nothing at the junctions or in front of shop doors.
 func _streets() -> void:
-	var f := int(data.face)
-	var c: Vector2i = data.corner
-	var r := CityLayout.radius()
-	var seen := {}
-	var deck := CityLayout.district_frame(data)
-	for lj in 6:
-		for li in 6:
-			var i := c.x-3+li
-			var j := c.y-3+lj
-			for street: Dictionary in CityRoads.cell_streets(f, i, j):
-				var ends: Array = street.ends
-				var key := "%s-%s" % [ends[0], ends[1]]
-				if seen.has(key): continue
-				seen[key] = true
-				var pts: Array = street.points
-				var clear_a := _junction_clear(f, ends[0])
-				var clear_b := _junction_clear(f, ends[1])
-				var a: Vector3 = (pts[0] as Vector3)*r
-				var m: Vector3 = (pts[1] as Vector3)*r
-				var b: Vector3 = (pts[2] as Vector3)*r
-				var total := a.distance_to(m)+m.distance_to(b)
-				var steps := int(total/6.5)
-				for s in steps:
-					var d := (s+0.5)*total/steps
-					if d<clear_a or total-d<clear_b or absf(d-total*0.5)<5.0: continue
-					var p := a.lerp(m, d/a.distance_to(m)) if d<a.distance_to(m) else m.lerp(b, (d-a.distance_to(m))/m.distance_to(b))
-					var dir := (m-a if d<a.distance_to(m) else b-m).normalized()
-					var up := p.normalized()
-					var local := deck.affine_inverse()*p
-					if absf(local.x)<60.0 and absf(local.z)<66.0: continue  # the port's deck and ramps
-					var x := dir.slide(up).normalized()
-					var frame := Transform3D(Basis(x, up, x.cross(up)), up*r)
-					for side: float in [-1.0, 1.0]:
-						var at := Vector3(0, CityRoads.KERB+0.02, side*(CityLayout.ROAD+CityLayout.WALK*0.72))
-						var salt := s*10+(1 if side>0 else 0)+key.hash() % 1000*100
-						if s % 3==0:
-							_props.add("street_lamp", frame, at, PI*0.5 if side>0 else -PI*0.5)
-						else:
-							var roll := CityLayout.rnd(0.17, salt)
-							if roll<0.12: _props.add("bench", frame, at+Vector3(0, 0, side*0.5), PI if side>0 else 0.0)
-							elif roll<0.2: _props.add("trash_bin", frame, at)
-							elif roll<0.25: _props.add("vending_machine", frame, at+Vector3(0, 0, side*0.7), PI if side>0 else 0.0)
-							elif roll<0.32: _props.add("planter", frame, at)
-					if s % 3==1:
-						_props.add("lantern_string", frame, Vector3(0, 7.0, 0), PI*0.5, 1.8)
+	for item: Array in CityLayout.street_furniture(data):
+		if item[0]=="lantern_span": _lantern_span(item[1])
+		else: _prop(str(item[0]), item[1], item[2], float(item[3]) if item.size()>3 else 0.0)
 
-## How far from a corner the street furniture keeps clear (the junction, or
-## the roundabout's ring and its sidewalk).
-func _junction_clear(face: int, corner: Vector2i) -> float:
-	var island := CityRoads.round_at(face, corner.x, corner.y)
-	return island+CityRoads.RING+CityLayout.WALK+1.5 if island>0.0 else CityLayout.ROAD+CityLayout.WALK+2.0
+## Supported festoon lights: the cable terminates on two sidewalk posts.
+func _lantern_span(frame: Transform3D) -> void:
+	var art := CityArt.new(_towers, frame, [])
+	var span := CityLayout.ROAD+CityLayout.WALK*0.65
+	var metal := Color("48443c")
+	for side: float in [-1.0, 1.0]:
+		var base := Vector3(0, CityRoads.drop(Vector2(0, side*span))+CityRoads.KERB, side*span)
+		art.part("box", base+Vector3.UP*3.9, Basis.IDENTITY, Vector3(0.24, 7.8, 0.24), metal)
+		art.part("box", base+Vector3.UP*0.3, Basis.IDENTITY, Vector3(0.6, 0.6, 0.6), Color("797369"), CityArt.M_STONE)
+		_solid(frame, base+Vector3.UP*3.9, Vector3(0.24, 7.8, 0.24))
+	for k in 16:
+		var z0 := lerpf(-span, span, k/16.0)
+		var z1 := lerpf(-span, span, (k+1)/16.0)
+		var a := Vector3(0, 6.6+1.2*pow(z0/span, 2), z0)
+		var b := Vector3(0, 6.6+1.2*pow(z1/span, 2), z1)
+		var basis := Basis.looking_at((b-a).normalized(), Vector3.RIGHT)
+		art.part("box", (a+b)*0.5, basis, Vector3(0.06, 0.06, a.distance_to(b)+0.02), metal)
+	for k in 5:
+		var z := lerpf(-span*0.78, span*0.78, k/4.0)
+		var y := 6.6+1.2*pow(z/span, 2)
+		art.part("box", Vector3(0, y-0.2, z), Basis.IDENTITY, Vector3(0.06, 0.4, 0.06), metal)
+		art.part("box", Vector3(0, y-0.6, z), Basis.IDENTITY, Vector3(0.5, 0.55, 0.5), Color("e8cf9e"), CityArt.M_GLOW)
+		art.part("box", Vector3(0, y-0.3, z), Basis.IDENTITY, Vector3(0.62, 0.12, 0.62), metal)
+
+## A bench's visible prop and its two seats share the same authored transform.
+func _prop(id: String, frame: Transform3D, at: Vector3, yaw := 0.0, scale := 1.0) -> void:
+	_props.add(id, frame, at, yaw, scale)
+	if id=="bench":
+		var pose := frame*Transform3D(Basis(Vector3.UP, yaw), at)
+		LeisureFurniture.bench_targets(self, CityLayout.bench_key(str(data.id), pose), pose, 0.65, 2.2)

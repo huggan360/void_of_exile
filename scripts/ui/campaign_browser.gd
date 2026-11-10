@@ -81,8 +81,9 @@ func _list() -> void:
 	var tales := {}
 	for id: String in Campaigns.LIST:
 		var def: Dictionary = Campaigns.LIST[id]
-		# Hidden tales appear only once the one before them is told.
-		if def.get("hidden", false) and str(_runs.get(str(def.get("requires", "")), {}).get("status", "")) != "done":
+		# Hidden tales appear once the one before them is told (and stay when it is replayed).
+		var before: Dictionary = _runs.get(str(def.get("requires", "")), {})
+		if def.get("hidden", false) and str(before.get("status", "")) != "done" and int(before.get("stars_best", 0)) <= 0:
 			continue
 		var pack := str(def.get("pack", ""))
 		if not tales.has(pack):

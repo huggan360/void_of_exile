@@ -11,6 +11,7 @@ var _revision := 0
 var _table_nodes := {}
 var _targets := {}
 var _table_revisions := {}
+var _hall_bench_seats := {}
 
 func now() -> float:
 	return Net.client.server_time() if Net.is_client() and Net.client else Net.now()
@@ -67,6 +68,7 @@ func resolve(place: GameWorld, id: String) -> Dictionary:
 	# City furniture is streamed visually; its authored positions also exist
 	# on the collision-only authority, so requests never depend on rendering.
 	if place is SpaceWorld:
+		if id.begins_with("citybench:"): return CityLayout.bench_seat(id)
 		if id.begins_with("city:"):
 			var spec := CityLayout.any_seat(id)
 			if not spec.is_empty() and not CityState.npc_seat(id):
@@ -86,7 +88,9 @@ func seat_spec(pid: int, place: GameWorld = null) -> Dictionary:
 	var s := state(pid)
 	var id := str(s.get("seat", ""))
 	var at := place if place else world
-	if id=="" or not is_instance_valid(at) or s.get("realm", "")!=at.realm_id: return {}
+	if id=="": return {}
+	if not is_instance_valid(at): return _hall_bench(id) if s.get("realm", "")=="hall" else {}
+	if s.get("realm", "")!=at.realm_id: return {}
 	return resolve(at, id)
 
 func occupied(realm: String, id: String, except_pid := 0) -> bool:
@@ -141,7 +145,7 @@ func action(p: Dictionary, args: Array, place: GameWorld = null) -> void:
 		"use":
 			if args.size()!=2: return
 			var id := str(args[1])
-			var spec := resolve(place, id)
+			var spec := _hall_bench(id) if not is_instance_valid(place) and str(p.realm)=="hall" else resolve(place, id)
 			if spec.is_empty() or pos.distance_to(spec.pos)>3.2: return
 			match str(spec.kind):
 				"seat":
@@ -321,6 +325,8 @@ func apply_seat(actor: Player, delta: float) -> bool:
 	if spec.is_empty(): return false
 	actor.global_transform = Transform3D(spec.get("basis", Basis.IDENTITY), spec.pos)
 	actor.velocity = Vector3.ZERO
+	actor._visual_offset = 0.0
+	actor.model.position.y = 0.0
 	actor.up_direction = actor.global_basis.y
 	actor.facing = float(spec.get("yaw", 0.0))
 	actor.model.rotation.y = actor.facing
@@ -362,3 +368,24 @@ func hint_rows(pid: int) -> Array:
 	if str(s.get("seat", ""))!="": rows.append([["@seat_stand"], "Stand up"])
 	if hands_busy(pid) or str(s.get("seat", ""))!="": rows.append([["@leisure_smoke"], "Cigar"])
 	return rows
+
+## The shared Tavern has no running RealmInstance on the dedicated server.
+## Read only its authored bench transforms; do not build its terrain or visuals.
+func _hall_bench(id: String) -> Dictionary:
+	if not id.begins_with("bench:"): return {}
+	if _hall_bench_seats.is_empty():
+		var scene := load("res://scenes/home/tavern.tscn") as PackedScene
+		var hall := scene.instantiate() as Node3D
+		var pending: Array[Node] = [hall]
+		while not pending.is_empty():
+			var node: Node = pending.pop_back()
+			for child: Node in node.get_children(): pending.append(child)
+			if not node is Node3D or str(node.get_meta("voxel_source", ""))!="res://props/town/bench/model.vox": continue
+			var pose := HomeTerrain._transform_to(node, hall)
+			for slot in 2:
+				var frame := pose*Transform3D(Basis.IDENTITY, Vector3((slot-0.5)*2.7*0.48, 0, -0.08))
+				var key := "bench:"+str(hall.get_path_to(node))+":"+str(slot)
+				_hall_bench_seats[key] = {kind = "seat", key = key, pos = frame*Vector3(0, 0.2, 0), basis = frame.basis.orthonormalized(),
+					yaw = 0.0, stand = frame*Vector3(0, 0.05, -1.25), drink = "beer"}
+		hall.free()
+	return _hall_bench_seats.get(id, {})

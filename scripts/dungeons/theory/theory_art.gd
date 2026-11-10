@@ -35,7 +35,8 @@ func build(layout: TheoryLayout) -> void:
 	_rng.seed = layout.seed_value+71867
 	_detail_seed = layout.seed_value+91703
 	_ship(false)
-	_ship(true)
+	_hostile_ships(layout)
+	_vent_maze(layout)
 	for path_index in layout.paths.size(): _ribbon(layout,path_index)
 	# Keep the former lock platform, without a puzzle or a blocking door.
 	_transit_platform()
@@ -93,7 +94,7 @@ func _box(at: Vector3,size: Vector3,color: Color,glow := 0.0,solid := false) -> 
 			_part.collision.append({at=at,size=size})
 			_part.bounds = (_part.bounds as AABB).merge(AABB(at-size*0.5,size))
 		return
-	_part.points.append(Transform3D(Basis.from_scale(size),at))
+	_part.points.append(Transform3D(Basis.from_scale(Coplanar.grow(size)),at))
 	_part.colors.append(_patina(color))
 	_part.glow.append(glow*(0.32 if _wreck_mode else 1.0))
 	_part.reacts.append(1.0 if _impact_enabled else 0.0)
@@ -231,7 +232,7 @@ func _cable(a: Vector3,b: Vector3,radius := 0.045,pin_end := false) -> void:
 
 func _fitting(kind: String,at: Vector3,size: Vector3,color: Color,basis := Basis.IDENTITY) -> void:
 	if server_only: return
-	_part.get_or_add("fittings",[]).append({kind=kind,frame=Transform3D(basis.scaled_local(size),at),color=_patina(color)})
+	_part.get_or_add("fittings",[]).append({kind=kind,frame=Transform3D(basis.scaled_local(Coplanar.grow(size)),at),color=_patina(color)})
 
 func _inlay(at: Vector3,size: Vector2,mode: int,color: Color,seed: float,basis := Basis.IDENTITY,fault := false) -> void:
 	if server_only: return
@@ -828,6 +829,7 @@ func _ducts() -> void:
 	signs.append({at=Vector3(-17,1.3,-613),text="IT FOLLOWED THE SIGNAL",color=Color("a13240")})
 
 func _ribbon(layout: TheoryLayout,index: int) -> void:
+	_impact_enabled = false
 	var frames: Array = layout.paths[index].frames
 	for i in frames.size()-1:
 		var a: Transform3D = frames[i]
@@ -918,6 +920,8 @@ func _ribbon(layout: TheoryLayout,index: int) -> void:
 				_part.unstable = true
 				for k in 7:
 					_box(Vector3(_rng.randf_range(-19,19),_rng.randf_range(4,13),_rng.randf_range(-5,5)),Vector3.ONE*_rng.randf_range(0.35,1.7),tint,0.4)
+
+	_impact_enabled = true
 
 static func _ribbon_width(z: float) -> float:
 	if z>=-125.0: return 1.0+clampf((-122.0-z)/3.0,0.0,1.0)*2.0/3.0
@@ -1045,3 +1049,86 @@ func _transform_decoration(first: int,frame: Transform3D) -> void:
 		var transformed: Transform3D = frame*_part.points[index]
 		_part.points[index] = transformed
 		_part.bounds = (_part.bounds as AABB).merge(transformed*AABB(Vector3.ONE*-0.5,Vector3.ONE))
+
+## Two compact four-bay hostile hulls, joined only by the maintenance maze.
+func _hostile_ships(layout: TheoryLayout) -> void:
+	_ship_mode = true
+	_wreck_mode = true
+	_impact_enabled = false
+	for hull in 2:
+		var start := TheoryLayout.SHIP_B_START if hull==0 else -620.0
+		for row in 4:
+			var z := start-5.5-row*11.0
+			_begin("wreck_compact_%d_%d" % [hull,row],Transform3D(Basis.IDENTITY,Vector3(0,0,z)),550)
+			_panel(Vector3(0,-0.3,0),Vector3(28,0.6,11),STEEL.darkened(0.35))
+			_panel(Vector3(0,6.2,0),Vector3(28.6,0.4,11),DARK)
+			for side: float in [-1.0,1.0]:
+				_panel(Vector3(side*14,3,0),Vector3(0.4,6,11),STEEL.darkened(0.3))
+				# A room on each side, with a four-metre doorway off the spine.
+				for end: float in [-1.0,1.0]:
+					_panel(Vector3(side*3.1,2.9,end*3.9),Vector3(0.3,5.8,3.2),STEEL)
+				_panel(Vector3(side*3.1,5.5,0),Vector3(0.3,1,4.6),STEEL)
+				_panel(Vector3(side*8.5,3,-5.35),Vector3(10.6,6,0.3),STEEL.darkened(0.2))
+				# Service benches and storage stay away from the room cabinets.
+				_box(Vector3(side*8,0.7,2.0),Vector3(3,1.4,1.2),TRIM,0,true)
+				_box(Vector3(side*8,1.45,2.0),Vector3(3.1,0.1,1.3),STEEL)
+				_pipe(Vector3(side*2.4,5.6,-5.5),Vector3(side*2.4,5.6,5.5),TRIM,0.12)
+				_box(Vector3(side*12.8,0.04,3.5),Vector3(1.5,0.06,1.8),BLOOD)
+			lights.append({at=Vector3(0,5.7,z),color=Color("b99a72"),energy=1.5,range=16.0,fault=true,seed=layout.seed_value+row+hull*11})
+			for side: float in [-1.0,1.0]:
+				lights.append({at=Vector3(side*9,5.5,z),color=Color("af9577"),energy=1.2,range=10.0,fault=true,seed=row*7+hull*43+side})
+			if row==0:
+				var gap := 7.0 if hull==0 else 1.5
+				for side: float in [-1.0,1.0]:
+					_panel(Vector3(side*(14.0+gap)*0.5,3,5.5),Vector3(14.0-gap,6,0.4),STEEL)
+			if row==3:
+				var gap := 1.5 if hull==0 else 7.0
+				for side: float in [-1.0,1.0]:
+					_panel(Vector3(side*(14.0+gap)*0.5,3,-5.5),Vector3(14.0-gap,6,0.4),STEEL)
+		# Room names guide searches without revealing the generated maze route.
+		for row in 4:
+			signs.append({at=Vector3(-3.0,3.5,start-5.5-row*11.0),text=["LIFE SUPPORT","COOLANT SERVICE","PRESSURE CONTROL","AUXILIARY POWER"][row],color=Color("d5b07e")})
+	# Flat collars share the exact bridge/ship floor height; the overlap is
+	# below the walking plane and leaves no daylight at the sill.
+	_begin("wreck_bridge_entry",Transform3D(Basis.IDENTITY,Vector3(0,0,TheoryLayout.SHIP_B_START)),260)
+	_panel(Vector3(0,-0.31,0),Vector3(14,0.6,1.0),STEEL)
+	for side: float in [-1.0,1.0]: _panel(Vector3(side*6.6,3,0),Vector3(0.7,6,1.0),STEEL)
+	_begin("wreck_escape_collar",Transform3D(Basis.IDENTITY,Vector3(0,0,-667)),260)
+	_panel(Vector3(0,-0.3,0),Vector3(14,0.6,6.0),STEEL)
+	for side: float in [-1.0,1.0]: _panel(Vector3(side*6.8,3,0),Vector3(0.4,6,6),STEEL)
+	_panel(Vector3(0,6.2,0),Vector3(14,0.4,6),DARK)
+	_wreck_mode = false
+	_ship_mode = false
+	_impact_enabled = true
+
+## A sealed ventilation hull. Closed raster tiles are solid wall, so players
+## must follow the randomized passages and cannot bypass them over the roof.
+func _vent_maze(layout: TheoryLayout) -> void:
+	_ship_mode = true
+	_wreck_mode = true
+	_impact_enabled = false
+	for row in TheoryLayout.VENT_ROWS*2+1:
+		_begin("wreck_vent_row_%d" % row,Transform3D.IDENTITY,260)
+		for col in TheoryLayout.VENT_COLS*2+1:
+			var cell := Vector2i(col,row)
+			var at := TheoryLayout.vent_point(cell)
+			if not layout.vent_cells.has(cell):
+				_panel(at+Vector3.UP*1.5,Vector3(3,3,3),STEEL.darkened(0.4))
+				continue
+			_panel(at+Vector3.DOWN*0.2,Vector3(3,0.4,3),TRIM)
+			_panel(at+Vector3.UP*3.1,Vector3(3,0.2,3),DARK)
+			for side: float in [-1.0,1.0]:
+				_box(at+Vector3(side*1.2,0.025,0),Vector3(0.08,0.04,2.7),STEEL)
+			if row % 4==1 and col % 2==1:
+				_box(at+Vector3(0,2.95,0),Vector3(0.9,0.08,0.35),Color("a9a87b"),0.45)
+				lights.append({at=at+Vector3.UP*2.7,color=Color("b4b28b"),energy=0.7,range=7.0,fault=true,seed=row*31+col})
+	# Short, enclosed connectors meet the two ship bulkheads exactly.
+	for span: Vector2 in [Vector2(-524.0,TheoryLayout.VENT_TOP),Vector2(TheoryLayout.VENT_BOTTOM,-620.0)]:
+		var length := absf(span.y-span.x)
+		_begin("wreck_vent_connector_%d" % int(-span.x),Transform3D(Basis.IDENTITY,Vector3(0,0,(span.x+span.y)*0.5)),260)
+		_panel(Vector3(0,-0.2,0),Vector3(3,0.4,length),TRIM)
+		_panel(Vector3(0,3.1,0),Vector3(3.4,0.2,length+0.1),DARK)
+		for side: float in [-1.0,1.0]: _panel(Vector3(side*1.65,1.5,0),Vector3(0.3,3,length+0.1),STEEL)
+	_wreck_mode = false
+	_ship_mode = false
+	_impact_enabled = true

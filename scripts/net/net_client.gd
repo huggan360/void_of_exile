@@ -605,6 +605,9 @@ func send_position(pos: Vector3) -> void:
 		return
 	_send_timer = 1.0 / SEND_RATE
 	var flags := (1 if player.shield.active else 0) | (2 if player.frozen else 0)
+	if player.get_meta("jetpack_attached",false): flags |= 4
+	if player.get_meta("jetpack_flying",false): flags |= 8
+	if player.get_meta("jet_on",false): flags |= 16
 	var speed := (player.velocity.slide(player.up_direction).length() if world is SpatialWorld else Vector2(player.velocity.x,player.velocity.z).length()) / maxf(0.1, Player.BASE_SPEED * stats.move_speed_multiplier())
 	Net.s_move.rpc_id(1, pos, player.facing, speed, flags)
 

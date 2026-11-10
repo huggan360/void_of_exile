@@ -9,14 +9,13 @@ class_name CityArt
 ##
 ## Parts are placed in a block's frame (the cell's tangent frame, metres);
 ## `solids` collects collision as [planet-space transform, size, "box"/"cyl"].
-const PLASTER := ["b8a888", "a88a80", "8a7a98", "7a8aa0", "8aa090", "a890a8", "c0a080", "6a6a8a", "9a8070", "5a5a7a",
-	"c8a0a8", "a0b8b0", "b8b090", "9a90b8", "c09080", "8a9a7a"]
-const ROOF := ["7a3a44", "3a4a6a", "5a3a6a", "8a5a2a", "2f5a5a", "6a2a3a", "4a3a5a", "3a5a3a"]
+const PLASTER := ["b8ac94", "c5bba6", "a69b8c", "8d9694", "c4b49b", "8c8175"]
+const ROOF := ["414b50", "4c5653", "665447", "55504a"]
 const BARK := ["5a3a2a", "6b4630", "4a3024", "704a34", "5e4232"]
-const LEAVES := ["3e6a46", "2f5a52", "6a4a7a", "7a3a5a", "4a7a3a", "3a5a6a", "8a6a3a"]
-const CAP := ["9a3a44", "6a3a7a", "3a6a7a", "a8603a", "7a2a5a"]
-const STONE := ["6a6070", "7a6a5a", "5a5a6a", "6a5a5a"]
-const NEON := ["ff6eb4", "6af0e0", "ffb86a", "9a8aff", "8dff9a", "ff8a5a"]
+const LEAVES := ["3e6a46", "2f5a52", "54734b", "697456"]
+const CAP := ["9a5f4e", "a07859", "79644d"]
+const STONE := ["79756e", "8b8173", "626b6c", "756b60"]
+const NEON := ["e0c491", "cfb47e", "d8cbb2"]
 const M_PLASTER := 0.0
 const M_BARK := 0.1
 const M_SHINGLE := 0.2
@@ -49,7 +48,62 @@ func pick(list: Array) -> Color:
 ## One part: `kind` mesh, local centre, rotation, size (m), colour, material,
 ## windows (0..1), round mapping, fine detail (only seen up close).
 func part(kind: String, at: Vector3, basis: Basis, size: Vector3, color: Color, mat := M_PLASTER, windows := 0.0, round := true, detail := false) -> void:
-	batch.add(kind, frame*Transform3D(basis*Basis.from_scale(size), at), color, Color(seed, windows, mat, 2.0 if round else 0.0), detail)
+	# Windows have their own geometry. Never paint a second window pattern on the wall.
+	batch.add(kind, frame*Transform3D(basis*Basis.from_scale(Coplanar.grow(size)), at), color, Color(seed, 0.0, mat, 2.0 if round else 0.0), detail)
+	if windows<=0.01 or size.y<2.5: return
+	if kind=="box": _windows(at, basis, size, windows, detail)
+	elif kind in ["cyl", "trunk", "sphere"]: _round_windows(kind, at, basis, size, windows, detail)
+
+## Frames are four separate rails; panes and mullions have disjoint faces.
+## Nothing depends on growing overlapping boxes by fractions of a centimetre.
+func _window(at: Vector3, rotation: Basis, width: float, height: float, lit: bool, detail: bool) -> void:
+	var trim := Color("504b42")
+	var rail := 0.14
+	for side: float in [-1.0, 1.0]:
+		_window_piece("box", at+rotation*Vector3(side*(width+rail)*0.5, 0, 0.28), rotation, Vector3(rail, height+rail*2.0, 0.24), trim, M_PLASTER, 0.0, false, detail)
+		_window_piece("box", at+rotation*Vector3(0, side*(height+rail)*0.5, 0.28), rotation, Vector3(width, rail, 0.24), trim, M_PLASTER, 0.0, false, detail)
+	# Split panes around the centre mullion, with an actual gap at each rail.
+	for side: float in [-1.0, 1.0]:
+		_window_piece("box", at+rotation*Vector3(side*(width+0.10)*0.25, 0, 0.22), rotation, Vector3((width-0.10)*0.5, height, 0.08), Color("c3aa7f") if lit else Color("354345"), M_GLOW if lit else M_PLASTER, 0.0, false, detail)
+	_window_piece("box", at+rotation*Vector3(0, 0, 0.28), rotation, Vector3(0.10, height, 0.24), trim, M_PLASTER, 0.0, false, detail)
+	_window_piece("box", at+rotation*Vector3(0, -height*0.5-rail-0.10, 0.25), rotation, Vector3(width+rail*3.0, 0.18, 0.65), Color("b6aa92"), M_STONE, 0.0, false, detail)
+
+func _window_piece(kind: String, at: Vector3, basis: Basis, size: Vector3, color: Color, mat: float, _windows: float, _round: bool, detail: bool) -> void:
+	batch.add(kind, frame*Transform3D(basis*Basis.from_scale(size), at), color, Color(seed, 0.0, mat, 0.0), detail)
+
+func _windows(at: Vector3, basis: Basis, size: Vector3, density: float, detail: bool) -> void:
+	var style := int(CityLayout.rnd(seed, 801)*3.0)
+	var floor_height: float = [4.4, 5.2, 6.0][style]
+	var rows := clampi(int(size.y/floor_height), 1, 20)
+	var wh := minf(2.5, size.y/rows*0.52)
+	for side in 4:
+		var turn := Basis(Vector3.UP, side*PI*0.5)
+		var width := size.x if side % 2==0 else size.z
+		var depth := size.z if side % 2==0 else size.x
+		if width<2.0: continue
+		var cols := clampi(int(width/(3.6 if style!=2 else 5.2)), 1, 10)
+		var ww := minf(width/cols*0.50, 2.4 if style!=1 else 1.4)
+		for row in rows:
+			for col in cols:
+				var center := Vector3((col+0.5)*width/cols-width*0.5, (row+0.5)*size.y/rows-size.y*0.5, depth*0.5)
+				_window(at+basis*turn*center, basis*turn, ww, wh, CityLayout.rnd(seed, 900+side*1000+row*cols+col)<density, detail)
+
+## On curved walls, each frame follows the local outward normal. Sphere windows
+## stay around the equator; cylinder frames sit outside their faceted wall.
+func _round_windows(kind: String, at: Vector3, basis: Basis, size: Vector3, density: float, detail: bool) -> void:
+	if minf(size.x, size.z)<2.0: return
+	var rows := 1 if kind=="sphere" else clampi(int(size.y/5.0), 1, 16)
+	var sides := 7
+	for row in rows:
+		var y := 0.0 if kind=="sphere" else (row+0.5)*size.y/rows-size.y*0.5
+		var taper := lerpf(1.0, 0.64, (y/size.y+0.5)) if kind=="trunk" else 1.0
+		for side in sides:
+			var angle := TAU*(side*2+0.5)/14.0
+			var point := Vector3(sin(angle)*size.x*0.5*taper, y, cos(angle)*size.z*0.5*taper)
+			var normal := Vector3(sin(angle)/size.x, 0, cos(angle)/size.z).normalized()
+			var turn := Basis(Vector3.UP, atan2(normal.x, normal.z))
+			var width := minf(1.4, minf(size.x, size.z)*taper*0.23)
+			_window(at+basis*point, basis*turn, width, minf(2.0, size.y/rows*0.5), CityLayout.rnd(seed, 1900+row*sides+side)<density, detail)
 
 ## One of the realm's voxel obstacles (obstacles/*.vox: trees, bushes, flowers,
 ## grass tufts...) standing on its base at `at`, turned by `yaw`.
@@ -393,7 +447,7 @@ func gardens(block: Dictionary, offset: float, p_seed: float, taken: Array) -> v
 				obstacle("bush", Vector3(at.x, y+0.15, at.y), r()*TAU, 0.8)
 				for b in 7:
 					var p := at+Vector2.from_angle(TAU*b/7.0+r())*rr*lerpf(0.45, 0.8, r())
-					obstacle("decor_flowers" if b % 3!=2 else "decor_tuft", Vector3(p.x, ground(p)+0.15, p.y), r()*TAU, 1.0, true)
+					obstacle("decor_flowers" if b % 3!=2 else "decor_tuft", Vector3(p.x, ground(p)+0.35, p.y), r()*TAU, 1.0, true)
 			3:
 				# A ring of hedge bushes.
 				for b in 6:
@@ -433,7 +487,7 @@ func park(block: Dictionary, lot: float, p_seed: float, pond: bool) -> Array:
 	var lawns := pack(block, lot, p_seed, 4, 5.0, 40.0)
 	for c: Array in lawns:
 		var at: Vector2 = c[0]
-		var rr := float(c[1])+1.0
+		var rr := float(c[1])*0.96
 		part("cyl", Vector3(at.x, ground(at)+0.06, at.y), Basis.IDENTITY, Vector3(rr*2.0, 0.3, rr*2.0), Color("3a6a42"), M_GRASS)
 	var spots: Array = []
 	if pond and not lawns.is_empty():

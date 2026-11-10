@@ -37,6 +37,8 @@ func _ready() -> void:
 		mesh.scale = Vector3.ONE * voxel_size
 		mesh.material_override = VoxModel.material() if i == 0 else VoxModel.glow_material()
 		add_child(mesh)
+	if folder.ends_with("/bench"):
+		LeisureFurniture.bench_targets(self, "bench:town:"+str(spec.pos), Transform3D.IDENTITY, 0.8, 2.7)
 	var body := StaticBody3D.new()
 	body.collision_layer = Player.OBSTACLE_LAYER
 	body.collision_mask = 0

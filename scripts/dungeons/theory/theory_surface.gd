@@ -111,13 +111,13 @@ func _glass(panes: Array) -> void:
 		add_child(node)
 
 func take_hit(at: Vector3,_direction: Vector3,_damage: int) -> void:
-	if broken: return
+	if broken or key.begins_with("ribbon_") or key=="transit_platform": return
 	flash(at)
 	if Net.is_client(): Net.client.send_action("theory",["impact",key,at])
 	else: world.impact(key,at)
 
 func flash(at: Vector3) -> void:
-	if material==null: return
+	if material==null or key.begins_with("ribbon_") or key=="transit_platform": return
 	_age = 0.0
 	material.set_shader_parameter("impact",Vector4(at.x,at.y,at.z,0.0))
 	material.set_shader_parameter("impact_age",0.0)

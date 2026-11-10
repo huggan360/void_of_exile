@@ -107,7 +107,7 @@ func refresh(_actor: Node3D) -> void:
 	if is_instance_valid(_quest_badge):
 		_quest_badge.visible = not done and ((repair and world.electrical_quest in ["", "repairs"]) or (not repair and not world.ship_airlock_open and world.electrical_quest in ["", "relays"]))
 	title = TheoryLayout.ELECTRICAL_NAMES[index]
-	action_text = "Read status" if done else "Repair and engage" if repair else "Inspect and switch on"
+	action_text = "Inspact" if done else "Repair" if repair else "Switch on"
 	confirm_text = ""
 	cancel_text = "Leave"
 	if done:
@@ -116,7 +116,7 @@ func refresh(_actor: Node3D) -> void:
 			description = "Circuit restored - lever engaged."
 			response = REPAIR_RESULTS[index-5]+(" All five circuits are restored. Escape airlock unlocked." if world.repaired_boxes.size()==5 else " %d/5 circuits restored." % world.repaired_boxes.size())
 		else:
-			description = "Airlock relay found - door unlocked." if found else "Checked - not the airlock relay."
+			description = "Door is unlocked" if found else "Checked - not the airlock relay."
 			response = "This is the airlock relay. The forward airlock is now open." if found else WRONG_RESULTS[index]
 	elif Time.get_ticks_msec()<_pending_until:
 		description = "Working on the circuit..."

@@ -39,10 +39,11 @@ static func _freedom(face: int, i: int, j: int) -> int:
 			"venues": out = mini(out, 1)
 	return out
 
-## Cells whose street between them is dropped (a district's lake or park spans both).
+## Cells whose street between them is dropped (a district's lake or park
+## spans both, or its spaceport building stands over them).
 static func merged(face: int, a: Vector2i, b: Vector2i) -> bool:
 	var ra := CityLayout.role(face, a.x, a.y)
-	if not ra in ["lake", "park"] or ra!=CityLayout.role(face, b.x, b.y): return false
+	if not ra in ["lake", "park", "port"] or ra!=CityLayout.role(face, b.x, b.y): return false
 	var da := CityLayout.district_of(face, a.x, a.y)
 	var db := CityLayout.district_of(face, b.x, b.y)
 	return not da.is_empty() and not db.is_empty() and da.district.id==db.district.id
@@ -186,8 +187,8 @@ static func texture() -> ImageTexture:
 ## What stands between the streets of a cell, in the cell's own frame (metres,
 ## x/z of CityLayout.cell's frame): [{key, seed, segs: [[a, b, t0, t1]], rounds:
 ## [[centre, radius]], role, face, i, j, sub}]. A diagonal cuts a cell into two
-## blocks. A district's lake or park over two cells is one block (in the
-## lower cell; the other has none).
+## blocks. A district's lake or park over two cells, or its port over four,
+## is one block (in the lowest cell; the others have none).
 static func blocks(face: int, i: int, j: int) -> Array:
 	var key := Vector3i(face, i, j)
 	if _blocks.has(key): return _blocks[key]
@@ -199,6 +200,8 @@ static func blocks(face: int, i: int, j: int) -> Array:
 			return out
 	for other: Vector2i in [Vector2i(i+1, j), Vector2i(i, j+1)]:
 		if other.x<_n() and other.y<_n() and merged(face, Vector2i(i, j), other): cells.append(other)
+	# The port's 2 x 2: the far cell too.
+	if cells.size()==3 and merged(face, Vector2i(i+1, j), Vector2i(i+1, j+1)): cells.append(Vector2i(i+1, j+1))
 	var frame: Transform3D = CityLayout.cell(face, i, j).frame
 	var inv := frame.affine_inverse()
 	var r := CityLayout.radius()

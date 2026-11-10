@@ -15,7 +15,7 @@ static var _tank: StandardMaterial3D
 static var _bulb: StandardMaterial3D
 static var _fire: ShaderMaterial
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	var actors: Array = []
 	var local: Node3D = world.get("local_player") if is_instance_valid(world) else null
 	if is_instance_valid(local): actors.append(local)
@@ -23,15 +23,11 @@ func _process(delta: float) -> void:
 	for actor: Node3D in actors:
 		var model: Node3D = actor.get("model")
 		if not is_instance_valid(model): continue
-		# The jetpack shows out in open space; the nozzles burn while thrusting.
-		var out := world is SpaceWorld and (world as SpaceWorld).zone_at(actor.global_position)=="void"
+		# Equipment stays visible while walking on a planet, with flames only during thrust.
+		var out := world is SpaceWorld and bool(actor.get_meta("jetpack_attached",false)) and (world as SpaceWorld).zone_at(actor.global_position)!="ship"
 		var pack := _jetpack(model, out)
 		if pack:
-			var thrust: bool = bool(actor.get_meta("jet_on", false)) if actor==local else actor.get_meta("jet_speed", 0.0)>0.5
-			if actor!=local:
-				var last: Vector3 = actor.get_meta("jet_last", actor.global_position)
-				actor.set_meta("jet_speed", last.distance_to(actor.global_position)/maxf(delta, 0.001))
-				actor.set_meta("jet_last", actor.global_position)
+			var thrust := bool(actor.get_meta("jet_on",false))
 			for flame: Node3D in pack.get_meta("flames"):
 				flame.visible = thrust
 				flame.scale = Vector3(1, 1, 1)*(0.85+0.3*sin(Time.get_ticks_msec()/40.0+flame.position.x*9.0))

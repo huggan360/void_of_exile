@@ -164,15 +164,33 @@ const MASK_REACH := 0.62  # the face coordinate (over the radius) at its texture
 static func curves() -> Array:
 	if not _curves.is_empty(): return _curves
 	var r := CityLayout.radius()
-	for road: Array in ROADS:
+	# Connect the relocated towns to the existing rural network.
+	var roads: Array = ROADS.duplicate(true)
+	for d: Dictionary in CityLayout.DISTRICTS:
+		var center := CityLayout.district_frame(d).origin.normalized()
+		var nearest := Vector3.UP
+		var distance := INF
+		for road: Array in ROADS:
+			for point: Vector3 in road:
+				var angle := center.angle_to(point)
+				if angle<distance:
+					distance = angle
+					nearest = point
+		var edge_angle := float(d.extent)*PI/(2.0*CityLayout.N)
+		if distance>edge_angle:
+			var edge := center.slerp(nearest, edge_angle/distance)
+			roads.append([edge, edge.slerp(nearest, 0.5), nearest])
+	for road: Array in roads:
 		var pts: Array[Vector3] = []
 		for p: Vector3 in road: pts.append(p)
 		for end in [0, pts.size()-1]:
 			for d: Dictionary in CityLayout.DISTRICTS:
 				var c := CityLayout.district_frame(d).origin.normalized()
 				var at: Vector3 = pts[end]
-				if at.angle_to(c)<0.21:
-					var edge := c.slerp(at, CITY_EDGE/at.angle_to(c))
+				var angle := at.angle_to(c)
+				var edge_angle := float(d.extent)*PI/(2.0*CityLayout.N)
+				if angle>0.001 and angle<0.21:
+					var edge := c.slerp(at, edge_angle/angle)
 					if end==0: pts.insert(0, edge)
 					else: pts.append(edge)
 		var out: Array[Vector3] = []

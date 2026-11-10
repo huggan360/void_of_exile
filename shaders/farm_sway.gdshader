@@ -4,6 +4,10 @@ shader_type spatial;
 // the wind and lean away from whoever walks through them (pushers).
 
 uniform vec3 planet_center;
+instance uniform float tile_visibility = 1.0;
+instance uniform float detail_near = 0.0;
+instance uniform float detail_far_start = 48.0;
+instance uniform float detail_far_end = 72.0;
 uniform float height = 1.0;  // the plant's top in mesh units
 uniform float sway = 0.0;  // how far a top leans (m)
 uniform vec4 pushers[8];  // xyz world position, w reach (m)
@@ -23,6 +27,11 @@ vec3 srgb_to_linear(vec3 c) {
 void vertex() {
 	local_pos = VERTEX;
 	local_normal = NORMAL;
+	vec3 plant_base = MODEL_MATRIX[3].xyz;
+	float distance_to_eye = length(plant_base - CAMERA_POSITION_WORLD);
+	float coverage = 1.0 - smoothstep(detail_far_start, detail_far_end, distance_to_eye);
+	if (detail_near > 0.0) coverage *= smoothstep(detail_near, detail_near + 20.0, distance_to_eye);
+	VERTEX.y *= coverage * tile_visibility;
 	if (sway > 0.0) {
 		vec3 base = MODEL_MATRIX[3].xyz;
 		vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;

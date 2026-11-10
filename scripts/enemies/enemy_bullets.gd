@@ -67,6 +67,10 @@ var _fire_looks := {}  # "color/size" -> {core, trail, burst: ParticleProcessMat
 func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node = null, shot_y := NAN, skip: Array = [],
 		owner := 0, boss_id := "") -> void:
 	attack = Burning.projectile(attack,(source as Enemy).def.id if source is Enemy else boss_id)
+	if source is Enemy and (source as Enemy).director.world is TheoryWorld and (source as Enemy).director.world.zone_at(origin) in ["space","fracture"]:
+		attack = attack.duplicate()
+		attack.free_3d = true
+		attack.flight_up = (source as Enemy).up_direction
 	if source is Enemy and not attack.has("bowl") and (source as Enemy).director.world.has_method("shot_bowl"):
 		var bowl: Array = (source as Enemy).director.world.shot_bowl(origin)
 		if not bowl.is_empty():
@@ -327,14 +331,14 @@ func _physics_process(delta: float) -> void:
 		var from: Vector3 = s.pos
 		s.hit_object = false
 		if s.turn != 0.0:
-			s.dir = s.dir.rotated(Vector3.UP, s.turn * delta)
+			s.dir = s.dir.rotated(s.attack.get("flight_up",Vector3.UP), s.turn * delta)
 		var step: float = s.speed * delta
 		s.travelled += step
 		var to: Vector3 = from + s.dir * step
 		var drop := maxf(0.0, 1.0 - s.travelled / SETTLE_DISTANCE)
 		var riding := not is_nan(float(s.slope))
 		var hill := false
-		if not s.attack.get("falling", false):
+		if not s.attack.get("falling", false) and not s.attack.get("free_3d",false):
 			var level: float = s.shot_y
 			if riding:
 				# A straight line up or down the slope; a hill rising into it stops it.
@@ -515,6 +519,7 @@ func _scatter_projectile(s: Dictionary, at: Vector3, floor_y: float) -> void:
 ## the shot height here to shot height over the ground as far out as the nearest
 ## player, like the players' arrows aim; NAN elsewhere (shots fly level).
 func _slope(origin: Vector3, direction: Vector3, attack: Dictionary, shot_y: float) -> float:
+	if attack.get("free_3d",false): return NAN
 	if not ground_follow.is_valid() or attack.get("falling", false): return NAN
 	var start := origin.y if is_nan(shot_y) else shot_y
 	if is_nan(float(ground_follow.call(origin.x, origin.z))): return NAN
@@ -550,6 +555,13 @@ func _child_shot(parent: Dictionary, dir: Vector3, attack: Dictionary) -> Dictio
 
 ## Does the segment from..to pass through the player's body (an upright capsule)?
 func _hits_player(p: Player, from: Vector3, to: Vector3, radius: float) -> bool:
+	if p.up_direction.dot(Vector3.UP)<0.999:
+		var inverse := p.global_transform.affine_inverse()
+		var local_from := inverse*from
+		var local_to := inverse*to
+		var center := Vector3(0,clampf(local_from.y,0.0,PLAYER_HEIGHT),0)
+		var closest_local := Geometry3D.get_closest_point_to_segment(center,local_from,local_to)
+		return Vector2(closest_local.x,closest_local.z).length()<PLAYER_RADIUS+radius and closest_local.y>-0.2 and closest_local.y<PLAYER_HEIGHT
 	var base := p.global_position
 	var closest := Geometry3D.get_closest_point_to_segment(Vector3(base.x, clampf(from.y, base.y, base.y + PLAYER_HEIGHT), base.z), from, to)
 	var flat := Vector2(closest.x - base.x, closest.z - base.z).length()

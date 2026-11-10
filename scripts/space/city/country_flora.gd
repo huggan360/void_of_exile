@@ -10,16 +10,31 @@ extends Node3D
 ## leaves; crops and grass sway and lean away from the player and the cows.
 var city: CityPlanet
 ## Three rings: [name, tile size (m), reach (m), slot step (m)].
-const LEVELS := [["crops", 12.0, 30.0, 1.0], ["hedges", 32.0, 110.0, 1.6], ["trees", 64.0, 300.0, 8.0]]
+# Build beyond the visible rings, so plants are ready before they are revealed.
+const LEVELS := [["crops", 12.0, 96.0, 1.0], ["hedges", 32.0, 170.0, 1.6], ["trees", 64.0, 400.0, 8.0], ["distant_crops", 24.0, 180.0, 2.0]]
+const FADE_RANGES := [Vector3(0, 48, 72), Vector3(0, 110, 140), Vector3(0, 300, 360), Vector3(40, 110, 150)]
 const TREES := ["tree_round", "tree_small", "tree_tall", "tree_round", "pine"]
 const BUDGET_USEC := 4000
 var _tiles := {}  # Vector4i(level, face, ti, tj) -> Node3D (or null while building)
 var _queue: Array = []  # [distance, key]
 var _scan := 0.0
 var _building := false
+var _fading: Array = []
 static var _kinds := {}  # kind -> {mesh, offset, unit, height, sway, material}
 
 func _process(delta: float) -> void:
+	for entry: Dictionary in _fading.duplicate():
+		# Streaming can free a tile before its fade finishes; check before casting.
+		if not is_instance_valid(entry.node):
+			_fading.erase(entry)
+			continue
+		var node := entry.node as MultiMeshInstance3D
+		if node.is_queued_for_deletion():
+			_fading.erase(entry)
+			continue
+		entry.weight = minf(1.0, float(entry.weight)+delta/0.8)
+		node.set_instance_shader_parameter("tile_visibility", entry.weight)
+		if entry.weight>=1.0: _fading.erase(entry)
 	var camera := get_viewport().get_camera_3d()
 	if camera==null: return
 	var center: Vector3 = CityLayout.planet().center
@@ -29,7 +44,7 @@ func _process(delta: float) -> void:
 	if not shown: return
 	_scan -= delta
 	if _scan<=0.0:
-		_scan = 0.4
+		_scan = 0.2
 		_schedule(eye)
 	if not _building and not _queue.is_empty():
 		var next: Array = _queue.pop_front()
@@ -69,7 +84,7 @@ func _schedule(eye: Vector3) -> void:
 	_queue.clear()
 	for key: Vector4i in want:
 		if not _tiles.has(key): _tiles[key] = null
-		if _tiles[key]==null: _queue.append([float(want[key])*(1.0 if key.x==0 else 1.6), key])
+		if _tiles[key]==null: _queue.append([float(want[key])*(0.7 if key.x==3 else 1.0 if key.x==0 else 1.6), key])
 	_queue.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0])<float(b[0]))
 
 ## A point on the ground of `face` at its ground coordinates `ab` (planet space).
@@ -102,6 +117,7 @@ func _build(key: Vector4i) -> void:
 			var h := CityCountry.hash3i(Vector3i(roundi(ab.x*8.0), roundi(ab.y*8.0), face*3+level), 9)
 			match level:
 				0: _crops(lists, face, ab, h)
+				3: _crops(lists, face, ab, h)
 				1: _hedge(lists, face, ab+(Vector2(h.x, h.y)-Vector2(0.5, 0.5))*0.6, h)
 				_: _trees(lists, face, ab+(Vector2(h.x, h.y)-Vector2(0.5, 0.5))*5.0, h)
 		if Time.get_ticks_usec()-start>BUDGET_USEC:
@@ -125,6 +141,13 @@ func _build(key: Vector4i) -> void:
 		node.multimesh = multi
 		node.material_override = spec.material
 		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if level==2 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Per-plant distance blending avoids showing or hiding an entire tile at once.
+		var fade: Vector3 = FADE_RANGES[level]
+		node.set_instance_shader_parameter("detail_near", fade.x)
+		node.set_instance_shader_parameter("detail_far_start", fade.y)
+		node.set_instance_shader_parameter("detail_far_end", fade.z)
+		node.set_instance_shader_parameter("tile_visibility", 0.0)
+		_fading.append({node = node, weight = 0.0})
 		node.visibility_range_end = float(LEVELS[level][2])+float(LEVELS[level][1])
 		holder.add_child(node)
 	_tiles[key] = holder

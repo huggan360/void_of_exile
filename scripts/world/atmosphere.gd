@@ -48,6 +48,8 @@ func _ready() -> void:
 	sky.sky_material = _sky_mat
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
+	# Keep the biome sky and horizon visible from ground-level camera views.
+	env.fog_sky_affect = 0.25
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_AGX
 	# AgX keeps highlights soft but mutes colors: a gentle grade brings back

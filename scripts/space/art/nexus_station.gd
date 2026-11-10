@@ -89,7 +89,7 @@ class Brush extends RefCounted:
 			body.add_child(collision)
 		if server_only: return
 		if not batches.has(kind): batches[kind] = []
-		batches[kind].append([Transform3D(frame.basis.scaled_local(size), frame.origin), color, glow])
+		batches[kind].append([Transform3D(frame.basis.scaled_local(Coplanar.grow(size)), frame.origin), color, glow])
 
 	func box(at: Vector3, size: Vector3, color: Color, solid := false, glow := 0.0) -> void:
 		part("box", Transform3D(Basis.IDENTITY, at), size, color, solid, glow)
@@ -236,7 +236,7 @@ func build(server: bool) -> void:
 		for i in 6:
 			var angle := TAU*i/6.0
 			var radial := Vector3(sin(angle), 0, cos(angle))
-			var label := SignBoard.make("BERTH %d" % (i+1), "plank", "", Color("ffe0a0"), 0.55)
+			var label := SignBoard.make("PORT %d" % (i+1), "plank", "", Color("ffe0a0"), 0.55)
 			label.transform = Transform3D(Basis(Vector3.UP, angle+PI), radial*49.0+Vector3(cos(angle), 0, -sin(angle))*2.9+Vector3.UP*1.65)
 			add_child(label)
 	var pad: Vector3 = anchors.rocket_pad.origin
@@ -523,6 +523,7 @@ func _plaza(art: Brush, server: bool) -> void:
 		var angle := TAU * (i + 0.5) / 12.0
 		if absf(sin(angle)) < 0.3: continue
 		var frame := Transform3D(Basis(Vector3.UP, angle), HEARTH + Vector3(sin(angle), 0, cos(angle)) * 5.4)
+		LeisureFurniture.bench_targets(self, "nexus:hearth_bench%d" % i, frame, 0.56, 2.7)
 		art.part("box", frame.translated_local(Vector3(0, 0.45, 0)), Vector3(2.7, 0.22, 0.9), WOOD, true)
 		art.part("box", frame.translated_local(Vector3(0, 0.95, 0.45)), Vector3(2.7, 0.8, 0.16), WOOD.darkened(0.15), true)
 		for side in [-1.1, 1.1]:

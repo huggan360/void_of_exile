@@ -8,7 +8,7 @@ extends Node3D
 ## districts built in full when you come near (CityDistrict) and the life in
 ## them (CityLife: townsfolk and traffic).
 const FACADES := ["4a3550", "2c4a52", "6a3a44", "b8a088", "2a2f4a", "7a4058", "3e3a5a", "5a4a3a", "8a6a7a", "34404e"]
-const NEON := ["ff6eb4", "6af0e0", "ffb86a", "9a8aff", "8dff9a", "ff8a5a"]
+const NEON := ["dec69e", "d4bc92", "c1c6b5"]
 const DISTRICT_RANGE := 1300.0
 const COLLIDE_RANGE := 110.0
 const CHUNK := 14  # cells a side per skyline chunk (2 x 2 a face: few draw calls)
@@ -25,6 +25,7 @@ var _building := false
 var _done := {}  # Vector3i(face, chunk i, chunk j) -> true once built
 var _country := false  # the farmland's farmsteads and roads, once the chunks are in
 static var _tower_material: ShaderMaterial
+static var _foliage_material: ShaderMaterial
 static var _meshes := {}
 
 ## Instanced parts: kind -> [transforms, colors, customs]; "d:" kinds are fine
@@ -72,11 +73,19 @@ class Batch extends RefCounted:
 			var node := MultiMeshInstance3D.new()
 			node.name = "%s_%s" % [label, key.replace(":", "_")]
 			node.multimesh = multi
-			node.material_override = VoxModel.material() if key.contains("vox:") else CityPlanet.tower_material()
+			node.material_override = CityPlanet.foliage_material() if key.contains("vox:") else CityPlanet.tower_material()
 			node.visibility_range_end = minf(far, detail_far) if detail else far
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if far<2000.0 and not detail else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			parent.add_child(node)
 		parts.clear()
+
+## Fine flowers and grass already have voxel colours; extra per-pixel noise
+## aliases on their small faces while the camera moves.
+static func foliage_material() -> ShaderMaterial:
+	if _foliage_material==null:
+		_foliage_material = VoxModel.material().duplicate() as ShaderMaterial
+		_foliage_material.set_shader_parameter("jitter", 0.0)
+	return _foliage_material
 
 static func tower_material() -> ShaderMaterial:
 	if _tower_material==null:
@@ -148,6 +157,10 @@ static func mesh(kind: String) -> Mesh:
 	return m
 
 func build() -> void:
+	var flora := CountryFlora.new()
+	flora.name = "Flora"
+	flora.city = self
+	add_child(flora)
 	life = CityLife.new()
 	life.city = self
 	add_child(life)
@@ -242,15 +255,11 @@ func _build_country() -> void:
 	batch.flush(holder, "farm", 3000.0, 400.0)
 	CityCountryArt.road_meshes(holder)
 	for key: Vector3i in _bodies.keys(): _drop_body(key)
-	var flora := CountryFlora.new()
-	flora.name = "Flora"
-	flora.city = self
-	add_child(flora)
 
 # --- The city kept on disk ------------------------------------------------------------------
 
 ## Bump when the city's buildings change in a way the scripts' dates won't show.
-const CACHE_VERSION := 3
+const CACHE_VERSION := 5
 const CACHE_DIR := "user://cache/city/"
 static var _cache_tag := ""
 
@@ -284,7 +293,8 @@ func _block(batch: Batch, face: int, i: int, j: int, role: String) -> void:
 	var key := Vector3i(face, i, j)
 	var solids: Array = []
 	var c := CityLayout.cell(face, i, j)
-	var lot := CityLayout.ROAD+CityLayout.WALK+0.8
+	var lot := CityLayout.ROAD+CityLayout.WALK+1.3
+	var settlement: Dictionary = CityLayout.district_of(face, i, j).get("district", {})
 	for block: Dictionary in CityRoads.blocks(face, i, j):
 		var seed := CityLayout.rnd(float(c.seed), 40+int(block.sub))
 		var art := CityArt.new(batch, block.frame, solids)
@@ -298,7 +308,7 @@ func _block(batch: Batch, face: int, i: int, j: int, role: String) -> void:
 					var foot: Array = feet[k]
 					var s := CityLayout.rnd(seed, 60+k)
 					var tall := lerpf(10.0, 95.0, pow(s, 2.2))*(1.5 if near else 1.0)*(1.0 if k==0 else 0.5)
-					art.building(foot[0], float(foot[1]), maxf(tall, 8.0), CityLayout.rnd(seed, 70+k), "", Color(NEON[int(s*NEON.size()) % NEON.size()]))
+					art.building(foot[0], float(foot[1]), maxf(tall*float(settlement.get("height_scale", 1.0)), 8.0), CityLayout.rnd(seed, 70+k), CityLayout.architecture(settlement, s), Color(str(settlement.get("neon", "d4bc92"))))
 				art.gardens(block, lot, seed, feet)
 	if _solids.has(key): (_solids[key] as Array).append_array(solids)
 	else: _solids[key] = solids
@@ -378,7 +388,7 @@ func _update_collision(at: Vector3) -> void:
 ## the ground shader (slabs on top, kerb stones on the sides), and solid.
 func _sidewalks(holder: Node3D, key: Vector3i) -> void:
 	var role := CityLayout.role(key.x, key.y, key.z)
-	if role in ["port", "farm"]: return
+	if role=="farm": return
 	var r := CityLayout.radius()
 	var h := CityRoads.KERB
 	var verts := PackedVector3Array()

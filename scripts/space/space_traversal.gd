@@ -59,6 +59,8 @@ const THROTTLE_REPEAT := 0.18  # seconds between steps while a key is held
 var _throttle_hold := 0.0
 ## Outside the ship on the jetpack: walking her deck or flying beside her.
 var spacewalk := false
+var jetpack_attached := false
+var _jetpack_block_notice := 0
 ## Open space is only for those who went out on purpose (up the ladder, a
 ## lost ship); anyone else who drops off the deck or a planet is put back.
 var _out_on_purpose := false
@@ -72,8 +74,9 @@ var _jet := Vector3.ZERO
 var outside := {}
 var deck := false
 ## Jetpacking down into a planet's air after unhooking: until you touch the
-## ground, then the jetpack is spent.
+## ground, then walk with the jetpack still equipped.
 var _descent := false
+var _planet_fall := false
 var _deck_arrival := false
 var _rehook_after := 0
 ## Red port badges over the planets' ports (key -> holder node).
@@ -264,7 +267,7 @@ func _update_bars(zone: String) -> void:
 	if aboard:
 		hud.bar_override = {hp = [aboard.hp, SpaceShip.MAX_HP, "", SHIP_HULL, SHIP_HULL_LIGHT, "ship"],
 			mp = [aboard.boost, 100.0, "", SHIP_BOOST, SHIP_BOOST_LIGHT, "flame"], parts = aboard.parts}
-	elif spacewalk:
+	elif jetpack_attached and (_descent or (spacewalk and not deck)):
 		hud.bar_override = {hp = [player.stats.hp, player.stats.max_hp, "", UIStyle.HP, UIStyle.HP_LIGHT, "heart"],
 			mp = [fuel, 100.0, "", JETPACK, JETPACK_LIGHT, "flame"]}
 	else:
@@ -326,15 +329,18 @@ func _update_hint() -> void:
 	if seat!="":
 		rows.append([["@seat_camera"], "Change camera"])
 		rows.append([["@seat_stand"], "Stand up"])
-	elif spacewalk:
-		if deck: rows.append([["Space"], "Fly"])
+	elif spacewalk or _descent:
+		if deck: rows.append([["@jetpack_thrust"], "Fly"])
 		else:
-			rows.append([["Space", "Shift"], "Up / Down"])
+			rows.append([["@jetpack_thrust", "@jetpack_descend"], "Up / Down"])
 			rows.append([["W", "S"], "Forward / Back"])
 			rows.append([["A", "D"], "Turn"])
 			if not outside.is_empty():
 				rows.append([["Ctrl"], "Reel in"])
 				rows.append([["@interact"], "Unhook line"])
+	if seat=="" and city_seat=="" and _lounge_seat=="" and world.zone_at(player.global_position)!="ship" and not world.jetpack_forbidden(player.global_position):
+		rows.append([["@jetpack_toggle"],"Detach jetpack" if jetpack_attached else "Attach jetpack"])
+		if jetpack_attached and not spacewalk and not _descent: rows.append([["@jetpack_thrust"],"Launch jetpack"])
 	if city_seat!="":
 		rows.append([["@interact"], "Sip"])
 		rows.append([["C"], "Order"])
@@ -369,7 +375,9 @@ func on_world_message(event: Array) -> void:
 			_flash_fade()
 			match str(event[1]):
 				"home": notice("Back at the Nexus.")
-				"deck", "adrift": _out_on_purpose = true
+				"deck", "adrift":
+					_out_on_purpose = true
+					_set_jetpack(true)
 			match str(event[1]):
 				"deck":
 					outside = {}
@@ -404,7 +412,11 @@ func toggle_map() -> void:
 
 func active_ship_actions() -> Array[String]:
 	var actions: Array[String] = []
-	if seat=="" and _lounge_seat=="": return actions
+	if seat=="" and _lounge_seat=="":
+		if city_seat=="" and Leisure.seat_spec(player.player_id).is_empty() and _lift<0 and not world is SurfaceShipWorld and world.zone_at(player.global_position)!="ship":
+			if not world.jetpack_forbidden(player.global_position): actions.append("jetpack_toggle")
+			if jetpack_attached: actions.append_array(["jetpack_thrust","jetpack_descend"])
+		return actions
 	actions.assign(["seat_camera", "seat_stand"])
 	if seat=="pilot" and _ship!=null:
 		if _ship.mode in ["berth", "landed"]: actions.append("ship_boost")
@@ -479,6 +491,14 @@ func _input(event: InputEvent) -> void:
 	if _lift>=0 and (event.is_action_pressed("interact") or event.is_action_pressed("shoot")):
 		var button := _lift_button()
 		if button>=0: world.request(["city", "call", _lift, button])
+		get_viewport().set_input_as_handled()
+		return
+	if seat=="" and _lounge_seat=="" and city_seat=="" and _lift<0 and not world is SurfaceShipWorld and world.zone_at(player.global_position)!="ship" and event.is_action_pressed("jetpack_toggle"):
+		if world.jetpack_forbidden(player.global_position):
+			notice("Jetpacks are disabled in strongholds and boss fights.")
+		else:
+			_set_jetpack(not jetpack_attached)
+			notice("Jetpack attached. Space launches; Z detaches." if jetpack_attached else "Jetpack detached.")
 		get_viewport().set_input_as_handled()
 		return
 	if spacewalk and not outside.is_empty() and outside.flying and event.is_action_pressed("interact"):
@@ -682,30 +702,62 @@ func physics_step(delta: float) -> void:
 		player.velocity = Vector3.ZERO
 		return
 	var state := world.sample_gravity(player.global_position)
-	# Off the line on the jetpack into a planet's air: fly down to its ground.
-	if spacewalk and outside.is_empty() and str(state.zone).begins_with("planet:"): _descent = true
-	if _descent:
+	if jetpack_attached and world.jetpack_forbidden(player.global_position):
+		_set_jetpack(false)
+		notice("Jetpack detached: ground combat only in strongholds and boss fights.")
+	# Keep the equipped pack while crossing the atmosphere and on touchdown.
+	if spacewalk and outside.is_empty() and str(state.zone).begins_with("planet:"):
+		_descent = jetpack_attached
+		_planet_fall = not jetpack_attached
+	if _descent or _planet_fall:
 		spacewalk = false
-		_out_on_purpose = false
+		_out_on_purpose = true
 		_last_zone = str(state.zone)
-		if str(state.zone).begins_with("planet:"):
-			_jet_descent(delta, state)
+		if str(state.zone).begins_with("planet:") or state.zone=="station":
+			_jet_descent(delta,state)
 			return
-		_descent = false
+		_descent = false  # Outside the atmosphere, continue in free flight.
+		_planet_fall = false
+	if jetpack_attached and (str(state.zone).begins_with("planet:") or state.zone=="station") and not player.controls_locked() and not player.ui_blocked and not player.interacting() and _lift<0 and Input.is_action_just_pressed("jetpack_thrust") and fuel>5.0:
+		_descent = true
+		_planet_fall = false
+		spacewalk = false
+		_out_on_purpose = true
+		_jet = player.global_basis.y*8.0
+		player.global_position += player.global_basis.y*0.2
+		if player.shield.active: player._set_shield(false)
+		_jet_descent(delta,state)
+		return
 	# From a ship room straight into open space is the ladder or a lost ship.
 	# Up through the hatch: stand on her deck even low in a planet's air.
 	if _deck_arrival and SpaceLayout.pocket_at(player.global_position)<0:
 		_deck_arrival = false
+		_set_jetpack(true)
 		_out_on_purpose = true
 		_find_deck()
 	if state.zone=="ship": outside = {}
-	if state.zone=="void" and _last_zone=="ship": _out_on_purpose = true
+	if state.zone=="void" and _last_zone=="ship":
+		_out_on_purpose = true
+		_set_jetpack(true)
 	if state.zone!="void" and outside.is_empty(): _out_on_purpose = false
 	_last_zone = str(state.zone)
 	spacewalk = _out_on_purpose and (state.zone=="void" or not outside.is_empty())
 	if spacewalk:
+		var before_jet_step := player.global_position
 		_spacewalk(delta)
+		if jetpack_attached and not world.jetpack_forbidden(before_jet_step) and world.jetpack_blocks_segment(before_jet_step,player.global_position):
+			player.global_position = before_jet_step
+			_jet = Vector3.ZERO
+			if not outside.is_empty():
+				outside.at = _hull(int(outside.ship)).affine_inverse()*before_jet_step
+				outside.vel = Vector3.ZERO
+			_jetpack_boundary_notice()
+		player.set_meta("jetpack_flying",not deck and jetpack_attached)
+		if not jetpack_attached: player._update_magic(delta)
+		player._update_combat(delta,Vector3.ZERO,JET_MAX)
 		return
+	player.set_meta("jetpack_flying",false)
+	player.set_meta("jet_on",false)
 	_jet = Vector3.ZERO
 	outside = {}
 	_rope.visible = false
@@ -723,8 +775,9 @@ func physics_step(delta: float) -> void:
 	player.up_direction = player.global_basis.y
 	var up := player.up_direction
 	# No magic or weapons aboard a ship: the crew is safe in the room.
-	var aboard: bool = state.zone=="ship" or state.zone=="planet:"+CityLayout.ID
-	if not aboard: player._update_magic(delta)
+	var aboard: bool = state.zone=="ship"
+	if not aboard and not jetpack_attached: player._update_magic(delta)
+	elif jetpack_attached and player.shield.active: player._set_shield(false)
 	if aboard or player.shield.active or player.stats.buffs.has_effect("quiet") or player.controls_locked() or player.interacting(): player._cancel_weapon_actions()
 	if not player.controls_locked() and not free_look():
 		player.camera_yaw += Input.get_axis("orbit_right", "orbit_left")*Player.ORBIT_SPEED*delta
@@ -775,12 +828,12 @@ func physics_step(delta: float) -> void:
 ## land). Flying, you live in the ship's frame, so she carries you along.
 ## Without a ship (she was lost) you float free in space.
 func _spacewalk(delta: float) -> void:
-	player._cancel_weapon_actions()
+	if jetpack_attached and player.shield.active: player._set_shield(false)
 	player.up_direction = Vector3.UP
 	var locked := player.controls_locked()
 	var input := Vector2.ZERO if locked else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	if player.debug_input!=Vector2.ZERO: input = player.debug_input
-	var rise := 0.0 if locked else float(Input.is_key_pressed(KEY_SPACE))-float(Input.is_key_pressed(KEY_SHIFT))
+	var rise := 0.0 if locked else float(Input.is_action_pressed("jetpack_thrust"))-float(Input.is_action_pressed("jetpack_descend"))
 	if not outside.is_empty() and not world.ship_views.has(int(outside.ship)):
 		outside = {}
 		notice("Your ship is gone! Your jetpack keeps you floating.")
@@ -793,7 +846,7 @@ func _spacewalk(delta: float) -> void:
 	if not outside.flying:
 		deck = true
 		fuel = minf(100.0, fuel+FUEL_REGEN*delta)
-		if rise>0.5 and fuel>5.0:
+		if jetpack_attached and rise>0.5 and fuel>5.0:
 			outside.flying = true
 			outside.vel = Vector3.UP*3.0
 			notice("Your line clips on at the deck hatch. Hold Ctrl to reel in.")
@@ -816,7 +869,7 @@ func _spacewalk(delta: float) -> void:
 	if not locked: player.camera_yaw -= input.x*JET_TURN*delta
 	var facing := Basis(Vector3.UP, player.camera_yaw)
 	var want := facing*Vector3(0, rise, input.y)
-	var burning := want.length()>0.1 and fuel>0.5
+	var burning := jetpack_attached and want.length()>0.1 and fuel>0.5
 	var vel: Vector3 = outside.vel
 	if burning:
 		vel = vel.move_toward(want.limit_length(1.0)*JET_MAX, JET_ACCEL*delta)
@@ -863,7 +916,7 @@ func _drift(delta: float, input: Vector2, rise: float) -> void:
 	player.global_basis = player.global_basis.slerp(Basis.IDENTITY, 1.0-exp(-delta*4.0)).orthonormalized()
 	if not player.controls_locked(): player.camera_yaw -= input.x*JET_TURN*delta
 	var want := player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(0, rise, input.y)
-	var burning := want.length()>0.1 and fuel>0.5
+	var burning := jetpack_attached and want.length()>0.1 and fuel>0.5
 	if burning:
 		_jet = _jet.move_toward(want.limit_length(1.0)*JET_MAX, JET_ACCEL*delta)
 		fuel = maxf(0.0, fuel-FUEL_DRAIN*delta)
@@ -872,47 +925,83 @@ func _drift(delta: float, input: Vector2, rise: float) -> void:
 		_jet = _jet.move_toward(Vector3.ZERO, JET_ACCEL*0.35*delta)
 		_fuel_rest -= delta
 		if _fuel_rest<=0.0: fuel = minf(100.0, fuel+FUEL_REGEN*delta)
-	player.global_position += _jet*delta
+	var destination := player.global_position+_jet*delta
+	if world.jetpack_blocks_segment(player.global_position,destination):
+		_jet = Vector3.ZERO
+		_jetpack_boundary_notice()
+	else: player.global_position = destination
 	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, 0)
 	player.set_meta("jet_on", burning)
 	player.velocity = Vector3.ZERO
 
-## Down through a planet's air on the jetpack (the same keys, the planet's
-## pull adding to Shift): the moment you touch the ground the jetpack is spent.
+## Fly through planet air without losing the pack; touching down returns to
+## ordinary walking, leaving Space available to launch again.
 func _jet_descent(delta: float, state: Dictionary) -> void:
-	player._cancel_weapon_actions()
 	_rope.visible = false
+	if player.shield.active: player._set_shield(false)
 	var frame: Transform3D = state.frame
-	player.global_basis = player.global_basis.slerp(frame.basis, 1.0-exp(-delta*4.0)).orthonormalized()
+	player.global_basis = player.global_basis.slerp(frame.basis,1.0-exp(-delta*8.0)).orthonormalized()
 	player.up_direction = player.global_basis.y
-	var up := player.global_basis.y
-	var locked := player.controls_locked()
-	var input := Vector2.ZERO if locked else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var rise := 0.0 if locked else float(Input.is_key_pressed(KEY_SPACE))-float(Input.is_key_pressed(KEY_SHIFT))
+	var up := player.up_direction
+	var locked := player.controls_locked() or player.ui_blocked or player.interacting()
+	var input := Vector2.ZERO if locked else Input.get_vector("move_left","move_right","move_forward","move_back")
+	var rise := 0.0 if locked else float(Input.is_action_pressed("jetpack_thrust"))-float(Input.is_action_pressed("jetpack_descend"))
 	if not locked: player.camera_yaw -= input.x*JET_TURN*delta
-	var want := player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(0, rise if fuel>0.5 else 0.0, input.y)
-	_jet = _jet.move_toward(want.limit_length(1.0)*JET_MAX*1.4, JET_ACCEL*delta)
-	_jet -= up*6.0*delta  # the planet pulls you down
-	_jet = _jet.limit_length(26.0)
-	if want.length()>0.1: fuel = maxf(0.0, fuel-FUEL_DRAIN*delta)
-	var from := player.global_position
-	var to := from+_jet*delta
-	var query := PhysicsRayQueryParameters3D.create(from+up*1.0, to-up*0.15, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
-	query.exclude = [player.get_rid()]
-	var hit := player.get_world_3d().direct_space_state.intersect_ray(query)
-	if not hit.is_empty() and (hit.normal as Vector3).dot(up)>0.4:
-		player.global_position = hit.position
-		player.velocity = Vector3.ZERO
-		_jet = Vector3.ZERO
+	var want := player.global_basis*Basis(Vector3.UP,player.camera_yaw)*Vector3(0,rise,input.y)
+	var burning := jetpack_attached and fuel>0.5 and want.length()>0.1
+	if burning:
+		_jet = _jet.move_toward(want.limit_length(1.0)*JET_MAX*1.4,JET_ACCEL*delta)
+		fuel = maxf(0.0,fuel-FUEL_DRAIN*delta)
+		_fuel_rest = 0.6
+	else:
+		_jet = _jet.move_toward(Vector3.ZERO,JET_ACCEL*0.2*delta)
+		_fuel_rest -= delta
+		if _fuel_rest<=0.0: fuel = minf(100.0,fuel+FUEL_REGEN*0.25*delta)
+	_jet = (_jet-up*6.0*delta).limit_length(26.0)
+	var previous := player.global_position
+	if not world.jetpack_forbidden(previous) and world.jetpack_blocks_segment(previous,previous+_jet*delta):
+		var along_boundary := _jet.slide(up)
+		_jet = along_boundary if not world.jetpack_blocks_segment(previous,previous+along_boundary*delta) else Vector3.ZERO
+		_jetpack_boundary_notice()
+	player.velocity = _jet
+	player.move_and_slide()
+	_jet = player.velocity
+	var floor_frame := world.surface_frame(player.global_position)
+	var below := (player.global_position-floor_frame.origin).dot(floor_frame.basis.y)<0.06
+	if (rise<=0.0 or not burning) and (player.is_on_floor() or below):
+		if below: player.global_position = floor_frame.origin+floor_frame.basis.y*0.08
 		_descent = false
-		fuel = 0.0
-		player.set_meta("jet_on", false)
-		notice("Touched down. Your jetpack is spent until you are back aboard.")
-		return
-	player.global_position = to
-	player.velocity = Vector3.ZERO
-	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, 0)
-	player.set_meta("jet_on", want.length()>0.1)
+		_planet_fall = false
+		spacewalk = false
+		_out_on_purpose = false
+		_jet = Vector3.ZERO
+		player.velocity = Vector3.ZERO
+		player.model.rotation = Vector3(0,player.facing,0)
+		player.set_meta("jet_on",false)
+		player.set_meta("jetpack_flying",false)
+		_checkpoint = player.global_position
+	else:
+		player.set_meta("jet_on",burning)
+		player.set_meta("jetpack_flying",true)
+		player._update_combat(delta,(player.global_position-previous).slide(up)/maxf(delta,0.001),JET_MAX)
+
+func _set_jetpack(attached: bool) -> void:
+	jetpack_attached = attached
+	player.set_meta("jetpack_attached",attached)
+	player._last_magic_press = -10.0
+	if player.shield.active: player._set_shield(false)
+	if not attached:
+		if _descent:
+			player.velocity = _jet
+			_planet_fall = true
+		_descent = false
+		player.set_meta("jet_on",false)
+		player.set_meta("jetpack_flying",false)
+
+func _jetpack_boundary_notice() -> void:
+	if Time.get_ticks_msec()<_jetpack_block_notice: return
+	_jetpack_block_notice = Time.get_ticks_msec()+2500
+	notice("Land outside the stronghold and enter on foot.")
 
 ## The ports' red ship badges, seen from aboard a ship near a planet (the
 ## planet hides those round its far side). A tale's yellow mark replaces the
@@ -1075,6 +1164,7 @@ func update_camera(delta: float) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if allow_capture else Input.MOUSE_MODE_VISIBLE
 	var sight := _crosshair as SpaceCrosshair
 	sight.mode = ""
+	if seat=="": sight.aim_center = sight.size*Vector2(0.5, 0.42 if shoulder else 0.5)
 	if allow_capture:
 		if seat=="pilot" and _ship!=null and _ship.mode=="flying": sight.mode = "pilot"
 		elif seat.begins_with("turret") and _ship!=null and _ship.mode=="flying": sight.mode = "turret"
@@ -1098,7 +1188,7 @@ func update_camera(delta: float) -> void:
 	if want_fp or shoulder or (spacewalk and mode==CameraMode.ANGLED):
 		var at := head
 		if not want_fp:
-			at += view*Vector3(0.65, 0.25, 3.4 if shoulder else 6.5)
+			at += view*Vector3(0.65, 0.25, 4.8 if shoulder else 6.5)
 			var ray := PhysicsRayQueryParameters3D.create(head, at, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 			ray.exclude = [player.get_rid()]
 			var hit := player.get_world_3d().direct_space_state.intersect_ray(ray)
@@ -1171,7 +1261,7 @@ func _seat_camera(delta: float) -> void:
 # --- Aiming on foot ---------------------------------------------------------------------
 
 func mouse_point() -> Vector3:
-	var mouse := player.get_viewport().get_visible_rect().size*0.5 if free_look() else player.get_viewport().get_mouse_position()
+	var mouse := player.get_viewport().get_visible_rect().size*Vector2(0.5, 0.42 if view_mode()==CameraMode.SHOULDER and not world.first_person_at(player.global_position) else 0.5) if free_look() else player.get_viewport().get_mouse_position()
 	var origin := player.camera.project_ray_origin(mouse)
 	var direction := player.camera.project_ray_normal(mouse)
 	if not free_look():
@@ -1334,6 +1424,9 @@ func _hide_hud(hidden: bool) -> void:
 	_overlay.visible = not hidden
 
 func _exit_tree() -> void:
+	player.set_meta("jetpack_attached",false)
+	player.set_meta("jetpack_flying",false)
+	player.set_meta("jet_on",false)
 	Input.mouse_mode = _old_mouse
 	if _outside_culled and is_instance_valid(world):
 		_outside_culled = false

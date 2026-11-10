@@ -32,7 +32,7 @@ func _process(_delta: float) -> void:
 			break
 
 func _draw() -> void:
-	var c := aim_center if mode=="pilot" and aim_center.is_finite() else size*0.5
+	var c := aim_center if mode in ["pilot", "fp"] and aim_center.is_finite() else size*0.5
 	var ink := Color(1, 0.95, 0.85, 0.9)
 	var shade := Color(0, 0, 0, 0.55)
 	match mode:

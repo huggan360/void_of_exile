@@ -7,11 +7,19 @@ const SHIP_B_START := -480.0
 const SHIP_B_END := -664.0
 const ARENA := Vector3(0,0,-1120)
 const WIDTH := 12.0
-# Wreck cabinets face the central passage from five open service bays.
-const ELECTRICAL_POSITIONS := [Vector3(-6.45,1.45,-1.2),Vector3(6.45,1.45,-23.2),Vector3(-6.45,1.45,-45.2),
-	Vector3(6.45,1.45,-67.2),Vector3(-6.45,1.45,-89.2),
-	Vector3(-6.45,1.45,-485.5),Vector3(6.45,1.45,-518.5),Vector3(-6.45,1.45,-551.5),
-	Vector3(6.45,1.45,-595.5),Vector3(-6.45,1.45,-639.5)]
+# Nine cabinets sit in rooms; one remains beside the observation corridor.
+const ELECTRICAL_POSITIONS := [Vector3(-26.9,1.45,-5.0),Vector3(26.9,1.45,-27.0),Vector3(-26.9,1.45,-49.0),
+	Vector3(26.9,1.45,-71.0),Vector3(-6.45,1.45,-89.2),
+	Vector3(-13.3,1.45,-490),Vector3(13.3,1.45,-512),Vector3(-13.3,1.45,-629),
+	Vector3(13.3,1.45,-650),Vector3(-13.3,1.45,-652)]
+const VENT_COLS := 7
+const VENT_ROWS := 15
+const VENT_TILE := 3.0
+const VENT_TOP := -525.5
+const VENT_BOTTOM := -618.5
+var vent_cells := {}  # raster Vector2i -> open passage
+var vent_route: Array[Vector2i] = []
+
 const ELECTRICAL_NAMES := ["Observation lighting","Coolant pumps","Engine service power","Habitat circuits","Navigation supply",
 	"Life support","Coolant circulation","Airlock hydraulics","Emergency lighting","Auxiliary reactor"]
 const ELECTRICAL_HINTS := ["The lamp ballast hums behind the panel.","Cold coolant pipes run into this cabinet.",
@@ -25,6 +33,7 @@ var seed_value: int
 
 func _init(value: int) -> void:
 	seed_value = value
+	_build_vent_maze()
 	var points := PackedVector3Array()
 	var rolls := PackedFloat32Array()
 	for i in 13:
@@ -41,9 +50,9 @@ func _init(value: int) -> void:
 	rolls = PackedFloat32Array()
 	for i in 193:
 		var t := float(i)/192.0
-		var envelope := sin(PI*t)
+		var envelope := sin(PI*t)*smoothstep(0.025,0.10,t)*(1.0-smoothstep(0.90,0.98,t))
 		points.append(Vector3(sin(TAU*t*1.5)*76.0*envelope,24.0*sin(TAU*t*2.0)*envelope,SHIP_B_END-404.0*t))
-		rolls.append(TAU*1.5*sin(PI*t)*sin(PI*t*1.5))
+		rolls.append(TAU*1.5*envelope*sin(PI*t*1.5))
 	for i in range(1,11):
 		var t := float(i)/10.0
 		var y := (3*t*t-2*t*t*t)*3.456-(t*t*t-t*t)*8.064+0.72*smoothstep(0.55,0.8,t)
@@ -81,11 +90,11 @@ func frame_on_path(index: int,weight: float) -> Transform3D:
 	return (frames[i] as Transform3D).interpolate_with(frames[i+1],at-i)
 
 func sample(position: Vector3) -> Dictionary:
-	# Both ships have conventional gravity, with continuous stairs between decks.
+	# The observation vessel has two decks; hostile ships and vents share a flat floor.
 	if position.z>SHIP_A_END-0.2:
 		return {frame=Transform3D(Basis.IDENTITY,Vector3(position.x,ship_floor(position,false),position.z)),zone="ship",distance=0.0}
 	if position.z<SHIP_B_START+0.2 and position.z>SHIP_B_END-0.2:
-		return {frame=Transform3D(Basis.IDENTITY,Vector3(position.x,ship_floor(position,true),position.z)),zone="wreck",distance=0.0}
+		return {frame=Transform3D(Basis.IDENTITY,Vector3(position.x,0,position.z)),zone="wreck",distance=0.0}
 	if position.z<-1068.0:
 		var local := position-ARENA
 		var radius := Vector2(local.x,local.z).length()
@@ -128,6 +137,61 @@ static func ship_floor(position: Vector3,wreck: bool) -> float:
 func validate_position(position: Vector3) -> bool:
 	if not position.is_finite(): return false
 	var state := sample(position)
-	if state.zone in ["ship","wreck"]: return absf(position.x)<34.0 and position.y>-3.0 and position.y<23.0
+	if state.zone=="ship": return absf(position.x)<34.0 and position.y>-3.0 and position.y<23.0
+	if state.zone=="wreck":
+		if position.z<VENT_TOP and position.z>VENT_BOTTOM:
+			return vent_open(position) and position.y>-1.0 and position.y<3.0
+		return absf(position.x)<14.5 and position.y>-1.0 and position.y<6.1
 	if state.zone=="arena": return position.distance_to(ARENA)<38.0
 	return state.distance<20.0
+
+## Randomized depth-first carving creates a connected labyrinth with dead ends.
+## There is exactly one traversable route between the two ships.
+func _build_vent_maze() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value ^ 0x5A17D
+	var entry := Vector2i(VENT_COLS/2, 0)
+	var visited := {entry: true}
+	var stack: Array[Vector2i] = [entry]
+	var parents := {}
+	vent_cells[entry*2+Vector2i.ONE] = true
+	while not stack.is_empty():
+		var current: Vector2i = stack.back()
+		var choices: Array[Vector2i] = []
+		for direction: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			var next := current+direction
+			if next.x>=0 and next.x<VENT_COLS and next.y>=0 and next.y<VENT_ROWS and not visited.has(next): choices.append(next)
+		if choices.is_empty():
+			stack.pop_back()
+			continue
+		var next: Vector2i = choices[rng.randi_range(0, choices.size()-1)]
+		visited[next] = true
+		parents[next] = current
+		vent_cells[current+next+Vector2i.ONE] = true
+		vent_cells[next*2+Vector2i.ONE] = true
+		stack.append(next)
+	vent_cells[Vector2i(VENT_COLS, 0)] = true
+	vent_cells[Vector2i(VENT_COLS, VENT_ROWS*2)] = true
+	var cursor := Vector2i(VENT_COLS/2, VENT_ROWS-1)
+	while true:
+		vent_route.push_front(cursor*2+Vector2i.ONE)
+		if cursor==entry: break
+		cursor = parents[cursor]
+
+static func vent_point(cell: Vector2i) -> Vector3:
+	return Vector3((cell.x-VENT_COLS)*VENT_TILE, 0, -527.0-cell.y*VENT_TILE)
+
+func vent_open(at: Vector3) -> bool:
+	var cell := Vector2i(roundi(at.x/VENT_TILE)+VENT_COLS, roundi((-527.0-at.z)/VENT_TILE))
+	return vent_cells.has(cell)
+
+func nearest_vent(at: Vector3) -> Vector3:
+	var nearest := Vector3.ZERO
+	var distance := INF
+	for cell: Vector2i in vent_cells:
+		var point := vent_point(cell)
+		var d := point.distance_squared_to(at)
+		if d<distance:
+			distance = d
+			nearest = point
+	return nearest

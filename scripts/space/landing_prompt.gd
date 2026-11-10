@@ -1,7 +1,7 @@
 class_name LandingPrompt
 extends InteractionTarget
 ## The pilot's landing offer in the conversation card (as an NPC's would
-## be): a pad below to land on, the way down to the Surface, or a Nexus berth
+## be): a pad below to land on, the way down to the Surface, or a Nexus port
 ## to dock at. The ship's land key (X) answers it, as in the seat's key help.
 var traversal: SpaceTraversal
 
@@ -25,7 +25,7 @@ func available(player: Node3D) -> bool:
 		action_text = "Descend"
 	elif ship.xform.origin.distance_to(SpaceLayout.NEXUS)<SpaceWorld.DOCK_RANGE:
 		title = "The Nexus"
-		description = "A free berth at the station. Bring her in?"
+		description = "A free port at the station. Bring her in?"
 		action_text = "Dock"
 	else:
 		return false

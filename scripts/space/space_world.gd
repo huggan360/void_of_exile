@@ -188,7 +188,8 @@ func recovery_point(position: Vector3) -> Vector3:
 func extra_speed(from: Vector3, to: Vector3) -> float:
 	if SpaceLayout.pocket_at(to)>=0 or SpaceLayout.pocket_at(from)>=0: return 0.0
 	var extra := 0.0
-	if zone_at(to)=="void" or zone_at(from)=="void": extra += SpaceTraversal.JET_MAX*1.8
+	if zone_at(to)=="void" or zone_at(from)=="void" or str(zone_at(to)).begins_with("planet:") or str(zone_at(from)).begins_with("planet:"):
+		extra += SpaceTraversal.JET_MAX*1.8
 	# Near a ship: she may be carrying them (on deck or on the line), turning included.
 	for ship: SpaceShip in ships.values():
 		if ship.xform.origin.distance_to(to)<90.0 or ship.xform.origin.distance_to(from)<90.0:
@@ -843,7 +844,7 @@ func hatch_position(ship: SpaceShip) -> Vector3:
 	var hatch: Transform3D = hull_anchors.get("hatch", Transform3D(Basis.IDENTITY, Vector3(9, -3, 4)))
 	var at := ship.xform*hatch.origin
 	if ship.planet==CityLayout.ID:
-		# Exit onto the flat port deck, above its surface (not the sphere below).
+		# Exit onto the flat port roof, above its surface (not the sphere below).
 		return ship.xform*Vector3(hatch.origin.x, -SpaceShip.LANDED_HEIGHT+0.15, hatch.origin.z)
 	var gravity := sample_gravity(at)
 	return (gravity.frame as Transform3D).origin+(gravity.frame as Transform3D).basis.y*0.15 if gravity.zone!="void" else at
@@ -979,6 +980,9 @@ func player_left(pid: int) -> void:
 # --- Replication --------------------------------------------------------------------------
 
 ## Whether another ship is on port `key` or setting down on it.
+func _fleet_pad_reserved(key: String) -> bool:
+	return Net.is_server() and Net.server.fleet.pad_reserved(realm_id, key)
+
 func port_taken(key: String, except_id := 0) -> bool:
 	for ship: SpaceShip in ships.values():
 		if ship.id==except_id: continue
@@ -992,7 +996,7 @@ func _ask_port(ship: SpaceShip, target: Dictionary) -> void:
 	for other: String in port_queues.keys():
 		if other!=key: port_queues[other].erase(ship.id)
 	var line: Array = port_queues.get(key, [])
-	if not port_taken(key, ship.id) and (line.is_empty() or int(line[0])==ship.id):
+	if not port_taken(key, ship.id) and not _fleet_pad_reserved(key) and (line.is_empty() or int(line[0])==ship.id):
 		line.erase(ship.id)
 		ship.begin_landing(target.planet, target.port)
 		_broadcast_ship(ship)
@@ -1021,7 +1025,7 @@ func _update_queues() -> void:
 				ship.queue = []
 				_tell_crew(ship, "You flew away from %s and left the landing line." % str(p.get("name", "the planet")))
 				_broadcast_ship(ship)
-		if not line.is_empty() and not port_taken(key):
+		if not line.is_empty() and not port_taken(key) and not _fleet_pad_reserved(key):
 			var first: SpaceShip = ships[int(line.pop_front())]
 			first.begin_landing(found.planet, found.port)
 			_tell_crew(first, "%s is free. Setting down." % found.port.name)
@@ -1344,3 +1348,25 @@ func create_fleet_ship(p: Dictionary, deployment: Dictionary, context: Dictionar
 	ships[ship.id] = ship
 	_ensure_interior(ship.slot)
 	return ship
+
+## Boss arenas and fortress airspace are ground-combat areas. Fortress bounds
+## extend above the roof so a jetpack cannot bypass gates by dropping inside.
+func jetpack_forbidden(at: Vector3) -> bool:
+	if is_instance_valid(gates):
+		for entry: Dictionary in gates.entries.values():
+			var root := entry.root as Node3D
+			var local := root.global_transform.affine_inverse()*at
+			if absf(local.x)<PlanetStrongholds.WALL_OUT+2.0 and absf(local.z)<PlanetStrongholds.WALL_OUT+2.0 and local.y> -8.0 and local.y<120.0: return true
+	for boss: Boss in Boss.all:
+		if not is_instance_valid(boss) or not is_ancestor_of(boss): continue
+		if boss.state not in [Enemy.State.ACTIVE,Enemy.State.INTRO,Enemy.State.DYING]: continue
+		if boss.global_position.distance_to(at)<boss.boss_def.bar_radius: return true
+	return false
+
+func jetpack_blocks_segment(from: Vector3, to: Vector3) -> bool:
+	if is_instance_valid(gates):
+		for entry: Dictionary in gates.entries.values():
+			var inverse := (entry.root as Node3D).global_transform.affine_inverse()
+			var box := AABB(Vector3(-PlanetStrongholds.WALL_OUT-2.0,-8,-PlanetStrongholds.WALL_OUT-2.0),Vector3((PlanetStrongholds.WALL_OUT+2.0)*2.0,128,(PlanetStrongholds.WALL_OUT+2.0)*2.0))
+			if box.intersects_segment(inverse*from,inverse*to): return true
+	return jetpack_forbidden(to)

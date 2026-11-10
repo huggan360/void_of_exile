@@ -105,7 +105,7 @@ func _box(at: Vector3,size: Vector3,color: Color,solid := false,ship := false,gl
 	var groups: Dictionary = _rocket_blocks if ship else _blocks
 	var key := ("glow_" if glow else "metal_")+color.to_html()
 	if not groups.has(key): groups[key]={color=color,glow=glow,transforms=[]}
-	groups[key].transforms.append(Transform3D(Basis.from_scale(size),at))
+	groups[key].transforms.append(Transform3D(Basis.from_scale(Coplanar.grow(size)),at))
 
 func _pipe(a: Vector3,b: Vector3,radius: float,color: Color,ship := false) -> void:
 	if _headless: return

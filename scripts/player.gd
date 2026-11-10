@@ -109,6 +109,7 @@ var model: Node3D
 var class_id := "archer"
 var camera: Camera3D
 var spatial_controller: SpatialController
+var ground_view: GroundView
 var shield := MagicShield.new()
 var aura := GearAura.new()
 var charge_effect := ChargeEffect.new()
@@ -173,6 +174,10 @@ var _hop := 0.0
 
 
 func set_spatial_world(place: GameWorld) -> void:
+	if is_instance_valid(ground_view):
+		remove_child(ground_view)
+		ground_view.free()
+		ground_view = null
 	if is_instance_valid(spatial_controller):
 		remove_child(spatial_controller)
 		spatial_controller.free()
@@ -180,6 +185,11 @@ func set_spatial_world(place: GameWorld) -> void:
 	if place is SpatialWorld:
 		spatial_controller = (place as SpatialWorld).make_controller(self)
 		if spatial_controller!=null: add_child(spatial_controller)
+
+	if place is HallWorld or place is IslandWorld:
+		ground_view = GroundView.new()
+		ground_view.player = self
+		add_child(ground_view)
 
 
 func _ready() -> void:
@@ -373,7 +383,7 @@ func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
 		# On the cursor's own ray, so the ring's middle is always at the cursor's tip.
 		aim_marker.track(_aim_point,
 				(Input.is_action_pressed("shoot") or _charging) and free_hands and stats.gear.weapon != null, delta)
-	if _aim_hold > 0.0 or (is_instance_valid(spatial_controller) and (spatial_controller.first_person>0.8 or (spatial_controller is SpaceTraversal and spatial_controller.free_look()))):
+	if _aim_hold > 0.0 or (is_instance_valid(ground_view) and ground_view.free_look()) or (is_instance_valid(spatial_controller) and (spatial_controller.first_person>0.8 or (spatial_controller is SpaceTraversal and spatial_controller.free_look()))):
 		facing = lerp_angle(facing, aim_yaw(), minf(1.0, delta * AIM_TURN_SPEED))
 	elif dir != Vector3.ZERO:
 		var local_dir := global_basis.inverse()*dir if is_instance_valid(spatial_controller) else dir
@@ -432,6 +442,7 @@ func _fire() -> void:
 ## the ground there.
 func _aim_origin_and_direction() -> Array:
 	if is_instance_valid(spatial_controller): return spatial_controller.aim_ray()
+	if is_instance_valid(ground_view) and ground_view.free_look(): return ground_view.aim_ray()
 	var forward := Basis(Vector3.UP, aim_yaw()) * Vector3.FORWARD
 	var origin := global_position + Vector3(0, SHOT_HEIGHT, 0) + forward * 0.6
 	var target := _aim_point
@@ -650,6 +661,7 @@ func aim_yaw() -> float:
 
 ## Where the mouse cursor points in the world: the first thing under it.
 func _mouse_point() -> Vector3:
+	if is_instance_valid(ground_view) and ground_view.free_look(): return ground_view.mouse_point()
 	var mouse := get_viewport().get_mouse_position()
 	var from := camera.project_ray_origin(mouse)
 	var dir := camera.project_ray_normal(mouse)
@@ -713,6 +725,9 @@ func set_zoom(distance: float) -> void:
 
 
 func _update_camera(delta: float) -> void:
+	if is_instance_valid(ground_view):
+		ground_view.update_camera(delta)
+		if ground_view.free_look(): return
 	# Follow the model's smoothed height, then ease the camera after it, so
 	# walking up a mountain moves the view gently instead of in steps.
 	var target_y := global_position.y + _visual_offset + 1.0

@@ -2,13 +2,13 @@ shader_type spatial;
 render_mode cull_back;
 // Vesperis's buildings (MultiMesh unit shapes: boxes, cylinders, spheres, domes,
 // cones, tori). Per instance: COLOR the base colour, INSTANCE_CUSTOM r seed,
-// g window density (0 = none), b the material (1 = glows in COLOR; else
+// g reserved (windows are separate geometry), b material (1 = glows in COLOR; else
 // b*10: 0 plaster, 1 bark, 2 shingles, 3 leaves, 4 stone, 5 water, 6 planks,
 // 7 grass, 8 mushroom cap), a the wall mapping (1 brass trims, 2 round: wraps
 // round the part).
 // Nothing is flat: every surface is cut into small voxels whose tones vary,
 // with the material's own pattern on top (bark grooves, shingle rows, bricks,
-// leaf clumps), and lit arched windows in lantern amber, rose, teal and mint.
+// leaf clumps). Framed windows use separate non-overlapping meshes.
 varying vec3 local_m;
 varying vec3 local_n;
 varying vec3 scale_m;
@@ -48,14 +48,13 @@ vec3 material(int kind, vec3 base, vec2 w, vec3 v, float seed, float near) {
 		c = base * (0.82 + id * 0.3);
 		c *= mix(1.0, 0.68, step(fract(w.y / 0.45), 0.2) * near);
 		c *= mix(1.0, 0.8, step(fract(x), 0.08) * near);
-	} else if (kind == 3 || kind == 7) {
-		// Leaves and grass: clumps of light and shade, now and then a flower.
-		float size = kind == 3 ? 0.55 : 0.3;
-		vec3 clump = floor(v * 0.25 / size);
-		float shade = hash(clump + seed);
-		c = base * (0.72 + shade * 0.5);
-		float bloom = hash(v + seed * 3.0);
-		if (bloom > 0.975) c = mix(lin(vec3(1.0, 0.62, 0.8)), lin(vec3(1.0, 0.88, 0.5)), step(0.9875, bloom));
+	} else if (kind == 3) {
+		// Broad leaf colour variation fades before it becomes subpixel noise.
+		float shade = hash(floor(v * 0.1) + seed);
+		c = base * (0.88 + shade * 0.18);
+	} else if (kind == 7) {
+		// Lawns are solid turf. Flowers are real meshes above this surface.
+		c = base;
 	} else if (kind == 4) {
 		// Stone blocks with mortar.
 		float row = floor(w.y / 0.5);
@@ -76,7 +75,8 @@ vec3 material(int kind, vec3 base, vec2 w, vec3 v, float seed, float near) {
 	} else if (kind == 8) {
 		c = base * (0.85 + tone * 0.25);
 	}
-	return c;
+	float footprint = max(length(dFdx(w)), length(dFdy(w)));
+	return mix(base, c, near * (1.0 - smoothstep(0.06, 0.22, footprint)));
 }
 
 void fragment() {
@@ -86,7 +86,7 @@ void fragment() {
 	float near = 1.0 - smoothstep(160.0, 600.0, dist);
 	if (custom.b > 0.95) {
 		ALBEDO = base * 0.4;
-		EMISSION = base * (0.55 + 0.06 * sin(TIME * 2.0 + seed));
+		EMISSION = base * (0.55);
 		ROUGHNESS = 0.5;
 	} else {
 		int kind = int(custom.b * 10.0 + 0.5);
@@ -101,40 +101,6 @@ void fragment() {
 		vec3 v = floor(local_m / grain);
 		vec3 color = material(kind, base, w, v, seed, near);
 		vec3 glow = vec3(0.0);
-		if (side && custom.g > 0.01) {
-			vec2 cell = vec2(along / 2.6, up / 3.6);
-			vec2 id = floor(cell);
-			vec2 f = fract(cell);
-			// Arched windows: a box below, a round top, a cross of mullions.
-			float box = step(0.28, f.x) * step(f.x, 0.72) * step(0.22, f.y) * step(f.y, 0.6);
-			float arch = step(length((f - vec2(0.5, 0.6)) * vec2(1.0, 1.25)), 0.22) * step(0.6, f.y);
-			float frame = max(box, arch);
-			float bar = step(abs(f.x - 0.5), 0.025) + step(abs(f.y - 0.5), 0.02);
-			frame *= 1.0 - clamp(bar, 0.0, 1.0) * near;
-			float lit = step(1.0 - custom.g, hash(vec3(id, seed)));
-			float pick = hash(vec3(id.yx, seed + 3.0));
-			vec3 lamp = pick < 0.55 ? vec3(1.0, 0.68, 0.36) : pick < 0.72 ? vec3(1.0, 0.45, 0.72) : pick < 0.88 ? vec3(0.35, 0.92, 0.88) : vec3(0.6, 1.0, 0.62);
-			float flick = 1.0 - step(0.985, hash(vec3(id, floor(TIME * 3.0)))) * step(0.9, pick);
-			// Far away the grid melts into an even glow so it never shimmers.
-			float glass = mix(custom.g * 0.4, frame, near);
-			color = mix(color, color * 0.3, glass);
-			glow = lamp * glass * mix(custom.g * 0.6, lit * flick, near) * 0.45;
-			// A frame round each window.
-			float rim = max(step(0.24, f.x) * step(f.x, 0.76) * step(0.18, f.y) * step(f.y, 0.86), 0.0) * (1.0 - frame);
-			rim *= step(length((f - vec2(0.5, 0.6)) * vec2(1.0, 1.25)), 0.27) + step(f.y, 0.6);
-			color = mix(color, color * 0.72, clamp(rim, 0.0, 1.0) * near * 0.6);
-			if (custom.a > 0.5 && custom.a < 1.5) {
-				float band = 1.0 - smoothstep(0.0, 0.08, abs(fract(up / 14.4) - 0.04));
-				color = mix(color, lin(vec3(0.85, 0.62, 0.32)), band * near);
-			}
-		} else if (!side && !round && kind == 0) {
-			// Flat roofs: darker, with a soft glow at the rim.
-			vec2 p = local_m.xz;
-			vec2 rim = scale_m.xz * 0.5 - abs(p);
-			float edge = 1.0 - smoothstep(0.0, 0.6, min(rim.x, rim.y));
-			color *= 0.7;
-			glow = lin(vec3(1.0, 0.6, 0.85)) * edge * 0.18 * step(0.5, local_n.y);
-		}
 		ALBEDO = color;
 		EMISSION = glow + (kind == 5 ? base * 0.12 : vec3(0.0));
 		ROUGHNESS = kind == 5 ? 0.15 : 0.82;

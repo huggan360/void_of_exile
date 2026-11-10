@@ -1122,7 +1122,9 @@ func _finish(party: Dictionary) -> void:
 			stats.purge_story_items(true)
 		var result := {id = run.id, title = def.title, stars = stars, elapsed = run.elapsed, xp = int(def.get("xp", 500))}
 		if run.id == "theory_of_everything":
-			# The Theory opens the sky: the Surface's launch pad answers now.
+			# The Theory opens the sky for good: the Surface's launch pad answers now.
+			book(p.account_id).space_unlocked = true
+			_touch(p.account_id)
 			server.social.send(pid, ["space_unlocked"])
 			server.social.system(pid, "[b]The way to Space is open![/b] A battleship waits at the [place]Skyward Launch Pad[/place] south of Hearthwick: buy her for %d Dots and launch." % SpaceWorld.SHIP_PRICE)
 		if def.get("pack_end", false):

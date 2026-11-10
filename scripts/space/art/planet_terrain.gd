@@ -102,7 +102,7 @@ func _make(face: int, level: int, x: int, y: int) -> Chunk:
 	return c
 
 ## Unit direction for cube face coordinates u, v in -1..1 (spherified cube).
-func _dir(face: int, u: float, v: float) -> Vector3:
+static func _dir(face: int, u: float, v: float) -> Vector3:
 	var n := FACES[face]
 	var a := Vector3(n.y, n.z, n.x)
 	var b := n.cross(a)

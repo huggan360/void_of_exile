@@ -304,7 +304,7 @@ func _box(group: String, center: Vector3, size: Vector3, color: Color) -> void:
 	if not _boxes.has(group):
 		_boxes[group] = []
 		_colors[group] = []
-	_boxes[group].append(Transform3D(Basis().scaled(size), center))
+	_boxes[group].append(Transform3D(Basis().scaled(Coplanar.grow(size)), center))
 	_colors[group].append(color)
 
 

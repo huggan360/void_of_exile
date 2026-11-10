@@ -103,12 +103,11 @@ func set_text(text: String) -> void:
 	var face := Vector2(tex.get_width(), tex.get_height())*px
 	if _face==null:
 		_face = MeshInstance3D.new()
-		_face.mesh = QuadMesh.new()
 		_face.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(_face)
-	(_face.mesh as QuadMesh).size = face
+	_face.mesh = _letter_face(face)
 	_face.material_override = _material(tex, float(spec[3]))
-	_face.position = Vector3(0, 0, 0.051 if style!="paint" else 0.0)
+	_face.position = Vector3(0, 0, 0.08 if style!="paint" else 0.035)
 	if style=="paint": return
 	var margin := px*4.0
 	var board := Vector3(face.x+margin*2.0, face.y+margin*2.0, 0.08)
@@ -156,7 +155,7 @@ static func pair_text(root: Node3D, text: String) -> void:
 ## Width and height of the board (or the paint) in metres.
 func extent() -> Vector2:
 	if _board: return Vector2((_board.mesh as BoxMesh).size.x, (_board.mesh as BoxMesh).size.y)
-	return (_face.mesh as QuadMesh).size if _face else Vector2.ZERO
+	return Vector2(_face.mesh.get_aabb().size.x, _face.mesh.get_aabb().size.y) if _face else Vector2.ZERO
 
 ## A wooden post with the sign on top, readable from both sides (face +Z and -Z).
 static func post(text: String, p_style := "plank", p_icon := "", height := 2.2, p_size := 1.0) -> Node3D:
@@ -240,6 +239,22 @@ static func texture(text: String, color: Color, p_icon := "") -> ImageTexture:
 	var tex := ImageTexture.create_from_image(image)
 	_textures[key] = tex
 	return tex
+
+static func _letter_face(extent: Vector2) -> ArrayMesh:
+	var half := extent*0.5
+	var vertices := PackedVector3Array([
+		Vector3(-half.x, half.y, 0), Vector3(half.x, half.y, 0), Vector3(half.x, -half.y, 0),
+		Vector3(-half.x, half.y, 0), Vector3(half.x, -half.y, 0), Vector3(-half.x, -half.y, 0)])
+	var uv := PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 0), Vector2(1, 1), Vector2(0, 1)])
+	var normals := PackedVector3Array([Vector3.BACK, Vector3.BACK, Vector3.BACK, Vector3.BACK, Vector3.BACK, Vector3.BACK])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_TEX_UV] = uv
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
 
 static func _material(tex: ImageTexture, glow: float) -> StandardMaterial3D:
 	var key := "%d|%f" % [tex.get_rid().get_id(), glow]

@@ -554,13 +554,19 @@ func _leave_realm(p: Dictionary) -> void:
 
 
 ## The Reach opens after the Theory of Everything: for its tellers, and for a
-## party standing in a Theory instance whose Empress has fallen.
+## party standing in a Theory instance whose Empress has fallen. Once told it
+## stays open: playing the Theory again (its run paused or active) never locks it.
 func _astral_unlocked(p: Dictionary) -> bool:
 	if config.test_mode: return true
 	var here: RealmInstance = realms.get(p.realm)
 	if here and here.world is TheoryWorld and here.world.boss_defeated: return true
 	if int(p.get("account_id", 0)) == 0 or not is_instance_valid(campaigns): return false
-	return str(campaigns.book(p.account_id).get("runs", {}).get("theory_of_everything", {}).get("status", "")) == "done"
+	var book: Dictionary = campaigns.book(p.account_id)
+	if book.get("space_unlocked", false): return true
+	# Accounts from before the flag: a finished Theory (now or ever) or its pack.
+	var run: Dictionary = book.get("runs", {}).get(AstralCampaign.ID, {})
+	return str(run.get("status", "")) == "done" or int(run.get("stars_best", 0)) > 0 or AstralCampaign.ID in book.get("dots_paid", []) \
+		or AstralCampaign.PACK in book.get("packs_done", [])
 
 
 ## True once per account: the Nexus tour plays on the first arrival.
@@ -666,6 +672,14 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		if not pos.is_finite(): return
 		# Still in a lost ship's room: the client hasn't heard yet. Wait for it.
 		if spatial is SpaceWorld and (spatial as SpaceWorld).stale_pocket(pos): return
+		if spatial is SpaceWorld and not spatial is SurfaceShipWorld:
+			var jet_world := spatial as SpaceWorld
+			if jet_world.jetpack_forbidden(p.pos):
+				flags &= ~28
+				p.flags = int(p.flags) & ~28
+			if ((flags | int(p.flags)) & 8)!=0 and jet_world.jetpack_blocks_segment(p.pos,pos):
+				Net.c_correct.rpc_id(peer_id,p.pos)
+				return
 		var barrier: Dictionary = spatial.barrier_between(p.pos,pos)
 		if not barrier.is_empty():
 			p.pos = barrier.point
@@ -1245,8 +1259,10 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 			var e: Enemy = realm.enemies[id]
 			if not is_instance_valid(e) or not e.is_inside_tree():
 				continue
-			var flat := minf(Vector2(e.global_position.x - here.x, e.global_position.z - here.z).length(), Vector2(e.global_position.x - outside.x, e.global_position.z - outside.z).length())
-			if flat > interest and not (e is Boss and flat < (e as Boss).boss_def.bar_radius + 10.0):
+			var spatial := realm.world is TheoryWorld or (realm.world is SpaceWorld and not realm.world is SurfaceShipWorld)
+			var enemy_interest := maxf(interest, 400.0) if spatial else interest
+			var flat := minf(e.global_position.distance_to(here), e.global_position.distance_to(outside)) if spatial else minf(Vector2(e.global_position.x - here.x, e.global_position.z - here.z).length(), Vector2(e.global_position.x - outside.x, e.global_position.z - outside.z).length())
+			if flat > enemy_interest and not (e is Boss and flat < (e as Boss).boss_def.bar_radius + 10.0):
 				continue
 			seen[id] = true
 			if not p.known.has(id):

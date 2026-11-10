@@ -9,6 +9,7 @@ var place: GameWorld
 var pose := Transform3D.IDENTITY
 var stand := Vector3.ZERO
 var seat_height := 0.45
+var bench := false
 
 func _ready() -> void:
 	super._ready()
@@ -20,7 +21,7 @@ func _ready() -> void:
 func spec() -> Dictionary:
 	if kind=="seat":
 		var frame := global_transform*pose
-		return {kind = kind, key = key, pos = frame.origin+frame.basis.y*(seat_height-0.8), basis = frame.basis, yaw = 0.0, stand = global_transform*stand, drink = drink}
+		return {kind = kind, key = key, pos = frame.origin+frame.basis.y*(seat_height-0.6), basis = frame.basis.orthonormalized(), yaw = 0.0, stand = global_transform*stand, drink = drink}
 	return {kind = kind, key = key, pos = global_position, basis = global_basis, drink = drink}
 
 func available(actor: Node3D) -> bool:
@@ -35,7 +36,7 @@ func available(actor: Node3D) -> bool:
 func refresh(actor: Node3D) -> void:
 	var s := Leisure.state(actor.player_id) if actor is Player else {}
 	match kind:
-		"seat": title = "Chair"; action_text = "Sit"
+		"seat": title = "Bench" if bench else "Chair"; action_text = "Sit"
 		"tap":
 			title = "Coffee pot" if drink=="coffee" else "Beer tap"
 			action_text = "Refill" if not s.get("cup", {}).is_empty() and s.cup.kind==drink else "Pour"
@@ -44,7 +45,7 @@ func refresh(actor: Node3D) -> void:
 			title = "Tabletop"
 			action_text = "Pick up cup" if occupied else "Put cup down"
 		"cigar": title = "Cigar box"; action_text = "Take a cigar"
-	description = ""
+	description = "Sit down for a while" if kind=="seat" else ""
 
 func activate(actor: Node3D) -> bool:
 	if not actor is Player or not available(actor): return false

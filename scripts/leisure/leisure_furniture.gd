@@ -48,6 +48,15 @@ static func chair(parent: Node3D, id: String, frame: Transform3D, server: bool, 
 	point.seat_height = height
 	return point
 
+## Add two independent places to existing bench art, without drawing another bench.
+static func bench_targets(parent: Node3D, id: String, frame: Transform3D, height := 0.65, width := 2.2) -> void:
+	for slot in 2:
+		var at := frame*Transform3D(Basis.IDENTITY, Vector3((slot-0.5)*width*0.48, 0, -0.08))
+		var point := target(parent, id+":"+str(slot), "seat", at)
+		point.bench = true
+		point.seat_height = height
+		point.stand = Vector3(0, 0.05, -1.25)
+
 static func table_spot(parent: Node3D, id: String, frame: Transform3D) -> LeisureTarget:
 	return target(parent, id, "table", frame)
 

@@ -16,6 +16,8 @@ extends Node3D
 
 const CHECK_INTERVAL := 0.25
 const SLEEP_DISTANCE := 70.0
+const SPATIAL_WAKE_DISTANCE := 180.0
+const SPATIAL_SLEEP_DISTANCE := 320.0
 
 ## Any enemy here died (campaign kill quests count these).
 signal enemy_killed(enemy: Enemy)
@@ -76,7 +78,7 @@ func target_for(pos: Vector3) -> Node3D:
 	for p in players:
 		if not is_instance_valid(p) or p.frozen or SpaceLayout.pocket_at(p.global_position)>=0:
 			continue
-		var d: float = Vector2(p.global_position.x - pos.x, p.global_position.z - pos.z).length_squared()
+		var d: float = p.global_position.distance_squared_to(pos) if world is TheoryWorld else Vector2(p.global_position.x - pos.x, p.global_position.z - pos.z).length_squared()
 		if d < best_d:
 			best = p
 			best_d = d
@@ -84,6 +86,11 @@ func target_for(pos: Vector3) -> Node3D:
 		return players[0]
 	return best
 
+
+## Wider retention is for Space and Theory, including spherical planet ground.
+## The Surface and its docked ship keep their original distances.
+func _wide_range() -> bool:
+	return world is TheoryWorld or (world is SpaceWorld and not world is SurfaceShipWorld)
 
 ## Flat distance from `pos` to the nearest active player.
 func _nearest_distance(pos: Vector3) -> float:
@@ -97,7 +104,7 @@ func _nearest_distance(pos: Vector3) -> float:
 			var ship := fleet.ship_in_slot(slot) if fleet else null
 			if ship==null or ship.mode!="landed": continue
 			at = ship.xform.origin
-		nearest = minf(nearest, Vector2(at.x-pos.x, at.z-pos.z).length())
+		nearest = minf(nearest, at.distance_to(pos) if _wide_range() else Vector2(at.x-pos.x, at.z-pos.z).length())
 	return nearest
 
 
@@ -123,11 +130,18 @@ func _profile_process(delta: float) -> void:
 		if memory.get("back_at", 0) == -1 or now < memory.get("back_at", 0):
 			continue  # wiped out (for now, or for good)
 		var reach: float = _site_definition(site).activate_radius
+		if _wide_range(): reach = maxf(reach, SPATIAL_WAKE_DISTANCE)
 		if _nearest_distance(site.pos) < reach:
 			_wake(site, memory.get("survivors", null))
 	for id in _awake.keys():
 		var pack: EnemyPack = _awake[id]
-		var far := _nearest_distance(pack.site.pos) > SLEEP_DISTANCE
+		# Keep a pack awake near its actual members as well as its spawn point.
+		var distance := _nearest_distance(pack.site.pos)
+		if _wide_range():
+			for member: Enemy in pack.members:
+				if is_instance_valid(member): distance = minf(distance, _nearest_distance(member.global_position))
+		var sleep_distance := maxf(SPATIAL_SLEEP_DISTANCE, float(_site_definition(pack.site).activate_radius)+80.0) if _wide_range() else SLEEP_DISTANCE
+		var far := distance > sleep_distance
 		if far and not pack.any_fighting():
 			_sleep(pack)
 
@@ -176,6 +190,7 @@ func _wake(site: Dictionary, survivors: Variant) -> void:
 	for i in ids.size():
 		var enemy_def := scaled_definition(Enemies.get_def(ids[i]))
 		var offset := Vector3.FORWARD.rotated(Vector3.UP, rng.randf() * TAU) * (0.0 if i == 0 else rng.randf_range(1.5, 4.5))
+		if world is TheoryWorld: offset = (world as TheoryWorld).surface_frame(site.pos).basis*offset
 		var spot := find_spawn_position(site.pos + offset, enemy_def, placements, site.pos, str(site.id).begins_with("quest_"))
 		if spot.is_empty():
 			_memory[site.id] = {survivors = ids.duplicate(), back_at = Time.get_ticks_msec() + 2000, finite = pack.respawn_time<0}
@@ -185,6 +200,7 @@ func _wake(site: Dictionary, survivors: Variant) -> void:
 		var enemy_def := scaled_definition(Enemies.get_def(ids[i]))
 		var enemy := _make_actor(enemy_def).setup(enemy_def, pack, self)
 		enemy.position = to_local(placements[i].pos)
+		if world is TheoryWorld: enemy.basis = (world as TheoryWorld).surface_frame(placements[i].pos).basis
 		add_child(enemy)
 		enemy.died.connect(pack._on_member_died)
 		enemy.died.connect(func(e: Enemy) -> void: enemy_killed.emit(e))
@@ -296,7 +312,8 @@ func find_spawn_position(origin: Vector3, enemy_def: EnemyDef, reserved: Array =
 		for i in (1 if ring == 0.0 else 16):
 			var angle := TAU * i / 16.0
 			var candidate := origin + Vector3(cos(angle), 0, sin(angle)) * ring
-			candidate.y = world.enemy_floor(candidate) if world.has_method("enemy_floor") else world.ground_height(candidate.x, candidate.z)
+			if world is TheoryWorld: candidate = (world as TheoryWorld).enemy_spawn_point(candidate)
+			else: candidate.y = world.enemy_floor(candidate) if world.has_method("enemy_floor") else world.ground_height(candidate.x, candidate.z)
 			if campaign_site and Vector2(candidate.x - home.x, candidate.z - home.z).length() > 20.0:
 				continue
 			if world is IslandWorld and (world as IslandWorld).generator._near_town(Vector2(candidate.x,candidate.z)):
@@ -307,7 +324,7 @@ func find_spawn_position(origin: Vector3, enemy_def: EnemyDef, reserved: Array =
 				continue
 			var overlaps := false
 			for other: Dictionary in reserved:
-				if Vector2(candidate.x - other.pos.x, candidate.z - other.pos.z).length() < radius + other.radius + 0.2:
+				if (candidate.distance_to(other.pos) if world is TheoryWorld else Vector2(candidate.x - other.pos.x, candidate.z - other.pos.z).length()) < radius + other.radius + 0.2:
 					overlaps = true
 					break
 			if not overlaps:

@@ -1,5 +1,7 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://scripts/leisure/leisure_bench.gd" id="bench_seats"]
+
 [ext_resource type="Shader" path="res://shaders/voxel_model.gdshader" id="1_i2tmg"]
 [ext_resource type="ArrayMesh" path="res://scenes/home/prefabs/bench.res" id="2_tfr17"]
 
@@ -13,6 +15,7 @@ shader_parameter/glow_strength = null
 size = Vector3(2.7, 1.7, 1.3)
 
 [node name="Bench" type="Node3D" unique_id=55368380]
+script = ExtResource("bench_seats")
 metadata/voxel_source = "res://props/town/bench/model.vox"
 
 [node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=63653922]

@@ -13,7 +13,11 @@ func available(actor: Node3D) -> bool:
 	return true
 
 func refresh(_actor: Node3D) -> void:
-	action_text = "Sit down" if kind=="seat" else "Call elevator"
+	if kind=="seat":
+		title = "Chair"
+		description = "Sit down for a while"
+		action_text = "Sit"
+	else: action_text = "Call elevator"
 
 func activate(actor: Node3D) -> bool:
 	if not available(actor): return false

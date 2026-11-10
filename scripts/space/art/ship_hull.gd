@@ -81,7 +81,7 @@ class ArtBatch extends RefCounted:
 		var key := kind + ":" + str(glow)
 		if not _groups.has(key): _groups[key] = {kind = kind, glow = glow, frames = [], colors = []}
 		var group: Dictionary = _groups[key]
-		group.frames.append(Transform3D(basis.scaled_local(size), at))
+		group.frames.append(Transform3D(basis.scaled_local(Coplanar.grow(size)), at))
 		group.colors.append(color)
 
 	func box(at: Vector3, size: Vector3, color: Color, glow: float = 0.0, basis: Basis = Basis.IDENTITY) -> void:

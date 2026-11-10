@@ -82,6 +82,9 @@ func _process(delta: float) -> void:
 	var s: Array = Net.client.player_state(player_id) if Net.client else []
 	if s.is_empty():
 		return
+	set_meta("jetpack_attached",(int(s[3]) & 4)!=0)
+	set_meta("jetpack_flying",(int(s[3]) & 8)!=0)
+	set_meta("jet_on",(int(s[3]) & 16)!=0)
 	var target: Vector3 = s[0]
 	global_basis = Net.client.world.surface_frame(target).basis if Net.client and Net.client.world is SpatialWorld else Basis.IDENTITY
 	if not _have_position or global_position.distance_to(target) >= NetClient.PLAYER_TELEPORT_DISTANCE:

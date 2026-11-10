@@ -281,7 +281,12 @@ func _physics_process(delta: float) -> void:
 	if player == null:
 		model.animate(0.0, delta)
 		return
+	var theory := director.world as TheoryWorld
+	if theory!=null:
+		global_basis = theory.surface_frame(global_position).basis
+		up_direction = global_basis.y
 	var to_player := player.global_position - global_position
+	if theory!=null: to_player = global_basis.inverse()*to_player
 	to_player.y = 0.0
 	var dist := to_player.length()
 	var move := Vector3.ZERO
@@ -302,6 +307,7 @@ func _physics_process(delta: float) -> void:
 		State.RETURNING:
 			var home := _anchor()
 			var back := home - global_position
+			if theory!=null: back = global_basis.inverse()*back
 			back.y = 0.0
 			if back.length() < 1.5:
 				state = State.IDLE
@@ -329,23 +335,29 @@ func _physics_process(delta: float) -> void:
 	if buffs.has_effect("static"):
 		move = Vector3.ZERO
 		_move = Vector3.ZERO
-	velocity.x = move.x * speed
-	velocity.z = move.z * speed
-	var ahead := global_position + Vector3(velocity.x, 0, velocity.z).normalized() * 0.6
-	if not director.world.is_walkable(ahead) or director.world.is_hazard(ahead) \
-			or (director.world.has_method("enemy_blocked") and director.world.enemy_blocked(ahead)):
-		velocity.x = 0.0
-		velocity.z = 0.0
-		_wander_timer = 0.0  # pick somewhere else
-		_strafe = -_strafe
-	velocity.y = 0.0 if is_on_floor() else velocity.y - GRAVITY * delta
-	var prev_y := global_position.y
-	move_and_slide()
-	# Worlds without walkable collision everywhere (planets on the server) hold their enemies to the ground.
-	if director.world.has_method("hold_enemy"): director.world.hold_enemy(self)
-	if move != Vector3.ZERO and is_on_floor() and is_on_wall():
-		_try_step_up(move)
-	var dy := global_position.y - prev_y
+	var dy := 0.0
+	if theory!=null:
+		var previous := global_position
+		theory.move_theory_enemy(self,move,speed,delta)
+		dy = (global_position-previous).dot(up_direction)
+	else:
+		velocity.x = move.x * speed
+		velocity.z = move.z * speed
+		var ahead := global_position + Vector3(velocity.x, 0, velocity.z).normalized() * 0.6
+		if not director.world.is_walkable(ahead) or director.world.is_hazard(ahead) \
+				or (director.world.has_method("enemy_blocked") and director.world.enemy_blocked(ahead)):
+			velocity.x = 0.0
+			velocity.z = 0.0
+			_wander_timer = 0.0  # pick somewhere else
+			_strafe = -_strafe
+		velocity.y = 0.0 if is_on_floor() else velocity.y - GRAVITY * delta
+		var prev_y := global_position.y
+		move_and_slide()
+		# Worlds without walkable collision everywhere (planets on the server) hold their enemies to the ground.
+		if director.world.has_method("hold_enemy"): director.world.hold_enemy(self)
+		if move != Vector3.ZERO and is_on_floor() and is_on_wall():
+			_try_step_up(move)
+		dy = global_position.y - prev_y
 	if absf(dy) > 0.25:
 		_visual_offset -= dy
 	_visual_offset = lerpf(_visual_offset, 0.0, minf(1.0, delta * 12.0))
@@ -425,11 +437,13 @@ func _fight_move(to_player: Vector3, dist: float, delta: float) -> Vector3:
 	# Followers don't wander too far from their leader, even in a fight.
 	if def.follows_leader and pack.leader and pack.leader != self and pack.leader.is_alive():
 		var to_leader := pack.leader.global_position - global_position
+		if director.world is TheoryWorld: to_leader = global_basis.inverse()*to_leader
 		to_leader.y = 0.0
 		if to_leader.length() > LEADER_LEASH:
 			move = (move + to_leader.normalized() * 0.8).normalized()
 	if def.leash > 0.0:
 		var to_home := _home - global_position
+		if director.world is TheoryWorld: to_home = global_basis.inverse()*to_home
 		to_home.y = 0.0
 		if to_home.length() > def.leash:
 			move = (move + to_home.normalized() * 1.2).normalized()
@@ -554,6 +568,7 @@ func _separation() -> Vector3:
 		if m == self or not is_instance_valid(m) or not m.is_alive():
 			continue
 		var away := global_position - m.global_position
+		if director.world is TheoryWorld: away = global_basis.inverse()*away
 		away.y = 0.0
 		var d := away.length()
 		if d < SEPARATION and d > 0.01:
@@ -604,7 +619,7 @@ func _fire(a: Dictionary) -> void:
 			# side shots sweep right across the space in front of it.
 			var fwd := deg_to_rad(a.get("spread_deg", 8.0))
 			for angle in [PI * 0.5, -PI * 0.5, fwd, -fwd]:
-				director.bullets.fire(origin, dir.rotated(Vector3.UP, angle), a, self, shot_y)
+				director.bullets.fire(origin, dir.rotated(up_direction, angle), a, self, shot_y)
 		"burst", "sweep":
 			_volleys.append({attack = a, left = count, timer = 0.0, t = 0.0,
 					side = 1.0 if randf() < 0.5 else -1.0, base = dir})
@@ -620,17 +635,22 @@ func _fire(a: Dictionary) -> void:
 			CameraShake.shake_from(self, global_position, a.get("shake", 0.35), 22.0)
 		"ring":
 			for k in count:
-				director.bullets.fire(origin, dir.rotated(Vector3.UP, TAU * k / count), a, self, shot_y)
+				director.bullets.fire(origin, dir.rotated(up_direction, TAU * k / count), a, self, shot_y)
 		"spread":
 			var step := deg_to_rad(a.get("spread_deg", 12.0))
 			for k in count:
-				director.bullets.fire(origin, dir.rotated(Vector3.UP, (k - (count - 1) * 0.5) * step), a, self, shot_y)
+				director.bullets.fire(origin, dir.rotated(up_direction, (k - (count - 1) * 0.5) * step), a, self, shot_y)
 		_:
 			director.bullets.fire(origin, dir, a, self, shot_y)
 
 
 ## [origin, flat direction to the player, shot height] for an attack.
 func _aim(a: Dictionary) -> Array:
+	if director.world is TheoryWorld and director.world.zone_at(global_position) in ["space","fracture"]:
+		var magnetic_origin := model.hand_position() if a.get("from_hand",false) else global_position+up_direction*Player.SHOT_HEIGHT
+		var victim := target()
+		var aim_at := victim.global_position+victim.global_basis.y*Player.SHOT_HEIGHT
+		return [magnetic_origin,(aim_at-magnetic_origin).normalized(),magnetic_origin.y]
 	var origin := model.hand_position()
 	var shot_y := global_position.y + Player.SHOT_HEIGHT
 	if not a.get("from_hand", false):
@@ -655,7 +675,7 @@ func _update_volleys(delta: float) -> void:
 				var total: int = a.get("count", 1)
 				var k := 1.0 - float(v.left - 1) / maxf(1.0, total - 1)
 				var arc := deg_to_rad(a.get("arc_deg", 100.0))
-				dir = (v.base as Vector3).rotated(Vector3.UP, (k - 0.5) * arc * v.side)
+				dir = (v.base as Vector3).rotated(up_direction, (k - 0.5) * arc * v.side)
 			director.bullets.fire(aim[0], dir, a, self, aim[2])
 			v.left -= 1
 			v.timer += a.get("interval", 0.1)
@@ -875,6 +895,9 @@ func mirror_update(delta: float) -> void:
 		return
 	var before := global_position
 	global_position = s.pos
+	if director!=null and director.world is TheoryWorld:
+		global_basis = (director.world as TheoryWorld).surface_frame(global_position).basis
+		up_direction = global_basis.y
 	if delta > 0.0:
 		var moved := Vector2(global_position.x - before.x, global_position.z - before.z).length() / delta
 		_mirror_speed = lerpf(_mirror_speed, moved, minf(1.0, delta * 10.0))
