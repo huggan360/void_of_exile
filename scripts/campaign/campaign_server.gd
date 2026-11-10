@@ -239,6 +239,15 @@ func _fresh_run(id: String) -> Dictionary:
 func _migrate_run(run: Dictionary) -> void:
 	var revision := int(Campaigns.get_def(run.id).get("revision", 1))
 	if int(run.get("revision", 1)) >= revision: return
+	if run.id == "first_light" and str(run.get("status", ""))!="done":
+		# The old First Light objectives have been replaced, not extended:
+		# reset unfinished runs to ordering a ship instead of misreading
+		# an old numeric step as an unrelated new objective.
+		run.step = 0
+		run.count = 0
+		run.erase("reach_step")
+		run.erase("tutorial_ship")
+		run.erase("tutorial_foe")
 	if run.id == "lily_thief":
 		var old := ["gerald", "gate", "bloom", "bloom_chest", "lily", "ask", "maribel", "thief", "cave", "necklace", "vote", "forge", "lie", "give", "farewell"]
 		var index := int(run.get("step", 0))
@@ -389,6 +398,7 @@ func _end(party: Dictionary, reason: String) -> void:
 	astral.ending(party,run)
 	if reach.matches(run): reach.step_ended(party)
 	var places := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
+	if party.campaign.id=="first_light": places.append(PortServer.space_for(str(party.campaign.realm)))
 	_scenes.erase(party.id)
 	_to_party(party, ["camp_scene_end"])
 	if book(party.campaign.account).active == party.campaign.id:
@@ -427,15 +437,19 @@ func left_party(p: Dictionary, party: Dictionary) -> void:
 	server.social.send(p.player_id, ["camp_scene_end"])
 	server.dungeons.grants.erase(p.player_id)
 	var run := _run_of(party)
-	if not party.campaign.is_empty() and p.realm in [party.campaign.realm, party.campaign.tavern,
-			party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]:
+	var occupied := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
+	if not party.campaign.is_empty() and party.campaign.id=="first_light": occupied.append(PortServer.space_for(str(party.campaign.realm)))
+	if not party.campaign.is_empty() and p.realm in occupied:
 		server.social.send_to(p.player_id, "hall")
 
 
 func joined_party(p: Dictionary, party: Dictionary) -> void:
 	_restore_items(p, _run_of(party))
 	if home_for(p) != "":
-		server.social.send_to(p.player_id, party.campaign.tavern)
+		if party.campaign.id=="first_light":
+			server.social.send_to(p.player_id, PortServer.space_for(str(party.campaign.realm)))
+		else:
+			server.social.send_to(p.player_id, party.campaign.tavern)
 
 
 # --- The campaign's worlds ------------------------------------------------------------------
