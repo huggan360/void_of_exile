@@ -34,6 +34,11 @@ func _run() -> void:
 	check(not venue.is_empty() and CityLayout.story_venue_door(venue).is_finite(), "shop has an actual accessible sidewalk door")
 	check(steps[1].kind=="reach_buy_part" and int(steps[1].price)==500 and steps[1].item=="story_nav_core",
 		"navigation core costs exactly 500 Dots")
+	check(str(steps[1].text).contains("Story Chest"), "Vesperis objective directs players to collect from a Story Chest")
+	check(ShardfieldCampaign._chest_spec(ShardfieldCampaign.CORE).get("id", "")=="nav_core",
+		"paid navigation core has its own golden Story Chest")
+	check(ShardfieldCampaign.new().ensure_chest({members = []}, {}, null, ShardfieldCampaign.CORE).is_empty(),
+		"unpaid parties cannot receive a navigation-core Story Chest")
 	check(steps[2].grant_key==SpaceLayout.FORTS.amberfall.key and steps[3].boss==SpaceLayout.FORTS.amberfall.boss,
 		"the Honeywarden's key fits Aurum's actual existing fortress")
 	var b: EnemyDef = Enemies.get_def("amber_colossus")
@@ -50,6 +55,9 @@ func _run() -> void:
 	for id: String in ShardfieldCampaign.PARTS:
 		var item: Item = Items.make(id)
 		check(item!=null and item.slot=="story", "real non-sale story item: "+id)
+		var spec := ShardfieldCampaign._chest_spec(id)
+		check(not spec.is_empty() and str(spec.get("item", ""))==id,
+			"actual Story Chest supports all handover items: "+id)
 	var party := {campaign = {id = "shardfield", realm = "camp_999_shardfield"}}
 	check(ReachCampaign.space_realm(party)==PortServer.space_for("camp_999_shardfield"),
 		"mission 4 uses a party-private Reach world")
