@@ -168,6 +168,9 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 		run.shard_nav_paid = true
 		campaigns._touch(party.campaign.account)
 		var chest: Dictionary = ensure_chest(party, run, world, CORE)
+		# Queue an immediate campaign-book save for the paid receipt and
+		# chest ID, instead of waiting for the normal periodic save.
+		campaigns.flush()
 		campaigns.server.social.system(int(p.player_id),
 			"Paid [b]500 Dots[/b]. Open the gold [b]Story Chest[/b] beside the shop to collect the Navigation Core."
 			if not chest.is_empty() else "Paid 500 Dots. Your Story Chest will be restored shortly.")
