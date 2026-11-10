@@ -137,7 +137,7 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 				var departed: Array = run.get("return_seen", [])
 				for ship: SpaceShip in ships:
 					if ship.mode!="berth" and not ship.id in departed: departed.append(ship.id)
-			run.return_seen = departed
+				run.return_seen = departed
 				for ship: SpaceShip in ships:
 					if ship.mode=="berth" and ship.id in departed:
 						campaigns._advance(party, {})
