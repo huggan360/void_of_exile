@@ -556,6 +556,23 @@ func server_action(p: Dictionary, args: Array) -> void:
 				_tell(p, "Orin's rescue skiff is on its way. Hold on for %d seconds." % int(RESCUE_TIME))
 
 ## Where `pos` is close enough to mend `id` on `ship` (the spot), or INF.
+## Exact quest indicator for one native ship repair, on deck or in the room.
+func repair_mark(ship: SpaceShip, id: String) -> Vector3:
+	if not SpaceShip.PARTS.has(id): return Vector3.INF
+	if bool(SpaceShip.PARTS[id].inside):
+		return pocket_point(ship.slot, (interior_anchors.get("repairs", {}) as Dictionary).get(id, Vector3.ZERO))
+	return ship.xform*(SpaceShip.PARTS[id].mend as Vector3)
+
+## Protect parked, orbiting and empty battleships in an active private tale:
+## fleet inactivity timers must never store them while the story is running.
+func protected_campaign_ship(ship: SpaceShip) -> bool:
+	if realm_id==REALM or not Net.is_server(): return false
+	for party: Dictionary in Net.server.social.parties.values():
+		if party.get("campaign", {}).is_empty() or PortServer.space_for(str(party.campaign.realm))!=realm_id: continue
+		var run: Dictionary = Net.server.campaigns._run_of(party)
+		if run.get("status", "")=="active" and (ship.party==int(party.id) or int(ship.owner) in party.members): return true
+	return false
+
 func repair_point(ship: SpaceShip, id: String, pos: Vector3) -> Vector3:
 	if SpaceShip.PARTS[id].inside:
 		var spot := pocket_point(ship.slot, (interior_anchors.get("repairs", {}) as Dictionary).get(id, Vector3.ZERO))
@@ -892,7 +909,9 @@ func _ensure_interior(slot: int) -> void:
 # --- Authority loop ------------------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
-	if Net.is_client(): return
+	if Net.is_client():
+		_follow_foe_marks()
+		return
 	city.step()
 	_broadcast_city()
 	_arrive_rescues()
@@ -920,6 +939,16 @@ func _physics_process(delta: float) -> void:
 ## A hit: the hull loses `damage` and the part nearest `at` (world) takes its share.
 func hurt_ship(ship: SpaceShip, damage: int, at := Vector3.INF) -> void:
 	if not ships.has(ship.id) or ship.mode=="storing": return
+	# Space Travels teaches damage without ever allowing a tutorial battle
+	# (or an accidental asteroid impact during repairs) to destroy the ship.
+	if Net.is_server() and realm_id!=REALM:
+		for party: Dictionary in Net.server.social.parties.values():
+			if party.get("campaign", {}).get("id", "")!="first_light" or PortServer.space_for(str(party.campaign.realm))!=realm_id: continue
+			var run := Net.server.campaigns._run_of(party)
+			if run.get("status", "")=="active" and Campaigns.step_def("first_light", int(run.step)).get("id", "") in ["ambush", "repairs"] and (ship.party==int(party.id) or int(ship.owner) in party.members):
+				damage = mini(damage, maxi(0, ship.hp-SpaceShip.MAX_HP/2))
+				break
+	if damage<=0: return
 	ship.hp = maxi(0, ship.hp-damage)
 	var id: String = SpaceShip.part_at(ship.xform.affine_inverse()*at) if at.is_finite() else SpaceShip.PARTS.keys()[randi() % SpaceShip.PARTS.size()]
 	var before := float(ship.parts.get(id, 100.0))
@@ -1066,6 +1095,9 @@ func handle_event(event: Array) -> void:
 				(local_player.spatial_controller as SpaceTraversal).notice(str(event[3]))
 		"bolt", "bolt_path", "bolt_end", "foes", "foe-", "hit":
 			foes.handle_event(event)
+		"reach_tutorial":
+			if Net.is_client() and is_instance_valid(local_player) and local_player.spatial_controller is SpaceTraversal:
+				(local_player.spatial_controller as SpaceTraversal).tutorial_cinematic(str(event[1]), int(event[2]), int(event[3]))
 		"launch_shake":
 			if is_instance_valid(local_player) and SpaceLayout.pocket_at(local_player.global_position)>=0:
 				var aboard := ship_in_slot(SpaceLayout.pocket_at(local_player.global_position))
@@ -1123,7 +1155,13 @@ func npc_position(id: String) -> Vector3:
 		if station==null: return Vector3.INF
 		var anchor: Variant = station.anchors.get(str(at.nexus))
 		return (anchor as Transform3D).origin if anchor is Transform3D else anchor if anchor is Vector3 else Vector3.INF
-	var spot := spot_position(str(at.planet), str(at.spot))
+	var spot: Vector3
+	if at.has("town"):
+		var p: Dictionary = SpaceLayout.planet(str(at.planet))
+		if p.is_empty(): return Vector3.INF
+		spot = (p.center as Vector3)+SpaceLayout.town_frame(p, str(at.town)).origin
+	else:
+		spot = spot_position(str(at.planet), str(at.spot))
 	if not spot.is_finite(): return spot
 	# Beside the spot rather than on it, so its search mark stays clear.
 	var frame := surface_frame(spot)
@@ -1163,6 +1201,7 @@ func _show_marks() -> void:
 		var holder := Node3D.new()
 		add_child(holder)
 		holder.global_position = mark.pos
+		if mark.kind=="foe": holder.set_meta("foe_id", int(mark.foe_id))
 		if zone_at(mark.pos)!="void": holder.global_basis = surface_frame(mark.pos).basis
 		var badge := QuestMarker.new("main")
 		holder.add_child(badge)
@@ -1170,6 +1209,16 @@ func _show_marks() -> void:
 			badge._material.disable_fog = true
 			badge._material.no_depth_test = true
 		_mark_nodes.append(holder)
+
+## Moving quest badges follow the actual replicated enemy ship, not its
+## original spawn position or a periodic static location snapshot.
+func _follow_foe_marks() -> void:
+	if not is_instance_valid(foes): return
+	for node: Node in _mark_nodes:
+		if not is_instance_valid(node) or not node.has_meta("foe_id"): continue
+		var view: Dictionary = foes._views.get(int(node.get_meta("foe_id")), {})
+		if not view.is_empty() and is_instance_valid(view.get("node")):
+			(node as Node3D).global_position = (view.node as Node3D).global_position
 
 ## The Reach's people stand at the station and on their planets.
 func _build_npcs() -> void:
