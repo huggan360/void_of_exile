@@ -65,7 +65,7 @@ func markers(step: Dictionary) -> Array:
 				pos = SEARCH_CENTER, radius = SEARCH_RADIUS}]
 		"reach_diner_dock":
 			return [{id = "lastlight_ports", kind = "target", name = "Dock at Last Light - berths 1 or 2",
-				pos = SpaceLayout.DINER, kind = "target"}]
+				pos = SpaceLayout.DINER}]
 		"reach_diner_beers":
 			return [{id = "lastlight_beer", kind = "target", name = "Order and finish a full beer at the diner's tap",
 				pos = SpaceLayout.DINER+TAP}]
