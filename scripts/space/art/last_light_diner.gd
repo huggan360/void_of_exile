@@ -112,6 +112,18 @@ func build(server: bool) -> void:
 	var host := CreatureModel.new("npc_baker")
 	host.position = Vector3(0,0,-9)
 	add_child(host)
+	# Wire the original diner's existing host model to the campaign NPC.
+	# No extra restaurant or duplicate character is spawned.
+	var host_target := InteractionTarget.new()
+	host_target.title = str(Campaigns.NPCS.lastlight_host.name)
+	host_target.description = str(Campaigns.NPCS.lastlight_host.greeting)
+	host_target.response = str(Campaigns.NPCS.lastlight_host.greeting)
+	host_target.action_text = "Talk"
+	host_target.reach = 4.0
+	host_target.position = Vector3.UP
+	host.add_child(host_target)
+	host_target.activated.connect(func(_actor: Node3D) -> void:
+		if Net.is_client(): Net.client.send_action("camp", ["quest", "npc:lastlight_host"]))
 	for i in 3:
 		var npc := CreatureModel.new("npc_baker" if i==0 else "npc_traveler")
 		add_child(npc)
