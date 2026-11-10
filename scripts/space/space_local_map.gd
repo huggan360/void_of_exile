@@ -1,6 +1,7 @@
 class_name SpaceLocalMap
 extends Control
 ## A camera-aligned geodesic patch: no longitude seam or polar boundary.
+const ContactsScript = preload("res://scripts/ui/minimap_contacts.gd")
 var contacts: Array[Dictionary] = []
 var extra_markers: Array[Dictionary] = []
 var diner := false
@@ -181,7 +182,7 @@ func _draw() -> void:
 			_mark((planet.center as Vector3)+SpaceLayout.fort_frame(planet).origin,UIStyle.BAD,"Fort")
 		if planet.get("city",false): _draw_streets()
 	for contact: Dictionary in contacts: _mark(contact.pos,contact.color)
-	for ship: SpaceShip in world.ships.values(): _mark(ship.xform.origin,MinimapContacts.INTERACT)
+	for ship: SpaceShip in world.ships.values(): _mark(ship.xform.origin,ContactsScript.INTERACT)
 	for mark: Dictionary in world.my_marks():
 		if str(mark.get("kind", ""))!="zone": _quest(mark.pos)
 	for mark: Dictionary in extra_markers:

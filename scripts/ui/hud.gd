@@ -421,6 +421,7 @@ func set_world(world: GameWorld, fog_of_war: FogOfWar) -> void:
 ## Bottom left: chat with its friends and party panel. The quest tracker
 ## sits at the left edge below the character picker, with notices below it.
 func add_social(social: SocialClient, body_of: Callable) -> void:
+	minimap.social = social
 	chat = ChatPanel.new()
 	chat.social = social
 	chat.player = player
@@ -448,7 +449,6 @@ func add_social(social: SocialClient, body_of: Callable) -> void:
 
 ## Portals, the towns (each in its own color) and your home.
 func refresh_markers() -> void:
-	minimap.social = social
 	minimap.markers.clear()
 	if not is_instance_valid(_world):
 		return

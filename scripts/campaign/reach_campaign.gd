@@ -5,8 +5,10 @@ extends RefCounted
 ## Progress comes from the shared SpaceWorld: party ships, landings, cannon
 ## kills, and searches at planet spots or repairs aboard (published as marks).
 var campaigns: CampaignServer
-var missing_parts := ShardfieldCampaign.new()
-var last_light := RestaurantCampaign.new()
+const ShardfieldScript = preload("res://scripts/campaign/shardfield_campaign.gd")
+const RestaurantScript = preload("res://scripts/campaign/restaurant_campaign.gd")
+var missing_parts = ShardfieldScript.new()
+var last_light = RestaurantScript.new()
 var _hooked_worlds := {}  # realm id -> instance id, so each private Reach is hooked only once
 
 ## Reworked Reach missions 2-5 use party-owned private Space instances.

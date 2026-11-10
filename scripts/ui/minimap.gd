@@ -22,7 +22,8 @@ const MAP_EDGE := 1.0 - 8.0 / ART_PIXELS  # carved stone, brass and inner outlin
 const MAX_JOBS := 4  # patches being painted in the background at once
 const UPLOAD_INTERVAL := 0.2  # seconds between sending newly painted map to the GPU
 
-var contacts := MinimapContacts.new()
+const ContactsScript = preload("res://scripts/ui/minimap_contacts.gd")
+var contacts = ContactsScript.new()
 var live_markers: Array[Dictionary] = []
 var social: SocialClient
 var _space_local: LocalMapScript

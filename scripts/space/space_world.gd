@@ -109,7 +109,7 @@ func _ready() -> void:
 		if is_instance_valid(local_player) and local_player.global_position.distance_to(Vector3(0, 0.1, 18))<3.0:
 			local_player.global_position = spawn_point)
 	queue_load_step(func() -> void:
-		var diner := LastLightDiner.new()
+		var diner = preload("res://scripts/space/art/last_light_diner.gd").new()
 		diner.name = "LastLightDiner"
 		add_child(diner)
 		diner.build(not visual))
