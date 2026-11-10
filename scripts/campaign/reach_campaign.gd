@@ -7,10 +7,10 @@ extends RefCounted
 var campaigns: CampaignServer
 var _hooked_worlds := {}  # realm id -> instance id, so each private Reach is hooked only once
 
-## The old First Light id is retained for progression compatibility. Only
-## Space Travels is private; the later Reach tales keep their existing realm.
+## Missions 2 and 3 use party-owned private Space instances. Later Reach
+## adventures continue in the shared world until they are reworked.
 static func space_realm(party: Dictionary) -> String:
-	if party.get("campaign", {}).get("id", "")=="first_light":
+	if party.get("campaign", {}).get("id", "") in ["first_light", "lantern_road"]:
 		return PortServer.space_for(str(party.campaign.realm))
 	return SpaceWorld.REALM
 
@@ -32,6 +32,25 @@ func _world(party: Dictionary) -> SpaceWorld:
 func _ships(party: Dictionary, world: SpaceWorld) -> Array:
 	return world.ships.values().filter(func(s: SpaceShip) -> bool:
 		return s.party==int(party.id) or int(s.owner) in party.members)
+
+## One existing farmyard in the countryside around Lanternheart; its gravel
+## approach is clear of the barn and farmhouse. Boss and story chest share it.
+const VESPERIS_FARM := 1
+const STARBALL := "story_wizard_starball"
+const WAND := "G5_wand"
+
+static func vesperis_farm_position() -> Vector3:
+	var frame := CityCountry.farm_frame(VESPERIS_FARM)
+	var local := Vector3(0, CityArt.ground(Vector2(0, 17)), 17)
+	return (CityLayout.planet().center as Vector3)+frame*local
+
+static func _vesperis_member_key(p: Dictionary) -> String:
+	return str(p.get("character_id", p.get("player_id", 0)))
+
+static func _contains_item(bag: Dictionary, id: String) -> bool:
+	for item: Variant in bag.get("items", []):
+		if item is Item and item.id==id: return true
+	return false
 
 ## A step target as a point in space.
 static func target_point(target: String) -> Vector3:
@@ -62,6 +81,20 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 		_reset_to_order(party, run, world)
 		return
 	match str(step.kind):
+		"reach_vesperis_port":
+			for ship: SpaceShip in ships:
+				if ship.mode=="landed" and ship.planet=="vesperis" and ship.port.begins_with("vesperis:lanternheart:"):
+					campaigns._advance(party, {})
+					return
+		"reach_vesperis_beers":
+			_vesperis_check_beers(party, run)
+			if int(run.step)!=int(step.get("story_index", run.step)) and run.status=="done": return
+		"reach_vesperis_boss":
+			_vesperis_ensure_farmer(run, world)
+		"reach_vesperis_ball":
+			if _vesperis_ball_step(party, run, world): return
+		"reach_vesperis_wands":
+			if _vesperis_wands_step(party, run, world): return
 		"reach_order":
 			if not ships.is_empty():
 				run.tutorial_ship = (ships[0] as SpaceShip).id
