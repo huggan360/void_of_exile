@@ -961,9 +961,11 @@ func _advance(party: Dictionary, p: Dictionary, side := false) -> void:
 		run.erase("key_receiver")
 		var stats := GameServer.character(receiver)
 		if stats and stats.find_item(str(step.grant_key)).is_empty():
-			stats.give([Items.make(str(step.grant_key))])
 			var key_item: Item = Items.make(str(step.grant_key))
-			server.social.system(receiver, "Received [b]%s[/b]. Use it at the fortress gate." % (key_item.item_name if key_item else str(step.grant_key)))
+			if key_item and stats.give([key_item])>0:
+				server.social.system(receiver, "Received [b]%s[/b]. Use it at the fortress gate." % key_item.item_name)
+			else:
+				server.social.system(receiver, "Your backpack is full. Ask the warden again at the fortress step for another key.")
 	# Only complete a multi-planet commission when all three *actual* story
 	# items are in the party's backpacks. Verify everything before consuming
 	# anything; no partial handover can swallow a single required component.
