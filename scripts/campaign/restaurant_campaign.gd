@@ -64,8 +64,11 @@ func markers(step: Dictionary) -> Array:
 			return [{id = "lastlight_signal", kind = "zone", name = "Possible Last Light Diner location",
 				pos = SEARCH_CENTER, radius = SEARCH_RADIUS}]
 		"reach_diner_dock":
-			return [{id = "lastlight_ports", kind = "target", name = "Dock at Last Light - berths 1 or 2",
-				pos = SpaceLayout.DINER}]
+			# These are the two existing chrome gangways, NOT new ports.
+			return [{id = "lastlight_port_1", kind = "target", name = "Last Light - port 1",
+				pos = SpaceLayout.DINER+Vector3(-29, 0, 0)},
+				{id = "lastlight_port_2", kind = "target", name = "Last Light - port 2",
+					pos = SpaceLayout.DINER+Vector3(29, 0, 0)}]
 		"reach_diner_beers":
 			return [{id = "lastlight_beer", kind = "target", name = "Order and finish a full beer at the diner's tap",
 				pos = SpaceLayout.DINER+TAP}]
