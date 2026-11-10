@@ -353,5 +353,5 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 
 ## The step ended: clear what it put in the world.
 func step_ended(party: Dictionary) -> void:
-	var world := _world()
+	var world := _world(party)
 	if world: world.set_marks(int(party.id), [])
