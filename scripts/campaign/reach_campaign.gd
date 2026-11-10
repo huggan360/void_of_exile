@@ -133,10 +133,20 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 					campaigns._advance(party, {})
 					return
 		"reach_dock":
-			for ship: SpaceShip in ships:
-				if ship.mode=="berth":
-					campaigns._advance(party, {})
-					return
+			if run.id=="first_light" and str(step.id)=="return":
+				var departed: Array = run.get("return_seen", [])
+				for ship: SpaceShip in ships:
+					if ship.mode!="berth" and not ship.id in departed: departed.append(ship.id)
+			run.return_seen = departed
+				for ship: SpaceShip in ships:
+					if ship.mode=="berth" and ship.id in departed:
+						campaigns._advance(party, {})
+						return
+			else:
+				for ship: SpaceShip in ships:
+					if ship.mode=="berth":
+						campaigns._advance(party, {})
+						return
 		"reach_repair":
 			for ship: SpaceShip in ships:
 				if ship.repairs.is_empty() and ship.broken:
@@ -155,6 +165,9 @@ func _begin(party: Dictionary, run: Dictionary, step: Dictionary, world: SpaceWo
 				world.foes.ambushes.append({at = target_point(str(step.get("target", "nexus"))), kind = str(step.get("foe", "brood_skiff")) if step.has("foe") else "brood_skiff", count = int(step.ambush)})
 				if not step.has("foe") and int(step.ambush)>=8:
 					world.foes.ambushes.append({at = target_point(str(step.target)), kind = "void_eel", count = int(step.ambush)/4})
+		"reach_dock":
+			if run.id=="first_light" and str(step.id)=="return":
+				run.return_seen = ships.filter(func(s: SpaceShip) -> bool: return s.mode!="berth").map(func(s: SpaceShip) -> int: return s.id)
 		"reach_tutorial_ambush":
 			var ship := world.ships.get(int(run.get("tutorial_ship", 0))) as SpaceShip
 			if ship==null: ship = _crewed(party, ships)
@@ -286,7 +299,11 @@ func _spawn_pursuer(party: Dictionary, run: Dictionary, world: SpaceWorld, ship:
 
 func _cripple(party: Dictionary, run: Dictionary, world: SpaceWorld, ship: SpaceShip) -> void:
 	# Protected hull: this lesson never destroys the tutorial ship.
-	ship.hp = maxi(SpaceShip.MAX_HP/2, mini(ship.hp, SpaceShip.MAX_HP/2))
+	ship.hp = SpaceShip.MAX_HP/2
+	ship.velocity = Vector3.ZERO
+	ship.speed = 0.0
+	ship.input = [0.0, 0.0, 0.0, 0.0, false, false]
+	ship.pulse = false
 	for part: String in SpaceShip.PARTS: ship.parts[part] = 0.0
 	ship.broken = true
 	if world.foes.foes.has(int(run.get("tutorial_foe", 0))):
