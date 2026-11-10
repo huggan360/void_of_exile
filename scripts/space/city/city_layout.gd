@@ -354,6 +354,36 @@ static func venue(key: String) -> Dictionary:
 			if v.key==key: return v
 	return {}
 
+## Mission 3 uses real existing venues in Lanternheart; these helpers
+## derive the positions from the same authored street layout as the renderer.
+static func story_wizard_venue() -> Dictionary:
+	for v: Dictionary in venues(DISTRICTS[0]):
+		if str(v.get("shop", ""))=="wizard": return v
+	return {}
+
+static func story_pub_venue() -> Dictionary:
+	var wizard := story_wizard_venue()
+	var best := {}
+	var distance := INF
+	for v: Dictionary in venues(DISTRICTS[0]):
+		if str(v.kind)!="bar": continue
+		var d := (v.frame.origin as Vector3).distance_to(wizard.frame.origin) if not wizard.is_empty() else 0.0
+		if d<distance:
+			distance = d
+			best = v
+	return best
+
+static func story_venue_door(v: Dictionary) -> Vector3:
+	if v.is_empty(): return Vector3.INF
+	var frame: Transform3D = v.frame
+	return (planet().center as Vector3)+frame*Vector3(0, 0, -float(v.size.z)*0.5-3.0)
+
+static func story_pub_tap() -> Vector3:
+	var v := story_pub_venue()
+	if v.is_empty(): return Vector3.INF
+	var frame: Transform3D = v.frame
+	return (planet().center as Vector3)+frame*Vector3(-2.5, 1.3, 4.1)
+
 ## A seat by id: {pos, yaw, drink, stand} in world space, or {}.
 static func seat(id: String) -> Dictionary:
 	var parts := id.split(":")
