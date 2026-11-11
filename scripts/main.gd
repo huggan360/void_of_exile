@@ -447,7 +447,9 @@ func travel(destination: String, at := Vector3.INF, cinematic_departure := false
 			if vessel: record.arrival_pos = target.pocket_point(vessel.slot, _offline_ship_transfer.passengers[player.player_id])
 		_offline_ship_transfer = {}
 	if record.has("arrival_pos"): at = record.arrival_pos
-	elif port=="rocket" and world is IslandWorld: at = (world as IslandWorld).launchpad_arrival()
+	elif port=="rocket" and world is IslandWorld:
+		at = (world as IslandWorld).home_point(stats.home)
+		if not at.is_finite(): at = world.spawn_point
 	if world is IslandWorld and SpaceLayout.pocket_at(at)>=0 and is_instance_valid(world.surface_ships):
 		player.set_spatial_world(world.surface_ships)
 	if at != Vector3.INF and (world.is_walkable(at) or (world is IslandWorld and SpaceLayout.pocket_at(at)>=0)):

@@ -383,7 +383,7 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if not Net.is_server() or not is_instance_valid(station): return
 			var pad: Transform3D = station.anchors.get("rocket_pad", Transform3D.IDENTITY)
 			if pos.distance_to(station.to_global(pad.origin))>8.0 or zone_at(pos)!="station": return
-			p.port = {kind = "rocket", destination = surface_realm()}
+			p.port = {kind = "rocket", destination = "realm_1"}
 		"city":
 			if args.size()>1 and str(args[1]) in ["sip", "order"]: return
 			var before := city.seat_of(pid)

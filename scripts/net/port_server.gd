@@ -127,8 +127,10 @@ func arrive(p: Dictionary, realm: RealmInstance, record: Dictionary) -> void:
 		p.dirty = true
 	elif realm.world is IslandWorld:
 		if is_instance_valid(realm.world.surface_ships): record.surface_ship_state = realm.world.surface_ships.state_wire()
-		if (str(port.get("kind", "")) == "descend" or (str(port.get("kind", "")) == "rocket" and str(port.get("destination", ""))==realm.realm_id)) and not port.has("transfer"):
-			var at := (realm.world as IslandWorld).launchpad_arrival()
+		if str(port.get("kind", "")) in ["descend", "rocket"] and not port.has("transfer"):
+			var surface := realm.world as IslandWorld
+			var at: Vector3 = surface.home_point(stats.home) if str(port.kind)=="rocket" else surface.launchpad_arrival()
+			if not at.is_finite() and str(port.kind)=="rocket": at = surface.spawn_point
 			if at.is_finite():
 				record.arrival_pos = at
 				record.port = str(port.kind)

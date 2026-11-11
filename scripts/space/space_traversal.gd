@@ -1374,7 +1374,7 @@ func fly_rocket_surface() -> void:
 	if cinematic or _rocket_flight: return
 	var game := world.game_root()
 	if game==null or not game.has_method("travel"): return
-	var destination := world.surface_realm()
+	var destination := "realm_1"
 	var rocket := world.rocket_node()
 	if rocket==null:
 		game.travel(destination, Vector3.INF, true)
