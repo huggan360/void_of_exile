@@ -7,6 +7,7 @@ var traversal: SpaceTraversal
 
 func _ready() -> void:
 	super._ready()
+	follows_player = true
 	key_action = "ship_land"
 
 func available(player: Node3D) -> bool:
@@ -16,8 +17,8 @@ func available(player: Node3D) -> bool:
 	global_position = player.global_position  # nearest of all while at the helm
 	var land := ship.landable()
 	if not land.is_empty():
-		title = str(land.port.name)
-		description = "The pad is right below. Set her down here?"
+		title = "Land here"
+		description = "%s. Set her down there?" % str(land.port.name)
 		action_text = "Land"
 	elif SpaceLayout.can_descend(ship.xform.origin):
 		title = "The Surface"

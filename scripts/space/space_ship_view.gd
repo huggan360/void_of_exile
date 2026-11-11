@@ -29,6 +29,9 @@ func setup(ship: SpaceShip) -> void:
 	_label.modulate = ship.tint.lightened(0.3)
 	_label.position = Vector3(0, 26, 0)
 	_label.no_depth_test = false
+	# A ship's name reads from far off in space, at a ship's scale.
+	_label.set_meta("label_reach", 2500.0)
+	_label.set_meta("label_world", 0.04)
 	add_child(_label)
 	_ramp = SpaceInteraction.new()
 	_ramp.world = world
@@ -160,9 +163,14 @@ func hit(at: Vector3) -> void:
 	var local := world.local_player
 	if is_instance_valid(local) and _ship and (_ship.seat_of(local.player_id)!="" or SpaceLayout.pocket_at(local.global_position)==_ship.slot):
 		local.add_trauma(0.35)
+		# Our own ship: the hit rings through the hull, wherever we stand in her.
+		GameAudio.play("ship_hit", Vector3.INF, {bus = "SFX", cooldown = 0.05, priority = 2})
+	else:
+		GameAudio.space_sound("ship_hit", at, {cooldown = 0.05})
 
 func explode() -> void:
 	set_process(false)
+	GameAudio.space_sound("space.explosion_big", global_position, {volume_db = 3.0, priority = 3})
 	var flash := OmniLight3D.new()
 	flash.light_color = Color("7dff9a")
 	flash.light_energy = 12.0

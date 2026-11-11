@@ -45,6 +45,7 @@ var _rescues := {}  # player id -> when Orin's skiff arrives (ticks msec)
 var _repairs := {}  # "ship:part" -> {pid, t, ship, part}
 ## Ships waiting for a busy port: port key -> [ship id, ...] in order.
 var port_queues := {}
+var _born_msec := Time.get_ticks_msec()  # ships already here on arrival make no summoning sound
 ## Farther than this from a planet's surface, a waiting ship leaves its line.
 const QUEUE_RANGE := 1600.0
 
@@ -166,7 +167,7 @@ func sample_gravity(position: Vector3) -> Dictionary:
 	if slot>=0:
 		return {frame = Transform3D(Basis.IDENTITY, Vector3(position.x, SpaceLayout.POCKET_ORIGIN.y, position.z)), zone = "ship", distance = 0.0, slot = slot}
 	var diner_offset: Vector3 = position-SpaceLayout.DINER
-	if absf(diner_offset.x)<39.0 and absf(diner_offset.z)<24.0 and absf(diner_offset.y)<14.0:
+	if absf(diner_offset.x)<39.0 and absf(diner_offset.z)<34.0 and absf(diner_offset.y)<22.0:
 		return {frame = Transform3D(Basis.IDENTITY, Vector3(position.x, SpaceLayout.DINER.y, position.z)), zone = "diner", distance = absf(diner_offset.y)}
 	var flat := Vector2(position.x-SpaceLayout.NEXUS.x, position.z-SpaceLayout.NEXUS.z).length()
 	if flat<SpaceLayout.STATION_RADIUS+6.0 and absf(position.y-SpaceLayout.NEXUS.y)<SpaceLayout.STATION_HALF_HEIGHT:
@@ -470,8 +471,18 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or ship.pilot()!=pid: return
 			var target := ship.landable()
 			if target.is_empty():
-				_tell(p, "Fly in low and slow over one of the planet's ports (the red ship marks) to land.")
+				_tell(p, "Fly into a planet's orbit, or low and slow over one of its ports (the red ship marks), to land.")
 				return
+			# Busy port: the nearest free one on the same planet, if there is one.
+			if port_taken(str(target.port.key), ship.id) or _fleet_pad_reserved(str(target.port.key)):
+				var best_d := INF
+				for entry: Dictionary in SpaceLayout.ports(target.planet):
+					var key := str(entry.key)
+					if port_taken(key, ship.id) or _fleet_pad_reserved(key): continue
+					var d := ship.xform.origin.distance_to((entry.pose as Transform3D).origin)
+					if d<best_d:
+						best_d = d
+						target = {planet = target.planet, port = entry}
 			_ask_port(ship, target)
 		"dock":
 			var ship := ship_of(pid)
@@ -1120,6 +1131,7 @@ func handle_event(event: Array) -> void:
 			for data: Array in event[1]:
 				var id := int(data[0])
 				var ship: SpaceShip = ships.get(id)
+				var summoned := not ship_views.has(id) and Time.get_ticks_msec()-_born_msec>3000
 				if Net.is_client() or ship==null:
 					ship = SpaceShip.from_wire(data, ship if Net.is_client() else null)
 					ships[id] = ship
@@ -1127,6 +1139,9 @@ func handle_event(event: Array) -> void:
 				if not (server_build or Net.is_server()):
 					_view_for(ship).push(ship, float(event[2]) if event.size()>2 else -1.0)
 					_burn_heart(ship)
+					# Your newly summoned ship: only you hear her arrive.
+					if summoned and is_instance_valid(local_player) and ship.owner==int(local_player.player_id):
+						GameAudio.play("ship_spawn", Vector3.INF, {bus = "SFX", priority = 2})
 		"ship-":
 			var id := int(event[1])
 			if Net.is_client(): ships.erase(id)
@@ -1195,9 +1210,8 @@ func npc_position(id: String) -> Vector3:
 	if info.get("world", "")!=REALM: return Vector3.INF
 	var at: Dictionary = info.at
 	if at.has("diner"):
-		# The visual host is already in LastLightDiner; do not add a second
-		# character model or alter the pre-existing neon building.
-		return SpaceLayout.DINER+Vector3(0, 0, -9)
+		# The visual host is already in LastLightDiner; do not add a second character model.
+		return SpaceLayout.DINER+LastLightDiner.HOST
 	if at.has("nexus"):
 		if station==null: return Vector3.INF
 		var anchor: Variant = station.anchors.get(str(at.nexus))

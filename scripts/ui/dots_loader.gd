@@ -22,4 +22,4 @@ func _draw() -> void:
 	for i in 3:
 		var bounce := maxf(0.0, sin((_elapsed * 7.0) - i * 0.8)) * 5.0
 		var alpha := 0.55 + 0.45 * (1.0 - float(i) * 0.12)
-		draw_circle(center + Vector2((i - 1) * spacing, -bounce), 4.0, Color(UIStyle.ACCENT, alpha))
+		draw_circle(center + Vector2((i - 1) * spacing, -bounce), 4.0, Color(Color.WHITE, alpha))

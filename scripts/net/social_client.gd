@@ -147,6 +147,7 @@ func _on_event(ev: Array) -> void:
 		"camp_done": campaign_done.emit(ev[1])
 		"dots":
 			if int(ev[2])>0 and str(ev[3])=="forge": GameAudio.play("forge_dismantle")
+			if int(ev[2])<0 and str(ev[3])=="shop": GameAudio.play("buy", Vector3.INF, {cooldown = 0.1})
 			Account.set_dots(int(ev[1]), int(ev[2]), str(ev[3]))
 		"camp_pack_done": pack_done.emit(ev[1])
 		"space_unlocked":  # the Theory of Everything is told: Space is open

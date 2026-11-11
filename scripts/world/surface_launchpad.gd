@@ -44,6 +44,9 @@ var _rng := RandomNumberGenerator.new()
 class FenceBoarding extends InteractionTarget:
 	var pad: SurfaceLaunchpad
 
+	func _init() -> void:
+		follows_player = true
+
 	func available(player: Node3D) -> bool:
 		if not enabled or not is_instance_valid(player) or not is_inside_tree(): return false
 		var local := pad.to_local(player.global_position)

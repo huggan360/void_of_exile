@@ -17,8 +17,18 @@ const ALIASES := {
 	magic_impact="combat.magic_hit", heal="player.heal", potion="item.potion", equip="item.equip",
 	magic_explosion="magic.explosion",
 	dot_gain="progression.dot_gain", warning_pulse="ui.warning_pulse", ui_click="ui.click", ui_hover="ui.hover",
-	party_invite="notification.party_invite", campaign_complete="notification.campaign_complete"
+	party_invite="notification.party_invite", campaign_complete="notification.campaign_complete",
+	buy="item.buy", ship_spawn="ship.spawn", ship_hit="ship.hit", ship_cannon="ship.cannon",
+	space_enemy_die="combat.space_enemy_death"
 }
+## Planet ambience in Space (SpaceLayout ids); Vesperis picks town or farmland itself.
+const PLANET_AMBIENCE := {verdance = "ambience.green_planet", rosamund = "ambience.purple_yellow_planet",
+	amberfall = "ambience.desert", tidewell = "ambience.island", shardheart = "ambience.purple_yellow_planet",
+	hollowmoon = "ambience.spooky_planet", mawgrave = "ambience.spooky_planet", pale_eye = "ambience.spooky_planet"}
+## Seconds an ambience loop's end overlaps its next pass.
+const AMBIENCE_CROSSFADE := 4.0
+## Space is big: a sound out there carries this far (m) from the ship.
+const SPACE_REACH := 1400.0
 var events := {}
 var voices: Array[Dictionary] = []
 var _streams := {}
@@ -57,6 +67,7 @@ var _test_token := 0
 var _test_label := ""
 var _last_mode := ""
 var _duck := 0.0
+var _hushed := false  # after a death: no music until the next world (the new character's)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -94,6 +105,23 @@ func _customize_events() -> void:
 		events[entry[0]] = {paths=["res://assets/audio/sfx/"+entry[1]],gain_db=-8.0,pitch_variance=.035}
 	events.magic_shield_hit = {paths=["res://assets/audio/sfx/magic_hit_shield1.wav","res://assets/audio/sfx/magic_hit_shield_2.wav"],gain_db=-7.0,pitch_variance=.035}
 	events.boss_intro = {paths=["res://assets/audio/sfx/cinematic_horror_impact_1.wav"],gain_db=-8.0,pitch_variance=0}
+	events["player.death"] = {paths=["res://assets/audio/sfx/player_die.wav"],gain_db=-4.0,pitch_variance=0}
+	# Space: the ships, the brood, the bosses' hazards, the shops and the fleet.
+	events["ship.hit"] = {paths=["res://assets/audio/sfx/ship_hit.wav","res://assets/audio/sfx/ship_hit2.wav"],gain_db=-4.0,pitch_variance=.035}
+	events["ship.spawn"] = {paths=["res://assets/audio/sfx/ship_spawn.wav"],gain_db=-5.0,pitch_variance=0}
+	events["item.buy"] = {paths=["res://assets/audio/sfx/buy.wav"],gain_db=-6.0,pitch_variance=.015}
+	events["combat.space_enemy_death"] = {paths=["res://assets/audio/sfx/enemy_die4.wav"],gain_db=-3.0,pitch_variance=.025}
+	for entry in [["ship.cannon","ship_cannon",-9.0],["brood.spit","brood_spit",-8.0],["brood.heavy","brood_heavy",-5.0],
+			["space.explosion_small","explosion_small",-5.0],["space.explosion_big","explosion_big",-3.0],
+			["hazard.strike","hazard_strike",-7.0],["hazard.slam","hazard_slam",-6.0]]:
+		events[entry[0]] = {paths=["res://assets/audio/generated/%s.wav" % entry[1]],gain_db=entry[2],pitch_variance=.035}
+	for entry in [["green_planet",-8.0],["island",-8.0],["purple_yellow_planet",-8.0],["spooky_planet",-8.0],["vesperis_city",-8.0],["vesperis_outside_city",-8.0]]:
+		events["ambience."+entry[0]] = {paths=["res://assets/audio/ambience/ambience_%s.ogg" % entry[0]],gain_db=entry[1],pitch_variance=0,loop=true}
+	events["music.space_theme"] = {paths=["res://assets/audio/music/space_theme.ogg"],gain_db=-8.0,pitch_variance=0,loop=true}
+	# The Theory of Everything's two layers run together from the first beat;
+	# the second is only turned up for the boss, so they never drift apart.
+	events["music.space.layer1"] = {paths=["res://assets/audio/music/space_music_layer1.ogg"],gain_db=-8.0,pitch_variance=0,loop=true}
+	events["music.space.layer2"] = {paths=["res://assets/audio/music/space_music_layer2.ogg"],gain_db=-10.0,pitch_variance=0,loop=true}
 	if events.has("combat.boss_impact"):
 		events["combat.boss_impact"].paths = ["res://assets/audio/sfx/heavy_boss_impact.wav"]
 	# Dragon vocalizations stay on the dragon; other bosses use human/monster variants.
@@ -230,7 +258,9 @@ func _stream(path: String, looping: bool) -> AudioStream:
 			stream.loop_offset = float(_loop_offsets.get(path, 0.0)) if looping else 0.0
 		elif stream is AudioStreamWAV:
 			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD if looping else AudioStreamWAV.LOOP_DISABLED
-			if looping: stream.loop_end = stream.data.size()/(4 if stream.stereo else 2)
+			# Count frames from the length: imported data is compressed (QOA), so
+			# its byte size would loop only the first few seconds.
+			if looping: stream.loop_end = int(round(stream.get_length()*stream.mix_rate))
 	_streams[key] = stream
 	return stream
 
@@ -270,6 +300,9 @@ func play(event: String, at: Vector3 = Vector3.INF, options: Dictionary = {}) ->
 	var entry: Dictionary = events.get(key,{})
 	var paths: Array = entry.get("paths",[])
 	var looping := bool(options.get("loop",false))
+	# Ambience beds play to their end and overlap the next pass (crossfade);
+	# music and positional loops loop natively.
+	var crossfade := looping and not at.is_finite() and (key.begins_with("ambience.") or str(options.get("bus",""))=="Ambience")
 	var stream: AudioStream
 	if paths.is_empty():
 		stream = _synth_stream(event,looping)
@@ -279,7 +312,7 @@ func play(event: String, at: Vector3 = Vector3.INF, options: Dictionary = {}) ->
 		var choice := posmod(int(options.variant), paths.size()) if options.has("variant") else _random.randi_range(0,paths.size()-1)
 		if not options.has("variant") and paths.size()>1 and choice==int(_last_variant.get(key,-1)): choice = (choice+1)%paths.size()
 		_last_variant[key] = choice
-		stream = _stream(str(paths[choice]),looping)
+		stream = _stream(str(paths[choice]),looping and not crossfade)
 	if stream==null: return {}
 	var priority := int(options.get("priority",1))
 	if voices.size()>=MAX_VOICES:
@@ -300,7 +333,8 @@ func play(event: String, at: Vector3 = Vector3.INF, options: Dictionary = {}) ->
 	var v := {event=key,stream=stream,position=at,positional=positional,bus=category,players=[],source=null,
 		age=0.0,seek=seek,max_age=duration,length=(stream.get_length()-seek)/pitch,pitch=pitch,gain=gain,level=0.0 if looping else 1.0,target=1.0,
 		loop=looping,stopping=false,fade=float(options.get("fade",.35)),max_distance=distance,priority=priority,
-		ally=bool(options.get("ally",false)),mode=str(AppSettings.audio.output_mode),source_id=options.get("source_id",0)}
+		ally=bool(options.get("ally",false)),mode=str(AppSettings.audio.output_mode),source_id=options.get("source_id",0),
+		xfade=minf(AMBIENCE_CROSSFADE,stream.get_length()*.25) if crossfade else 0.0,cycle=0.0,tail=[],tail_age=0.0}
 	voices.append(v)
 	_start_players(v,seek)
 	_update_voice(v)
@@ -370,6 +404,7 @@ func _rebuild_voice(v: Dictionary) -> void:
 	for p in v.players:
 		if is_instance_valid(p): p.stop(); p.queue_free()
 	v.players = []
+	_drop_tail(v)
 	_start_players(v,position)
 
 func _dispose(v: Dictionary) -> void:
@@ -377,8 +412,30 @@ func _dispose(v: Dictionary) -> void:
 	for p in v.players:
 		if is_instance_valid(p): p.stop(); p.queue_free()
 	v.players = []
+	_drop_tail(v)
 	v.stopping = true
 	if FrameTrace.enabled: FrameTrace.record("audio/dispose",profile_started)
+
+## The previous pass of a crossfading ambience loop, once it has faded out.
+func _drop_tail(v: Dictionary) -> void:
+	for p in v.get("tail",[]):
+		if is_instance_valid(p): p.stop(); p.queue_free()
+	v.tail = []
+
+## A crossfading loop near its end starts its next pass over the old one.
+func _cycle_crossfade(v: Dictionary, delta: float) -> void:
+	v.cycle = float(v.cycle)+delta*float(v.pitch)
+	if not (v.tail as Array).is_empty():
+		v.tail_age = float(v.tail_age)+delta
+		if float(v.tail_age)>=float(v.xfade): _drop_tail(v)
+	if v.stopping or float(v.cycle)<v.stream.get_length()-float(v.seek)-float(v.xfade): return
+	_drop_tail(v)
+	v.tail = v.players
+	v.tail_age = 0.0
+	v.players = []
+	v.cycle = 0.0
+	v.seek = 0.0
+	_start_players(v,0.0)
 
 func _process(delta: float) -> void:
 	if not FrameTrace.enabled: _profile_process(delta); return
@@ -431,10 +488,11 @@ func _profile_process(delta: float) -> void:
 			if not is_instance_valid(owner): stop(v)
 			elif (owner as Node3D).is_inside_tree(): v.position = (owner as Node3D).global_position
 		if bool(v.ally) and not AppSettings.audio.ally_sounds: stop(v)
+		if float(v.xfade)>0.0: _cycle_crossfade(v,delta)
 		v.level = move_toward(float(v.level),float(v.target),delta/maxf(.01,float(v.fade)))
 		if (v.stopping and v.level<=.001) or (not v.loop and v.age>v.length+.08):
 			_dispose(v); voices.remove_at(i); continue
-		if update_positions or v.stopping or absf(float(v.level)-float(v.target))>.001: _update_voice(v)
+		if update_positions or v.stopping or absf(float(v.level)-float(v.target))>.001 or not (v.tail as Array).is_empty(): _update_voice(v)
 	if FrameTrace.enabled: FrameTrace.record("audio/voices",segment_started)
 	if _cooldowns.size()>2048:
 		var now := Time.get_ticks_msec()/1000.0
@@ -445,8 +503,15 @@ func _update_voice(v: Dictionary) -> void:
 	var gain: float = v.gain+linear_to_db(maxf(.00001,float(v.level)))
 	if bool(v.ally): gain += linear_to_db(maxf(.00001,float(AppSettings.audio.ally_volume)))-5
 	if not v.positional:
+		var head := gain
+		if not (v.tail as Array).is_empty():
+			# Equal-power crossfade between the old pass and the new one.
+			var k := clampf(float(v.tail_age)/maxf(.01,float(v.xfade)),0,1)
+			head += linear_to_db(maxf(.00001,sqrt(k)))
+			for p in v.tail:
+				if is_instance_valid(p): p.volume_db = gain+linear_to_db(maxf(.00001,sqrt(1.0-k)))
 		for p in v.players:
-			if absf(p.volume_db-gain)>.05: p.volume_db = gain
+			if absf(p.volume_db-head)>.05: p.volume_db = head
 		return
 	var local: Vector3 = _listener.global_basis.inverse()*(Vector3(v.position)-_listener.global_position)
 	var distance := local.length()
@@ -521,8 +586,49 @@ func footstep(at: Vector3, ally := false, source_id := 0) -> Dictionary:
 	_last_variant[bucket] = variant
 	return play("step_"+surface+str(variant),at if ally else Vector3.INF,{bus="SFX",ally=ally,source_id=source_id,cooldown=.18,volume_db=-7,max_distance=12,priority=1})
 
-func enemy_death_event(definition: EnemyDef) -> String:
-	return "small_enemy_die" if definition.body_height * definition.model_scale <= 1.5 else "enemy_die"
+func enemy_death_event(definition: EnemyDef, enemy: Node = null) -> String:
+	if definition.body_height * definition.model_scale <= 1.5: return "small_enemy_die"
+	# Out among the stars (planets, the Theory of Everything) the bigger ones get their own cry.
+	return "space_enemy_die" if is_instance_valid(enemy) and _in_spatial_world(enemy) else "enemy_die"
+
+static func _in_spatial_world(node: Node) -> bool:
+	var at := node.get_parent()
+	while at != null:
+		if at is SpatialWorld: return not at is SurfaceShipWorld
+		if at is GameWorld: return false
+		at = at.get_parent()
+	return false
+
+## Where Space's sounds are heard from: the camera when it is out in space,
+## otherwise (looking round a ship room) the ship the player is in.
+func space_ear() -> Vector3:
+	var space := _world as SpaceWorld
+	if space == null or not is_instance_valid(_player): return Vector3.INF
+	var eye := _player.camera.global_position
+	var slot := SpaceLayout.pocket_at(eye)
+	if slot < 0: return eye
+	var ship := space.ship_in_slot(slot)
+	return ship.xform.origin if ship else Vector3.INF
+
+## A sound out in Space (bolts, hits, explosions): it carries far, softening
+## with distance from space_ear(). Elsewhere (the Surface's ships) it is an
+## ordinary positional sound.
+func space_sound(event: String, at: Vector3, options: Dictionary = {}) -> Dictionary:
+	if Net.is_server(): return {}
+	var reach := float(options.get("reach", SPACE_REACH))
+	var opts := options.duplicate()
+	opts.erase("reach")
+	if not _world is SpaceWorld:
+		opts.max_distance = minf(reach, 160.0)
+		return play(event, at, opts)
+	var ear := space_ear()
+	if not ear.is_finite(): return {}
+	var distance := ear.distance_to(at)
+	if distance > reach: return {}
+	opts.bus = "SFX"
+	opts.volume_db = float(opts.get("volume_db", 0.0))+linear_to_db(maxf(.00001, clampf(1.0-distance/reach, 0, 1)*minf(1.0, 40.0/maxf(40.0, distance))))
+	opts.source_id = opts.get("source_id", str(at.snapped(Vector3.ONE*20)))
+	return play(event, Vector3.INF, opts)
 
 func rumble_event(seconds: float) -> String:
 	var event := "combat.boss_rumble_%dms" % roundi(seconds * 1000.0)
@@ -581,6 +687,7 @@ func set_context(player: Player, world: GameWorld) -> void:
 	if is_instance_valid(world) and world.get_instance_id()!=_scene_id:
 		_footsteps.clear()
 		_scene_id = world.get_instance_id()
+		_hushed = false
 		for v in voices:
 			if v.positional: stop(v,.12)
 		_tick = 0
@@ -629,6 +736,21 @@ func _ambient_for(biome: int) -> String:
 		Biomes.DEEP_DARK: return "ambience.cinematic"
 	return "ambience.wind"
 
+## Space's ambience: the planet under you (Vesperis: in a town or out in the
+## fields), otherwise the open dark. A ship's room sounds like where she is.
+func _space_ambience() -> String:
+	var at := _player.global_position
+	var slot := SpaceLayout.pocket_at(at)
+	if slot >= 0:
+		var ship := (_world as SpaceWorld).ship_in_slot(slot)
+		if ship == null: return "ambience.cinematic"
+		at = ship.xform.origin
+	var planet := SpaceLayout.planet_near(at)
+	if planet.is_empty(): return "ambience.cinematic"
+	if str(planet.id) == CityLayout.ID:
+		return "ambience.vesperis_city" if CityLayout.in_town(at-(planet.center as Vector3)) else "ambience.vesperis_outside_city"
+	return str(PLANET_AMBIENCE.get(str(planet.id), "ambience.cinematic"))
+
 func _update_context() -> void:
 	if not is_instance_valid(_world) or not is_instance_valid(_player): return
 	var signature := ""
@@ -639,7 +761,9 @@ func _update_context() -> void:
 	_update_music()
 	var weights := {}
 	if _world is TheoryWorld:
-		pass  # The authored space/ship score and ambience will be supplied later.
+		pass  # The ship's hum is in its own fires and machines.
+	elif _world is SpaceWorld:
+		weights[_space_ambience()] = 1.0
 	elif _world is IslandWorld:
 		for offset in [Vector3.ZERO,Vector3(14,0,0),Vector3(-14,0,0),Vector3(0,0,14),Vector3(0,0,-14)]:
 			var id := _world.biome_at(_player.global_position+offset).id
@@ -665,6 +789,9 @@ func _update_context() -> void:
 ## when audible combat begins; they never run silently under exploration.
 func _update_music() -> void:
 	var plan := _music_plan()
+	if bool(plan.get("sync", false)):
+		_update_synced_music(plan)
+		return
 	var bed := str(plan.get("bed", ""))
 	if bed != _music_key or (bed != "" and _music.is_empty()):
 		stop(_music, 2.5)
@@ -685,6 +812,40 @@ func _update_music() -> void:
 				fixed_pitch = true, start_at = 0.0, cooldown = 0.0})
 
 
+## Two layers started on the same frame and looping together (same length);
+## the second is only turned up and down, never restarted, so the rhythm holds.
+func _update_synced_music(plan: Dictionary) -> void:
+	var bed := str(plan.bed)
+	var layer := str(plan.layer)
+	if bed != _music_key or layer != _music_layer_key or _music.is_empty() or _music_layer.is_empty() or _music.stopping or _music_layer.stopping:
+		stop(_music, 2.5)
+		stop(_music_layer, 2.5)
+		_music_key = bed
+		_music_layer_key = layer
+		_music_encounter = ""
+		var options := {loop = true, bus = "Music", fade = 2.5, fixed_pitch = true, cooldown = 0.0}
+		_music = play(bed, Vector3.INF, options)
+		_music_layer = play(layer, Vector3.INF, options)
+		if not _music_layer.is_empty(): _music_layer.target = 0.0
+	if _music_layer.is_empty(): return
+	_music_layer.fade = 1.5
+	_music_layer.target = 1.0 if bool(plan.get("boss", false)) else 0.0
+
+
+## Our character died: the death impact, and the music fades out fast under
+## it and stays quiet until the next world (the new character's) loads.
+func player_died() -> void:
+	play("player.death", Vector3.INF, {bus = "SFX", priority = 3, fixed_pitch = true, cooldown = 1.0})
+	_hushed = true
+	stop(_music, 0.5)
+	stop(_music_layer, 0.5)
+	_music = {}
+	_music_key = ""
+	_music_layer = {}
+	_music_layer_key = ""
+	_music_encounter = ""
+
+
 ## The reliable death event also covers a missed dying snapshot or a frame
 ## stall, so returning to a cleared winter arena cannot restart its score.
 func boss_defeated(id: String, realm: String) -> void:
@@ -702,10 +863,11 @@ func _music_world_key() -> String:
 
 
 func _music_plan() -> Dictionary:
-	if _world is TheoryWorld: return {}
-	var normal := "music.tavern" if Campaigns.is_tavern(_world.realm_id) else "music.japanese"
-	if _player.stats.hp <= 0.0 or not _player.model.visible:
-		return {}  # Give the death cue space until the next character/world.
+	var normal := "music.space_theme" if _world is SpaceWorld else "music.tavern" if Campaigns.is_tavern(_world.realm_id) else "music.japanese"
+	# Give the death cue space until the next character/world. (Not the
+	# model's visibility: first person hides it while you are alive.)
+	if _hushed or _player.stats.hp <= 0.0:
+		return {}
 	var world_key := _music_world_key()
 	var active: Boss
 	var castle_king: Boss
@@ -723,6 +885,8 @@ func _music_plan() -> Dictionary:
 	if active != null:
 		var actor_id := active.net_id if active.net_id != 0 else active.get_instance_id()
 		encounter = "%s/%d/%d" % [world_key, actor_id, active.intro_serial]
+	if _world is TheoryWorld:
+		return {bed = "music.space.layer1", layer = "music.space.layer2", sync = true, boss = fighting}
 	var dungeon := _world as DungeonWorld
 	if dungeon != null and str(dungeon.record.get("dungeon", "")) == "goblins_cave":
 		return {bed = "music.battle2.layer1", layer = "music.battle2.layer2" if fighting else "", encounter = encounter}

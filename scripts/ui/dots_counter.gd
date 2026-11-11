@@ -28,6 +28,49 @@ var _shown := 0
 var _target := 0
 var _pending := 0  # dots still in the air
 var _flash := 0.0
+static var _icon_texture: ImageTexture
+
+
+## The dot icon itself (pixel art), shared by every price in the game.
+static func icon_texture() -> ImageTexture:
+	if _icon_texture == null:
+		_icon_texture = ImageTexture.create_from_image(PixelArt.image_from_rows(PackedStringArray(ICON_ROWS), {
+			"G": Dots.COLOR_DARK,
+			"M": Dots.COLOR,
+			"W": Color(0.9, 1.0, 0.82),
+		}))
+	return _icon_texture
+
+
+## An amount of Dots as the number and the dot icon (never the word): white,
+## or green when it is a sale price. Set it again with set_amount().
+static func amount(value: int, font_size := 18, sale := false) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var label := UIStyle.label("", font_size, Color.WHITE)
+	label.name = "Amount"
+	label.add_theme_font_override("font", UIStyle.bold())
+	label.add_theme_color_override("font_outline_color", Color(0.02, 0.04, 0.06))
+	label.add_theme_constant_override("outline_size", 4)
+	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(label)
+	var icon := TextureRect.new()
+	icon.texture = icon_texture()
+	icon.custom_minimum_size = Vector2.ONE*roundf(font_size*0.9)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_SCALE
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(icon)
+	set_amount(row, value, sale)
+	return row
+
+
+static func set_amount(row: HBoxContainer, value: int, sale := false) -> void:
+	var label := row.get_node("Amount") as Label
+	label.text = Dots.format(value)
+	label.add_theme_color_override("font_color", UIStyle.GOOD if sale else Color.WHITE)
 
 
 func _ready() -> void:
@@ -35,11 +78,7 @@ func _ready() -> void:
 	add_theme_constant_override("separation", 6)
 	tooltip_text = "Dots: dismantle items at the forge, finish campaigns for the first time"
 	alignment = BoxContainer.ALIGNMENT_END
-	_icon.texture = ImageTexture.create_from_image(PixelArt.image_from_rows(PackedStringArray(ICON_ROWS), {
-		"G": Dots.COLOR_DARK,
-		"M": Dots.COLOR,
-		"W": Color(0.9, 1.0, 0.82),
-	}))
+	_icon.texture = icon_texture()
 	_icon.custom_minimum_size = Vector2(ICON, ICON)
 	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_icon.stretch_mode = TextureRect.STRETCH_SCALE

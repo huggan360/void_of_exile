@@ -3,7 +3,8 @@ extends PanelContainer
 ## The shipwright's centered fleet window, matching the Chronicler's book.
 ## Your battleships, each its own ship on the account (FleetServer).
 ## Take a stored one out onto the pad, store one in use, or buy a new one.
-## A lost ship is gone; a stored one costs nothing to take out.
+## A lost ship is gone (not listed); a stored one costs nothing to take out.
+## Amounts are the number and the dot icon, never the word.
 ## Drawn in the game's own skin: the ivy window, stone cards and buttons.
 const SIZE := CampaignBrowser.SIZE
 const SHIP_ICON := ["........w.......", ".......ww.......", "......wws.......", ".....wwss.......", "....wwsss..p....", "...wwssss..pp...",
@@ -12,13 +13,14 @@ const SHIP_ICON := ["........w.......", ".......ww.......", "......wws.......", 
 const SHIP_COLORS := {w = "f4e6c8", s = "c8b090", p = "ff6eb4", m = "6a4a2a", b = "3a2418", k = "8a5a3a", o = "ffd27a", c = "6af0e0"}
 var interaction: InteractionCard
 var _target: InteractionTarget
-var _dots := UIStyle.rich("", UIStyle.SIZE_NORMAL)
+var _dots := DotsCounter.amount(0, UIStyle.SIZE_NORMAL)
 var _list := VBoxContainer.new()
 var _note := UIStyle.label("", UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM)
 var _buy := Button.new()
-var _price := UIStyle.rich("", UIStyle.SIZE_NORMAL)
+var _price := DotsCounter.amount(SpaceWorld.SHIP_PRICE, UIStyle.SIZE_NORMAL)
 var _hint := UIStyle.label("", UIStyle.SIZE_SMALL, UIStyle.BAD)
 var _waiting := false
+var _asked := ""  # the operation waiting for its answer
 var _refresh_in := 0.0
 var _data := {}
 static var _icon: ImageTexture
@@ -34,8 +36,7 @@ func _ready() -> void:
 	var title := UIStyle.heading("Shipwright", 28)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
-	_dots.fit_content = true
-	_dots.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_dots.alignment = BoxContainer.ALIGNMENT_END
 	_dots.custom_minimum_size.x = 150
 	_dots.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(_dots)
@@ -64,8 +65,6 @@ func _ready() -> void:
 	_buy.focus_mode = Control.FOCUS_NONE
 	_buy.pressed.connect(func() -> void: _request(["buy"]))
 	buy_row.add_child(_buy)
-	_price.fit_content = true
-	_price.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_price.custom_minimum_size.x = 110
 	_price.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	buy_row.add_child(_price)
@@ -108,6 +107,7 @@ func _request(args: Array) -> void:
 		_render()
 		return
 	_waiting = true
+	_asked = str(args[0])
 	_refresh_in = 8.0
 	_render()
 	Net.client.send_action("fleet", args)
@@ -118,8 +118,10 @@ func receive(data: Dictionary) -> void:
 	_refresh_in = 3.0
 	if data.has("error"): _hint.text = str(data.error)
 	else:
+		if _asked=="buy": GameAudio.play("buy", Vector3.INF, {cooldown = 0.2})
 		_data = data
 		_hint.text = ""
+	_asked = ""
 	_render()
 
 func _dots_now() -> int:
@@ -130,16 +132,14 @@ func _render() -> void:
 		_list.remove_child(row)
 		row.queue_free()
 	var clear := bool(_data.get("pad_clear", true))
-	var dots_hex := Dots.COLOR.to_html(false)
-	_dots.text = "[right][b][color=#%s]%s[/color][/b] [color=#%s]Dots[/color][/right]" % [dots_hex, Dots.format(_dots_now()), UIStyle.TEXT_DIM.to_html(false)]
-	_price.text = "[b][color=#%s]%s[/color][/b] [color=#%s]Dots[/color]" % [dots_hex, Dots.format(SpaceWorld.SHIP_PRICE), UIStyle.TEXT_DIM.to_html(false)]
+	DotsCounter.set_amount(_dots, _dots_now())
 	_note.text = "" if clear else "The pad is in use: fly that ship off, or store it at a shipwright."
 	_note.visible = _note.text!=""
 	_buy.disabled = _waiting or _dots_now()<SpaceWorld.SHIP_PRICE or not clear
-	var ships: Array = _data.get("ships", [])
+	var ships: Array = (_data.get("ships", []) as Array).filter(func(ship: Dictionary) -> bool: return str(ship.get("status", ""))!="destroyed")
 	for ship: Dictionary in ships: _list.add_child(_card(ship, clear))
 	if ships.is_empty():
-		var none := UIStyle.label("..." if _waiting else "You have no ships yet.", UIStyle.SIZE_NORMAL, UIStyle.TEXT_DIM)
+		var none := UIStyle.label("..." if _waiting else "No ships", UIStyle.SIZE_NORMAL, UIStyle.TEXT_DIM)
 		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_list.add_child(none)
 	_hint.visible = _hint.text!=""

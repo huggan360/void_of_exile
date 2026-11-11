@@ -360,7 +360,7 @@ func _shoot(from: Vector3, vel: Vector3, friendly: bool, ship: int, damage: int,
 	var bolt := {id = _next_bolt, pos = from, vel = vel, initial = vel.normalized(), life = 3.2, friendly = friendly, ship = ship, gunner = gunner, damage = damage, radius = 1.0+size*0.1}
 	_next_bolt += 1
 	_bolts.append(bolt)
-	_emit(["bolt", from, vel, friendly, size, bolt.id])
+	_emit(["bolt", from, vel, friendly, size, bolt.id, ship])
 	return bolt
 
 func _emit(event: Array) -> void:
@@ -384,7 +384,7 @@ func handle_event(event: Array) -> void:
 					flag.name = "TurretTarget"
 					flag.set_meta("brood_id", id)
 					ship.add_child(flag)
-					_views[id] = {node = ship, target = data[2], fwd = data[4] if data.size()>4 else Vector3.FORWARD}
+					_views[id] = {node = ship, target = data[2], fwd = data[4] if data.size()>4 else Vector3.FORWARD, kind = str(data[1])}
 				var target_flag := (_views[id].node as Node3D).get_node("TurretTarget") as TargetFlag
 				target_flag.target = bool(data[6]) if data.size()>6 else true
 				_views[id].target = data[2]
@@ -392,12 +392,20 @@ func handle_event(event: Array) -> void:
 				if data.size()>5: (_views[id].node as BroodShip).set_health(float(data[5]))
 		"foe-":
 			var id := int(event[1])
+			var big := false
 			if _views.has(id):
+				big = str(_views[id].get("kind", "")) in ["brood_carrier", "brood_mother"]
 				(_views[id].node as Node3D).queue_free()
 				_views.erase(id)
-			if bool(event[3]): _burst(event[2])
+			if bool(event[3]):
+				_burst(event[2])
+				GameAudio.space_sound("space.explosion_big" if big else "space.explosion_small", event[2], {volume_db = 2.0 if big else 0.0, priority = 2})
 		"bolt":
-			_visual_bolt(event[1], event[2], bool(event[3]), float(event[4]) if event.size()>4 else 1.0, int(event[5]) if event.size()>5 else 0)
+			var size := float(event[4]) if event.size()>4 else 1.0
+			_visual_bolt(event[1], event[2], bool(event[3]), size, int(event[5]) if event.size()>5 else 0)
+			if not bool(event[3]): GameAudio.space_sound("brood.heavy" if size>=2.0 else "brood.spit", event[1], {cooldown = 0.06})
+			elif not _own_ship(int(event[6]) if event.size()>6 else 0):  # our own guns sound as we fire
+				GameAudio.space_sound("ship_cannon", event[1], {cooldown = 0.05, volume_db = -2.0})
 		"bolt_path":
 			for path: Array in event[1]:
 				for entry: Array in _visual_bolts:
@@ -413,12 +421,22 @@ func handle_event(event: Array) -> void:
 		"hit":
 			_flash(event[1], Color("ffd27a"), 14.0)
 			if event.size()<4: return
+			if str(event[2])=="foe": GameAudio.space_sound("ship_hit", event[1], {cooldown = 0.05})
+			elif str(event[2])=="ground": GameAudio.space_sound("wand_impact", event[1], {cooldown = 0.07, reach = 300.0})
 			if str(event[2])=="foe" and _views.has(int(event[3])):
 				var brood: BroodShip = _views[int(event[3])].node
 				brood.set_health(float(event[4]))
 				brood.glitch(event[1])
 			elif str(event[2])=="ship" and world.ship_views.has(int(event[3])):
 				(world.ship_views[int(event[3])] as SpaceShipView).hit(event[1])
+
+## Whether ship `id` is the one the local player is aboard.
+func _own_ship(id: int) -> bool:
+	var me := world.local_player
+	if id==0 or not is_instance_valid(me): return false
+	var ship := world.ship_of(me.player_id)
+	if ship==null: ship = world.ship_in_slot(SpaceLayout.pocket_at(me.global_position))
+	return ship!=null and ship.id==id
 
 func _interpolate(delta: float) -> void:
 	for view: Dictionary in _views.values():

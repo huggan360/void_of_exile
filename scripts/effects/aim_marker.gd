@@ -87,8 +87,9 @@ func _ready() -> void:
 	visible = false
 
 
-## Every frame: `point` = the ground under the aim; `held` = shooting.
-func track(point: Vector3, held: bool, delta: float) -> void:
+## Every frame: `point` = the ground under the aim; `held` = shooting; `up`
+## = the ground's up there (a planet's gravity in Space), the ring lies flat to it.
+func track(point: Vector3, held: bool, delta: float, up := Vector3.UP) -> void:
 	_time += delta
 	if held and not _held:
 		_snap = SNAP_FROM  # a fresh press: the ring snaps in
@@ -101,7 +102,8 @@ func track(point: Vector3, held: bool, delta: float) -> void:
 	visible = _alpha > 0.01
 	if not visible:
 		return
-	global_position = point + Vector3.UP * 0.06
+	var side := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
+	global_transform = Transform3D(Basis(side, up, side.cross(up)).orthonormalized(), point + up * 0.06)
 	_ring.scale = Vector3.ONE * _snap * (1.0 + 0.04 * sin(_time * 7.0))
 	_material.set_shader_parameter("alpha", _alpha)
 	_material.set_shader_parameter("pulse", 0.5 + 0.5 * sin(_time * 7.0))

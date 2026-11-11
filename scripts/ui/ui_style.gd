@@ -178,8 +178,9 @@ static func theme() -> Theme:
 		_theme.set_color("default_color", "RichTextLabel", TEXT)
 		_theme.set_color("font_color", "Label", TEXT)
 		for type in ["LineEdit", "TextEdit"]:
-			_theme.set_stylebox("normal", type, panel())
-			_theme.set_stylebox("focus", type, panel_outlined(ACCENT))
+			_theme.set_stylebox("normal", type, field_box(false))
+			_theme.set_stylebox("focus", type, field_box(true))
+			_theme.set_stylebox("read_only", type, field_box(false))
 			_theme.set_color("font_color", type, TEXT)
 			_theme.set_color("font_placeholder_color", type, TEXT_DIM)
 		for type in ["HScrollBar", "VScrollBar"]:
@@ -283,6 +284,25 @@ static func content_panel(margin := 14.0) -> StyleBoxEmpty:
 	var box := StyleBoxEmpty.new()
 	box.set_content_margin_all(margin)
 	return box
+
+
+## Text fields: a recessed box a shade darker than the window, with a thin
+## outline (lit in the accent colour while typing), so they stand out from
+## the panel they sit on.
+static var _fields := {}
+static func field_box(focused: bool) -> StyleBoxFlat:
+	if not _fields.has(focused):
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(0.02, 0.025, 0.05, 0.85)
+		box.border_color = Color(ACCENT, 0.9) if focused else Color(0.55, 0.6, 0.75, 0.45)
+		box.set_border_width_all(2)
+		box.set_corner_radius_all(4)
+		box.content_margin_left = 12
+		box.content_margin_right = 12
+		box.content_margin_top = 6
+		box.content_margin_bottom = 6
+		_fields[focused] = box
+	return _fields[focused]
 
 
 ## Recessed item slot, lit when hovered.

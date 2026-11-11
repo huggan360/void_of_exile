@@ -17,6 +17,10 @@ var confirm_text := ""
 var cancel_text := "No"
 ## Devices may receive an authoritative result while their card is open.
 var live_response := false
+## A target that places itself next to the player in available() (a fence,
+## a landed ship's hull, the pilot's landing offer): the card always asks it,
+## wherever it was last.
+var follows_player := false
 ## The key the card shows (and the action that answers it).
 var key_action := "interact"
 ## Optional 1-10 dungeon rating.

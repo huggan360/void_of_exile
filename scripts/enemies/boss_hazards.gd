@@ -225,6 +225,7 @@ func _activate(h: Dictionary) -> void:
 				return
 			_erupt(h)
 		"lane":
+			_sound("hazard.strike", h.pos)
 			h.strip.transparency = 1.0 - ACTIVE_ALPHA
 			h.fill.visible = false
 			if h.has("wall"):
@@ -242,6 +243,7 @@ func _erupt(h: Dictionary) -> void:
 		if Vector2(p.global_position.x - pos.x, p.global_position.z - pos.z).length() < h.radius + EnemyBullets.PLAYER_RADIUS * 0.6:
 			_hurt(p, h, Time.get_ticks_msec() / 1000.0, 0.0)
 	_spikes(pos, h.radius, h.color)
+	_sound("hazard.slam", pos)
 	CameraShake.shake_at(pos, SHAKE, 10.0)
 	h.node.queue_free()
 	_hazards.erase(h)
@@ -288,6 +290,13 @@ func _hurt(p: Node3D, h: Dictionary, now: float, tick: float) -> void:
 	if not Net.is_client() and h.damage.y>0 and is_instance_valid(boss) and boss.def.id in ["vharok", "magma_warden", "pyre_ent", "blue_dragon"]:
 		GameServer.apply_buff(p.player_id,"burning",Burning.CONTACT_DURATION,1,boss.def.enemy_name)
 	p.take_damage(float(randi_range(h.damage.x, h.damage.y)) * mult, false, h.opts.get("magic", false))
+
+
+## The space bosses' hazards strike and slam audibly (clients only; one per
+## boss at a time so a field of circles is one sound, not twenty).
+func _sound(event: String, pos: Vector3) -> void:
+	if Net.is_server() or not is_instance_valid(boss) or not GameAudio._in_spatial_world(boss): return
+	GameAudio.play(event, pos, {source_id = boss.get_instance_id(), cooldown = 0.12, max_distance = 70.0})
 
 
 func _players() -> Array:

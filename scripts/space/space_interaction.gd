@@ -15,6 +15,7 @@ const SEAT_TITLES := {pilot = "Pilot's helm", turret_top = "Top cannon", turret_
 
 func _ready() -> void:
 	super._ready()
+	follows_player = kind=="outside"
 	reach = 3.0 if kind in ["seat", "hatch", "tap", "ladder", "repair", "deck_hatch"] else 3.5 if kind=="repair_out" else 6.0 if kind=="outside" else 4.0
 	match kind:
 		"table":
@@ -97,10 +98,16 @@ func _beside_landed(actor: Node3D) -> bool:
 	var hull := get_parent() as Node3D
 	if hull==null: return false
 	var local := hull.to_local(actor.global_position)
-	var half := ShipHull.beam(clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
-	var near := Vector3(clampf(local.x, -half, half), local.y+1.0, clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
-	position = near
+	var near := _follow(actor)
 	return Vector2(local.x-near.x, local.z-near.z).length()<=LANDED_REACH and absf(local.y+SpaceShip.LANDED_HEIGHT)<6.0
+
+## The point of the hull nearest `actor`, where the card sits.
+func _follow(actor: Node3D) -> Vector3:
+	var local := (get_parent() as Node3D).to_local(actor.global_position)
+	var half := ShipHull.beam(clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
+	position = Vector3(clampf(local.x, -half, half), local.y+1.0, clampf(local.z, ShipHull.BOW_Z, ShipHull.STERN_Z))
+	return position
+
 
 func refresh(actor: Node3D) -> void:
 	if kind in ["repair", "repair_out"]:

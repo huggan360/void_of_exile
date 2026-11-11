@@ -314,11 +314,6 @@ func _update_hint() -> void:
 				rows.append([["@ship_roll_left", "@ship_roll_right"], "Roll"])
 				rows.append([["@ship_boost"], "Boost"])
 				rows.append([["@ship_fire"], "Fire cannons"])
-				var land := _ship.landable()
-				if not _ship.queue.is_empty(): rows.append([["@ship_land"], "Waiting to land"])
-				elif not land.is_empty(): rows.append([["@ship_land"], "Land here?"])
-				elif SpaceLayout.can_descend(_ship.xform.origin): rows.append([["@ship_land"], "Descend"])
-				elif minf(_ship.xform.origin.distance_to(SpaceLayout.NEXUS), _ship.xform.origin.distance_to(SpaceLayout.DINER))<SpaceWorld.DOCK_RANGE: rows.append([["@ship_land"], "Dock"])
 		"turret_top", "turret_left", "turret_right":
 			if _ship!=null and _ship.mode=="flying":
 				rows.append([["Mouse"], "Aim"])
@@ -577,6 +572,7 @@ func _seated(delta: float) -> void:
 			if enabled and not Leisure.hands_busy(player.player_id) and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 				_fire_timer = 0.2
 				world.request(["fire", _pilot_direction()])
+				GameAudio.play("ship_cannon", Vector3.INF, {bus = "SFX", cooldown = 0.05})
 		"turret_top", "turret_left", "turret_right":
 			var dir := _turret_direction()
 			_aim_timer -= delta
@@ -587,7 +583,7 @@ func _seated(delta: float) -> void:
 			if _ship.mode=="flying" and not Leisure.hands_busy(player.player_id) and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and not player.controls_locked() and not player.ui_blocked and not player.interacting() and not map.visible and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 				_fire_timer = 0.2
 				world.request(["fire", dir])
-				GameAudio.play("enemy_shot", player.camera.global_position)
+				GameAudio.play("ship_cannon", Vector3.INF, {bus = "SFX", cooldown = 0.05})
 		"map":
 			pass
 
@@ -649,6 +645,8 @@ func _turret_direction() -> Vector3:
 
 func physics_step(delta: float) -> void:
 	if not is_instance_valid(world): return
+	# The aim ring shows only where you shoot on foot (_update_combat brings it back).
+	player.aim_marker.hide()
 	if player.frozen:
 		player.frozen = not world.is_presentation_ready()
 		if not player.frozen and seat=="" and world.city.seat_of(player.player_id)=="": player.clear_spawn(world)
@@ -785,7 +783,6 @@ func physics_step(delta: float) -> void:
 			player.facing = atan2(-local_dir.x, -local_dir.z)
 		player.model.rotation.y = player.facing
 		player.model.animate(dir.length(), delta)
-	player.aim_marker.hide()
 
 # --- Outside on the jetpack ------------------------------------------------------------
 
@@ -871,16 +868,19 @@ func _spacewalk(delta: float) -> void:
 	outside.vel = vel
 	player.global_position = hull*at
 	player.global_basis = hull.basis
-	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, -input.x*0.12)
+	# A and D turn you (D to the right): the body faces where you fly.
+	player.facing = player.camera_yaw
+	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, 0)
 	player.set_meta("jet_on", burning)
 	player.velocity = Vector3.ZERO
 	_update_rope(hull)
 
-## Free in space without a ship: the same controls, in the world's frame.
+## Free in space without a ship: the same controls, in your own frame. You
+## keep the orientation you had (coming up out of a planet's air you are not
+## swung round to the world's up), so the camera and the body stay put.
 func _drift(delta: float, input: Vector2, rise: float) -> void:
 	deck = false
 	_rope.visible = false
-	player.global_basis = player.global_basis.slerp(Basis.IDENTITY, 1.0-exp(-delta*4.0)).orthonormalized()
 	if not player.controls_locked(): player.camera_yaw -= input.x*JET_TURN*delta
 	var want := player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(0, rise, input.y)
 	var burning := jetpack_attached and want.length()>0.1 and fuel>0.5
@@ -897,6 +897,7 @@ func _drift(delta: float, input: Vector2, rise: float) -> void:
 		_jet = Vector3.ZERO
 		_jetpack_boundary_notice()
 	else: player.global_position = destination
+	player.facing = player.camera_yaw
 	player.model.rotation = Vector3(input.y*0.35, player.camera_yaw, 0)
 	player.set_meta("jet_on", burning)
 	player.velocity = Vector3.ZERO
@@ -950,7 +951,11 @@ func _jet_descent(delta: float, state: Dictionary) -> void:
 	else:
 		player.set_meta("jet_on",burning)
 		player.set_meta("jetpack_flying",true)
-		player._update_combat(delta,(player.global_position-previous).slide(up)/maxf(delta,0.001),JET_MAX)
+		# A and D turn you; the body faces where you fly, held still (no walk cycle).
+		player.facing = player.camera_yaw
+		player.velocity = Vector3.ZERO
+		player._update_combat(delta,Vector3.ZERO,JET_MAX)
+		player.model.rotation = Vector3(input.y*0.35, player.facing, 0)
 
 func _set_jetpack(attached: bool) -> void:
 	jetpack_attached = attached

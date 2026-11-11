@@ -82,7 +82,8 @@ void fragment() {
 	vec3 ray = surface - cam;
 	float total = length(ray);
 	vec3 dir = ray / max(total, 0.001);
-	if (total > 900.0) {
+	bool sky = total > 900.0;
+	if (sky) {
 		// Sky or open sea: treat it as far, unexplored distance.
 		surface = cam + dir * 900.0;
 		total = 900.0;
@@ -96,6 +97,12 @@ void fragment() {
 	// Solid cover: an unexplored surface is never visible through the fog.
 	float surface_hidden = 1.0 - revealed(surface.xz);
 	float solid = smoothstep(0.15, 0.85, surface_hidden);
+	// Looking up at the sky there is no land to cover: the point "900 m away"
+	// is high in the air, and covering it would paint the region map (like
+	// the minimap) across the sky. Only at the horizon and below does it count.
+	if (sky) {
+		solid *= 1.0 - smoothstep(-0.02, 0.06, dir.y);
+	}
 
 	// March from the surface back toward the camera through the fog layer,
 	// with a per-pixel jitter so the steps never show as bands.

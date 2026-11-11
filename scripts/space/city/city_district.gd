@@ -366,7 +366,11 @@ func _port_roof(port: Node3D, art: NexusStation.Brush) -> void:
 	var desk := CityLayout.SHIPWRIGHT
 	art.box(desk+Vector3(0, 0.6, 0), Vector3(5.0, 1.2, 1.5), Color("65513d"), true)
 	art.box(desk+Vector3(0, 1.25, 0), Vector3(5.2, 0.12, 1.7), Color("cfb47e"))
-	_prop("holo_board", port.transform, desk+Vector3(0, 1.4, 0), 0.0, 0.65)
+	# The SHOP board behind the shipwright on two posts, its face (-Z in the
+	# model) turned to the customers and the pads.
+	var board := desk+Vector3(0, 1.7, -2.6)
+	_prop("holo_board", port.transform, board, PI, 0.65)
+	for x: float in [-1.75, 1.75]: art.box(Vector3(desk.x+x, desk.y+1.0, board.z-0.1), Vector3(0.18, 2.0, 0.18), Color("d9ac60"))
 	_prop("potted_tree", port.transform, desk+Vector3(-4, 0, 0))
 	var wright := SpaceInteraction.new()
 	wright.world = city.world

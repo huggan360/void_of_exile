@@ -97,6 +97,13 @@ static func face_uv(dir: Vector3) -> Array:
 	var d := dir.dot(n)
 	return [best, atan(dir.dot(a)/d)*4.0/PI, atan(dir.dot(b)/d)*4.0/PI]
 
+## Whether planet-space `local` stands over one of the three towns (not farmland).
+static func in_town(local: Vector3) -> bool:
+	var uv := face_uv(local.normalized())
+	var i := clampi(int(floor((float(uv[1])+1.0)*0.5*N)), 0, N-1)
+	var j := clampi(int(floor((float(uv[2])+1.0)*0.5*N)), 0, N-1)
+	return not district_of(int(uv[0]), i, j).is_empty()
+
 static func cell_uv(i: int, j: int) -> Vector2:
 	return Vector2((i+0.5)/N*2.0-1.0, (j+0.5)/N*2.0-1.0)
 

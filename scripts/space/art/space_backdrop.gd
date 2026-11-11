@@ -124,15 +124,17 @@ func set_air(air: Dictionary, amount: float, up := Vector3.UP) -> void:
 	material.set_shader_parameter("air_horizon", horizon)
 	env.fog_light_color = SPACE_FOG.lerp(horizon.darkened(0.1), k)
 	env.fog_light_energy = 1.0
-	env.fog_depth_begin = lerpf(FOG_BEGIN, 900.0, k)
-	env.fog_depth_end = lerpf(FOG_END, 9000.0, k)
+	# A planet's `air.haze` (<1) brings its horizon haze closer: thicker air.
+	var haze := float(air.get("air", {}).get("haze", 1.0)) if not air.is_empty() else 1.0
+	env.fog_depth_begin = lerpf(FOG_BEGIN, 900.0*haze, k)
+	env.fog_depth_end = lerpf(FOG_END, 9000.0*haze, k)
 	env.fog_depth_curve = lerpf(1.6, 2.2, k)
 	env.fog_density = lerpf(1.0, 0.75, k)
 	env.ambient_light_color = Color("8e9cbc").lerp(sky.lerp(Color.WHITE, 0.5), k)
 	env.ambient_light_energy = lerpf(0.24, 0.3, k)
 	env.tonemap_exposure = lerpf(0.78, 0.66, k)
 	if bool(air.get("city", false)):
-		# The purple city sky remains visible, without tinting every interior.
+		# The amber sunset sky remains visible, without tinting every interior.
 		env.ambient_light_color = Color("8e9cbc").lerp(Color("e7dfd2"), k)
 		env.ambient_light_energy = lerpf(0.24, 0.14, k)
 		env.tonemap_exposure = 0.78

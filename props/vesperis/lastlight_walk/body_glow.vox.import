@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chenfqe7rgnp"
+path="res://.godot/imported/body_glow.vox-200aa4400b2c8384a8cc528d2487f70f.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/lastlight_walk/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-200aa4400b2c8384a8cc528d2487f70f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

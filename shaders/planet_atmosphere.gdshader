@@ -11,8 +11,31 @@ uniform float planet_radius = 600.0;
 uniform float atmo_radius = 720.0;
 uniform vec3 sun_dir = vec3(0.0, 1.0, 0.0);
 uniform float strength = 1.0;
+uniform float uneven = 0.55;  // how patchy the haze is (0 even)
+uniform float seed = 0.0;
 uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
 varying vec3 world_pos;
+
+float air_hash(vec3 p) {
+	p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
+	p *= 17.0;
+	return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float air_noise(vec3 x) {
+	vec3 i = floor(x);
+	vec3 f = fract(x);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(mix(air_hash(i), air_hash(i + vec3(1, 0, 0)), f.x), mix(air_hash(i + vec3(0, 1, 0)), air_hash(i + vec3(1, 1, 0)), f.x), f.y),
+		mix(mix(air_hash(i + vec3(0, 0, 1)), air_hash(i + vec3(1, 0, 1)), f.x), mix(air_hash(i + vec3(0, 1, 1)), air_hash(i + vec3(1, 1, 1)), f.x), f.y), f.z);
+}
+
+// Patches of thicker and thinner air over the globe, drifting slowly.
+float patches(vec3 dir, float time) {
+	vec3 q = dir * 3.0 + vec3(seed, time * 0.006, -seed);
+	float n = air_noise(q) * 0.6 + air_noise(q * 2.3 + 4.7) * 0.3 + air_noise(q * 5.1 - 2.1) * 0.1;
+	return mix(1.0, 0.35 + n * 1.5, uneven);
+}
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -52,7 +75,7 @@ void fragment() {
 	for (int i = 0; i < 10; i++) {
 		vec3 p = o + d * (t0 + (float(i) + 0.5) * dt);
 		float h = max(length(p) - planet_radius, 0.0);
-		float density = exp(-h / scale_h) * dt;
+		float density = exp(-h / scale_h) * dt * patches(normalize(p), TIME);
 		float sun = dot(normalize(p), sun_dir);
 		optical += density;
 		lit += density * smoothstep(-0.28, 0.35, sun);

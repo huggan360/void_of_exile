@@ -10,7 +10,7 @@ extends RefCounted
 const NEXUS := Vector3.ZERO
 ## Hidden outer-Gloam restaurant, safely inside the boundary steering zone.
 const DINER := Vector3(16000, 0, 34500)
-const DINER_RADIUS := 38.0
+const DINER_RADIUS := 44.0
 ## Station deck: flat gravity inside this cylinder, deck at y = 0.
 const STATION_RADIUS := 62.0
 const STATION_HALF_HEIGHT := 14.0
@@ -58,7 +58,7 @@ const PLANETS := [
 		about = "Pink crystal meadows, candy-coloured trees, fairy shrines and floating petals."},
 	{id = "amberfall", name = "Amberfall", region = "haven", center = Vector3(2800, 900, 7400), radius = 760.0,
 		pad = Vector3.UP, danger = 1, palette = ["b07a34", "d9a85a", "6a3e18", "5fd18a", "fff0c8", "ffc27a"],
-		terrain = {style = "dunes", height = 42.0, size = 170.0},
+		terrain = {style = "dunes", height = 42.0, size = 170.0}, air = {storm = 2.2},
 		about = "Amber dunes, honey lakes, lantern towers and a sleepy desert market."},
 	{id = "tidewell", name = "Tidewell", region = "haven", center = Vector3(-7400, 500, 8600), radius = 900.0,
 		pad = Vector3.UP, danger = 1, palette = ["2f86c9", "7fd6e8", "e8d6a0", "3f9d6a", "ffffff", "8ad2ff"],
@@ -81,8 +81,9 @@ const PLANETS := [
 		terrain = {style = "spires", height = 110.0, size = 230.0},
 		about = "Storm planet with a vast eye-shaped storm; obsidian spires and the end of the map."},
 	{id = "vesperis", name = "Vesperis", region = "haven", center = Vector3(-2400, 700, -6600), radius = 1000.0,
-		pad = Vector3.UP, danger = 0, palette = ["2c2638", "ffb86a", "1a1626", "ff6eb4", "6af0e0", "594362"],
+		pad = Vector3.UP, danger = 0, palette = ["2c2638", "ffb86a", "1a1626", "ff6eb4", "6af0e0", "e8954a"],
 		terrain = {style = "city", height = 0.0, size = 200.0}, city = true,
+		air = {dusk = "ff6a3a", thick = 1.8, strength = 1.5, haze = 0.5, storm = 2.6},  # a thick amber sunset, streaming out
 		about = "The Lantern City: three city cores with spaceports, set in farmland of wheat fields, red barns and grazing cows."},
 ]
 

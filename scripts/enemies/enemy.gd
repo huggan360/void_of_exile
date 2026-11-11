@@ -776,7 +776,7 @@ func _shed_voxels() -> void:
 
 func _die() -> void:
 	state = State.DEAD
-	GameAudio.emit_from(GameAudio.enemy_death_event(def), self, {cooldown = 0.08, max_distance = 52.0})
+	GameAudio.emit_from(GameAudio.enemy_death_event(def, self), self, {cooldown = 0.08, max_distance = 52.0})
 	var pts := model.voxel_points()
 	Debris.burst_points(director, pts[0], pts[1], model.voxel_size(), 400,
 			global_position + Vector3.UP * height() * 0.4, global_position.y)

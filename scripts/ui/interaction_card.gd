@@ -163,10 +163,12 @@ func update_prompt(player: Player, blocked: bool) -> void:
 		_near_targets.clear()
 		for node in get_tree().get_nodes_in_group("interaction_targets"):
 			if not node is InteractionTarget or not world.is_ancestor_of(node): continue
-			if node.global_position.distance_squared_to(_near_origin)<=pow(node.reach+6.0,2.0): _near_targets.append(weakref(node))
+			if node.follows_player or node.global_position.distance_squared_to(_near_origin)<=pow(node.reach+6.0,2.0): _near_targets.append(weakref(node))
 	for ref: WeakRef in _near_targets:
 		var candidate := ref.get_ref() as InteractionTarget
 		if not is_instance_valid(candidate): continue
+		# Followers move next to the player in available(): ask first, then measure.
+		if candidate.follows_player and not candidate.available(player): continue
 		var d := candidate.global_position.distance_squared_to(player.global_position)
 		if d>candidate.reach*candidate.reach or not candidate.available(player): continue
 		if seated and _chair_target(candidate): continue

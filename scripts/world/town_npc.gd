@@ -54,7 +54,6 @@ func _ready() -> void:
 		title.font_size = 30
 		title.pixel_size = 0.004
 		title.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		title.fixed_size = true
 		title.position.y = QuestMarker.model_top(self) + 0.35
 		add_child(title)
 	_yaw = _open_yaw(float(spec.get("yaw", 0.0)))

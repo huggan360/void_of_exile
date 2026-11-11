@@ -72,6 +72,9 @@ func _copy_art(source: Node) -> void:
 	while not pending.is_empty() and count<cap:
 		var node: Node = pending.pop_back()
 		if node is PlanetTerrain or node is CountryFlora or node is CityLife or str(node.name)=="OrbitLOD": continue
+		# The air shell and the far glow (an additive square, opaque black on
+		# the chart's clear background) belong to the live sky, not the chart.
+		if str(node.name) in ["Air", "Gloria", "Plumes"]: continue
 		for child: Node in node.get_children(): pending.append(child)
 		var copy: GeometryInstance3D
 		if node is MeshInstance3D:

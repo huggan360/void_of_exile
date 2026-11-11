@@ -1,7 +1,8 @@
 class_name ForgePanel
 extends PanelContainer
 ## Bram's forge (talk to the smith in the Tavern): drag an item from your
-## backpack onto the anvil, see what it's worth in Dots, and Dismantle it.
+## backpack onto the anvil, see what it's worth (the number and the dot
+## icon) and Dismantle it. Kept minimal: no explanations.
 ## The server takes the item and pays (EconomyServer.dismantle); the Dots
 ## fly from the forge's mouth up to the counter by the account bar.
 ## Shown under the backpack while the conversation with the smith is open.
@@ -16,8 +17,8 @@ var mouth: Node3D
 var dots: DotsCounter
 var _target: InteractionTarget
 var _slot: ForgeSlot
-var _value := UIStyle.label("", 28, Dots.COLOR)
-var _hint := UIStyle.label("Drag an item from your backpack onto the anvil.", UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM)
+var _value := DotsCounter.amount(0, 28)
+var _hint := UIStyle.label("", UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM)
 var _button := Button.new()
 var _waiting := false
 
@@ -36,10 +37,8 @@ func _ready() -> void:
 	var title := UIStyle.heading("Bram's Forge", 22)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
-	_value.add_theme_font_override("font", UIStyle.bold())
-	_value.add_theme_color_override("font_outline_color", Color(0.02, 0.1, 0.04))
-	_value.add_theme_constant_override("outline_size", 6)
-	_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_value.alignment = BoxContainer.ALIGNMENT_CENTER
+	_value.custom_minimum_size.y = 36
 	box.add_child(_value)
 	_slot = ForgeSlot.new(stats)
 	_slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -53,22 +52,10 @@ func _ready() -> void:
 	_hint.custom_minimum_size.x = 300
 	box.add_child(_hint)
 	_button.text = "Dismantle"
-	_button.add_theme_font_override("font", UIStyle.bold())
-	_button.add_theme_font_size_override("font_size", 20)
+	UIStyle.button_styles(_button)
+	_button.focus_mode = Control.FOCUS_NONE
 	_button.custom_minimum_size = Vector2(220, 48)
 	_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
-		var style := StyleBoxFlat.new()
-		style.bg_color = {normal = Color(0.72, 0.12, 0.1), hover = Color(0.86, 0.18, 0.13), pressed = Color(0.55, 0.08, 0.07),
-				disabled = Color(0.32, 0.14, 0.13), focus = Color(0.72, 0.12, 0.1)}[state]
-		style.border_color = Color(1.0, 0.62, 0.35) if state != "disabled" else Color(0.45, 0.25, 0.2)
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(4)
-		style.set_content_margin_all(8)
-		if state == "focus":
-			style.draw_center = false
-		_button.add_theme_stylebox_override(state, style)
-	_button.add_theme_color_override("font_disabled_color", Color(0.7, 0.55, 0.5))
 	_button.pressed.connect(dismantle)
 	box.add_child(_button)
 	stats.changed.connect(_refresh)
@@ -102,11 +89,10 @@ func _refresh() -> void:
 	if not is_instance_valid(_slot):
 		return
 	_slot.validate()
-	var value := Dots.dismantle_value(_slot.item)
-	_value.text = "+%s Dots" % Dots.format(value) if _slot.item else "Dots: —"
-	_value.modulate.a = 1.0 if _slot.item else 0.5
-	_hint.text = "%s becomes %s Dots. It is gone for good." % [_slot.item.item_name, Dots.format(value)] if _slot.item \
-			else "Drag an item from your backpack onto the anvil."
+	DotsCounter.set_amount(_value, Dots.dismantle_value(_slot.item))
+	_value.modulate.a = 1.0 if _slot.item else 0.0
+	_hint.text = ""
+	_hint.visible = false
 	_button.disabled = _slot.item == null or _waiting
 	_button.text = "Dismantling..." if _waiting else "Dismantle"
 
@@ -115,7 +101,8 @@ func dismantle() -> void:
 	if _slot.item == null or _waiting:
 		return
 	if not Net.is_client():
-		_hint.text = "The forge works when you play online or in Singleplayer."
+		_hint.text = "Online or Singleplayer only"
+		_hint.visible = true
 		return
 	var camera := get_viewport().get_camera_3d()
 	if dots and camera and is_instance_valid(mouth) and not camera.is_position_behind(mouth.global_position):
@@ -178,8 +165,23 @@ class ForgeSlot:
 			clear()
 			accept_event()
 
+	## Dragging it off the anvil: the anvil lets go, and it is an ordinary drag
+	## of the item from where it really is (drop it anywhere in the backpack;
+	## let go elsewhere and it is simply back in its place).
 	func _get_drag_data(_at_position: Vector2) -> Variant:
-		return null
+		if item == null or source.is_empty():
+			return null
+		var from := source.duplicate()
+		var preview := ItemIcon.new()
+		preview.show_item(item)
+		preview.size = Vector2(Item.ICON_SIZE, Item.ICON_SIZE) * ICON_SCALE
+		preview.position = -preview.size * 0.5
+		var holder := Control.new()  # so the icon is centered on the cursor
+		holder.add_child(preview)
+		set_drag_preview(holder)
+		_drag_source = {player_id = stats.player_id, place = from, item_id = item.id}
+		clear()
+		return {from = from}
 
 	func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 		if not (data is Dictionary and data.has("from")) or not str(data.from.get("kind", "")) in ["pack", "gear", "quick"]:

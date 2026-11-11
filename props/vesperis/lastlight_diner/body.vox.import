@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dbjmar5drtq1h"
+path="res://.godot/imported/body.vox-9ea3ffbad149d8b78289873d269aae09.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/lastlight_diner/body.vox"
+dest_files=["res://.godot/imported/body.vox-9ea3ffbad149d8b78289873d269aae09.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

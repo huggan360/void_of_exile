@@ -15,6 +15,7 @@ var _radius: float
 var _colors: Array[Color] = []
 var _server := false
 var _atmosphere: ShaderMaterial
+var _plumes: ShaderMaterial
 var _was_near := false
 var _air_strength := 1.0
 var _ground_at := Vector3.INF
@@ -86,6 +87,7 @@ func _process(_delta: float) -> void:
 		_ground_at = local.global_position
 	if near and flora: flora.update_collision(global_transform.affine_inverse()*local.global_position)
 	_was_near = near
+	if _plumes: _plumes.set_shader_parameter("sun_dir", SpaceBackdrop.sun_direction())
 	if _atmosphere:
 		_atmosphere.set_shader_parameter("sun_dir", SpaceBackdrop.sun_direction())
 		# Inside the air the sky itself turns to day; the shell would only fog it.
@@ -100,15 +102,18 @@ func _air() -> void:
 		_shell_mesh.rings = 32
 		_quad = QuadMesh.new()
 		_quad.size = Vector2.ONE
-	var thick := SpaceLayout.air_height(_planet)
+	# `air` (optional) styles the look only: dusk colour, shell thickness and density.
+	var air: Dictionary = _planet.get("air", {})
+	var thick := SpaceLayout.air_height(_planet)*float(air.get("thick", 1.0))
 	_atmosphere = ShaderMaterial.new()
 	_atmosphere.shader = preload("res://shaders/planet_atmosphere.gdshader")
 	_atmosphere.set_shader_parameter("sky", _colors[5])
-	_atmosphere.set_shader_parameter("dusk", _colors[4].lerp(Color("ff9a6a"), 0.5))
+	_atmosphere.set_shader_parameter("dusk", Color(str(air.dusk)) if air.has("dusk") else _colors[4].lerp(Color("ff9a6a"), 0.5))
 	_atmosphere.set_shader_parameter("planet_radius", _radius)
 	_atmosphere.set_shader_parameter("atmo_radius", _radius+thick)
-	_air_strength = 1.0 if _planet.region=="haven" else 0.75
+	_air_strength = (1.0 if _planet.region=="haven" else 0.75)*float(air.get("strength", 1.0))
 	_atmosphere.set_shader_parameter("strength", _air_strength)
+	_atmosphere.set_shader_parameter("seed", float(abs(str(_planet.id).hash()) % 1000)*0.37)
 	var shell := MeshInstance3D.new()
 	shell.name = "Air"
 	shell.mesh = _shell_mesh
@@ -125,9 +130,28 @@ func _air() -> void:
 	glow.shader = preload("res://shaders/planet_halo.gdshader")
 	glow.set_shader_parameter("tint", _colors[5])
 	glow.set_shader_parameter("planet_radius", _radius)
-	glow.set_shader_parameter("strength", 0.55 if _planet.region=="haven" else 0.35)
+	glow.set_shader_parameter("strength", (0.55 if _planet.region=="haven" else 0.35)*minf(float(air.get("strength", 1.0)), 1.3))
 	halo.material_override = glow
 	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# The air streaming out into space (stronger where `air.storm` says so).
+	var plumes := MeshInstance3D.new()
+	plumes.name = "Plumes"
+	plumes.mesh = _quad
+	var span := 7.0
+	plumes.scale = Vector3.ONE*_radius*span
+	_plumes = ShaderMaterial.new()
+	_plumes.shader = preload("res://shaders/planet_plumes.gdshader")
+	_plumes.set_shader_parameter("sky", _colors[5])
+	_plumes.set_shader_parameter("dusk", Color(str(air.dusk)) if air.has("dusk") else _colors[4].lerp(Color("ff9a6a"), 0.5))
+	_plumes.set_shader_parameter("planet_radius", _radius)
+	_plumes.set_shader_parameter("span", span)
+	_plumes.set_shader_parameter("seed", float(abs(str(_planet.id).hash()) % 1000)*0.37)
+	_plumes.set_shader_parameter("strength", (0.32 if _planet.region=="haven" else 0.22)*float(air.get("storm", 1.0)))
+	plumes.material_override = _plumes
+	plumes.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	plumes.custom_aabb = AABB(-Vector3.ONE*3.0, Vector3.ONE*6.0)
+	plumes.sorting_offset = -12.0
+	add_child(plumes)
 	halo.custom_aabb = AABB(-Vector3.ONE*3.0, Vector3.ONE*6.0)
 	add_child(halo)
 	if bool(_planet.terrain.get("sea", false)):

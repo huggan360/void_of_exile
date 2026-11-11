@@ -9,6 +9,7 @@ extends ResponsiveUILayer
 ##   game menu     (Escape) the logo in the top left, with Resume, Unstuck,
 ##                 Options, Leave and Quit Game in the middle
 ##   servers       the server list (ServerPanel)
+##   joining       "Joining Singleplayer" / a server, with Cancel (JoinScreen)
 ## Options uses the same scaled canvas. Neither menu pauses anything: the world
 ## (and the server) keep going, only your character's input is locked.
 
@@ -32,6 +33,7 @@ var _start_actions: Array[Control] = []
 var _pause := Control.new()
 var options := OptionsPanel.new()
 var servers := ServerPanel.new()
+var joining := JoinScreen.new()
 var account := AccountWidget.new()
 var _leave: Button
 var _play_buttons: Array[Button] = []
@@ -104,6 +106,7 @@ func _ready() -> void:
 	pause_box.add_child(_button("Quit Game", func() -> void: quit_pressed.emit()))
 	root.add_child(options)
 	root.add_child(servers)
+	root.add_child(joining)
 	servers.back_requested.connect(func() -> void:
 		servers.hide()
 		_start.visible = true)
@@ -180,9 +183,20 @@ func show_servers(message := "", color := UIStyle.TEXT_DIM) -> void:
 		show_start()
 	_start.hide()
 	options.hide()
+	joining.hide()
 	servers.open()
 	if message != "":
 		servers.say(message, color)
+
+
+## The join screen over the start screen's backdrop (nothing else showing).
+func show_joining(place: String, detail := "") -> void:
+	if not visible or not _from_start:
+		show_start()
+	_start.hide()
+	options.hide()
+	servers.hide()
+	joining.open(place, detail)
 
 
 func show_options() -> void:
@@ -213,6 +227,7 @@ func hide_all() -> void:
 	options.discard_preview()
 	options.hide()
 	servers.hide()
+	joining.hide()
 	visible = false
 	_start.hide()
 	_pause.hide()
@@ -222,6 +237,7 @@ func _show(page: Control, dim: float, blur: float) -> void:
 	options.discard_preview()
 	options.hide()
 	servers.hide()
+	joining.hide()
 	_leave.visible = Net.is_client()
 	_leave.text = "Leave Singleplayer" if Net.is_client() and Net.client.info.get("singleplayer", false) else "Leave Server"
 	_start_background.visible = _from_start

@@ -19,7 +19,7 @@ signal shot(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phas
 signal ring_cast(spell: Item)
 
 ## Movement at 0 speed stat; PlayerStats applies the per-point Speed bonus.
-const BASE_SPEED := 4.63
+const BASE_SPEED := 5.79  # 4.63 x 1.25
 ## Walking on roads and town streets is this much faster.
 const ROAD_SPEED := 1.5
 ## Conversations: the camera swings in from the side, at this distance.
@@ -382,7 +382,8 @@ func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
 	if aim_marker.is_inside_tree():
 		# On the cursor's own ray, so the ring's middle is always at the cursor's tip.
 		aim_marker.track(_aim_point,
-				(Input.is_action_pressed("shoot") or _charging) and free_hands and stats.gear.weapon != null, delta)
+				(Input.is_action_pressed("shoot") or _charging) and free_hands and stats.gear.weapon != null, delta,
+				up_direction.normalized() if is_instance_valid(spatial_controller) else Vector3.UP)
 	if _aim_hold > 0.0 or (is_instance_valid(ground_view) and ground_view.free_look()) or (is_instance_valid(spatial_controller) and (spatial_controller.first_person>0.8 or (spatial_controller is SpaceTraversal and spatial_controller.free_look()))):
 		facing = lerp_angle(facing, aim_yaw(), minf(1.0, delta * AIM_TURN_SPEED))
 	elif dir != Vector3.ZERO:

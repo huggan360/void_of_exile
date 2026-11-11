@@ -81,6 +81,11 @@ var _dead := false  # online: our character died, waiting for the next one
 var _switching := false
 var _creating_character := false
 var _connecting := false
+## Bumped by Cancel on the join screen: a join in progress checks it after
+## every wait and stops if it changed.
+var _join_token := 0
+var _join_singleplayer := false
+var _singleplayer_pid := 0
 var _death_record := {}
 
 var _args := {}
@@ -101,6 +106,7 @@ func _ready() -> void:
 		get_tree().change_scene_to_file.call_deferred("res://scenes/server/dedicated.tscn")
 		return
 	get_tree().node_added.connect(_readable_world_label)
+	add_child(WorldLabels.new())
 	_setup_input()
 	_parse_args()
 
@@ -157,6 +163,7 @@ func _ready() -> void:
 	_world_loader.progress_changed.connect(transition.set_progress)
 	menus.singleplayer_pressed.connect(_start_singleplayer)
 	menus.join_requested.connect(_join_server)
+	menus.joining.cancel_requested.connect(_cancel_join)
 	menus.leave_pressed.connect(func() -> void: _return_offline("You left."))
 	menus.quit_pressed.connect(_quit)
 	menus.unstuck_pressed.connect(_unstuck)
@@ -708,7 +715,7 @@ func _on_died(player_id: int, items_lost: int) -> void:
 		return
 	Leisure.forget_player(player_id)
 	GameAudio.shield(false)
-	GameAudio.play("player.death", Vector3.INF, {bus = "SFX", priority = 3, fixed_pitch = true})
+	GameAudio.player_died()
 	hud.toasts.push("You died. Your character is gone, with everything it carried.", UIStyle.HP)
 	if items_lost > 0:
 		hud.toasts.push("%d items lost. A new adventurer wakes in the Tavern." % items_lost, UIStyle.HP, 3.5)
@@ -723,11 +730,14 @@ func _on_died(player_id: int, items_lost: int) -> void:
 func _start_singleplayer() -> void:
 	if not await _ensure_character():
 		return
-	menus.show_servers()
-	menus.servers.show_joining("Singleplayer")
+	_join_token += 1
+	var token := _join_token
+	_join_singleplayer = true
+	menus.show_joining("Singleplayer", "Starting your world")
 	player.input_locked = true
 	_traveling = true
 	var key := await Account.singleplayer_key()
+	if token != _join_token: return
 	var port := 24600 + randi() % 300
 	var args := PackedStringArray()
 	if not OS.has_feature("template"):
@@ -736,17 +746,17 @@ func _start_singleplayer() -> void:
 		args.append("--headless")
 	args.append_array(["--", "--dedicated", "--singleplayer", "--key=" + key,
 			"--port=%d" % port, "--parent=%d" % OS.get_process_id(), "--accounts=" + Account.url()])
-	if key == "" or OS.create_process(OS.get_executable_path(), args) <= 0:
-		_traveling = false
-		menus.show_servers("Singleplayer couldn't start.", UIStyle.HP_LIGHT)
+	_singleplayer_pid = OS.create_process(OS.get_executable_path(), args) if key != "" else 0
+	if _singleplayer_pid <= 0:
+		_join_failed("Singleplayer couldn't start.")
 		return
-	if not await _wait_for_server(port, 40.0):
-		_traveling = false
-		menus.show_servers("Singleplayer didn't start.", UIStyle.HP_LIGHT)
-		Account.problem.emit("Singleplayer didn't start.")
+	var started := await _wait_for_server(port, 40.0)
+	if token != _join_token: return
+	if not started:
+		_join_failed("Singleplayer didn't start.")
 		return
 	_traveling = false
-	_join_server("127.0.0.1", port)
+	_join_server("127.0.0.1", port, token)
 
 
 ## Waits until a server answers its status ping (it's starting up).
@@ -803,34 +813,81 @@ func join_friend(target: Dictionary) -> void:
 
 
 ## A server was picked: connect with our login and the character we play.
-func _join_server(address: String, port: int) -> void:
+## `token`: the singleplayer start that leads here (0: a fresh join).
+func _join_server(address: String, port: int, token := 0) -> void:
 	if _connecting:
 		return
+	if token == 0:
+		_join_token += 1
+		_join_singleplayer = false
+	token = _join_token
 	_connecting = true
-	menus.servers.show_joining(menus.servers.server_name(address, port))
-	if not await _ensure_character():
-		_connecting = false
-		menus.servers.clear_joining()
+	var place := menus.servers.server_name(address, port)
+	menus.show_joining(place, "Connecting")
+	if not await _ensure_character() or token != _join_token:
+		if token == _join_token:
+			_connecting = false
+			menus.show_servers()
 		return
+	menus.show_joining(place, "Connecting")
 	var client := Net.join(address, port, Account.token(), Account.character_id(), Account.username())
 	social.attach(client)
 	Account.friends()
 	client.refused.connect(func(reason: String) -> void:
+		if token != _join_token: return
 		Net.leave()
-		_connecting = false
-		_traveling = false
-		menus.show_servers(reason, UIStyle.HP_LIGHT), CONNECT_ONE_SHOT)
+		_join_failed(reason), CONNECT_ONE_SHOT)
 	client.welcomed.connect(_on_welcomed, CONNECT_ONE_SHOT)
-	client.lost.connect(func(reason: String) -> void: _return_offline(reason, UIStyle.HP_LIGHT))
+	client.lost.connect(func(reason: String) -> void:
+		if _connecting and token == _join_token:
+			# Never got in: back to where the join started.
+			Net.leave()
+			_join_failed(reason)
+		elif token == _join_token: _return_offline(reason, UIStyle.HP_LIGHT))
 	client.died.connect(_on_online_death)
 	client.switched.connect(_on_switched)
 	client.switch_failed.connect(_on_switch_failed)
 	client.account_xp.connect(Account.set_total_xp)
 
 
+## Cancel on the join screen: stop at once. Singleplayer's own server is
+## stopped and we go back to the main menu; a server's join drops and we go
+## back to the server list.
+func _cancel_join() -> void:
+	_join_token += 1
+	if Net.is_client() or _connecting: Net.leave()
+	if _singleplayer_pid > 0:
+		OS.kill(_singleplayer_pid)
+		_singleplayer_pid = 0
+	_connecting = false
+	_traveling = false
+	if _join_singleplayer: menus.show_start()
+	else: menus.show_servers()
+	_join_singleplayer = false
+
+
+## A join that didn't work: back where it started from, saying why.
+func _join_failed(reason: String) -> void:
+	_join_token += 1
+	if _singleplayer_pid > 0:
+		OS.kill(_singleplayer_pid)
+		_singleplayer_pid = 0
+	_connecting = false
+	_traveling = false
+	if _join_singleplayer:
+		menus.show_start()
+		Account.problem.emit(reason)
+	else: menus.show_servers(reason, UIStyle.HP_LIGHT)
+	_join_singleplayer = false
+
+
 ## The server took us in: play our character, starting in its Tavern.
 func _on_welcomed(info: Dictionary) -> void:
+	if not _connecting: return  # cancelled meanwhile
 	_connecting = false
+	_singleplayer_pid = 0  # its server stops by itself when we leave
+	_join_singleplayer = false
+	menus.joining.set_detail("Entering the Tavern")
 	GameServer.adopt(player.player_id, int(info.player_id))
 	player.player_id = int(info.player_id)
 	Net.client.stats = stats
@@ -932,7 +989,7 @@ func _on_online_death(info: Dictionary) -> void:
 	if _dead: return
 	Leisure.forget_player(player.player_id)
 	GameAudio.shield(false)
-	GameAudio.play("player.death", Vector3.INF, {bus = "SFX", priority = 3, fixed_pitch = true})
+	GameAudio.player_died()
 	_dead = true
 	player.input_locked = true
 	low_health.dead = true
@@ -1866,10 +1923,10 @@ func _debug_online() -> void:
 	get_tree().quit()
 
 
-## Fixed screen units keep names and combat text readable at every camera zoom.
+## Names and combat text keep a real size, held readable between a minimum
+## and a maximum on screen and not drawn past their reach (WorldLabels).
 func _readable_world_label(node: Node) -> void:
 	if node is Label3D:
-		node.fixed_size = true
-		node.pixel_size = 0.0005
 		node.no_depth_test = true
 		if node.font == null: node.font = UIStyle.bold()
+		WorldLabels.register(node)

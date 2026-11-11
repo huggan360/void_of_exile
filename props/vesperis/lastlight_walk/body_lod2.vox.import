@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://wumiaob1vf4q"
+path="res://.godot/imported/body_lod2.vox-beab7588b51d8043d8f4703b10dcb8ff.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/lastlight_walk/body_lod2.vox"
+dest_files=["res://.godot/imported/body_lod2.vox-beab7588b51d8043d8f4703b10dcb8ff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

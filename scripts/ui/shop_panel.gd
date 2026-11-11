@@ -1,8 +1,9 @@
 class_name ShopPanel
 extends PanelContainer
 ## A shopkeeper's wares (ShopKeeper, Shops): on the right while you talk to
-## them, your backpack on the left. Every item with its price in Dots, offers
-## struck through and highlighted, rare pieces marked "1 left". Pick one and
+## them, your backpack on the left. Every item with its price (the number and
+## the dot icon: white, green on sale), the offers on top, rare pieces marked
+## "1 left". Kept minimal: no explanations. Pick one and
 ## Buy: the server checks the account's Dots and the account service's stock
 ## (EconomyServer.buy), the item lands in the backpack.
 
@@ -15,7 +16,6 @@ var interaction: InteractionCard
 var shop_id := ""
 var _target: InteractionTarget
 var _title := UIStyle.heading("", 24)
-var _subtitle := UIStyle.label("", UIStyle.SIZE_SMALL, UIStyle.TEXT_DIM)
 var _offers := RichTextLabel.new()
 var _grid := GridContainer.new()
 var _empty := UIStyle.label("", UIStyle.SIZE_NORMAL, UIStyle.TEXT_DIM)
@@ -42,8 +42,6 @@ func _ready() -> void:
 	add_child(box)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_title)
-	_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(_subtitle)
 	_offers.bbcode_enabled = true
 	_offers.fit_content = true
 	_offers.scroll_active = false
@@ -66,21 +64,10 @@ func _ready() -> void:
 	_picked.custom_minimum_size.x = 420
 	box.add_child(_picked)
 	_button.text = "Buy"
-	_button.add_theme_font_override("font", UIStyle.bold())
-	_button.add_theme_font_size_override("font_size", 20)
-	_button.custom_minimum_size = Vector2(220, 46)
+	UIStyle.button_styles(_button)
+	_button.focus_mode = Control.FOCUS_NONE
+	_button.custom_minimum_size = Vector2(220, 48)
 	_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
-		var style := StyleBoxFlat.new()
-		style.bg_color = {normal = Color(0.14, 0.55, 0.26), hover = Color(0.2, 0.68, 0.32), pressed = Color(0.1, 0.42, 0.2),
-				disabled = Color(0.18, 0.26, 0.22), focus = Color(0.14, 0.55, 0.26)}[state]
-		style.border_color = Color(0.6, 1.0, 0.65) if state != "disabled" else Color(0.3, 0.42, 0.34)
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(4)
-		style.set_content_margin_all(8)
-		if state == "focus": style.draw_center = false
-		_button.add_theme_stylebox_override(state, style)
-	_button.add_theme_color_override("font_disabled_color", Color(0.6, 0.7, 0.62))
 	_button.pressed.connect(buy)
 	box.add_child(_button)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -102,7 +89,6 @@ func open_for(target: InteractionTarget, shop: String) -> void:
 	var def: Dictionary = Shops.DEFS.get(shop, {})
 	_title.text = str(def.get("name", "Shop"))
 	_title.add_theme_color_override("font_color", Color(str(def.get("color", "e5b96d"))))
-	_subtitle.text = str(def.get("title", ""))
 	show()
 	_rebuild()
 
@@ -171,16 +157,13 @@ func _rebuild() -> void:
 				_mark()
 				if event.double_click: buy())
 		cell.add_child(slot)
-		var price := UIStyle.rich("", UIStyle.SIZE_SMALL)
-		price.fit_content = true
-		price.custom_minimum_size.x = 80
-		var text := "[center]"
-		if int(e.off) > 0: text += "[s][color=#a7b8cd]%s[/color][/s] " % Dots.format(int(e.base))
-		text += "[b][color=#%s]%s[/color][/b]" % [Dots.COLOR.to_html(false), Dots.format(int(e.price))]
-		if int(e.left) == 0: text += "\n[color=#ff8080]sold out[/color]"
-		elif int(e.left) > 0: text += "\n[color=#ffd84a]1 left[/color]"
-		price.text = text+"[/center]"
+		var price := DotsCounter.amount(int(e.price), UIStyle.SIZE_SMALL, int(e.off) > 0)
+		price.alignment = BoxContainer.ALIGNMENT_CENTER
 		cell.add_child(price)
+		if int(e.left) >= 0:
+			var left := UIStyle.label("sold out" if int(e.left) == 0 else "1 left", UIStyle.SIZE_SMALL, Color("ff8080") if int(e.left) == 0 else Color("ffd84a"))
+			left.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			cell.add_child(left)
 		_grid.add_child(cell)
 		_cells[id] = {box = cell, slot = slot, entry = e}
 	_empty.visible = _cells.is_empty()
@@ -207,22 +190,17 @@ func _refresh_button() -> void:
 	var e := _entry()
 	var dots := Account.dots()
 	if e.is_empty():
-		_picked.text = "[center][color=#a7b8cd]Pick something to buy.[/color][/center]"
+		_picked.text = ""
 		_button.disabled = true
 		_button.text = "Buy"
 	else:
 		var item := Items.make(str(e.id))
-		var price := int(e.price)
-		_picked.text = "[center][b]%s[/b]  for  [b][color=#%s]%s Dots[/color][/b]%s[/center]" % [item.item_name if item else str(e.id),
-			Dots.COLOR.to_html(false), Dots.format(price), ("  [color=#ffd84a](%d%% off)[/color]" % int(e.off)) if int(e.off) > 0 else ""]
-		_button.disabled = _waiting > 0.0 or int(e.left) == 0 or dots < price or not Net.is_client()
+		_picked.text = "[center][b]%s[/b][/center]" % (item.item_name if item else str(e.id))
+		_button.disabled = _waiting > 0.0 or int(e.left) == 0 or dots < int(e.price) or not Net.is_client()
 		_button.text = "Buying..." if _waiting > 0.0 else "Sold out" if int(e.left) == 0 else "Buy"
-	if not Net.is_client():
-		_hint.text = "Shops sell when you play online or in Singleplayer."
-	elif not e.is_empty() and dots < int(e.price):
-		_hint.text = "You have %s Dots. Sell things at a smith's forge for more." % Dots.format(dots)
-	else:
-		_hint.text = "You have %s Dots. Prices are the same in every world." % Dots.format(dots)
+	_hint.text = "" if Net.is_client() else "Online or Singleplayer only"
+	_hint.visible = _hint.text != ""
+	_picked.visible = _picked.text != ""
 
 
 func buy() -> void:

@@ -1,9 +1,16 @@
 class_name SpeechBubble
 extends Control
 ## Screen-space chat attached to a world-space character. New messages replace old ones.
+## It shrinks with distance like the character, held between a readable
+## minimum and a maximum up close, and is not drawn past REACH.
 
 const MAX_CHARACTERS := 140
 const MAX_WIDTH := 260.0
+const REACH := 45.0
+## Full size this many metres from the camera; smaller farther, within the limits.
+const NEAR := 9.0
+const MIN_SCALE := 0.5
+const MAX_SCALE := 1.0
 static var _layer: ResponsiveUILayer
 static var _root: Control
 static var _bubbles := {}
@@ -13,6 +20,7 @@ var _anchor_id: int
 var _height := 2.9
 var _background := UIStyle.TEXT
 var _border := UIStyle.OUTLINE
+var _pop := 0.6  # the pop-in (0.6 to 1), times the distance's size
 
 
 static func say(anchor: Node3D, text: String, kind: String, height := 2.9) -> void:
@@ -48,7 +56,7 @@ static func _show_message(anchor_ref: WeakRef, text: String, kind: String, heigh
 	anchor.tree_exiting.connect(bubble.queue_free, CONNECT_ONE_SHOT)
 	bubble._follow()
 	var tween := bubble.create_tween()
-	tween.tween_property(bubble, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(bubble, "_pop", 1.0, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_interval(minf(3.5 + 0.06 * mini(text.length(), MAX_CHARACTERS), 9.0) - 0.18)
 	tween.tween_property(bubble, "modulate:a", 0.0, 0.4)
 	tween.tween_callback(bubble.queue_free)
@@ -87,7 +95,6 @@ func _build(content: String, kind: String) -> void:
 	label.size = size - Vector2(24, 16)
 	add_child(label)
 	pivot_offset = Vector2(size.x * 0.5, size.y + 8)
-	scale = Vector2.ONE * 0.6
 
 
 ## Shopkeepers' bubbles (game text only, never player chat): BBCode for bold
@@ -120,7 +127,6 @@ func _build_rich(markup: String) -> void:
 	label.custom_minimum_size = label.size
 	add_child(label)
 	pivot_offset = Vector2(size.x * 0.5, size.y + 8)
-	scale = Vector2.ONE * 0.6
 
 
 func _process(_delta: float) -> void:
@@ -137,11 +143,13 @@ func _follow() -> void:
 		hide()
 		return
 	var point: Vector3 = anchor.global_position + anchor.global_basis.y.normalized() * _height
-	visible = not camera.is_position_behind(point) and camera.global_position.distance_to(point) <= 80.0
+	var distance := camera.global_position.distance_to(point)
+	visible = not camera.is_position_behind(point) and distance <= REACH
 	if visible and anchor.has_meta("city_actor"):
 		var ray := PhysicsRayQueryParameters3D.create(camera.global_position, point, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 		visible = anchor.get_world_3d().direct_space_state.intersect_ray(ray).is_empty()
 	if visible:
+		scale = Vector2.ONE*_pop*clampf(NEAR/maxf(distance, 0.5), MIN_SCALE, MAX_SCALE)
 		position = (camera.unproject_position(point) / _layer.scale - pivot_offset).round()
 
 

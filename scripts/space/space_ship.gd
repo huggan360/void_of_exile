@@ -172,7 +172,20 @@ func altitude(p: Dictionary) -> float:
 
 ## The port a pilot may land at from here (X): {planet, port}, or {}.
 func landable() -> Dictionary:
-	if mode!="flying" or speed>LAND_SPEED: return {}
+	if mode!="flying": return {}
+	# From anywhere in a planet's orbit band: its nearest port (she flies the
+	# rest of the way down by herself, round the planet).
+	var held := orbit_planet()
+	if not held.is_empty():
+		var nearest := {}
+		var nearest_d := INF
+		for entry: Dictionary in SpaceLayout.ports(held):
+			var d := xform.origin.distance_to((entry.pose as Transform3D).origin)
+			if d<nearest_d:
+				nearest_d = d
+				nearest = {planet = held, port = entry}
+		return nearest
+	if speed>LAND_SPEED: return {}
 	var best := {}
 	var best_d := PORT_RANGE
 	for p: Dictionary in SpaceLayout.PLANETS:
@@ -191,7 +204,7 @@ func landable() -> Dictionary:
 ## Sets down on a port: an arc in from where she is.
 func begin_landing(p: Dictionary, entry: Dictionary) -> void:
 	var to: Transform3D = entry.pose
-	landing = {from = xform, to = to, t = 0.0, time = LAND_TIME+xform.origin.distance_to(to.origin)/250.0, planet = p.id, port = entry.key}
+	landing = {from = xform, to = to, t = 0.0, time = LAND_TIME+xform.origin.distance_to(to.origin)/250.0, planet = p.id, port = entry.key, center = p.center}
 	mode = "landing"
 	queue = []
 	speed = 0.0
@@ -211,9 +224,15 @@ func step(delta: float) -> int:
 			var k := smoothstep(0.0, 1.0, float(landing.t))
 			var from: Transform3D = landing.from
 			var to: Transform3D = landing.to
-			# Arc in from above the pad rather than through the ground.
-			var lift := (to.basis.y*80.0)*sin(k*PI)*0.6
-			xform = Transform3D(from.basis.slerp(to.basis, k), from.origin.lerp(to.origin, k)+lift)
+			# Round the planet and in from above the pad, never through the
+			# ground: the way swings about the planet's middle while the height
+			# eases down, with a hump that grows with the distance travelled.
+			var center: Vector3 = landing.get("center", to.origin-to.basis.y*1000.0)
+			var a := from.origin-center
+			var b := to.origin-center
+			var dir := a.normalized().slerp(b.normalized(), k)
+			var hump := (80.0+a.normalized().angle_to(b.normalized())*b.length()*0.25)*sin(k*PI)*0.6
+			xform = Transform3D(from.basis.slerp(to.basis, k), center+dir*(lerpf(a.length(), b.length(), k)+hump))
 			if landing.t>=1.0:
 				mode = "landed"
 				planet = str(landing.planet)

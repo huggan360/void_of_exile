@@ -17,7 +17,6 @@ var _burning := BurningVisuals.new()
 
 func _ready() -> void:
 	nameplate.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	nameplate.fixed_size = true
 	nameplate.position.y = 2.25
 	nameplate.font = UIStyle.bold()
 	nameplate.font_size = 36
