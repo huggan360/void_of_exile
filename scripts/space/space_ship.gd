@@ -197,8 +197,8 @@ func begin_landing(p: Dictionary, entry: Dictionary) -> void:
 	speed = 0.0
 	velocity = Vector3.ZERO
 
-## Authority step. `asteroids` is SpaceLayout.asteroids(); returns impact damage taken.
-func step(delta: float, asteroids: Array) -> int:
+## Authority step; returns impact damage taken (from asteroids).
+func step(delta: float) -> int:
 	input_age += delta
 	# Nobody at the helm (or a pilot that went quiet): she holds her speed and
 	# heading, so a crew can set a course and leave the wheel.
@@ -298,18 +298,16 @@ func step(delta: float, asteroids: Array) -> int:
 		var n := Vector3(flat.x, 0, flat.y).normalized() if flat.length()>0.1 else Vector3.RIGHT
 		next = Vector3(n.x*cone, next.y, n.z*cone)
 		velocity = velocity.slide(n)
-	if absf(next.z-SpaceLayout.SHARDFIELD.center.z)<SpaceLayout.SHARDFIELD.extents.z+400.0:
-		for rock: Array in asteroids:
-			var at: Vector3 = rock[0]
-			var r: float = float(rock[1])+RADIUS*0.7
-			if absf(at.x-next.x)>r or absf(at.y-next.y)>r or absf(at.z-next.z)>r: continue
-			if next.distance_to(at)<r:
-				var n := (next-at).normalized()
-				next = at+n*r
-				var into := -velocity.dot(n)
-				if into>8.0: damage += int(20.0+into*1.5)
-				velocity = velocity.bounce(n)*0.35
-				speed *= 0.35
+	for rock: Array in SpaceLayout.rocks_near(next, RADIUS*0.7):
+		var at: Vector3 = rock[0]
+		var r: float = float(rock[1])+RADIUS*0.7
+		if next.distance_to(at)<r:
+			var n := (next-at).normalized()
+			next = at+n*r
+			var into := -velocity.dot(n)
+			if into>8.0: damage += int(20.0+into*1.5)
+			velocity = velocity.bounce(n)*0.35
+			speed *= 0.35
 	if next.length()>SpaceLayout.WORLD_RADIUS:
 		next = next.normalized()*SpaceLayout.WORLD_RADIUS
 		velocity = velocity.slide(next.normalized())
@@ -335,12 +333,12 @@ static func part_at(local: Vector3) -> String:
 			best = id
 	return best
 
-## Whether the pulse drive may run here: clear of planets, the Nexus, the
-## Shardfield and the edge of the Reach.
+## Whether the pulse drive may run here: clear of planets, the Nexus, rocks
+## and the edge of the Reach.
 static func pulse_clear(at: Vector3) -> bool:
 	if minf(at.distance_to(SpaceLayout.NEXUS), at.distance_to(SpaceLayout.DINER))<PULSE_CLEARANCE: return false
 	if at.length()>SpaceLayout.WORLD_RADIUS-SpaceLayout.BOUNDARY_WARN: return false
-	if absf(at.z-SpaceLayout.SHARDFIELD.center.z)<SpaceLayout.SHARDFIELD.extents.z+600.0 and absf(at.x)<SpaceLayout.SHARDFIELD.extents.x+600.0: return false
+	if not SpaceLayout.rocks_near(at, 300.0).is_empty(): return false
 	for p: Dictionary in SpaceLayout.PLANETS:
 		if at.distance_to(p.center)<float(p.radius)*1.6+PULSE_CLEARANCE: return false
 	return true

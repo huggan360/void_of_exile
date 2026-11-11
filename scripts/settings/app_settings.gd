@@ -178,6 +178,11 @@ func install_bindings() -> void:
 		for event in InputMap.action_get_events(action):
 			if event is InputEventKey and (event.keycode == KEY_TAB or event.physical_keycode == KEY_TAB):
 				InputMap.action_erase_event(action, event)
+	# Space is magic: it must never press a button that kept focus after a click.
+	for action in ["ui_accept", "ui_select"]:
+		for event in InputMap.action_get_events(action):
+			if event is InputEventKey and (event.keycode == KEY_SPACE or event.physical_keycode == KEY_SPACE):
+				InputMap.action_erase_event(action, event)
 	for entry: Dictionary in ControlBindings.ACTIONS:
 		var action: String = entry.id
 		if not InputMap.has_action(action): InputMap.add_action(action)

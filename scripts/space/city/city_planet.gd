@@ -2,14 +2,14 @@ class_name CityPlanet
 extends Node3D
 ## Vesperis on the client (child of its SpacePlanet, so in planet space): the
 ## fairytale city over the whole sphere (CityArt: tree houses, crooked towers,
-## mushroom houses, parks and lakes on every block the streets leave), built a
-## few milliseconds a frame nearest first, in chunks so far ones are culled; the
-## raised sidewalks and collision of the blocks around the player; the three
-## districts built in full when you come near (CityDistrict) and the life in
-## them (CityLife: townsfolk and traffic).
+## mushroom houses, parks and lakes on every block the streets leave), the
+## farmland and the three districts (CityDistrict) are all built while Space
+## loads, like every other planet's town and plants, in chunks so far ones are
+## culled. From orbit a light skyline stands in for them. Up close come the
+## raised sidewalks and collision of the blocks around the player and the life
+## in the districts (CityLife: townsfolk and traffic).
 const FACADES := ["4a3550", "2c4a52", "6a3a44", "b8a088", "2a2f4a", "7a4058", "3e3a5a", "5a4a3a", "8a6a7a", "34404e"]
 const NEON := ["dec69e", "d4bc92", "c1c6b5"]
-const DISTRICT_RANGE := 1300.0
 const DETAIL_ALTITUDE := 1800.0
 const COLLIDE_RANGE := 110.0
 const CHUNK := 14  # cells a side per skyline chunk (2 x 2 a face: few draw calls)
@@ -24,10 +24,7 @@ var _detail_shown := false
 var _solids := {}  # Vector3i cell -> Array of [Transform3D, Vector3 size, kind]
 var _bodies := {}  # Vector3i cell -> Node3D (collision and raised sidewalks)
 var _timer := 0.0
-var _chunks: Array = []  # [face, ci, cj] still to build
-var _building := false
 var _done := {}  # Vector3i(face, chunk i, chunk j) -> true once built
-var _country := false  # the farmland's farmsteads and roads, once the chunks are in
 static var _tower_material: ShaderMaterial
 static var _foliage_material: ShaderMaterial
 static var _meshes := {}
@@ -184,10 +181,22 @@ static func mesh(kind: String) -> Mesh:
 
 func build() -> void:
 	_build_orbit_lod()
+	# Everything up front (from the disk cache after the first time), so the
+	# city never streams in after Space has loaded.
 	for face in 6:
 		for cj in range(0, CityLayout.N, CHUNK):
 			for ci in range(0, CityLayout.N, CHUNK):
-				_chunks.append([face, ci, cj])
+				_build_chunk(face, ci, cj, true)
+	_build_country()
+	for d: Dictionary in CityLayout.DISTRICTS:
+		var district := CityDistrict.new()
+		district.name = "District_"+str(d.id)
+		district.city = self
+		district.data = d
+		district.visible = false
+		add_child(district)
+		district.build()
+		districts[d.id] = district
 
 ## A few hundred simple instanced silhouettes, ready immediately from the
 ## Nexus. No citizens, collisions, voxel props or detailed windows at orbit.
@@ -222,6 +231,7 @@ func _start_detail() -> void:
 	life = CityLife.new()
 	life.city = self
 	add_child(life)
+	for d: Dictionary in CityLayout.DISTRICTS: life.add_district(d)
 	var flora := CountryFlora.new()
 	flora.name = "Flora"
 	flora.city = self
@@ -251,24 +261,7 @@ func _update_frame(delta: float) -> void:
 	# Orbit and detailed city geometry are exclusive: never draw overlapping
 	# proxy buildings through the full-resolution houses.
 	_orbit_lod.visible = not close
-	for d: Dictionary in CityLayout.DISTRICTS:
-		var distance := eye.distance_to(to_global(CityLayout.district_frame(d).origin))
-		if districts.has(d.id): (districts[d.id] as Node3D).visible = close and distance<DISTRICT_RANGE
 	if not close: return
-	# Districts come in when the camera is near (from orbit they are skyline).
-	for d: Dictionary in CityLayout.DISTRICTS:
-		var at := to_global(CityLayout.district_frame(d).origin)
-		if not districts.has(d.id) and eye.distance_to(at)<DISTRICT_RANGE:
-			var district := CityDistrict.new()
-			district.name = "District_"+str(d.id)
-			district.city = self
-			district.data = d
-			add_child(district)
-			district.build()
-			districts[d.id] = district
-			life.add_district(d)
-	if not _chunks.is_empty() and not _building: _build_next(to_local(eye) if eye.is_finite() else Vector3.ZERO)
-	elif _chunks.is_empty() and not _building and not _country: _build_country()
 	_timer -= delta
 	if _timer<=0.0 and is_instance_valid(local):
 		_timer = 0.25
@@ -276,22 +269,9 @@ func _update_frame(delta: float) -> void:
 
 # --- Skyline ------------------------------------------------------------------------------
 
-## The nearest unbuilt chunk, a slice at a time across frames.
-func _build_next(eye: Vector3) -> void:
-	var best := 0
-	var best_d := 1e18
-	for k in _chunks.size():
-		var c: Array = _chunks[k]
-		var mid := CityLayout.cell(int(c[0]), mini(int(c[1])+CHUNK/2, CityLayout.N-1), mini(int(c[2])+CHUNK/2, CityLayout.N-1))
-		var d := (mid.frame as Transform3D).origin.distance_squared_to(eye)
-		if d<best_d:
-			best_d = d
-			best = k
-	var chunk: Array = _chunks.pop_at(best)
-	_building = true
-	_build_chunk(int(chunk[0]), int(chunk[1]), int(chunk[2]))
-
-func _build_chunk(face: int, ci: int, cj: int) -> void:
+## One chunk of skyline; `now` builds it in one go (while loading) instead of
+## a slice a frame.
+func _build_chunk(face: int, ci: int, cj: int, now := false) -> void:
 	var batch := Batch.new()
 	var file := _cache_file(face, ci, cj)
 	var kept := _read_cache(file)
@@ -305,7 +285,7 @@ func _build_chunk(face: int, ci: int, cj: int) -> void:
 			var r := CityLayout.role(face, i, j)
 			if r in ["district", "park", "lake"]: _block(batch, face, i, j, r)
 			_island(batch, face, i, j)
-			if Time.get_ticks_usec()-start>BUDGET_USEC:
+			if not now and Time.get_ticks_usec()-start>BUDGET_USEC:
 				await get_tree().process_frame
 				if not is_inside_tree(): return
 				start = Time.get_ticks_usec()
@@ -323,12 +303,10 @@ func _finish_chunk(face: int, ci: int, cj: int, batch: Batch, buffers: Dictionar
 	_done[Vector3i(face, ci/CHUNK, cj/CHUNK)] = true
 	add_child(holder)
 	batch.flush(holder, "c", 6000.0, DETAIL_RANGE, buffers, true, 192.0)
-	_building = false
 
 ## The farmland between the city cores (CityCountryArt): farmsteads, roadside
 ## trees and the dirt roads. Collision near the player is rebuilt to take them in.
 func _build_country() -> void:
-	_country = true
 	var batch := Batch.new()
 	CityCountryArt.build(batch, _solids)
 	var holder := Node3D.new()

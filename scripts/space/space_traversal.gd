@@ -1397,6 +1397,7 @@ func fly_rocket_surface() -> void:
 	world.request(["rocket_surface"])
 	await game.travel(destination, Vector3.INF, true)
 	# Successful travel destroys this controller. Only a refused trip gets here.
+	if is_instance_valid(game.transition): game.transition.fade_from_black()
 	cinematic = false
 	player.cinematic_locked = false
 	_rocket_flight = false

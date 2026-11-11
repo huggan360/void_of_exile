@@ -15,11 +15,14 @@ var _map_fountain := Vector2.ZERO
 var campaign_tavern := false
 ## The Chronicle Gate south of the fountain: lit only while your party plays a campaign.
 var campaign_portal: Portal
-## The chapel market (ShopKeeper): red and white stalls either side of the chapel
-## yard, facing it, and two keepers by the chapel door. [shop, x, z].
-const MARKET_STALLS := [["priest", -11.5, 74.5], ["wizard", -17.0, 74.5], ["bowyer", 11.5, 74.5], ["alchemist", 17.0, 74.5]]
-const MARKET_KEEPERS := [["relic", -5.5, 75.5], ["curio", 5.5, 75.5]]
-const MARKET_CENTER := Vector2(0, 70)
+## The chapel market (ShopKeeper) on the cobbled MarketSquare before the chapel:
+## two rows of red and white stalls facing each other across the walk to the
+## chapel door, each keeper standing inside their stall behind the counter.
+## [shop, x, z]; stalls face the middle (x = 0).
+const MARKET_STALLS := [["priest", -12.0, 57.5], ["wizard", -12.0, 63.5], ["relic", -12.0, 69.5],
+		["bowyer", 12.0, 57.5], ["alchemist", 12.0, 63.5], ["curio", 12.0, 69.5]]
+## Where a keeper stands in the stall: behind the counter, under the awning.
+const STALL_KEEPER := Vector3(0, 0, 0.2)
 var _prepared_decor := {}
 var _prepared_load := false
 
@@ -45,7 +48,7 @@ func _ready() -> void:
 	if home_terrain==null: home_terrain = HomeTerrain.from_scene(self)
 	var e := HomeTerrain.EXTENT
 	# Only the playable plateau and shallow lagoon need terrain.
-	_add_terrain(HallGenerator.new(home_terrain), AABB(Vector3(-e, 0, -e), Vector3(e * 2 + 1, 40, e * 2 + 1)), "tavern", [scene_file_path])
+	_add_terrain(HallGenerator.new(home_terrain), AABB(Vector3(-e, 0, -e), Vector3(e * 2 + 1, 40, e * 2 + 1)), "tavern", [scene_file_path, "res://scripts/world/home_terrain.gd"])
 	if not has_node("CoastWater"): _add_water(IslandGenerator.SEA_LEVEL + 0.6, 400.0)
 	_heaven()
 	if has_node("Spawn"): spawn_point = $Spawn.position
@@ -121,9 +124,12 @@ func _prepare_navigation() -> void:
 	_footprints.resize(HomeTerrain.SIDE*HomeTerrain.SIDE)
 	_footprints.fill(0)
 	for collider in find_children("*","CollisionShape3D",true,false):
-		if not collider.shape is BoxShape3D: continue
+		var size: Vector3
+		if collider.shape is BoxShape3D: size = collider.shape.size
+		elif collider.shape is CylinderShape3D: size = Vector3(collider.shape.radius*2.0, collider.shape.height, collider.shape.radius*2.0)
+		else: continue
 		var local := HomeTerrain._transform_to(collider,self)
-		var bounds: AABB = local*AABB(-collider.shape.size/2,collider.shape.size)
+		var bounds: AABB = local*AABB(-size/2,size)
 		plan.props.append({pos=bounds.get_center(),solid_size=bounds.size})
 		_mark_footprint(bounds,2 if has_node("Buildings") and $Buildings.is_ancestor_of(collider) else 1)
 	navigation = TownNavigation.new(plan,self)
@@ -225,6 +231,7 @@ func is_walkable(pos: Vector3) -> bool:
 	return home_terrain.is_land(floori(pos.x), floori(pos.z))
 
 func map_color(x: int, z: int) -> Color:
+	if _cloud_top(x, z) > 0.0: return CLOUD_MAP_COLOR
 	var i := home_terrain.index(x, z)
 	if i < 0: return WATER_COLOR
 	if _footprints[i] == 2: return Color(.47, .32, .23)
@@ -235,11 +242,12 @@ func ground_height(x: float, z: float) -> float:
 	return home_terrain.stand_height(floori(x), floori(z))
 
 
-## Stalls from the village market prefab, a shopkeeper behind each counter.
 # --- Heaven: the Tavern floats on clouds -----------------------------------------------------
 
 ## Water stays in the lagoon, with short spills into a shallow voxel cloud rim.
 const CLOUD_FLOOR := 4.0
+const CLOUD_COLOR := Color("f3eee3")
+const CLOUD_MAP_COLOR := Color("d8d3c8")  # the rim on the minimap, a shade under the clouds
 
 func _heaven() -> void:
 	var e := HomeTerrain.EXTENT
@@ -306,19 +314,13 @@ func _cloud_rim() -> void:
 	var e := HomeTerrain.EXTENT
 	for z in range(-e, e, 3):
 		for x in range(-e, e, 3):
-			var d := home_terrain.shore_distance(x, z)
-			var ripple := sin(x * 0.13) * 2.0 + cos(z * 0.17) * 2.0
-			if d > -HomeTerrain.RIM + 2.0 or d < -HomeTerrain.RIM - 12.0 - ripple:
+			var top := _cloud_top(x, z)
+			if top <= 0.0:
 				continue
-			var crest := int((sin(x * 0.21) + cos(z * 0.19) + 2.0) * 0.75)
-			var top := 9.0 + crest
-			# Small channels let the lagoon spill into the clouds.
-			if HomeTerrain.is_fall(x, z) and d > -HomeTerrain.RIM - 3.0:
-				top = 6.0
 			var size := Vector3(3, top - CLOUD_FLOOR, 3)
 			transforms.append(Transform3D(Basis.from_scale(size), Vector3(x + 1.5, CLOUD_FLOOR + size.y * 0.5, z + 1.5)))
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color("f3eee3")
+	material.albedo_color = CLOUD_COLOR
 	material.roughness = 1.0
 	material.emission_enabled = true
 	material.emission = Color("eee0c8")
@@ -338,22 +340,36 @@ func _cloud_rim() -> void:
 	clouds.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(clouds)
 
+## Top of the cloud box covering column (x, z), or 0 where there is none.
+## The rim is built from 3x3 boxes; the minimap draws the same ones.
+func _cloud_top(x: int, z: int) -> float:
+	var e := HomeTerrain.EXTENT
+	x = -e + floori(float(x + e) / 3.0) * 3
+	z = -e + floori(float(z + e) / 3.0) * 3
+	if x < -e or z < -e or x >= e or z >= e:
+		return 0.0
+	var d := home_terrain.shore_distance(x, z)
+	var ripple := sin(x * 0.13) * 2.0 + cos(z * 0.17) * 2.0
+	if d > -HomeTerrain.RIM + 2.0 or d < -HomeTerrain.RIM - 12.0 - ripple:
+		return 0.0
+	var crest := int((sin(x * 0.21) + cos(z * 0.19) + 2.0) * 0.75)
+	# Small channels let the lagoon spill into the clouds.
+	if HomeTerrain.is_fall(x, z) and d > -HomeTerrain.RIM - 3.0:
+		return 6.0
+	return 9.0 + crest
+
+## Stalls from the village market prefab, a shopkeeper inside each one.
 func _build_market() -> void:
 	var stall_scene: PackedScene = load("res://scenes/home/prefabs/market.tscn")
 	for spec: Array in MARKET_STALLS:
 		var at := Vector3(float(spec[1]), 10, float(spec[2]))
-		var to_center := Vector2(MARKET_CENTER.x-at.x, MARKET_CENTER.y-at.z)
-		var yaw := atan2(-to_center.x, -to_center.y)  # the stall's front (-Z) faces the yard
+		var yaw := -PI * 0.5 if at.x < 0.0 else PI * 0.5  # the stall's front (-Z) faces the walk
 		var stall: Node3D = stall_scene.instantiate()
 		stall.name = "MarketStall_"+str(spec[0])
 		stall.position = at
 		stall.rotation.y = yaw
 		add_child(stall)
-		var behind := Basis(Vector3.UP, yaw)*Vector3(0, 0, 2.1)
-		var keeper := ShopKeeper.place(self, str(spec[0]), Transform3D(Basis(Vector3.UP, yaw), at+behind))
-		keeper.target.reach = 5.5  # over the counter
+		var facing := Basis(Vector3.UP, yaw)
+		var keeper := ShopKeeper.place(self, str(spec[0]), Transform3D(facing, at+facing*STALL_KEEPER))
+		keeper.target.reach = 4.5  # over the counter
 		_practical_light(at+Vector3(0, 3.6, 0), Color("ffc47d"), 0.9, 7.0)
-	for spec: Array in MARKET_KEEPERS:
-		var at := Vector3(float(spec[1]), 10, float(spec[2]))
-		var to_center := Vector2(MARKET_CENTER.x-at.x, MARKET_CENTER.y-at.z)
-		ShopKeeper.place(self, str(spec[0]), Transform3D(Basis(Vector3.UP, atan2(-to_center.x, -to_center.y)), at))

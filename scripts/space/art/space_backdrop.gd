@@ -34,7 +34,6 @@ func build(server: bool) -> void:
 	_server = server
 	if server: return
 	_asteroids()
-	_pass_lanterns()
 	_dust_field()
 	_edge()
 	_build_surface()
@@ -241,12 +240,12 @@ func _asteroids() -> void:
 		var rotation := Basis.from_euler(Vector3(rng.randf()*TAU, rng.randf()*TAU, rng.randf()*TAU))
 		var variant := rng.randi_range(0, 2)
 		var giant := radius>150.0
-		var key := "%d:%d:%s" % [floori(at.x/CELL), floori(at.y/CELL), "g" if giant else str(variant)]
+		var key := "%d:%d:%d:%s" % [floori(at.x/CELL), floori(at.y/CELL), floori(at.z/CELL), "g" if giant else str(variant)]
 		if not cells.has(key): cells[key] = {variant = variant, giant = giant, items = []}
 		var tone := Color("4d495e").lerp(Color("8b7470"), rng.randf()*0.65)
 		cells[key].items.append([Transform3D(rotation.scaled_local(Vector3.ONE*radius), at), tone, rng.randf()])
 		if entry[2]:
-			var ckey := "%d:%d" % [floori(at.x/CELL), floori(at.y/CELL)]
+			var ckey := "%d:%d:%d" % [floori(at.x/CELL), floori(at.y/CELL), floori(at.z/CELL)]
 			if not crystal_cells.has(ckey):
 				var holder := Node3D.new()
 				add_child(holder)
@@ -277,18 +276,6 @@ func _asteroids() -> void:
 		instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		add_child(instance)
 	for brush: NexusStation.Brush in crystal_cells.values(): brush.finish()
-
-func _pass_lanterns() -> void:
-	var art := NexusStation.Brush.new(self, false, 12000.0)
-	for pass_position: Vector3 in SpaceLayout.passes():
-		for z in [-1900.0, -950.0, 0.0, 950.0, 1900.0]:
-			for i in 10:
-				var angle := TAU*i/10
-				var at := pass_position+Vector3(cos(angle), sin(angle), 0)*(SpaceLayout.PASS_RADIUS-40.0)+Vector3(0, 0, z)
-				art.part("sphere", Transform3D(Basis.IDENTITY, at), Vector3.ONE*9, Color("ffd18a"), false, 3.0)
-				art.box(at+Vector3(0, -9, 0), Vector3(1.5, 13, 1.5), Color("bd935b"))
-				art.crystal(at+Vector3(0, 6, 0), 8, Color("8bedbe"))
-	art.finish()
 
 # --- Atmosphere of space -----------------------------------------------------------
 

@@ -67,9 +67,11 @@ func refresh_art(world: SpaceWorld) -> bool:
 func _copy_art(source: Node) -> void:
 	var pending: Array[Node] = [source]
 	var count := 0
-	while not pending.is_empty() and count<240:
+	# Vesperis is a whole city of parts: draw all of it, not its far stand-in.
+	var cap := 4000 if planet.get("city", false) else 240
+	while not pending.is_empty() and count<cap:
 		var node: Node = pending.pop_back()
-		if node is PlanetTerrain or node is CountryFlora or node is CityLife: continue
+		if node is PlanetTerrain or node is CountryFlora or node is CityLife or str(node.name)=="OrbitLOD": continue
 		for child: Node in node.get_children(): pending.append(child)
 		var copy: GeometryInstance3D
 		if node is MeshInstance3D:

@@ -542,9 +542,9 @@ static func divine() -> Array[Item]:
 			"The deep sea, folded small enough to carry. It wants to unfold.", {magic = 32, mp = 100},
 			["Shield costs 30% less MP", "Warp ring rolls out three times"],
 			{shield_drain = 0.7}, Color("#6cfce8"), 0.7))
-	out[-1].shield_tint = Color("#4fafab")
-	out[-1].shield_arcs = Color("#6cfce8")
-	out[-1].shield_rainbow = 0.15
+	out[-1].shield_tint = Color("#14305e")  # black magic: deep navy with blue sparks
+	out[-1].shield_arcs = Color("#2f6fe0")
+	out[-1].shield_rainbow = 0.0
 	out[-1].warp = 0.085
 	out[-1].ring = {damage = 280, range = 12.0, speed = 14.0, cost = 55, cooldown = 1.5, pulses = 3}
 

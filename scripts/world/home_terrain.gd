@@ -13,9 +13,11 @@ const BEACH := 8  # top block of beaches and pier decks
 const SEAFLOOR := 4
 const PIER_POST := 2
 ## The Tavern floats in the sky: the lagoon reaches RIM blocks past the coast,
-## then a shallow cloud rim (gaps where water spills over) and beyond it sky.
+## then the cloud rim (HallWorld, gaps where water spills over) and beyond it sky.
 const RIM := 12.0
 const VOID := -1000
+## Pier decks stop this far inside the lagoon's edge, short of the clouds.
+const PIER_REACH := RIM - 3.0
 ## Waterfalls: angles (radians, from +x toward +z) and half widths of the gaps.
 const FALLS := [[0.35, 0.09], [1.6, 0.07], [2.55, 0.1], [3.7, 0.08], [4.6, 0.06], [5.5, 0.09]]
 
@@ -53,7 +55,7 @@ static func from_scene(root: Node) -> HomeTerrain:
 	for plaza in root.find_children("*", "Marker3D", true, false):
 		if plaza is HomePlaza:
 			var at := _transform_to(plaza, root).origin
-			plazas.append({center = Vector2(at.x, at.z), radius = plaza.radius, pattern = plaza.pattern})
+			plazas.append({center = Vector2(at.x, at.z), radius = plaza.radius, size = plaza.size, pattern = plaza.pattern})
 	terrain.build(coast, roads, plazas)
 	return terrain
 
@@ -81,13 +83,9 @@ func build(coast: PackedVector2Array, roads: Array[Dictionary], plazas: Array[Di
 			var d := _shore[i]
 			var wx := x - EXTENT
 			var wz := z - EXTENT
-			if d < -RIM - 1.5:
-				height[i] = 0  # open sky (top AIR marks it; heights are bytes)
+			if d < -RIM + 0.5:
+				height[i] = 0  # open sky past the lagoon (top AIR marks it; heights are bytes)
 				top[i] = Blocks.AIR
-			elif d < -RIM + 0.5:
-				# The lip round the lagoon, open where a waterfall pours over.
-				height[i] = 6 if is_fall(wx, wz) else BEACH
-				top[i] = Blocks.SEAFLOOR if is_fall(wx, wz) else Blocks.SNOW
 			elif d <= 0.0:
 				# Shallows, then a lagoon floor.
 				height[i] = 7 if d > -1.5 else 6 if d > -4.0 else 5 if d > -9.0 else SEAFLOOR
@@ -271,7 +269,7 @@ func _pave_road(road: Dictionary) -> void:
 				if d < half or (d < half + 0.7 and _hash(x, z, 14) < 0.4):
 					top[i] = Blocks.GRAVEL if _hash(x, z, 15) < 0.18 else Blocks.DIRT
 			"pier":
-				if d < half:
+				if d < half and _shore[i] > -PIER_REACH:
 					if height[i] < BEACH:
 						deck[i] = PIER_POST if d > half - 1.0 and posmod(x + z, 4) == 0 else 1
 					else:
@@ -281,11 +279,19 @@ func _pave_road(road: Dictionary) -> void:
 func _pave_plaza(plaza: Dictionary) -> void:
 	var c: Vector2 = plaza.center
 	var r: float = plaza.radius
-	for z in range(floori(c.y - r), ceili(c.y + r) + 1):
-		for x in range(floori(c.x - r), ceili(c.x + r) + 1):
+	var half: Vector2 = plaza.get("size", Vector2.ZERO) * 0.5
+	var square := half != Vector2.ZERO
+	var reach := half if square else Vector2(r, r)
+	for z in range(floori(c.y - reach.y), ceili(c.y + reach.y) + 1):
+		for x in range(floori(c.x - reach.x), ceili(c.x + reach.x) + 1):
 			var i := index(x, z)
 			var offset := Vector2(x + 0.5, z + 0.5) - c
 			var d := offset.length()
+			if square:
+				# Rectangles: d is how far in from the edge, measured like a radius.
+				if absf(offset.x) >= half.x or absf(offset.y) >= half.y:
+					continue
+				d = r - minf(half.x - absf(offset.x), half.y - absf(offset.y))
 			if i < 0 or d >= r or height[i] < BEACH:
 				continue
 			var block := Blocks.PAVING

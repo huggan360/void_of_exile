@@ -5,6 +5,8 @@ extends WarpWave
 ## crackling arcs in the spell's colors. Hits each obstacle once as the ring
 ## passes it, for less damage the further out it gets. Shakes nearby cameras.
 ## Clashes with enemy ripples where they touch (see WarpWave).
+## It stays strong all the way out and then bursts into motes (SpellFX),
+## and every hit flashes in the spell's style.
 
 signal hit(target: Node, damage: int)
 
@@ -13,6 +15,7 @@ const BAND := 1.2  # ring thickness in meters
 const MIN_DAMAGE_SHARE := 0.5  # what's left at the very edge of the range
 const SHAKE_STRENGTH := 0.3
 const SHAKE_RADIUS := 16.0
+const BURST_TIME := 0.18  # the flare as it bursts at the edge of its range
 
 var spell: Item
 var damage_multiplier := 1.0
@@ -21,7 +24,8 @@ var visual_only := false
 var _hit := {}  # instance id -> true
 var _mesh := MeshInstance3D.new()
 var _torus := TorusMesh.new()
-var _sparks: GPUParticles3D
+var _sparks: Array[GPUParticles3D] = []
+var _bursting := -1.0  # counts up while bursting
 
 
 static func cast(parent: Node3D, origin: Vector3, p_spell: Item, delay := 0.0, multiplier := 1.0) -> MagicRing:
@@ -59,19 +63,26 @@ func _ready() -> void:
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_mesh.position.y = 0.9
 	add_child(_mesh)
-	_sparks = _make_sparks()
-	add_child(_sparks)
+	_material.set_shader_parameter("darkness", SpellFX.style(spell).darkness)
+	_sparks = SpellFX.edge_motes(spell)
+	for p in _sparks:
+		p.position.y = 0.6
+		add_child(p)
 	_apply()
 
 
 func _begin() -> void:
 	visible = true
 	set_physics_process(true)
-	_sparks.emitting = true
+	for p in _sparks: p.emitting = true
+	SpellFX.cast(get_parent(), global_position, spell)
 	CameraShake.shake_at(global_position, SHAKE_STRENGTH * (1.4 if spell.is_divine() else 1.0), SHAKE_RADIUS)
 
 
 func _physics_process(delta: float) -> void:
+	if _bursting >= 0.0:
+		_burst_step(delta)
+		return
 	var reach: float = spell.ring.range
 	var previous := radius
 	previous_radius = radius
@@ -80,7 +91,31 @@ func _physics_process(delta: float) -> void:
 	_damage_band(previous, radius)
 	_apply()
 	if radius >= reach:
+		_burst()
+
+
+## Reached the edge: the ring flares, swells and scatters into sparks.
+func _burst() -> void:
+	_bursting = 0.0
+	for p in _sparks: p.emitting = false
+	SpellFX.ring_burst(get_parent(), global_transform, radius, spell)
+	if spell.is_divine():
+		CameraShake.shake_at(global_position, SHAKE_STRENGTH * 0.6, SHAKE_RADIUS)
+
+
+func _burst_step(delta: float) -> void:
+	_bursting += delta
+	var t := _bursting / BURST_TIME
+	if t >= 1.0:
 		queue_free()
+		return
+	radius += spell.ring.speed * delta * 0.6
+	band = BAND * (0.5 + t * 1.5)
+	_torus.inner_radius = maxf(0.05, radius - band * 0.5)
+	_torus.outer_radius = radius + band * 0.5
+	_material.set_shader_parameter("intensity", (1.0 - t) * (1.0 - t))
+	_material.set_shader_parameter("pulse", 1.0 - t)
+	_material.set_shader_parameter("ring_radius", radius)
 
 
 func _apply() -> void:
@@ -91,11 +126,11 @@ func _apply() -> void:
 	_torus.inner_radius = maxf(0.05, radius - band * 0.5)
 	_torus.outer_radius = radius + band * 0.5
 	_mesh.scale = Vector3(1.0, 0.6, 1.0)  # a little flatter than round
-	_material.set_shader_parameter("intensity", 1.0 - t * t)  # fades as it weakens
+	_material.set_shader_parameter("intensity", 1.0 - t * 0.3)  # holds until it bursts
 	_material.set_shader_parameter("ring_radius", radius)
-	if _sparks:
-		(_sparks.process_material as ParticleProcessMaterial).emission_ring_radius = radius
-		(_sparks.process_material as ParticleProcessMaterial).emission_ring_inner_radius = maxf(0.0, radius - 0.3)
+	for p in _sparks:
+		(p.process_material as ParticleProcessMaterial).emission_ring_radius = radius
+		(p.process_material as ParticleProcessMaterial).emission_ring_inner_radius = maxf(0.0, radius - 0.3)
 
 
 ## Hits obstacles the ring passed over this frame.
@@ -126,6 +161,7 @@ func _damage_band(inner: float, outer: float) -> void:
 		else:
 			target.take_hit(target.global_position + global_basis.y, (global_basis*Vector3(flat.x,0,flat.y)).normalized(), damage)
 		hit.emit(target, damage)
+		SpellFX.hit(get_parent(), target.global_position + global_basis.y * 0.9, (global_basis*Vector3(flat.x,0,flat.y)).normalized(), spell)
 
 
 ## Damage at the current radius (it weakens the further out it gets).
@@ -138,40 +174,3 @@ func power() -> float:
 func damage_at_distance(distance: float, arc_strength := 1.0) -> int:
 	var falloff := lerpf(1.0, MIN_DAMAGE_SHARE, clampf(distance / spell.ring.range, 0.0, 1.0))
 	return maxi(1, roundi(spell.ring.damage * damage_multiplier * falloff * arc_strength))
-
-
-func _make_sparks() -> GPUParticles3D:
-	var pm := ParticleProcessMaterial.new()
-	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_RING
-	pm.emission_ring_axis = Vector3.UP
-	pm.emission_ring_height = 0.2
-	pm.direction = Vector3.UP
-	pm.spread = 40.0
-	pm.initial_velocity_min = 1.0
-	pm.initial_velocity_max = 3.0
-	pm.gravity = Vector3(0, -4, 0)
-	pm.color = spell.shield_arcs
-	pm.hue_variation_min = -spell.shield_rainbow * 0.5
-	pm.hue_variation_max = spell.shield_rainbow * 0.5
-	var shrink := Curve.new()
-	shrink.add_point(Vector2(0, 1))
-	shrink.add_point(Vector2(1, 0))
-	var shrink_tex := CurveTexture.new()
-	shrink_tex.curve = shrink
-	pm.scale_curve = shrink_tex
-	var cube := BoxMesh.new()
-	cube.size = Vector3.ONE * 0.1
-	var mat := ShaderMaterial.new()
-	mat.shader = preload("res://shaders/fire_voxel.gdshader")
-	cube.material = mat
-	var p := GPUParticles3D.new()
-	p.process_material = pm
-	p.draw_pass_1 = cube
-	p.amount = 60 if spell.is_divine() else 36
-	p.lifetime = 0.6
-	p.emitting = false
-	p.position.y = 0.6
-	p.local_coords = true
-	p.visibility_aabb = AABB(Vector3(-16, -2, -16), Vector3(32, 6, 32))
-	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return p

@@ -74,12 +74,12 @@ size = Vector3(1.375, 1, 2.25)
 metadata/voxel_source = "res://props/home/forge_house/model.vox"
 
 [node name="CarvedVoxels" type="MeshInstance3D" parent="." unique_id=660983682]
-transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.125, -0.375, -4.875)
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.125, -0.345, -4.875)
 material_override = SubResource("ShaderMaterial_byc7l")
 mesh = ExtResource("2_3pk4f")
 
 [node name="LitWindows" type="MeshInstance3D" parent="." unique_id=796516360]
-transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.125, -0.375, -4.875)
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -5.125, -0.345, -4.875)
 material_override = SubResource("ShaderMaterial_eagex")
 mesh = ExtResource("3_dfg62")
 

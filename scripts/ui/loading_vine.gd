@@ -41,6 +41,8 @@ func _draw() -> void:
 	if progress > 0.02: _leaf(_point(progress), Vector2(13,-9), 1.0)
 
 func _leaf(base: Vector2, direction: Vector2, amount: float) -> void:
+	# A barely sprouted leaf collapses to a point and cannot be triangulated.
+	if amount < 0.05: return
 	var tip := base+direction*amount
 	var normal := direction.orthogonal().normalized()*3.2*amount
 	draw_colored_polygon(PackedVector2Array([base, base.lerp(tip,0.55)+normal, tip, base.lerp(tip,0.55)-normal]), INK)

@@ -33,7 +33,6 @@ var hull_anchors := {}
 var foes: SpaceFoes
 var gates: PlanetStrongholds  # the planets' boss fortresses (StrongholdGates for Boss and the gate keys)
 var _biomes := {}
-var _asteroids: Array = []
 var _next_ship := 1
 var _snapshot_timer := 0.0
 var _rocket: SmallRocket
@@ -78,7 +77,7 @@ func _init(data: Dictionary) -> void:
 		biome.volumetric_fog_density = 0.0
 		biome.torch_energy = 0.0
 		_biomes[spec[0]] = biome
-	_asteroids = SpaceLayout.asteroids()
+	SpaceLayout.asteroids()  # place the rocks once, up front
 
 func game_root() -> Node:
 	return get_parent()
@@ -960,7 +959,7 @@ func _physics_process(delta: float) -> void:
 	if not port_queues.is_empty(): _update_queues()
 	for ship: SpaceShip in ships.values().duplicate():
 		if ship.mode=="descending": ship.xform.origin += Vector3.DOWN*600.0*delta
-		var damage := ship.step(delta, _asteroids)
+		var damage := ship.step(delta)
 		if damage>0: hurt_ship(ship, damage)
 	_snapshot_timer -= delta
 	if _snapshot_timer<=0.0 and not ships.is_empty():

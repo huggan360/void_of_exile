@@ -136,7 +136,7 @@ static func apply_viewport(viewport: Viewport, values: Dictionary, base_scale: f
 		return
 	RenderingServer.directional_shadow_atlas_set_size([256, 1024, 2048, 4096][shadows], true)
 	var soft: int = [RenderingServer.SHADOW_QUALITY_HARD, RenderingServer.SHADOW_QUALITY_HARD,
-			RenderingServer.SHADOW_QUALITY_SOFT_VERY_LOW, RenderingServer.SHADOW_QUALITY_SOFT_LOW][shadows]
+			RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM][shadows]
 	RenderingServer.directional_soft_shadow_filter_set_quality(soft)
 	RenderingServer.positional_soft_shadow_filter_set_quality(soft)
 	# High keeps the project's own renderer settings (the original look).
@@ -186,14 +186,17 @@ static func apply_atmosphere(env: Environment, sun: DirectionalLight3D, values: 
 	env.ssao_enabled = level(values, "ambient_occlusion") > 0
 	env.ssil_enabled = level(values, "indirect_light") > 0
 	env.glow_enabled = values.glow == "on"
-	# The same source size and softness as the Tavern in all environments.
-	sun.light_angular_distance = 1.2
-	sun.shadow_blur = 1.15
+	# A small sun disc: soft contact-hardening edges without the grain a wide
+	# penumbra gets over large outdoor scenes at these filter sample counts.
+	sun.light_angular_distance = 0.5
+	sun.shadow_blur = 1.0
 	var shadows := level(values, "shadows")
 	sun.shadow_enabled = shadows > 0
 	sun.directional_shadow_max_distance = [40.0, 45.0, 60.0, 80.0][shadows]
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if shadows >= 2 \
 			else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	# Cross-fade the cascades so there is no visible seam where one ends.
+	sun.directional_shadow_blend_splits = shadows >= 2
 
 
 static func volumetric_fog_allowed(values: Dictionary) -> bool:

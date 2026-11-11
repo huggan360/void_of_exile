@@ -16,8 +16,9 @@ shader = ExtResource("1_5wflo")
 shader_parameter/jitter = null
 shader_parameter/glow_strength = 3.0
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_d8013"]
-size = Vector3(12.5, 7.5, 12.5)
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_d8013"]
+height = 3.0
+radius = 6.2
 
 [node name="Fountain" type="Node3D" unique_id=288560347]
 metadata/voxel_source = "res://props/home/fountain/model.vox"
@@ -37,5 +38,5 @@ collision_layer = 2
 collision_mask = 0
 
 [node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope3" unique_id=1794262903]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, 0)
-shape = SubResource("BoxShape3D_d8013")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_d8013")

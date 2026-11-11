@@ -13,7 +13,6 @@
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/magicians_house.tscn" id="E10"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/fountain.tscn" id="E11"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/garden_bed.tscn" id="E12"]
-[ext_resource type="PackedScene" path="res://scenes/home/prefabs/market.tscn" id="E13"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/well.tscn" id="E14"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/woodland_0.tscn" id="E15"]
 [ext_resource type="PackedScene" path="res://scenes/home/prefabs/rose_cottage.tscn" id="E16"]
@@ -148,14 +147,14 @@ point_count = 5
 
 [sub_resource type="Curve3D" id="Curve13"]
 _data = {
-"points": PackedVector3Array(4, 0, 0, -4, 0, 0, -72, 10, 0, 4.167, 0, 0, -4.167, 0, 0, -84, 10, 0, 4.333, 0, 0, -4.333, 0, 0, -97, 10, 0),
+"points": PackedVector3Array(2, 0, 0, -2, 0, 0, -72, 10, 0, 2, 0, 0, -2, 0, 0, -78, 10, 0, 2, 0, 0, -2, 0, 0, -84, 10, 0),
 "tilts": PackedFloat32Array(0, 0, 0)
 }
 point_count = 3
 
 [sub_resource type="Curve3D" id="Curve14"]
 _data = {
-"points": PackedVector3Array(0, 0, 3, 0, 0, -3, -93, 10, 0, 0, 0, 3, 0, 0, -3, -93, 10, -9),
+"points": PackedVector3Array(0, 0, 3, 0, 0, -3, -81, 10, 0, 0, 0, 3, 0, 0, -3, -81, 10, -8),
 "tilts": PackedFloat32Array(0, 0)
 }
 point_count = 2
@@ -1075,10 +1074,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 81, 10, -8)
 script = ExtResource("E5")
 radius = 6.0
 
-[node name="ChapelYard" type="Marker3D" parent="Plazas" unique_id=1505855351]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 71)
+[node name="MarketSquare" type="Marker3D" parent="Plazas" unique_id=1505855351]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 64)
 script = ExtResource("E5")
 radius = 7.0
+size = Vector2(36, 20)
 pattern = "cobble"
 
 [node name="Buildings" type="Node3D" parent="." unique_id=475135360]
@@ -1232,34 +1232,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 10, 27.5)
 [node name="FlowerBedWest2" parent="Gardens" unique_id=1457765581 instance=ExtResource("E12")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 10, 43.5)
 
-[node name="FlowerBedWest3" parent="Gardens" unique_id=762712462 instance=ExtResource("E12")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 10, 60.5)
-
 [node name="FlowerBedEast1" parent="Gardens" unique_id=1729403004 instance=ExtResource("E12")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 10, 27.5)
 
 [node name="FlowerBedEast2" parent="Gardens" unique_id=572937243 instance=ExtResource("E12")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 10, 43.5)
 
-[node name="FlowerBedEast3" parent="Gardens" unique_id=1532421702 instance=ExtResource("E12")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 10, 60.5)
-
 [node name="StreetFurniture" type="Node3D" parent="." unique_id=1603368428]
-
-[node name="MarketWest1" parent="StreetFurniture" unique_id=1855877358 instance=ExtResource("E13")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 10, 6.2)
-
-[node name="MarketWest2" parent="StreetFurniture" unique_id=1894735112 instance=ExtResource("E13")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 10, 6.2)
-
-[node name="MarketEast1" parent="StreetFurniture" unique_id=1777107034 instance=ExtResource("E13")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 10, 6.4)
-
-[node name="MarketEast2" parent="StreetFurniture" unique_id=16657520 instance=ExtResource("E13")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43, 10, 6.4)
-
-[node name="MarketEast3" parent="StreetFurniture" unique_id=2026353763 instance=ExtResource("E13")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 10, 6.4)
 
 [node name="Well1" parent="StreetFurniture" unique_id=966343487 instance=ExtResource("E14")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33, 10, -32)

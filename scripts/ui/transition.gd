@@ -49,6 +49,13 @@ func fade_from_black(time := 0.45) -> void:
 	_black_tween.tween_callback(_black.hide)
 	await _black_tween.finished
 
+## The loading screen now covers everything: a black fade from before the
+## trip (the rocket's departure) must not outlive it into the new world.
+func _clear_black() -> void:
+	if is_instance_valid(_black_tween): _black_tween.kill()
+	_black.modulate.a = 0.0
+	_black.hide()
+
 func is_black() -> bool:
 	return _black.visible and _black.modulate.a>0.5
 
@@ -76,6 +83,7 @@ func jump_in(place_name: String) -> void:
 	var tween := create_tween()
 	tween.tween_method(_departure,0.0,1.0,JUMP_TIME)
 	await tween.finished
+	_clear_black()
 	_fracture.clear()
 	_warp.hide()
 	_busy = false
@@ -93,6 +101,7 @@ func fade_in(place_name: String) -> void:
 	var tween := create_tween()
 	tween.tween_property(_loading,"modulate:a",1.0,FADE_TIME)
 	await tween.finished
+	_clear_black()
 
 func jump_out() -> void:
 	if _busy: return

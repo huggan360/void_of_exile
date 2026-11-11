@@ -2,8 +2,8 @@ class_name SpaceLayout
 extends RefCounted
 ## The Astral Reach: one large round space world shared by art, gravity, the
 ## server and the map. The Nexus station is at the origin in the peaceful
-## Haven; the Shardfield (an asteroid wall with crystals) separates it from
-## the dark Gloam behind it (+Z). Ship interiors are rooms far below everything.
+## Haven; past the Shardfield lies the dark Gloam (+Z). Asteroids drift
+## everywhere, thickening toward the Gloam (see asteroids()). Ship interiors are rooms far below everything.
 ## Planets are whole worlds: `surface_height` is their deterministic terrain,
 ## used by the server (gravity, hull collisions) and the art (terrain meshes).
 
@@ -414,27 +414,64 @@ static func pocket_at(position: Vector3) -> int:
 	if slot<0 or slot>=POCKET_SLOTS: return -1
 	return slot if absf(position.z)<40.0 and absf(position.x-pocket_origin(slot).x)<40.0 else -1
 
-## Deterministic asteroids of the Shardfield: [position, radius, crystal (bool)].
-## The wall has three passes (gaps) the campaigns fly through; a few giants
-## anchor the field.
+## Deterministic asteroids: [position, radius, crystal (bool)]. They drift
+## through the whole Reach, sparse in the Haven and thickening the deeper you
+## fly toward the Gloam (rock_density). Planets, the Nexus, the diner, the
+## ascent from the Surface and the campaign passes keep clear water around them.
+const ROCKS := 6500
+const ROCK_CELL := 700.0  # lookup grid (bigger than any rock)
+static var _rocks: Array = []
+static var _rock_grid := {}
+
 static func asteroids() -> Array:
+	if not _rocks.is_empty(): return _rocks
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SHARDFIELD.seed
 	var out: Array = []
-	var c: Vector3 = SHARDFIELD.center
-	var e: Vector3 = SHARDFIELD.extents
-	var gaps := passes()
-	while out.size()<3200:
-		# Denser toward the middle plane of the wall.
-		var at := c+Vector3(rng.randf_range(-e.x, e.x), rng.randf_range(-e.y, e.y)*rng.randf(), rng.randf_range(-e.z, e.z))
-		var open := false
-		for gap: Vector3 in gaps:
-			if Vector2(at.x-gap.x, at.y-gap.y).length()<PASS_RADIUS: open = true
-		if open or at.distance_to(planet("shardheart").center)<560.0: continue
-		var giant := rng.randf()<0.025
+	var reach := WORLD_RADIUS-BOUNDARY_WARN-800.0
+	while out.size()<ROCKS:
+		# Thickest near the plane the planets share, thinning above and below.
+		var at := Vector3(rng.randf_range(-reach, reach), rng.randf_range(-6000.0, 6000.0)*rng.randf(), rng.randf_range(-reach, reach))
+		var density := rock_density(at)
+		if at.length()>reach or rng.randf()>density or not _rock_clear(at): continue
+		var giant := rng.randf()<0.01+0.025*density
 		var radius := rng.randf_range(160.0, 320.0) if giant else rng.randf_range(10.0, 70.0)
-		out.append([at, radius, rng.randf()<0.22])
+		out.append([at, radius, rng.randf()<0.04+0.12*density])
+	_rocks = out
+	for rock: Array in out:
+		var key := Vector3i((rock[0] as Vector3)/ROCK_CELL)
+		if not _rock_grid.has(key): _rock_grid[key] = []
+		_rock_grid[key].append(rock)
 	return out
+
+## How thick the rocks are at `at`, 0..1: a scattering in the Haven, more
+## past the Shardfield, a thick drift in the Gloam.
+static func rock_density(at: Vector3) -> float:
+	var deep := smoothstep(-8000.0, 32000.0, at.z)
+	return 0.035+0.965*deep*deep
+
+## Rocks that could touch a sphere of `reach` (at most ROCK_CELL) at `at`.
+static func rocks_near(at: Vector3, reach := 0.0) -> Array:
+	asteroids()
+	var out: Array = []
+	var cell := Vector3i(at/ROCK_CELL)
+	for x in range(-1, 2):
+		for y in range(-1, 2):
+			for z in range(-1, 2):
+				var bucket: Array = _rock_grid.get(cell+Vector3i(x, y, z), [])
+				for rock: Array in bucket:
+					if (rock[0] as Vector3).distance_to(at)<float(rock[1])+reach: out.append(rock)
+	return out
+
+static func _rock_clear(at: Vector3) -> bool:
+	if at.distance_to(NEXUS)<3200.0 or at.distance_to(DINER)<1500.0: return false
+	if Vector2(at.x-ASCENT.x, at.z-ASCENT.z).length()<1200.0 and at.y<1500.0: return false
+	if at.y<SURFACE_FLOOR+1500.0: return false
+	for p: Dictionary in PLANETS:
+		if at.distance_to(p.center)<float(p.radius)*1.8+500.0: return false
+	for gap: Vector3 in passes():
+		if at.distance_to(gap)<PASS_RADIUS: return false
+	return true
 
 const PASS_RADIUS := 480.0
 

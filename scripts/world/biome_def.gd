@@ -62,8 +62,8 @@ extends Resource
 @export var ambient_color := Color.WHITE
 @export_range(0.0, 1.0) var ambient_sky_contribution := 1.0
 @export var exposure := 1.0
-@export var saturation := 1.12
-@export var contrast := 1.10
+@export var saturation := 1.18
+@export var contrast := 1.06
 @export_range(0.0, 1.0) var cinematic_grade := 0.0
 @export var particle_size := 0.08
 @export var fog_color := Color(0.7, 0.8, 0.9)

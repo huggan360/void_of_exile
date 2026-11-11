@@ -20,6 +20,7 @@ uniform float pulse = 0.0;     // flashes when the shield absorbs a hit
 uniform vec3 tint : source_color = vec3(0.65, 0.8, 1.0);
 uniform vec3 arc_color : source_color = vec3(0.85, 0.92, 1.0);
 uniform float rainbow = 0.55;  // how much the arcs shift through rainbow colors
+uniform float darkness = 0.0;  // black-magic spells dim the world they bend
 uniform float brace = 0.0;               // 0..1, how hard a wave is pushing
 uniform vec3 brace_dir = vec3(0.0, 0.0, 1.0);  // which way the wave travels (local space)
 uniform vec4 obstacle = vec4(0.0);       // xyz world center, w radius (0 = none)
@@ -110,7 +111,7 @@ void fragment() {
 	arc *= step(0.35, noise3(p * 0.9 - TIME * 0.5));  // only some patches crackle at a time
 	vec3 rainbow_col = 0.55 + 0.45 * cos(6.2831 * (vec3(0.0, 0.33, 0.67) + local_pos.y * 0.35 + TIME * 0.15));
 
-	vec3 color = behind;
+	vec3 color = behind * (1.0 - darkness * (0.5 + rim * 0.4));
 	color += tint * rim * (0.5 + pulse);
 	color += mix(arc_color, rainbow_col, rainbow) * arc * (2.2 + pulse * 2.0 + facing_wave * 4.0);
 	// The face meeting the wave glows hot, with crackling streaks blown back.

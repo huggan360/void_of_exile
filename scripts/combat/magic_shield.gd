@@ -7,6 +7,9 @@ extends Node3D
 ## When a warp wave (an enemy ripple) washes over it, brace() makes the bubble
 ## lean into it: it dents where the wave hits, streams back into a teardrop
 ## and sheds streaks of light past its sides, like walking into a gale.
+##
+## Around the bubble spin two rings of the spell's motes (SpellFX), in
+## opposite directions. Letting go flings the motes outward.
 
 const RADIUS := 1.35
 const FADE_SPEED := 7.0
@@ -26,6 +29,10 @@ var _brace_target := 0.0
 var _brace_hold := 0.0
 var _brace_dir := Vector3.FORWARD  # world direction the wave travels
 var _wind := _make_wind()
+var _spell: Item
+var _aura := Node3D.new()
+var _rings: Array[Node3D] = []
+var _was_active := false
 
 
 func _ready() -> void:
@@ -46,6 +53,8 @@ func _ready() -> void:
 	_light.light_volumetric_fog_energy = 0.5
 	add_child(_light)
 	add_child(_wind)
+	_aura.position.y = _mesh.position.y
+	add_child(_aura)
 	_apply()
 
 
@@ -53,6 +62,14 @@ func _ready() -> void:
 func set_spell(spell: Item) -> void:
 	if spell == null:
 		return
+	if spell != _spell:
+		_spell = spell
+		for ring in _rings: ring.queue_free()
+		_rings = SpellFX.aura_rings(spell, RADIUS)
+		for ring in _rings:
+			_aura.add_child(ring)
+			if active: SpellFX.gather(ring)
+		_material.set_shader_parameter("darkness", SpellFX.style(spell).darkness)
 	_material.set_shader_parameter("tint", spell.shield_tint)
 	_material.set_shader_parameter("arc_color", spell.shield_arcs)
 	(_wind.process_material as ParticleProcessMaterial).color = spell.shield_arcs
@@ -69,6 +86,9 @@ func flash() -> void:
 ## Every projectile dents the bubble in its incoming direction, like a warp wave.
 func impact(direction: Vector3) -> void:
 	flash()
+	if is_inside_tree() and direction.length() > 0.01:
+		var d := direction.normalized()
+		SpellFX.hit(self, _mesh.global_position - d * RADIUS, -d, _spell)
 	brace(direction, 1.0)
 	_brace_hold = 0.18
 
@@ -96,6 +116,15 @@ func _process(delta: float) -> void:
 		_brace_target = 0.0  # waves have to keep pushing to keep it bent
 	var rate := BRACE_RISE if _brace_target > _brace else BRACE_FALL
 	_brace = move_toward(_brace, _brace_target, delta * rate)
+	if active != _was_active:
+		_was_active = active
+		var heavy := _spell != null and _spell.is_divine()
+		for ring in _rings:
+			if active: SpellFX.gather(ring)
+			else: SpellFX.release(ring, heavy)
+		if not active and _spell != null and is_inside_tree():
+			SpellFX.flash(self, _mesh.global_position, SpellFX.style(_spell).accent, 1.4 if heavy else 1.0)
+	for ring in _rings: SpellFX.spin(ring, delta)
 	_apply()
 
 

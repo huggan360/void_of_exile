@@ -10,7 +10,10 @@ shader_parameter/jitter = null
 shader_parameter/glow_strength = null
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ml2wl"]
-size = Vector3(3.5, 3.8, 2.8)
+size = Vector3(3.3, 1.25, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_post"]
+size = Vector3(0.35, 3.0, 0.35)
 
 [node name="Market" type="Node3D" unique_id=1035617957]
 metadata/voxel_source = "res://props/town/market/model.vox"
@@ -24,6 +27,14 @@ mesh = ExtResource("2_xf3r2")
 collision_layer = 2
 collision_mask = 0
 
-[node name="ClosedCollision" type="CollisionShape3D" parent="SolidEnvelope2" unique_id=862101654]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+[node name="Counter" type="CollisionShape3D" parent="SolidEnvelope2" unique_id=862101654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 0.62, -0.75)
 shape = SubResource("BoxShape3D_ml2wl")
+
+[node name="PostBackLeft" type="CollisionShape3D" parent="SolidEnvelope2" unique_id=862101655]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, 1.5, 1.0)
+shape = SubResource("BoxShape3D_post")
+
+[node name="PostBackRight" type="CollisionShape3D" parent="SolidEnvelope2" unique_id=862101656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.625, 1.5, 1.0)
+shape = SubResource("BoxShape3D_post")

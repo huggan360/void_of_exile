@@ -4,5 +4,9 @@
     7.5,
     12.5
   ],
-  "closed": true
+  "closed": true,
+  "cylinder": [
+    6.2,
+    3.0
+  ]
 }
