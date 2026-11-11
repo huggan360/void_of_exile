@@ -45,7 +45,7 @@ func build(server: bool) -> void:
 			light.light_color = Color("ffce8b")
 			light.light_energy = 1.1
 			light.omni_range = 9.0
-			light.shadow_enabled = false
+			NearbyLightShadows.register_light(light)
 			light.distance_fade_enabled = true
 			light.distance_fade_begin = 14.0
 			light.distance_fade_length = 16.0

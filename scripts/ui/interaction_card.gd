@@ -23,6 +23,10 @@ var _page := 0
 var _typing: Tween
 var _voice := DialogueVoice.new()
 var _shown_response := ""
+var _near_targets: Array[WeakRef] = []
+var _near_world: GameWorld
+var _near_origin := Vector3.INF
+var _near_refresh := 0
 
 func _ready() -> void:
 	add_child(_voice)
@@ -152,10 +156,20 @@ func update_prompt(player: Player, blocked: bool) -> void:
 		return
 	var nearest: InteractionTarget
 	var distance := INF
-	for candidate in get_tree().get_nodes_in_group("interaction_targets"):
-		if not candidate is InteractionTarget or not world.is_ancestor_of(candidate) or not candidate.available(player): continue
+	if _near_world!=world or Time.get_ticks_msec()>=_near_refresh or player.global_position.distance_squared_to(_near_origin)>9.0:
+		_near_world = world
+		_near_origin = player.global_position
+		_near_refresh = Time.get_ticks_msec()+150
+		_near_targets.clear()
+		for node in get_tree().get_nodes_in_group("interaction_targets"):
+			if not node is InteractionTarget or not world.is_ancestor_of(node): continue
+			if node.global_position.distance_squared_to(_near_origin)<=pow(node.reach+6.0,2.0): _near_targets.append(weakref(node))
+	for ref: WeakRef in _near_targets:
+		var candidate := ref.get_ref() as InteractionTarget
+		if not is_instance_valid(candidate): continue
+		var d := candidate.global_position.distance_squared_to(player.global_position)
+		if d>candidate.reach*candidate.reach or not candidate.available(player): continue
 		if seated and _chair_target(candidate): continue
-		var d: float = candidate.global_position.distance_squared_to(player.global_position)
 		if d < distance:
 			nearest = candidate
 			distance = d

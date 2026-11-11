@@ -15,10 +15,7 @@ uniform float rotation = 0.0;
 uniform float art_pixels = 70.0;   // pixel grid across the whole minimap
 uniform vec3 unexplored : source_color = vec3(0.04, 0.045, 0.08);
 uniform float map_edge = 0.954545;  // two art pixels reserved for the frame
-uniform vec3 frame_color : source_color = vec3(0.11, 0.12, 0.2);
-uniform vec3 outline_color : source_color = vec3(0.03, 0.03, 0.06);
-uniform sampler2D frame_tex : filter_nearest, repeat_enable;
-uniform vec3 brass_color : source_color = vec3(0.90, 0.72, 0.42);
+#include "res://shaders/minimap_frame.gdshaderinc"
 
 void fragment() {
 	// Frame: snap to the minimap's own pixel grid, then work in -1..1.
@@ -30,16 +27,7 @@ void fragment() {
 		discard;
 	}
 	vec3 color;
-	if (r > 1.0 - 2.0 / art_pixels) {
-		color = outline_color;  // one art-pixel outer outline
-	} else if (r > 1.0 - 4.0 / art_pixels) {
-		float angle = atan(p.y, p.x) / 6.2831853;
-		color = texture(frame_tex, vec2(fract(angle * 5.0), 0.5)).rgb * (p.y < 0.0 ? 1.0 : 0.70);
-	} else if (r > 1.0 - 6.0 / art_pixels) {
-		color = brass_color * (p.y < 0.0 ? 0.88 : 0.56);
-	} else if (r > map_edge) {
-		color = outline_color;
-	} else {
+	if (!minimap_rim(p, art_pixels, map_edge, color)) {
 		float c = cos(rotation);
 		float s = sin(rotation);
 		vec2 q = p_smooth / map_edge;

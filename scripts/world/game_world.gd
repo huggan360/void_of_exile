@@ -122,6 +122,7 @@ func _add_light(pos: Vector3, color: Color, energy := 1.5, light_range := 6.0) -
 	light.light_color = color
 	light.light_energy = energy
 	light.omni_range = light_range
+	NearbyLightShadows.register_light(light)
 	light.light_volumetric_fog_energy = 2.0
 	light.distance_fade_enabled = true
 	light.distance_fade_begin = 45.0

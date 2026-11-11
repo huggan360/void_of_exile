@@ -14,9 +14,9 @@ extends Node
 const BLEND_SPEED := 0.8  # per second; ~1-2 s to settle into a new biome
 const FLOATS := ["sun_energy", "sun_pitch", "sun_yaw", "ambient_energy", "fog_density",
 		"volumetric_fog_density", "reveal_radius", "fog_of_war_opacity", "torch_energy",
-		"particle_hue_variation"]
+		"particle_hue_variation", "ambient_sky_contribution", "exposure", "saturation", "contrast", "cinematic_grade", "particle_size"]
 const COLORS := ["sky_top_color", "sky_horizon_color", "sun_color", "fog_color",
-		"fog_of_war_color", "particle_color"]
+		"fog_of_war_color", "particle_color", "ambient_color"]
 const VECTORS := ["particle_velocity"]
 ## How much of a biome's own look reaches each screen-wide setting (the rest
 ## is plain daylight). Anything not listed takes the biome's look fully.
@@ -38,6 +38,12 @@ var _settled := false
 var _target: BiomeDef
 var _sky_mat := ProceduralSkyMaterial.new()
 var _neutral := Biomes.neutral()
+var _grade_layer := CanvasLayer.new()
+var _grade_material := ShaderMaterial.new()
+var _grade_screen := ColorRect.new()
+var _color_curve := Gradient.new()
+var _color_lut := GradientTexture1D.new()
+var _last_grade := -1.0
 
 
 func _ready() -> void:
@@ -55,19 +61,24 @@ func _ready() -> void:
 	# AgX keeps highlights soft but mutes colors: a gentle grade brings back
 	# rich, vibrant color and a little depth.
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.18
-	env.adjustment_contrast = 1.06
+	env.adjustment_saturation = 1.12
+	env.adjustment_contrast = 1.05
 	# SDFGI, SSAO, SSIL, glow and shadows follow the quality settings
 	# (_apply_graphics).
-	env.glow_intensity = 0.8
-	env.glow_bloom = 0.05
+	env.glow_intensity = 0.55
+	env.glow_bloom = 0.02
+	env.glow_hdr_threshold = 1.3
 	env.fog_enabled = true
 	# Let glowing blocks and bounce light (from SDFGI) light up the volumetric
 	# fog too, not just the lamps: lava and crystals get visible halos.
 	env.volumetric_fog_gi_inject = 0.5
 	env.volumetric_fog_length = 80.0
 
+	# Contact shadows and bounce are tuned centrally in GraphicsSettings so
+	# the camera environments in space and the realms use the same treatment.
 	add_child(sun)
+	add_child(NearbyLightShadows.new())
+	_setup_grade()
 	_setup_particles()
 	AppSettings.graphics_changed.connect(_apply_graphics)
 	_apply_graphics()
@@ -145,7 +156,16 @@ func _apply() -> void:
 	_sky_mat.ground_horizon_color = c.sky_horizon_color
 	_sky_mat.ground_bottom_color = c.fog_color.darkened(0.5)
 	var graphics := AppSettings.graphics
+	env.ambient_light_color = c.ambient_color
+	env.ambient_light_sky_contribution = c.ambient_sky_contribution
 	env.ambient_light_energy = c.ambient_energy * GraphicsSettings.ambient_factor(graphics)
+	# GI reads the tuned ambient/sky mix too, keeping open-air shade readable.
+	# `indoor` on the Tavern means its own palette, not a sealed interior.
+	env.sdfgi_read_sky_light = true
+	env.tonemap_exposure = c.exposure
+	env.adjustment_saturation = c.saturation
+	env.adjustment_contrast = c.contrast
+	_update_grade(c.cinematic_grade)
 	env.fog_light_color = c.fog_color
 	env.fog_density = c.fog_density
 	env.volumetric_fog_enabled = c.volumetric_fog_density > 0.001 and GraphicsSettings.volumetric_fog_allowed(graphics)
@@ -159,6 +179,7 @@ func _apply() -> void:
 	pm.direction = c.particle_velocity.normalized()
 	pm.initial_velocity_min = c.particle_velocity.length() * 0.6
 	pm.initial_velocity_max = c.particle_velocity.length() * 1.2
+	(particles.draw_pass_1 as QuadMesh).size = Vector2.ONE * c.particle_size
 	particles.amount_ratio = c.particle_color.a * GraphicsSettings.particle_ratio(graphics)
 	particles.emitting = particles.amount_ratio > 0.0
 	pm.color = Color(c.particle_color, 1.0)
@@ -168,6 +189,36 @@ func _apply() -> void:
 	if fog_of_war:
 		fog_of_war.visible = _target.fog_of_war_enabled and not fog_of_war_hidden
 		fog_of_war.set_style(c.fog_of_war_color, c.reveal_radius, c.fog_of_war_opacity)
+
+
+## Only the world is filtered: CanvasLayer 0 precedes the HUD's layer 1.
+func _setup_grade() -> void:
+	_grade_layer.layer = 0
+	add_child(_grade_layer)
+	var screen := _grade_screen
+	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	screen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_grade_material.shader = preload("res://shaders/world_cinematic.gdshader")
+	screen.material = _grade_material
+	_grade_layer.add_child(screen)
+	_color_curve.offsets = PackedFloat32Array([0.0, 0.2, 0.5, 0.8, 1.0])
+	_color_curve.colors = PackedColorArray([Color.BLACK,Color(0.2,0.2,0.2),Color(0.5,0.5,0.5),Color(0.8,0.8,0.8),Color.WHITE])
+	_color_lut.gradient = _color_curve
+	_color_lut.width = 256
+	env.adjustment_color_correction = _color_lut
+
+func set_world_visible(active: bool) -> void:
+	_grade_layer.visible = active
+
+func _update_grade(amount: float) -> void:
+	_grade_screen.visible = amount>0.001
+	_grade_material.set_shader_parameter("strength", amount)
+	if absf(amount-_last_grade)<0.003: return
+	_last_grade = amount
+	var warm := [Color.BLACK,Color(0.195,0.20,0.205),Color(0.5,0.5,0.5),Color(0.815,0.805,0.79),Color(1.0,1.0,0.995)]
+	for i in _color_curve.get_point_count():
+		var v := _color_curve.get_offset(i)
+		_color_curve.set_color(i,Color(v,v,v).lerp(warm[i],amount))
 
 
 ## A biome's particle palette: each new particle picks one of its colors at

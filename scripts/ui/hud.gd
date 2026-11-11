@@ -83,8 +83,6 @@ var _fps_readout := Label.new()
 var _fps_timer := 0.0
 var _stats_button: Button
 var _equipment_column: VBoxContainer
-var _hud_reveal_left := 0.0
-const WORLD_UI_ALPHA := 0.60
 ## Loot bags of the current world (set by Main).
 var loot: LootBags
 
@@ -397,7 +395,6 @@ func toggle_stats() -> void:
 	_stats_panel.visible = not _stats_panel.visible
 	if _stats_panel.visible:
 		_stats_panel.refresh()
-		_hud_reveal_left = 1.0
 
 
 ## Debug: shows a slot's tooltip as if hovered.
@@ -543,7 +540,7 @@ func _process(_delta: float) -> void:
 
 func _profile_process(_delta: float) -> void:
 	if not is_instance_valid(player.spatial_controller): key_help.set_rows(Leisure.hint_rows(player.player_id))
-	_update_world_ui_fade(_delta, _ui_root.get_global_mouse_position())
+	_keep_world_ui_opaque()
 	_fps_readout.visible = AppSettings.video.show_fps
 	_fps_timer -= _delta
 	if _fps_readout.visible and _fps_timer<=0:
@@ -594,25 +591,13 @@ func _profile_process(_delta: float) -> void:
 			GameServer.request_use(player.player_id, {kind = "quick", key = 1})
 
 
-## Keep peripheral controls readable on hover without dimming combat bars/map.
-func _update_world_ui_fade(delta: float, pointer: Vector2) -> void:
-	var in_tavern := not is_instance_valid(_world) or Campaigns.is_tavern(_world.realm_id)
-	var controls: Array[Control] = [account_bar, picker, _equipment_column, _stats_panel, quest_banner, toasts, buff_strip]
+## Keep the same steady GUI opacity in the Tavern and every other world.
+func _keep_world_ui_opaque() -> void:
+	var controls: Array[Control] = [account_bar,picker,_equipment_column,_stats_panel,quest_banner,toasts,buff_strip]
 	if chat: controls.append(chat)
 	if social_panel: controls.append(social_panel)
-	var inventory_open := Input.is_action_pressed("inventory") or (is_instance_valid(_inventory) and _inventory.visible)
-	var hovered := false
 	for control in controls:
-		if is_instance_valid(control) and control.is_visible_in_tree() and control.get_global_rect().has_point(pointer):
-			hovered = true
-			break
-	if inventory_open or hovered or account_bar.is_open(): _hud_reveal_left = 0.8
-	else: _hud_reveal_left = maxf(0.0, _hud_reveal_left - delta)
-	var target := 1.0 if in_tavern or _hud_reveal_left > 0.0 else WORLD_UI_ALPHA
-	for control in controls:
-		if not is_instance_valid(control): continue
-		var blend := 1.0 - exp(-delta * (14.0 if target > control.modulate.a else 3.5))
-		control.modulate.a = lerpf(control.modulate.a, target, blend)
+		if is_instance_valid(control) and control.modulate.a!=1.0: control.modulate.a = 1.0
 
 
 ## Debug: opens the backpack as if Tab were held.

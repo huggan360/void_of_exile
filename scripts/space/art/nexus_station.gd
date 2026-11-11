@@ -136,6 +136,7 @@ class Brush extends RefCounted:
 
 	func finish() -> void:
 		if server_only: return
+		preload("res://scripts/space/space_map_geometry.gd").publish_brush(root,batches)
 		if _material == null:
 			_material = ShaderMaterial.new()
 			_material.shader = load("res://shaders/space_props.gdshader")
@@ -270,7 +271,7 @@ func build(server: bool) -> void:
 			light.light_color = Color("ffce8e")
 			light.light_energy = 1.5
 			light.omni_range = 22
-			light.shadow_enabled = false
+			NearbyLightShadows.register_light(light)
 			light.distance_fade_enabled = true
 			light.distance_fade_begin = 150
 			light.distance_fade_length = 60
@@ -587,7 +588,7 @@ func _hearth_fire() -> void:
 	glow.light_color = Color("6dffa4")
 	glow.light_energy = 2.4
 	glow.omni_range = 13.0
-	glow.shadow_enabled = false
+	NearbyLightShadows.register_light(glow)
 	add_child(glow)
 
 ## Hand-painted arrows pointing to the places a new arrival looks for.

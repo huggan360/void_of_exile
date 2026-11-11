@@ -276,7 +276,8 @@ func _update_bars(zone: String) -> void:
 ## The camera inside a planet's air takes on its sky, fog and light.
 func _update_air() -> void:
 	if not is_instance_valid(world.backdrop): return
-	var eye := player.camera.global_position
+	var active_camera := get_viewport().get_camera_3d()
+	var eye := active_camera.global_position if active_camera else player.camera.global_position
 	var air := {}
 	var amount := 0.0
 	var up := Vector3.UP

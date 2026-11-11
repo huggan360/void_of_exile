@@ -107,6 +107,7 @@ func _building(kind: String, frame: Transform3D, style: String) -> void:
 	light.light_color = Color(str(PlanetFlora.SETS[planet.id].colors[6]))
 	light.light_energy = 0.8
 	light.omni_range = 12.0
+	NearbyLightShadows.register_light(light)
 	light.position.y = prefab.height*size*0.6
 	light.distance_fade_enabled = true
 	light.distance_fade_begin = 160.0

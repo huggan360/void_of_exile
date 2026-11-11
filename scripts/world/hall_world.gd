@@ -95,11 +95,23 @@ func _ready() -> void:
 	if has_node("StreetFurniture"):
 		for prop in $StreetFurniture.get_children():
 			if str(prop.name).begins_with("Lantern"):
-				_add_light(prop.position + Vector3(0, 3.3, 0), Color(1, .74, .42), .65, 5.5)
+				_practical_light(prop.position + Vector3(0, 3.3, 0), Color("ffb965"), 1.25, 8.0)
 	if has_node("Fountain"):
 		_map_fountain = Vector2($Fountain.position.x, $Fountain.position.z)
-		_add_light($Fountain.position + Vector3(0, 5, 0), Color(.35, .8, 1), 1.2, 12)
+		_practical_light($Fountain.position + Vector3(0, 4.5, 0), Color("65dccc"), 0.95, 10.0)
 	_scatter_decor()
+
+## Keep pools of lamp light broad and soft, with only three nearby shadow maps.
+func _practical_light(at: Vector3, color: Color, energy: float, radius: float) -> OmniLight3D:
+	var light := _add_light(at,color,energy,radius)
+	light.light_size = 0.45
+	light.omni_attenuation = 1.4
+	light.light_indirect_energy = 1.1
+	light.light_volumetric_fog_energy = 0.7
+	light.light_bake_mode = Light3D.BAKE_STATIC
+	light.shadow_blur = 1.2
+	light.distance_fade_shadow = 32.0
+	return light
 
 func _prepare_navigation() -> void:
 	var plan := VillageFeature.new()
@@ -306,11 +318,11 @@ func _cloud_rim() -> void:
 			var size := Vector3(3, top - CLOUD_FLOOR, 3)
 			transforms.append(Transform3D(Basis.from_scale(size), Vector3(x + 1.5, CLOUD_FLOOR + size.y * 0.5, z + 1.5)))
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.97, 0.98, 1.0)
+	material.albedo_color = Color("f3eee3")
 	material.roughness = 1.0
 	material.emission_enabled = true
-	material.emission = Color(0.78, 0.85, 1.0)
-	material.emission_energy_multiplier = 0.18
+	material.emission = Color("eee0c8")
+	material.emission_energy_multiplier = 0.1
 	var cube := BoxMesh.new()
 	cube.size = Vector3.ONE
 	cube.material = material
@@ -340,7 +352,7 @@ func _build_market() -> void:
 		var behind := Basis(Vector3.UP, yaw)*Vector3(0, 0, 2.1)
 		var keeper := ShopKeeper.place(self, str(spec[0]), Transform3D(Basis(Vector3.UP, yaw), at+behind))
 		keeper.target.reach = 5.5  # over the counter
-		_add_light(at+Vector3(0, 3.6, 0), Color(1, .78, .5), .55, 6.0)
+		_practical_light(at+Vector3(0, 3.6, 0), Color("ffc47d"), 0.9, 7.0)
 	for spec: Array in MARKET_KEEPERS:
 		var at := Vector3(float(spec[1]), 10, float(spec[2]))
 		var to_center := Vector2(MARKET_CENTER.x-at.x, MARKET_CENTER.y-at.z)

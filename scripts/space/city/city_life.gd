@@ -17,7 +17,7 @@ func _ready() -> void:
 	for lane: Dictionary in CityLayout.lanes():
 		for k in int(lane.count):
 			var id: String = lane.models[(k+int(lane.seed)) % lane.models.size()]
-			if not _traffic.has(id): _traffic[id] = {entries = [], batches = []}
+			if not _traffic.has(id): _traffic[id] = {entries = [], active = [], batches = []}
 			_traffic[id].entries.append([lane, k])
 	for id: String in _traffic:
 		var entry: Dictionary = _traffic[id]
@@ -30,6 +30,7 @@ func _ready() -> void:
 			multi.transform_format = MultiMesh.TRANSFORM_3D
 			multi.mesh = data[0]
 			multi.instance_count = entry.entries.size()
+			multi.visible_instance_count = 0
 			var node := MultiMeshInstance3D.new()
 			node.multimesh = multi
 			node.material_override = VoxModel.material() if part==0 else VoxModel.glow_material()
@@ -117,6 +118,12 @@ func _cup(id: String) -> void:
 	_cups[id] = {node = holder, material = drink}
 
 func _process(delta: float) -> void:
+	if not FrameTrace.enabled: _update_frame(delta); return
+	var started := Time.get_ticks_usec()
+	_update_frame(delta)
+	FrameTrace.record("city/life",started)
+
+func _update_frame(delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera==null: return
 	var eye := camera.global_position
@@ -130,6 +137,8 @@ func _process(delta: float) -> void:
 	var scan := _scan<=0.0
 	if scan: _scan = 0.3
 	for entry: Dictionary in _people:
+		# Unspawned citizens need only the proximity scan, not a pose every frame.
+		if not scan and not is_instance_valid(entry.node): continue
 		var pose: Transform3D
 		var moving := false
 		if entry.has("walker"):
@@ -172,19 +181,32 @@ func _process(delta: float) -> void:
 				var lines: Array = entry.get("lines", CHAT)
 				SpeechBubble.say(person, str(lines[cycle % lines.size()]), "say", 2.2)
 	_graze(eye, t, delta, scan)
+	# One inverse per frame, shared by all traffic instances and mesh parts.
+	var inverse_frame := global_transform.affine_inverse()
 	for id: String in _traffic:
 		var entry: Dictionary = _traffic[id]
-		for i in entry.entries.size():
-			var pair: Array = entry.entries[i]
+		if scan:
+			entry.active.clear()
+			for pair: Array in entry.entries:
+				if (pair[0].bounds as AABB).has_point(eye): entry.active.append(pair)
+			for batch: Array in entry.batches:
+				(batch[0] as MultiMesh).visible_instance_count = entry.active.size()
+		for i in entry.active.size():
+			var pair: Array = entry.active[i]
 			var pose := CityLayout.vehicle_pose(pair[0], int(pair[1]), t)
-			var up := ((pose[0] as Vector3)-(CityLayout.planet().center as Vector3)).normalized()
+			var up := ((pose[0] as Vector3)-(pair[0].center as Vector3)).normalized()
 			var basis := Basis.looking_at((pose[1] as Vector3).slide(up).normalized(), up)
 			for batch: Array in entry.batches:
 				var scaled := basis.scaled(Vector3.ONE*float(batch[1]))
-				(batch[0] as MultiMesh).set_instance_transform(i, global_transform.affine_inverse()*Transform3D(scaled, (pose[0] as Vector3)+scaled*(batch[2] as Vector3)))
+				(batch[0] as MultiMesh).set_instance_transform(i, inverse_frame*Transform3D(scaled, (pose[0] as Vector3)+scaled*(batch[2] as Vector3)))
+
 	if scan:
 		for id: String in _cups:
 			var cup: Dictionary = _cups[id]
+			# Empty distant cups do not need a global seat query or shader upload.
+			if (cup.node as Node3D).global_position.distance_squared_to(eye)>10000.0:
+				(cup.node as Node3D).visible = false
+				continue
 			var fill := 1.0 if CityState.npc_seat(id) else 0.0
 			(cup.node as Node3D).visible = fill>0.0
 			(cup.material as ShaderMaterial).set_shader_parameter("fill", fill*0.9)

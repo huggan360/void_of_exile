@@ -219,6 +219,7 @@ func _ready() -> void:
 func _set_menu_only(active: bool) -> void:
 	_menu_only = active
 	get_viewport().disable_3d = active
+	atmosphere.set_world_visible(not active)
 	var mode := Node.PROCESS_MODE_DISABLED if active else Node.PROCESS_MODE_INHERIT
 	for node: Node in [player, player.aim_marker, atmosphere, fog_of_war, arrows,
 			enemy_bullets, xp_orbs, loot_bags, hud, low_health, campaign]:

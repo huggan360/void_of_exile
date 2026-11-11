@@ -198,7 +198,7 @@ class FortArt extends RefCounted:
 			omni.light_color = light[1]
 			omni.omni_range = light[2]
 			omni.light_energy = light[3]
-			omni.shadow_enabled = false
+			NearbyLightShadows.register_light(omni)
 			root.add_child(omni)
 
 	## A paved arena (one cell, its top a hair above the terrace) and a ring of glowing runes.

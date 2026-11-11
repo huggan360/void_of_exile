@@ -10,13 +10,17 @@ extends Node3D
 const FACADES := ["4a3550", "2c4a52", "6a3a44", "b8a088", "2a2f4a", "7a4058", "3e3a5a", "5a4a3a", "8a6a7a", "34404e"]
 const NEON := ["dec69e", "d4bc92", "c1c6b5"]
 const DISTRICT_RANGE := 1300.0
+const DETAIL_ALTITUDE := 1800.0
 const COLLIDE_RANGE := 110.0
 const CHUNK := 14  # cells a side per skyline chunk (2 x 2 a face: few draw calls)
-const BUDGET_USEC := 6000
+const BUDGET_USEC := 2000
 const DETAIL_RANGE := 520.0
 var world: SpaceWorld
 var districts := {}  # id -> CityDistrict once built
 var life: CityLife
+var _orbit_lod: Node3D
+var _detail_started := false
+var _detail_shown := false
 var _solids := {}  # Vector3i cell -> Array of [Transform3D, Vector3 size, kind]
 var _bodies := {}  # Vector3i cell -> Node3D (collision and raised sidewalks)
 var _timer := 0.0
@@ -59,25 +63,47 @@ class Batch extends RefCounted:
 				buf[o+16] = u.r; buf[o+17] = u.g; buf[o+18] = u.b; buf[o+19] = u.a
 			out[key] = [count, buf]
 		return out
-	func flush(parent: Node3D, label: String, far: float, detail_far := CityPlanet.DETAIL_RANGE, packed := {}) -> void:
+	func flush(parent: Node3D, label: String, far: float, detail_far := CityPlanet.DETAIL_RANGE, packed := {}, cast_shadows := false, cell_size := 0.0) -> void:
 		var all := packed if not packed.is_empty() else buffers()
+		preload("res://scripts/space/space_map_geometry.gd").publish_packed(parent,all)
+		if cell_size>0.0: all = _spatial_buffers(all,cell_size)
 		for key: String in all:
 			var detail := key.begins_with("d:")
 			var multi := MultiMesh.new()
 			multi.transform_format = MultiMesh.TRANSFORM_3D
 			multi.use_colors = true
 			multi.use_custom_data = true
-			multi.mesh = CityPlanet.mesh(key.trim_prefix("d:"))
+			multi.mesh = CityPlanet.mesh(key.get_slice("@",0).trim_prefix("d:"))
 			multi.instance_count = int(all[key][0])
 			multi.buffer = all[key][1]
 			var node := MultiMeshInstance3D.new()
-			node.name = "%s_%s" % [label, key.replace(":", "_")]
+			node.name = "%s_%s" % [label, key.replace(":", "_").replace("@", "_")]
 			node.multimesh = multi
 			node.material_override = CityPlanet.foliage_material() if key.contains("vox:") else CityPlanet.tower_material()
 			node.visibility_range_end = minf(far, detail_far) if detail else far
-			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if far<2000.0 and not detail else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if (cast_shadows or far<2000.0) and not detail else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			parent.add_child(node)
 		parts.clear()
+
+	## Keep real geometry unchanged, but give the renderer local bounds for
+	## camera and shadow culling. Whole-district MultiMeshes defeat both.
+	func _spatial_buffers(source: Dictionary, cell_size: float) -> Dictionary:
+		var groups := {}
+		for key: String in source:
+			var buffer: PackedFloat32Array = source[key][1]
+			for i in int(source[key][0]):
+				var offset := i*20
+				var origin := Vector3(buffer[offset+3],buffer[offset+7],buffer[offset+11])
+				var cell := Vector3i((origin/cell_size).floor())
+				var group := "%s@%d_%d_%d" % [key,cell.x,cell.y,cell.z]
+				if not groups.has(group): groups[group] = []
+				(groups[group] as Array).append(buffer.slice(offset,offset+20))
+		var out := {}
+		for key: String in groups:
+			var buffer := PackedFloat32Array()
+			for piece: PackedFloat32Array in groups[key]: buffer.append_array(piece)
+			out[key] = [groups[key].size(),buffer]
+		return out
 
 ## Fine flowers and grass already have voxel colours; extra per-pixel noise
 ## aliases on their small faces while the camera moves.
@@ -157,23 +183,78 @@ static func mesh(kind: String) -> Mesh:
 	return m
 
 func build() -> void:
-	var flora := CountryFlora.new()
-	flora.name = "Flora"
-	flora.city = self
-	add_child(flora)
-	life = CityLife.new()
-	life.city = self
-	add_child(life)
-	CityRoads.texture()  # every corner, before anything reads them
+	_build_orbit_lod()
 	for face in 6:
 		for cj in range(0, CityLayout.N, CHUNK):
 			for ci in range(0, CityLayout.N, CHUNK):
 				_chunks.append([face, ci, cj])
 
+## A few hundred simple instanced silhouettes, ready immediately from the
+## Nexus. No citizens, collisions, voxel props or detailed windows at orbit.
+func _build_orbit_lod() -> void:
+	_orbit_lod = Node3D.new()
+	_orbit_lod.name = "OrbitLOD"
+	add_child(_orbit_lod)
+	for d: Dictionary in CityLayout.DISTRICTS:
+		var holder := Node3D.new()
+		holder.name = "Skyline_"+str(d.id)
+		_orbit_lod.add_child(holder)
+		var art := NexusStation.Brush.new(holder, false)
+		for item: Dictionary in CityLayout.district_cells(d):
+			if item.role in ["park", "lake", "plaza", "port"]: continue
+			var cell: Dictionary = item.cell
+			var pose: Transform3D = cell.frame
+			var seed := CityLayout.rnd(float(cell.seed), 51)
+			var height := lerpf(16.0,float(d.tower)*0.8,seed)
+			var width := lerpf(9.0,17.0,CityLayout.rnd(seed,4))
+			var color := Color(CityArt.PLASTER[int(seed*CityArt.PLASTER.size()) % CityArt.PLASTER.size()])
+			art.part("cylinder",pose*Transform3D(Basis.IDENTITY,Vector3(0,height*0.5,0)),Vector3(width,height,width),color)
+			art.part("cone",pose*Transform3D(Basis.IDENTITY,Vector3(0,height+width*0.2,0)),Vector3(width*1.1,width*0.4,width*1.1),Color(CityArt.ROOF[0]))
+			art.part("box",pose*Transform3D(Basis.IDENTITY,Vector3(0,height*0.7,width*0.5+0.1)),Vector3(width*0.7,0.5,0.15),Color(str(d.neon)),false,0.7)
+		art.finish()
+		for node in holder.get_children():
+			if node is GeometryInstance3D:
+				node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				node.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+
+func _start_detail() -> void:
+	_detail_started = true
+	life = CityLife.new()
+	life.city = self
+	add_child(life)
+	var flora := CountryFlora.new()
+	flora.name = "Flora"
+	flora.city = self
+	add_child(flora)
+	CityRoads.texture()
+
 func _process(delta: float) -> void:
+	if not FrameTrace.enabled: _update_frame(delta); return
+	var started := Time.get_ticks_usec()
+	_update_frame(delta)
+	FrameTrace.record("city/streaming",started)
+
+func _update_frame(delta: float) -> void:
 	var local: Node3D = world.local_player if is_instance_valid(world) else null
 	var camera := get_viewport().get_camera_3d()
 	var eye := camera.global_position if camera else Vector3.INF
+	var close := eye.distance_to(global_position)<CityLayout.radius()+DETAIL_ALTITUDE
+	if close and not _detail_started: _start_detail()
+	if close != _detail_shown:
+		_detail_shown = close
+		for child in get_children():
+			if child == _orbit_lod: continue
+			if child is Node3D: child.visible = close
+		if is_instance_valid(life): life.set_process(close)
+		var flora := get_node_or_null("Flora")
+		if flora: flora.set_process(close)
+	# Orbit and detailed city geometry are exclusive: never draw overlapping
+	# proxy buildings through the full-resolution houses.
+	_orbit_lod.visible = not close
+	for d: Dictionary in CityLayout.DISTRICTS:
+		var distance := eye.distance_to(to_global(CityLayout.district_frame(d).origin))
+		if districts.has(d.id): (districts[d.id] as Node3D).visible = close and distance<DISTRICT_RANGE
+	if not close: return
 	# Districts come in when the camera is near (from orbit they are skyline).
 	for d: Dictionary in CityLayout.DISTRICTS:
 		var at := to_global(CityLayout.district_frame(d).origin)
@@ -238,9 +319,10 @@ func _build_chunk(face: int, ci: int, cj: int) -> void:
 func _finish_chunk(face: int, ci: int, cj: int, batch: Batch, buffers: Dictionary) -> void:
 	var holder := Node3D.new()
 	holder.name = "Skyline_%d_%d_%d" % [face, ci, cj]
+	holder.visible = _detail_shown
 	_done[Vector3i(face, ci/CHUNK, cj/CHUNK)] = true
 	add_child(holder)
-	batch.flush(holder, "c", 6000.0, DETAIL_RANGE, buffers)
+	batch.flush(holder, "c", 6000.0, DETAIL_RANGE, buffers, true, 192.0)
 	_building = false
 
 ## The farmland between the city cores (CityCountryArt): farmsteads, roadside
@@ -252,7 +334,7 @@ func _build_country() -> void:
 	var holder := Node3D.new()
 	holder.name = "Country"
 	add_child(holder)
-	batch.flush(holder, "farm", 3000.0, 400.0)
+	batch.flush(holder, "farm", 3000.0, 400.0, {}, true, 192.0)
 	CityCountryArt.road_meshes(holder)
 	for key: Vector3i in _bodies.keys(): _drop_body(key)
 

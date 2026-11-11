@@ -20,8 +20,8 @@ var _dust: GPUParticles3D
 var _dust_material: ParticleProcessMaterial
 var _barrier: MeshInstance3D
 var _light: DirectionalLight3D
-var _air_k := 0.0
-var _air_up := Vector3.UP
+var _city_air := false
+var _sun_configured := false
 
 ## The sun as currently lit (it swings to daylight over a landing site).
 static func sun_direction() -> Vector3:
@@ -40,12 +40,29 @@ func build(server: bool) -> void:
 	_build_surface()
 	var sun := DirectionalLight3D.new()
 	_light = sun
+	_sun_configured = false
 	sun.name = "HavenSunlight"
 	sun.basis = Basis.looking_at(-sun_direction(), Vector3.UP)
 	sun.light_color = Color("ffdfab")
 	sun.light_energy = 0.8
 	sun.shadow_enabled = false
 	add_child(sun)
+	if not AppSettings.graphics_changed.is_connected(_apply_graphics):
+		AppSettings.graphics_changed.connect(_apply_graphics)
+
+func _apply_graphics() -> void:
+	if _sky_environment == null or not is_instance_valid(_light): return
+	GraphicsSettings.apply_atmosphere(_sky_environment, _light, AppSettings.graphics)
+	_apply_city_gi_policy()
+
+func _apply_city_gi_policy() -> void:
+	# SDFGI produces broad probe blotches in the instanced city terminals on
+	# large floors. Use stable ambient + authored lights on city planets;
+	# voxel worlds and other planets retain the player's GI quality choice.
+	_sky_environment.sdfgi_enabled = GraphicsSettings.level(AppSettings.graphics, "gi") > 0 and not _city_air
+	# View-dependent bounce can visibly settle after camera motion. City
+	# lighting comes from stable ambient and local fixtures instead.
+	_sky_environment.ssil_enabled = GraphicsSettings.level(AppSettings.graphics, "indirect_light") > 0 and not _city_air
 
 func environment() -> Environment:
 	if _server: return null
@@ -69,14 +86,14 @@ func environment() -> Environment:
 		_sky_environment.glow_bloom = 0.14
 		_sky_environment.adjustment_enabled = true
 		_sky_environment.adjustment_saturation = 1.18
-		_sky_environment.adjustment_contrast = 1.06
+		_sky_environment.adjustment_contrast = 1.12
 		_sky_environment.fog_enabled = true
 		_sky_environment.fog_mode = Environment.FOG_MODE_DEPTH
 		_sky_environment.fog_sky_affect = 0.0
 		_sky_environment.volumetric_fog_enabled = false
 	set_air({}, 0.0)
 	# The same light as the realms: the player's GI, occlusion and sun shadows.
-	if is_instance_valid(_light): GraphicsSettings.apply_atmosphere(_sky_environment, _light, AppSettings.graphics)
+	_apply_graphics()
 	return _sky_environment
 
 static var _sun := SUN_DIR.normalized()
@@ -88,9 +105,8 @@ static func air_amount(id: String) -> float:
 	return _air_amount if id==_air_id else 0.0
 
 ## Space by default; inside a planet's `air` (amount 0..1, 1 on the ground)
-## its day sky replaces space, a light horizon haze hides the far ground and
-## the sun swings toward a friendly afternoon over `up` so every landing
-## site is in daylight.
+## its day sky replaces space and a light horizon haze hides the far ground.
+## The sun retains its world-space direction through the whole transition.
 func set_air(air: Dictionary, amount: float, up := Vector3.UP) -> void:
 	var env := _sky_environment
 	if env==null: return
@@ -100,8 +116,8 @@ func set_air(air: Dictionary, amount: float, up := Vector3.UP) -> void:
 	var sky := Color(str(air.palette[5])) if not air.is_empty() else SPACE_FOG
 	var horizon := sky.darkened(0.22)
 	var top := sky.darkened(0.5)
-	_air_k = k
-	_air_up = up.normalized()
+	_city_air = bool(air.get("city", false)) and k > 0.05
+	_apply_city_gi_policy()
 	var material := env.sky.sky_material as ShaderMaterial
 	material.set_shader_parameter("air_mix", k)
 	material.set_shader_parameter("air_up", up.normalized())
@@ -116,22 +132,20 @@ func set_air(air: Dictionary, amount: float, up := Vector3.UP) -> void:
 	env.ambient_light_color = Color("8e9cbc").lerp(sky.lerp(Color.WHITE, 0.5), k)
 	env.ambient_light_energy = lerpf(0.24, 0.3, k)
 	env.tonemap_exposure = lerpf(0.78, 0.66, k)
+	if bool(air.get("city", false)):
+		# The purple city sky remains visible, without tinting every interior.
+		env.ambient_light_color = Color("8e9cbc").lerp(Color("e7dfd2"), k)
+		env.ambient_light_energy = lerpf(0.24, 0.14, k)
+		env.tonemap_exposure = 0.78
 
-## Sunlight comes from the burning sun itself, as seen from the eye; on a
-## planet's ground it swings toward a friendly afternoon over the landing site.
-func _aim_sun(eye: Vector3) -> void:
-	var toward := SUN_DIR.normalized()
-	if SpaceLayout.pocket_at(eye)>=0:
-		# Rooms are far from everything: they keep the light of the sky above.
-		toward = SUN_DIR.normalized()
-	var day := toward
-	if _air_k>0.0:
-		var tangent := (toward-_air_up*toward.dot(_air_up)).normalized()
-		if not tangent.is_finite() or tangent.length()<0.1: tangent = _air_up.cross(Vector3.RIGHT).normalized()
-		day = (_air_up*0.78+tangent*0.62).normalized()
-	_sun = toward.slerp(day, _air_k) if _air_k>0.0 else toward
+## The sun has one world-space direction in orbit and on every planet.
+## Landing changes atmospheric scattering, never the light's position.
+func _aim_sun(_eye: Vector3) -> void:
+	if _sun_configured: return
+	_sun = SUN_DIR.normalized()
 	if _sky_environment: (_sky_environment.sky.sky_material as ShaderMaterial).set_shader_parameter("sun_dir", _sun)
-	if is_instance_valid(_light): _light.basis = Basis.looking_at(-_sun, Vector3.UP if absf(_sun.y)<0.98 else Vector3.FORWARD)
+	if is_instance_valid(_light): _light.basis = Basis.looking_at(-_sun, Vector3.UP)
+	_sun_configured = true
 
 ## Inside a ship room: warm lantern light, a little brighter than space.
 func set_indoor() -> void:

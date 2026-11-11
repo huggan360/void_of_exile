@@ -9,13 +9,13 @@ class_name CityArt
 ##
 ## Parts are placed in a block's frame (the cell's tangent frame, metres);
 ## `solids` collects collision as [planet-space transform, size, "box"/"cyl"].
-const PLASTER := ["b8ac94", "c5bba6", "a69b8c", "8d9694", "c4b49b", "8c8175"]
+const PLASTER := ["303b46", "3b3549", "344449", "41404b", "39423e", "463a43"]
 const ROOF := ["414b50", "4c5653", "665447", "55504a"]
 const BARK := ["5a3a2a", "6b4630", "4a3024", "704a34", "5e4232"]
 const LEAVES := ["3e6a46", "2f5a52", "54734b", "697456"]
 const CAP := ["9a5f4e", "a07859", "79644d"]
-const STONE := ["79756e", "8b8173", "626b6c", "756b60"]
-const NEON := ["e0c491", "cfb47e", "d8cbb2"]
+const STONE := ["484c55", "514853", "3b4c51", "4b454d"]
+const NEON := ["54d8d0", "c482ed", "efad64"]
 const M_PLASTER := 0.0
 const M_BARK := 0.1
 const M_SHINGLE := 0.2
@@ -53,6 +53,31 @@ func part(kind: String, at: Vector3, basis: Basis, size: Vector3, color: Color, 
 	if windows<=0.01 or size.y<2.5: return
 	if kind=="box": _windows(at, basis, size, windows, detail)
 	elif kind in ["cyl", "trunk", "sphere"]: _round_windows(kind, at, basis, size, windows, detail)
+	if mat == M_PLASTER or mat == M_STONE:
+		_neon_mark(kind, at, basis, size, detail)
+
+## Raised, opaque neon strokes sit clear of the wall; no coplanar decals or
+## extra point lights. Shared primitive batches keep these cheap to draw.
+func _neon_mark(kind: String, at: Vector3, basis: Basis, size: Vector3, detail: bool) -> void:
+	if size.x < 2.0 or size.y < 2.5: return
+	var width := minf(1.25, size.x * 0.16)
+	for facing: float in [0.0, PI]:
+		var turn := Basis(Vector3.UP, facing)
+		var wall := turn.z * (size.z * 0.5 + 0.12)
+		wall.y = minf(size.y * 0.3, 3.0)
+		if kind != "box":
+			# Fit the sign to a cylinder facet, on both street-facing sides.
+			var angle := facing + TAU * 0.25 / 14.0
+			turn = Basis(Vector3.UP, angle)
+			wall = Vector3(sin(angle) * size.x * 0.5, 0, cos(angle) * size.z * 0.5) + turn.z * 0.18
+		neon_sign(at + basis * wall, basis * turn, width, detail)
+
+func neon_sign(center: Vector3, pose: Basis, width := 1.25, detail := false) -> void:
+	var ink := Color(NEON[absi(int(seed * 997.0)) % NEON.size()])
+	for side: float in [-1.0, 1.0]:
+		_window_piece("box", center + pose.x * side * width * 0.42, pose,
+			Vector3(0.09, 0.65, 0.08), ink, M_GLOW, 0.0, false, detail)
+	_window_piece("box", center + pose.y * 0.36, pose, Vector3(width, 0.09, 0.08), ink, M_GLOW, 0.0, false, detail)
 
 ## Frames are four separate rails; panes and mullions have disjoint faces.
 ## Nothing depends on growing overlapping boxes by fractions of a centimetre.
@@ -323,7 +348,7 @@ func _mushroom(base: Vector3, radius: float, p_tall: float) -> void:
 	var tall := p_tall
 	var stem := radius*1.2
 	var height := tall-cap_h*0.75
-	part("cyl", base+Vector3.UP*height*0.5, Basis.IDENTITY, Vector3(stem, height, stem), Color("d8c8a8").darkened(r()*0.15), M_PLASTER, 0.45)
+	part("cyl", base+Vector3.UP*height*0.5, Basis.IDENTITY, Vector3(stem, height, stem), pick(PLASTER), M_PLASTER, 0.45)
 	solid(base+Vector3.UP*height*0.5, Vector3(stem*0.95, height, stem*0.95))
 	var cap := pick(CAP)
 	var top := base+Vector3.UP*height
@@ -359,7 +384,8 @@ func _lantern(base: Vector3, radius: float, tall: float, glow: Color) -> void:
 	for level in levels:
 		var h := tall*(0.62 if level==0 and levels>1 else 0.38/maxf(1, levels-1)) if levels>1 else tall
 		var at := base+Vector3.UP*(y+h*0.5)
-		batch.add("cyl", frame*Transform3D(Basis.from_scale(Vector3(size, h, size)), at), walls.lightened(level*0.06), Color(seed, 0.6, M_PLASTER, 2.0))
+		part("cyl", at, Basis.IDENTITY, Vector3(size, h, size), walls.lightened(level*0.06), M_PLASTER)
+		_neon_mark("cyl", at, Basis.IDENTITY, Vector3(size, h, size), false)
 		solid(at, Vector3(size*0.95, h, size*0.95))
 		part("torus", base+Vector3.UP*(y+h), Basis.IDENTITY, Vector3(size*1.04, 0.5, size*1.04), glow, M_GLOW, 0.0, true, true)
 		y += h

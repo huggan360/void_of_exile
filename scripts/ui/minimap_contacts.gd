@@ -33,7 +33,13 @@ func update(world: GameWorld, player: Player, social: SocialClient, delta: float
 		for node: Node in world.get_tree().get_nodes_in_group("remote_players"):
 			if world.is_ancestor_of(node): people.append(weakref(node))
 		for node: Node in world.get_tree().get_nodes_in_group("interaction_targets"):
-			if node is InteractionTarget and world.is_ancestor_of(node): targets.append(weakref(node))
+			# Mark people and useful destinations, not every seat and tabletop.
+			if world is SpaceWorld:
+				if node is LeisureTarget: continue
+				if node is CityTarget and node.kind=="seat": continue
+				if node is SpaceInteraction and node.kind in ["seat","tap","repair","repair_out","ladder","deck_hatch"]: continue
+			if node is InteractionTarget and world.is_ancestor_of(node) and (node as Node3D).global_position.distance_squared_to(player.global_position)<40000.0:
+				targets.append(weakref(node))
 	for ref: WeakRef in enemies:
 		var enemy := ref.get_ref() as Enemy
 		if not is_instance_valid(enemy) or not enemy.is_alive() or not enemy.is_visible_in_tree() or not is_instance_valid(enemy.model) or not enemy.model.visible: continue

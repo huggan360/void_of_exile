@@ -388,6 +388,7 @@ func _build_graphics(page: Control) -> void:
 			if _refreshing: return
 			var values := AppSettings.graphics.duplicate()
 			values[id] = f[2][index][0]
+			if id=="upscaler" and values[id]=="off": values.render_scale = 100
 			AppSettings.set_graphics(values))
 		_row(column, str(f[1]), option, str(f[3]))
 		_graphics_options[id] = option
@@ -402,6 +403,8 @@ func _refresh_graphics() -> void:
 	_preset.select(maxi(0,(GraphicsSettings.PRESETS+["custom"]).find(values.preset)))
 	for id: String in _graphics_options:
 		_graphics_options[id].select(maxi(0,GraphicsSettings.choices(id).find(values[id])))
+	if _graphics_options.has("render_scale"):
+		_graphics_options["render_scale"].disabled = values.upscaler=="off"
 	_refreshing = false
 
 func _build_controls(page: Control) -> void:

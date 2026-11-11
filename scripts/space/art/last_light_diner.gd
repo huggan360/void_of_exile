@@ -108,6 +108,7 @@ func build(server: bool) -> void:
 		lamp.light_color = Color("ffd49a")
 		lamp.light_energy = 1.0
 		lamp.omni_range = 13
+		NearbyLightShadows.register_light(lamp)
 		add_child(lamp)
 	var host := CreatureModel.new("npc_baker")
 	host.position = Vector3(0,0,-9)

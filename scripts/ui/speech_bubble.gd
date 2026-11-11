@@ -35,7 +35,7 @@ static func _show_message(anchor_ref: WeakRef, text: String, kind: String, heigh
 	if not is_instance_valid(_layer):
 		_layer = ResponsiveUILayer.new()
 		_layer.name = "SpeechBubbles"
-		_layer.layer = 5
+		_layer.layer = 0  # Above the world, below the HUD (layer 1) and its windows.
 		anchor.get_tree().root.add_child(_layer)
 		_root = _layer.make_ui_root()
 	var bubble := SpeechBubble.new()

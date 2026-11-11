@@ -31,15 +31,20 @@ void vertex() {
 	float distance_to_eye = length(plant_base - CAMERA_POSITION_WORLD);
 	float coverage = 1.0 - smoothstep(detail_far_start, detail_far_end, distance_to_eye);
 	if (detail_near > 0.0) coverage *= smoothstep(detail_near, detail_near + 20.0, distance_to_eye);
-	VERTEX.y *= coverage * tile_visibility;
+	float visibility = coverage * tile_visibility;
+	if (visibility <= 0.001) {
+		VERTEX = vec3(0.0);
+		return;
+	}
+	VERTEX.y *= visibility;
 	if (sway > 0.0) {
 		vec3 base = MODEL_MATRIX[3].xyz;
-		vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		vec3 displacement = vec3(0.0);
 		vec3 up = normalize(base - planet_center);
 		float t = clamp(VERTEX.y / height, 0.0, 1.0);
 		float bend = t * t;
 		vec3 side = normalize(cross(up, vec3(0.31, 0.77, 0.55)));
-		world += side * sin(TIME * 1.6 + dot(base, vec3(0.13, 0.17, 0.11))) * sway * 0.16 * bend;
+		displacement += side * sin(TIME * 1.6 + dot(base, vec3(0.13, 0.17, 0.11))) * sway * 0.16 * bend;
 		for (int k = 0; k < 8; k++) {
 			vec4 who = pushers[k];
 			if (who.w <= 0.0) continue;
@@ -48,11 +53,17 @@ void vertex() {
 			float dist = length(d);
 			if (dist < who.w) {
 				float push = (who.w - dist) / who.w;
-				world += normalize(d + side * 0.001) * push * 0.8 * bend * sway;
-				world -= up * push * 0.4 * bend * sway;
+				displacement += normalize(d + side * 0.001) * push * 0.8 * bend * sway;
+				displacement -= up * push * 0.4 * bend * sway;
 			}
 		}
-		VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
+		// These instances have orthogonal scaled bases. Transform the offset
+		// directly, avoiding a matrix inverse and a world-position round trip.
+		vec3 x = MODEL_MATRIX[0].xyz;
+		vec3 y = MODEL_MATRIX[1].xyz;
+		vec3 z = MODEL_MATRIX[2].xyz;
+		VERTEX += vec3(dot(displacement,x)/max(dot(x,x),0.000001),
+			dot(displacement,y)/max(dot(y,y),0.000001),dot(displacement,z)/max(dot(z,z),0.000001));
 	}
 }
 

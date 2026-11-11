@@ -14,15 +14,22 @@ var city: CityPlanet
 const LEVELS := [["crops", 12.0, 96.0, 1.0], ["hedges", 32.0, 170.0, 1.6], ["trees", 64.0, 400.0, 8.0], ["distant_crops", 24.0, 180.0, 2.0]]
 const FADE_RANGES := [Vector3(0, 48, 72), Vector3(0, 110, 140), Vector3(0, 300, 360), Vector3(40, 110, 150)]
 const TREES := ["tree_round", "tree_small", "tree_tall", "tree_round", "pine"]
-const BUDGET_USEC := 4000
+const BUDGET_USEC := 1500
 var _tiles := {}  # Vector4i(level, face, ti, tj) -> Node3D (or null while building)
 var _queue: Array = []  # [distance, key]
 var _scan := 0.0
+var _scheduled_eye := Vector3.INF
 var _building := false
 var _fading: Array = []
 static var _kinds := {}  # kind -> {mesh, offset, unit, height, sway, material}
 
 func _process(delta: float) -> void:
+	if not FrameTrace.enabled: _update_frame(delta); return
+	var started := Time.get_ticks_usec()
+	_update_frame(delta)
+	FrameTrace.record("city/flora",started)
+
+func _update_frame(delta: float) -> void:
 	for entry: Dictionary in _fading.duplicate():
 		# Streaming can free a tile before its fade finishes; check before casting.
 		if not is_instance_valid(entry.node):
@@ -45,7 +52,9 @@ func _process(delta: float) -> void:
 	_scan -= delta
 	if _scan<=0.0:
 		_scan = 0.2
-		_schedule(eye)
+		if eye.distance_squared_to(_scheduled_eye)>16.0:
+			_scheduled_eye = eye
+			_schedule(eye)
 	if not _building and not _queue.is_empty():
 		var next: Array = _queue.pop_front()
 		if _tiles.has(next[1]) and _tiles[next[1]]==null: _build(next[1])
@@ -101,6 +110,21 @@ static func _face_of(dir: Vector3) -> int:
 		if dir.dot(CityLayout.FACES[f])>dir.dot(CityLayout.FACES[best]): best = f
 	return best
 
+func _tile_inside_city(key: Vector4i) -> bool:
+	var tile: float = LEVELS[key.x][1]
+	var city_id := ""
+	for corner: Vector2 in [Vector2.ZERO,Vector2.RIGHT,Vector2.DOWN,Vector2.ONE]:
+		var p := _point(key.y,(Vector2(key.z,key.w)+corner)*tile)
+		var uv := CityLayout.face_uv(p.normalized())
+		var i := floori((float(uv[1])+1.0)*0.5*CityLayout.N)
+		var j := floori((float(uv[2])+1.0)*0.5*CityLayout.N)
+		var district := CityLayout.district_of(int(uv[0]),i,j)
+		if district.is_empty(): return false
+		var id := str(district.district.id)
+		if city_id!="" and city_id!=id: return false
+		city_id = id
+	return true
+
 ## Plants one tile, a slice at a time across frames.
 func _build(key: Vector4i) -> void:
 	_building = true
@@ -108,6 +132,15 @@ func _build(key: Vector4i) -> void:
 	var face := key.y
 	var tile: float = LEVELS[level][1]
 	var step: float = LEVELS[level][3]
+	# Country crops never grow inside a city core. A tile wholly within one
+	# rectangular district is already covered by its gardens/parks; avoid
+	# sampling hundreds of masked planting positions just to build an empty tile.
+	if _tile_inside_city(key):
+		var empty := Node3D.new()
+		add_child(empty)
+		_tiles[key] = empty
+		_building = false
+		return
 	var count := int(round(tile/step))
 	var lists := {}  # kind -> Array[Transform3D]
 	var start := Time.get_ticks_usec()

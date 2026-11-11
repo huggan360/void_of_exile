@@ -9,25 +9,23 @@ const COUNT := 256
 func _ready() -> void:
 	var cube := BoxMesh.new()
 	cube.size = Vector3.ONE * 0.125
-	var material := StandardMaterial3D.new()
-	material.albedo_color = water_color
-	material.emission_enabled = true
-	material.emission = water_color
-	material.emission_energy_multiplier = 0.45
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://shaders/voxel_fountain.gdshader")
+	material.set_shader_parameter("water_color",water_color)
+	material.set_shader_parameter("flow_speed",flow_speed)
 	cube.material = material
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.mesh = cube
 	multi.instance_count = COUNT
+	multi.custom_aabb = AABB(Vector3(-5,0,-5),Vector3(10,9,10))
+	for i in COUNT: multi.set_instance_transform(i,Transform3D.IDENTITY)
 	_water.multimesh = multi
 	_water.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_water)
-	_process(0)
 
-func _process(delta: float) -> void:
-	_time += delta * flow_speed
-	for i in COUNT:
-		_water.multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY, drop_position(i)))
+# Kept as the CPU reference for authored fountain positions. The GPU now
+# animates the same 256 cubes without per-frame transform uploads.
 
 func drop_position(i: int) -> Vector3:
 	var tier := i % 4

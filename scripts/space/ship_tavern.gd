@@ -10,5 +10,5 @@ func _ready() -> void:
 	candle.light_color = Color("ffb36a")
 	candle.light_energy = 0.9
 	candle.omni_range = 4.5
-	candle.shadow_enabled = false
+	NearbyLightShadows.register_light(candle)
 	add_child(candle)

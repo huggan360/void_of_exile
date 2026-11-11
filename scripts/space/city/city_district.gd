@@ -100,7 +100,7 @@ func build() -> void:
 	_bridge()
 	_streets()
 	_props.flush(self)
-	_towers.flush(self, "district", 3000.0)
+	_towers.flush(self, "district", 3000.0, CityPlanet.DETAIL_RANGE, {}, true, 96.0)
 
 ## A planet-space holder at `frame`.
 func _holder(frame: Transform3D, label: String) -> Node3D:
@@ -143,17 +143,18 @@ func _sign(parent: Node3D, text: String, at: Vector3, color: Color, size := 1.0,
 	parent.add_child(sign)
 	return sign
 
-func _light(parent: Node3D, at: Vector3, color: Color, energy := 1.2, reach := 9.0) -> void:
+func _light(parent: Node3D, at: Vector3, color: Color, energy := 1.2, reach := 9.0) -> OmniLight3D:
 	var omni := OmniLight3D.new()
 	omni.position = at
 	omni.light_color = color
 	omni.light_energy = energy
 	omni.omni_range = reach
-	omni.shadow_enabled = false
+	NearbyLightShadows.register_light(omni)
 	omni.distance_fade_enabled = true
 	omni.distance_fade_begin = 70.0
 	omni.distance_fade_length = 30.0
 	parent.add_child(omni)
+	return omni
 
 # --- Spaceport --------------------------------------------------------------------------------
 
@@ -242,7 +243,14 @@ func _port() -> void:
 	for x: float in [-28.0, 0.0, 28.0]:
 		for z: float in [-28.0, 0.0, 28.0]:
 			if x>0.0 and z<0.0: continue  # the stair core
-			_light(port, Vector3(x, hall-1.5, z), _tint, 1.6, 22.0)
+			# Broad overlapping ceiling fill rather than isolated colored pools.
+			# Keep the themed color in fixtures; floor illumination is warm white.
+			var fill := _light(port, Vector3(x, hall-1.5, z), Color("fff0db").lerp(_tint, 0.08), 0.4, 46.0)
+			fill.omni_attenuation = 0.9
+			fill.light_specular = 0.15
+			fill.light_indirect_energy = 0.25
+			fill.distance_fade_begin = 110.0
+			fill.distance_fade_length = 50.0
 	_sign(port, "Stairs to the pads", Vector3(core.x-ch+1.5, 4.2, cz1+0.1), _neon, 0.9, 0.0, "slate", "arrow")
 	_port_core(port, art)
 	_port_roof(port, art)
@@ -480,12 +488,14 @@ func _cottage(v: Dictionary, seed: float) -> void:
 	var wall := art.pick(look[0]).lightened(0.12 if look[1]==CityArt.M_PLANK else 0.0)
 	var mat: float = look[1]
 	for side: float in [-1.0, 1.0]:
-		art.part("box", Vector3(side*(hx+0.35), wall_h*0.5-0.3, 0.35), Basis.IDENTITY, Vector3(0.7, wall_h, size.z+0.7), wall, mat, 0.3, false)
-		_solid(frame, Vector3(side*(hx+0.35), wall_h*0.5-0.3, 0.35), Vector3(0.7, wall_h, size.z+0.7))
+		art.part("box", Vector3(side*(hx+0.35), wall_h*0.5-0.3, 0), Basis.IDENTITY, Vector3(0.7, wall_h, size.z), wall, mat, 0.3, false)
+		_solid(frame, Vector3(side*(hx+0.35), wall_h*0.5-0.3, 0), Vector3(0.7, wall_h, size.z))
 		_graffiti_on(frame, Vector3(side*(hx+0.72), 2.2, (art.r()-0.5)*5.0), Basis(Vector3.UP, side*PI*0.5), int(art.r()*CityTextures.GRAFFITI_COUNT), art.r()<0.55)
 	art.part("box", Vector3(0, wall_h*0.5-0.3, hz+0.35), Basis.IDENTITY, Vector3(size.x+1.4, wall_h, 0.7), wall, mat, 0.3, false)
 	_solid(frame, Vector3(0, wall_h*0.5-0.3, hz+0.35), Vector3(size.x+1.4, wall_h, 0.7))
-	art.part("box", Vector3(0, (size.y+wall_h)*0.5-0.15, -hz), Basis.IDENTITY, Vector3(size.x+1.4, wall_h-size.y+0.3, 0.7), wall, mat, 0.4, false)
+	art.part("box", Vector3(0, (size.y+0.06+wall_h)*0.5, -hz), Basis.IDENTITY, Vector3(size.x+1.4, wall_h-size.y-0.06, 0.7), wall, mat, 0.4, false)
+	# A neon glyph above the street entrance, mounted clear of the wall.
+	art.neon_sign(Vector3(hx*0.65, size.y+1.5, -hz-0.48), Basis(Vector3.UP, PI), 1.5)
 	var beam := art.pick(CityArt.BARK)
 	for x: float in [-1.0, 1.0]:
 		for z: float in [-1.0, 1.0]:
@@ -534,7 +544,7 @@ func _room(v: Dictionary) -> void:
 	art.box(Vector3(0, 0.12, -1.0), Vector3(size.x*0.55, 0.02, size.z*0.45), look.rug)
 	# Inside finish (covers the podium's own faces), a ceiling with lamp strips.
 	var hidden: bool = v.kind=="speakeasy"
-	art.box(Vector3(0, size.y*0.5, hz-0.1), Vector3(size.x, size.y, 0.2), look.wall)
+	art.box(Vector3(0, size.y*0.5, hz-0.16), Vector3(size.x, size.y, 0.2), look.wall)
 	for side: float in [-1.0, 1.0]:
 		if hidden and side<0.0:
 			# The tunnel comes in through the left wall.
@@ -543,7 +553,7 @@ func _room(v: Dictionary) -> void:
 			art.box(Vector3(-hx+0.1, (3.0+size.y)*0.5, 0), Vector3(0.2, size.y-3.0, 2.4), look.wall)
 			art.box(Vector3(-hx+0.25, 3.1, 0), Vector3(0.2, 0.15, 2.6), Color("d9ac60"))
 			continue
-		art.box(Vector3(side*(hx-0.1), size.y*0.5, 0), Vector3(0.2, size.y, size.z), look.wall)
+		art.box(Vector3(side*(hx-0.16), size.y*0.5, 0), Vector3(0.2, size.y, size.z), look.wall)
 		art.box(Vector3(side*(hx-0.25), 1.0, 0), Vector3(0.12, 0.12, size.z-0.4), Color("d9ac60"))
 	art.box(Vector3(0, size.y-0.05, 0), Vector3(size.x, 0.12, size.z), look.wall.darkened(0.35))
 	for k in 3: art.box(Vector3(-hx+3.0+k*(size.x-6.0)/2.0, size.y-0.18, 0), Vector3(0.35, 0.08, size.z-2.0), look.lamp, false, 1.6)

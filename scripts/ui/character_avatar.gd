@@ -84,10 +84,17 @@ func _frame_head(model: Node3D) -> void:
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	_camera.size = maxf(bounds.size.x, bounds.size.y) * 1.22 + 0.04
 	_camera.look_at_from_position(center + Vector3(0, 0, -bounds.size.z - 3.0), center)
-	if not _live:
-		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_sync_visibility()
 
+
+func _ready() -> void:
+	visibility_changed.connect(_sync_visibility)
+	_sync_visibility()
+
+func _sync_visibility() -> void:
+	if not is_visible_in_tree(): _viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	else: _viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if _live else SubViewport.UPDATE_ONCE
 
 func _process(delta: float) -> void:
-	if _live and _model and _model.has_method("animate"):
+	if _live and is_visible_in_tree() and _model and _model.has_method("animate"):
 		_model.animate(0.0, delta)

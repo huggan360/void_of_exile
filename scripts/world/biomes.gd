@@ -73,14 +73,17 @@ static func _colors(stone: Color, stone_dark: Color, foliage: Color, wood: Color
 static func _build() -> void:
 	_all.resize(COUNT)
 
-	# Home base: calm golden evening, no fog (just a faint haze for light halos).
+	# Home base: amber evening light with restrained teal shade and fountain accents.
 	_all[HALL] = _make({
 		id = HALL, biome_name = "The Tavern",
 		top_block = Blocks.HALL_FLOOR,
-		sky_top_color = Color(0.22, 0.32, 0.58), sky_horizon_color = Color(0.95, 0.72, 0.5),
-		sun_color = Color(1.0, 0.86, 0.68), sun_energy = 1.3, sun_pitch = 38.0,
-		ambient_energy = 0.9, fog_of_war_enabled = false, volumetric_fog_density = 0.004, indoor = true,
-		particle_color = Color(1.0, 0.85, 0.6, 0.4), particle_velocity = Vector3(0.1, 0.25, 0),
+		sky_top_color = Color("6b979c"), sky_horizon_color = Color("d8d5bf"),
+		sun_color = Color("ffe0b4"), sun_energy = 1.65, sun_pitch = 32.0,
+		ambient_energy = 1.05, ambient_color = Color("fff0d9"), ambient_sky_contribution = 0.12,
+		exposure = 1.08, saturation = 1.10, contrast = 1.12, cinematic_grade = 0.25,
+		fog_color = Color("ddd1b5"), fog_density = 0.0002,
+		fog_of_war_enabled = false, volumetric_fog_density = 0.0012, indoor = true,
+		particle_color = Color(1.0, 0.82, 0.57, 0.14), particle_velocity = Vector3(0.06, 0.12, 0), particle_size = 0.04,
 	})
 
 

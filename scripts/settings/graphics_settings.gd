@@ -12,8 +12,8 @@ const PRESETS := ["low", "medium", "high"]
 const FEATURES := [
 	["render_scale", "Render scale", [[50, "50%"], [67, "67%"], [75, "75%"], [85, "85%"], [100, "100%"]],
 		"Renders the 3D world at fewer pixels; the interface stays sharp. The biggest win on weak GPUs."],
-	["upscaler", "Upscaling", [["bilinear", "Bilinear"], ["fsr", "AMD FSR 1"], ["fsr2", "AMD FSR 2"]],
-		"How a reduced render scale is stretched back to the screen."],
+	["upscaler", "Upscaling", [["off", "Off (native)"], ["bilinear", "Bilinear"], ["fsr", "AMD FSR 1"], ["fsr2", "AMD FSR 2"]],
+		"Off uses native window resolution and bypasses render scaling and reconstruction. Other modes resize a reduced 3D resolution."],
 	["antialiasing", "Anti-aliasing", [["off", "Off"], ["fxaa", "FXAA"], ["msaa2", "MSAA 2×"], ["msaa4", "MSAA 4×"], ["taa", "TAA"]],
 		"Smooths jagged voxel edges. FXAA is almost free; MSAA is sharper but costs more."],
 	["shadows", "Shadows", [["off", "Off"], ["low", "Low"], ["medium", "Medium"], ["high", "High"]],
@@ -34,7 +34,7 @@ const FEATURES := [
 		"Embers, snow, spores and dust drifting around you."],
 ]
 const PRESET_VALUES := {
-	high = {render_scale = 100, upscaler = "bilinear", antialiasing = "msaa2", shadows = "high", gi = "high",
+	high = {render_scale = 100, upscaler = "off", antialiasing = "msaa2", shadows = "high", gi = "high",
 			ambient_occlusion = "high", indirect_light = "high", volumetric_fog = "high", glow = "on",
 			lights = "high", particles = "high"},
 	medium = {render_scale = 85, upscaler = "fsr", antialiasing = "fxaa", shadows = "medium", gi = "low",
@@ -88,6 +88,7 @@ static func sanitize(value: Dictionary) -> Dictionary:
 		var id: String = f[0]
 		if value.has(id) and value[id] in choices(id):
 			result[id] = value[id]
+	if result.upscaler=="off": result.render_scale = 100
 	result.preset = matching_preset(result)
 	return result
 
@@ -112,11 +113,14 @@ static func level(values: Dictionary, id: String) -> int:
 ## Window and renderer-wide parts. `base_scale` is the fullscreen-resolution
 ## ratio AppSettings already works out.
 static func apply_viewport(viewport: Viewport, values: Dictionary, base_scale: float) -> void:
-	var scale := clampf(base_scale * float(values.render_scale) / 100.0, 0.25, 2.0)
+	var scale := 1.0 if str(values.upscaler) == "off" else clampf(base_scale * float(values.render_scale) / 100.0, 0.25, 2.0)
 	viewport.scaling_3d_scale = scale
+	# Native resolution bypasses reconstruction, even if FSR remains selected.
+	# FSR 2 at 1:1 still accumulates history and can trail moving voxel art.
+	var temporal_upscale := str(values.upscaler) == "fsr2" and scale < 0.999
 	match str(values.upscaler):
 		"fsr2":
-			viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2
+			viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2 if temporal_upscale else Viewport.SCALING_3D_MODE_BILINEAR
 		"fsr":
 			viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if scale < 1.0 else Viewport.SCALING_3D_MODE_BILINEAR
 		_:
@@ -125,7 +129,7 @@ static func apply_viewport(viewport: Viewport, values: Dictionary, base_scale: f
 	viewport.msaa_3d = Viewport.MSAA_4X if aa == "msaa4" else Viewport.MSAA_2X if aa == "msaa2" else Viewport.MSAA_DISABLED
 	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if aa == "fxaa" else Viewport.SCREEN_SPACE_AA_DISABLED
 	# FSR 2 brings its own temporal AA.
-	viewport.use_taa = aa == "taa" and values.upscaler != "fsr2"
+	viewport.use_taa = aa == "taa" and not temporal_upscale
 	var shadows := level(values, "shadows")
 	viewport.positional_shadow_atlas_size = [256, 1024, 2048, 2048][shadows]
 	if DisplayServer.get_name() == "headless":
@@ -168,10 +172,23 @@ static func apply_atmosphere(env: Environment, sun: DirectionalLight3D, values: 
 	var gi := level(values, "gi")
 	env.sdfgi_enabled = gi > 0
 	env.sdfgi_cascades = 6 if gi >= 3 else 4
-	env.sdfgi_use_occlusion = gi >= 3
+	# Thin procedural walls need leak prevention at both GI quality levels.
+	env.sdfgi_use_occlusion = gi > 0
+	# Keep bounce subordinate to the authored lighting. Large-radius SSIL can
+	# paint visible patches across flat floors as objects enter/leave the view.
+	env.sdfgi_energy = 0.7
+	env.ssao_radius = 0.55
+	env.ssao_intensity = 0.65
+	env.ssao_power = 1.0
+	env.ssao_light_affect = 0.0
+	env.ssil_intensity = 0.2
+	env.ssil_radius = 1.0
 	env.ssao_enabled = level(values, "ambient_occlusion") > 0
 	env.ssil_enabled = level(values, "indirect_light") > 0
 	env.glow_enabled = values.glow == "on"
+	# The same source size and softness as the Tavern in all environments.
+	sun.light_angular_distance = 1.2
+	sun.shadow_blur = 1.15
 	var shadows := level(values, "shadows")
 	sun.shadow_enabled = shadows > 0
 	sun.directional_shadow_max_distance = [40.0, 45.0, 60.0, 80.0][shadows]

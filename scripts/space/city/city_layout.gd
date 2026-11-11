@@ -538,12 +538,18 @@ static func walkers(d: Dictionary) -> Array:
 static func walker_pose(d: Dictionary, w: Dictionary, t: float) -> Array:
 	var loop: Array = walk_loops(d)[w.loop]
 	var count := loop.size()
-	var lengths: Array[float] = []
-	var total := 0.0
-	for k in count:
-		var l := (loop[k] as Vector3).distance_to(loop[(k+1) % count])
-		lengths.append(l)
-		total += l
+	var route_key := "walk_lengths:%s:%d" % [str(d.id), int(w.loop)]
+	if not _cache.has(route_key):
+		var lengths := PackedFloat32Array()
+		var total := 0.0
+		for k in count:
+			var length := (loop[k] as Vector3).distance_to(loop[(k+1) % count])
+			lengths.append(length)
+			total += length
+		_cache[route_key] = {lengths = lengths, total = total}
+	var route: Dictionary = _cache[route_key]
+	var lengths: PackedFloat32Array = route.lengths
+	var total: float = route.total
 	# Walk, with a short stop at a few corners (looking around, chatting).
 	var stop := (3.0 if w.chat else 1.2)*4.0/count
 	var cycle := total/float(w.speed)+stop*count
@@ -592,7 +598,7 @@ static func lanes() -> Array:
 				for layer in 3:
 					if (k+layer) % 2==1: continue
 					out.append({kind = "sky", dirs = pts, altitude = 34.0+layer*26.0+rnd(0.7, dk)*6.0, side = 3.5, speed = 16.0+layer*5.0,
-						count = 4+layer, seed = dk*7+layer,
+						count = 2+layer/2, seed = dk*7+layer,
 						models = ["sky_taxi", "sky_sedan", "sky_sports", "sky_van", "sky_police", "sky_bike", "sky_bus", "sky_hauler", "sky_gondola"]})
 	# Skyways between the districts (great circles), high and busy.
 	for a in DISTRICTS.size():
@@ -601,15 +607,37 @@ static func lanes() -> Array:
 		var db := district_frame(DISTRICTS[b]).origin.normalized()
 		var pts: Array[Vector3] = []
 		for s in 25: pts.append(da.slerp(db, s/24.0))
-		out.append({kind = "sky", dirs = pts, altitude = 120.0, side = 5.0, speed = 32.0, count = 14, seed = 900+a,
+		out.append({kind = "sky", dirs = pts, altitude = 120.0, side = 5.0, speed = 32.0, count = 5, seed = 900+a,
 			models = ["sky_bus", "sky_taxi", "sky_hauler", "sky_sedan", "sky_sports", "sky_gondola"]})
 	for lane: Dictionary in out:
 		var pts: Array[Vector3] = []
 		for dir: Vector3 in lane.dirs: pts.append(center+dir*(radius()+float(lane.altitude)))
 		lane.points = pts
 		var total := 0.0
-		for k in pts.size()-1: total += pts[k].distance_to(pts[k+1])
+		var lengths := PackedFloat32Array()
+		var ends := PackedFloat32Array()
+		var directions := PackedVector3Array()
+		var bounds := AABB(pts[0], Vector3.ZERO)
+		for k in pts.size()-1:
+			var segment := pts[k+1]-pts[k]
+			var length := segment.length()
+			lengths.append(length)
+			directions.append(segment / maxf(length, 0.01))
+			total += length
+			ends.append(total)
+			bounds = bounds.expand(pts[k+1])
+		var phases := PackedFloat32Array()
+		for k in int(lane.count):
+			phases.append(total*2.0*float(k)/int(lane.count)+rnd(float(lane.seed)*0.01,k)*12.0)
 		lane.length = total
+		lane.segment_lengths = lengths
+		lane.segment_ends = ends
+		lane.segment_directions = directions
+		lane.phases = phases
+		lane.bounds = bounds.grow(850.0)
+		lane.center = center
+		lane.radius = radius()
+
 	_cache.lanes = out
 	return out
 
@@ -665,21 +693,18 @@ static func street_runs(face: int, corner: Vector2i, k: int, along_u: bool) -> A
 static func vehicle_pose(lane: Dictionary, k: int, t: float) -> Array:
 	var pts: Array = lane.points
 	var length := float(lane.length)
-	var count := int(lane.count)
-	var s := fposmod(t*float(lane.speed)+length*2.0*float(k)/count+rnd(float(lane.seed)*0.01, k)*12.0, length*2.0)
+	var s := fposmod(t*float(lane.speed)+float(lane.phases[k]),length*2.0)
 	var forward := s<length
 	var along := s if forward else length*2.0-s
-	var i := 0
-	while i<pts.size()-2 and along>(pts[i] as Vector3).distance_to(pts[i+1]):
-		along -= (pts[i] as Vector3).distance_to(pts[i+1])
-		i += 1
-	var a: Vector3 = pts[i]
-	var b: Vector3 = pts[i+1]
-	var f := clampf(along/maxf(a.distance_to(b), 0.01), 0.0, 1.0)
-	var pos := a.lerp(b, f)
-	var up := (pos-(planet().center as Vector3)).normalized()
-	var dir := (b-a).normalized()*(1.0 if forward else -1.0)
-	pos = (planet().center as Vector3)+up*(radius()+float(lane.altitude))
+	var ends: PackedFloat32Array = lane.segment_ends
+	var i := mini(ends.bsearch(along), pts.size()-2)
+	var start := 0.0 if i==0 else float(ends[i-1])
+	var f := clampf((along-start)/maxf(float(lane.segment_lengths[i]),0.01),0.0,1.0)
+	var pos := (pts[i] as Vector3).lerp(pts[i+1],f)
+	var center: Vector3 = lane.center
+	var up := (pos-center).normalized()
+	var dir: Vector3 = lane.segment_directions[i]*(1.0 if forward else -1.0)
+	pos = center+up*(float(lane.radius)+float(lane.altitude))
 	pos += dir.cross(up).normalized()*float(lane.side)
 	if lane.kind=="sky": pos += up*sin(t*0.7+k)*0.6
 	return [pos, dir]
