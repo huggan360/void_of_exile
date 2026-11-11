@@ -47,7 +47,8 @@
         -2
       ],
       "role": "arm",
-      "amount": 0.15
+      "amount": 0.08,
+      "throws": false
     },
     "leg_l": {
       "part": "leg",
@@ -70,5 +71,6 @@
     8,
     16,
     -15
-  ]
+  ],
+  "waddle": 0.25
 }

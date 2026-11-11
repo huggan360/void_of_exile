@@ -292,7 +292,7 @@ const LIST := {
 			{id="realm",kind="enter",world="campaign",text="Return to the Surface through the Chronicle Gate"},
 			{id="mechanic",kind="talk",world="campaign",npc="astral_mechanic",shared=true,
 				text="Find Orin at Starfall Launchworks in the woods",
-				say="You found my little clearing! [place]Starfall Launchworks[/place], first port to a very unreasonable sky.|My ship needs a [b]starcoil[/b], a [b]spellsteel nozzle[/b] and an [b]aether heart[/b]. My supply chest is beside the workshop. Bring all three to me.|Once she is ready, every member of your party must board. Nobody gets left in the trees."},
+				say="You found my little clearing! [place]Starfall Launchworks[/place], first port to a very unreasonable sky.|My ship needs a [b]starcoil[/b], a [b]spellsteel nozzle[/b] and an [b]aether heart[/b]. My supply chest is beside me. Bring all three to me.|Once she is ready, every member of your party must board. Nobody gets left in the trees."},
 			{id="parts",kind="astral_parts",world="campaign",npc="astral_mechanic",count=3,
 				text="Take the three rocket parts from the supply chest and bring them to Orin (%d/%d)",
 				say="Perfect. The starcoil holds, the nozzle is seated, and the heart is singing.|She is ready. Go to the boarding hatch. I'll keep the engines warm until [b]everyone[/b] is aboard."},

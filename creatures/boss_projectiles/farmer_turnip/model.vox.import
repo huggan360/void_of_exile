@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dhhmmqdx51vvt"
+path="res://.godot/imported/model.vox-aadd3e29b1c9f125acd5152c2002c553.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/farmer_turnip/model.vox"
+dest_files=["res://.godot/imported/model.vox-aadd3e29b1c9f125acd5152c2002c553.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

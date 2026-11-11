@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://5n8qca7guiq"
+path="res://.godot/imported/body.vox-55c9de7ea02d38b9f95a5b46bebd7013.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/farmer_buckshot/body.vox"
+dest_files=["res://.godot/imported/body.vox-55c9de7ea02d38b9f95a5b46bebd7013.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

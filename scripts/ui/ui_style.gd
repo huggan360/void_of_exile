@@ -9,7 +9,7 @@ const OUTLINE := Color("080d16")
 const BEVEL_LIGHT := Color("87724f")
 const BEVEL_DARK := Color("0b1120")
 const TEXT := Color("f6ead3")
-const TEXT_DIM := Color("a7b8cd")
+const TEXT_DIM := Color("e0e0e0")
 const ACCENT := Color("82d7ed")
 const GOLD := Color("e5b96d")
 const GOOD := Color(0.5, 0.95, 0.5)
@@ -76,6 +76,12 @@ static var _bold: FontVariation
 static var _italic: FontVariation
 static var _theme: Theme
 static var _boxes := {}
+## Temporary artwork selection. Empty string restores the original blue set.
+const TEXTURE_SET := "black"
+
+static func texture_path(filename: String) -> String:
+	return "res://assets/ui/"+(TEXTURE_SET+"/" if not TEXTURE_SET.is_empty() else "")+filename
+
 static var _skin_textures := {}
 
 
@@ -132,21 +138,30 @@ static func theme() -> Theme:
 		var tree := Engine.get_main_loop() as SceneTree
 		if tree and not tree.node_added.is_connected(_shadow_added): tree.node_added.connect(_shadow_added)
 		for type in ["Button", "OptionButton", "MenuButton"]:
+			_theme.set_color("font_color", type, TEXT)
+			_theme.set_color("font_hover_color", type, TEXT)
+			_theme.set_color("icon_hover_color", type, Color.WHITE)
 			for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
 				var tint := Color(0.74, 0.82, 0.95)
-				if state == "hover": tint = Color(0.92, 0.98, 1.0)
-				elif state in ["pressed", "hover_pressed"]: tint = Color(0.50, 0.62, 0.80)
-				elif state == "disabled": tint = Color(0.38, 0.44, 0.54)
-				var face := _skin_box("stone", tint, 8)
+				if state == "disabled": tint = Color(0.38, 0.44, 0.54)
+				var down: bool = state in ["pressed", "hover_pressed"]
+				var face := _skin_box("stone_pressed" if down else "stone", tint, 8)
 				face.content_margin_left = 18
 				face.content_margin_right = 18
+				face.content_margin_top = 11 if down else 8
+				face.content_margin_bottom = 5 if down else 8
 				_theme.set_stylebox(state, type, face)
 				_theme.set_stylebox(state + "_mirrored", type, face)
 		for type in ["TabContainer", "TabBar"]:
-			_theme.set_stylebox("tab_hovered", type, panel_outlined(ACCENT))
+			_theme.set_stylebox("tab_hovered", type, panel())
+			_theme.set_color("font_hovered_color", type, TEXT)
 			_theme.set_stylebox("tab_selected", type, panel_outlined(GOLD))
 			_theme.set_stylebox("tab_unselected", type, panel())
 			_theme.set_stylebox("tab_disabled", type, panel())
+		_theme.set_stylebox("panel", "PopupMenu", popup_panel())
+		_theme.set_stylebox("hover", "PopupMenu", StyleBoxEmpty.new())
+		_theme.set_color("font_hover_color", "PopupMenu", TEXT)
+		_theme.set_stylebox("panel", "TooltipPanel", popup_panel())
 		_theme.default_font = font()
 		_theme.default_font_size = SIZE_NORMAL
 		for type in ["Label", "Button", "RichTextLabel"]:
@@ -172,7 +187,8 @@ static func theme() -> Theme:
 			_theme.set_stylebox("grabber", type, panel())
 			_theme.set_stylebox("grabber_highlight", type, panel_outlined(ACCENT))
 			_theme.set_stylebox("grabber_pressed", type, panel_outlined(GOLD))
-		_theme.set_stylebox("panel", "TabContainer", panel())
+		_theme.set_stylebox("panel", "TabContainer", content_panel())
+		_theme.set_stylebox("panel", "ScrollContainer", content_panel(0))
 		_theme.set_stylebox("tab_selected", "TabContainer", panel_outlined(GOLD))
 		_theme.set_stylebox("tab_unselected", "TabContainer", panel())
 	return _theme
@@ -203,16 +219,17 @@ static func _cached(key: String, make: Callable) -> StyleBoxTexture:
 ## a consistent UI size without resampling their retained pixel artwork.
 static func _skin_texture(kind: String) -> Texture2D:
 	if not _skin_textures.has(kind):
-		var baked := {panel = "ui_blue_stone_panel.png", ivy_panel = "ui_blue_ivy_panel.png", item_slot = "ui_item_slot.png"}
+		var baked := {item_slot = "ui_item_slot.png"}
 		if baked.has(kind):
-			_skin_textures[kind] = load("res://assets/ui/" + str(baked[kind]))
+			_skin_textures[kind] = load(texture_path(str(baked[kind])))
 			return _skin_textures[kind]
-		var ivy := kind == "ivy"
-		var path := "res://assets/ui/ui_ivy_panel.png" if ivy else "res://assets/ui/ui_stone_button.png"
+		var ivy := kind in ["ivy", "ivy_pressed", "ivy_popup", "ivy_panel", "panel"]
+		var path := texture_path("ui_ivy_button_pressed.png" if kind == "ivy_pressed" else "ui_ivy_panel.png" if ivy else "ui_stone_button_pressed.png" if kind == "stone_pressed" else "ui_stone_button.png")
 		var source: Texture2D = load(path)
 		var region := Rect2i(14, 12, 1223, 1219) if ivy else Rect2i(28, 152, 2116, 398)
+		if kind == "panel": region = Rect2i(326, 320, 600, 600)
 		var texture := ImageTexture.create_from_image(source.get_image().get_region(region))
-		texture.set_size_override(Vector2i(192, 192) if ivy else Vector2i(192, 48))
+		texture.set_size_override(Vector2i(96, 96) if kind == "ivy_popup" else Vector2i(192, 192) if ivy else Vector2i(192, 48))
 		_skin_textures[kind] = texture
 	return _skin_textures[kind]
 
@@ -220,33 +237,32 @@ static func _skin_texture(kind: String) -> Texture2D:
 static func _skin_box(kind: String, tint: Color, margin: float) -> StyleBoxTexture:
 	var box := StyleBoxTexture.new()
 	box.texture = _skin_texture(kind)
-	var edge := 48.0 if kind in ["ivy", "ivy_panel"] else 3.0 if kind == "item_slot" else 9.0
+	var edge := 0.0 if kind == "panel" else 24.0 if kind == "ivy_popup" else 48.0 if kind in ["ivy", "ivy_pressed", "ivy_panel"] else 3.0 if kind == "item_slot" else 9.0
 	box.texture_margin_left = edge
 	box.texture_margin_right = edge
 	box.texture_margin_top = edge
 	box.texture_margin_bottom = edge
-	box.modulate_color = tint
-	if kind in ["panel", "ivy_panel"]:
+	var intensity := maxf(tint.r, maxf(tint.g, tint.b))
+	box.modulate_color = Color(intensity, intensity, intensity, tint.a) if TEXTURE_SET=="black" else tint
+	if kind in ["panel", "ivy_panel", "ivy_popup"]:
 		box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
 		box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
 	box.set_content_margin_all(margin)
 	return box
 
 
-## Quiet blue stone for small cards; matching artwork without climbing ivy.
+## Inner cards use only the original moss frame artwork's dark interior.
 static func panel() -> StyleBoxTexture:
 	return _cached("panel", func() -> StyleBoxTexture:
-		return _skin_box("panel", Color(0.52, 0.60, 0.75), 14))
+		return _skin_box("panel", Color.WHITE, 14))
 
 
 static func panel_outlined(color: Color) -> StyleBoxTexture:
 	return _cached("panel_" + color.to_html(), func() -> StyleBoxTexture:
-		var tint := Color(0.59, 0.67, 0.81)
-		if color.is_equal_approx(ACCENT): tint = Color(0.74, 0.94, 1.0)
-		return _skin_box("panel", tint, 12))
+		return _skin_box("panel", Color.WHITE, 12))
 
 
-## Ivy belongs on selected larger windows, keeping text clear of the corners.
+## Every window shares the original moss frame and its dark blue interior.
 static func ornament_panel() -> StyleBoxTexture:
 	return _cached("ivy_panel", func() -> StyleBoxTexture:
 		var box := _skin_box("ivy_panel", Color.WHITE, 24)
@@ -256,25 +272,40 @@ static func ornament_panel() -> StyleBoxTexture:
 		return box)
 
 
+## Small popups keep the moss frame at half scale, with clear inner padding.
+static func popup_panel() -> StyleBoxTexture:
+	return _cached("ivy_popup", func() -> StyleBoxTexture:
+		return _skin_box("ivy_popup", Color.WHITE, 24))
+
+
+## Nested pages reveal the outer background instead of drawing another box.
+static func content_panel(margin := 14.0) -> StyleBoxEmpty:
+	var box := StyleBoxEmpty.new()
+	box.set_content_margin_all(margin)
+	return box
+
+
 ## Recessed item slot, lit when hovered.
 static func slot(hovered := false) -> StyleBoxTexture:
 	return _cached("slot_%s" % hovered, func() -> StyleBoxTexture:
 		return _skin_box("item_slot", Color(1.25, 1.35, 1.45) if hovered else Color.WHITE, 0))
 
 
-## Pixel button: state colors change without moving its label.
+## Pressed stone faces sink into their rim; equal total padding keeps layout fixed.
 static func button_styles(target: Button, skin := "stone") -> void:
 	# Moss keeps its own greens; stone gets the cool blue tint.
 	var ivy := skin == "ivy"
 	var normal := _skin_box(skin, Color(0.86, 0.9, 0.86) if ivy else Color(0.74, 0.82, 0.95), 0)
-	var hover := _skin_box(skin, Color.WHITE if ivy else Color(0.92, 0.98, 1.0), 0)
-	var pressed := _skin_box(skin, Color(0.62, 0.68, 0.62) if ivy else Color(0.50, 0.62, 0.80), 0)
+	var hover := normal
+	var pressed := _skin_box("ivy_pressed" if ivy else "stone_pressed", Color(0.86, 0.9, 0.86) if ivy else Color(0.74, 0.82, 0.95), 0)
 	var disabled := _skin_box(skin, Color(0.5, 0.54, 0.5) if ivy else Color(0.38, 0.44, 0.54), 0)
 	for s in [normal, hover, pressed, disabled]:
 		s.content_margin_left = 18
 		s.content_margin_right = 18
 		s.content_margin_top = 8
 		s.content_margin_bottom = 14  # room for the lip
+	pressed.content_margin_top = 11
+	pressed.content_margin_bottom = 11
 	target.add_theme_stylebox_override("normal", normal)
 	target.add_theme_stylebox_override("hover", hover)
 	target.add_theme_stylebox_override("pressed", pressed)
@@ -289,7 +320,7 @@ static func button_styles(target: Button, skin := "stone") -> void:
 	focus.set_border_width_all(1)
 	target.add_theme_stylebox_override("focus", focus)
 	target.add_theme_color_override("font_disabled_color", TEXT_DIM)
-	target.add_theme_color_override("font_hover_color", ACCENT)
+	target.add_theme_color_override("font_hover_color", TEXT)
 	text(target, SIZE_NORMAL)
 	target.add_theme_font_override("font", bold())
 
@@ -299,6 +330,7 @@ static func text(target: Control, size := SIZE_NORMAL, color := TEXT) -> void:
 	target.add_theme_font_override("font", heading_font() if size >= SIZE_LARGE else font())
 	target.add_theme_font_size_override("font_size", size)
 	target.add_theme_color_override("font_color", color)
+	if target is Button: target.add_theme_color_override("font_hover_color", color)
 	target.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.75))
 	target.add_theme_constant_override("shadow_offset_x", 2)
 	target.add_theme_constant_override("shadow_offset_y", 2)

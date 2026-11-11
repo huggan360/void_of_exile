@@ -760,6 +760,9 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 	if GameServer.interacting(pid) and kind in ["hit", "ring", "shield", "obstacle", "obstacle_hit"]: return
 	if GameServer.intro_locked(pid) and kind in ["hit","ring","shield","obstacle","obstacle_hit"]: return
 	match kind:
+		"tavern_escape":
+			if args.size() == 1 and args[0] is bool:
+				GameServer.set_tavern_escape(pid, args[0])
 		"interaction":
 			if args.size() == 1 and args[0] is bool: GameServer.set_interaction_protection(pid, args[0])
 		"dungeon":
@@ -804,6 +807,7 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 			if p.get("awaiting_arrival", false):
 				p.awaiting_arrival = false
 				GameServer.grant_arrival_protection(pid)
+				GameServer.set_tavern_escape(pid, false)
 		"hit":  # [enemy net id, damage, direction, equipped item, secondary]
 			if args.size() >= 3:
 				_player_hit_enemy(p, int(args[0]), int(args[1]), args[2] if args[2] is Vector3 else Vector3.ZERO,

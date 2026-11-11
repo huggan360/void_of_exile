@@ -19,13 +19,16 @@ signal leave_pressed
 signal unstuck_pressed
 signal quit_pressed
 
-const LOGO := preload("res://assets/branding/launch_logo.png")
+const LOGO := preload("res://assets/branding/launch_logo_limited.png")
 const LOGO_SMALL := LOGO
 const FADE_TIME := 0.25
 
 var _backdrop := ColorRect.new()
 var _backdrop_material := ShaderMaterial.new()
+var _start_background := TextureRect.new()
 var _start := Control.new()
+var _start_logo: TextureRect
+var _start_actions: Array[Control] = []
 var _pause := Control.new()
 var options := OptionsPanel.new()
 var servers := ServerPanel.new()
@@ -46,6 +49,16 @@ func _ready() -> void:
 	_backdrop.material = _backdrop_material
 	_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(_backdrop)
+	_start_background.texture = preload("res://assets/branding/launch_background_black.png")
+	_start_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_start_background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_start_background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_start_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ink := ShaderMaterial.new()
+	ink.shader = preload("res://shaders/startup_two_ink.gdshader")
+	_start_background.material = ink
+	root.add_child(_start_background)
+	_start_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# Start screen: the logo and the buttons under it, all centered.
 	_start.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -53,6 +66,7 @@ func _ready() -> void:
 	root.add_child(_start)
 	var start_box := _column(_start)
 	var logo := _logo(LOGO, Vector2(820, 307))
+	_start_logo = logo
 	start_box.add_child(logo)
 	start_box.add_child(_spacer(12))
 	_play_buttons.append(_button("Singleplayer", func() -> void: singleplayer_pressed.emit()))
@@ -61,6 +75,8 @@ func _ready() -> void:
 		start_box.add_child(b)
 	start_box.add_child(_button("Options", show_options))
 	start_box.add_child(_button("Quit Game", func() -> void: quit_pressed.emit()))
+	for child: Control in start_box.get_children():
+		if child != logo: _start_actions.append(child)
 	# Bottom left: the account.
 	account.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	account.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -114,6 +130,25 @@ func _update_play() -> void:
 	for b in _play_buttons:
 		b.disabled = not Account.is_logged_in()
 		b.tooltip_text = "" if Account.is_logged_in() else "Log in first (bottom left)"
+
+
+## Lay out the final menu without showing a second logo or its actions yet.
+func prepare_startup() -> void:
+	show_start()
+	_start_logo.modulate.a = 0.0
+	for control in _start_actions: control.modulate.a = 0.0
+	account.modulate.a = 0.0
+
+func startup_logo_rect() -> Rect2:
+	return _start_logo.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, _start_logo.size)
+
+func reveal_startup() -> void:
+	_start_logo.modulate.a = 1.0
+	var reveal := create_tween().set_parallel(true)
+	for i in _start_actions.size():
+		reveal.tween_property(_start_actions[i], "modulate:a", 1.0, 0.3).set_delay(i * 0.04)
+	reveal.tween_property(account, "modulate:a", 1.0, 0.3)
+	await reveal.finished
 
 
 func show_start() -> void:
@@ -189,6 +224,7 @@ func _show(page: Control, dim: float, blur: float) -> void:
 	servers.hide()
 	_leave.visible = Net.is_client()
 	_leave.text = "Leave Singleplayer" if Net.is_client() and Net.client.info.get("singleplayer", false) else "Leave Server"
+	_start_background.visible = _from_start
 	_start.visible = page == _start
 	_pause.visible = page == _pause
 	_backdrop_material.set_shader_parameter("dim", dim)
@@ -218,7 +254,7 @@ func _logo(texture: Texture2D, logo_size: Vector2) -> TextureRect:
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo.custom_minimum_size = logo_size
 	logo.size = logo_size
-	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return logo
 

@@ -16,7 +16,7 @@ var _diamond := LevelDiamond.new(46.0)
 func _ready() -> void:
 	alignment = BoxContainer.ALIGNMENT_END
 	add_theme_constant_override("separation", 8)
-	_menu.add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
+	_menu.add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	_list.add_theme_constant_override("separation", 6)
 	_menu.add_child(_list)
 	_menu.hide()

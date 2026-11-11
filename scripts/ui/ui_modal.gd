@@ -19,7 +19,7 @@ func _init(title := "", min_width := 560.0) -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
-	panel.add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
+	panel.add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	panel.custom_minimum_size.x = min_width
 	center.add_child(panel)
 	body.add_theme_constant_override("separation", 12)

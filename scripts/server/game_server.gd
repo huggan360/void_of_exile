@@ -165,11 +165,22 @@ func begin_boss_intro(encounter: int, realm: String, ids: Array, duration: float
 		_players[id].shield = false
 	return admitted
 
+## No timeout: tavern escape remains safe through animation and slow loading.
+func set_tavern_escape(player_id: int, active: bool) -> void:
+	if not _players.has(player_id): return
+	_players[player_id].tavern_escape = active
+	if active: _players[player_id].shield = false
+
+func tavern_escaping(player_id: int) -> bool:
+	return bool(_players.get(player_id, {}).get("tavern_escape", false))
+
 func intro_locked(player_id: int) -> bool:
+	if tavern_escaping(player_id): return true
 	var entry: Dictionary = _intro_locks.get(player_id,{})
 	return not entry.is_empty() and entry.realm==player_realm(player_id) and Time.get_ticks_msec()<int(entry.until)
 
 func intro_protected(player_id: int) -> bool:
+	if tavern_escaping(player_id): return true
 	var entry: Dictionary = _intro_locks.get(player_id,{})
 	return not entry.is_empty() and entry.realm==player_realm(player_id) and Time.get_ticks_msec()<int(entry.safe_until)
 

@@ -82,7 +82,7 @@ func update(camp: Dictionary,world: GameWorld) -> void:
 	campaign.main.hud.visible=false
 	var now := Net.client.server_time() if Net.is_client() else Net.now()
 	var age := now-float(flight.start)
-	var center: Vector3=world.astral_site
+	var center: Vector3=world.astral_anchor("rocket")-AstralStation.ROCKET_OFFSET
 	var t := clampf(age,0,AstralCampaign.FLIGHT_SECONDS)
 	var lift := pow(maxf(0,t-3.2),2)*2.2
 	var ascent := smoothstep(4.7,10.1,t)
@@ -92,18 +92,18 @@ func update(camp: Dictionary,world: GameWorld) -> void:
 	var from: Vector3
 	var look: Vector3
 	if t<3.2:
-		from=center+Vector3(23,9,21).lerp(Vector3(20,5.5,16),smoothstep(0,3.2,t))
-		look=center+Vector3(6,5,-5)
+		from=center+Vector3(15,6,9).lerp(Vector3(13,4.5,6),smoothstep(0,3.2,t))
+		look=center+Vector3(6,3.5,-5)
 		_caption.text="STARLING / AETHER HEART IGNITION" if t>0.7 else "All crew aboard"
 	elif t<6.6:
 		var w := smoothstep(3.2,6.6,t)
-		from=center+Vector3(20,5.5,16).lerp(Vector3(38,25,34),w)
-		look=center+Vector3(6,lift+8,-5)
+		from=center+Vector3(13,4.5,6).lerp(Vector3(38,25,34),w)
+		look=center+Vector3(6,lift+3.5,-5)
 		_caption.text="STARFALL LAUNCHWORKS / LIFTOFF"
 	else:
 		var w := smoothstep(6.6,10.5,t)
 		from=center+Vector3(38,25,34).lerp(Vector3(85,95,90),w)
-		look=center+Vector3(6,lift+8,-5)
+		look=center+Vector3(6,lift+3.5,-5)
 		_caption.text="DESTINATION / AURORA OBSERVATION VESSEL"
 	var target := Transform3D(Basis.IDENTITY,from).looking_at(look,Vector3.UP)
 	_camera.global_transform=_from.interpolate_with(target,smoothstep(-0.9,0.25,age))

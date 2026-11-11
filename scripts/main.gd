@@ -1,5 +1,5 @@
 extends Node3D
-## Runs the game: opens on the start screen (over the Tavern, blurred), then
+## Runs the game: opens on a static start screen, then
 ## travels between worlds through portals with a jump to lightspeed and the
 ## loading screen in between, keeps the atmosphere and fog of war in step with
 ## the biome, and connects the character's stats to the HUD (levels, XP, damage).
@@ -70,6 +70,7 @@ var hud: Hud
 var transition := Transition.new()
 var _world_loader := WorldLoader.new()
 var _preparing_world := false
+var _menu_only := false
 var _world_generation := 0
 var _async_world_build := false
 var low_health := LowHealthOverlay.new()
@@ -203,24 +204,29 @@ func _ready() -> void:
 		_load_world("realm_1" if _args.get("world", "") == "realm" else "hall")
 		_take_screenshot()
 		return
-	# The start screen, over the Tavern turning slowly in the background.
-	_traveling = true
-	hud.visible = false
-	player.input_locked = true
-	# Branding is the first visible scene. Prepare the menu world underneath it;
-	# booting is not portal travel and must never play the assembly animation.
+	# The start menu is entirely 2D. Build a world only after joining a game.
+	_set_menu_only(true)
 	var intro := preload("res://scripts/ui/launch_intro.gd").new()
 	add_child(intro)
-	intro.play(true)
-	if not await _load_world_async("hall"): return
-	await _arrive(false)
-	hud.visible = false
-	player.input_locked = true
-	menus.show_start()
-	intro.release_to_menu()
+	menus.prepare_startup()
+	intro.play(menus)
 	await intro.finished
 	if not await Account.refresh():
 		menus.show_login(false)
+
+
+## Disable gameplay processing and the viewport's 3D pass behind static menus.
+func _set_menu_only(active: bool) -> void:
+	_menu_only = active
+	get_viewport().disable_3d = active
+	var mode := Node.PROCESS_MODE_DISABLED if active else Node.PROCESS_MODE_INHERIT
+	for node: Node in [player, player.aim_marker, atmosphere, fog_of_war, arrows,
+			enemy_bullets, xp_orbs, loot_bags, hud, low_health, campaign]:
+		node.process_mode = mode
+	if active:
+		player.input_locked = true
+		hud.hide()
+		GameAudio.clear_world_context()
 
 
 ## A human-controlled development session, isolated by its launcher data folder.
@@ -389,6 +395,11 @@ func travel(destination: String, at := Vector3.INF, cinematic_departure := false
 		hud.toasts.push("The Chambers open when you play online or in Singleplayer.", UIStyle.HP_LIGHT, 3.0)
 		return
 	_traveling = true
+	var leaving_tavern := Campaigns.is_tavern(world.realm_id)
+	var entering_tavern := Campaigns.is_tavern(destination)
+	if Campaigns.is_tavern(destination):
+		GameServer.set_tavern_escape(player.player_id, true)
+		if Net.is_client(): Net.client.send_action("tavern_escape", [true])
 	_ship_travel = cinematic_departure or _port_arrival in ["launch", "descend"]
 	boss_introduction.cancel()
 	if world is CastleWorld and is_instance_valid(world.encounter): world.encounter._restore_camera()
@@ -397,18 +408,17 @@ func travel(destination: String, at := Vector3.INF, cinematic_departure := false
 	hud.visible = false
 	var original_client := Net.client
 	var original_generation := _world_generation
-	if _ship_travel:
-		await transition.fade_in(place_name(destination))
-		if cinematic_departure: await transition.fade_from_black(0.2)
-	elif not _args.has("qa-quick"): await transition.jump_in(place_name(destination))
+	if not _args.has("qa-quick"):
+		if leaving_tavern: await transition.jump_in(place_name(destination))
+		else: await transition.fade_in(place_name(destination))
 	if original_client!=Net.client or original_generation!=_world_generation: return
 	var record := {}
 	if Net.is_client():
 		record = await Net.client.enter(destination)
 		if record.has("error"):
 			hud.visible = true
-			if _ship_travel: await transition.reveal()
-			elif not _args.has("qa-quick"): await transition.jump_out()
+			if not _args.has("qa-quick"): await transition.reveal()
+			_end_tavern_escape()
 			player.input_locked = false
 			hud.toasts.push(record.error, UIStyle.HP_LIGHT, 3.0)
 			_traveling = false
@@ -420,8 +430,8 @@ func travel(destination: String, at := Vector3.INF, cinematic_departure := false
 		_preparing_world = false
 		if is_instance_valid(world): world.process_mode = Node.PROCESS_MODE_INHERIT
 		hud.visible = true
-		if _ship_travel: await transition.reveal()
-		elif not _args.has("qa-quick"): await transition.jump_out()
+		if not _args.has("qa-quick"): await transition.reveal()
+		_end_tavern_escape()
 		player.input_locked = _dead
 		_traveling = false
 		_ship_travel = false
@@ -450,12 +460,15 @@ func travel(destination: String, at := Vector3.INF, cinematic_departure := false
 		view._cockpit = bool(_ship_view_state.get("cockpit", true))
 	if port=="descend" and world is IslandWorld and is_instance_valid(world.surface_ships):
 		world.surface_ships.begin_arrival(player.player_id)
-	await _arrive()
+	await _arrive(entering_tavern)
 
 
+func _end_tavern_escape() -> void:
+	GameServer.set_tavern_escape(player.player_id, false)
+	if Net.is_client(): Net.client.send_action("tavern_escape", [false])
 
-## Waits until the new place is ready around the player (as short as
-## possible), then drops out of hyperspace into it.
+
+## Wait for presentation readiness, then assemble the Tavern or fade in.
 func _arrive(animate := true) -> void:
 	await get_tree().process_frame
 	while player.frozen or (is_instance_valid(world) and not world.is_presentation_ready()):
@@ -463,14 +476,15 @@ func _arrive(animate := true) -> void:
 	await get_tree().create_timer(0.15).timeout  # a moment for the first frames to settle
 	# Portal capture is part of loading too; finish the bar only after it is ready.
 	transition.set_progress(0.95)
-	if _ship_travel:
-		await transition.reveal()
-		_ship_travel = false
-	elif animate and not _args.has("qa-quick"): await transition.jump_out()
+	if not _args.has("qa-quick"):
+		if animate: await transition.jump_out()
+		else: await transition.reveal()
+	_ship_travel = false
 	hud.visible = true
 	_async_world_build = false
 	if is_instance_valid(world): world.set_meta("asynchronous_load",false)
 	GameServer.grant_arrival_protection(player.player_id)
+	GameServer.set_tavern_escape(player.player_id, false)
 	if Net.is_client(): Net.s_action.rpc_id(1, "arrived", [])
 	player.input_locked = _dead
 	_traveling = false
@@ -508,6 +522,7 @@ func _load_world_async(destination: String, online_record := {}) -> bool:
 
 
 func _load_world(destination: String, online_record := {}, spawn_resolver := Callable(), prepared: GameWorld = null) -> void:
+	_set_menu_only(false)
 	_world_generation += 1
 	_world_loader.cancel_prepare()
 	player.set_spatial_world(null)
@@ -771,7 +786,7 @@ func join_friend(target: Dictionary) -> void:
 	var released := await Account.wait_for_release(character_id, session)
 	_traveling = false
 	if not released or Account.token() != session:
-		await transition.jump_out()
+		await transition.reveal()
 		menus.show_servers("Your previous server is still saving, or the character is unavailable. Try joining again.", UIStyle.HP_LIGHT)
 		return
 	Account.choose(character_id)
@@ -841,7 +856,9 @@ func _switch_character(character_id: int) -> void:
 	hud.picker.close_drop()
 	hud.visible = false
 	var client := Net.client
-	if not _args.has("qa-quick"): await transition.jump_in(place_name("hall"))
+	if not _args.has("qa-quick"):
+		if Campaigns.is_tavern(world.realm_id): await transition.jump_in(place_name("hall"))
+		else: await transition.fade_in(place_name("hall"))
 	if not Net.is_client() or Net.client != client:
 		return
 	client.switch_character(character_id)
@@ -891,7 +908,7 @@ func _on_switch_failed(reason: String) -> void:
 	if not _switching:
 		return
 	hud.visible = true
-	if not _args.has("qa-quick"): await transition.jump_out()
+	if not _args.has("qa-quick"): await transition.reveal()
 	_switching = false
 	_traveling = false
 	player.input_locked = _dead
@@ -964,16 +981,34 @@ func _return_offline(message: String, color := UIStyle.TEXT_DIM) -> void:
 	_world_loader.cancel_prepare()
 	while _world_loader.is_preparing(): await get_tree().process_frame
 	while transition.is_animating(): await get_tree().process_frame
-	await transition.fade_in(place_name("hall"))
-	if not await _load_world_async("hall"): return
-	await _arrive()
-	hud.visible = false
-	player.input_locked = true
+	await transition.fade_in("Main menu")
+	_set_menu_only(true)
+	boss_introduction.clear_world()
+	player.set_spatial_world(null)
+	player.ground_height = Callable()
+	player.hazard = Callable()
+	player.road = Callable()
+	player.terrain = null
+	player.walkable = Callable()
+	hud.minimap._finish_tasks()
+	hud.minimap.world = null
+	hud._world = null
+	campaign._world = null
+	arrows.clear()
+	enemy_bullets.clear()
+	xp_orbs.clear()
+	if is_instance_valid(world): _world_loader.retire(world)
+	world = null
+	GameServer.report_position(player.player_id, "", Vector3.ZERO)
+	_preparing_world = false
+	_async_world_build = false
+	_traveling = false
 	Account.refresh()
 	if was_singleplayer:
 		menus.show_start()
 	else:
 		menus.show_servers(message, color)
+	await transition.reveal()
 
 
 ## Unstuck (game menu): hop to the nearest free spot. Not while seated,
@@ -1025,8 +1060,7 @@ func _place_player(pos: Vector3) -> void:
 		(world as IslandWorld).update_streaming(pos,not _async_world_build)
 
 
-## Pulled to the party in the same world: the same fracture and assembly,
-## with nearby chunks prepared under the portal instead of a blocking rebuild.
+## Same-world party travel fades through the loading screen.
 func _warp(at: Vector3) -> void:
 	if _traveling or _dead or not is_instance_valid(world):
 		return
@@ -1036,9 +1070,9 @@ func _warp(at: Vector3) -> void:
 	hud.visible = false
 	_async_world_build = true
 	world.set_meta("asynchronous_load",true)
-	await transition.jump_in(world.display_name)
+	await transition.fade_in(world.display_name)
 	_place_player(Vector3(at.x, world.ground_height(at.x, at.z), at.z))
-	await _arrive()
+	await _arrive(false)
 	hud.visible = had_hud
 
 
@@ -1099,14 +1133,14 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _menu_only: return
 	if menus.is_options_open(): return
 	if event.is_action_pressed("nexus"):
 		# Escape: straight back to the Tavern from anywhere in a realm.
 		if not _traveling and not _dead and not menus.is_open() and not Campaigns.is_tavern(world.realm_id) and not player.frozen:
 			get_viewport().set_input_as_handled()
 			# In Space too: R goes home (the realm gate brings you back to the same spot).
-			if world is SpaceWorld and player.spatial_controller is SpaceTraversal: (player.spatial_controller as SpaceTraversal).recall()
-			else: travel("hall")
+			travel("hall")
 		return
 	if event.is_action_pressed("menu"):
 		if _traveling or (menus.is_open() and not menus.is_game_menu_open()): return

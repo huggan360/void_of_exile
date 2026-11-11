@@ -1,14 +1,13 @@
 extends CanvasLayer
-## A short branding reveal over the already prepared start screen.
+## Reveal the branding, then move the same logo into the prepared start menu.
 signal finished
 
 var _root := Control.new()
 var _background := TextureRect.new()
 var _logo_group := Control.new()
-var _world_ready := false
-
-func release_to_menu() -> void:
-	_world_ready = true
+var _logo_shadow: TextureRect
+var _menu: Menus
+var _move_progress := 0.0
 
 
 func _ready() -> void:
@@ -23,7 +22,10 @@ func _ready() -> void:
 	_root.add_child(black)
 	black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	black.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_background.texture = preload("res://assets/branding/launch_background.png")
+	var ink := ShaderMaterial.new()
+	ink.shader = preload("res://shaders/startup_two_ink.gdshader")
+	_background.material = ink
+	_background.texture = preload("res://assets/branding/launch_background_black.png")
 	_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -40,7 +42,7 @@ func _ready() -> void:
 	_logo_group.modulate.a = 0.0
 	for is_shadow in [true, false]:
 		var logo := TextureRect.new()
-		logo.texture = preload("res://assets/branding/launch_logo.png")
+		logo.texture = preload("res://assets/branding/launch_logo_limited.png")
 		logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -48,11 +50,14 @@ func _ready() -> void:
 		_logo_group.add_child(logo)
 		logo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		if is_shadow:
+			_logo_shadow = logo
 			logo.modulate = Color(0.0, 0.0, 0.0, 0.4)
 			logo.position.y += 7.0
 
 
-func play(wait_for_world := false) -> void:
+func play(menu: Menus = null) -> void:
+	_menu = menu
+	if is_instance_valid(_menu): _logo_group.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	# Preferences are applied by AppSettings before Main starts. Give the
 	# desktop time to finish the fullscreen switch before starting the clock.
 	await get_tree().process_frame
@@ -63,19 +68,34 @@ func play(wait_for_world := false) -> void:
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(_background, "modulate:a", 1.0, 1.2)
 	tween.tween_property(_logo_group, "modulate:a", 1.0, 1.0)
-	tween.tween_interval(1.6)
+	tween.tween_interval(0.35)
 	await tween.finished
-	# World preparation runs under the branding, with no portal arrival on boot.
-	while wait_for_world and not _world_ready: await get_tree().process_frame
-	var reveal := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	reveal.tween_property(_root,"modulate:a",0.0,1.2)
-	await reveal.finished
+	if is_instance_valid(menu):
+		var move := create_tween().set_parallel(true)
+		move.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		move.tween_method(func(weight: float) -> void:
+			_move_progress = weight
+			_place_logo(), 0.0, 1.0, 0.85)
+		move.tween_property(_logo_shadow, "modulate:a", 0.0, 0.85)
+		await move.finished
+		# Identical background and logo geometry: hand over without fading either.
+		hide()
+		await menu.reveal_startup()
 	finished.emit()
 	queue_free()
 
 
 func _resize() -> void:
 	_root.size = get_viewport().get_visible_rect().size
+	_place_logo()
+
+func _place_logo() -> void:
+	if not is_instance_valid(_menu): return
+	# Match the actual menu size from the first visible frame. Only translate.
+	var target := _menu.startup_logo_rect()
+	_logo_group.size = target.size
+	var center := (_root.size - target.size) * 0.5
+	_logo_group.position = center.lerp(target.position, _move_progress)
 
 
 func _input(event: InputEvent) -> void:

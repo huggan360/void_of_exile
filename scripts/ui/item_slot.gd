@@ -1,7 +1,7 @@
 class_name ItemSlot
 extends Control
 ## An item slot in pixel art: a recessed square holding the item's 8 x 8 icon
-## at 5x with a hairline white outline, a tiny grade badge ("G3", "D"), and a
+## at 6x with a hairline white outline, a tiny grade badge ("G3", "D"), and a
 ## hover tooltip. Divine items shimmer with a soft glow. Empty slots show a
 ## faint dotted outline.
 ##
@@ -18,7 +18,9 @@ extends Control
 signal hovered(slot: ItemSlot, item: Item)
 signal unhovered
 
-const ICON_SCALE := 5
+const ICON_SCALE := 6
+const SLOT_SIZE := 72.0
+const SLOT_GAP := 6.0
 
 var item: Item
 var slot_name := ""  # e.g. "Bonus"
@@ -36,7 +38,7 @@ func _init(p_slot_name := "", p_stats: PlayerStats = null, p_place := {}) -> voi
 	slot_name = p_slot_name
 	stats = p_stats
 	place = p_place
-	custom_minimum_size = Vector2(20, 20) * PixelArt.SCALE
+	custom_minimum_size = Vector2.ONE * SLOT_SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST  # crisp pixel-art icons
 	mouse_entered.connect(func() -> void:
@@ -135,7 +137,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 func _draw() -> void:
 	var accepting := _hover and get_viewport().gui_is_dragging() \
 			and _can_drop_data(Vector2.ZERO, get_viewport().gui_get_drag_data())
-	draw_style_box(_frame_style(_hover or accepting), Rect2(Vector2.ZERO, size))
+	draw_style_box(_frame_style(accepting), Rect2(Vector2.ZERO, size))
 	if unusable():
 		draw_rect(Rect2(Vector2.ONE * 4, size - Vector2.ONE * 8), Color(0.95, 0.12, 0.1, 0.22))
 	if accepting:
@@ -144,8 +146,6 @@ func _draw() -> void:
 	var icon_pos := ((size - icon_size) * 0.5).floor()
 	_art.visible = item != null and not artwork_hidden()
 	if item and not artwork_hidden():
-		if _hover:
-			icon_pos.y -= PixelArt.SCALE  # lifts a little when hovered
 		_art.position = icon_pos
 		_art.size = icon_size
 		_art.show_item(item)
@@ -186,7 +186,7 @@ func _frame_style(highlighted: bool) -> StyleBoxTexture:
 
 
 func _process(_delta: float) -> void:
-	if _hover or (item and item.is_divine()):
+	if (_hover and get_viewport().gui_is_dragging()) or (item and item.is_divine()):
 		queue_redraw()  # drop highlight follows dragging; divine glow pulses
 
 

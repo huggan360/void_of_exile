@@ -50,44 +50,40 @@ func _ready() -> void:
 	_panel.add_theme_stylebox_override("panel",UIStyle.ornament_panel())
 	center.add_child(_panel)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation",14)
+	column.add_theme_constant_override("separation",18)
 	_panel.add_child(column)
 	var header := HBoxContainer.new()
 	header.add_child(UIStyle.heading("Options",32))
-	var subtitle := UIStyle.label("Make yourself at home",16,UIStyle.TEXT_DIM)
-	subtitle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	subtitle.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	header.add_child(subtitle)
 	column.add_child(header)
 	tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tabs.add_theme_font_override("font",UIStyle.bold())
 	tabs.add_theme_font_size_override("font_size",18)
-	tabs.add_theme_stylebox_override("panel",UIStyle.panel())
+	tabs.add_theme_stylebox_override("panel",UIStyle.content_panel(0))
 	tabs.add_theme_stylebox_override("tab_selected",UIStyle.panel_outlined(UIStyle.GOLD))
 	tabs.add_theme_color_override("font_selected_color",UIStyle.GOLD)
 	var navigation := HBoxContainer.new()
-	navigation.add_theme_constant_override("separation", 6)
+	navigation.add_theme_constant_override("separation", 8)
 	column.add_child(navigation)
 	tabs.tabs_visible = false
 	var group := ButtonGroup.new()
 	for caption in ["General", "Audio", "Video", "Graphics", "Controls"]:
 		var button := UIStyle.button(caption)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size.y = 44
 		button.toggle_mode = true
 		button.button_group = group
 		button.size_flags_stretch_ratio = 1.0
 		button.pressed.connect(_select_tab.bind(_tab_buttons.size()))
 		navigation.add_child(button)
 		_tab_buttons.append(button)
-	tabs.tab_changed.connect(func(index: int) -> void:
-		for i in _tab_buttons.size(): _tab_buttons[i].set_pressed_no_signal(i == index))
+	tabs.tab_changed.connect(_update_navigation)
 	column.add_child(tabs)
 	for name_value in ["General","Audio","Video","Graphics","Controls"]:
 		var page := MarginContainer.new()
 		page.name = name_value
 		for edge in ["left","top","right","bottom"]: page.add_theme_constant_override("margin_"+edge,12)
 		tabs.add_child(page)
+	_build_general(tabs.get_child(0))
 	_build_video(tabs.get_child(2))
 	_build_audio(tabs.get_child(1))
 	_build_graphics(tabs.get_child(3))
@@ -126,30 +122,79 @@ func _scroll_page(page: Control) -> VBoxContainer:
 	page.add_child(scroll)
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_theme_constant_override("separation",12)
+	column.add_theme_constant_override("separation",8)
 	scroll.add_child(column)
 	return column
 
-func _row(column: VBoxContainer, title: String, widget: Control) -> Label:
+func _help(text: String) -> Button:
+	var button := Button.new()
+	button.text = "?"
+	button.flat = true
+	button.custom_minimum_size = Vector2(28, 28)
+	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	button.tooltip_text = text
+	button.add_theme_font_override("font", UIStyle.bold())
+	button.add_theme_font_size_override("font_size", 18)
+	button.add_theme_color_override("font_color", UIStyle.ACCENT)
+	button.pressed.connect(func() -> void: _show_modal("help", "Help", text, [["Close", cancel_modal]]))
+	return button
+
+func _style_dropdown(option: OptionButton) -> void:
+	option.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	option.add_theme_font_size_override("font_size", 18)
+	option.add_theme_constant_override("arrow_margin", 16)
+	option.add_theme_constant_override("h_separation", 16)
+	for state in ["normal", "hover", "pressed", "disabled", "hover_pressed"]:
+		var style := option.get_theme_stylebox(state).duplicate() as StyleBox
+		style.content_margin_left = 18
+		style.content_margin_right = 42
+		style.content_margin_top = 13 if state in ["pressed", "hover_pressed"] else 10
+		style.content_margin_bottom = 7 if state in ["pressed", "hover_pressed"] else 10
+		option.add_theme_stylebox_override(state, style)
+	var popup := option.get_popup()
+	popup.add_theme_font_override("font", UIStyle.font())
+	popup.add_theme_font_size_override("font_size", 18)
+	popup.add_theme_stylebox_override("panel", UIStyle.popup_panel())
+	popup.add_theme_constant_override("v_separation", 14)
+	popup.add_theme_constant_override("item_start_padding", 14)
+	popup.add_theme_constant_override("item_end_padding", 14)
+
+func _row(column: VBoxContainer, title: String, widget: Control, help_text := "") -> Label:
 	var row := HBoxContainer.new()
-	row.custom_minimum_size.y = 44
-	row.add_theme_constant_override("separation",16)
-	var label := UIStyle.label(title)
+	row.custom_minimum_size.y = 48
+	row.add_theme_constant_override("separation", 16)
+	var label := UIStyle.label(title, 19)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(label)
-	widget.custom_minimum_size.x = 320
+	var help := _help(help_text)
+	help.visible = not help_text.is_empty()
+	row.add_child(help)
+	widget.custom_minimum_size.x = 340
 	widget.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(widget)
 	column.add_child(row)
+	if widget is OptionButton: _style_dropdown(widget)
+	if widget is CheckButton:
+		for state in ["normal", "hover", "pressed", "disabled", "hover_pressed"]:
+			widget.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+		widget.alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	return label
+
+func _build_general(page: Control) -> void:
+	var column := _scroll_page(page)
+	_gui.add_item("Small",0)
+	_gui.add_item("Medium",1)
+	_gui.add_item("Large",2)
+	_row(column,"Interface scale",_gui,"Scales the interface to your window size. Medium uses the original interface size.")
+	_row(column,"Show FPS",_show_fps,"Show the frame rate while playing.")
 
 func _build_video(page: Control) -> void:
 	var column := _scroll_page(page)
 	_mode.add_item("Windowed",0)
 	_mode.add_item("Fullscreen",1)
 	_row(column,"Window mode",_mode)
-	_resolution_label = _row(column,"Resolution",_resolution)
+	_resolution_label = _row(column,"Resolution",_resolution,"Fullscreen resolution changes the game image; the interface stays sharp.")
 	var count := DisplayServer.get_screen_count() if AppSettings.desktop_available() else 1
 	for i in maxi(1,count):
 		var dimensions := DisplayServer.screen_get_size(i) if AppSettings.desktop_available() else AppSettings.reference_size
@@ -159,15 +204,7 @@ func _build_video(page: Control) -> void:
 	_row(column,"V-Sync",_vsync)
 	for value in [0,30,60,120,144,165,240]: _fps.add_item("Unlimited" if value==0 else "%d FPS" % value,value)
 	_row(column,"Frame rate limit",_fps)
-	_gui.add_item("Small",0)
-	_gui.add_item("Medium - default",1)
-	_gui.add_item("Large",2)
-	_row(column,"GUI scale",_gui)
 	_row(column,"Resizable window",_resizable)
-	_row(column,"Show FPS",_show_fps)
-	var note := UIStyle.label("Fullscreen resolution changes the game image; the interface stays sharp.\nGUI scale follows the window size. Medium matches the original fullscreen interface.",16,UIStyle.TEXT_DIM)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(note)
 	var reset := UIStyle.button("Reset video defaults")
 	reset.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	reset.pressed.connect(func() -> void: _draft = AppSettings.defaults(); _refresh_video())
@@ -199,7 +236,7 @@ func _build_audio(page: Control) -> void:
 	for item in [["Headphones", "headphones"], ["Speakers", "speakers"], ["Surround", "surround"]]:
 		_audio_output.add_item(item[0])
 		_audio_output.set_item_metadata(_audio_output.item_count-1,item[1])
-	_row(column,"Listening setup",_audio_output)
+	_row(column,"Listening setup",_audio_output,"Choose your speakers or headphones. For surround sound, enable 5.1 speakers in your operating system first.")
 	_audio_width.min_value = 0
 	_audio_width.max_value = 1
 	_audio_width.step = .01
@@ -211,7 +248,7 @@ func _build_audio(page: Control) -> void:
 	var width_value := UIStyle.label("%d%%" % roundi(float(AppSettings.audio.stereo_width)*100),16,UIStyle.TEXT_DIM)
 	width_value.custom_minimum_size.x = 55
 	width_row.add_child(width_value)
-	_row(column,"SFX headphone width",width_row)
+	_row(column,"Headphone width",width_row,_audio_width.tooltip_text)
 	_audio_width.value_changed.connect(func(value: float) -> void:
 		width_value.text = "%d%%" % roundi(value*100)
 		_commit_audio("stereo_width",value))
@@ -225,11 +262,10 @@ func _build_audio(page: Control) -> void:
 	_audio_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_audio_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_audio_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_audio_status.hide()
 	output_row.add_child(_audio_status)
+	output_row.add_child(_help("Play a sound from each direction to check your listening setup. Headphones use a binaural direction test."))
 	column.add_child(output_row)
-	var note := UIStyle.label("For surround sound, enable 5.1 speakers in your operating system first. Headphones use a binaural direction test.",15,UIStyle.TEXT_DIM)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(note)
 	column.add_child(UIStyle.heading("Levels",20))
 	for slider in [_audio_master,_audio_music,_audio_sfx,_audio_ambience,_audio_ally_volume]:
 		slider.min_value = 0
@@ -248,10 +284,7 @@ func _build_audio(page: Control) -> void:
 	for item in [["Balanced", "balanced"], ["Night", "night"], ["Wide", "wide"]]:
 		_audio_dynamic.add_item(item[0])
 		_audio_dynamic.set_item_metadata(_audio_dynamic.item_count-1,item[1])
-	_row(column,"Range",_audio_dynamic)
-	var range_note := UIStyle.label("Night keeps quiet sounds easier to hear at lower volumes. Wide preserves more contrast between quiet and loud sounds.",15,UIStyle.TEXT_DIM)
-	range_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(range_note)
+	_row(column,"Range",_audio_dynamic,"Night makes quiet sounds easier to hear at low volume. Wide preserves more contrast between quiet and loud sounds.")
 	_audio_output.item_selected.connect(func(_index: int) -> void: _commit_audio("output_mode",_audio_output.get_item_metadata(_audio_output.selected)))
 	_audio_dynamic.item_selected.connect(func(_index: int) -> void: _commit_audio("dynamic_range",_audio_dynamic.get_item_metadata(_audio_dynamic.selected)))
 	_audio_master.value_changed.connect(func(value: float) -> void: _commit_audio("master",value))
@@ -333,33 +366,20 @@ func _refresh_video() -> void:
 
 func _update_footer() -> void:
 	if not is_instance_valid(_apply): return
-	_apply.visible = tabs.current_tab==2
+	_apply.visible = tabs.current_tab in [0,2]
 	_apply.disabled = _draft==AppSettings.video
-	_status.text = "Apply to preview changes" if tabs.current_tab==2 and _draft!=AppSettings.video else "Changes saved automatically" if tabs.current_tab in [1,3,4] else ""
+	_status.text = ""
 
 func _build_graphics(page: Control) -> void:
 	var column := _scroll_page(page)
-	for preset in ["Low","Medium","High - original","Custom"]: _preset.add_item(preset)
+	for preset in ["Low","Medium","High","Custom"]: _preset.add_item(preset)
 	_preset.set_item_disabled(3,true)
-	_row(column,"Quality preset",_preset)
-	var adapter := "%s (%s)" % [RenderingServer.get_video_adapter_name(),RenderingServer.get_video_adapter_vendor()] if AppSettings.desktop_available() else "-"
-	var note := UIStyle.label("Low and Medium are made for weaker PCs and laptops; High is the full look. Every feature below can be tuned on its own. Graphics card: "+adapter,16,UIStyle.TEXT_DIM)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(note)
+	var adapter := RenderingServer.get_video_adapter_name() if AppSettings.desktop_available() else "Unavailable"
+	_row(column,"Quality preset",_preset,"Low and Medium reduce graphics cost. High enables the full look. You can adjust each feature separately.\nGraphics card: "+adapter)
 	_preset.item_selected.connect(func(index: int) -> void:
 		if not _refreshing and index<3: AppSettings.set_graphics(GraphicsSettings.defaults(GraphicsSettings.PRESETS[index])))
 	for f: Array in GraphicsSettings.FEATURES:
 		var id: String = f[0]
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation",16)
-		var text := VBoxContainer.new()
-		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		text.add_theme_constant_override("separation",0)
-		text.add_child(UIStyle.label(f[1]))
-		var hint := UIStyle.label(f[3],14,UIStyle.TEXT_DIM)
-		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		text.add_child(hint)
-		row.add_child(text)
 		var option := OptionButton.new()
 		for choice: Array in f[2]: option.add_item(str(choice[1]))
 		option.custom_minimum_size.x = 320
@@ -369,10 +389,9 @@ func _build_graphics(page: Control) -> void:
 			var values := AppSettings.graphics.duplicate()
 			values[id] = f[2][index][0]
 			AppSettings.set_graphics(values))
-		row.add_child(option)
-		column.add_child(row)
+		_row(column, str(f[1]), option, str(f[3]))
 		_graphics_options[id] = option
-	var reset := UIStyle.button("Use the suggested preset for this PC")
+	var reset := UIStyle.button("Auto-detect")
 	reset.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	reset.pressed.connect(func() -> void: AppSettings.set_graphics(GraphicsSettings.defaults(GraphicsSettings.suggested_preset())))
 	column.add_child(reset)
@@ -387,9 +406,10 @@ func _refresh_graphics() -> void:
 
 func _build_controls(page: Control) -> void:
 	var column := _scroll_page(page)
-	var hint := UIStyle.label("Click a binding, then press a key or mouse button. Escape cancels. Flight and on-foot controls can share keys. While flying, flight controls take priority. Conflicts within a section can be swapped.",16,UIStyle.TEXT_DIM)
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	column.add_child(hint)
+	var help_row := HBoxContainer.new()
+	help_row.alignment = BoxContainer.ALIGNMENT_END
+	help_row.add_child(_help("Click a binding, then press a key or mouse button. Escape cancels. Flight and on-foot controls can share keys; flight controls take priority while flying. Conflicts within a section can be swapped."))
+	column.add_child(help_row)
 	var category := ""
 	for entry: Dictionary in ControlBindings.ACTIONS:
 		if category!=entry.category:
@@ -403,14 +423,11 @@ func _build_controls(page: Control) -> void:
 		title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(title)
 		var bind := UIStyle.button("")
-		bind.custom_minimum_size = Vector2(210,44)
+		bind.custom_minimum_size = Vector2(260,44)
 		bind.pressed.connect(begin_capture.bind(str(entry.id)))
 		row.add_child(bind)
 		_binding_buttons[entry.id] = bind
-		var default_label := UIStyle.label("Default: "+ControlBindings.text(ControlBindings.default_binding(entry.id)),14,UIStyle.TEXT_DIM)
-		default_label.custom_minimum_size.x = 160
-		default_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		row.add_child(default_label)
+		row.add_child(_help("Default: "+ControlBindings.text(ControlBindings.default_binding(entry.id))))
 		var reset := UIStyle.button("Reset")
 		reset.custom_minimum_size.x = 90
 		reset.pressed.connect(_request_binding.bind(str(entry.id),ControlBindings.default_binding(entry.id)))
@@ -435,7 +452,7 @@ func _build_modal() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_modal.add_child(center)
 	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel",UIStyle.panel_outlined(UIStyle.ACCENT))
+	box.add_theme_stylebox_override("panel",UIStyle.ornament_panel())
 	box.custom_minimum_size.x = 620
 	center.add_child(box)
 	var column := VBoxContainer.new()
@@ -557,5 +574,13 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+func _update_navigation(index: int) -> void:
+	for i in _tab_buttons.size():
+		var button := _tab_buttons[i]
+		button.set_pressed_no_signal(i == index)
+		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
+			button.add_theme_color_override(state, UIStyle.GOLD if i==index else UIStyle.TEXT)
+
 func _select_tab(index: int) -> void:
 	tabs.current_tab = index
+	_update_navigation(index)

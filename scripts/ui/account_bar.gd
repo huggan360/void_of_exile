@@ -2,8 +2,10 @@ class_name AccountBar
 extends Control
 ## Ornate account XP meter and an icon-led, horizontally scrollable journey.
 
-const BAR_SIZE := Vector2(700, 110)
-const HEADER_HEIGHT := 110.0
+const BAR_ART_SIZE := Vector2(700, 110)
+const BAR_SCALE := 0.9
+const BAR_SIZE := BAR_ART_SIZE * BAR_SCALE
+const HEADER_HEIGHT := BAR_SIZE.y
 const DRAWER_WIDTH := 900.0
 const DRAWER_HEIGHT := 380.0
 const TRACK_INSET := DRAWER_WIDTH * 0.5
@@ -52,7 +54,7 @@ class RewardIcon extends Control:
 		var c := size * 0.5
 		var art_scale := 6 if size.y >= 76 else 4
 		if item:
-			var extent := Vector2.ONE * (64 if size.y >= 76 else 44)
+			var extent := Vector2.ONE * (72 if size.y >= 88 else 48)
 			var at := c - extent * 0.5
 			_art.position = at
 			_art.size = extent
@@ -95,11 +97,15 @@ class RewardTile extends PanelContainer:
 			add_child(count)
 	func _make_custom_tooltip(_for_text: String) -> Object:
 		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
-		panel.custom_minimum_size.x = 340
+		panel.add_theme_stylebox_override("panel", UIStyle.popup_panel())
+		# Give wrapping text a real width before it computes its height. A Label
+		# first laid out at zero width can otherwise make this popup screen-high.
+		panel.custom_minimum_size.x = 356
+		panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var col := VBoxContainer.new()
 		col.custom_minimum_size.x = 308
+		col.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		col.add_theme_constant_override("separation", 8)
 		panel.add_child(col)
 		var row := HBoxContainer.new()
@@ -111,16 +117,20 @@ class RewardTile extends PanelContainer:
 		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		row.add_child(icon)
-		var title := UIStyle.heading(AccountBar.reward_title(reward), 21)
-		title.custom_minimum_size.x = 220
+		var title := UIStyle.rich("[b]"+TextMarkup.color(AccountBar.reward_title(reward), UIStyle.GOLD)+"[/b]", 21)
+		title.custom_minimum_size.x = 232
+		title.size = Vector2(232, 0)
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(title)
-		var detail := UIStyle.label(str(reward.get("text", "")), 17)
-		detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var detail := UIStyle.rich(TextMarkup.escape(str(reward.get("text", ""))), 17)
+		detail.custom_minimum_size.x = 308
+		detail.size = Vector2(308, 0)
 		col.add_child(detail)
-		var status := UIStyle.label("Unlocked" if unlocked else "Unlocks at account level %d" % int(reward.level), 15, UIStyle.GOOD if unlocked else UIStyle.TEXT_DIM)
-		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var caption := "Unlocked" if unlocked else "Unlocks at account level %d" % int(reward.level)
+		var status := UIStyle.rich(TextMarkup.color(caption, UIStyle.GOOD if unlocked else UIStyle.TEXT_DIM), 15)
+		status.custom_minimum_size.x = 308
+		status.size = Vector2(308, 0)
 		col.add_child(status)
 		return panel
 
@@ -149,7 +159,7 @@ static func reward_title(reward: Dictionary) -> String:
 
 func _ready() -> void:
 	custom_minimum_size = BAR_SIZE
-	_frame_texture = load("res://assets/ui/account_xp_frame.png")
+	_frame_texture = load(UIStyle.texture_path("account_xp_frame.png"))
 	_bar.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	z_index = 10
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -363,8 +373,8 @@ func _fill_track() -> void:
 			var tile := RewardTile.new()
 			tile.reward = rewards[i]
 			tile.unlocked = level <= current
-			tile.position = Vector2(level_position(level) - rewards.size() * 38 + i * 76, 104)
-			tile.size = Vector2(68, 68)
+			tile.position = Vector2(level_position(level) - rewards.size() * 44 + i * 88, 104)
+			tile.size = Vector2(80, 80)
 			_track.add_child(tile)
 			_tiles.append(tile)
 	_track.queue_redraw()
@@ -392,9 +402,10 @@ func _draw_track() -> void:
 
 func _draw_bar() -> void:
 	if not _frame_texture: return
+	_bar.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE * BAR_SCALE)
 	# The generated atlas preserves the supplied pixel-art frame; runtime
 	# XP and type stay independent of its decorative gold and blank badge.
-	_bar.draw_texture_rect_region(_frame_texture, Rect2(Vector2.ZERO, BAR_SIZE), Rect2(64, 184, 2048, 320))
+	_bar.draw_texture_rect_region(_frame_texture, Rect2(Vector2.ZERO, BAR_ART_SIZE), Rect2(64, 184, 2048, 320))
 	var inset := Rect2(52, 45, 512, 21)
 	var width := floorf(inset.size.x * _shown_fill)
 	if width > 0:

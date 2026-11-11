@@ -155,7 +155,7 @@ func _ensure_parts(party: Dictionary,run: Dictionary) -> void:
 			if slot>=0: existing.items[slot]=item
 		GameServer.bag_changed.emit(int(existing.id))
 	else:
-		var at: Vector3=realm.world.astral_anchor("parts")+Vector3(0,0,2.2)
+		var at: Vector3=realm.world.astral_anchor("parts")
 		run.chest=GameServer.spawn_bag(party.campaign.realm,missing,at,GameServer.PUBLIC,"story")
 		data(run).parts_chest=run.chest
 	campaigns._touch(party.campaign.account)
@@ -181,7 +181,7 @@ func action(party: Dictionary,run: Dictionary,p: Dictionary,objective_id: String
 		if state.installed.size()==3:
 			campaigns._start_scene(party,p,step,world.astral_anchor("mechanic"))
 		else:
-			campaigns._start_scene(party,p,{npc="astral_mechanic",advance=false,say="I've installed %d of the three parts. Check the supply chest beside my workshop, and have whoever carries the rest bring them to me." % state.installed.size()},world.astral_anchor("mechanic"))
+			campaigns._start_scene(party,p,{npc="astral_mechanic",advance=false,say="I've installed %d of the three parts. Check the supply chest beside me, and have whoever carries the rest bring them to me." % state.installed.size()},world.astral_anchor("mechanic"))
 		campaigns.flush()
 		campaigns.server.social.broadcast(party)
 		return true

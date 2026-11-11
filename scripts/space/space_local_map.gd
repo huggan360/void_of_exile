@@ -164,8 +164,8 @@ func _draw() -> void:
 	if not is_instance_valid(world) or not is_instance_valid(player): return
 	var mid := size*0.5
 	var edge := size.x*0.46
-	draw_arc(mid,edge,0,TAU,96,UIStyle.OUTLINE,8.0)
-	draw_arc(mid,edge,0,TAU,96,UIStyle.GOLD,2.0)
+	draw_arc(mid,edge,0,TAU,96,Color("080808") if UIStyle.TEXTURE_SET=="black" else UIStyle.OUTLINE,8.0)
+	draw_arc(mid,edge,0,TAU,96,Color.WHITE if UIStyle.TEXTURE_SET=="black" else UIStyle.GOLD,2.0)
 	_draw_structures()
 	if planet.is_empty():
 		for k in range(6,8) if diner else range(SpaceLayout.BERTHS):

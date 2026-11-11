@@ -6,7 +6,7 @@ extends PanelContainer
 
 const MAIN_COLOR := UIStyle.GOLD
 const SIDE_COLOR := UIStyle.GOOD
-const OBJECTIVE_SIZE := 22
+const OBJECTIVE_SIZE := 18
 
 var social: SocialClient
 var boss_visible := false
@@ -15,11 +15,11 @@ var place := ""
 var _title := Label.new()
 var _time := Label.new()
 var _main_heading := Label.new()
-var _objective := Label.new()
-var _main_destination := Label.new()
+var _objective := RichTextLabel.new()
+var _main_destination := RichTextLabel.new()
 var _side_heading := Label.new()
-var _side := Label.new()
-var _side_destination := Label.new()
+var _side := RichTextLabel.new()
+var _side_destination := RichTextLabel.new()
 var _main_section := HBoxContainer.new()
 var _side_section := HBoxContainer.new()
 var _section_divider: HSeparator
@@ -45,7 +45,7 @@ func _ready() -> void:
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 10)
 	column.add_child(head)
-	UIStyle.text(_title, 20, MAIN_COLOR)
+	UIStyle.text(_title, 22, MAIN_COLOR)
 	_title.clip_text = true
 	_title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -68,7 +68,7 @@ func _ready() -> void:
 
 
 func _configure_section(section: HBoxContainer, heading: Label, heading_text: String,
-		objective: Label, destination: Label, accent: Color) -> void:
+		objective: RichTextLabel, destination: RichTextLabel, accent: Color) -> void:
 	section.add_theme_constant_override("separation", 8)
 	section.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var marker := ColorRect.new()
@@ -83,19 +83,18 @@ func _configure_section(section: HBoxContainer, heading: Label, heading_text: St
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	section.add_child(content)
 	heading.text = heading_text
-	UIStyle.text(heading, 15, accent)
+	UIStyle.text(heading, 22, accent)
 	heading.add_theme_font_override("font", UIStyle.bold())
 	content.add_child(heading)
 	objective.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	objective.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	objective.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UIStyle.text(objective, OBJECTIVE_SIZE, accent)
-	objective.add_theme_font_override("font", UIStyle.bold())
+	_style_body(objective, OBJECTIVE_SIZE)
 	content.add_child(objective)
 	destination.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	destination.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	destination.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UIStyle.text(destination, UIStyle.SIZE_SMALL, accent.lightened(0.12))
+	_style_body(destination, UIStyle.SIZE_SMALL)
 	content.add_child(destination)
 
 
@@ -190,17 +189,18 @@ func _process(_delta: float) -> void:
 	if key == _shown:
 		return
 	_title.text = str(camp.get("title", ""))
-	_objective.text = Campaigns.objective_text(step, int(camp.get("count", 0)), camp.get("home_progress", {}), player_id)
+	var objective_text := Campaigns.objective_text(step, int(camp.get("count", 0)), camp.get("home_progress", {}), player_id)
 	if step.kind=="astral_board":
 		var launch: Dictionary=camp.get("astral",{})
-		_objective.text="Launching for the Aurora..." if not launch.get("flight",{}).is_empty() else "Board the magic rocket (%d/%d aboard). Waiting for your party." % [launch.get("boarded",[]).size(),int(launch.get("required",1))]
-	_main_destination.text = _where(step)
+		objective_text="Launching for the Aurora..." if not launch.get("flight",{}).is_empty() else "Board the magic rocket (%d/%d aboard). Waiting for your party." % [launch.get("boarded",[]).size(),int(launch.get("required",1))]
+	_objective.text = _quest_text(objective_text)
+	_main_destination.text = TextMarkup.to_bbcode("[place]" + _where(step) + "[/place]") if not _where(step).is_empty() else ""
 	_main_destination.visible = not _main_destination.text.is_empty()
 	_side_section.visible = side_visible
 	_section_divider.visible = side_visible
 	if side_visible:
-		_side.text = Campaigns.objective_text(side_step, 0)
-		_side_destination.text = _where(side_step)
+		_side.text = _quest_text(Campaigns.objective_text(side_step, 0))
+		_side_destination.text = TextMarkup.to_bbcode("[place]" + _where(side_step) + "[/place]") if not _where(side_step).is_empty() else ""
 		_side_destination.visible = not _side_destination.text.is_empty()
 	if _details.visible:
 		_fill_details()
@@ -221,3 +221,70 @@ func _where(step: Dictionary) -> String:
 		"dungeon":
 			return "Story dungeon" if not Dungeons.is_dungeon(place) else ""
 	return ""
+
+
+func _style_body(label: RichTextLabel, font_size: int) -> void:
+	label.bbcode_enabled = true
+	label.fit_content = true
+	label.scroll_active = false
+	label.add_theme_font_override("normal_font", UIStyle.font())
+	label.add_theme_font_override("bold_font", UIStyle.bold())
+	label.add_theme_font_override("italics_font", UIStyle.font())
+	label.add_theme_font_size_override("normal_font_size", font_size)
+	label.add_theme_font_size_override("bold_font_size", font_size)
+	label.add_theme_color_override("default_color", Color.WHITE)
+
+
+var _terms := {}
+var _term_pattern: RegEx
+var _tag_pattern := RegEx.create_from_string("\\[(npc|place|enemy)\\]([^\\[]+)\\[/\\1\\]")
+
+## Share dialogue's semantic tags and palette, without changing plain quest data.
+func _quest_text(text: String) -> String:
+	if _term_pattern == null:
+		_collect_terms(Campaigns.LIST)
+		for npc: Dictionary in Campaigns.NPCS.values():
+			var full_name := str(npc.name)
+			_terms[full_name] = "npc"
+			_terms[full_name.split(" the ")[0]] = "npc"
+			# Objectives often use only the given name (Orin, Gerald, Fen).
+			var words := full_name.split(" ")
+			var titled := words[0] in ["Captain", "Quartermaster", "Elder", "Keeper", "Seer", "Warden", "Wizard", "Starwright", "Scrapper", "Fisher", "Old"]
+			if words.size()>1 and words[0]!="The":
+				_terms[str(words[1] if titled else words[0]).trim_suffix(",")] = "npc"
+		for name: String in ["The Tavern", "Tavern", "Surface", "Chronicle Gate", "Hollow Castle", "Nexus", "Aurora", "Starfall Launchworks", "Chromatic Expanse", "Unravelling", "Convergence"]:
+			_terms[name] = "place"
+		var names: Array = _terms.keys()
+		names.sort_custom(func(a: String, b: String) -> bool: return a.length()>b.length())
+		var escaped := PackedStringArray()
+		for name: String in names:
+			for symbol: String in ["\\", ".", "+", "*", "?", "(", ")", "[", "]", "{", "}", "^", "$", "|"]:
+				name = name.replace(symbol, "\\"+symbol)
+			escaped.append(name)
+		_term_pattern = RegEx.create_from_string("\\[(?:/?(?:npc|place|enemy|b|i))\\]|(?<![\\p{L}\\p{N}_])(?:"+"|".join(escaped)+")(?![\\p{L}\\p{N}_])")
+	var out := ""
+	var cursor := 0
+	var depth := 0
+	for found: RegExMatch in _term_pattern.search_all(text):
+		out += text.substr(cursor, found.get_start()-cursor)
+		var word := found.get_string()
+		if word.begins_with("["):
+			depth += -1 if word.begins_with("[/") else 1
+			out += word
+		elif depth==0:
+			out += "[%s]%s[/%s]" % [_terms[word], word, _terms[word]]
+		else: out += word
+		cursor = found.get_end()
+	return TextMarkup.to_bbcode(out+text.substr(cursor))
+
+
+func _collect_terms(value: Variant) -> void:
+	if value is Dictionary:
+		for key in value:
+			if key in ["village", "cabin"] and value[key] is String: _terms[value[key]] = "place"
+			_collect_terms(value[key])
+	elif value is Array:
+		for child in value: _collect_terms(child)
+	elif value is String:
+		for found: RegExMatch in _tag_pattern.search_all(value):
+			_terms[found.get_string(2)] = found.get_string(1)

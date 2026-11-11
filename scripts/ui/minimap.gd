@@ -68,10 +68,10 @@ func _ready() -> void:
 	_material.shader = preload("res://shaders/minimap.gdshader")
 	_material.set_shader_parameter("art_pixels", ART_PIXELS)
 	_material.set_shader_parameter("map_edge", MAP_EDGE)
-	_material.set_shader_parameter("frame_color", UIStyle.BG)
-	_material.set_shader_parameter("outline_color", UIStyle.OUTLINE)
+	_material.set_shader_parameter("frame_color", Color("181818") if UIStyle.TEXTURE_SET=="black" else UIStyle.BG)
+	_material.set_shader_parameter("outline_color", Color("080808") if UIStyle.TEXTURE_SET=="black" else UIStyle.OUTLINE)
 	_material.set_shader_parameter("frame_tex", UIStyle._skin_texture("stone"))
-	_material.set_shader_parameter("brass_color", UIStyle.GOLD)
+	_material.set_shader_parameter("brass_color", Color.WHITE if UIStyle.TEXTURE_SET=="black" else UIStyle.GOLD)
 	_map_rect.material = _material
 	_map_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_map_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE

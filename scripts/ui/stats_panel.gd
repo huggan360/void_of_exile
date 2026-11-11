@@ -12,7 +12,7 @@ func _init(p_stats: PlayerStats) -> void:
 
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", UIStyle.panel())
+	add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	custom_minimum_size = Vector2(340, 0)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)

@@ -36,7 +36,7 @@ func _init(p_stats: PlayerStats) -> void:
 
 func _ready() -> void:
 	add_to_group("shop_panels")
-	add_theme_stylebox_override("panel", UIStyle.panel_outlined(Color(0.55, 0.85, 1.0)))
+	add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
 	add_child(box)

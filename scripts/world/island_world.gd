@@ -73,8 +73,8 @@ func _init(record: Dictionary, prepared_layout := {}) -> void:
 	_portal_pos = generator.surface(Vector2(spawn_point.x, spawn_point.z) + inland * 7.0)
 	_keep_clear = [spawn_point, _portal_pos]
 	if astral_site.is_finite():
-		for z in range(-24,33,8):
-			for x in range(-28,29,8): _keep_clear.append(astral_site+Vector3(x,0,z))
+		for key in ["mechanic", "parts", "boarding", "rocket"]:
+			_keep_clear.append(astral_anchor(key))
 	for village in generator.villages:
 		_village_plans[village.display_name] = village
 		for building: Dictionary in village.houses + village.props:
@@ -407,11 +407,13 @@ func is_water(pos: Vector3) -> bool:
 
 
 func astral_anchor(key: String) -> Vector3:
-	return astral_site+AstralStation.OFFSETS.get(key,Vector3.ZERO) if astral_site.is_finite() else Vector3.INF
+	if not astral_site.is_finite(): return Vector3.INF
+	var at: Vector3 = astral_site+(AstralStation.ROCKET_OFFSET if key=="rocket" else AstralStation.OFFSETS.get(key,Vector3.ZERO))
+	at.y = generator.column(floori(at.x), floori(at.z)).x+1.0
+	return at
 
 
 func ground_height(x: float, z: float) -> float:
-	if astral_site.is_finite() and AstralStation.contains(astral_site,Vector3(x,0,z)): return astral_site.y
 	return generator.column(floori(x), floori(z)).x + 1.0
 
 
@@ -574,7 +576,6 @@ func _gather_decor(groups: Dictionary, area: Rect2i) -> void:
 	for key: String in tile:
 		if not groups.has(key): groups[key] = []
 		for transform: Transform3D in tile[key]:
-			if astral_site.is_finite() and AstralStation.contains(astral_site,transform.origin,0.5): continue
 			groups[key].append(transform)
 
 

@@ -14,9 +14,18 @@ func _ready() -> void:
 	_style.shadow_size = 9
 	_style.shadow_offset = Vector2(0, 3)
 	resized.connect(queue_redraw)
+	var owner_button := get_parent() as Button
+	if owner_button:
+		owner_button.button_down.connect(queue_redraw)
+		owner_button.button_up.connect(queue_redraw)
+		owner_button.toggled.connect(func(_pressed: bool) -> void: queue_redraw())
 
 func _draw() -> void:
 	if not _has_body(get_parent()): return
+	var owner_button := get_parent() as Button
+	var down: bool = owner_button != null and owner_button.is_pressed()
+	_style.shadow_size = 2 if down else 9
+	_style.shadow_offset = Vector2(0, 1 if down else 3)
 	var radius := int(minf(size.x, size.y) * 0.5) if rounded else 5
 	_style.set_corner_radius_all(radius)
 	draw_style_box(_style, Rect2(Vector2(2, 2), (size - Vector2(4, 4)).max(Vector2.ZERO)))

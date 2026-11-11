@@ -64,7 +64,7 @@ func _ready() -> void:
 	_button.add_child(row)
 	add_child(_button)
 
-	_drop.add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
+	_drop.add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	_drop.custom_minimum_size = Vector2(510, 0)
 	_drop.z_index = 35
 	_drop.hide()

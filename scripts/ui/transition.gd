@@ -1,12 +1,12 @@
 class_name Transition
 extends ResponsiveUILayer
-## Continuous travel: fracture, acceleration, void portal, reconstruction.
+## Tavern departure/arrival uses voxels; other worlds fade through loading.
 const JUMP_TIME := 3.4
 const ARRIVE_TIME := 4.0
-const FADE_TIME := 0.3
+const FADE_TIME := 0.8
 var _warp := ColorRect.new()
 var _warp_material := ShaderMaterial.new()
-var _loading := PortalLoadingScreen.new()
+var _loading := preload("res://scripts/ui/ink_loading_screen.gd").new()
 var _fracture := PortalFracture.new()
 var _busy := false
 ## Plain black for small moves (getting in and out of a ship).
@@ -119,7 +119,7 @@ func _arrival(value: float) -> void:
 func _set_strength(value: float) -> void:
 	_warp_material.set_shader_parameter("strength",value)
 
-## Ordinary travel loading: portals alone use the voxel fracture effect.
+## Reveal ordinary travel without capturing or meshing the world.
 func reveal() -> void:
 	_loading.set_progress(1.0)
 	var tween := create_tween()

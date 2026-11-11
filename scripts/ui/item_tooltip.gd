@@ -9,7 +9,7 @@ var stats: PlayerStats
 
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
+	add_theme_stylebox_override("panel", UIStyle.popup_panel())
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_text.bbcode_enabled = true
 	_text.fit_content = true
@@ -28,7 +28,7 @@ func show_item(item: Item) -> void:
 	if item == null:
 		hide()
 		return
-	add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.grade_color(item)))
+	add_theme_stylebox_override("panel", UIStyle.popup_panel())
 	var lines := PackedStringArray()
 	lines.append("[font_size=24][b]%s[/b][/font_size]" % TextMarkup.color(item.item_name, UIStyle.grade_color(item)))
 	lines.append(TextMarkup.color(item.grade_name(), UIStyle.DIVINE_COLOR if item.is_divine() else UIStyle.TEXT_DIM)

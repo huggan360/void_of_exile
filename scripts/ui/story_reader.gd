@@ -29,7 +29,7 @@ var item: Item
 
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
+	add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	custom_minimum_size = Vector2(520, 0)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)

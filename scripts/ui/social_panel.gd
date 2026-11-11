@@ -24,7 +24,7 @@ var _searching := false
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(WIDTH, 0)
-	add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.BEVEL_LIGHT))
+	add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
 	add_child(column)

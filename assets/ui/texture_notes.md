@@ -30,3 +30,20 @@ Panel fill (opaque):
 Item slot (transparent outside corners):
 
 > Use case: stylized-concept. Asset type: one inventory equipment-slot sprite for a pixel-art action RPG. The attached blue stone button is a STYLE REFERENCE ONLY. Create ONE perfectly square empty item slot, front view, designed on a 60 by 60 pixel-art grid and enlarged with nearest-neighbor edges. Fill almost the entire canvas with the slot, leaving only a very small transparent margin outside clipped corner pixels. Thin 3-pixel-at-native-size beveled dark blue stone border with tiny cyan top-left edge highlights, dark indigo/navy recessed center with subtle fine slate texture, sparse tiny stone chips. Match the reference's blue/cyan palette and chunky pixel rendering. The center must be dark enough behind a colorful item icon. Equal border thickness on all four sides, unornamented corners, no gold, no ivy, no symbols, no object/icon, no text, no glow outside the frame, no heavy outer drop shadow. Make this dedicated square slot, not a horizontal button forced into a square. Preserve small fine texture detail rather than large stretched streaks. Transparent pixels only outside the outer clipped corners; the slot interior is opaque.
+
+## Shared window treatment
+
+Windows use the original `ui_ivy_panel.png` moss frame and its existing dark
+blue interior. The theme crops this source directly; it does not insert the
+brighter `ui_blue_stone_tile.png` fill. Nested tab and scroll pages are
+transparent. Small inner cards sample only the original dark interior, at the
+same tint as their parent window. Buttons and item slots keep their artwork.
+The baked blue panel files remain available but are not used by the theme.
+
+## Button depth
+
+`ui_stone_button_pressed.png` and `ui_ivy_button_pressed.png` are matching
+imagegen edits of the original button/frame artwork, with recessed faces and
+inset shadows. Pressed and hover-pressed states use these textures, move label
+padding down three pixels, and shorten the drop shadow. Total content padding
+is unchanged so clicking does not resize controls or move neighbouring rows.

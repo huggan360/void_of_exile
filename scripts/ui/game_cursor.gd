@@ -39,7 +39,10 @@ static func _sized(texture: Texture2D, px: int) -> Texture2D:
 
 
 func _apply() -> void:
-	Input.set_custom_mouse_cursor(_pressed if _down else _normal, Input.CURSOR_ARROW, _hotspot)
+	# Controls request hand/help/text shapes on hover. Use the game's pointer
+	# for every shape so hovering never swaps to a system cursor.
+	for shape in range(Input.CURSOR_HELP + 1):
+		Input.set_custom_mouse_cursor(_pressed if _down else _normal, shape, _hotspot)
 
 
 func _input(event: InputEvent) -> void:

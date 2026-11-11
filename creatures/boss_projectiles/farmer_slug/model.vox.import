@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwptoaiosxhw"
+path="res://.godot/imported/model.vox-49ebfd241244e31396f6a463e08735a7.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/farmer_slug/model.vox"
+dest_files=["res://.godot/imported/model.vox-49ebfd241244e31396f6a463e08735a7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

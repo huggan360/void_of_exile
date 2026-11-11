@@ -38,7 +38,7 @@ func _init(p_record: Dictionary, can_delete := true, continue_text := "Close", j
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.HP))
+	panel.add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	center.add_child(panel)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 14)

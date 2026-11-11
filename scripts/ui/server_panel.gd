@@ -35,7 +35,7 @@ func _ready() -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
-	_panel.add_theme_stylebox_override("panel", UIStyle.panel_outlined(UIStyle.GOLD))
+	_panel.add_theme_stylebox_override("panel", UIStyle.ornament_panel())
 	center.add_child(_panel)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 14)

@@ -555,6 +555,26 @@ func shield(active: bool) -> void:
 		_shield_cast = {}
 		_shield = {}
 
+## Static menus have no world ambience, spatial loops or combat music.
+func clear_world_context() -> void:
+	_player = null
+	_world = null
+	_scene_id = 0
+	for voice: Dictionary in voices:
+		if voice.positional or voice.bus in ["Ambience", "Music"]: stop(voice, 0.15)
+	_ambience.clear()
+	_emitters.clear()
+	_remote_shields.clear()
+	_footsteps.clear()
+	_music = {}
+	_music_key = ""
+	_music_layer = {}
+	_music_layer_key = ""
+	_music_encounter = ""
+	_shield = {}
+	_shield_cast = {}
+	_shield_up = false
+
 func set_context(player: Player, world: GameWorld) -> void:
 	_player = player
 	_world = world

@@ -237,26 +237,24 @@ func _ready() -> void:
 	_xp_ring.size_flags_horizontal = Control.SIZE_SHRINK_END
 	column.add_child(_xp_ring)
 	UIStyle.add_shadow(_xp_ring, true)
-	var slot_row := HBoxContainer.new()
-	slot_row.add_theme_constant_override("separation", 6)
-	slot_row.alignment = BoxContainer.ALIGNMENT_END
-	column.add_child(slot_row)
+	var slot_grid := GridContainer.new()
+	slot_grid.columns = 2
+	slot_grid.add_theme_constant_override("h_separation", int(ItemSlot.SLOT_GAP))
+	slot_grid.add_theme_constant_override("v_separation", int(ItemSlot.SLOT_GAP))
+	slot_grid.size_flags_horizontal = Control.SIZE_SHRINK_END
+	column.add_child(slot_grid)
 	for entry in SLOTS:
 		var slot := ItemSlot.new(entry[1], stats, {kind = "gear", key = entry[0]})
 		slot.hovered.connect(func(_s: ItemSlot, item: Item) -> void: _tooltip.show_item(item))
 		slot.unhovered.connect(_tooltip.hide)
-		slot_row.add_child(slot)
+		slot_grid.add_child(slot)
 		_slots[entry[0]] = slot
-	var quick_row := HBoxContainer.new()
-	quick_row.add_theme_constant_override("separation", 6)
-	quick_row.alignment = BoxContainer.ALIGNMENT_END
-	column.add_child(quick_row)
 	for i in PlayerStats.QUICKSLOTS:
 		var slot := ItemSlot.new("Quickslot", stats, {kind = "quick", key = i})
 		slot.key_hint = ["F", "G"][i]
 		slot.hovered.connect(func(_s: ItemSlot, item: Item) -> void: _tooltip.show_item(item))
 		slot.unhovered.connect(_tooltip.hide)
-		quick_row.add_child(slot)
+		slot_grid.add_child(slot)
 		_quick.append(slot)
 
 	# Stats tab: hangs to the left of the right-hand column.
