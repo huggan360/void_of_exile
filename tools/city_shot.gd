@@ -1,7 +1,7 @@
 extends "res://scripts/main.gd"
 ## Views of Vesperis (offline) for art checks: --shots=<dir> [--views=a,b].
-## Views: aerial, street, round (a roundabout), houses, lift (riding the
-## elevator, first person), lift_out (the tower from the street).
+## Views: aerial, street, round (a roundabout), houses, spire (the Lantern
+## Spire from the street, its hall and the orb).
 func _parse_args() -> void:
 	super._parse_args()
 	_args.erase("online")
@@ -48,14 +48,9 @@ func _run() -> void:
 	var d: Dictionary = CityLayout.DISTRICTS[int(_args.get("district", "0"))]
 	var port := CityLayout.district_frame(d)
 	port.origin += center
-	var views := str(_args.get("views", "aerial,street,round,houses,lift_out,lift")).split(",")
+	var views := str(_args.get("views", "aerial,street,round,houses,spire")).split(",")
 	_place(port*Transform3D(Basis.IDENTITY, Vector3(0, 0.6, 25)))
-	var city_planet := space.planets[CityLayout.ID].get_node("City") as CityPlanet
-	var started := Time.get_ticks_msec()
-	await _wait(3.0)
-	print("[city-shot] after 3 s: %d of %d chunks still to build" % [city_planet._chunks.size(), 6*4])
-	while not city_planet._chunks.is_empty() and Time.get_ticks_msec()-started<60000: await get_tree().process_frame
-	print("[city-shot] whole planet built in %.1f s" % ((Time.get_ticks_msec()-started)/1000.0))
+	await _wait(3.0)  # the city is built while Space loads; let the near collision settle
 	var up := port.basis.y
 	for view in views:
 		match view:
@@ -110,47 +105,18 @@ func _run() -> void:
 				await _snap("ship_lock", Transform3D(Basis.IDENTITY, room+Vector3(-2.5, 2.2, -10.0)).looking_at(room+Vector3(-7.6, 2.0, -10.0), Vector3.UP))
 			"houses":
 				await _snap("houses", Transform3D(Basis.IDENTITY, port*Vector3(-60, 30, -150)).looking_at(port*Vector3(-140, 25, -260), up))
-			"lift_out":
-				var e: Dictionary = CityLayout.elevators().filter(func(x: Dictionary) -> bool: return x.district==d.id)[0]
-				var tower := CityLayout.tower_world(e)
-				_place(tower*Transform3D(Basis.IDENTITY, Vector3(0, 0.2, -30)))
+			"spire":
+				var spire := CityLayout.spire_world()
+				_place(spire*Transform3D(Basis.IDENTITY, Vector3(0, 0.2, -30)))
 				await _wait(1.0)
-				await _snap("lift_out", Transform3D(Basis.IDENTITY, tower*Vector3(-25, 3, -60)).looking_at(tower*Vector3(0, 60, 0), tower.basis.y))
-			"lift":
-				var e: Dictionary = CityLayout.elevators().filter(func(x: Dictionary) -> bool: return x.district==d.id)[0]
-				var tower := CityLayout.tower_world(e)
-				var id := int(e.id)
-				_place(tower*Transform3D(Basis.IDENTITY, Vector3(0, 0.2, -4.0)))
-				await _wait(0.5)
-				space.request(["city", "call", id, 0])
-				var until := Time.get_ticks_msec()+20000
-				while (int(space.city.elevators[id].floor)!=0 or space.city.elevators[id].phase!="idle") and Time.get_ticks_msec()<until: await get_tree().process_frame
-				await _snap("lift_lobby", Transform3D(Basis.IDENTITY, tower*Vector3(0, 1.7, -9)).looking_at(tower*Vector3(0, 1.6, 1.5), tower.basis.y))
-				_place(tower*Transform3D(Basis.IDENTITY, CityState.SHAFT+Vector3(0, 0.15, 0.6)))
-				await _wait(0.6)
-				space.request(["city", "call", id, 2])
-				await _wait(5.0)
-				var local := tower.affine_inverse()*player.global_position
-				var city_node := space.planets[CityLayout.ID].get_node("City") as CityPlanet
-				var worst := 0.0
-				for k in 120:
-					await get_tree().physics_frame
-					var car_y := float((city_node.districts[d.id].cars[id].car as Node3D).position.y)
-					var gap := (tower.affine_inverse()*player.global_position).y-car_y
-					if gap<-0.05: print("[city-shot] tick %d: rider %.2f below the car floor (car %.2f, phase %s, lift %d)" % [k, -gap, car_y, space.city.elevators[id].phase, control._lift])
-					worst = minf(worst, gap)
-				print("[city-shot] riding: rider at y %.1f, deepest below the car floor %.2f m" % [local.y, -worst])
-				await _snap("lift_ride", Transform3D(Basis.IDENTITY, player.global_position+tower.basis.y*1.6).looking_at(tower*(CityState.SHAFT+Vector3(0, local.y+1.4, -3)), tower.basis.y))
-				await _wait(6.0)
-				local = tower.affine_inverse()*player.global_position
-				print("[city-shot] arrived: rider at y %.1f, car at %.1f" % [local.y, float(space.city.car_state(id)[0])])
-				await _snap("lift_top", Transform3D(Basis.IDENTITY, tower*Vector3(6, 90, -9)).looking_at(tower*Vector3(0, 89, 1.5), tower.basis.y))
-	var city_node := space.planets[CityLayout.ID].get_node("City") as CityPlanet
+				await _snap("spire_out", Transform3D(Basis.IDENTITY, spire*Vector3(-35, 6, -80)).looking_at(spire*Vector3(0, 55, 0), spire.basis.y))
+				await _snap("spire_hall", Transform3D(Basis.IDENTITY, spire*Vector3(0, 1.7, -8.5)).looking_at(spire*Vector3(0, 1.6, 4), spire.basis.y))
+				await _snap("spire_orb", Transform3D(Basis.IDENTITY, spire*Vector3(0, CityLayout.ORB_FLOOR+2.5, 5.5)).looking_at(spire*Vector3(0, CityLayout.ORB_FLOOR+1.0, -6), spire.basis.y))
 	var frames := 0
 	var t0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec()-t0<3000:
 		await get_tree().process_frame
 		frames += 1
-	print("[city-shot] chunks left %d, %.0f fps over 3 s, %d draw calls" % [city_node._chunks.size(), frames/3.0, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)])
+	print("[city-shot] %.0f fps over 3 s, %d draw calls" % [frames/3.0, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)])
 	print("[city-shot] done")
 	get_tree().quit()

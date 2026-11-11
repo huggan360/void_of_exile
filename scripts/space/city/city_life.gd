@@ -9,10 +9,11 @@ var _traffic := {}
 var _scan := 0.0
 var _cups := {}
 var _cows: Array[Dictionary] = []  # {farm, cow, node}: the farmsteads' grazing cows
-const CHAT := ["The sky garden is lovely tonight.", "Three moons and still late for work!", "Coffee first, galaxies later.", "Have you found the Hidden Valve?"]
+const CHAT := ["The orb has the best view on Vesperis.", "Three moons and still late for work!", "Coffee first, galaxies later.", "Fresh bread at the corner, smell that?"]
 
 func _ready() -> void:
 	for farm in CityCountry.FARMS.size():
+		if not CityCountry.farm_open(farm): continue
 		for cow in 5: _cows.append({farm = farm, cow = cow, node = null})
 	for lane: Dictionary in CityLayout.lanes():
 		for k in int(lane.count):
@@ -78,9 +79,8 @@ func add_district(d: Dictionary) -> void:
 			_people.append({pose = frame*Transform3D(Basis(Vector3.UP, float(s.yaw)), s.pos),
 				model = CityLayout.FOLK[(k+absi(str(v.key).hash())) % CityLayout.FOLK.size()], seated = true, node = null, bubble = -1})
 		for s: Dictionary in v.seats: _cup(str(s.id))
-	for e: Dictionary in CityLayout.elevators():
-		if e.district!=d.id: continue
-		for s: Dictionary in CityLayout.tower_seats(e): _cup(str(s.id))
+	if d.id==CityLayout.SPIRE_DISTRICT:
+		for s: Dictionary in CityLayout.orb_seats(): _cup(str(s.id))
 
 func _cup(id: String) -> void:
 	var spec := CityLayout.any_seat(id)
@@ -158,7 +158,7 @@ func _update_frame(delta: float) -> void:
 					var talk := InteractionTarget.new()
 					talk.title = str(entry.title)
 					talk.description = str(entry.lines[0])
-					talk.response = "Make yourself at home. The lifts lead to the sky gardens and bars."
+					talk.response = "Make yourself at home. Ask at the Lantern Spire for a ride up to the orb."
 					talk.position.y = 1.0
 					person.add_child(talk)
 			elif not near and is_instance_valid(entry.node):

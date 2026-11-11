@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyi3fg8ow7k33"
+path="res://.godot/imported/model.vox-e7ade8fc9e7bdc563c7f9c0a2491879c.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/hall_moss/model.vox"
+dest_files=["res://.godot/imported/model.vox-e7ade8fc9e7bdc563c7f9c0a2491879c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

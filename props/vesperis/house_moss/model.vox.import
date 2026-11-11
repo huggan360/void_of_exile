@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://btubxmf6fod4f"
+path="res://.godot/imported/model.vox-8289e57b0a71c215dcf1670734055f24.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/house_moss/model.vox"
+dest_files=["res://.godot/imported/model.vox-8289e57b0a71c215dcf1670734055f24.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

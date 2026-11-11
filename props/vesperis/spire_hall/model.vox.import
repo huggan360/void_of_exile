@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://disg1qak7fxyh"
+path="res://.godot/imported/model.vox-0b7e8614408380a1bc5352d14a25036a.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/spire_hall/model.vox"
+dest_files=["res://.godot/imported/model.vox-0b7e8614408380a1bc5352d14a25036a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

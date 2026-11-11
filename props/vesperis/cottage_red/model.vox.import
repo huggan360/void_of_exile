@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://6tx7bk6sanil"
+path="res://.godot/imported/model.vox-d4de5e943f6d2beec3adf942576def6f.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/cottage_red/model.vox"
+dest_files=["res://.godot/imported/model.vox-d4de5e943f6d2beec3adf942576def6f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

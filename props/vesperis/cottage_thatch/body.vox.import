@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://da4246savc7qi"
+path="res://.godot/imported/body.vox-0ad00aa8eae44bc5d5176343e2a0bc53.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/cottage_thatch/body.vox"
+dest_files=["res://.godot/imported/body.vox-0ad00aa8eae44bc5d5176343e2a0bc53.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

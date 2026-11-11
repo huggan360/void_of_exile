@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b3ijtwoj28ty0"
+path="res://.godot/imported/body_lod1.vox-50d500001d5c0bf22d53b422e88b57e2.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/hall_moss/body_lod1.vox"
+dest_files=["res://.godot/imported/body_lod1.vox-50d500001d5c0bf22d53b422e88b57e2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

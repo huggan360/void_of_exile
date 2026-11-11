@@ -357,6 +357,9 @@ var _was_aboard := false
 func expect_ship_move() -> void:
 	_ship_move_until = Time.get_ticks_msec()+2500
 	_ship_moved = false
+	_ship_move_from = player.global_position
+
+var _ship_move_from := Vector3.ZERO
 
 func _update_ship_fade() -> void:
 	var aboard := SpaceLayout.pocket_at(player.global_position)>=0
@@ -365,6 +368,8 @@ func _update_ship_fade() -> void:
 		# The ground may still be building where we arrived: give it time.
 		if _ship_move_until!=0: _ship_move_until = maxi(_ship_move_until, Time.get_ticks_msec()+4000)
 	_was_aboard = aboard
+	# Moved within the same place (the Lantern Spire's attendant).
+	if _ship_move_until!=0 and player.global_position.distance_to(_ship_move_from)>20.0: _ship_moved = true
 	if _ship_move_until==0 or not transition.is_black(): return
 	if (_ship_moved and not player.frozen) or Time.get_ticks_msec()>_ship_move_until:
 		_ship_move_until = 0

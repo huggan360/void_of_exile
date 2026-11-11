@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://q75w4r1xhuct"
+path="res://.godot/imported/model.vox-ebd8c3548a3b1b03f71297e70fa8f543.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/lodge_slate/model.vox"
+dest_files=["res://.godot/imported/model.vox-ebd8c3548a3b1b03f71297e70fa8f543.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

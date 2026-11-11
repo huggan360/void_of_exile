@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bcym052ddsxvo"
+path="res://.godot/imported/model.vox-1ef113c378763d52627938f9b2ea5bf8.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/house_plum/model.vox"
+dest_files=["res://.godot/imported/model.vox-1ef113c378763d52627938f9b2ea5bf8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

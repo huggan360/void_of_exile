@@ -2,22 +2,18 @@ class_name CityState
 extends RefCounted
 ## Vesperis's shared state, decided by the authority (the server, or the game
 ## offline) and mirrored on every client: who sits where, the drink in front of
-## each seat, and every elevator. Townsfolk and traffic need nothing here: they
+## each seat. Townsfolk and traffic need nothing here: they
 ## follow the server clock (clock()), so everyone sees the same city.
 ##
 ## Seats: sit at an empty one and the waiter brings your drink a moment later;
 ## X sips it (beer leaves you tipsy, coffee quickens your step), C orders another.
-## Elevators: a call (from a floor's panel or a button in the car) queues that
-## floor; the car closes its doors, rides, and opens them again.
+## The Lantern Spire's attendants take you up to its orb and back (no lift:
+## the screen fades to black and you stand in the other place, see orb_trip()).
 const ORDER_TIME := 2.5
 const SIP := 0.25
-const DOORS := 1.2  # seconds to close or open
-const STAY := 4.0  # doors stay open this long with nobody calling
 var seats := {}  # seat id -> player id
 var cups := {}  # seat id -> drink left (0..1)
 var orders := {}  # seat id -> clock time it arrives
-## id -> {floor, target, phase (idle, closing, moving, opening), t0, t1, from, to, queue: Array}
-var elevators := {}
 var changed := false  # authority: something to broadcast
 
 static var _tick := -1
@@ -38,14 +34,10 @@ static func _now() -> float:
 	if Net.is_client() and Net.client: return Net.client.server_time()
 	return Net.now()
 
-func _init() -> void:
-	for e: Dictionary in CityLayout.elevators():
-		elevators[int(e.id)] = {floor = 0, target = 0, phase = "idle", t0 = 0.0, t1 = 0.0, from = 0, to = 0, queue = []}
-
 ## Townsfolk already sitting there (from the layout) take a seat for good.
 static func npc_seat(id: String) -> bool:
 	var parts := id.split(":")
-	if parts.size()!=3 or parts[1].begins_with("tower"): return false
+	if parts.size()!=3 or parts[1]=="orb": return false
 	var v := CityLayout.venue(parts[1])
 	return not v.is_empty() and int(parts[2]) in v.patrons
 
@@ -93,19 +85,6 @@ func handle(pid: int, pos: Vector3, args: Array) -> String:
 			orders[id] = clock()+ORDER_TIME
 			changed = true
 			return "Another one, coming right up."
-		"call":
-			var e := int(args[2]) if args.size()>2 else -1
-			var floor := int(args[3]) if args.size()>3 else -1
-			if not elevators.has(e) or floor<0 or floor>=4: return ""
-			var lift: Dictionary = elevators[e]
-			# Only from inside the car or at that floor's door.
-			if not (inside_car(e, pos) or at_landing(e, floor, pos)): return ""
-			if floor==int(lift.floor) and lift.phase=="idle":
-				lift.t0 = clock()  # hold the doors open
-				changed = true
-				return ""
-			if not floor in lift.queue and floor!=int(lift.target): lift.queue.append(floor)
-			changed = true
 	return ""
 
 ## Gives up any seat; true when there was one.
@@ -124,88 +103,25 @@ func step() -> void:
 			orders.erase(id)
 			cups[id] = 1.0
 			changed = true
-	for e: int in elevators:
-		var lift: Dictionary = elevators[e]
-		match str(lift.phase):
-			"idle":
-				if not lift.queue.is_empty() and now-float(lift.t0)>1.0:
-					lift.target = int(lift.queue.pop_front())
-					lift.phase = "closing"
-					lift.t0 = now
-					changed = true
-			"closing":
-				if now-float(lift.t0)>=DOORS:
-					var spec: Dictionary = CityLayout.elevators()[e]
-					var dh := absf(float(spec.floors[lift.target].h)-float(spec.floors[lift.floor].h))
-					lift.phase = "moving"
-					lift.from = lift.floor
-					lift.to = lift.target
-					lift.t0 = now
-					lift.t1 = now+maxf(3.0, dh/CityLayout.ELEVATOR_SPEED)
-					changed = true
-			"moving":
-				if now>=float(lift.t1):
-					lift.floor = lift.to
-					lift.phase = "opening"
-					lift.t0 = now
-					changed = true
-			"opening":
-				if now-float(lift.t0)>=DOORS:
-					lift.phase = "idle"
-					lift.t0 = now
-					changed = true
 
 func wire() -> Dictionary:
-	return {seats = seats.duplicate(), cups = cups.duplicate(), orders = orders.duplicate(), elevators = elevators.duplicate(true)}
+	return {seats = seats.duplicate(), cups = cups.duplicate(), orders = orders.duplicate()}
 
 func apply(data: Dictionary) -> void:
 	seats = data.get("seats", {}).duplicate()
 	cups = data.get("cups", {}).duplicate()
 	orders = data.get("orders", {}).duplicate()
-	for e in data.get("elevators", {}):
-		elevators[int(e)] = (data.elevators[e] as Dictionary).duplicate(true)
 
-# --- Elevator geometry (shared) ------------------------------------------------------------
+# --- The Lantern Spire's orb ----------------------------------------------------------------
 
-## Height of the car's floor above the tower's ground at clock time `t`, and
-## how open its doors are (0 shut, 1 open).
-func car_state(e: int, t := NAN) -> Array:
-	if is_nan(t): t = clock()
-	var lift: Dictionary = elevators[e]
-	var spec: Dictionary = CityLayout.elevators()[e]
-	var floors: Array = spec.floors
-	match str(lift.phase):
-		"moving":
-			var k := clampf((t-float(lift.t0))/maxf(0.01, float(lift.t1)-float(lift.t0)), 0.0, 1.0)
-			k = k*k*(3.0-2.0*k)
-			return [lerpf(float(floors[lift.from].h), float(floors[lift.to].h), k), 0.0]
-		"closing":
-			return [float(floors[lift.floor].h), 1.0-clampf((t-float(lift.t0))/DOORS, 0.0, 1.0)]
-		"opening":
-			return [float(floors[lift.floor].h), clampf((t-float(lift.t0))/DOORS, 0.0, 1.0)]
-	return [float(floors[lift.floor].h), 1.0]
-
-const CAR := Vector3(3.4, 3.0, 3.4)
-## The car's middle sits at the tower's centre, a little behind (its door faces -Z).
-const SHAFT := Vector3(0, 0, 1.5)
-
-func inside_car(e: int, pos: Vector3) -> bool:
-	var spec: Dictionary = CityLayout.elevators()[e]
-	var local := CityLayout.tower_world(spec).affine_inverse()*pos-SHAFT
-	var h := float(car_state(e)[0])
-	return absf(local.x)<CAR.x*0.5+0.3 and absf(local.z)<CAR.z*0.5+0.3 and local.y>h-1.0 and local.y<h+CAR.y
-
-func at_landing(e: int, floor: int, pos: Vector3) -> bool:
-	var spec: Dictionary = CityLayout.elevators()[e]
-	var local := CityLayout.tower_world(spec).affine_inverse()*pos-SHAFT
-	var h := float(spec.floors[floor].h)
-	return absf(local.x)<4.0 and local.z>-CAR.z*0.5-6.0 and local.z<0.0 and absf(local.y-h)<3.0
-
-## The elevator whose car holds `pos`, or -1.
-func car_at(pos: Vector3) -> int:
-	for e: int in elevators:
-		if inside_car(e, pos): return e
-	return -1
+## Where an attendant sends someone standing at `pos` (world space): up to the
+## orb from the hall, down to the hall from the orb, or INF when nobody is near.
+static func orb_trip(pos: Vector3) -> Vector3:
+	var up := CityLayout.orb_spot(true)
+	var down := CityLayout.orb_spot(false)
+	if pos.distance_to(CityLayout.attendant(false))<5.0: return up
+	if pos.distance_to(CityLayout.attendant(true))<5.0: return down
+	return Vector3.INF
 
 ## The player rigs share leg pivots. Applied after their normal animation.
 static func seated_pose(model: Node3D) -> void:

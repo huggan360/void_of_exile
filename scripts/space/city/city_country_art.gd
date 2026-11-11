@@ -18,6 +18,7 @@ static var _road_material: ShaderMaterial
 ## Every farmstead and roadside tree into `batch`; collision per city cell into `solids`.
 static func build(batch: CityPlanet.Batch, solids: Dictionary) -> void:
 	for k in CityCountry.FARMS.size():
+		if not CityCountry.farm_open(k): continue
 		var frame := CityCountry.farm_frame(k)
 		var list: Array = []
 		var art := CityArt.new(batch, frame, list)

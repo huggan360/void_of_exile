@@ -188,7 +188,7 @@ func sample_gravity(position: Vector3) -> Dictionary:
 	return {frame = Transform3D(Basis.IDENTITY, position), zone = "void", distance = 1e6}
 
 func first_person_at(position: Vector3) -> bool:
-	return SpaceLayout.pocket_at(position)>=0 or city.car_at(position)>=0
+	return SpaceLayout.pocket_at(position)>=0
 
 ## Anywhere inside the Reach: spacewalkers float in open space on jetpacks.
 func is_walkable(position: Vector3) -> bool:
@@ -384,6 +384,11 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if pos.distance_to(station.to_global(pad.origin))>8.0 or zone_at(pos)!="station": return
 			p.port = {kind = "rocket", destination = "realm_1"}
 		"city":
+			if args.size()>1 and str(args[1])=="orb":
+				# The Lantern Spire's attendant: up to the orb or back down.
+				var to := CityState.orb_trip(pos)
+				if to.is_finite(): teleport(p, to, "city_orb")
+				return
 			if args.size()>1 and str(args[1]) in ["sip", "order"]: return
 			var before := city.seat_of(pid)
 			var message := city.handle(pid, pos, args)

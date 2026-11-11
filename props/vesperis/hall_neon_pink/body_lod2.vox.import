@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://de4ydnh7plg7"
+path="res://.godot/imported/body_lod2.vox-9a0789aeddd5a050dbb93429777d0aa6.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/hall_neon_pink/body_lod2.vox"
+dest_files=["res://.godot/imported/body_lod2.vox-9a0789aeddd5a050dbb93429777d0aa6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

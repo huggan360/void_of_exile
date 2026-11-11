@@ -4,7 +4,7 @@ extends InteractionTarget
 ## rocket down to the Surface, a ship's seats and its hatch, and boarding a
 ## landed ship from outside. Each sends one request to the authority.
 var world: SpaceWorld
-var kind := "table"  # table, rocket, seat, hatch, outside, repair, ladder, deck_hatch, tap
+var kind := "table"  # table, rocket, seat, hatch, outside, repair, ladder, deck_hatch, tap, orb_up, orb_down
 var part := ""
 var seat := ""
 var ship_id := 0
@@ -46,6 +46,16 @@ func _ready() -> void:
 		"wright":
 			action_text = "Ships"
 			response = "Need a ship, captain?"
+		"orb_up":
+			title = "Lift attendant"
+			description = "Up to the Lantern Orb, the best view on Vesperis."
+			action_text = "Ride up"
+			response = "Hold on to your hat!"
+		"orb_down":
+			title = "Lift attendant"
+			description = "Back down to the Spire's hall."
+			action_text = "Ride down"
+			response = "Mind the step on the way out."
 		"tap":
 			title = "Beer tap"
 			description = "A big boy just for you"
@@ -142,6 +152,8 @@ func activate(actor: Node3D) -> bool:
 			_through_black(["deck", ship_id, hull.global_transform.affine_inverse()*actor.global_position])
 		"tap":
 			world.request(["pour"])
+		"orb_up", "orb_down":
+			_through_black(["city", "orb"])
 		"wright":
 			response = "Need a ship, captain?"
 			get_tree().call_group("fleet_panels", "open_for", self)

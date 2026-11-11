@@ -13,10 +13,8 @@ enum CameraMode { ANGLED, SHOULDER, FIRST_PERSON }
 var camera_mode := CameraMode.ANGLED
 var city_seat := ""
 var _lounge_seat := ""
-var _lift := -1
 var _ship_slot := -1
 var _outside_culled := false  # the outside hidden while we're in a ship room  # the room of the ship we sat in, to stand up beside the chair
-var _lift_height := 0.0
 var seat := ""
 var _ship: SpaceShip
 var _checkpoint := Vector3.ZERO
@@ -346,7 +344,6 @@ func _update_hint() -> void:
 		rows.append([["@interact"], "Sip"])
 		rows.append([["C"], "Order"])
 		rows.append([["Z"], "Stand up"])
-	if _lift>=0: rows.append([["@interact"], "Press button"])
 	_hint.text = ""
 	var game := world.game_root()
 	var hud: Variant = game.get("hud") if game else null
@@ -414,7 +411,7 @@ func toggle_map() -> void:
 func active_ship_actions() -> Array[String]:
 	var actions: Array[String] = []
 	if seat=="" and _lounge_seat=="":
-		if city_seat=="" and Leisure.seat_spec(player.player_id).is_empty() and _lift<0 and not world is SurfaceShipWorld and world.zone_at(player.global_position)!="ship":
+		if city_seat=="" and Leisure.seat_spec(player.player_id).is_empty() and not world is SurfaceShipWorld and world.zone_at(player.global_position)!="ship":
 			if not world.jetpack_forbidden(player.global_position): actions.append("jetpack_toggle")
 			if jetpack_attached: actions.append_array(["jetpack_thrust","jetpack_descend"])
 		return actions
@@ -474,12 +471,10 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.physical_keycode==KEY_V and seat=="":
-		if _lift>=0: notice("The elevator uses first person. Your camera returns when you step out.")
-		else:
-			camera_mode = (view_mode()+1) % 3
-			if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position) in ["station", "diner"]: camera_mode = CameraMode.SHOULDER
-			AppSettings.video.space_camera = camera_mode
-			AppSettings.save_preferences()
+		camera_mode = (view_mode()+1) % 3
+		if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position) in ["station", "diner"]: camera_mode = CameraMode.SHOULDER
+		AppSettings.video.space_camera = camera_mode
+		AppSettings.save_preferences()
 		get_viewport().set_input_as_handled()
 		return
 	if city_seat!="":
@@ -489,12 +484,7 @@ func _input(event: InputEvent) -> void:
 		else: return
 		get_viewport().set_input_as_handled()
 		return
-	if _lift>=0 and (event.is_action_pressed("interact") or event.is_action_pressed("shoot")):
-		var button := _lift_button()
-		if button>=0: world.request(["city", "call", _lift, button])
-		get_viewport().set_input_as_handled()
-		return
-	if seat=="" and _lounge_seat=="" and city_seat=="" and _lift<0 and not world is SurfaceShipWorld and world.zone_at(player.global_position)!="ship" and event.is_action_pressed("jetpack_toggle"):
+	if seat=="" and _lounge_seat=="" and city_seat=="" and not world is SurfaceShipWorld and world.zone_at(player.global_position)!="ship" and event.is_action_pressed("jetpack_toggle"):
 		if world.jetpack_forbidden(player.global_position):
 			notice("Jetpacks are disabled in strongholds and boss fights.")
 		else:
@@ -526,16 +516,6 @@ func land() -> void:
 	if _ship==null or _ship.mode!="flying": return
 	if SpaceLayout.can_descend(_ship.xform.origin): world.request(["descend"])
 	else: world.request(["land"] if not _ship.landable().is_empty() else ["dock"])
-
-func _lift_button() -> int:
-	var planet: SpacePlanet = world.planets.get(CityLayout.ID)
-	if planet==null or _lift<0: return -1
-	var city := planet.get_node_or_null("City") as CityPlanet
-	if city==null: return -1
-	for district: CityDistrict in city.districts.values():
-		var button := district.button_at(_lift, player.camera.global_position, -player.camera.global_basis.z)
-		if button>=0: return button
-	return -1
 
 func free_look() -> bool:
 	return view_mode()!=CameraMode.ANGLED or world.first_person_at(player.global_position)
@@ -685,20 +665,6 @@ func physics_step(delta: float) -> void:
 		player.model.animate(0.0, delta)
 		CityState.seated_pose(player.model)
 		return
-	# The floor displacement is evaluated from the same server clock as its
-	# visible car, before movement. Menu users ride along too.
-	if _lift>=0:
-		var tower := CityLayout.tower_world(CityLayout.elevators()[_lift])
-		var local := tower.affine_inverse()*player.global_position-CityState.SHAFT
-		if absf(local.x)<CityState.CAR.x*0.5+0.3 and absf(local.z)<CityState.CAR.z*0.5+0.3 and absf(local.y-_lift_height)<3.0:
-			# Stand on the car's floor itself while it rides (no sinking through it
-			# a frame behind); the car was placed first this frame (CityDistrict).
-			var car := float(world.city.car_state(_lift)[0])
-			if str(world.city.elevators[_lift].phase)=="moving" or absf(car-_lift_height)>0.001:
-				player.global_position += tower.basis.y*(car-local.y)
-				player.velocity = player.velocity.slide(tower.basis.y)
-	_lift = world.city.car_at(player.global_position)
-	if _lift>=0: _lift_height = float(world.city.car_state(_lift)[0])
 	if cinematic or seat!="":
 		player.velocity = Vector3.ZERO
 		return
@@ -719,7 +685,7 @@ func physics_step(delta: float) -> void:
 			return
 		_descent = false  # Outside the atmosphere, continue in free flight.
 		_planet_fall = false
-	if jetpack_attached and (str(state.zone).begins_with("planet:") or state.zone in ["station", "diner"]) and not player.controls_locked() and not player.ui_blocked and not player.interacting() and _lift<0 and Input.is_action_just_pressed("jetpack_thrust") and fuel>5.0:
+	if jetpack_attached and (str(state.zone).begins_with("planet:") or state.zone in ["station", "diner"]) and not player.controls_locked() and not player.ui_blocked and not player.interacting() and Input.is_action_just_pressed("jetpack_thrust") and fuel>5.0:
 		_descent = true
 		_planet_fall = false
 		spacewalk = false

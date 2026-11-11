@@ -4,8 +4,6 @@ extends InteractionTarget
 var world: SpaceWorld
 var kind := "seat"
 var seat := ""
-var elevator := -1
-var floor := 0
 
 func available(actor: Node3D) -> bool:
 	if not super.available(actor): return false
@@ -17,11 +15,9 @@ func refresh(_actor: Node3D) -> void:
 		title = "Chair"
 		description = "Sit down for a while"
 		action_text = "Sit"
-	else: action_text = "Call elevator"
 
 func activate(actor: Node3D) -> bool:
 	if not available(actor): return false
 	if kind=="seat": Leisure.request(actor as Player, ["use", seat])
-	else: world.request(["city", "call", elevator, floor])
 	activated.emit(actor)
 	return false

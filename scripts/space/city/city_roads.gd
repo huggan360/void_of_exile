@@ -3,8 +3,8 @@ class_name CityRoads
 ## client). The corners of the cell grid (CityLayout) are nudged about, streets
 ## bend between them, a few blocks are cut by a diagonal street and some
 ## corners are roundabouts, so the city reads as grown rather than ruled.
-## Blocks that hold fixed rooms (the spaceport, the elevator towers, the secret
-## bar) keep straight streets; shop blocks only lean a little.
+## Blocks that hold fixed rooms (the spaceport, the Lantern Spire) keep
+## straight streets; the blocks of shop and bar halls only lean a little.
 ##
 ## Everything is kept as unit directions from the planet centre. The ground
 ## shader reads the same numbers from texture() (four texels per corner: the
@@ -16,8 +16,6 @@ const BEND := 0.11  # sideways bend of a street's middle, in cells
 const ISLAND := 4.5  # roundabout island radius (m)
 const RING := 6.0  # ring road width round the island (m)
 const KERB := 0.16  # sidewalk height (m)
-## District corners (local 0..6) that are always roundabouts.
-const DISTRICT_ROUNDS := [Vector2i(1, 1), Vector2i(4, 1), Vector2i(5, 5), Vector2i(2, 5)]
 static var _nodes := {}  # Vector3i(face, i, j) -> [dir, round radius, mid u dir, has u, mid v dir, has v, diag mid dir, diag type]
 static var _texture: ImageTexture
 static var _blocks := {}
@@ -35,7 +33,7 @@ static func _freedom(face: int, i: int, j: int) -> int:
 	for c: Vector2i in [Vector2i(i-1, j-1), Vector2i(i, j-1), Vector2i(i-1, j), Vector2i(i, j)]:
 		match CityLayout.role(face, c.x, c.y):
 			"port": return -1
-			"elevator", "secret": out = 0
+			"spire": out = 0
 			"venues": out = mini(out, 1)
 	return out
 
@@ -48,18 +46,17 @@ static func merged(face: int, a: Vector2i, b: Vector2i) -> bool:
 	var db := CityLayout.district_of(face, b.x, b.y)
 	return not da.is_empty() and not db.is_empty() and da.district.id==db.district.id
 
-## Streets run only where a city core is on at least one side; the farmland
-## has its own winding country roads (CityCountry).
-static func _city_side(face: int, cells: Array) -> bool:
-	for c: Vector2i in cells:
-		if c.x>=0 and c.y>=0 and c.x<_n() and c.y<_n() and CityLayout.role(face, c.x, c.y)!="farm": return true
+## No grid streets any more: the towns grow their own (CityTown) and the
+## farmland has its winding country roads (CityCountry). The grid is kept for
+## the ground shader's lookups and is empty.
+static func _city_side(_face: int, _cells: Array) -> bool:
 	return false
 
 ## Bending is only for streets between open blocks.
 static func _may_bend(face: int, cells: Array) -> bool:
 	for c: Vector2i in cells:
 		if c.x<0 or c.y<0 or c.x>=_n() or c.y>=_n(): return false
-		if CityLayout.role(face, c.x, c.y) in ["port", "elevator", "secret", "venues"]: return false
+		if CityLayout.role(face, c.x, c.y) in ["port", "spire", "venues"]: return false
 	return true
 
 static func _grid_dir(face: int, gi: float, gj: float) -> Vector3:
@@ -80,14 +77,6 @@ static func node(face: int, i: int, j: int) -> Array:
 	var g := Vector2(i, j)+Vector2(_r(face, i, j, 1)-0.5, _r(face, i, j, 2)-0.5)*2.0*amount
 	var dir := _grid_dir(face, g.x, g.y)
 	var round := 0.0
-	if free>=0:
-		var at := CityLayout.district_of(face, mini(i, n-1), mini(j, n-1))
-		var forced := false
-		for d: Dictionary in CityLayout.DISTRICTS:
-			if int(d.face)!=face: continue
-			var local := Vector2i(i-(d.corner.x-3), j-(d.corner.y-3))
-			if local in DISTRICT_ROUNDS: forced = true
-		if forced: round = ISLAND
 	var out: Array = [dir, round, Vector3.ZERO, false, Vector3.ZERO, false, Vector3.ZERO, 0]
 	_nodes[key] = out
 	# Streets to the next corners (their middles bend sideways).

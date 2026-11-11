@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://spp58hsrohdw"
+path="res://.godot/imported/body_glow.vox-2339ceaabe5c345bb5477d0f22814290.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/cottage_moss/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-2339ceaabe5c345bb5477d0f22814290.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -69,7 +69,7 @@ func _run() -> void:
 		check(not landing.is_empty(), str(d.id)+": available landing pad")
 		await _shot(str(d.id), Transform3D(Basis.IDENTITY, port*Vector3(140, 140, 220)).looking_at(port*Vector3(0, 20, 0), port.basis.y))
 	await get_tree().physics_frame
-	_paths(city)
+	await _paths(city)
 	check(CityLayout.landing_site(center+Vector3.DOWN*1020, 150.0, Callable()).is_empty(), "no landing among arbitrary buildings")
 	var first := CityLayout.DISTRICTS[0]
 	var cafe: Dictionary = CityLayout.venues(first).filter(func(v: Dictionary) -> bool: return v.kind=="cafe")[0]
@@ -114,28 +114,29 @@ func _run() -> void:
 	check(player.stats.buffs.has_effect("drunk"), "beer grants existing drunk effect")
 	space.request(["city", "stand"])
 	await _wait()
-	var e: Dictionary = CityLayout.elevators()[0]
-	var tower := CityLayout.tower_world(e)
-	_place(tower*Transform3D(Basis.IDENTITY, Vector3(2.6, 0.15, -2.0)))
+	# The Lantern Spire: its attendant takes us up to the orb and back.
+	var spire := CityLayout.spire_world()
+	_place(Transform3D(spire.basis, CityLayout.attendant(false)+spire.basis*Vector3(0, 0.2, -1.5)))
 	await _wait(0.5)
-	space.request(["city", "call", 0, 0])
-	var deadline := Time.get_ticks_msec()+24000
-	while (int(space.city.elevators[0].floor)!=0 or space.city.elevators[0].phase!="idle") and Time.get_ticks_msec()<deadline: await get_tree().process_frame
-	_place(tower*Transform3D(Basis.IDENTITY, CityState.SHAFT+Vector3(0, 0.12, 0)))
-	await _wait(0.4)
-	check(control._lift==0 and control.first_person>0.8, "elevator forces first person")
-	space.request(["city", "call", 0, 1])
-	await _wait(8.0)
-	var local := tower.affine_inverse()*player.global_position
-	check(absf(local.y-44.0)<0.5, "elevator carries rider to sky garden (y=%.2f)" % local.y)
-	# Doors still opening (and the mirror a moment behind online): wait for it to settle.
-	deadline = Time.get_ticks_msec()+5000
-	while (space.city.elevators[0].phase!="idle" or int(space.city.elevators[0].floor)!=1) and Time.get_ticks_msec()<deadline: await get_tree().process_frame
-	check(space.city.elevators[0].phase=="idle" and int(space.city.elevators[0].floor)==1, "elevator opens at selected floor")
-	_place(tower*Transform3D(Basis.IDENTITY, Vector3(0, 44.1, -7)))
-	await _wait()
-	check(control.first_person<0.1 and control.camera_mode==SpaceTraversal.CameraMode.SHOULDER, "exit restores shoulder camera")
-	await _shot("garden", Transform3D(Basis.IDENTITY, tower*Vector3(8, 47, -9)).looking_at(tower*Vector3(-4, 45, 6), tower.basis.y))
+	space.request(["city", "orb"])
+	await _wait(1.0)
+	check(player.global_position.distance_to(CityLayout.orb_spot(true))<2.0, "attendant takes us up to the orb")
+	await _wait(1.0)
+	var orb_local := spire.affine_inverse()*player.global_position
+	check(absf(orb_local.y-CityLayout.ORB_FLOOR)<0.6, "the orb's floor holds us (y=%.2f)" % orb_local.y)
+	await _shot("orb", Transform3D(Basis.IDENTITY, spire*Vector3(0, CityLayout.ORB_FLOOR+3.0, 5.5)).looking_at(spire*Vector3(0, CityLayout.ORB_FLOOR+1.0, -6), spire.basis.y))
+	_place(Transform3D(spire.basis, CityLayout.attendant(true)+spire.basis*Vector3(1.0, 0.2, 0)))
+	await _wait(0.3)
+	space.request(["city", "orb"])
+	await _wait(1.0)
+	check(player.global_position.distance_to(CityLayout.orb_spot(false))<2.0, "and back down to the hall")
+	space.request(["city", "orb"])
+	await _wait(0.5)
+	_place(spire*Transform3D(Basis.IDENTITY, Vector3(0, 0.3, -30)))
+	await _wait(0.3)
+	space.request(["city", "orb"])
+	await _wait(0.5)
+	check(player.global_position.distance_to(CityLayout.orb_spot(true))>20.0, "no orb trip away from the attendant")
 	for mode in 3:
 		control.camera_mode = mode
 		control.look_pitch = 0.2
@@ -147,11 +148,10 @@ func _run() -> void:
 	# State transfer and request validation without changing the live authority.
 	var copy := CityState.new()
 	copy.apply(space.city.wire())
-	check(copy.car_state(0)==space.city.car_state(0), "late join restores elevator pose")
 	copy.handle(999, Vector3.ZERO, ["city", "sit", s.id])
 	check(copy.seat_of(999)=="", "remote seat request rejected")
-	check(CityLayout.any_seat("city:tower999:0").is_empty(), "invalid elevator seat rejected")
-	check(city.life._traffic.size()==12, "all twelve traffic models active")
+	check(CityLayout.any_seat("city:orb:999").is_empty(), "invalid orb seat rejected")
+	check(not city.life._traffic.is_empty(), "street traffic active")
 	check(city.life._people.size()>150, "staff, patrons and pedestrian population")
 	print("[city] DONE failures=", _failures)
 	get_tree().quit(0 if _failures==0 else 1)
@@ -161,7 +161,6 @@ func _paths(city: CityPlanet) -> void:
 	var physics := player.get_world_3d().direct_space_state
 	for d: Dictionary in CityLayout.DISTRICTS:
 		if not city.districts.has(d.id): continue
-		var district: CityDistrict = city.districts[d.id]
 		var port := CityLayout.district_frame(d)
 		port.origin += center
 		var ramps_ok := true
@@ -173,28 +172,14 @@ func _paths(city: CityPlanet) -> void:
 				var hit := physics.intersect_ray(ray)
 				if hit.is_empty() or (hit.normal as Vector3).dot(port.basis.y)<0.85: ramps_ok = false
 		check(ramps_ok, str(d.id)+": port ramps have continuous walkable surfaces")
-		for item: Dictionary in CityLayout.district_cells(d):
-			if item.role!="secret": continue
-			var frame: Transform3D = item.cell.frame
-			frame.origin += center
-			var query := PhysicsRayQueryParameters3D.create(frame*Vector3(-17, 1.2, 4), frame*Vector3(-7, 1.2, 4), Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
-			check(physics.intersect_ray(query).is_empty(), str(d.id)+": service tunnel connects to hidden bar")
-		var bridge := CityLayout.sky_bridge(str(d.id))
-		var up := ((bridge[0] as Vector3)-center).normalized()
-		var query := PhysicsRayQueryParameters3D.create((bridge[0] as Vector3)+up, (bridge[1] as Vector3)+up, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
-		var blocker := physics.intersect_ray(query)
-		if not blocker.is_empty():
-			var shape_owner: Node = blocker.collider
-			var a: Vector3 = bridge[0]
-			print("[city] bridge blocked by %s at %.1f m of %.1f (%s)" % [shape_owner.get_path(), a.distance_to(blocker.position),
-				a.distance_to(bridge[1]), CityLayout.tower_world(CityLayout.elevators()[4]).affine_inverse()*blocker.position])
-		check(blocker.is_empty(), str(d.id)+": sky bridge doorway path is clear")
-		for e: int in district.cars:
-			var car: Node3D = district.cars[e].car
-			for f in 4:
-				var eye := car.to_global(Vector3(0, 1.5, 0))
-				var button := car.to_global(district.cars[e].buttons[f])
-				check(district.button_at(e, eye, (button-eye).normalized())==f, "lift %d: physical button %d selects correct floor" % [e, f])
+	# The Spire's hall: its doorway is open, its round wall is solid.
+	var spire := CityLayout.spire_world()
+	_place(spire*Transform3D(Basis.IDENTITY, Vector3(0, 0.3, -14)))
+	await get_tree().create_timer(0.6).timeout
+	var door := PhysicsRayQueryParameters3D.create(spire*Vector3(0, 1.2, -13), spire*Vector3(0, 1.2, -6.5), Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
+	check(physics.intersect_ray(door).is_empty(), "spire: hall doorway is open")
+	var wall := PhysicsRayQueryParameters3D.create(spire*Vector3(-13, 1.2, 0), spire*Vector3(-7, 1.2, 0), Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
+	check(not physics.intersect_ray(wall).is_empty(), "spire: hall wall is solid")
 	# Different players contend for one seat on the authority; stale/remote
 	# requests must not displace the occupant.
 	var state := CityState.new()

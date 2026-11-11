@@ -32,12 +32,12 @@ void vertex() {
 	float coverage = 1.0 - smoothstep(detail_far_start, detail_far_end, distance_to_eye);
 	if (detail_near > 0.0) coverage *= smoothstep(detail_near, detail_near + 20.0, distance_to_eye);
 	float visibility = coverage * tile_visibility;
+	// Fully faded plants collapse to a point (vertex shaders can't return early).
 	if (visibility <= 0.001) {
 		VERTEX = vec3(0.0);
-		return;
 	}
 	VERTEX.y *= visibility;
-	if (sway > 0.0) {
+	if (sway > 0.0 && visibility > 0.001) {
 		vec3 base = MODEL_MATRIX[3].xyz;
 		vec3 displacement = vec3(0.0);
 		vec3 up = normalize(base - planet_center);

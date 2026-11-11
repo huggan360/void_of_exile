@@ -160,45 +160,52 @@ const MASK_SIZE := 1024  # texels a face side in mask_texture()
 const MASK_REACH := 0.62  # the face coordinate (over the radius) at its texture's edge
 
 ## Every road as a dense polyline of unit directions (Catmull-Rom through its
-## waypoints), ends at a city run on to the city's outer street.
+## waypoints). Each town's avenues end in gates (CityTown): every gate gets a
+## road out to the nearest farm road that way, and farm roads that ran into a
+## town are cut at its edge and led to its nearest gate.
 static func curves() -> Array:
 	if not _curves.is_empty(): return _curves
 	var r := CityLayout.radius()
-	# Connect the relocated towns to the existing rural network.
-	var roads: Array = ROADS.duplicate(true)
+	var gates: Array[Vector3] = []
 	for d: Dictionary in CityLayout.DISTRICTS:
-		var center := CityLayout.district_frame(d).origin.normalized()
-		var nearest := Vector3.UP
-		var distance := INF
-		for road: Array in ROADS:
-			for point: Vector3 in road:
-				var angle := center.angle_to(point)
-				if angle<distance:
-					distance = angle
-					nearest = point
-		var edge_angle := float(d.extent)*PI/(2.0*CityLayout.N)
-		if distance>edge_angle:
-			var edge := center.slerp(nearest, edge_angle/distance)
-			roads.append([edge, edge.slerp(nearest, 0.5), nearest])
-	for road: Array in roads:
+		for g: Vector2 in CityTown.plan(d).gates: gates.append(CityTown.dir(d, g))
+	var roads: Array = []
+	for road: Array in ROADS:
 		var pts: Array[Vector3] = []
 		for p: Vector3 in road: pts.append(p)
-		for end in [0, pts.size()-1]:
-			for d: Dictionary in CityLayout.DISTRICTS:
-				var c := CityLayout.district_frame(d).origin.normalized()
-				var at: Vector3 = pts[end]
-				var angle := at.angle_to(c)
-				var edge_angle := float(d.extent)*PI/(2.0*CityLayout.N)
-				if angle>0.001 and angle<0.21:
-					var edge := c.slerp(at, edge_angle/angle)
-					if end==0: pts.insert(0, edge)
-					else: pts.append(edge)
+		# Cut where it enters a town; each outside piece runs on to a gate.
+		var piece: Array[Vector3] = []
+		for k in pts.size():
+			if _in_town(pts[k]):
+				if piece.size()>=1:
+					piece.append(_nearest_gate(gates, piece[-1]))
+					if piece.size()>=2: roads.append(piece)
+				piece = []
+				continue
+			if piece.is_empty() and k>0: piece.append(_nearest_gate(gates, pts[k]))
+			piece.append(pts[k])
+		if piece.size()>=2: roads.append(piece)
+	for gate: Vector3 in gates:
+		# Out of the gate a little, then to the nearest farm road point beyond.
+		var out := gate+(gate-_town_center(gate)).normalized()*0.012
+		out = out.normalized()
+		var best := Vector3.INF
+		var best_angle := 0.5
+		for road: Array in ROADS:
+			for point: Vector3 in road:
+				var angle := gate.angle_to(point)
+				if angle>best_angle or _in_town(point) or (point-gate).normalized().dot((out-gate).normalized())<0.3: continue
+				best_angle = angle
+				best = point
+		if best.is_finite(): roads.append([gate, out, best])
+		else: roads.append([gate, out])
+	for pts: Array in roads:
 		var out: Array[Vector3] = []
 		for k in pts.size()-1:
-			var p0 := pts[maxi(k-1, 0)]
-			var p1 := pts[k]
-			var p2 := pts[k+1]
-			var p3 := pts[mini(k+2, pts.size()-1)]
+			var p0: Vector3 = pts[maxi(k-1, 0)]
+			var p1: Vector3 = pts[k]
+			var p2: Vector3 = pts[k+1]
+			var p3: Vector3 = pts[mini(k+2, pts.size()-1)]
 			var steps := maxi(1, ceili(p1.angle_to(p2)*r/SAMPLE))
 			for s in steps:
 				var t := float(s)/steps
@@ -209,6 +216,27 @@ static func curves() -> Array:
 		out.append(pts[-1])
 		_curves.append(out)
 	return _curves
+
+## A farmstead still out in the fields (the towns have grown over some).
+static func farm_open(k: int) -> bool:
+	return not _in_town(FARMS[k][0]) and not _in_town((farm_frame(k)*Vector3(0, 0, 40)).normalized())
+
+## Whether a direction lies inside one of the towns (their planned edge).
+static func _in_town(dir: Vector3) -> bool:
+	return CityTown.in_any(dir, -10.0)
+
+static func _nearest_gate(gates: Array[Vector3], to: Vector3) -> Vector3:
+	var best := gates[0]
+	for g in gates:
+		if g.angle_to(to)<best.angle_to(to): best = g
+	return best
+
+static func _town_center(at: Vector3) -> Vector3:
+	var best := CityLayout.district_frame(CityLayout.DISTRICTS[0]).origin.normalized()
+	for d: Dictionary in CityLayout.DISTRICTS:
+		var c := CityLayout.district_frame(d).origin.normalized()
+		if c.angle_to(at)<best.angle_to(at): best = c
+	return best
 
 ## A farmstead's yard frame (planet space, on the ground): +Z points into the
 ## widest gap between the roads that leave it, where the buildings stand.
@@ -248,6 +276,7 @@ static func mask_texture() -> ImageTexture:
 		for dir: Vector3 in curve: _stamp(image, dir, ROAD_HALF+1.8)
 	_road_image = image.duplicate()
 	for k in FARMS.size():
+		if not farm_open(k): continue
 		var frame := farm_frame(k)
 		for z: float in [0.0, 16.0, 32.0, 48.0, 64.0]: _stamp(image, (frame*Vector3(0, 0, z)).normalized(), 32.0)
 	var n := CityLayout.N

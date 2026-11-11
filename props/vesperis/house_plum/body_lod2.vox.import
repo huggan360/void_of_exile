@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chrbulongay5x"
+path="res://.godot/imported/body_lod2.vox-9118f2f5477f030fdc4694cf043ab9b2.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/house_plum/body_lod2.vox"
+dest_files=["res://.godot/imported/body_lod2.vox-9118f2f5477f030fdc4694cf043ab9b2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true
