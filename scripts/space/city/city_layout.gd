@@ -2,15 +2,16 @@ class_name CityLayout
 ## Vesperis, the Lantern City: a planet that is one city. Data only, the same
 ## on the server and every client (no randomness that is not seeded here).
 ##
-## The ground is a perfect sphere. A grid of cells covers it (each cube face,
-## equal-angle, split into N x N cells): it says where the three towns lie (a
-## round, ragged blob of cells round each spaceport, `reach` wobbling with the
-## angle) and the rest is farmland (CityCountry). Each town's streets, houses,
-## halls, plazas, parks and pond are grown from its own plan (CityTown), with no
-## grid in them: the cafes, bars and shops you can walk into and sit in stand in
-## timber halls along the avenues near the port, voxel houses (CityHouses) line
-## every street. Lanternheart has the Lantern Spire, whose attendants take you
-## up to its orb.
+## The ground is a perfect sphere. A grid of cells covers it: each cube face
+## (equal-angle) is split into N x N cells and streets run along every cell
+## edge over the whole planet (bent and nudged so they read as grown, see
+## CityRoads), through the towns and the farmland alike. A town is a round,
+## ragged blob of cells round a spaceport (reach, wobbling with the angle): a
+## ring of timber halls round its port holds the cafes, bars and shops you can
+## walk into and sit in, voxel houses fill the rest of its blocks (CityHouses),
+## with plazas, parks and lakes between them. Lanternheart has the Lantern
+## Spire, whose attendants take you up to its orb. Outside the towns the
+## blocks are fields (CityCountry).
 ##
 ## Every building piece stands in its own tangent frame (planet space, Y up
 ## the local normal), so floors are level wherever they are.
@@ -20,17 +21,27 @@ const ROAD := 4.5  # half width of the carriageway (m)
 const WALK := 3.5  # sidewalk width on each side
 const FACES: Array[Vector3] = [Vector3.RIGHT, Vector3.LEFT, Vector3.UP, Vector3.DOWN, Vector3.BACK, Vector3.FORWARD]
 ## A town: the 2 x 2 cells inside `corner` (cells corner-1..corner) are its
-## spaceport. `reach` is its radius in cells (the outline wobbles round it).
+## spaceport. `reach` is its radius in cells (the outline wobbles round it),
+## `shops` how far out from the port the ring of halls goes. Special cells are
+## offsets from `corner` (the cell corner-ish (i, j) is corner+offset).
 const DISTRICTS := [
 	{id = "lanternheart", name = "Lanternheart", port = "Lanternheart Spaceport", face = 2, corner = Vector2i(14, 14),
-		tint = "e8cc9a", neon = "d7ab68", reach = 5.4, seed = 0.31},
+		tint = "e8cc9a", neon = "d7ab68", reach = 5.4, shops = 2.9, seed = 0.31,
+		plaza = [Vector2i(1, 0), Vector2i(-3, 1), Vector2i(2, -3)], park = [Vector2i(-4, -1), Vector2i(-4, 0), Vector2i(3, 3)],
+		lake = [Vector2i(-1, 3), Vector2i(0, 3)], rounds = [Vector2i(3, -2), Vector2i(-3, 3), Vector2i(-2, -3), Vector2i(4, 2)]},
 	{id = "rosewater", name = "Rosewater", port = "Rosewater Docks", face = 4, corner = Vector2i(13, 16),
-		tint = "e8d9bc", neon = "b9c9bd", reach = 4.0, seed = 0.67},
+		tint = "e8d9bc", neon = "b9c9bd", reach = 4.0, shops = 2.4, seed = 0.67,
+		plaza = [Vector2i(1, 1)], park = [Vector2i(2, -2), Vector2i(-1, 2)],
+		lake = [Vector2i(-3, -1), Vector2i(-3, 0)], rounds = [Vector2i(2, 2), Vector2i(-2, -2)]},
 	{id = "brasswork", name = "Brasswork Heights", port = "Brasswork Skyport", face = 1, corner = Vector2i(15, 13),
-		tint = "dac39b", neon = "b9935e", reach = 4.4, seed = 0.13},
+		tint = "dac39b", neon = "b9935e", reach = 4.4, shops = 2.4, seed = 0.13,
+		plaza = [Vector2i(-2, -2)], park = [Vector2i(2, 1), Vector2i(2, 2)],
+		lake = [Vector2i(-2, 1)], rounds = [Vector2i(-2, 2), Vector2i(3, -2)]},
 ]
-## The Lantern Spire stands in Lanternheart (CityTown places it by the ring road).
+## The Lantern Spire stands in Lanternheart's cell corner+SPIRE_CELL, its door
+## toward the plaza in the next cell (+j).
 const SPIRE_DISTRICT := "lanternheart"
+const SPIRE_CELL := Vector2i(1, -1)
 ## The orb (make_vesperis_houses.py): its middle, radius and floor above the ground.
 const ORB_CENTER := 92.0
 const ORB_RADIUS := 14.0
@@ -138,13 +149,17 @@ static func edge(d: Dictionary, angle: float) -> float:
 	var seed := float(d.seed)*TAU
 	return float(d.reach)*(1.0+0.16*sin(angle*3.0+seed)+0.09*sin(angle*5.0-seed*2.0))
 
-## "farm" outside the towns, "port" under a spaceport, else "town".
 static func role(face: int, i: int, j: int) -> String:
 	var at := district_of(face, i, j)
-	if at.is_empty(): return "farm"
+	if at.is_empty(): return "farm"  # outside the three towns: farmland (CityCountry)
 	var rel: Vector2i = at.rel
 	if rel.x in [-1, 0] and rel.y in [-1, 0]: return "port"
-	return "town"
+	var d: Dictionary = at.district
+	if d.id==SPIRE_DISTRICT and rel==SPIRE_CELL: return "spire"
+	for kind: String in ["plaza", "park", "lake"]:
+		if rel in d[kind]: return kind
+	if (at.offset as Vector2).length()<float(d.shops): return "venues"
+	return "district"
 
 static func district(id: String) -> Dictionary:
 	for d: Dictionary in DISTRICTS:
@@ -247,22 +262,42 @@ static func venues(d: Dictionary) -> Array:
 	var key := "venues:"+str(d.id)
 	if _cache.has(key): return _cache[key]
 	var out: Array = []
+	var n := 0
 	var shops_dealt := 0
-	var rooms: Array = CityTown.plan(d).rooms
-	for n in rooms.size():
-		var kind: String = VENUE_CYCLE[(n+DISTRICTS.find(d)*3) % VENUE_CYCLE.size()]
-		var room: Dictionary = rooms[n]
-		var v := _venue("%s_r%d" % [d.id, n], kind, CityTown.frame(d, room.at, room.forward), d, n+1)
-		v.hall = HALLS[(n+DISTRICTS.find(d)) % HALLS.size()] if not kind in ["bar", "noodle", "arcade"] \
-			else NEON_HALLS[(n+DISTRICTS.find(d)) % NEON_HALLS.size()]
-		# Shop rooms get a real shop (Shops), dealt round so every kind is somewhere.
-		if kind.begins_with("shop"):
-			v.shop = SHOP_ROTATION[(DISTRICTS.find(d)*6+shops_dealt) % SHOP_ROTATION.size()]
-			v.name = str(Shops.DEFS[v.shop].name)
-			shops_dealt += 1
-		out.append(v)
+	for item: Dictionary in district_cells(d):
+		var c: Dictionary = item.cell
+		var frame: Transform3D = c.frame
+		if str(item.role)!="venues": continue
+		for side: int in [-1, 1]:
+			var kind: String = VENUE_CYCLE[(n+DISTRICTS.find(d)*3) % VENUE_CYCLE.size()]
+			n += 1
+			# Along its own street (front or back of the block), door to the sidewalk.
+			var street := room_street(c, side)
+			var at := frame*Vector3(street[0].x, 0, street[0].y)
+			var dir := at.normalized()
+			var room := _tangent(dir, frame.basis*Vector3(street[1].x, 0, street[1].y))
+			var v := _venue("%s_%d_%d_%d" % [d.id, item.local.x, item.local.y, side+1], kind, room, d, n)
+			v.hall = HALLS[(n+DISTRICTS.find(d)) % HALLS.size()] if not kind in ["bar", "noodle", "arcade"] \
+				else NEON_HALLS[(n+DISTRICTS.find(d)) % NEON_HALLS.size()]
+			# Shop rooms get a real shop (Shops), dealt round so every kind is somewhere.
+			if kind.begins_with("shop"):
+				v.shop = SHOP_ROTATION[(DISTRICTS.find(d)*6+shops_dealt) % SHOP_ROTATION.size()]
+				v.name = str(Shops.DEFS[v.shop].name)
+				shops_dealt += 1
+			out.append(v)
 	_cache[key] = out
 	return out
+
+## A shop room's place on its street: [local centre, inward normal (local)]:
+## the front wall flush with the sidewalk's inner edge, square to the street.
+static func room_street(c: Dictionary, side: int) -> Array:
+	var j := int(c.j)+(0 if side<0 else 1)
+	var a := CityRoads.corner_local(int(c.face), int(c.i), j, c.frame)
+	var b := CityRoads.corner_local(int(c.face), int(c.i)+1, j, c.frame)
+	var along := (b-a).normalized()
+	var inward := Vector2(-along.y, along.x)
+	if inward.dot(-(a+b)*0.5)<0.0: inward = -inward
+	return [(a+b)*0.5+inward*(ROAD+WALK+0.2+ROOM.z*0.5), inward]
 
 static func _venue(key: String, kind: String, frame: Transform3D, d: Dictionary, n: int) -> Dictionary:
 	var names: Array = VENUE_NAMES.get(kind, VENUE_NAMES.get(kind.split("_")[0], ["Lantern Hall"]))
@@ -374,8 +409,11 @@ static func seat(id: String) -> Dictionary:
 static func spire_frame() -> Transform3D:
 	if _cache.has("spire"): return _cache.spire
 	var d := district(SPIRE_DISTRICT)
-	var spot: Dictionary = CityTown.plan(d).spire
-	var out := CityTown.frame(d, spot.at, spot.forward)
+	var c: Vector2i = d.corner
+	var here := cell(int(d.face), c.x+SPIRE_CELL.x, c.y+SPIRE_CELL.y)
+	var front := cell(int(d.face), c.x+SPIRE_CELL.x, c.y+SPIRE_CELL.y+1)
+	var at := (here.frame as Transform3D).origin
+	var out := _tangent(at.normalized(), at-(front.frame as Transform3D).origin)
 	_cache.spire = out
 	return out
 
@@ -426,29 +464,30 @@ static func any_seat(id: String) -> Dictionary:
 
 # --- People and traffic (time-driven, the same for everyone) ---------------------------------
 
-## Sidewalk walks of a town: up one side of each street and back down the
-## other, as world points (a walker pauses at each).
+## Sidewalk loops of a district: rings around its blocks, as world points.
 static func walk_loops(d: Dictionary) -> Array:
 	var key := "loops:"+str(d.id)
 	if _cache.has(key): return _cache[key]
 	var out: Array = []
 	var center := (planet().center as Vector3)
-	for street: Dictionary in CityTown.plan(d).streets:
-		var pts: PackedVector2Array = street.pts
-		var off := float(street.half)+CityTown.WALK*0.5
-		var loop: Array[Vector3] = []
-		for side: float in [1.0, -1.0]:
-			var last := Vector2(1e9, 1e9)
-			for q in pts.size():
-				var k := q if side>0.0 else pts.size()-1-q
-				var along := (pts[mini(k+1, pts.size()-1)]-pts[maxi(k-1, 0)]).normalized()
-				var p := pts[k]+Vector2(-along.y, along.x)*off*side
-				if q>0 and q<pts.size()-1 and p.distance_to(last)<9.0: continue
-				last = p
-				loop.append(center+CityTown.dir(d, p)*(radius()+0.05))
-		if loop.size()>=4: out.append(loop)
+	for item: Dictionary in district_cells(d):
+		var c: Dictionary = item.cell
+		for block: Dictionary in CityRoads.blocks(int(c.face), int(c.i), int(c.j)):
+			var frame: Transform3D = block.frame
+			var loop: Array[Vector3] = []
+			var line := CityRoads.outline(block, ROAD+WALK*0.5, 18)
+			for k in line.size():
+				# Thin the ring to its turns (walkers pause at each).
+				if k>0 and k<line.size()-1 and line[k].distance_to(loop_last(loop, frame, center))<6.0: continue
+				loop.append(center+(frame*Vector3(line[k].x, 0, line[k].y)).normalized()*(radius()+CityRoads.KERB))
+			if loop.size()>=3: out.append(loop)
 	_cache[key] = out
 	return out
+
+static func loop_last(loop: Array[Vector3], frame: Transform3D, center: Vector3) -> Vector2:
+	if loop.is_empty(): return Vector2(1e9, 1e9)
+	var p := frame.affine_inverse()*((loop[-1]-center).normalized()*radius())
+	return Vector2(p.x, p.z)
 
 ## Walkers of a district: {model, loop, phase, speed, pause}.
 const FOLK := ["city_courier", "city_noble", "city_guard", "city_mechanic", "city_kid", "city_dancer", "city_elder", "city_vendor",
@@ -460,7 +499,7 @@ static func walkers(d: Dictionary) -> Array:
 	if _cache.has(key): return _cache[key]
 	var out: Array = []
 	var loops := walk_loops(d)
-	for k in clampi(int(CityTown.plan(d).houses.size()/8), 16, 70):
+	for k in clampi(int(district_cells(d).size()*0.6), 16, 60):
 		var s := rnd(float(DISTRICTS.find(d)+1)*0.37, k)
 		out.append({id = k, model = FOLK[int(rnd(s, 3)*FOLK.size()) % FOLK.size()], loop = int(rnd(s, 1)*loops.size()) % loops.size(),
 			phase = rnd(s, 2), speed = 1.1+rnd(s, 4)*0.7, reverse = rnd(s, 5)<0.5, chat = rnd(s, 6)<0.3})
@@ -502,26 +541,24 @@ static func walker_pose(d: Dictionary, w: Dictionary, t: float) -> Array:
 		at -= seg+stop
 	return [loop[0], Vector3.FORWARD, true]
 
-## Traffic lanes: {kind, points (world), altitude, speed, count, models}: cabs
-## and carts along each town's ring road, avenues and crescent lanes.
+## Traffic lanes: {kind, points (world), altitude, speed, count, models}: carts
+## and cabs along the streets of each town, every grid line across it, split
+## where a park, lake or the spaceport drops the street.
 static func lanes() -> Array:
 	if _cache.has("lanes"): return _cache.lanes
 	var out: Array = []
 	var p := planet()
 	var center := (p.center as Vector3)
 	for d: Dictionary in DISTRICTS:
-		var streets: Array = CityTown.plan(d).streets
-		for n in streets.size():
-			var st: Dictionary = streets[n]
-			if st.kind=="lane": continue
-			var dirs: Array[Vector3] = []
-			var pts: PackedVector2Array = st.pts
-			for q in range(0, pts.size(), 2): dirs.append(CityTown.dir(d, pts[q]))
-			if (pts.size()-1) % 2: dirs.append(CityTown.dir(d, pts[pts.size()-1]))
-			if dirs.size()<3: continue
-			var dk := DISTRICTS.find(d)*1000+n
-			out.append({kind = "ground", dirs = dirs, altitude = 0.0, side = 1.7, speed = 6.0+rnd(0.3, dk)*3.0, count = maxi(1, dirs.size()/10),
-				models = ["ground_cab", "ground_truck", "ground_tram", "ground_cab"], seed = dk})
+		var f := int(d.face)
+		var c: Vector2i = d.corner
+		var span := ceili(float(d.reach)*1.4)+1
+		for k in range(-span, span+1):
+			for along_u: bool in [true, false]:
+				var dk := DISTRICTS.find(d)*1000+(k+span)*2+(1 if along_u else 0)
+				for run: Array in street_runs(f, c, k, along_u, span):
+					out.append({kind = "ground", dirs = run, altitude = 0.0, side = 2.2, speed = 7.0+rnd(0.3, dk)*3.0, count = maxi(1, run.size()/8),
+						models = ["ground_cab", "ground_truck", "ground_tram", "ground_cab"], seed = dk+run.size()*1000})
 	for lane: Dictionary in out:
 		var pts: Array[Vector3] = []
 		for dir: Vector3 in lane.dirs: pts.append(center+dir*(radius()+float(lane.altitude)))
@@ -554,6 +591,57 @@ static func lanes() -> Array:
 	_cache.lanes = out
 	return out
 
+## The streets of a town's grid line `k` (an offset from its corner) as
+## unit-direction polylines across `span` cells either way, split where a park,
+## lake or the port drops a street, going round the roundabouts on their ring.
+static func street_runs(face: int, corner: Vector2i, k: int, along_u: bool, span: int) -> Array:
+	var runs: Array = []
+	var run: Array[Vector3] = []
+	var at := func(s: int) -> Vector2i: return Vector2i(corner.x-span+s, corner.y+k) if along_u else Vector2i(corner.x+k, corner.y-span+s)
+	for s in span*2:
+		var a: Vector2i = at.call(s)
+		var b: Vector2i = at.call(s+1)
+		if a.x<0 or a.y<0 or a.x>=N or a.y>=N or b.x>N or b.y>N:
+			if run.size()>2: runs.append(run)
+			run = []
+			continue
+		var node := CityRoads.node(face, a.x, a.y)
+		var present: bool = node[3] if along_u else node[5]
+		if not present:
+			if run.size()>2: runs.append(run)
+			run = []
+			continue
+		if run.is_empty(): run.append(CityRoads.dir(face, a.x, a.y))
+		run.append(node[2] if along_u else node[4])
+		run.append(CityRoads.dir(face, b.x, b.y))
+	if run.size()>2: runs.append(run)
+	# Round the roundabouts (inner corners of a run) on the middle of the ring.
+	var out: Array = []
+	for line: Array in runs:
+		var pts: Array[Vector3] = []
+		for q in line.size():
+			var here: Vector3 = line[q]
+			var g := face_uv(here)
+			var gi := roundi((float(g[1])+1.0)*0.5*N)
+			var gj := roundi((float(g[2])+1.0)*0.5*N)
+			var island := CityRoads.round_at(face, gi, gj) if q % 2==0 else 0.0
+			if island<=0.0 or q==0 or q==line.size()-1:
+				pts.append(here)
+				continue
+			var frame := _tangent(here, Vector3.UP if absf(here.y)<0.9 else Vector3.RIGHT)
+			var inv := frame.affine_inverse()
+			var p0 := inv*((line[q-1] as Vector3)*radius())
+			var p1 := inv*((line[q+1] as Vector3)*radius())
+			var a0 := atan2(p0.z, p0.x)
+			var a1 := atan2(p1.z, p1.x)
+			var sweep := fposmod(a1-a0, TAU)  # counter-clockwise round the island
+			var ring := island+CityRoads.RING*0.5
+			for m in 7:
+				var a := a0+sweep*m/6.0
+				pts.append((frame*Vector3(cos(a)*ring, 0, sin(a)*ring)).normalized())
+		out.append(pts)
+	return out
+
 ## A vehicle on a lane at time t: [position, forward]. Lanes are driven both
 ## ways (out and back on either side of the line), so traffic never ends.
 static func vehicle_pose(lane: Dictionary, k: int, t: float) -> Array:
@@ -575,43 +663,58 @@ static func vehicle_pose(lane: Dictionary, k: int, t: float) -> Array:
 	if lane.kind=="sky": pos += up*sin(t*0.7+k)*0.6
 	return [pos, dir]
 
-## Lamps along every street, either side in turn, benches, bins and planters
-## between them and lantern strings across: [prop, frame, local at, yaw].
 static func street_furniture(data: Dictionary) -> Array:
-	var key := "furniture:"+str(data.id)
-	if _cache.has(key): return _cache[key]
 	var out: Array = []
-	var streets: Array = CityTown.plan(data).streets
-	for n in streets.size():
-		var st: Dictionary = streets[n]
-		var pts: PackedVector2Array = st.pts
-		var total := 0.0
-		for q in pts.size()-1: total += pts[q].distance_to(pts[q+1])
-		var s := 7.0
-		var k := 0
-		while s<total-7.0:
-			var at := 0.0
-			var q := 0
-			while q<pts.size()-2 and at+pts[q].distance_to(pts[q+1])<s:
-				at += pts[q].distance_to(pts[q+1])
-				q += 1
-			var along := (pts[q+1]-pts[q]).normalized()
-			var p := pts[q].lerp(pts[q+1], clampf((s-at)/maxf(0.01, pts[q].distance_to(pts[q+1])), 0.0, 1.0))
-			var frame := CityTown.frame(data, p, along)  # -Z along the street, +X its right side
-			var side := 1.0 if k % 2==0 else -1.0
-			var edge := float(st.half)+CityTown.WALK*0.62
-			var face := PI*0.5 if side>0 else -PI*0.5  # toward the street
-			out.append(["street_lamp", frame, Vector3(side*edge, 0.02, 0), face])
-			var roll := rnd(0.17, n*1000+k)
-			var other := Vector3(-side*edge, 0.02, 2.5)
-			if roll<0.18: out.append(["bench", frame, other+Vector3(-side*0.3, 0, 0), -face])
-			elif roll<0.28: out.append(["planter", frame, other])
-			elif roll<0.34: out.append(["trash_bin", frame, other])
-			if k % 3==1 and st.kind!="lane": out.append(["lantern_span", frame*Transform3D(Basis(Vector3.UP, PI*0.5), Vector3.ZERO), Vector3.ZERO])
-			s += 14.0
-			k += 1
-	_cache[key] = out
+	var f := int(data.face)
+	var c: Vector2i = data.corner
+	var r := CityLayout.radius()
+	var seen := {}
+	for item: Dictionary in district_cells(data):
+			var i := int(item.cell.i)
+			var j := int(item.cell.j)
+			for street: Dictionary in CityRoads.cell_streets(f, i, j):
+				var ends: Array = street.ends
+				var key := "%s-%s" % [ends[0], ends[1]]
+				if seen.has(key): continue
+				seen[key] = true
+				var pts: Array = street.points
+				var clear_a := _junction_clear(f, ends[0])
+				var clear_b := _junction_clear(f, ends[1])
+				var a: Vector3 = (pts[0] as Vector3)*r
+				var m: Vector3 = (pts[1] as Vector3)*r
+				var b: Vector3 = (pts[2] as Vector3)*r
+				var total := a.distance_to(m)+m.distance_to(b)
+				var steps := int(total/6.5)
+				for s in steps:
+					var d := (s+0.5)*total/steps
+					if d<clear_a or total-d<clear_b or absf(d-total*0.5)<5.0: continue
+					var p := a.lerp(m, d/a.distance_to(m)) if d<a.distance_to(m) else m.lerp(b, (d-a.distance_to(m))/m.distance_to(b))
+					var dir := (m-a if d<a.distance_to(m) else b-m).normalized()
+					var up := p.normalized()
+					var x := dir.slide(up).normalized()
+					var frame := Transform3D(Basis(x, up, x.cross(up)), up*r)
+					for side: float in [-1.0, 1.0]:
+						var at := Vector3(0, CityRoads.KERB+0.02, side*(CityLayout.ROAD+CityLayout.WALK*0.72))
+						var salt := s*10+(1 if side>0 else 0)+key.hash() % 1000*100
+						if s % 3==0:
+							out.append(["street_lamp", frame, at, PI*0.5 if side>0 else -PI*0.5])
+						else:
+							var roll := CityLayout.rnd(0.17, salt)
+							if roll<0.12: out.append(["bench", frame, at+Vector3(0, 0, side*0.5), 0.0 if side>0 else PI])
+							elif roll<0.2: out.append(["trash_bin", frame, at])
+							elif roll<0.25: out.append(["vending_machine", frame, at+Vector3(0, 0, side*0.7), 0.0 if side>0 else PI])
+							elif roll<0.32: out.append(["planter", frame, at])
+					if s % 3==1:
+						out.append(["lantern_span", frame, Vector3.ZERO])
+
 	return out
+
+## How far from a corner the street furniture keeps clear (the junction, or
+## the roundabout's ring and its sidewalk).
+static func _junction_clear(face: int, corner: Vector2i) -> float:
+	var island := CityRoads.round_at(face, corner.x, corner.y)
+	return island+CityRoads.RING+CityLayout.WALK+1.5 if island>0.0 else CityLayout.ROAD+CityLayout.WALK+2.0
+
 
 static func bench_key(district_id: String, pose: Transform3D) -> String:
 	var at := pose.origin.snapped(Vector3.ONE*0.01)
@@ -639,32 +742,39 @@ static func bench_frames(d: Dictionary) -> Array[Transform3D]:
 	var port := district_frame(d)
 	for row in 2:
 		for k in 4: out.append(port*Transform3D(Basis.IDENTITY, Vector3(-9.0+k*6.0, 0.04, -17.0+row*4.0)))
-	var plan := CityTown.plan(d)
-	for spot: Array in plan.plazas:
-		var frame := CityTown.frame(d, spot[0], Vector2(0, -1))
-		var bench := minf(10.0, minf(13.4, float(spot[1])*0.75)*0.75)  # as CityDistrict._plaza
-		for k in 8:
-			if k % 2==0: continue
-			var a := TAU*k/8.0+0.39
-			out.append(frame*Transform3D(Basis(Vector3.UP, -a+PI*0.5), Vector3(cos(a)*bench, 0.1, sin(a)*bench)))
-	for role: String in ["parks", "lakes"]:
-		for spot: Array in plan[role]:
-			var block := CityTown.green_block(d, spot, "lake" if role=="lakes" else "park")
-			var frame: Transform3D = block.frame
-			var seed := rnd(float(d.seed), int((spot[0] as Vector2).length()))
-			var lot := ROAD+WALK+0.8
-			var lake: bool = role=="lakes"
-			var spots := CityArt.pack(block, lot+1.5, seed, 3, 6.0, 60.0) if lake else CityArt.pack(block, lot, seed, 4, 5.0, 40.0)
-			for k in spots.size():
-				var at: Vector2 = spots[k][0]
-				var rr := float(spots[k][1])+(2.6 if lake else 0.0)
-				var count := 6 if lake else 4
-				for b in count:
-					if b % 2!=0: continue
-					var a := TAU*(b+0.5)/count+k
-					var p := at+Vector2.from_angle(a)*(rr+1.6 if lake else rr*0.85)
-					if CityRoads.field(block, p)<lot+0.5: continue
-					out.append(frame*Transform3D(Basis(Vector3.UP, -a+PI*0.5 if lake else -a-PI*0.5), Vector3(p.x, CityRoads.drop(p)+0.15, p.y)))
+	for item: Dictionary in district_cells(d):
+		var c: Dictionary = item.cell
+		if item.role=="plaza":
+			var blocks := CityRoads.blocks(int(c.face), int(c.i), int(c.j))
+			if blocks.is_empty(): continue
+			var block: Dictionary = blocks[0]
+			var seed: Vector2 = block.seed
+			var room := CityRoads.field(block, seed)-ROAD-WALK-1.0
+			if room<7.0: continue
+			var cell_frame: Transform3D = block.frame
+			var frame := Transform3D(cell_frame.basis, cell_frame*Vector3(seed.x, CityRoads.drop(seed), seed.y))
+			var bench := minf(10.0, minf(13.4, room*0.75)*0.75)
+			for k in 8:
+				if k % 2==0: continue
+				var a := TAU*k/8.0+0.39
+				out.append(frame*Transform3D(Basis(Vector3.UP, -a+PI*0.5), Vector3(cos(a)*bench, 0.1, sin(a)*bench)))
+		elif item.role in ["park", "lake"]:
+			for block: Dictionary in CityRoads.blocks(int(c.face), int(c.i), int(c.j)):
+				var frame: Transform3D = block.frame
+				var seed := rnd(float(c.seed), 40+int(block.sub))
+				var lot := ROAD+WALK+0.8
+				var lake: bool = block.role=="lake"
+				var spots := CityArt.pack(block, lot+1.5, seed, 3, 6.0, 60.0) if lake else CityArt.pack(block, lot, seed, 4, 5.0, 40.0)
+				for k in spots.size():
+					var at: Vector2 = spots[k][0]
+					var rr := float(spots[k][1])+(2.6 if lake else 0.0)
+					var count := 6 if lake else 4
+					for b in count:
+						if b % 2!=0: continue
+						var a := TAU*(b+0.5)/count+k
+						var p := at+Vector2.from_angle(a)*(rr+1.6 if lake else rr*0.85)
+						if CityRoads.field(block, p)<lot+0.5: continue
+						out.append(frame*Transform3D(Basis(Vector3.UP, -a+PI*0.5 if lake else -a-PI*0.5), Vector3(p.x, CityRoads.drop(p)+0.15, p.y)))
 	for item: Array in street_furniture(d):
 		if item[0]=="bench": out.append((item[1] as Transform3D)*Transform3D(Basis(Vector3.UP, float(item[3]) if item.size()>3 else 0.0), item[2]))
 	return out

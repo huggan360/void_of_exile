@@ -1,8 +1,7 @@
 class_name CityCountryArt
 ## Vesperis's farmland on the client (CityCountry's data): each farmstead's red
 ## barn, silos, farmhouse, gravel yard, fenced pasture (the cows are CityLife's),
-## sometimes a pond; trees along the country roads; and the roads themselves
-## as dirt ribbons laid on the ground.
+## sometimes a pond.
 const RED := Color("a8322c")
 const TRIM := Color("efe6d6")
 const ROOF := Color("4a3a3a")
@@ -11,11 +10,9 @@ const WOOD := Color("7a5236")
 const HAY := Color("d8b45a")
 const GRAVEL := Color("9a8a70")
 ## Where the pasture fence stands in a yard frame (x from, x to, z from, z to).
-const PASTURE := [-14.0, 14.0, 44.0, 68.0]
+const PASTURE := [-15.0, -3.0, 0.0, 14.0]  # x0, x1, z0, z1 in the yard frame
 
-static var _road_material: ShaderMaterial
-
-## Every farmstead and roadside tree into `batch`; collision per city cell into `solids`.
+## Every farmstead into `batch`; collision per city cell into `solids`.
 static func build(batch: CityPlanet.Batch, solids: Dictionary) -> void:
 	for k in CityCountry.FARMS.size():
 		if not CityCountry.farm_open(k): continue
@@ -25,25 +22,6 @@ static func build(batch: CityPlanet.Batch, solids: Dictionary) -> void:
 		art.seed = float(k)*0.137+0.05
 		_farm(art, k)
 		_keep(solids, frame.origin, list)
-	var n := 0
-	for curve: Array in CityCountry.curves():
-		for i in range(6, curve.size()-6, 11):
-			n += 1
-			if CityLayout.rnd(float(n)*0.071, 3)>0.4 or _near_city(curve[i], 0.22): continue
-			var dir: Vector3 = curve[i]
-			var frame := CityLayout._tangent(dir, (curve[i+1] as Vector3)-dir)
-			var list: Array = []
-			var art := CityArt.new(batch, frame, list)
-			var side := -1.0 if CityLayout.rnd(float(n)*0.071, 4)<0.5 else 1.0
-			var spot := frame*Vector3(side*(CityCountry.ROAD_HALF+3.5), 0, 0)
-			if CityCountry.masked(spot.normalized(), 1.5): continue  # another road or a yard
-			art.tree(Vector2(side*(CityCountry.ROAD_HALF+3.5), 0), lerpf(2.6, 4.0, CityLayout.rnd(float(n)*0.071, 5)), float(n)*0.071)
-			_keep(solids, frame.origin, list)
-
-static func _near_city(dir: Vector3, angle: float) -> bool:
-	for d: Dictionary in CityLayout.DISTRICTS:
-		if dir.angle_to(CityLayout.district_frame(d).origin.normalized())<angle: return true
-	return false
 
 ## Collision goes with the city cell it stands in (CityPlanet builds it near the player).
 static func _keep(solids: Dictionary, at: Vector3, list: Array) -> void:
@@ -57,18 +35,18 @@ static func _keep(solids: Dictionary, at: Vector3, list: Array) -> void:
 static func _ground(x: float, z: float) -> float:
 	return CityArt.ground(Vector2(x, z))
 
-## One farmstead in its yard frame (+Z away from the roads).
+## One farmstead in its yard frame, all within CityCountry.FARM_HALF of its
+## middle (it stands in a field block between the streets).
 static func _farm(art: CityArt, k: int) -> void:
-	# A gravel yard where the roads come in.
-	art.part("cyl", Vector3(0, _ground(0, 20)-0.12, 20), Basis.IDENTITY, Vector3(34, 0.3, 30), GRAVEL, CityArt.M_STONE)
-	_barn(art, Vector2(9, 28), -0.2+art.r()*0.4)
-	_silo(art, Vector2(22, 18), lerpf(11.0, 15.0, art.r()))
-	if art.r()<0.6: _silo(art, Vector2(24, 24), lerpf(8.0, 12.0, art.r()))
-	art._cottage(Vector3(-11, _ground(-11, 20), 20), 4.2)
+	art.part("cyl", Vector3(0, _ground(0, 0)-0.12, 0), Basis.IDENTITY, Vector3(26, 0.3, 26), GRAVEL, CityArt.M_STONE)
+	_barn(art, Vector2(6, 8), -0.2+art.r()*0.4)
+	_silo(art, Vector2(13, -6), lerpf(11.0, 15.0, art.r()))
+	if art.r()<0.6: _silo(art, Vector2(13.5, 0.5), lerpf(8.0, 12.0, art.r()))
+	art._cottage(Vector3(-9, _ground(-9, -8), -8), 4.2)
 	_pasture(art)
-	for i in 3: _bale(art, Vector2(-4+i*2.2, 34+art.r()), art.r()*TAU)
-	if k % 3==0: art.lake_pool(Vector2(-27, 32), 6.0)
-	for spot: Vector2 in [Vector2(-20, 8), Vector2(30, 36), Vector2(-24, 52), Vector2(24, 60)]:
+	for i in 3: _bale(art, Vector2(-4+i*2.2, -14+art.r()), art.r()*TAU)
+	if k % 3==0: art.lake_pool(Vector2(6, -12), 3.6)
+	for spot: Vector2 in [Vector2(-15, -15), Vector2(15, 15), Vector2(-15, 16), Vector2(16, -15)]:
 		if CityCountry.masked((art.frame*Vector3(spot.x, 0, spot.y)).normalized(), 3.0, true): continue  # a road runs there
 		art.tree(spot, lerpf(2.8, 4.2, art.r()), art.seed+spot.x*0.01)
 
@@ -159,45 +137,3 @@ static func cow_pose(farm: int, cow: int, t: float) -> Transform3D:
 	var local := Vector3(at.x, _ground(at.x, at.y), at.y)
 	var basis := Basis.looking_at(Vector3(heading.x, 0, heading.y), Vector3.UP)
 	return frame*Transform3D(basis, local)
-
-## The country roads as dirt ribbons a few centimetres over the fields.
-static func road_meshes(parent: Node3D) -> void:
-	var r := CityLayout.radius()
-	for curve: Array in CityCountry.curves():
-		var verts := PackedVector3Array()
-		var normals := PackedVector3Array()
-		var uvs := PackedVector2Array()
-		var along := 0.0
-		for i in curve.size():
-			var dir: Vector3 = curve[i]
-			var ahead: Vector3 = (curve[mini(i+1, curve.size()-1)] as Vector3)-(curve[maxi(i-1, 0)] as Vector3)
-			var side := dir.cross(ahead).normalized()
-			if i>0: along += (dir-(curve[i-1] as Vector3)).length()*r
-			for s: float in [-1.0, 1.0]:
-				verts.append(dir*(r+0.05)+side*s*CityCountry.ROAD_HALF)
-				normals.append(dir)
-				uvs.append(Vector2(0.5+s*0.5, along))
-		var indices := PackedInt32Array()
-		for i in curve.size()-1:
-			var a := i*2
-			indices.append_array([a, a+1, a+2, a+1, a+3, a+2])
-		var arrays := []
-		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX] = verts
-		arrays[Mesh.ARRAY_NORMAL] = normals
-		arrays[Mesh.ARRAY_TEX_UV] = uvs
-		arrays[Mesh.ARRAY_INDEX] = indices
-		var mesh := ArrayMesh.new()
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		var node := MeshInstance3D.new()
-		node.mesh = mesh
-		node.material_override = road_material()
-		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		node.visibility_range_end = 2600.0
-		parent.add_child(node)
-
-static func road_material() -> ShaderMaterial:
-	if _road_material == null:
-		_road_material = ShaderMaterial.new()
-		_road_material.shader = preload("res://shaders/country_road.gdshader")
-	return _road_material

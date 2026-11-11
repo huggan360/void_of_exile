@@ -87,11 +87,12 @@ func build() -> void:
 	add_child(_body)
 	_port()
 	var venues := CityLayout.venues(data)
-	var plan := CityTown.plan(data)
-	for n in (plan.plazas as Array).size(): _plaza(plan.plazas[n], n)
-	for role: String in ["parks", "lakes"]:
-		for spot: Array in plan[role]:
-			_green(CityTown.green_block(data, spot, "lake" if role=="lakes" else "park"), CityLayout.rnd(float(data.seed), int((spot[0] as Vector2).length())))
+	for item: Dictionary in CityLayout.district_cells(data):
+		match str(item.role):
+			"plaza": _plaza(item.cell)
+			"park", "lake":
+				for block: Dictionary in CityRoads.blocks(int(item.cell.face), int(item.cell.i), int(item.cell.j)):
+					_green(block, CityLayout.rnd(float(item.cell.seed), 40+int(block.sub)))
 	for v: Dictionary in venues: _room(v)
 	if data.id==CityLayout.SPIRE_DISTRICT: _spire()
 	_streets()
@@ -657,10 +658,16 @@ func _spire() -> void:
 ## A plaza on its block: cobbles (the ground's), a ring of paving round a
 ## fountain (a canal in Rosewater), benches and planters in a circle, trees,
 ## lamps and a vendor's stall, all sized to the room the streets leave.
-func _plaza(spot: Array, n: int) -> void:
-	var room := float(spot[1])
-	var frame := CityTown.frame(data, spot[0], Vector2(0, -1))
-	var node := _holder(frame, "Plaza_%d" % n)
+func _plaza(c: Dictionary) -> void:
+	var blocks := CityRoads.blocks(int(c.face), int(c.i), int(c.j))
+	if blocks.is_empty(): return
+	var block: Dictionary = blocks[0]
+	var cell_frame: Transform3D = block.frame
+	var seed: Vector2 = block.seed
+	var room := CityRoads.field(block, seed)-CityLayout.ROAD-CityLayout.WALK-1.0
+	if room<7.0: return
+	var frame := Transform3D(cell_frame.basis, cell_frame*Vector3(seed.x, CityRoads.drop(seed), seed.y))
+	var node := _holder(frame, "Plaza_%d_%d" % [c.i, c.j])
 	var art := NexusStation.Brush.new(node, false, 500.0)
 	var ring := minf(13.4, room*0.75)
 	art.round_part(Vector3(0, 0.05, 0), room, 0.1, Color("9a8c78"))
@@ -702,7 +709,7 @@ func _plaza(spot: Array, n: int) -> void:
 	for k in 4:
 		var a := TAU*k/4.0+PI*0.25
 		_prop("street_lamp", frame, Vector3(cos(a), 0, sin(a))*room*0.95+Vector3.UP*0.1)
-	_prop("noodle_stall" if n % 2 else "kiosk", frame, Vector3(room*0.8, 0.1, 0), PI*0.5)
+	_prop("noodle_stall" if (int(c.i)+int(c.j)) % 2 else "kiosk", frame, Vector3(room*0.8, 0.1, 0), PI*0.5)
 	_prop("hydrant_fountain", frame, Vector3(-room*0.8, 0.1, 3.0))
 	_prop("planter", frame, Vector3(-room*0.75, 0.1, -6.0), -PI*0.5)
 	art.finish()

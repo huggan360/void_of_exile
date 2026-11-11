@@ -222,11 +222,10 @@ void fragment() {
 			color = tex_at(slab_tex, vec2(info.x, across - 0.3));
 		}
 	} else {
-		// In the towns: lawns between the houses (the streets are meshes).
-		color = tex_at(grass_tex, vec2(dot(p, ax), dot(p, bx)));
+		color = tex_at(cobble_tex, vec2(dot(p, ax), dot(p, bx)));
 	}
 	// Far away the pixels give way to their average so nothing shimmers.
-	vec3 far_color = best < road ? vec3(0.17, 0.15, 0.2) : best < road + walk ? vec3(0.55, 0.52, 0.57) : vec3(0.27, 0.42, 0.25);
+	vec3 far_color = best < road ? vec3(0.17, 0.15, 0.2) : best < road + walk ? vec3(0.55, 0.52, 0.57) : vec3(0.45, 0.4, 0.46);
 	if (island >= 0.0) far_color = vec3(0.24, 0.4, 0.27);
 	if (farm && best >= road + 0.35 && !side) far_color = field_far;
 	color = mix(far_color, color, detail);

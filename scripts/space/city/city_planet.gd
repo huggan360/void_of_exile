@@ -189,8 +189,7 @@ func build() -> void:
 	# city never streams in after Space has loaded.
 	for face in 6:
 		for cj in range(0, CityLayout.N, CHUNK):
-			for ci in range(0, CityLayout.N, CHUNK): _done[Vector3i(face, ci/CHUNK, cj/CHUNK)] = true
-	for d: Dictionary in CityLayout.DISTRICTS: _build_town(d)
+			for ci in range(0, CityLayout.N, CHUNK): _build_chunk(face, ci, cj)
 	_build_country()
 	for d: Dictionary in CityLayout.DISTRICTS:
 		var district := CityDistrict.new()
@@ -244,114 +243,36 @@ func _update_frame(delta: float) -> void:
 		_timer = 0.25
 		_update_collision(to_local(local.global_position))
 
-# --- Skyline ------------------------------------------------------------------------------
+# --- Blocks ------------------------------------------------------------------------------
 
-## A town from its plan (CityTown): its houses, halls and the Spire, its parks,
-## pond and garden trees in one batch (kept on disk after the first time), the
-## walls' collision filed by grid cell for _update_collision, and its streets.
-func _build_town(d: Dictionary) -> void:
-	var holder := Node3D.new()
-	holder.name = "Town_"+str(d.id)
-	add_child(holder)
-	_streets(d, holder)
-	var file := _cache_file(-1, DISTRICTS_INDEX[d.id], 0)
+## A chunk of cells: its blocks and roundabouts in one batch (kept on disk
+## after the first time) and their walls' collision filed by cell.
+func _build_chunk(face: int, ci: int, cj: int) -> void:
+	var batch := Batch.new()
+	var file := _cache_file(face, ci, cj)
 	var kept := _read_cache(file)
 	if not kept.is_empty():
-		for key: Vector3i in kept.solids: (_solids.get_or_add(key, []) as Array).append_array(kept.solids[key])
-		Batch.new().flush(holder, "t", 9000.0, DETAIL_RANGE, kept.buffers, true, 96.0)
+		for key: Vector3i in kept.solids: _solids[key] = kept.solids[key]
+		_finish_chunk(face, ci, cj, batch, kept.buffers)
 		return
-	var batch := Batch.new()
-	var list: Array = []
-	var plan := CityTown.plan(d)
-	for h: Dictionary in plan.houses: CityHouses.place(batch, list, str(h.name), CityTown.frame(d, h.at, h.forward))
-	for v: Dictionary in CityLayout.venues(d): CityHouses.place(batch, list, str(v.hall), v.frame)
-	if not (plan.spire as Dictionary).is_empty():
-		CityHouses.place(batch, list, "spire_hall", CityLayout.spire_frame())
-		CityHouses.place(batch, list, "spire", CityLayout.spire_frame())
-	var lot := CityLayout.ROAD+CityLayout.WALK+1.0
-	for role: String in ["parks", "lakes"]:
-		for spot: Array in plan[role]:
-			var block := CityTown.green_block(d, spot, "lake" if role=="lakes" else "park")
-			var art := CityArt.new(batch, block.frame, list)
-			var seed := CityLayout.rnd(float(d.seed), int((spot[0] as Vector2).length()))
-			if role=="lakes": art.lake(block, lot, seed)
-			else: art.park(block, lot, seed, CityLayout.rnd(seed, 5)<0.35)
-	for k in (plan.green as Array).size():
-		var spot: Array = plan.green[k]
-		var art := CityArt.new(batch, CityTown.frame(d, spot[0], Vector2(0, -1)), list)
-		art.tree(Vector2.ZERO, float(spot[1]), CityLayout.rnd(float(d.seed), 7000+k))
-	var solids := {}
-	for solid: Array in list:
-		var at: Vector3 = (solid[0] as Transform3D).origin
-		var uv := CityLayout.face_uv(at.normalized())
-		var key := Vector3i(int(uv[0]), clampi(int(floor((float(uv[1])+1.0)*0.5*CityLayout.N)), 0, CityLayout.N-1),
-			clampi(int(floor((float(uv[2])+1.0)*0.5*CityLayout.N)), 0, CityLayout.N-1))
-		(solids.get_or_add(key, []) as Array).append(solid)
-	for key: Vector3i in solids: (_solids.get_or_add(key, []) as Array).append_array(solids[key])
+	for j in range(cj, mini(cj+CHUNK, CityLayout.N)):
+		for i in range(ci, mini(ci+CHUNK, CityLayout.N)):
+			var r := CityLayout.role(face, i, j)
+			if r in ["district", "park", "lake", "venues", "spire"]: _block(batch, face, i, j, r)
+			_island(batch, face, i, j)
 	var buffers := batch.buffers()
+	var solids := {}
+	for key: Vector3i in _solids:
+		if key.x==face and key.y/CHUNK==ci/CHUNK and key.z/CHUNK==cj/CHUNK: solids[key] = _solids[key]
 	_write_cache(file, {buffers = buffers, solids = solids})
-	batch.flush(holder, "t", 9000.0, DETAIL_RANGE, buffers, true, 96.0)
+	_finish_chunk(face, ci, cj, batch, buffers)
 
-const DISTRICTS_INDEX := {lanternheart = 0, rosewater = 1, brasswork = 2}
-
-## A town's streets as two meshes laid just over the ground: the sidewalks
-## (slabs, a kerb along the road) and over them the cobbled carriageways, so
-## where streets meet the cobbles run on cleanly.
-func _streets(d: Dictionary, holder: Node3D) -> void:
-	var r := CityLayout.radius()
-	for road in [false, true]:
-		var verts := PackedVector3Array()
-		var normals := PackedVector3Array()
-		var uvs := PackedVector2Array()
-		var uv2s := PackedVector2Array()
-		var indices := PackedInt32Array()
-		for st: Dictionary in CityTown.plan(d).streets:
-			var pts: PackedVector2Array = st.pts
-			var half := float(st.half)
-			var width := half if road else half+CityTown.WALK
-			var first := verts.size()
-			for q in pts.size():
-				var along := (pts[mini(q+1, pts.size()-1)]-pts[maxi(q-1, 0)]).normalized()
-				var across := Vector2(-along.y, along.x)
-				for s: float in [-1.0, 1.0]:
-					var p := pts[q]+across*s*width
-					var dir := CityTown.dir(d, p)
-					verts.append(dir*(r+(0.06 if road else 0.035)))
-					normals.append(dir)
-					uvs.append(p)
-					uv2s.append(Vector2(s*width, half))
-			for q in pts.size()-1:
-				var a := first+q*2
-				indices.append_array([a, a+2, a+1, a+1, a+2, a+3])
-		var arrays := []
-		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX] = verts
-		arrays[Mesh.ARRAY_NORMAL] = normals
-		arrays[Mesh.ARRAY_TEX_UV] = uvs
-		arrays[Mesh.ARRAY_TEX_UV2] = uv2s
-		arrays[Mesh.ARRAY_INDEX] = indices
-		var mesh := ArrayMesh.new()
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		var node := MeshInstance3D.new()
-		node.name = "Roads" if road else "Sidewalks"
-		node.mesh = mesh
-		node.material_override = street_material(road)
-		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		node.visibility_range_end = 6000.0
-		holder.add_child(node)
-
-static var _street_materials := {}
-
-static func street_material(road: bool) -> ShaderMaterial:
-	if not _street_materials.has(road):
-		var mat := ShaderMaterial.new()
-		mat.shader = preload("res://shaders/town_street.gdshader")
-		mat.set_shader_parameter("road", road)
-		mat.set_shader_parameter("cobble_tex", CityTextures.cobbles())
-		mat.set_shader_parameter("slab_tex", CityTextures.slabs())
-		mat.set_shader_parameter("kerb_tex", CityTextures.kerb())
-		_street_materials[road] = mat
-	return _street_materials[road]
+func _finish_chunk(face: int, ci: int, cj: int, batch: Batch, buffers: Dictionary) -> void:
+	var holder := Node3D.new()
+	holder.name = "Skyline_%d_%d_%d" % [face, ci, cj]
+	_done[Vector3i(face, ci/CHUNK, cj/CHUNK)] = true
+	add_child(holder)
+	batch.flush(holder, "c", 9000.0, DETAIL_RANGE, buffers, true, 192.0)
 
 ## The farmland between the city cores (CityCountryArt): farmsteads, roadside
 ## trees and the dirt roads. Collision near the player is rebuilt to take them in.
@@ -362,13 +283,12 @@ func _build_country() -> void:
 	holder.name = "Country"
 	add_child(holder)
 	batch.flush(holder, "farm", 3000.0, 400.0, {}, true, 192.0)
-	CityCountryArt.road_meshes(holder)
 	for key: Vector3i in _bodies.keys(): _drop_body(key)
 
 # --- The city kept on disk ------------------------------------------------------------------
 
 ## Bump when the city's buildings change in a way the scripts' dates won't show.
-const CACHE_VERSION := 6
+const CACHE_VERSION := 7
 const CACHE_DIR := "user://cache/city/"
 static var _cache_tag := ""
 
@@ -378,7 +298,7 @@ static func _cache_file(face: int, ci: int, cj: int) -> String:
 	if _cache_tag=="":
 		var stamp := "%d|%s" % [CACHE_VERSION, Net.VERSION]
 		for path in ["res://scripts/space/city/city_art.gd", "res://scripts/space/city/city_planet.gd", "res://scripts/space/city/city_roads.gd",
-				"res://scripts/space/city/city_layout.gd", "res://scripts/space/space_layout.gd", "res://scripts/space/city/city_houses.gd", "res://scripts/space/city/city_town.gd", CityHouses.CATALOG]:
+				"res://scripts/space/city/city_layout.gd", "res://scripts/space/space_layout.gd", "res://scripts/space/city/city_houses.gd", CityHouses.CATALOG]:
 			stamp += "|%d" % FileAccess.get_modified_time(path)
 		_cache_tag = stamp.md5_text().substr(0, 10)
 		DirAccess.make_dir_recursive_absolute(CACHE_DIR)
@@ -397,9 +317,118 @@ static func _write_cache(file: String, data: Dictionary) -> void:
 	var f := FileAccess.open_compressed(file, FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
 	if f: f.store_var(data)
 
-# --- Collision -----------------------------------------------------------------
+## A cell's blocks: voxel houses along its streets with gardens behind them,
+## the halls round its shop rooms, the Lantern Spire alone in its block (a
+## clear square round its door), or a park or a lake.
+func _block(batch: Batch, face: int, i: int, j: int, role: String) -> void:
+	var key := Vector3i(face, i, j)
+	var solids: Array = []
+	var c := CityLayout.cell(face, i, j)
+	var lot := CityLayout.ROAD+CityLayout.WALK+1.0
+	var at := CityLayout.district_of(face, i, j)
+	# The halls round this cell's shop rooms; houses keep clear of them.
+	var avoid: Array = []
+	if role=="venues" and not at.is_empty():
+		var prefix := "%s_%d_%d_" % [at.district.id, at.local.x, at.local.y]
+		for v: Dictionary in CityLayout.venues(at.district):
+			if not str(v.key).begins_with(prefix): continue
+			CityHouses.place(batch, solids, str(v.hall), v.frame)
+			var street := CityLayout.room_street(c, 1 if str(v.key).ends_with("_2") else -1)
+			avoid.append([street[0], Vector2(CityLayout.ROOM.x*0.5+1.8, CityLayout.ROOM.z*0.5+1.8), (street[1] as Vector2).orthogonal().angle()])
+	if role=="spire":
+		CityHouses.place(batch, solids, "spire_hall", CityLayout.spire_frame())
+		CityHouses.place(batch, solids, "spire", CityLayout.spire_frame())
+	else:
+		for block: Dictionary in CityRoads.blocks(face, i, j):
+			var seed := CityLayout.rnd(float(c.seed), 40+int(block.sub))
+			var art := CityArt.new(batch, block.frame, solids)
+			match role:
+				"park": art.park(block, lot, seed, CityLayout.rnd(seed, 5)<0.35)
+				"lake": art.lake(block, lot, seed)
+				_:
+					var taken := _houses(batch, solids, block, lot, seed, avoid)
+					for a: Array in avoid: taken.append([a[0], (a[1] as Vector2).length()])
+					art.gardens(block, lot, seed, taken)
+	if _solids.has(key): (_solids[key] as Array).append_array(solids)
+	else: _solids[key] = solids
 
-## Static shapes for the cells within reach of the player (planet-space `at`).
+## Voxel houses round a block, side by side along its streets, each with its
+## door to the sidewalk; returns their [local centre, radius] for the gardens.
+func _houses(batch: Batch, solids: Array, block: Dictionary, lot: float, seed: float, avoid: Array) -> Array:
+	var placed: Array = []
+	var line := CityRoads.outline(block, lot, 96, false)
+	var n := line.size()
+	if n<6: return placed
+	var lengths := PackedFloat32Array([0.0])
+	for k in n: lengths.append(lengths[k]+line[k].distance_to(line[(k+1) % n]))
+	var total := lengths[n]
+	var center: Vector2 = block.seed
+	var frame: Transform3D = block.frame
+	var walk := CityLayout.rnd(seed, 3)*4.0
+	var k := 0
+	while walk<total-4.0 and k<60:
+		k += 1
+		var name: String = CityHouses.HOUSES[int(CityLayout.rnd(seed, 100+k)*CityHouses.HOUSES.size()) % CityHouses.HOUSES.size()]
+		var fp := CityHouses.footprint(name)
+		var mid := walk+fp.size.x*0.5
+		if mid>=total: break
+		var seg := clampi(lengths.bsearch(mid)-1, 0, n-1)
+		var a := line[seg]
+		var b := line[(seg+1) % n]
+		var along := (b-a).normalized()
+		var p := a.lerp(b, clampf((mid-lengths[seg])/maxf(0.001, lengths[seg+1]-lengths[seg]), 0.0, 1.0))
+		var out := Vector2(along.y, -along.x)
+		if out.dot(p-center)<0.0: out = -out
+		var yaw := atan2(-out.x, -out.y)  # the house's front (-Z) to the street
+		# The front wall on the lot line; the model's origin is its door.
+		var basis := Basis(Vector3.UP, yaw)
+		var depth_mid := fp.get_center()
+		var turned := basis*Vector3(depth_mid.x, 0, depth_mid.y)
+		var origin3 := Vector3(p.x, 0, p.y)-turned-Vector3(out.x, 0, out.y)*(fp.size.y*0.5+0.3)
+		var origin := Vector2(origin3.x, origin3.z)
+		var house := origin+Vector2(turned.x, turned.z)
+		var radius := fp.size.length()*0.5
+		var fits := true
+		for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+			var q := house+(Vector2(fp.size.x*0.5*corner.x, fp.size.y*0.5*corner.y)).rotated(-yaw)
+			if CityRoads.field(block, q)<lot-0.4: fits = false
+		for other: Array in placed:
+			if house.distance_to(other[0])<(radius+float(other[1]))*0.78: fits = false
+		for r: Array in avoid:
+			var local := (house-(r[0] as Vector2)).rotated(-float(r[2]))
+			if ((local.abs()-(r[1] as Vector2)).max(Vector2.ZERO)).length()<radius*0.8: fits = false
+		if not fits:
+			walk += 2.0
+			continue
+		CityHouses.place(batch, solids, name, frame*Transform3D(basis, Vector3(origin.x, CityRoads.drop(origin), origin.y)))
+		placed.append([house, radius])
+		walk += fp.size.x+lerpf(0.8, 3.2, CityLayout.rnd(seed, 200+k))
+	return placed
+
+## A roundabout's island at corner (i, j): a raised lawn, a kerb of stones
+## and a big curly tree (or, now and then, a lantern on a plinth).
+func _island(batch: Batch, face: int, i: int, j: int) -> void:
+	var island := CityRoads.round_at(face, i, j)
+	if island<=0.0: return
+	var dir := CityRoads.dir(face, i, j)
+	var frame := CityLayout._tangent(dir, Vector3.UP if absf(dir.y)<0.9 else Vector3.RIGHT)
+	var key := Vector3i(face, mini(i, CityLayout.N-1), mini(j, CityLayout.N-1))
+	var solids: Array = _solids.get(key, [])
+	_solids[key] = solids
+	var art := CityArt.new(batch, frame, solids)
+	art.seed = CityLayout.rnd(float(face*1000+i*31+j), 9)
+	art.part("cyl", Vector3(0, CityRoads.KERB*0.5, 0), Basis.IDENTITY, Vector3(island*2.0, CityRoads.KERB+0.1, island*2.0), Color("b8b0a8"), CityArt.M_STONE)
+	art.part("cyl", Vector3(0, CityRoads.KERB+0.04, 0), Basis.IDENTITY, Vector3(island*2.0-0.8, 0.1, island*2.0-0.8), Color("3a6a42"), CityArt.M_GRASS)
+	if art.r()<0.75: art.tree(Vector2.ZERO, lerpf(3.0, 4.2, art.r()), art.seed+0.3)
+	else:
+		art.part("cyl", Vector3(0, 1.0, 0), Basis.IDENTITY, Vector3(1.6, 1.8, 1.6), Color(CityArt.STONE[0]), CityArt.M_STONE)
+		art.part("cyl", Vector3(0, 3.5, 0), Basis.IDENTITY, Vector3(0.35, 3.4, 0.35), Color("d9ac60"))
+		art.part("sphere", Vector3(0, 5.6, 0), Basis.IDENTITY, Vector3.ONE*1.3, Color(NEON[int(art.r()*NEON.size()) % NEON.size()]), CityArt.M_GLOW)
+		art.solid(Vector3(0, 1.0, 0), Vector3(1.6, 2.0, 1.6))
+
+# --- Collision and raised sidewalks -----------------------------------------------------------------
+
+## Static shapes and kerbed sidewalks for the blocks within reach of the player (planet-space `at`).
 func _update_collision(at: Vector3) -> void:
 	if at.length()>CityLayout.radius()+400.0:
 		for key: Vector3i in _bodies.keys(): _drop_body(key)
@@ -445,8 +474,68 @@ func _update_collision(at: Vector3) -> void:
 				shape.shape = box
 			shape.transform = solid[0]
 			body.add_child(shape)
+		_sidewalks(holder, key)
 
 func _drop_body(key: Vector3i) -> void:
 	var body: Node = _bodies[key]
 	_bodies.erase(key)
 	if is_instance_valid(body): body.queue_free()
+
+## The sidewalks round a cell's blocks as raised slabs with kerbs, painted by
+## the ground shader (slabs on top, kerb stones on the sides), and solid.
+func _sidewalks(holder: Node3D, key: Vector3i) -> void:
+	var role := CityLayout.role(key.x, key.y, key.z)
+	if role=="farm": return
+	var r := CityLayout.radius()
+	var h := CityRoads.KERB
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+	for block: Dictionary in CityRoads.blocks(key.x, key.y, key.z):
+		var frame: Transform3D = block.frame
+		var outer := CityRoads.outline(block, CityLayout.ROAD, 40, false)
+		var inner := CityRoads.outline(block, CityLayout.ROAD+CityLayout.WALK, 40, false)
+		if outer.size()!=inner.size() or outer.size()<3: continue
+		var at := func(p: Vector2, lift: float) -> Vector3: return (frame*Vector3(p.x, 0, p.y)).normalized()*(r+lift)
+		var n := outer.size()
+		for k in n:
+			var o0: Vector3 = at.call(outer[k], h)
+			var o1: Vector3 = at.call(outer[(k+1) % n], h)
+			var i0: Vector3 = at.call(inner[k], h)
+			var i1: Vector3 = at.call(inner[(k+1) % n], h)
+			var up := o0.normalized()
+			_quad(verts, normals, o0, o1, i1, i0, up)
+			# The kerb's face down to the street, and the step into the courtyard.
+			var ob0: Vector3 = at.call(outer[k], -0.05)
+			var ob1: Vector3 = at.call(outer[(k+1) % n], -0.05)
+			_quad(verts, normals, ob0, ob1, o1, o0, ((o0+o1)*0.5-frame*Vector3(block.seed.x, 0, block.seed.y)).slide(up).normalized())
+			var ib0: Vector3 = at.call(inner[k], -0.05)
+			var ib1: Vector3 = at.call(inner[(k+1) % n], -0.05)
+			_quad(verts, normals, i1, i0, ib0, ib1, (frame*Vector3(block.seed.x, 0, block.seed.y)-(i0+i1)*0.5).slide(up).normalized())
+	if verts.is_empty(): return
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var node := MeshInstance3D.new()
+	node.mesh = mesh
+	node.material_override = PlanetTerrain.material_for(CityLayout.planet())
+	holder.add_child(node)
+	var body := StaticBody3D.new()
+	body.collision_layer = Player.TERRAIN_LAYER
+	body.collision_mask = 0
+	var shape := CollisionShape3D.new()
+	var tris := ConcavePolygonShape3D.new()
+	tris.set_faces(verts)
+	tris.backface_collision = true
+	shape.shape = tris
+	body.add_child(shape)
+	holder.add_child(body)
+
+## Two triangles a, b, c, d facing `normal` (wound to face it).
+static func _quad(verts: PackedVector3Array, normals: PackedVector3Array, a: Vector3, b: Vector3, c: Vector3, d: Vector3, normal: Vector3) -> void:
+	var flip := (b-a).cross(c-a).dot(normal)>0.0
+	for p: Vector3 in ([a, c, b, a, d, c] if flip else [a, b, c, a, c, d]):
+		verts.append(p)
+		normals.append(normal)

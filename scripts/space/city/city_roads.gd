@@ -46,11 +46,11 @@ static func merged(face: int, a: Vector2i, b: Vector2i) -> bool:
 	var db := CityLayout.district_of(face, b.x, b.y)
 	return not da.is_empty() and not db.is_empty() and da.district.id==db.district.id
 
-## No grid streets any more: the towns grow their own (CityTown) and the
-## farmland has its winding country roads (CityCountry). The grid is kept for
-## the ground shader's lookups and is empty.
+## Streets run along every cell edge on the whole planet, towns and farmland
+## alike, so the network is one and no street ends in the middle of nowhere.
+## (Only a town's own lake, park or spaceport drops the street between its cells.)
 static func _city_side(_face: int, _cells: Array) -> bool:
-	return false
+	return true
 
 ## Bending is only for streets between open blocks.
 static func _may_bend(face: int, cells: Array) -> bool:
@@ -77,6 +77,15 @@ static func node(face: int, i: int, j: int) -> Array:
 	var g := Vector2(i, j)+Vector2(_r(face, i, j, 1)-0.5, _r(face, i, j, 2)-0.5)*2.0*amount
 	var dir := _grid_dir(face, g.x, g.y)
 	var round := 0.0
+	if free>=0:
+		# A town's roundabouts (corner offsets in CityLayout.DISTRICTS), only
+		# where town lies on all four sides.
+		for d: Dictionary in CityLayout.DISTRICTS:
+			if int(d.face)!=face or not Vector2i(i, j)-(d.corner as Vector2i) in d.rounds: continue
+			var inside := true
+			for c: Vector2i in [Vector2i(i-1, j-1), Vector2i(i, j-1), Vector2i(i-1, j), Vector2i(i, j)]:
+				if CityLayout.role(face, c.x, c.y)=="farm": inside = false
+			if inside: round = ISLAND
 	var out: Array = [dir, round, Vector3.ZERO, false, Vector3.ZERO, false, Vector3.ZERO, 0]
 	_nodes[key] = out
 	# Streets to the next corners (their middles bend sideways).
