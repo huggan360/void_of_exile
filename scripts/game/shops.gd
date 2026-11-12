@@ -1,7 +1,7 @@
 class_name Shops
 ## Shops: keepers who sell items for Dots. What every shop sells, its prices
 ## and its offers come from the account service (SHOPS in
-## account_service/void_accounts.py), so they are the same on every server and
+## void_of_exile_account repo, server/void_accounts.py), so they are the same on every server and
 ## in Singleplayer; this file names the shops, picks their keepers and words
 ## their speech bubbles. Keep the shop ids in step with the account service.
 ##

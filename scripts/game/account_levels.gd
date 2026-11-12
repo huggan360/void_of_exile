@@ -1,6 +1,6 @@
 class_name AccountLevels
 ## The account level curve, the same as the account service's
-## (account_service/void_accounts.py xp_to_next): every character's XP also
+## (void_of_exile_account repo, server/void_accounts.py xp_to_next): every character's XP also
 ## counts for its account, and so does part of what a dead character earned
 ## and carried.
 

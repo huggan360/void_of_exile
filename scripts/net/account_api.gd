@@ -1,6 +1,6 @@
 class_name AccountApi
 extends Node
-## Talks to the account service (account_service/void_accounts.py, running
+## Talks to the account service (void_of_exile_account repo, server/void_accounts.py, running
 ## at void.plainshow.se): JSON over HTTPS. The game client logs in and lists
 ## characters and servers with it; the dedicated server loads, saves and
 ## buries characters with its server key.

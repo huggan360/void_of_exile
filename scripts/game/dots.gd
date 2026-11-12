@@ -3,7 +3,7 @@ class_name Dots
 ## by dismantling items at the forge, the first time an account finishes a
 ## campaign, and from campaign packs. The account service keeps the count
 ## and pays dismantling with the same table (DISMANTLE_DOTS in
-## account_service/void_accounts.py): keep both in step.
+## void_of_exile_account repo, server/void_accounts.py): keep both in step.
 
 const COLOR := Color(0.36, 0.95, 0.45)
 const COLOR_DARK := Color(0.1, 0.45, 0.18)

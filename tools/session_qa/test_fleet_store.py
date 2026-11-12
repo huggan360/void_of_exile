@@ -8,7 +8,7 @@ import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location('void_accounts', ROOT/'account_service/void_accounts.py')
+spec = importlib.util.spec_from_file_location('void_accounts', ROOT.parent/'void_of_exile_account/server/void_accounts.py')
 a = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(a)
 
