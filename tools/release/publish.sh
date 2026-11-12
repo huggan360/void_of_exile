@@ -11,6 +11,7 @@
 #   tools/release/publish.sh            # version from release/release.json
 #   tools/release/publish.sh --now
 #   tools/release/publish.sh --build-only
+#   tools/release/publish.sh --replace      # publish the same version again (new build)
 set -Eeuo pipefail
 
 PROJECT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -18,11 +19,12 @@ GODOT="${GODOT:-$HOME/Godot/godot_voxel_editor}"
 REPO="${REPO:-huggan360/void_of_exile}"
 PI="${PI:-hugohansson@192.168.1.5}"
 WORK="${WORK:-$HOME/tmp/void_release}"
-NOW=0; BUILD_ONLY=0
+NOW=0; BUILD_ONLY=0; REPLACE=0
 for arg in "$@"; do
     case "$arg" in
         --now) NOW=1 ;;
         --build-only) BUILD_ONLY=1 ;;
+        --replace) REPLACE=1 ;;
         *) echo "unknown option $arg" >&2; exit 2 ;;
     esac
 done
@@ -35,8 +37,8 @@ VERSION="$(python3 -c 'import json;print(json.load(open("release/release.json"))
 TAG="v$VERSION"
 COMMIT="$(git rev-parse HEAD)"
 [[ -f release/cover.png ]] || fail "release/cover.png is missing"
-if [[ $BUILD_ONLY == 0 ]] && git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-    fail "$TAG is already released. Bump the version in release/release.json."
+if [[ $BUILD_ONLY == 0 && $REPLACE == 0 ]] && git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+    fail "$TAG is already released. Bump the version in release/release.json, or pass --replace."
 fi
 git ls-files --error-unmatch release/release.json release/cover.png >/dev/null 2>&1 || fail "commit release/ first"
 git diff --quiet HEAD -- release/ || fail "release/ has uncommitted changes; commit them first"
@@ -84,6 +86,15 @@ ls -la "$WORK"/*.tar.gz
 TOKEN="${GITHUB_TOKEN:-$(sed -nE 's#https://[^:]+:([^@]+)@github.com.*#\1#p' ~/.git-credentials | head -1)}"
 [[ -n "$TOKEN" ]] || fail "no GitHub token (set GITHUB_TOKEN)"
 api() { curl -fsS -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" "$@"; }
+
+if [[ $REPLACE == 1 ]]; then
+    info "Replacing the published $TAG"
+    OLD="$(curl -fsS -H "Authorization: Bearer $TOKEN" "https://api.github.com/repos/$REPO/releases/tags/$TAG" 2>/dev/null \
+        | python3 -c 'import json,sys;print(json.load(sys.stdin)["id"])' || true)"
+    [[ -n "$OLD" ]] && api -X DELETE "https://api.github.com/repos/$REPO/releases/$OLD" >/dev/null
+    git push -q origin ":refs/tags/$TAG" 2>/dev/null || true
+    git tag -d "$TAG" >/dev/null 2>&1 || true
+fi
 
 info "Tagging $TAG and creating the GitHub release"
 git tag -a "$TAG" "$COMMIT" -m "Void of Exile $VERSION"
