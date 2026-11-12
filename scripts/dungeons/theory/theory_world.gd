@@ -235,7 +235,6 @@ func _finish_world() -> void:
 	for sign: Dictionary in art.signs: _sign(sign.at,sign.text,sign.color)
 	DungeonPortal.place(self,{id="spawn_exit",pos=spawn_point+Vector3(0,0,4),exit=true,dungeon="theory_of_everything",destination=record.get("origin","hall")})
 	if boss_defeated: _open_star_portal()
-	DungeonPortal.place(self,{id="theory_exit",pos=TheoryLayout.ARENA+Vector3(0,3.3,-23),exit=true,dungeon="theory_of_everything",destination=record.get("origin","hall")})
 
 ## After the Empress falls: the way on to the Astral Reach and its Nexus.
 func _open_star_portal() -> void:
