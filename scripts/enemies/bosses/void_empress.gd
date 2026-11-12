@@ -30,11 +30,11 @@ func _floor_radius() -> float:
 	return 25.0 - phase * 5.5
 
 func _spine(speed := 7.0) -> Dictionary:
-	return Boss.shot("bolt", PINK, Vector2i(36, 48), speed, 0.17, 24.0,
+	return Boss.shot("bolt", PINK, Vector2i(48, 65), speed, 0.17, 24.0,
 		{voxel_model = "boss_projectiles/void_spine", authored_projectile = true, pixel_projectile = true, size = 1.0})
 
 func _glob(speed := 5.5) -> Dictionary:
-	return Boss.shot("orb", ACID, Vector2i(30, 42), speed, 0.2, 22.0,
+	return Boss.shot("orb", ACID, Vector2i(50, 71), speed, 0.2, 22.0,
 		{voxel_model = "boss_projectiles/acid_glob", authored_projectile = true, pixel_projectile = true, size = 1.1})
 
 ## The tail coils over her back, then whips a sweeping fan of spines.
@@ -65,7 +65,7 @@ func _acid_rain() -> void:
 		var angle := randf() * TAU
 		marks.append(in_arena(encounter_center + Vector3(cos(angle), 0, sin(angle)) * randf_range(5.0, _floor_radius()), _floor_radius()))
 	for at in marks:
-		hazards.circle(at, 2.6, 1.4, Vector2i(40, 54), ACID, {patch = {time = 3.5, tick = 0.6, damage = Vector2i(12, 18)}})
+		hazards.circle(at, 2.6, 1.4, Vector2i(77, 105), ACID, {patch = {time = 3.5, tick = 0.6, damage = Vector2i(12, 18)}})
 	after(0.8, func() -> void:
 		fire_fan(shot_origin(), aim_dir(), 5, 18.0, _glob(5.0)))
 
@@ -90,7 +90,7 @@ func _lunge() -> void:
 	face_override = dir
 	after(1.2, func() -> void:
 		model.boss_pose("charge", 1.2)
-		start_charge(dir, length, 13.0, Vector2i(55, 70), func() -> void:
+		start_charge(dir, length, 13.0, Vector2i(90, 115), func() -> void:
 			model.boss_pose("charge_recover", 0.8)
 			face_override = Vector3.ZERO
 			# Settles back toward the centre so the shrinking floor stays fair.

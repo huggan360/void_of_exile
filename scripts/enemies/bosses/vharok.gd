@@ -176,7 +176,7 @@ func _arm_summon(helper: Enemy, stagger := 0.0) -> void:
 
 
 func _white_spiral() -> void:
-	var attack := Boss.shot("orb",Color(0.96,0.97,1.0),Vector2i(45,60),8.0,0.16,65.0,
+	var attack := Boss.shot("orb",Color(0.96,0.97,1.0),Vector2i(57, 76),8.0,0.16,65.0,
 		{size=0.85, authored_projectile=true, voxel_model="boss_projectiles/white_ember",pixel_projectile=true,projectile_glow=0.7})
 	for k in 6:
 		shoot(shot_origin(),Vector3.FORWARD.rotated(Vector3.UP,_spiral_angle+k*TAU/6.0),attack)
@@ -185,7 +185,7 @@ func _white_spiral() -> void:
 
 func _shard_ring() -> void:
 	var offset := PI/8.0 if _shard_offset else 0.0
-	var attack := Boss.shot("flame_shard",FIRE,Vector2i(55,70),7.5,0.16,65.0,{size=1.0})
+	var attack := Boss.shot("flame_shard",FIRE,Vector2i(70, 89),7.5,0.16,65.0,{size=1.0})
 	for k in 8:
 		shoot(shot_origin(),Vector3.FORWARD.rotated(Vector3.UP,offset+k*TAU/8.0),attack)
 	_shard_offset = not _shard_offset
@@ -197,10 +197,10 @@ func _fireball_fan() -> void:
 	model.boss_pose("cast",0.8)
 	pulse_glow(1.8, 0.6)
 	after(0.6, func() -> void:
-		var heavy := Boss.shot("fireball", Color("ffd578"), Vector2i(70, 85), 7.0, 0.29, 60.0,
+		var heavy := Boss.shot("fireball", Color("ffd578"), Vector2i(111, 135), 7.0, 0.29, 60.0,
 			{size = 1.65, effects = [{id = "defense", amount = -8, duration = 2.0}], effect_source = "Vharok searing fireball"})
 		fire_fan(shot_origin(), aim_dir(), 5, 15.0,
-			Boss.shot("fireball", FIRE, Vector2i(70, 85), 8.0, 0.22, 60.0, {size = 1.3}), heavy))
+			Boss.shot("fireball", FIRE, Vector2i(111, 135), 8.0, 0.22, 60.0, {size = 1.3}), heavy))
 
 
 func _cleave() -> void:
@@ -214,7 +214,7 @@ func _cleave() -> void:
 	after(0.8, func() -> void:
 		face_override = Vector3.ZERO
 		model.boss_pose("cleave_release",0.5)
-		var attack := Boss.shot("crescent", Color(1.0, 0.3, 0.1), Vector2i(90, 105), 6.0, 0.3, 60.0, {size = 1.4, shared_hits = [], pierce_players = true, pierce_shields = true, armor_piercing = true})
+		var attack := Boss.shot("crescent", Color(1.0, 0.3, 0.1), Vector2i(180, 210), 6.0, 0.3, 60.0, {size = 1.4, shared_hits = [], pierce_players = true, pierce_shields = true, armor_piercing = true})
 		for deg in [-12.0, 12.0]:
 			shoot(shot_origin(), dir.rotated(Vector3.UP, deg_to_rad(deg)), attack))
 
@@ -224,8 +224,8 @@ func _brands() -> void:
 	for offset: Vector3 in [Vector3.ZERO, Vector3(2.2, 0, 0.6), Vector3(-1.2, 0, 2.0)]:
 		var opts := {}
 		if hazards.count("patch") + hazards.count("circle") < 4:
-			opts.patch = {time = 3.0, tick = 0.75, damage = Vector2i(20, 25), group = "vharok_patches"}
-		hazards.circle(in_arena(at + offset, 23.0), 1.1, 1.2, Vector2i(75, 90), WARN, opts)
+			opts.patch = {time = 3.0, tick = 0.75, damage = Vector2i(19, 24), group = "vharok_patches"}
+		hazards.circle(in_arena(at + offset, 23.0), 1.1, 1.2, Vector2i(155, 186), WARN, opts)
 
 
 # --- Phase 2 -----------------------------------------------------------------------------
@@ -267,7 +267,7 @@ func _pact(delta: float) -> void:
 			_brand_timer = 2.8
 			var at := target().global_position
 			for offset: Vector3 in [Vector3.ZERO, Vector3(1.8, 0, -1.2)]:
-				hazards.circle(in_arena(at + offset, 23.0), 1.1, 1.2, Vector2i(70, 85), WARN)
+				hazards.circle(in_arena(at + offset, 23.0), 1.1, 1.2, Vector2i(144, 175), WARN)
 		_mite_timer -= delta
 		if _mite_timer <= 0.0:
 			_mite_timer = 6.0
@@ -319,7 +319,7 @@ func _line_up_charge() -> void:
 	hazards.lane(global_position + dir * length * 0.5, dir, maxf(2.0, length), 2.6, 0.8, 0.0, Vector2i.ZERO, 0.0, WARN)
 	after(0.8, func() -> void:
 		model.boss_pose("charge",length/12.0+0.2)
-		start_charge(dir, length, 12.0, Vector2i(135,160), _after_charge))
+		start_charge(dir, length, 12.0, Vector2i(177, 210), _after_charge))
 
 
 func _after_charge() -> void:
@@ -327,7 +327,7 @@ func _after_charge() -> void:
 	model.boss_pose("charge_recover",0.7)
 	pulse_glow(2.0, 0.6)
 	after(0.6, func() -> void:
-		fire_fan(shot_origin(), aim_dir(), 3, 14.0, Boss.shot("fireball", HOT, Vector2i(70, 85), 8.0, 0.22, 60.0, {size = 1.2}))
+		fire_fan(shot_origin(), aim_dir(), 3, 14.0, Boss.shot("fireball", HOT, Vector2i(144, 175), 8.0, 0.22, 60.0, {size = 1.2}))
 		after(0.7, func() -> void:
 			_charging = false
 			_charge_timer = 0.2))
@@ -354,7 +354,7 @@ func _slam() -> void:
 				p.take_damage(float(randi_range(95, 110)), false, false)
 				hit.append(p)
 		# The ring skips anyone the slam itself just hit.
-		EnemyRipple.spawn(director.bullets, spot, {radius = 12.0, speed = 6.0, damage_min = 55, damage_max = 65},
+		EnemyRipple.spawn(director.bullets, spot, {radius = 12.0, speed = 6.0, damage_min = 70, damage_max = 83},
 				Color(1.0, 0.45, 0.2), director.bullets.players, hit)
 		CameraShake.shake_from(self, spot, 0.6, 24.0)
 		var pts := PackedVector3Array()
@@ -370,7 +370,7 @@ func _wing_fan() -> void:
 	model.boss_pose("cast",0.9)
 	pulse_glow(2.2, 0.7)
 	after(0.7, func() -> void:
-		fire_fan(shot_origin(), aim_dir(), 7, 16.0, Boss.shot("fireball", FIRE, Vector2i(50, 65), 7.0, 0.2, 60.0, {size = 1.1})))
+		fire_fan(shot_origin(), aim_dir(), 7, 16.0, Boss.shot("fireball", FIRE, Vector2i(79, 103), 7.0, 0.2, 60.0, {size = 1.1})))
 
 
 func _cross() -> void:
@@ -378,7 +378,7 @@ func _cross() -> void:
 	var a := randf() * PI
 	for k in 2:
 		var dir := Vector3.FORWARD.rotated(Vector3.UP, a + k * PI * 0.5)
-		hazards.lane(global_position, dir, 46.0, 0.8, 1.2, 1.5, Vector2i(80, 95), 0.8, Color(1.0, 0.5, 0.1), {group = "vharok_cross"})
+		hazards.lane(global_position, dir, 46.0, 0.8, 1.2, 1.5, Vector2i(165, 196), 0.8, Color(1.0, 0.5, 0.1), {group = "vharok_cross"})
 
 
 func _reset_hook() -> void:

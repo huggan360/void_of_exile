@@ -20,7 +20,7 @@ func _threshold_reached(next: int) -> void:
 	if not resting: begin_rest(func() -> void: _enter_phase(next), "The Siren draws a breath beneath the tide")
 
 func _water(speed := 6.0) -> Dictionary:
-	return Boss.shot("bolt", WATER, Vector2i(40, 52), speed, 0.18, 25.0,
+	return Boss.shot("bolt", WATER, Vector2i(55, 72), speed, 0.18, 25.0,
 		{voxel_model = "boss_projectiles/tide_shard", authored_projectile = true, pixel_projectile = true, size = 0.9})
 
 func _tides() -> void:
@@ -41,17 +41,17 @@ func _song() -> void:
 	var gap := atan2(-aim_dir().x, -aim_dir().z)
 	mark_ring_gaps(gap, 62.0, 1.2, PEARL)
 	after(1.2, func() -> void:
-		fire_ring(shot_origin(), 20 if phase < 2 else 26, Boss.shot("disc", PEARL, Vector2i(36, 46), 4.5, 0.2, 24.0,
+		fire_ring(shot_origin(), 20 if phase < 2 else 26, Boss.shot("disc", PEARL, Vector2i(40, 51), 4.5, 0.2, 24.0,
 			{voxel_model = "boss_projectiles/siren_echo", authored_projectile = true, pixel_projectile = true,
 				effects = [{id = "quiet", duration = 1.25}], effect_source = "Abyssal Siren song"}), gap, 62.0)
-		EnemyRipple.spawn(director.bullets, at, {radius = 15.0, speed = 3.4, damage_min = 26, damage_max = 36, knockback = 0.25}, WATER, players(), []))
+		EnemyRipple.spawn(director.bullets, at, {radius = 15.0, speed = 3.4, damage_min = 29, damage_max = 40, knockback = 0.25}, WATER, players(), []))
 
 func _crystals() -> void:
 	model.boss_pose("summon", 1.8)
 	_verse += PI / 5.0
 	for i in 4:
 		var at := encounter_center + Vector3.FORWARD.rotated(Vector3.UP, _verse + i * PI * 0.5) * 7.0
-		hazards.circle(at, 1.8, 1.3 + i * 0.15, Vector2i(42, 56), WATER)
+		hazards.circle(at, 1.8, 1.3 + i * 0.15, Vector2i(66, 89), WATER)
 
 func _reef() -> void:
 	model.boss_pose("summon", 2.5)

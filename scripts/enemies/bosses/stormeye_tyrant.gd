@@ -35,10 +35,10 @@ func _threshold_reached(next: int) -> void:
 		"The storm around the Eye tightens" if next==1 else "The Eye cracks open: the cataclysm", "kneel")
 
 func _orb(speed := 5.5) -> Dictionary:
-	return PlanetBosses.shot("storm_orb", "orb", STORM, Vector2i(56, 72), speed, 24.0, 1.0)
+	return PlanetBosses.shot("storm_orb", "orb", STORM, Vector2i(86, 110), speed, 24.0, 1.0)
 
 func _lance(speed := 11.0) -> Dictionary:
-	return PlanetBosses.shot("eye_lance", "bolt", RED, Vector2i(66, 84), speed, 26.0, 1.1)
+	return PlanetBosses.shot("eye_lance", "bolt", RED, Vector2i(126, 161), speed, 26.0, 1.1)
 
 ## Bursts of eye lances: quick, aimed, re-aimed each burst.
 func _lances() -> void:
@@ -59,10 +59,10 @@ func _lightning() -> void:
 		var dir: Vector3 = p.global_position-global_position
 		dir.y = 0.0
 		dir = dir.normalized()
-		hazards.lane(global_position+dir*15.0, dir, 30.0, 1.6, 0.9, 0.35, Vector2i(70, 88), 0.35, STORM)
+		hazards.lane(global_position+dir*15.0, dir, 30.0, 1.6, 0.9, 0.35, Vector2i(154, 194), 0.35, STORM)
 		for side: float in [-1.0, 1.0]:
 			var d := dir.rotated(Vector3.UP, side*0.5)
-			hazards.lane(global_position+d*15.0, d, 30.0, 1.4, 1.1, 0.35, Vector2i(70, 88), 0.35, STORM)
+			hazards.lane(global_position+d*15.0, d, 30.0, 1.4, 1.1, 0.35, Vector2i(154, 194), 0.35, STORM)
 
 ## Storm rays out of the Eye, turning.
 func _rays(count: int, speed: float) -> void:
@@ -73,7 +73,7 @@ func _rays(count: int, speed: float) -> void:
 		var axis := func() -> Array:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, _ray_angle+offset)
 			return [global_position+dir*2.5, dir]
-		hazards.ray(axis, 30.0, 1.1, 1.1, 5.0, Vector2i(66, 84), 0.55, STORM, {group = "storm_rays"})
+		hazards.ray(axis, 30.0, 1.1, 1.1, 5.0, Vector2i(145, 185), 0.55, STORM, {group = "storm_rays"})
 	after(6.2, func() -> void: _ray_speed = 0.0)
 
 func _spiral(arms: int) -> void:
@@ -110,10 +110,10 @@ func _split_lances() -> void:
 
 ## Lightning circles under everyone and around the citadel floor.
 func _lightning_circles() -> void:
-	for p in players(): hazards.circle(in_arena(p.global_position, 27.0), 2.6, 0.9, Vector2i(66, 84), STORM)
+	for p in players(): hazards.circle(in_arena(p.global_position, 27.0), 2.6, 0.9, Vector2i(145, 185), STORM)
 	for k in 8:
 		var a := TAU*k/8.0+randf()*0.4
-		hazards.circle(in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*randf_range(8.0, 25.0), 27.0), 2.6, 1.2, Vector2i(66, 84), RED)
+		hazards.circle(in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*randf_range(8.0, 25.0), 27.0), 2.6, 1.2, Vector2i(145, 185), RED)
 
 func _shards(count: int) -> void:
 	model.boss_pose("summon", 1.8)

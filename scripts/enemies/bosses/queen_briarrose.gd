@@ -28,10 +28,10 @@ func _threshold_reached(next: int) -> void:
 		"The Queen's petals open wide" if next==1 else "The roses wilt... and the thorns wake", "kneel")
 
 func _petal(speed := 5.5) -> Dictionary:
-	return PlanetBosses.shot("rose_petal", "disc", ROSE, Vector2i(32, 44), speed, 22.0, 1.0)
+	return PlanetBosses.shot("rose_petal", "disc", ROSE, Vector2i(35, 48), speed, 22.0, 1.0)
 
 func _thorn(speed := 8.0) -> Dictionary:
-	return PlanetBosses.shot("thorn_spike", "needle", THORN, Vector2i(38, 50), speed, 20.0, 1.0)
+	return PlanetBosses.shot("thorn_spike", "needle", THORN, Vector2i(51, 68), speed, 20.0, 1.0)
 
 ## Arms of petals spiralling out of her gown.
 func _spiral(arms: int, sense: float) -> void:
@@ -61,7 +61,7 @@ func _thorns() -> void:
 ## Rose buds drift out and burst into rings of petals.
 func _blooms(count: int) -> void:
 	model.boss_pose("cast", 1.2)
-	var bud := PlanetBosses.shot("rose_petal", "orb", PINK, Vector2i(40, 52), 4.0, 9.0, 1.6,
+	var bud := PlanetBosses.shot("rose_petal", "orb", PINK, Vector2i(43, 56), 4.0, 9.0, 1.6,
 		{terminal = {delay = 0.4, count = 10 if phase<2 else 12, attack = _petal(4.5)}})
 	after(0.8, func() -> void: fire_fan(shot_origin(), aim_dir(), count, 360.0/count, bud))
 
@@ -71,7 +71,7 @@ func _thorn_lanes() -> void:
 	for k in 3:
 		after(k*0.9, func() -> void:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, a+k*PI/3.0)
-			hazards.lane(encounter_center, dir, 56.0, 2.4, 1.1, 0.5, Vector2i(45, 60), 0.5, THORN))
+			hazards.lane(encounter_center, dir, 56.0, 2.4, 1.1, 0.5, Vector2i(70, 93), 0.5, THORN))
 
 ## Rings of petals, each with a gap you have to find.
 func _petal_wall() -> void:
@@ -94,10 +94,10 @@ func _storm() -> void:
 ## Thorns burst out of the ground under everyone, then around her.
 func _eruptions() -> void:
 	for p in players():
-		hazards.circle(in_arena(p.global_position, 27.0), 2.4, 1.0, Vector2i(50, 64), THORN)
+		hazards.circle(in_arena(p.global_position, 27.0), 2.4, 1.0, Vector2i(88, 112), THORN)
 	for k in 6:
 		var a := TAU*k/6.0+randf()*0.5
-		hazards.circle(in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*randf_range(8.0, 22.0), 27.0), 2.4, 1.3, Vector2i(50, 64), THORN)
+		hazards.circle(in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*randf_range(8.0, 22.0), 27.0), 2.4, 1.3, Vector2i(88, 112), THORN)
 
 func _sprites(count: int) -> void:
 	model.boss_pose("summon", 1.8)

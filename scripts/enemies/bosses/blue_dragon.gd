@@ -89,7 +89,7 @@ func _tide_gates() -> void:
 			var a := k * TAU / 24.0
 			if absf(angle_difference(fposmod(a - gate, PI * 0.5), 0.0)) < deg_to_rad(16.0):
 				continue
-			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, a), _flame(0.9, 6.0, Vector2i(40, 50))))
+			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, a), _flame(0.9, 6.0, Vector2i(59, 74))))
 
 
 ## A forward wing beat that throws a wide fan of flame.
@@ -97,7 +97,7 @@ func _wing_gust() -> void:
 	model.flap()
 	pulse_glow(1.8, 0.4)
 	after(0.4, func() -> void:
-		fire_fan(shot_origin(), aim_dir(), 7, 12.0, _flame(1.3, 9.0, Vector2i(50, 60), PALE)))
+		fire_fan(shot_origin(), aim_dir(), 7, 12.0, _flame(1.3, 9.0, Vector2i(74, 89), PALE)))
 
 
 ## Five lines of fire, each four flames at rising speeds; the star turns.
@@ -111,7 +111,7 @@ func _star_breath() -> void:
 		for k in 5:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, start + k * TAU / 5.0)
 			for speed in [5.0, 6.5, 8.0, 9.5]:
-				shoot(shot_origin(), dir, _flame(1.2, speed, Vector2i(60, 70))))
+				shoot(shot_origin(), dir, _flame(1.2, speed, Vector2i(89, 104))))
 
 
 # --- Phase 2 ------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ func _comet_wheel() -> void:
 	for ring in 3:
 		after(0.5 + ring * 0.3, func() -> void:
 			for k in 10:
-				var comet := _flame(1.8, 4.5, Vector2i(60, 75))
+				var comet := _flame(1.8, 4.5, Vector2i(116, 145))
 				comet.effects = [{id = "defense", amount = -8, duration = 2.0}]
 				comet.effect_source = "Blue Dragon heavy comet"
 				shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, start + k * TAU / 10.0 + ring * deg_to_rad(12.0)),
@@ -141,7 +141,7 @@ func _twin_breath() -> void:
 		after(0.75 + k * 0.05, func() -> void:
 			var step := deg_to_rad(60.0) * (1.0 - k / 9.0)
 			for side in [-1.0, 1.0]:
-				shoot(shot_origin(), aim.rotated(Vector3.UP, step * side), _flame(1.4, 9.0, Vector2i(55, 65), PALE)))
+				shoot(shot_origin(), aim.rotated(Vector3.UP, step * side), _flame(1.4, 9.0, Vector2i(82, 96), PALE)))
 
 
 ## A full ring alternating big slow flames and small fast ones.
@@ -153,7 +153,7 @@ func _nova() -> void:
 		for k in 32:
 			var big := k % 2 == 0
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, offset + k * TAU / 32.0),
-					_flame(1.7 if big else 0.9, 4.5 if big else 7.5, Vector2i(55, 70))))
+					_flame(1.7 if big else 0.9, 4.5 if big else 7.5, Vector2i(65, 83))))
 
 
 # --- Phase 3 ------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ func _tempest_nova() -> void:
 		for ring in 3:
 			for k in 18:
 				shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, offset + (k + ring / 3.0) * TAU / 18.0),
-						_flame(1.3, 8.0 - ring * 2.0, Vector2i(60, 70), PALE if ring == 1 else AZURE)))
+						_flame(1.3, 8.0 - ring * 2.0, Vector2i(71, 83), PALE if ring == 1 else AZURE)))
 
 
 ## Blue meteors fall across the arena, one on the target.
@@ -181,7 +181,7 @@ func _meteor_rain() -> void:
 	for k in spots.size():
 		var spot := in_arena(spots[k], 22.0)
 		after(k * 0.22, func() -> void:
-			hazards.circle(spot, 1.6, 1.2, Vector2i(80, 95), WARN))
+			hazards.circle(spot, 1.6, 1.2, Vector2i(128, 152), WARN))
 
 
 ## A breath that turns a full circle, starting at the target.
@@ -192,7 +192,7 @@ func _spiral_breath() -> void:
 	var sense := 1.0 if randf() < 0.5 else -1.0
 	for k in 48:
 		after(0.6 + k * 0.05, func() -> void:
-			shoot(shot_origin(), aim.rotated(Vector3.UP, sense * TAU * k / 48.0), _flame(1.4, 7.0, Vector2i(55, 65))))
+			shoot(shot_origin(), aim.rotated(Vector3.UP, sense * TAU * k / 48.0), _flame(1.4, 7.0, Vector2i(65, 77))))
 
 
 func _reset_hook() -> void:

@@ -18,7 +18,7 @@ func _threshold_reached(next: int) -> void:
 	if not resting: begin_rest(func() -> void: _enter_phase(next), "The furnace draws breath")
 
 func _ember(speed := 6.0) -> Dictionary:
-	return Boss.shot("fireball", FIRE, Vector2i(45, 58), speed, 0.2, 26.0,
+	return Boss.shot("fireball", FIRE, Vector2i(43, 56), speed, 0.2, 26.0,
 		{voxel_model = "boss_projectiles/magma_seed", authored_projectile = true, pixel_projectile = true,
 			light_energy = 0.6, light_range = 3.0, projectile_glow = 1.1, size = 0.9})
 
@@ -38,8 +38,8 @@ func _eruption() -> void:
 	for side in [-1.0, 1.0]:
 		for step in 4:
 			var at: Vector3 = encounter_center + axis * side * (3.5 + step * 2.6)
-			hazards.circle(at, 1.65, 1.2 + step * 0.22, Vector2i(52, 68), FIRE,
-				{patch = {time = 2.5, damage = Vector2i(24, 32), tick = 0.9}})
+			hazards.circle(at, 1.65, 1.2 + step * 0.22, Vector2i(65, 85), FIRE,
+				{patch = {time = 2.5, damage = Vector2i(14, 18), tick = 0.9}})
 	after(1.2, func() -> void: model.boss_pose("slam_release", 0.6))
 
 func _cinders() -> void:
@@ -70,7 +70,7 @@ func _breach() -> void:
 	hazards.lane(global_position + direction * distance * 0.5, direction, distance, 3.0, 1.3, 0.0, Vector2i.ZERO, 0.0, HOT)
 	after(1.3, func() -> void:
 		model.boss_pose("charge", 1.8)
-		start_charge(direction, distance, 8.0, Vector2i(55, 72), func() -> void:
+		start_charge(direction, distance, 8.0, Vector2i(67, 88), func() -> void:
 			face_override = Vector3.ZERO
 			model.boss_pose("charge_recover", 1.0)))
 

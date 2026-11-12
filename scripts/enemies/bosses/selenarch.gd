@@ -35,10 +35,10 @@ func _threshold_reached(next: int) -> void:
 		"The moon behind Selenarch goes dark" if next==1 else "Its ribs open on a green star", "kneel")
 
 func _moon(speed := 5.5) -> Dictionary:
-	return PlanetBosses.shot("moon_shard", "crescent", MOON, Vector2i(48, 62), speed, 22.0, 1.0)
+	return PlanetBosses.shot("moon_shard", "crescent", MOON, Vector2i(105, 136), speed, 22.0, 1.0)
 
 func _wisp(speed := 5.0) -> Dictionary:
-	return PlanetBosses.shot("ghost_wisp", "orb", GHOST, Vector2i(44, 58), speed, 24.0, 1.1)
+	return PlanetBosses.shot("ghost_wisp", "orb", GHOST, Vector2i(77, 102), speed, 24.0, 1.1)
 
 ## Two rings of moons orbit it, one each way, then fly loose.
 func _orrery() -> void:
@@ -74,7 +74,7 @@ func _beams(count: int, speed: float) -> void:
 		var axis := func() -> Array:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, _beam_angle+offset)
 			return [global_position+dir*2.0, dir]
-		hazards.ray(axis, 28.0, 1.0, 1.2, 4.5, Vector2i(55, 70), 0.6, MOON, {group = "moonbeams"})
+		hazards.ray(axis, 28.0, 1.0, 1.2, 4.5, Vector2i(139, 176), 0.6, MOON, {group = "moonbeams"})
 	after(5.8, func() -> void: _beam_speed = 0.0)
 
 ## A ring of ghosts with two gaps, then another turned a little.
@@ -97,11 +97,11 @@ func _blink() -> void:
 ## Stars fall on everyone and burst into rings of moon shards.
 func _stars() -> void:
 	model.boss_pose("summon", 1.4)
-	var star := PlanetBosses.shot("ghost_wisp", "comet", GHOST, Vector2i(50, 64), 3.5, 7.0, 1.8,
+	var star := PlanetBosses.shot("ghost_wisp", "comet", GHOST, Vector2i(88, 112), 3.5, 7.0, 1.8,
 		{terminal = {delay = 0.35, count = 12, attack = _moon(5.0)}})
 	after(0.7, func() -> void: fire_fan(shot_origin(), aim_dir(), 7, 360.0/7.0, star))
 	for p in players():
-		hazards.circle(in_arena(p.global_position, 27.0), 2.6, 1.2, Vector2i(55, 70), GHOST)
+		hazards.circle(in_arena(p.global_position, 27.0), 2.6, 1.2, Vector2i(139, 176), GHOST)
 
 func _ghosts(count: int) -> void:
 	for i in count:

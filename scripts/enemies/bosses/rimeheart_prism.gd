@@ -106,8 +106,8 @@ func _helix(delta: float) -> void:
 	while _helix_timer <= 0.0:
 		_helix_timer += 0.42
 		_helix_angle = wrapf(_helix_angle + deg_to_rad(13.0), 0.0, TAU)
-		var a := Boss.shot("shard", ICE, Vector2i(45, 55), 6.5, 0.15, 22.0)
-		var b := Boss.shot("shard", Color(0.75, 0.95, 1.0), Vector2i(45, 55), 5.5, 0.15, 22.0)
+		var a := Boss.shot("shard", ICE, Vector2i(58, 71), 6.5, 0.15, 22.0)
+		var b := Boss.shot("shard", Color(0.75, 0.95, 1.0), Vector2i(58, 71), 5.5, 0.15, 22.0)
 		for k in 3:
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, _helix_angle + k * TAU / 3.0), a)
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, -_helix_angle + k * TAU / 3.0 + PI / 3.0), b)
@@ -119,8 +119,8 @@ func _bloom() -> void:
 	pulse_glow(2.0, 0.7)
 	var offset := randf() * TAU
 	after(0.7, func() -> void:
-		var burst := Boss.shot("shard", ICE, Vector2i(45, 55), 6.0, 0.14, 12.0)
-		var orb := Boss.shot("orb", Color(0.7, 0.95, 1.0), Vector2i(70, 85), 4.0, 0.4, 8.0,
+		var burst := Boss.shot("shard", ICE, Vector2i(58, 71), 6.0, 0.14, 12.0)
+		var orb := Boss.shot("orb", Color(0.7, 0.95, 1.0), Vector2i(90, 110), 4.0, 0.4, 8.0,
 				{size = 1.5, effects = [{id = "static", duration = 3.0}], effect_source = "Rimeheart crystal bloom",
 					terminal = {delay = 0.35, count = 6, attack = burst}})
 		for k in 8:
@@ -131,7 +131,7 @@ func _spears() -> void:
 	model.boss_pose("cast", 1.0)
 	var at := target().global_position
 	for offset: Vector3 in [Vector3.ZERO, Vector3(1.7, 0, 0.9), Vector3(-1.4, 0, -1.4), Vector3(0.4, 0, 2.1)]:
-		hazards.circle(in_arena(at + offset, 22.0), 0.9, 1.1, Vector2i(75, 85), WARN)
+		hazards.circle(in_arena(at + offset, 22.0), 0.9, 1.1, Vector2i(134, 152), WARN)
 
 
 # --- Phase 2: the conduit ---------------------------------------------------------------
@@ -231,7 +231,7 @@ func _orbit_rings() -> void:
 		for k in 16:
 			var fast := k % 2 == 0
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, start + k * TAU / 16.0),
-					Boss.shot("shard", ICE if fast else Color(0.8, 0.97, 1.0), Vector2i(50, 60), 7.0 if fast else 4.5, 0.15, 24.0)))
+					Boss.shot("shard", ICE if fast else Color(0.8, 0.97, 1.0), Vector2i(64, 77), 7.0 if fast else 4.5, 0.15, 24.0)))
 
 
 ## Six spokes along the hexagon, each a line of four shards at rising speeds.
@@ -244,7 +244,7 @@ func _spokes() -> void:
 		for k in 6:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, start + k * TAU / 6.0)
 			for speed in [4.0, 5.5, 7.0, 8.5]:
-				shoot(shot_origin(), dir, Boss.shot("shard", ICE, Vector2i(50, 60), speed, 0.15, 24.0)))
+				shoot(shot_origin(), dir, Boss.shot("shard", ICE, Vector2i(64, 77), speed, 0.15, 24.0)))
 
 
 func _update_curtains(delta: float, living: Array) -> void:
@@ -265,7 +265,7 @@ func _update_curtains(delta: float, living: Array) -> void:
 		if ends[0] in living and ends[1] in living:
 			var a: Vector3 = (_towers[ends[0]] as Enemy).global_position
 			var b: Vector3 = (_towers[ends[1]] as Enemy).global_position
-			_curtains[edge] = hazards.segment(a, b, 0.6, 0.8, 2.0, Vector2i(55, 65), 0.7, ICE,
+			_curtains[edge] = hazards.segment(a, b, 0.6, 0.8, 2.0, Vector2i(102, 120), 0.7, ICE,
 					{group = "curtains", height = BEAM_HEIGHT})
 	_curtain_parity = 1 - _curtain_parity
 
@@ -382,7 +382,7 @@ func _tempest(delta: float) -> void:
 	_stream_next -= delta
 	while _stream_next <= 0.0 and _stream > 0.0:
 		_stream_next += 0.2
-		var attack := Boss.shot("shard", ICE, Vector2i(60, 75), 6.5, 0.15, 24.0)
+		var attack := Boss.shot("shard", ICE, Vector2i(77, 97), 6.5, 0.15, 24.0)
 		for k in 4:
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, _stream_angle + k * PI * 0.5), attack)
 	if _stream <= 0.0:
@@ -394,7 +394,7 @@ func _comets() -> void:
 	hazards.lane(global_position + dir * 6.0, dir, 12.0, 1.2, 0.7, 0.0, Vector2i.ZERO, 0.0, WARN)
 	pulse_glow(2.0, 0.7)
 	after(0.7, func() -> void:
-		fire_fan(shot_origin(), dir, 3, 10.0, Boss.shot("comet", Color(0.75, 0.95, 1.0), Vector2i(75, 90), 7.5, 0.25, 22.0, {size = 1.2})))
+		fire_fan(shot_origin(), dir, 3, 10.0, Boss.shot("comet", Color(0.75, 0.95, 1.0), Vector2i(126, 152), 7.5, 0.25, 22.0, {size = 1.2})))
 
 
 ## As each storm ends: a full ring that leaves no gaps, at half the speed.
@@ -402,7 +402,7 @@ func _closing_ring() -> void:
 	var offset := randf() * TAU
 	for k in 28:
 		shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, offset + k * TAU / 28.0),
-				Boss.shot("shard", Color(0.8, 0.97, 1.0), Vector2i(50, 60), 4.0, 0.15, 24.0))
+				Boss.shot("shard", Color(0.8, 0.97, 1.0), Vector2i(64, 77), 4.0, 0.15, 24.0))
 
 
 func _reset_hook() -> void:

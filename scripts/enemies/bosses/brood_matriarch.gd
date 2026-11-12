@@ -37,10 +37,10 @@ func _threshold_reached(next: int) -> void:
 		"Her egg sacs burst: the brood shields her" if next==1 else "The hive rots from within", "kneel")
 
 func _lance(speed := 7.5) -> Dictionary:
-	return PlanetBosses.shot("acid_lance", "needle", ACID, Vector2i(52, 66), speed, 22.0, 1.0)
+	return PlanetBosses.shot("acid_lance", "needle", ACID, Vector2i(120, 153), speed, 22.0, 1.0)
 
 func _spore(burst: int) -> Dictionary:
-	return PlanetBosses.shot("spore_cluster", "orb", PINK, Vector2i(56, 70), 4.5, 8.0, 1.6,
+	return PlanetBosses.shot("spore_cluster", "orb", PINK, Vector2i(162, 203), 4.5, 8.0, 1.6,
 		{terminal = {delay = 0.35, count = burst, attack = _lance(6.0)}})
 
 ## Spore clusters drift out and split into acid lances.
@@ -70,7 +70,7 @@ func _pools() -> void:
 		var a := randf()*TAU
 		marks.append(in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*randf_range(6.0, 25.0), 27.0))
 	for at in marks:
-		hazards.circle(at, 2.8, 1.3, Vector2i(50, 64), ACID, {patch = {time = 4.0, tick = 0.6, damage = Vector2i(14, 20)}})
+		hazards.circle(at, 2.8, 1.3, Vector2i(164, 210), ACID, {patch = {time = 4.0, tick = 0.6, damage = Vector2i(24, 35)}})
 
 ## Five arms of spores winding out of her.
 func _spiral() -> void:
@@ -80,7 +80,7 @@ func _spiral() -> void:
 	for beat in 20:
 		after(0.4+beat*0.15, func() -> void:
 			for arm in 5:
-				var attack := PlanetBosses.shot("spore_cluster", "orb", PINK, Vector2i(46, 60), 5.0, 22.0, 1.0)
+				var attack := PlanetBosses.shot("spore_cluster", "orb", PINK, Vector2i(107, 139), 5.0, 22.0, 1.0)
 				attack.turn = 0.14
 				shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, start+beat*0.2+arm*TAU/5.0), attack))
 
@@ -92,7 +92,7 @@ func _double_ring() -> void:
 		model.strike()
 		fire_ring(shot_origin(), 32, _lance(6.0), gap, 44.0))
 	after(1.5, func() -> void:
-		fire_ring(shot_origin(), 24, PlanetBosses.shot("spore_cluster", "orb", PINK, Vector2i(46, 60), 4.5, 22.0, 1.0), gap+0.2, 44.0))
+		fire_ring(shot_origin(), 24, PlanetBosses.shot("spore_cluster", "orb", PINK, Vector2i(107, 139), 4.5, 22.0, 1.0), gap+0.2, 44.0))
 
 ## She crouches, then lunges along a marked lane, spitting lances as she lands.
 func _lunge() -> void:
@@ -103,7 +103,7 @@ func _lunge() -> void:
 	face_override = dir
 	after(1.1, func() -> void:
 		model.boss_pose("charge", 1.1)
-		start_charge(dir, length, 15.0, Vector2i(70, 90), func() -> void:
+		start_charge(dir, length, 15.0, Vector2i(163, 210), func() -> void:
 			model.boss_pose("charge_recover", 0.8)
 			face_override = Vector3.ZERO
 			fire_ring(shot_origin(), 18, _lance(6.5))

@@ -83,7 +83,7 @@ func _halo(radius: float, count: int, loops: float) -> void:
 	var sense := 1.0 if randf() < 0.5 else -1.0
 	after(0.6, func() -> void:
 		fire_orbit(global_position, radius, count, 5.0, loops, sense,
-				Boss.shot("bolt", VIOLET, Vector2i(55, 70), 5.0, 0.16, 1.0), randf() * TAU))
+				Boss.shot("bolt", VIOLET, Vector2i(104, 133), 5.0, 0.16, 1.0), randf() * TAU))
 
 
 ## A ring, then the same ring again: slower, magenta, half a step turned.
@@ -91,8 +91,8 @@ func _echo_rings() -> void:
 	model.boss_pose("cast", 1.4)
 	pulse_glow(1.6, 0.5)
 	var offset := randf() * TAU
-	after(0.5, func() -> void: _ring(14, offset, Boss.shot("bolt", VIOLET, Vector2i(55, 70), 6.5, 0.16, 22.0)))
-	after(1.0, func() -> void: _ring(14, offset + PI / 14.0, Boss.shot("bolt", MAGENTA, Vector2i(55, 70), 4.5, 0.16, 22.0)))
+	after(0.5, func() -> void: _ring(14, offset, Boss.shot("bolt", VIOLET, Vector2i(84, 106), 6.5, 0.16, 22.0)))
+	after(1.0, func() -> void: _ring(14, offset + PI / 14.0, Boss.shot("bolt", MAGENTA, Vector2i(84, 106), 4.5, 0.16, 22.0)))
 
 
 func _ring(count: int, offset: float, attack: Dictionary, from := Vector3.INF) -> void:
@@ -109,18 +109,18 @@ func _whirlpool() -> void:
 	_whirl_sign = -_whirl_sign
 	var offset := randf() * TAU
 	after(0.6, func() -> void:
-		_ring(16, offset, Boss.shot("bolt", MAGENTA, Vector2i(55, 70), 6.0, 0.16, 24.0, {turn = 0.45 * sense})))
+		_ring(16, offset, Boss.shot("bolt", MAGENTA, Vector2i(84, 106), 6.0, 0.16, 24.0, {turn = 0.45 * sense})))
 
 
 func _black_sun(count: int) -> void:
 	model.boss_pose("cast", 1.2)
 	pulse_glow(2.2, 1.0)
 	after(1.0, func() -> void:
-		var needles := Boss.shot("needle", MAGENTA, Vector2i(45, 55), 6.0, 0.12, 14.0)
+		var needles := Boss.shot("needle", MAGENTA, Vector2i(111, 136), 6.0, 0.12, 14.0)
 		var aim := aim_dir()
 		for k in count:
 			var dir := aim if count == 1 else aim.rotated(Vector3.UP, deg_to_rad(25.0) * (k * 2 - 1))
-			shoot(shot_origin(), dir, Boss.shot("orb", Color(0.25, 0.08, 0.35), Vector2i(75, 90), 3.5, 0.45, 10.0,
+			shoot(shot_origin(), dir, Boss.shot("orb", Color(0.25, 0.08, 0.35), Vector2i(167, 200), 3.5, 0.45, 10.0,
 					{size = 1.6, effects = [{id = "quiet", duration = 1.75}], effect_source = "Hollow Crown black sun",
 						terminal = {delay = 0.4, count = 12 if count > 1 else 8, attack = needles}})))
 
@@ -132,7 +132,7 @@ func _rune_pairs() -> void:
 		after(0.8 + k * 0.12, func() -> void:
 			var dir := aim_dir()
 			var side := dir.cross(Vector3.UP) * 0.6
-			var attack := Boss.shot("bolt", VIOLET, Vector2i(60, 75), 7.5, 0.16, 20.0)
+			var attack := Boss.shot("bolt", VIOLET, Vector2i(91, 114), 7.5, 0.16, 20.0)
 			shoot(shot_origin() + side, dir, attack)
 			shoot(shot_origin() - side, dir, attack))
 
@@ -190,7 +190,7 @@ func _teleport() -> void:
 		collision_layer = 0
 		immune = true
 		# The afterimage it leaves behind bursts into a ring.
-		_ring(12, randf() * TAU, Boss.shot("needle", MAGENTA, Vector2i(50, 60), 5.5, 0.12, 18.0), shot_origin()))
+		_ring(12, randf() * TAU, Boss.shot("needle", MAGENTA, Vector2i(95, 114), 5.5, 0.12, 18.0), shot_origin()))
 	after(0.85, func() -> void:
 		global_position = Vector3(dest.x, global_position.y, dest.z)
 		velocity = Vector3.ZERO
@@ -219,7 +219,7 @@ func _seams() -> void:
 	var a := randf() * TAU
 	for k in 2:
 		var dir := Vector3.FORWARD.rotated(Vector3.UP, a + k * PI * 0.5)
-		hazards.lane(in_arena(at, 20.0), dir, 8.0, 0.6, 0.9, 1.5, Vector2i(60, 70), 0.75, MAGENTA, {group = "void_seams"})
+		hazards.lane(in_arena(at, 20.0), dir, 8.0, 0.6, 0.9, 1.5, Vector2i(131, 153), 0.75, MAGENTA, {group = "void_seams"})
 
 
 # --- Phase 3 -------------------------------------------------------------------------------
@@ -242,7 +242,7 @@ func _run_vortex(delta: float) -> void:
 	_vortex_next -= delta
 	while _vortex_next <= 0.0 and _vortex > 0.0:
 		_vortex_next += 0.22
-		var attack := Boss.shot("bolt", MAGENTA, Vector2i(60, 75), 6.0, 0.16, 24.0, {turn = -0.5 * _whirl_sign})
+		var attack := Boss.shot("bolt", MAGENTA, Vector2i(114, 142), 6.0, 0.16, 24.0, {turn = -0.5 * _whirl_sign})
 		for k in 3:
 			shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, _vortex_angle + k * TAU / 3.0), attack)
 	if _vortex <= 0.0:
@@ -257,7 +257,7 @@ func _collapse() -> void:
 	hazards.marker(global_position, 15.0, 1.0, WARN)
 	for ring in 2:
 		after(1.0 + ring * 0.6, func() -> void:
-			var attack := Boss.shot("bolt", VIOLET if ring == 0 else MAGENTA, Vector2i(60, 75), 6.0, 0.16, 14.0)
+			var attack := Boss.shot("bolt", VIOLET if ring == 0 else MAGENTA, Vector2i(148, 185), 6.0, 0.16, 14.0)
 			for k in 20:
 				var radial := Vector3.FORWARD.rotated(Vector3.UP, offset + (k + ring * 0.5) * TAU / 20.0)
 				var origin := in_arena(global_position + radial * 15.0, 24.0)

@@ -194,7 +194,7 @@ func _disc_wheel() -> void:
 		var dir := Vector3.FORWARD.rotated(Vector3.UP, spin + k * TAU / 8.0)
 		hazards.lane(global_position + dir * 3.5, dir, 5.0, 1.0, 0.75, 0.0, Vector2i.ZERO, 0.0, WARN)
 	after(0.75, func() -> void:
-		var attack := Boss.shot("disc", GOLD, Vector2i(85, 100), DISC_SPEED, 0.45, TAU * DISC_SPEED / DISC_TURN * 0.92,
+		var attack := Boss.shot("disc", GOLD, Vector2i(94, 111), DISC_SPEED, 0.45, TAU * DISC_SPEED / DISC_TURN * 0.92,
 				{size = 1.6, turn = turn, pierce_players = true, pierce_shields = true, armor_piercing = true,
 					effects = [{id = "dexterity", amount = -10, duration = 2.0}], effect_source = "Scarab Regent heavy disc"})
 		for k in 8:
@@ -205,11 +205,11 @@ func _needles() -> void:
 	model.boss_pose("cast", 0.8)
 	pulse_glow(1.6, 0.6)
 	after(0.6, func() -> void:
-		fire_fan(shot_origin(), aim_dir(), 7, 10.0, Boss.shot("needle", GOLD, Vector2i(55, 70), 10.0, 0.13, 20.0)))
+		fire_fan(shot_origin(), aim_dir(), 7, 10.0, Boss.shot("needle", GOLD, Vector2i(76, 97), 10.0, 0.13, 20.0)))
 
 
 static func _mote(speed := 6.0) -> Dictionary:
-	return Boss.shot("orb", Color(1.0, 0.75, 0.4), Vector2i(45, 60), speed, 0.2, 22.0,
+	return Boss.shot("orb", Color(1.0, 0.75, 0.4), Vector2i(62, 83), speed, 0.2, 22.0,
 			{size = 1.0, authored_projectile = true, voxel_model = "boss_projectiles/gold_sunmote", pixel_projectile = true,
 			projectile_glow = 0.8, fire_brightness = 0.9})
 
@@ -296,19 +296,19 @@ func _rays() -> void:
 		var axis := func() -> Array:
 			var dir := Vector3.FORWARD.rotated(Vector3.UP, _ray_angle_now + side)
 			return [global_position + dir * (def.hit_radius * def.model_scale), dir]
-		hazards.ray(axis, RAY_LENGTH, 0.7, 1.1, RAY_ACTIVE, Vector2i(70, 85), 0.75, Color(1.0, 0.9, 0.5), {group = "solar_rays"})
+		hazards.ray(axis, RAY_LENGTH, 0.7, 1.1, RAY_ACTIVE, Vector2i(111, 135), 0.75, Color(1.0, 0.9, 0.5), {group = "solar_rays"})
 
 
 func _gold_fan() -> void:
 	pulse_glow(1.3, 0.5)
 	after(0.5, func() -> void:
-		fire_fan(shot_origin(), aim_dir(), 5, 12.0, Boss.shot("needle", GOLD, Vector2i(60, 75), 8.5, 0.13, 20.0)))
+		fire_fan(shot_origin(), aim_dir(), 5, 12.0, Boss.shot("needle", GOLD, Vector2i(83, 104), 8.5, 0.13, 20.0)))
 
 
 func _sand_spears() -> void:
 	var at := target().global_position
 	for offset: Vector3 in [Vector3.ZERO, Vector3(1.6, 0, 1.2), Vector3(-1.8, 0, 0.6)]:
-		hazards.circle(in_arena(at + offset, 22.0), 0.8, 1.2, Vector2i(75, 90), Color(0.95, 0.75, 0.4))
+		hazards.circle(in_arena(at + offset, 22.0), 0.8, 1.2, Vector2i(135, 162), Color(0.95, 0.75, 0.4))
 
 
 # --- Phase 3 ------------------------------------------------------------------------------
@@ -332,7 +332,7 @@ func _charge_lane(second: bool) -> void:
 	hazards.lane(global_position + dir * length * 0.5, dir, maxf(2.0, length), 3.0, 1.0, 0.0, Vector2i.ZERO, 0.0, PINK)
 	after(1.0, func() -> void:
 		model.boss_pose("charge", length / 13.0 + 0.2)
-		start_charge(dir, length, 13.0, Vector2i(135, 155), _expose))
+		start_charge(dir, length, 13.0, Vector2i(174, 200), _expose))
 
 
 ## Plants its legs and opens the shell: the damage window.
@@ -349,7 +349,7 @@ func _ring() -> void:
 	var gap := randf() * PI
 	mark_ring_gaps(gap, 60.0, 0.9, Color(1.0, 0.95, 0.7))
 	after(0.9, func() -> void:
-		fire_ring(shot_origin(), 22, Boss.shot("needle", GOLD, Vector2i(65, 80), 6.5, 0.14, 22.0), gap, 60.0))
+		fire_ring(shot_origin(), 22, Boss.shot("needle", GOLD, Vector2i(72, 89), 6.5, 0.14, 22.0), gap, 60.0))
 
 
 func _comets() -> void:
@@ -358,7 +358,7 @@ func _comets() -> void:
 	for k in 4:
 		var spot: Vector3 = in_arena(at + offsets[k], 22.0)
 		after(k * 0.5, func() -> void:
-			hazards.circle(spot, 1.1, 1.2, Vector2i(80, 95), PINK))
+			hazards.circle(spot, 1.1, 1.2, Vector2i(144, 171), PINK))
 
 
 func _reset_hook() -> void:

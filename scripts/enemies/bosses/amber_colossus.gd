@@ -28,10 +28,10 @@ func _threshold_reached(next: int) -> void:
 		"Molten honey cracks through the Colossus" if next==1 else "The shell splits: the hive inside wakes", "kneel")
 
 func _shard(speed := 7.5) -> Dictionary:
-	return PlanetBosses.shot("amber_shard", "shard", AMBER, Vector2i(42, 56), speed, 24.0, 1.1)
+	return PlanetBosses.shot("amber_shard", "shard", AMBER, Vector2i(76, 102), speed, 24.0, 1.1)
 
 func _honey(speed := 5.0) -> Dictionary:
-	return PlanetBosses.shot("honey_orb", "orb", HONEY, Vector2i(38, 50), speed, 20.0, 1.2)
+	return PlanetBosses.shot("honey_orb", "orb", HONEY, Vector2i(55, 73), speed, 20.0, 1.2)
 
 func _volley() -> void:
 	model.boss_pose("cast", 1.0)
@@ -43,7 +43,7 @@ func _volley() -> void:
 ## Fists down: a shockwave around it and a ring of honey.
 func _slam() -> void:
 	model.boss_pose("slam_windup", 1.1)
-	hazards.circle(global_position, 7.0, 1.1, Vector2i(55, 70), AMBER)
+	hazards.circle(global_position, 7.0, 1.1, Vector2i(119, 152), AMBER)
 	after(1.1, func() -> void:
 		model.boss_pose("slam_release", 0.5)
 		model.strike()
@@ -59,7 +59,7 @@ func _honey_rain() -> void:
 		var a := randf()*TAU
 		marks.append(in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*randf_range(6.0, 24.0), 27.0))
 	for at in marks:
-		hazards.circle(at, 2.4, 1.3, Vector2i(45, 58), HONEY, {patch = {time = 3.0, tick = 0.6, damage = Vector2i(10, 16)}})
+		hazards.circle(at, 2.4, 1.3, Vector2i(94, 121), HONEY, {patch = {time = 3.0, tick = 0.6, damage = Vector2i(11, 17)}})
 		after(1.35, func() -> void:
 			var o := at
 			o.y = shot_origin().y
@@ -90,7 +90,7 @@ func _rush() -> void:
 	face_override = dir
 	after(1.2, func() -> void:
 		model.boss_pose("charge", 1.2)
-		start_charge(dir, length, 14.0, Vector2i(60, 78), func() -> void:
+		start_charge(dir, length, 14.0, Vector2i(117, 152), func() -> void:
 			model.boss_pose("charge_recover", 0.8)
 			face_override = Vector3.ZERO
 			fire_ring(shot_origin(), 20, _shard(6.5))
@@ -103,7 +103,7 @@ func _rush() -> void:
 func _boomerangs() -> void:
 	model.play_attack(0.6)
 	var base := aim_dir()
-	var disc := PlanetBosses.shot("amber_shard", "disc", AMBER, Vector2i(48, 60), 8.0, 32.0, 1.4, {returns = 15.0})
+	var disc := PlanetBosses.shot("amber_shard", "disc", AMBER, Vector2i(70, 87), 8.0, 32.0, 1.4, {returns = 15.0})
 	after(0.6, func() -> void: fire_fan(shot_origin(), base, 8, 45.0, disc))
 
 func _spiral() -> void:

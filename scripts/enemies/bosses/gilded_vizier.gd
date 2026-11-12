@@ -40,7 +40,7 @@ func _hourglass() -> void:
 	for side in [-1.0, 1.0]:
 		for step in 4:
 			var at: Vector3 = encounter_center + axis * side * (3.0 + step * 2.5)
-			hazards.circle(at, 1.3, 1.2 + step * 0.18, Vector2i(40, 52), GOLD)
+			hazards.circle(at, 1.3, 1.2 + step * 0.18, Vector2i(46, 60), GOLD)
 	after(1.0, func() -> void:
 		fire_fan(shot_origin(), axis.rotated(Vector3.UP, PI * 0.5), 5, 18.0, _sand(5.0))
 		fire_fan(shot_origin(), axis.rotated(Vector3.UP, -PI * 0.5), 5, 18.0, _sand(5.0)))
