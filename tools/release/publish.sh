@@ -4,8 +4,9 @@
 # Builds the committed HEAD in a clean worktree (uncommitted work is never
 # shipped), packs only the exported game files, tags v<version> and publishes
 # a GitHub release with release/release.json and release/cover.png. The Pi
-# picks the release up within five minutes (void-release-sync.timer); pass
-# --now to trigger it right away.
+# picks the release up within five minutes (void-release-sync.timer, from the
+# void_of_exile_account repo) and refreshes the website wiki; pass --now to
+# trigger it right away.
 #
 #   tools/release/publish.sh            # version from release/release.json
 #   tools/release/publish.sh --now
@@ -68,6 +69,15 @@ info["platforms"] = {"linux-x86_64": {"archive": sys.argv[3], "launch": "VoidOfE
 json.dump(info, open(sys.argv[1], "w"), indent=2)
 PY
 cp release/cover.png "$WORK/cover.png"
+
+info "Website wiki data (catalog, renders, wiki.json)"
+rm -rf "$HOME/tmp/void_wiki/media"; mkdir -p "$HOME/tmp/void_wiki/media"
+env XDG_DATA_HOME="$WORK/userdata" "$GODOT" --headless --path "$TREE" tools/export_review_catalog.tscn >"$WORK/wiki.log" 2>&1
+python3 "$TREE/tools/enrich_review_catalog.py" >>"$WORK/wiki.log" 2>&1
+# Renders need the graphical renderer: a window opens for a few seconds.
+env XDG_DATA_HOME="$WORK/userdata" "$GODOT" --path "$TREE" tools/export_wiki_media.tscn >>"$WORK/wiki.log" 2>&1
+python3 "$TREE/tools/web/build_site_data.py" "$WORK/wiki" --version "$VERSION"
+tar -C "$WORK/wiki" -czf "$WORK/wiki.tar.gz" .
 ls -la "$WORK"/*.tar.gz
 [[ $BUILD_ONLY == 1 ]] && { info "Build only: $WORK"; exit 0; }
 
@@ -84,7 +94,7 @@ print(json.dumps({"tag_name": "v" + i["version"], "name": "Void of Exile " + i["
     "body": "\n".join("- " + n for n in i.get("notes", [])), "prerelease": False, "make_latest": "true"}))')"
 RELEASE="$(api -X POST "https://api.github.com/repos/$REPO/releases" -d "$BODY")"
 UPLOAD="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["upload_url"].split("{")[0])' <<<"$RELEASE")"
-for f in "$ARCHIVE" release.json cover.png; do
+for f in "$ARCHIVE" release.json cover.png wiki.tar.gz; do
     case "$f" in *.gz) type=application/gzip ;; *.json) type=application/json ;; *) type=image/png ;; esac
     api -X POST -H "Content-Type: $type" --data-binary @"$WORK/$f" "$UPLOAD?name=$f" >/dev/null
     echo "  uploaded $f"
