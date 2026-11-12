@@ -315,6 +315,15 @@ func clear() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not FrameTrace.enabled:
+		_physics_step(delta)
+		return
+	var started := Time.get_ticks_usec()
+	_physics_step(delta)
+	FrameTrace.record("enemies/bullets", started)
+
+
+func _physics_step(delta: float) -> void:
 	var space := get_world_3d().direct_space_state
 	# Player bodies share a terrain layer locally; resolve them only through
 	# the swept player/shield tests below, never as a wall that eats the shot.
@@ -349,9 +358,13 @@ func _physics_process(delta: float) -> void:
 			if s.attack.has("bowl"): to.y += _bowl_floor(s.attack.bowl, to) - _bowl_floor(s.attack.bowl, s.origin)
 		var query := PhysicsRayQueryParameters3D.create(from, to, (0 if riding else Player.TERRAIN_LAYER) | Player.OBSTACLE_LAYER)
 		query.exclude = excluded
+		var t_ray := Time.get_ticks_usec() if FrameTrace.enabled else 0
 		var wall: Dictionary = space.intersect_ray(query) if s.collision_boxes.is_empty() else {}
+		if FrameTrace.enabled: FrameTrace.record("bullets/ray", t_ray)
 		if s.half_extents!=Vector3.ZERO:
+			var t_box := Time.get_ticks_usec() if FrameTrace.enabled else 0
 			var fraction := _wide_wall_fraction(space,s,from,to,excluded)
+			if FrameTrace.enabled: FrameTrace.record("bullets/wide", t_box)
 			if fraction<1:
 				to = from.lerp(to,fraction)
 				s.travelled = s.range
@@ -362,7 +375,9 @@ func _physics_process(delta: float) -> void:
 			s.hit_object = true
 			if from.distance_squared_to(wall.position)<from.distance_squared_to(to): to = wall.position
 			s.travelled = s.range
+			var t_audio := Time.get_ticks_usec() if FrameTrace.enabled else 0
 			GameAudio.play("magic_impact" if s.magic else "enemy_shot", to, {source_id = s.owner, cooldown = 0.12, max_distance = 48.0})
+			if FrameTrace.enabled: FrameTrace.record("bullets/impact_sound", t_audio)
 		# A player's expanding magic can tear apart enemy magic before it arrives.
 		if s.magic and _interfere(s,from,to):
 			s.blocked = true
@@ -391,8 +406,10 @@ func _physics_process(delta: float) -> void:
 					break
 				if _shot_hits_player(p,from,to,s):
 					p.last_hit_by = s.attack.get("by", "")
+					var t_hit := Time.get_ticks_usec() if FrameTrace.enabled else 0
 					if p.take_damage(float(s.damage), s.armor_piercing, s.magic):
 						p.receive_attack_effects(s.attack)
+					if FrameTrace.enabled: FrameTrace.record("bullets/hit_player", t_hit)
 					s.hit.append(p)
 					s.hit_at[p] = now
 					if not s.pierce:
@@ -427,11 +444,15 @@ func _physics_process(delta: float) -> void:
 		if s.travelled >= s.range:
 			if not s.blocked and not s.ripple.is_empty():
 				if s.hit_object: GameAudio.play("magic_explosion", s.pos, {source_id = s.owner, cooldown = 0.12})
+				var t_ripple := Time.get_ticks_usec() if FrameTrace.enabled else 0
 				EnemyRipple.spawn(self, s.pos - Vector3.UP * Player.SHOT_HEIGHT, s.ripple, s.color, players, s.hit, s.hit_object)
+				if FrameTrace.enabled: FrameTrace.record("bullets/ripple", t_ripple)
+			var t_free := Time.get_ticks_usec() if FrameTrace.enabled else 0
 			if s.trail:
 				_burn_out(s)
 			s.node.queue_free()
 			_shots.remove_at(i)
+			if FrameTrace.enabled: FrameTrace.record("bullets/remove", t_free)
 
 
 ## Swept sphere contact with the visible shield, including fast projectiles.

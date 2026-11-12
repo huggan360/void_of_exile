@@ -8,7 +8,7 @@ extends Node
 ## keeps them (in its data folder, see ServerConfig) and sends each client
 ## the record of the realm it enters; a client keeps none of its own.
 
-const LAYOUT_VERSION := 6
+const LAYOUT_VERSION := 7  # 7: the Surface remade in 0.25 m voxels (new map)
 ## Every realm is the same island: the reviewed map (docs/realm_expansion/
 ## seed_20261031.json), no longer a random one per realm.
 const MAP_SEED := 20261031
@@ -47,6 +47,9 @@ func get_or_create_realm(realm_id: String) -> Dictionary:
 		record.destroyed = []
 		record.cleared_packs = []
 		record.pack_survivors = {}
+		# Fortress gates moved with the new map.
+		record.erase("stronghold_gates")
+		record.erase("opened_gates")
 		record.layout_version = LAYOUT_VERSION
 		_save(record)
 	_realms[realm_id] = record
@@ -67,7 +70,7 @@ func _migrate_expansion(record: Dictionary) -> void:
 			if id==old or id.begins_with(old+"_"):
 				var mapped := replacement+id.trim_prefix(old)
 				if not record.pack_survivors.has(mapped): record.pack_survivors[mapped] = record.pack_survivors[id].duplicate()
-	record.layout_version = LAYOUT_VERSION
+	record.layout_version = 6
 
 
 ## The fortresses whose gates are unsealed in this realm (keys used, no reset since).

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwk4jdjgwrsl3"
+path="res://.godot/imported/stump.vox-061d1409234caa8f53d8b9bff968357f.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/stump.vox"
+dest_files=["res://.godot/imported/stump.vox-061d1409234caa8f53d8b9bff968357f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

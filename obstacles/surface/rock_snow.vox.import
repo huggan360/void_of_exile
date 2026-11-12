@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://1idlojvpe15i"
+path="res://.godot/imported/rock_snow.vox-bddc49ce703f9548935adbb663d2d913.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/rock_snow.vox"
+dest_files=["res://.godot/imported/rock_snow.vox-bddc49ce703f9548935adbb663d2d913.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

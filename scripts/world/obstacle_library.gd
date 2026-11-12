@@ -31,9 +31,15 @@ class Prefab:
 	var _glow_buffer: VoxelBuffer  # only glow voxels
 	var _palette: VoxelColorPalette
 	var _meshes := {}  # biome id -> [base mesh or null, glow mesh or null]
+	var _lods := {}  # biome id -> coarse mesh
 
 	func is_decor() -> bool:
-		return prefab_name.begins_with("decor_")
+		return prefab_name.get_file().begins_with("decor_")
+
+	## Small things drawn at half the voxel size (the Surface's fine_* stones,
+	## reeds, mushrooms).
+	func is_fine() -> bool:
+		return is_decor() or prefab_name.get_file().begins_with("fine_")
 
 	## [base mesh, glow mesh] with the slots filled in from a biome's colors.
 	func meshes_for(biome: BiomeDef) -> Array:
@@ -50,6 +56,28 @@ class Prefab:
 			_meshes[biome.id] = [base, glow]
 		return _meshes[biome.id]
 
+	## A coarse copy for distant trees: voxels twice as big (2 x 2 x 2 merged),
+	## one mesh with the glow voxels in their colour. Draw it at voxel_size * 2.
+	func lod_mesh_for(biome: BiomeDef) -> Mesh:
+		if _lods.has(biome.id): return _lods[biome.id]
+		var palette: VoxelColorPalette = _palette.duplicate()
+		for slot in range(1, biome.obstacle_colors.size()):
+			palette.set_color(slot, biome.obstacle_colors[slot])
+		var source := DIR + prefab_name + ".vox"
+		var colors := str(biome.id)+":"+str(Array(biome.obstacle_colors).map(func(c: Color) -> String: return c.to_html()))
+		_lods[biome.id] = VoxModel.cached("%s|lod|%s" % [source, colors], source, func() -> Mesh: return VoxModel.mesh_from_buffer(_coarse(), palette))
+		return _lods[biome.id]
+
+	func _coarse() -> VoxelBuffer:
+		var half := Vector3i((size.x + 1) / 2, (size.y + 1) / 2, (size.z + 1) / 2)
+		var out := VoxelBuffer.new()
+		out.create(half.x, half.y, half.z)
+		for i in voxel_positions.size():
+			var v := Vector3i(((voxel_positions[i] - mesh_offset()) / voxel_size).floor()) / 2
+			if out.get_voxel(v.x, v.y, v.z, VoxelBuffer.CHANNEL_COLOR) == 0:
+				out.set_voxel(voxel_slots[i], v.x, v.y, v.z, VoxelBuffer.CHANNEL_COLOR)
+		return out
+
 	## Local offset to place the mesh so the prefab is centered on its origin.
 	func mesh_offset() -> Vector3:
 		return Vector3(-size.x * 0.5, 0, -size.z * 0.5) * voxel_size
@@ -64,7 +92,7 @@ static func get_prefab(prefab_name: String) -> Prefab:
 	var data := VoxModel.load_vox(DIR + prefab_name + ".vox")
 	var p := Prefab.new()
 	p.prefab_name = prefab_name
-	p.voxel_size = DECOR_VOXEL_SIZE if p.is_decor() else VOXEL_SIZE
+	p.voxel_size = DECOR_VOXEL_SIZE if p.is_fine() else VOXEL_SIZE
 	var buffer: VoxelBuffer = data[0]
 	p._palette = data[1]
 	p.size = buffer.get_size()
@@ -73,7 +101,7 @@ static func get_prefab(prefab_name: String) -> Prefab:
 	_split_glow(p, buffer)
 	_read_voxels(p, buffer)
 	p.hp = clampi(p.voxel_positions.size() / 120, 2, 14)
-	if not p.is_decor():
+	if not p.is_fine():
 		_build_collision(p, buffer)
 	_cache[prefab_name] = p
 	return p

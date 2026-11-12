@@ -53,8 +53,10 @@ const SPIRIT_PACKS_BLUELAY := [{pack = "spirit_brown_pack", chance = 0.135}, {pa
 ## realm and home share one base look: no blue sky cast, a warm neutral haze.
 const DAY := {
 	sky_top_color = Color(0.27, 0.38, 0.62), sky_horizon_color = Color(0.94, 0.78, 0.6),
-	sun_color = Color(1.0, 0.89, 0.74), sun_energy = 1.35, sun_pitch = 44.0, ambient_energy = 0.9,
-	fog_color = Color(0.86, 0.8, 0.7), fog_density = 0.0012, volumetric_fog_density = 0.004,
+	sun_color = Color(1.0, 0.87, 0.7), sun_energy = 1.35, sun_pitch = 36.0, ambient_energy = 0.9,
+	fog_color = Color(0.86, 0.8, 0.7), fog_density = 0.0008, volumetric_fog_density = 0.0,
+	cinematic_grade = 0.25, saturation = 1.18, contrast = 1.06,
+	fog_of_war_enabled = false,
 }
 
 
@@ -97,7 +99,7 @@ static func _build() -> void:
 			{pack = "tide_snail_pack", density = 0.18}
 		], biome_name = "Shores", god_stat = "dexterity",
 		top_block = Blocks.SAND, under_block = Blocks.SAND,
-		obstacle_density = 0.25, obstacles = {palm = 4, rock = 1, bush = 0.5},
+		obstacle_density = 0.18, obstacles = {"surface/rock_grey": 2, "surface/log": 1},
 		obstacle_colors = _colors(Color(0.6, 0.58, 0.52), Color(0.42, 0.4, 0.36),
 				Color(0.32, 0.62, 0.25), Color(0.58, 0.42, 0.26), Color(0.9, 0.85, 0.7), Color(0.2, 0.45, 0.18)),
 		decor = {decor_pebbles = 2, decor_dry_grass = 1}, decor_density = 0.08,
@@ -109,9 +111,10 @@ static func _build() -> void:
 	_all[WOODS] = _make(DAY.merged({
 		id = WOODS, biome_name = "Woods",
 		top_block = Blocks.GRASS,
-		obstacle_density = 0.8,
-		obstacles = {tree_round = 6, tree_small = 4, tree_tall = 2, bush = 4, rock = 1.5,
-				burnt_tree = 0.3, campfire = 0.15, pillar = 0.3},
+		obstacle_density = 0.4,
+		obstacles = {"surface/rock_grey": 3, "surface/rock_slab": 2, "surface/log": 2,
+				"surface/stump": 1.5, "pillar": 0.3},
+		fog_density = 0.0, volumetric_fog_density = 0.0,
 		obstacle_colors = _colors(Color(0.55, 0.55, 0.55), Color(0.38, 0.38, 0.4),
 				Color(0.3, 0.56, 0.22), Color(0.42, 0.3, 0.18), Color(0.36, 0.52, 0.26), Color(0.2, 0.4, 0.16)),
 		decor = {decor_tuft = 6, decor_flowers = 3, decor_mushrooms = 1, decor_pebbles = 1},
@@ -133,8 +136,8 @@ static func _build() -> void:
 	_all[JUNGLE] = _make({
 		id = JUNGLE, biome_name = "Jungle",
 		top_block = Blocks.JUNGLE_GRASS,
-		obstacle_density = 0.85,
-		obstacles = {tree_tall = 6, tree_round = 2, bush = 6, palm = 2, pillar = 0.3},
+		obstacle_density = 0.35,
+		obstacles = {"surface/rock_grey": 2, "surface/log": 2, "pillar": 0.5},
 		obstacle_colors = _colors(Color(0.5, 0.52, 0.45), Color(0.3, 0.33, 0.28),
 				Color(0.16, 0.55, 0.2), Color(0.4, 0.28, 0.16), Color(0.92, 0.35, 0.45), Color(0.08, 0.35, 0.12)),
 		decor = {decor_fern = 6, decor_tuft = 3, decor_flowers = 2, decor_mushrooms = 1},
@@ -151,7 +154,7 @@ static func _build() -> void:
 		sun_color = Color(1.0, 0.96, 0.85), sun_energy = 1.3, sun_pitch = 50.0, ambient_energy = 0.85,
 		fog_color = Color(0.62, 0.74, 0.64), fog_density = 0.002, volumetric_fog_density = 0.008,
 		torch_energy = 0.3,
-		reveal_radius = 18.0, fog_of_war_color = Color(0.1, 0.18, 0.12),
+		reveal_radius = 18.0, fog_of_war_color = Color(0.1, 0.18, 0.12), fog_of_war_enabled = false,
 		particle_color = Color(0.8, 1.0, 0.4, 0.5), particle_velocity = Vector3(0.1, 0.2, 0.1),
 	})
 	_all[DESERT] = _make({
@@ -159,7 +162,7 @@ static func _build() -> void:
 		top_block = Blocks.DESERT_SAND, under_block = Blocks.DESERT_SAND, stone_block = Blocks.DESERT_ROCK,
 		ruin_block = Blocks.SANDSTONE,
 		obstacle_density = 0.35,
-		obstacles = {cactus = 5, rock = 2, pillar = 1, dead_tree = 0.6, campfire = 0.2},
+		obstacles = {"surface/rock_sand": 4, "cactus": 2, "pillar": 1},
 		obstacle_colors = _colors(Color(0.85, 0.68, 0.45), Color(0.65, 0.48, 0.3),
 				Color(0.35, 0.55, 0.3), Color(0.6, 0.45, 0.28), Color(0.95, 0.4, 0.5), Color(0.25, 0.42, 0.22)),
 		decor = {decor_dry_grass = 4, decor_pebbles = 3}, decor_density = 0.2,
@@ -177,7 +180,7 @@ static func _build() -> void:
 		sky_top_color = Color(0.35, 0.55, 0.85), sky_horizon_color = Color(0.95, 0.85, 0.65),
 		sun_color = Color(1.0, 0.94, 0.8), sun_energy = 1.5, sun_pitch = 58.0, ambient_energy = 0.85,
 		fog_color = Color(0.95, 0.85, 0.68), fog_density = 0.0015, volumetric_fog_density = 0.003,
-		reveal_radius = 22.0, fog_of_war_color = Color(0.75, 0.62, 0.42),
+		reveal_radius = 22.0, fog_of_war_color = Color(0.75, 0.62, 0.42), fog_of_war_enabled = false,
 		particle_color = Color(0.95, 0.8, 0.55, 0.5), particle_velocity = Vector3(1.5, 0.05, 0.3),
 	})
 
@@ -198,8 +201,8 @@ static func _build() -> void:
 		],
 		top_block = Blocks.ASH, under_block = Blocks.DOOM_ROCK, stone_block = Blocks.DOOM_ROCK,
 		glow_block = Blocks.EMBER, glow_chance = 0.006, ruin_block = Blocks.OBSIDIAN,
-		obstacle_density = 0.6,
-		obstacles = {burnt_tree = 6, dead_tree = 2, obelisk = 1.5, boulder = 1.5, campfire = 1},
+		obstacle_density = 0.4,
+		obstacles = {"surface/rock_lava": 4, "surface/rock_dark": 2, "obelisk": 1.2},
 		obstacle_colors = _colors(Color(0.2, 0.18, 0.18), Color(0.12, 0.1, 0.1),
 				Color(0.32, 0.14, 0.1), Color(0.18, 0.13, 0.11), Color(0.8, 0.22, 0.08), Color(0.22, 0.1, 0.08),
 				Color(1.0, 0.45, 0.12)),
@@ -232,8 +235,8 @@ static func _build() -> void:
 		],
 		top_block = Blocks.TUNDRA, under_block = Blocks.FOSEN_ROCK, stone_block = Blocks.FOSEN_ROCK,
 		ruin_block = Blocks.FOSEN_ROCK,
-		obstacle_density = 0.6,
-		obstacles = {pine = 8, tree_small = 1, ice_spike = 1.5, boulder = 1.5, campfire = 0.2},
+		obstacle_density = 0.4,
+		obstacles = {"surface/rock_snow": 4, "ice_spike": 1.5, "surface/rock_grey": 1},
 		obstacle_colors = _colors(Color(0.55, 0.58, 0.62), Color(0.38, 0.4, 0.45),
 				Color(0.16, 0.35, 0.28), Color(0.35, 0.25, 0.18), Color(0.93, 0.96, 1.0), Color(0.1, 0.25, 0.2)),
 		decor = {decor_flowers = 3, decor_pebbles = 2}, decor_density = 0.25,
@@ -246,15 +249,15 @@ static func _build() -> void:
 		sun_color = Color(0.98, 0.97, 0.95), sun_energy = 1.15, sun_pitch = 38.0, ambient_energy = 0.95,
 		fog_color = Color(0.86, 0.88, 0.9), fog_density = 0.0045, volumetric_fog_density = 0.012,
 		torch_energy = 0.5, mood = 0.5,
-		reveal_radius = 13.0, fog_of_war_color = Color(0.82, 0.85, 0.89),
+		reveal_radius = 13.0, fog_of_war_color = Color(0.82, 0.85, 0.89), fog_of_war_enabled = false,
 		particle_color = Color(1, 1, 1, 0.9), particle_velocity = Vector3(0.4, -1.5, 0.2),
 	})
 	_all[BLUELAY] = _make({
 		id = BLUELAY, biome_name = "Bluelay",
 		top_block = Blocks.BLUE_MOSS, under_block = Blocks.BLUE_ROCK, stone_block = Blocks.BLUE_ROCK,
 		glow_block = Blocks.BLUE_GLOW, glow_chance = 0.012, ruin_block = Blocks.BLUE_ROCK,
-		obstacle_density = 0.6,
-		obstacles = {glowshroom = 4, crystal_cluster = 3, rock = 1.5, tree_small = 1},
+		obstacle_density = 0.45,
+		obstacles = {"glowshroom": 3, "crystal_cluster": 3, "surface/crystal_blue": 2, "surface/rock_blue": 2},
 		obstacle_colors = _colors(Color(0.26, 0.3, 0.45), Color(0.16, 0.19, 0.3),
 				Color(0.18, 0.4, 0.6), Color(0.2, 0.22, 0.36), Color(0.45, 0.8, 0.95), Color(0.1, 0.24, 0.4),
 				Color(0.3, 0.85, 1.0)),
@@ -296,7 +299,7 @@ static func _build() -> void:
 		top_block = Blocks.DEEP_SAND, under_block = Blocks.DEEP_SAND, stone_block = Blocks.DESERT_ROCK,
 		ruin_block = Blocks.SANDSTONE,
 		obstacle_density = 0.3,
-		obstacles = {cactus = 3, dead_tree = 1.5, rock = 1.5, pillar = 1.5, obelisk = 0.8},
+		obstacles = {"surface/rock_sand": 3, "cactus": 2, "pillar": 1.5, "obelisk": 0.8},
 		obstacle_colors = _colors(Color(0.9, 0.72, 0.42), Color(0.7, 0.52, 0.3),
 				Color(0.42, 0.55, 0.28), Color(0.62, 0.46, 0.28), Color(1.0, 0.85, 0.4), Color(0.3, 0.42, 0.2)),
 		decor = {decor_dry_grass = 3, decor_pebbles = 2}, decor_density = 0.12,
@@ -307,7 +310,7 @@ static func _build() -> void:
 		sky_top_color = Color(0.4, 0.58, 0.85), sky_horizon_color = Color(1.0, 0.86, 0.6),
 		sun_color = Color(1.0, 0.92, 0.72), sun_energy = 1.6, sun_pitch = 62.0, ambient_energy = 0.9,
 		fog_color = Color(0.98, 0.84, 0.55), fog_density = 0.003, volumetric_fog_density = 0.006,
-		reveal_radius = 15.0, fog_of_war_color = Color(0.85, 0.68, 0.38),
+		reveal_radius = 15.0, fog_of_war_color = Color(0.85, 0.68, 0.38), fog_of_war_enabled = false,
 		particle_color = Color(1.0, 0.85, 0.5, 0.7), particle_velocity = Vector3(2.0, 0.1, 0.4),
 	})
 
@@ -328,7 +331,7 @@ static func _build() -> void:
 		top_block = Blocks.DEEP_STONE, under_block = Blocks.DEEP_SLATE, stone_block = Blocks.DEEP_SLATE,
 		ruin_block = Blocks.DEEP_SLATE, lampposts = false,
 		obstacle_density = 0.35,
-		obstacles = {boulder = 2, rock = 2, dead_tree = 2, obelisk = 1, pillar = 1},
+		obstacles = {"surface/rock_dark": 4, "obelisk": 1, "pillar": 1, "surface/crystal_violet": 1},
 		obstacle_colors = _colors(Color(0.17, 0.17, 0.2), Color(0.1, 0.1, 0.12),
 				Color(0.14, 0.16, 0.18), Color(0.13, 0.12, 0.12), Color(0.22, 0.22, 0.26), Color(0.08, 0.09, 0.1),
 				Color(0.05, 0.05, 0.06)),

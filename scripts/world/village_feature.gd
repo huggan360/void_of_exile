@@ -17,6 +17,9 @@ const HOME_STYLES := {
 }
 
 var village_seed := 0
+## "capital", "town", "village" or "hamlet" when baked into the Surface; ""
+## for a planned round town (generated places).
+var kind := ""
 var biome_id := Biomes.WOODS
 var capital := false
 ## Directions (radians, Vector2.from_angle) of the streets leaving town.
@@ -91,6 +94,115 @@ static func plan(at: Vector2i, biome: int, seed_value: int, height: int, is_capi
 	f._furnish(streets, rng)
 	f._settle_residents()
 	return f
+
+
+## A town, village or farm baked into the Surface (SurfaceMap): its houses,
+## barns, props and yard trees as laid out by the baker, its streets read from
+## the map. The ground is already shaped, so shape() leaves it alone. Residents
+## and the shops' keepers are planned here as before.
+static func from_baked(s: Dictionary, generator: IslandGenerator) -> VillageFeature:
+	var f := VillageFeature.new()
+	var map := generator.map
+	f.type = "village"
+	f.kind = str(s.kind)
+	f.center = Vector2i(floori(float(s.center[0])), floori(float(s.center[1])))
+	f.base_height = roundi(float(s.height)) - 1
+	f.required = true
+	f.capital = f.kind == "capital"
+	f.biome_id = int(s.biome)
+	f.village_seed = hash(str(s.name))
+	f.display_name = str(s.name)
+	f.radius = float(s.radius)
+	f.plaza_radius = float(s.plaza_radius)
+	f.map_color = Color(s.map_color[0], s.map_color[1], s.map_color[2])
+	f.light_color = Color(1.0, 0.72, 0.4)
+	f.bounds = Rect2i(f.center - Vector2i.ONE * int(f.radius), Vector2i.ONE * (int(f.radius) * 2 + 1))
+	f._side = int(f.radius) * 2 + 1
+	f._occupied.resize(f._side * f._side)
+	f._occupied.fill(0)
+	for a in s.exits: f.exits.append(float(a))
+	for z in range(-int(f.radius), int(f.radius) + 1):
+		for x in range(-int(f.radius), int(f.radius) + 1):
+			var cell := f.center + Vector2i(x, z)
+			if map.cell_flags(cell.x, cell.y) & SurfaceMap.ROAD and Vector2(x, z).length() < f.radius:
+				f._surface[cell] = true
+	var rng := RandomNumberGenerator.new()
+	rng.seed = f.village_seed
+	var i := 0
+	for h: Dictionary in s.houses:
+		var pos := Vector3(h.pos[0], h.pos[1], h.pos[2])
+		var yaw := float(h.yaw)
+		var spec := {center = Vector2i(floori(pos.x), floori(pos.z)), half = Vector2i(4, 4), turn = 0, yaw = yaw,
+			role = str(h.role), variant = 0, seed = rng.randi(), asset = str(h.asset), pos = pos, scale = float(h.scale),
+			solid_size = Vector3(h.solid[0], h.solid[1], h.solid[2]), solid_offset = Vector3(h.offset[0], h.offset[1], h.offset[2])}
+		f.houses.append(spec)
+		for cell in f._rect_cells(Vector2(pos.x, pos.z) + Vector2(spec.solid_offset.x, spec.solid_offset.z).rotated(-yaw),
+				Vector2(spec.solid_size.x, spec.solid_size.z) * 0.5 + Vector2.ONE * 0.4, yaw):
+			f._mark(cell, 2)
+		if spec.role in ["smith", "magician", "inn", "herbalist"]:
+			var front := Vector2(-sin(yaw), -cos(yaw))
+			var depth := float(spec.solid_size.z) * 0.5 + 1.6
+			var station := Vector2(pos.x, pos.z) + front * depth + front.orthogonal() * 1.5
+			var npc_role: String = spec.role if spec.role in ["smith", "magician"] else "baker" if spec.role == "inn" else "gardener"
+			var npc := f._npc(npc_role, station, spec.seed, true)
+			npc.yaw = yaw
+			f.residents.append(npc)
+			f.service_sites.append({id = "%s_%d" % [f.display_name, i], role = spec.role, house = i,
+				door = Vector3(station.x, pos.y, station.y), npc = npc,
+				portrait = "res://creatures/npc_%s/portrait.png" % npc_role, shop_enabled = false})
+		i += 1
+	for p: Dictionary in s.props:
+		var pos := Vector3(p.pos[0], p.pos[1], p.pos[2])
+		var solid := Vector3(p.solid[0], p.solid[1], p.solid[2])
+		f.props.append({asset = str(p.asset), pos = pos, yaw = float(p.yaw), solid_size = solid, scale = float(p.scale),
+			solid_offset = Vector3(p.offset[0], p.offset[1], p.offset[2])})
+		for cell in f._rect_cells(Vector2(pos.x, pos.z), Vector2(solid.x, solid.z) * 0.5, float(p.yaw)):
+			f._mark(cell, 2)
+	for t: Dictionary in s.trees:
+		var pos := Vector3(t.pos[0], t.pos[1], t.pos[2])
+		f.trees.append({prefab = "surface/" + str(t.prefab), pos = pos, yaw = float(t.yaw)})
+		for cell in f._rect_cells(Vector2(pos.x, pos.z), Vector2(1.0, 1.0), 0.0):
+			f._mark(cell, 2)
+	for l: Array in s.lights:
+		f.light_spots.append(Vector3(l[0], l[1], l[2]))
+	var c := Vector2(f.center) + Vector2(0.5, 0.5)
+	var folk: int = {"capital": 10, "town": 6, "village": 4, "hamlet": 1}.get(f.kind, 2)
+	for k in folk:
+		var role: String = ["villager", "gardener", "baker", "traveler"][k % 4] if f.kind != "hamlet" else "gardener"
+		var start := c + Vector2.from_angle(k * TAU / maxf(folk, 1.0) + 0.3) * (f.plaza_radius + 1.0)
+		f.residents.append(f._npc(role, start, rng.randi(), false))
+	if f.kind != "hamlet":
+		# The steward keeps the town book on the plaza: talk to them to make
+		# this town the account home.
+		var a := rng.randf() * TAU
+		var steward := f._npc("steward", c + Vector2.from_angle(a) * maxf(f.plaza_radius - 1.4, 2.0), rng.randi(), true)
+		steward.model = "npc_traveler"
+		steward.title = "Steward  -  Town Hall"
+		var inward := -Vector2.from_angle(a)
+		steward.yaw = atan2(-inward.x, -inward.y)
+		f.residents.append(steward)
+	if f._surface.is_empty():
+		for z in range(-3, 4):
+			for x in range(-3, 4):
+				f._surface[f.center + Vector2i(x, z)] = true
+	f._settle_residents()
+	for r: Dictionary in f.residents:
+		r.pos.y = generator.ground_y(r.pos.x, r.pos.z)
+		var route: Array[Vector3] = r.route
+		for k in route.size():
+			route[k].y = generator.ground_y(route[k].x, route[k].z)
+	for service in f.service_sites:
+		service.door = service.npc.pos
+	return f
+
+
+func shapes_terrain() -> bool:
+	return kind == ""
+
+
+func covers(x: int, z: int) -> bool:
+	if kind == "": return super.covers(x, z)
+	return Vector2(x - center.x, z - center.y).length() <= radius
 
 
 # --- Streets ----------------------------------------------------------------------

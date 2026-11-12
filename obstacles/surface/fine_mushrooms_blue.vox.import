@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dkfqggmri47ac"
+path="res://.godot/imported/fine_mushrooms_blue.vox-4b2b1a9cdba36da2359349d9f09c8397.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/fine_mushrooms_blue.vox"
+dest_files=["res://.godot/imported/fine_mushrooms_blue.vox-4b2b1a9cdba36da2359349d9f09c8397.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

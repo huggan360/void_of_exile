@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cme5o2y3rqy2b"
+path="res://.godot/imported/jungle_giant.vox-fc0fcb8b6f3d20ee4a3c3d42bf08959b.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/jungle_giant.vox"
+dest_files=["res://.godot/imported/jungle_giant.vox-fc0fcb8b6f3d20ee4a3c3d42bf08959b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://u31ijbmawscg"
+path="res://.godot/imported/crystal_blue.vox-ccc1c34fed7cba6a169db26b6c2f0579.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/crystal_blue.vox"
+dest_files=["res://.godot/imported/crystal_blue.vox-ccc1c34fed7cba6a169db26b6c2f0579.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

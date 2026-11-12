@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ynl72pn3mw01"
+path="res://.godot/imported/ash_spire.vox-d70ab38bb8a2aa9dbe17b1cc28260814.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/ash_spire.vox"
+dest_files=["res://.godot/imported/ash_spire.vox-d70ab38bb8a2aa9dbe17b1cc28260814.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

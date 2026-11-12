@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bjn6fa8jvsvrd"
+path="res://.godot/imported/orchard_apple.vox-a255e8c54825785e4bf489298219c519.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/orchard_apple.vox"
+dest_files=["res://.godot/imported/orchard_apple.vox-a255e8c54825785e4bf489298219c519.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

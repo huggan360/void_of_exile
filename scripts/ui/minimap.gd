@@ -44,6 +44,9 @@ var _map: Image
 var _map_tex: ImageTexture
 var _back_tex: ImageTexture
 var _painted := {}  # Vector2i patch -> true
+## The whole map came ready-made (the Surface's baked map): nothing to paint,
+## and the big map shows all of it.
+var _prebaked := false
 var _origin := Vector2.ZERO
 var _size := 0
 var _rotation := 0.0
@@ -113,13 +116,18 @@ func setup(p_world: GameWorld) -> void:
 	_origin = Vector2(-world.half_extent, -world.half_extent)
 	_map = Image.create_empty(_size, _size, false, Image.FORMAT_RGB8)
 	_map.fill(Color(0.04, 0.05, 0.08))
+	_prebaked = false
+	var whole: Image = world.call("full_map") if world.has_method("full_map") else null
+	if whole != null and whole.get_width() == _size:
+		_map = whole
+		_prebaked = true
 	_map_tex = ImageTexture.create_from_image(_map)
 	_back_tex = ImageTexture.create_from_image(_map)
 	_painted.clear()
 	_material.set_shader_parameter("map_tex", _map_tex)
 	_material.set_shader_parameter("map_origin", _origin)
 	_material.set_shader_parameter("map_size", float(_size))
-	var fog_on := world.biome_at(world.spawn_point).fog_of_war_enabled
+	var fog_on := world.biome_at(world.spawn_point).fog_of_war_enabled and not _prebaked
 	_material.set_shader_parameter("explored_tex", fog_of_war.explored_texture() if fog_on else _all_explored)
 
 
@@ -128,7 +136,7 @@ func set_expanded(on: bool, art_pixels := ART_PIXELS) -> void:
 	if on == expanded and art_pixels == _art_pixels: return
 	if on and not expanded:
 		_small_radius = view_radius
-		view_radius = clampf(view_radius * 3.0, ZOOM_MIN, ZOOM_MAX * 3.0)
+		view_radius = _whole_radius() if _prebaked else clampf(view_radius * 3.0, ZOOM_MIN, ZOOM_MAX * 3.0)
 	elif not on and expanded:
 		view_radius = _small_radius
 	expanded = on
@@ -141,7 +149,15 @@ func set_expanded(on: bool, art_pixels := ART_PIXELS) -> void:
 
 
 func zoom(steps: float) -> void:
-	view_radius = clampf(view_radius * pow(1.15, steps), ZOOM_MIN, ZOOM_MAX * (3.0 if expanded else 1.0))
+	var far := (_whole_radius() if _prebaked else ZOOM_MAX * 3.0) if expanded else ZOOM_MAX
+	view_radius = clampf(view_radius * pow(1.15, steps), ZOOM_MIN, far)
+
+
+## Big enough to show every corner of the map from where the player stands.
+func _whole_radius() -> float:
+	if player == null: return float(_size)
+	var p := Vector2(absf(player.global_position.x - (_origin.x + _size * 0.5)), absf(player.global_position.z - (_origin.y + _size * 0.5)))
+	return (p + Vector2.ONE * _size * 0.5).length() * 0.98
 
 
 func set_routes(main: PackedVector3Array, side: PackedVector3Array) -> void:
@@ -239,6 +255,7 @@ func reveal_at(pos: Vector3) -> void:
 
 
 func _paint_around(pos: Vector3) -> void:
+	if _prebaked: return
 	for i in range(_tasks.size() - 1, -1, -1):
 		if WorkerThreadPool.is_task_completed(_tasks[i]):
 			WorkerThreadPool.wait_for_task_completion(_tasks[i])

@@ -262,6 +262,15 @@ func target() -> Node3D:
 
 
 func _physics_process(delta: float) -> void:
+	if not FrameTrace.enabled:
+		_physics_step(delta)
+		return
+	var started := Time.get_ticks_usec()
+	_physics_step(delta)
+	FrameTrace.record("enemies/move", started)
+
+
+func _physics_step(delta: float) -> void:
 	if not mirror and _tick_burning(delta): return
 	buffs.tick()
 	if mirror:
@@ -344,15 +353,21 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move.x * speed
 		velocity.z = move.z * speed
 		var ahead := global_position + Vector3(velocity.x, 0, velocity.z).normalized() * 0.6
-		if not director.world.is_walkable(ahead) or director.world.is_hazard(ahead) \
-				or (director.world.has_method("enemy_blocked") and director.world.enemy_blocked(ahead)):
+		var t_checks := Time.get_ticks_usec() if FrameTrace.enabled else 0
+		var blocked: bool = not director.world.is_walkable(ahead) or director.world.is_hazard(ahead) \
+				or (director.world.has_method("enemy_blocked") and director.world.enemy_blocked(ahead)) \
+				or (director.world.has_method("enemy_step_blocked") and director.world.enemy_step_blocked(global_position, ahead))
+		if FrameTrace.enabled: FrameTrace.record("enemies/ground_checks", t_checks)
+		if blocked:
 			velocity.x = 0.0
 			velocity.z = 0.0
 			_wander_timer = 0.0  # pick somewhere else
 			_strafe = -_strafe
 		velocity.y = 0.0 if is_on_floor() else velocity.y - GRAVITY * delta
 		var prev_y := global_position.y
+		var t_slide := Time.get_ticks_usec() if FrameTrace.enabled else 0
 		move_and_slide()
+		if FrameTrace.enabled: FrameTrace.record("enemies/slide", t_slide)
 		# Worlds without walkable collision everywhere (planets on the server) hold their enemies to the ground.
 		if director.world.has_method("hold_enemy"): director.world.hold_enemy(self)
 		if move != Vector3.ZERO and is_on_floor() and is_on_wall():

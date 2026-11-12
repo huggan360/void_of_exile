@@ -42,10 +42,7 @@ func prepare(destination: String, record: Dictionary) -> GameWorld:
 	elif record.get("chambers",false): kind = "chambers"
 	elif record.get("space",false): kind = "space"
 	elif record.has("dungeon"): kind = "dungeon"
-	var layout := {}
-	if kind=="island":
-		await _resource(RealmLayout.SCENE)
-		layout = RealmLayout.data()
+	var layout := {}  # the Surface is baked (SurfaceMap); no hand layout to load
 	var models: Array[String] = []
 	# Resolve registries on the main thread; the worker gets immutable names.
 	var enemy_ids: Array = Enemies.all_ids() if kind=="island" else []

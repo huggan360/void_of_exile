@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bra64im6nof8p"
+path="res://.godot/imported/bush_green.vox-ad00e45de78b12f95c6e34cc82c295c4.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/bush_green.vox"
+dest_files=["res://.godot/imported/bush_green.vox-ad00e45de78b12f95c6e34cc82c295c4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

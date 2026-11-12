@@ -83,6 +83,15 @@ func clear() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not FrameTrace.enabled:
+		_physics_step(delta)
+		return
+	var started := Time.get_ticks_usec()
+	_physics_step(delta)
+	FrameTrace.record("player/arrows", started)
+
+
+func _physics_step(delta: float) -> void:
 	var space := get_world_3d().direct_space_state
 	for s in _shots:
 		if s.stuck:

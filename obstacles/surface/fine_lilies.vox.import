@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b2xtm12v3yfni"
+path="res://.godot/imported/fine_lilies.vox-04e734bc263778188632fae268399027.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/fine_lilies.vox"
+dest_files=["res://.godot/imported/fine_lilies.vox-04e734bc263778188632fae268399027.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

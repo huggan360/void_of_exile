@@ -134,7 +134,7 @@ func _add_light(pos: Vector3, color: Color, energy := 1.5, light_range := 6.0) -
 ## `cache` names a world that is the same every time (the Tavern, the
 ## Surface): its generated chunks are kept on disk (TerrainCache) and loaded
 ## after the first time instead of generated. Unique worlds (dungeons) pass "".
-func _add_terrain(generator: VoxelGenerator, bounds: AABB, cache := "", sources: Array = []) -> void:
+func _add_terrain(generator: VoxelGenerator, bounds: AABB, cache := "", sources: Array = [], mesher: VoxelMesher = null) -> void:
 	terrain = VoxelTerrain.new()
 	terrain.generator = generator
 	if cache != "":
@@ -142,13 +142,13 @@ func _add_terrain(generator: VoxelGenerator, bounds: AABB, cache := "", sources:
 		if stream:
 			terrain.stream = stream
 			terrain.tree_exiting.connect(func() -> void: TerrainCache.close(stream))
-	terrain.mesher = Blocks.mesher()
+	terrain.mesher = mesher if mesher else Blocks.mesher()
 	terrain.gi_mode = GeometryInstance3D.GI_MODE_STATIC  # lets SDFGI bounce light off it
 	terrain.bounds = bounds
 	add_child(terrain)
 
 
-func _add_water(surface_y: float, extent: float) -> void:
+func _add_water(surface_y: float, extent: float) -> MeshInstance3D:
 	_water_surface = surface_y
 	var plane := PlaneMesh.new()
 	plane.size = Vector2.ONE * extent * 2.0
@@ -162,6 +162,7 @@ func _add_water(surface_y: float, extent: float) -> void:
 	water.material_override = mat
 	water.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(water)
+	return water
 
 
 func _add_portal(pos: Vector3, facing: Vector3, destination: String, color_a: Color, color_b: Color) -> Portal:

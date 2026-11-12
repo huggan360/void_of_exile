@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dvtv77rw567cq"
+path="res://.godot/imported/bush_jungle.vox-89fcfa9bd31902031a31ad3173a99868.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/bush_jungle.vox"
+dest_files=["res://.godot/imported/bush_jungle.vox-89fcfa9bd31902031a31ad3173a99868.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

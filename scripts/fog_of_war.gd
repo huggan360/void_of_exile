@@ -23,6 +23,11 @@ var _last_cell := Vector2i(1 << 30, 0)
 var _dirty := false
 var _upload_timer := 0.0
 var _strongholds: Array[StrongholdFeature] = []
+## Regional fog (the Surface): drawn wherever a biome has fog, whatever biome
+## the player stands in. As real volumetric fog when the settings allow it.
+var regional := false
+var _volume: FogVolume
+var _volume_material := ShaderMaterial.new()
 var _revealed_forts := {}
 
 ## Seconds between sending the explored map to the GPU. The clear circle
@@ -55,6 +60,27 @@ func _ready() -> void:
 	noise_tex.seamless = true
 	_material.set_shader_parameter("noise_map", noise_tex)
 	material_override = _material
+	_volume_material.shader = preload("res://shaders/surface_fog.gdshader")
+	_volume_material.set_shader_parameter("noise_map", noise_tex)
+	_volume = FogVolume.new()
+	_volume.size = Vector3(240, 70, 240)
+	_volume.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
+	_volume.material = _volume_material
+	_volume.visible = false
+	add_child(_volume)
+	AppSettings.graphics_changed.connect(_choose_look)
+
+
+## Volumetric when regional and the settings allow volumetric fog; the
+## screen-space layer otherwise.
+func uses_volume() -> bool:
+	return regional and _image != null and GraphicsSettings.volumetric_fog_allowed(AppSettings.graphics)
+
+
+func _choose_look() -> void:
+	var volume := uses_volume()
+	_volume.visible = volume
+	layers = 0 if volume else 1
 
 
 ## Starts a fresh, fully hidden map. half_extent: playable size from the
@@ -73,12 +99,18 @@ func setup(half_extent: int, biome_at := Callable(), height_at := Callable(), pr
 	_material.set_shader_parameter("explored_map", _texture)
 	_material.set_shader_parameter("map_origin", _origin)
 	_material.set_shader_parameter("map_size", float(_size))
+	_volume_material.set_shader_parameter("explored_map", _texture)
+	_volume_material.set_shader_parameter("map_origin", _origin)
+	_volume_material.set_shader_parameter("map_size", float(_size))
 	_material.set_shader_parameter("use_region_map", biome_at.is_valid())
 	if biome_at.is_valid():
 		_material.set_shader_parameter("region_map",ImageTexture.create_from_image(prepared.region) if prepared.has("region") else _region_map(biome_at))
 	_material.set_shader_parameter("use_height_map", height_at.is_valid())
 	if height_at.is_valid():
 		_material.set_shader_parameter("height_map",ImageTexture.create_from_image(prepared.height) if prepared.has("height") else _height_map(height_at))
+	_volume_material.set_shader_parameter("region_map", _material.get_shader_parameter("region_map"))
+	_volume_material.set_shader_parameter("height_map", _material.get_shader_parameter("height_map"))
+	_choose_look()
 
 ## CPU images only, safe for the single world-preparation worker. Texture
 ## publication stays in setup() on the main thread.
@@ -134,7 +166,7 @@ static func _region_image(size: int, origin: Vector2, biome_at: Callable) -> Ima
 		for x in cells:
 			var pos := Vector3(origin.x + (x + 0.5) * REGION_CELL, 0.0, origin.y + (y + 0.5) * REGION_CELL)
 			var biome: BiomeDef = biome_at.call(pos)
-			img.set_pixel(x, y, Color(biome.fog_of_war_color, biome.fog_of_war_opacity))
+			img.set_pixel(x, y, Color(biome.fog_of_war_color, biome.fog_of_war_opacity if biome.fog_of_war_enabled else 0.0))
 	return img
 
 
@@ -149,6 +181,7 @@ func set_style(color: Color, radius: float, opacity: float) -> void:
 	_radius = radius
 	_material.set_shader_parameter("fog_color", color)
 	_material.set_shader_parameter("reveal_radius", radius)
+	_volume_material.set_shader_parameter("reveal_radius", radius)
 	_material.set_shader_parameter("fog_opacity", opacity)
 
 
@@ -159,6 +192,9 @@ func reveal_around(pos: Vector3) -> void:
 		return
 	_reveal_strongholds(pos)
 	_material.set_shader_parameter("player_pos", Vector2(pos.x, pos.z))
+	if _volume.visible:
+		_volume_material.set_shader_parameter("player_pos", Vector2(pos.x, pos.z))
+		_volume.global_position = Vector3(pos.x, pos.y + 12.0, pos.z)
 	_upload_timer -= get_process_delta_time()
 	if _dirty and _upload_timer <= 0.0:
 		_texture.update(_image)

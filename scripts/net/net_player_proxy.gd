@@ -16,7 +16,7 @@ var _terrain_viewer: VoxelViewer
 
 func _ready() -> void:
 	_terrain_viewer = VoxelViewer.new()
-	_terrain_viewer.view_distance = 96
+	_terrain_viewer.view_distance = 64  # collision where enemies move near players
 	_terrain_viewer.requires_visuals = false
 	add_child(_terrain_viewer)
 

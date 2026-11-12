@@ -18,27 +18,30 @@ static func plan(generator: IslandGenerator) -> Vector3:
 	var best_score := INF
 	# No towns, walls, roads or shore in the clearing. Prefer a level
 	# clearing near the woodland heart, with a full ring of trees around it.
-	for z in range(-180,181,12):
-		for x in range(-180,181,12):
-			if Vector2(x,z).length()<90 or Vector2(x,z).length()>185: continue
+	var home := Vector2i(generator.villages[0].center) if not generator.villages.is_empty() else Vector2i.ZERO
+	for oz in range(-180,181,12):
+		for ox in range(-180,181,12):
+			var x := home.x+ox
+			var z := home.y+oz
+			if Vector2(ox,oz).length()<90 or Vector2(ox,oz).length()>185: continue
 			var low := INF
 			var high := -INF
 			var clear := true
 			for dz in [-8,0,8]:
 				for dx in [-9,0,9]:
 					var col := generator.column(x+dx,z+dz)
-					if col.y!=Biomes.WOODS or generator.feature_at(x+dx,z+dz)!=null: clear=false
+					if col.y!=Biomes.WOODS or generator.feature_at(x+dx,z+dz)!=null or generator.map.cell_flags(x+dx,z+dz)&IslandGenerator.BUSY or generator.map.cell_water(x+dx,z+dz)>0: clear=false
 					low = minf(low,col.x+1)
 					high = maxf(high,col.x+1)
 			if not clear: continue
-			var score := (high-low)*30.0+Vector2(x,z).length()*0.06
+			var score := (high-low)*30.0+Vector2(ox,oz).length()*0.06
 			if score<best_score:
 				# Check the complete footprint: nine samples can miss a narrow
 				# diagonal road, a small ruin or a creek between the corners.
 				for dz in range(-8,9,2):
 					if not clear: break
 					for dx in range(-9,10,2):
-						if generator.column(x+dx,z+dz).y!=Biomes.WOODS or generator.feature_at(x+dx,z+dz)!=null:
+						if generator.column(x+dx,z+dz).y!=Biomes.WOODS or generator.feature_at(x+dx,z+dz)!=null or generator.map.cell_flags(x+dx,z+dz)&IslandGenerator.BUSY or generator.map.cell_water(x+dx,z+dz)>0:
 							clear=false
 							break
 				if not clear: continue
@@ -47,7 +50,7 @@ static func plan(generator: IslandGenerator) -> Vector3:
 	if not best.is_finite():
 		push_error("No woodland clearing for Starfall Launchworks")
 		return best
-	best.y = generator.column(floori(best.x), floori(best.z)).x + 1.0
+	best.y = generator.ground_y(best.x, best.z)
 	return best
 
 static func contains(center: Vector3,point: Vector3,margin := 0.0) -> bool:

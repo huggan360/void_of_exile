@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dx4cbwdm1xf0x"
+path="res://.godot/imported/log.vox-6de5910f6cf749d96cc3a51c15591fc9.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/log.vox"
+dest_files=["res://.godot/imported/log.vox-6de5910f6cf749d96cc3a51c15591fc9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

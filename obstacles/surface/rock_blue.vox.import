@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://occxdciu3hup"
+path="res://.godot/imported/rock_blue.vox-ac0b1c323e293651c1fa3d30553b0416.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/rock_blue.vox"
+dest_files=["res://.godot/imported/rock_blue.vox-ac0b1c323e293651c1fa3d30553b0416.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

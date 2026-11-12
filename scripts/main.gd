@@ -600,6 +600,7 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 	player.hazard = world.is_hazard
 	player.road = world.is_road
 	xp_orbs.ground_height = world.ground_height
+	fog_of_war.regional = world is IslandWorld
 	if world is SpatialWorld: fog_of_war.setup(32)
 	else: fog_of_war.setup(world.half_extent,world.biome_at,world.ground_height,world.get_meta("prepared_fog",{}))
 	world.remove_meta("prepared_fog")
@@ -1498,6 +1499,8 @@ func _take_screenshot() -> void:
 		await get_tree().create_timer(0.55).timeout  # mid-burst
 	else:
 		await get_tree().create_timer(float(_args.get("wait", 4.0))).timeout  # let GI and fog settle
+	if _args.has("play") and str(_args.shot) in ["", "true"]:
+		return  # an offline look around (--shot --world=realm --play): stay in the game
 	get_viewport().get_texture().get_image().save_png(_args.shot)
 	get_tree().quit()
 

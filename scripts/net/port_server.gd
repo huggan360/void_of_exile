@@ -77,11 +77,12 @@ func descend(pid: int) -> void:
 	if not p.is_empty(): p.port = {kind = "descend"}
 
 
-## The Tavern's realm gate: back to the same spot in Space if that is where
-## the character was (and Space is open to them). Returns the destination.
+## A campaign Tavern's realm gate: back to the same spot in that tale's Space
+## if that is where the character was (and Space is open to them). The main
+## Tavern's gate always leads to the Surface. Returns the destination.
 func redirect(p: Dictionary, destination: String) -> String:
 	if not (Campaigns.is_tavern(str(p.get("realm", ""))) or str(p.get("realm", "")) == ""): return destination
-	if destination != "realm_1" and not Campaigns.is_campaign_realm(destination): return destination
+	if not Campaigns.is_campaign_realm(destination): return destination
 	var stats := GameServer.character(p.player_id)
 	if stats == null or str(stats.travel.get("last", "")) != "space": return destination
 	var space := str(stats.travel.get("space", SpaceWorld.REALM))

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dxud267yvxs3a"
+path="res://.godot/imported/blossom.vox-18dddb49bc898ac08e1eb5d824be291f.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/blossom.vox"
+dest_files=["res://.godot/imported/blossom.vox-18dddb49bc898ac08e1eb5d824be291f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

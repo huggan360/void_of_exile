@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://crm03ottfjgm2"
+path="res://.godot/imported/campfire_ring.vox-c13492a76bf81d476141382e80688cb1.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/campfire_ring.vox"
+dest_files=["res://.godot/imported/campfire_ring.vox-c13492a76bf81d476141382e80688cb1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

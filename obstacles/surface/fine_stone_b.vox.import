@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0l3u1mht7v3n"
+path="res://.godot/imported/fine_stone_b.vox-b34e940762d3b924688dcefb8272a924.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/fine_stone_b.vox"
+dest_files=["res://.godot/imported/fine_stone_b.vox-b34e940762d3b924688dcefb8272a924.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

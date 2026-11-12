@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dqyxveewumdy8"
+path="res://.godot/imported/rock_lava.vox-d3804043f0fc4a6c59153f4465630e67.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/rock_lava.vox"
+dest_files=["res://.godot/imported/rock_lava.vox-d3804043f0fc4a6c59153f4465630e67.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

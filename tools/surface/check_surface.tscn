@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/surface/check_surface.gd" id="1"]
+
+[node name="CheckSurface" type="Node"]
+script = ExtResource("1")

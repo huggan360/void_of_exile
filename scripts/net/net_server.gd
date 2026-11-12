@@ -584,7 +584,12 @@ func _pick_realm(wanted: String) -> RealmInstance:
 	var cap := int(config.value("realms", "max_players_per_realm", 85))
 	if realms.has(wanted) and realms[wanted].proxies.size() < cap and not Campaigns.is_campaign_realm(wanted) and not Campaigns.is_castle(wanted) and not Dungeons.is_dungeon(wanted):
 		return realms[wanted]
-	var ids := realms.keys().filter(func(id: String) -> bool: return not Campaigns.is_campaign_realm(id) and not Campaigns.is_castle(id) and not Dungeons.is_dungeon(id))
+	# The Surface that was asked for, if it isn't open yet (never Space instead).
+	if wanted.begins_with("realm_") and not realms.has(wanted) and wanted.trim_prefix("realm_").is_valid_int():
+		return _open_realm(wanted)
+	# Only Surfaces count as somewhere else with room: Space, Chambers and the
+	# like are their own places.
+	var ids := realms.keys().filter(func(id: String) -> bool: return str(id).begins_with("realm_") and not Campaigns.is_campaign_realm(id) and not Campaigns.is_castle(id) and not Dungeons.is_dungeon(id))
 	ids.sort()
 	for id in ids:
 		if realms[id].proxies.size() < cap:

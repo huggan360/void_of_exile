@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://mfa1o45hhpyb"
+path="res://.godot/imported/maple.vox-471923055d1cde423151cf0afe1c6699.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/maple.vox"
+dest_files=["res://.godot/imported/maple.vox-471923055d1cde423151cf0afe1c6699.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

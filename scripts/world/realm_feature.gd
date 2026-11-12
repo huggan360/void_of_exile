@@ -112,6 +112,11 @@ func is_structure() -> bool:
 	return not type in PATH_TYPES
 
 
+## Whether shape() changes the ground (baked towns don't).
+func shapes_terrain() -> bool:
+	return true
+
+
 ## Road points (for placing lampposts along them).
 func path() -> PackedVector2Array:
 	return _path

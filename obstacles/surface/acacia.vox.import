@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://2puc2p303eno"
+path="res://.godot/imported/acacia.vox-d77a8ff02fadc0ee87f51e919e17a7b6.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/acacia.vox"
+dest_files=["res://.godot/imported/acacia.vox-d77a8ff02fadc0ee87f51e919e17a7b6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

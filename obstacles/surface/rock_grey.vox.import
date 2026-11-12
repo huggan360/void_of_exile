@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b32105uexf1ny"
+path="res://.godot/imported/rock_grey.vox-0b602e9d2a943bc890f7ca0de0ef40dd.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/rock_grey.vox"
+dest_files=["res://.godot/imported/rock_grey.vox-0b602e9d2a943bc890f7ca0de0ef40dd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

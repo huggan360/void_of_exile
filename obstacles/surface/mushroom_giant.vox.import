@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://be0lhq2gidjs1"
+path="res://.godot/imported/mushroom_giant.vox-83a95557b509f92789195264c197710e.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/mushroom_giant.vox"
+dest_files=["res://.godot/imported/mushroom_giant.vox-83a95557b509f92789195264c197710e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

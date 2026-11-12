@@ -108,7 +108,7 @@ func blend_to(biome: BiomeDef, delta: float) -> void:
 		_settled = false
 		_set_palette(biome)
 	_target = biome
-	if fog_of_war: fog_of_war.visible = _target.fog_of_war_enabled and not fog_of_war_hidden
+	if fog_of_war: fog_of_war.visible = (_target.fog_of_war_enabled or fog_of_war.regional) and not fog_of_war_hidden
 	if _settled: return
 	_blend(1.0 - exp(-BLEND_SPEED * delta * 3.0))
 
@@ -141,6 +141,9 @@ func _goal(prop: String) -> Variant:
 	k = 1.0 - (1.0 - k) * (1.0 - _target.mood)
 	if own is Color:
 		return (_neutral.get(prop) as Color).lerp(own, k)
+	# A biome without haze (the woods) has none at all, not daylight's.
+	if prop in ["fog_density", "volumetric_fog_density"] and float(own) <= 0.0:
+		return 0.0
 	var value := lerpf(_neutral.get(prop), own, k)
 	# Keep realm colors readable at the farther camera distance. Indoor
 	# atmospheres (including the Tavern) and fog of war retain their style.
@@ -168,7 +171,9 @@ func _apply() -> void:
 	_update_grade(c.cinematic_grade)
 	env.fog_light_color = c.fog_color
 	env.fog_density = c.fog_density
-	env.volumetric_fog_enabled = c.volumetric_fog_density > 0.001 and GraphicsSettings.volumetric_fog_allowed(graphics)
+	var fog_volume := fog_of_war != null and fog_of_war.visible and fog_of_war.uses_volume()
+	env.volumetric_fog_enabled = (c.volumetric_fog_density > 0.001 or fog_volume) and GraphicsSettings.volumetric_fog_allowed(graphics)
+	env.volumetric_fog_length = 140.0 if fog_volume else 80.0
 	env.volumetric_fog_density = c.volumetric_fog_density
 	env.volumetric_fog_albedo = c.fog_color.lightened(0.4)
 	sun.light_color = c.sun_color
@@ -187,7 +192,7 @@ func _apply() -> void:
 	pm.hue_variation_max = c.particle_hue_variation
 
 	if fog_of_war:
-		fog_of_war.visible = _target.fog_of_war_enabled and not fog_of_war_hidden
+		fog_of_war.visible = (_target.fog_of_war_enabled or fog_of_war.regional) and not fog_of_war_hidden
 		fog_of_war.set_style(c.fog_of_war_color, c.reveal_radius, c.fog_of_war_opacity)
 
 

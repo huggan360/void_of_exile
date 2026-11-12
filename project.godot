@@ -47,6 +47,13 @@ enabled=PackedStringArray("res://addons/voxel_export/plugin.cfg")
 anti_aliasing/quality/msaa_3d=2
 limits/global_shader_variables/buffer_size=1048576
 
+[shader_globals]
+
+see_through={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+
 [voxel]
 
 threads/count/margin_below_max=2

@@ -186,13 +186,14 @@ func set_spatial_world(place: GameWorld) -> void:
 		spatial_controller = (place as SpatialWorld).make_controller(self)
 		if spatial_controller!=null: add_child(spatial_controller)
 
-	if place is HallWorld or place is IslandWorld:
+	if place is HallWorld or place is IslandWorld or place is ChambersWorld:
 		ground_view = GroundView.new()
 		ground_view.player = self
 		add_child(ground_view)
 
 
 func _ready() -> void:
+	add_to_group("local_player")
 	var shape := CollisionShape3D.new()
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = 0.4
@@ -206,9 +207,17 @@ func _ready() -> void:
 	model = PlayerClasses.make_model(class_id)
 	add_child(model)
 
+	# Terrain is drawn far out, but its collision (costly to build, and for
+	# the physics) only reaches where arrows, aim and the camera need it.
 	terrain_viewer = VoxelViewer.new()
 	terrain_viewer.view_distance = 128
+	terrain_viewer.requires_collisions = false
 	add_child(terrain_viewer)
+	var collision_viewer := VoxelViewer.new()
+	collision_viewer.view_distance = 48
+	collision_viewer.requires_visuals = false
+	collision_viewer.requires_collisions = true
+	terrain_viewer.add_child(collision_viewer)  # moves with it (aboard a ship too)
 
 	camera = Camera3D.new()
 	camera.fov = CAMERA_FOV
@@ -309,15 +318,37 @@ func place(pos: Vector3, p_terrain: VoxelTerrain, p_walkable := Callable()) -> v
 	_camera_y = pos.y + 1.0
 
 
+## Collision is built apart from the visible terrain (a smaller viewer), so
+## arriving also waits until the ground under the feet is really solid.
+func _ground_solid() -> bool:
+	if terrain == null or terrain.scale.is_equal_approx(Vector3.ONE): return true
+	var from := global_position + Vector3.UP * 3.0
+	var ray := PhysicsRayQueryParameters3D.create(from, global_position + Vector3.DOWN * 6.0, TERRAIN_LAYER)
+	return not get_world_3d().direct_space_state.intersect_ray(ray).is_empty()
+
+
+## On the Surface: never lost under the ground (fell through before its
+## collision streamed in): back on top.
+func _fall_guard() -> void:
+	if terrain == null or terrain.scale.is_equal_approx(Vector3.ONE) or not ground_height.is_valid(): return
+	var ground: float = ground_height.call(global_position.x, global_position.z)
+	if global_position.y < ground - 2.5:
+		global_position.y = ground + 0.3
+		velocity.y = 0.0
+
+
 func _physics_process(delta: float) -> void:
 	_update_zoom(delta)
+	_fall_guard()
 	if not frozen and Leisure.apply_seat(self, delta): return
 	if is_instance_valid(spatial_controller):
 		spatial_controller.physics_step(delta)
 		return
 	if frozen:
 		var area := AABB(global_position - Vector3(8, 8, 8), Vector3(16, 16, 16))
-		if terrain and terrain.is_area_meshed(area):
+		# The Surface's terrain is scaled (0.25 m voxels): ask in its own units.
+		if terrain: area = terrain.global_transform.affine_inverse() * area
+		if terrain and terrain.is_area_meshed(area) and _ground_solid():
 			frozen = false
 			clear_spawn(null)
 		_update_camera(delta)
@@ -343,7 +374,9 @@ func _physics_process(delta: float) -> void:
 	velocity.x = dir.x * speed + _knock.x
 	velocity.z = dir.z * speed + _knock.z
 	_knock = _knock.lerp(Vector3.ZERO, 1.0 - exp(-KNOCKBACK_DRAG * delta))
-	if walkable.is_valid():
+	# Never trap anyone: from a spot that is itself off limits (pushed into
+	# deep water), every way out is allowed.
+	if walkable.is_valid() and walkable.call(global_position):
 		# Check each axis on its own so the player slides along shorelines.
 		var look := 0.5
 		if not walkable.call(global_position + Vector3(signf(velocity.x) * look, 0, 0)):
@@ -356,9 +389,11 @@ func _physics_process(delta: float) -> void:
 		_hop = 0.0
 
 	var prev_y := global_position.y
+	var t_slide := Time.get_ticks_usec() if FrameTrace.enabled else 0
 	move_and_slide()
 	if dir != Vector3.ZERO and is_on_floor() and is_on_wall():
 		_try_step_up(dir)
+	if FrameTrace.enabled: FrameTrace.record("player/slide", t_slide)
 
 	# Steps move the body instantly; let the model glide to the new height.
 	var dy := global_position.y - prev_y

@@ -161,6 +161,8 @@ func _copy_terrain(terrain: VoxelTerrain) -> Dictionary:
 	# Copy occupied blocks once on the main thread; the worker only scans its
 	# private buffer. Include side walls and soil, not a flat height-map sheet.
 	var world: GameWorld = terrain.get_parent()
+	if not terrain.scale.is_equal_approx(Vector3.ONE):
+		return {}  # fine-voxel terrain (the Surface): too many voxels to shatter
 	var center := _focus
 	center.y = world.ground_height(center.x,center.z)
 	var half := clampi(ceili(_camera.size*1.8),28,62) if _camera.projection==Camera3D.PROJECTION_ORTHOGONAL else 48

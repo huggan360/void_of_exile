@@ -32,17 +32,19 @@ const FEATURES := [
 		"Low: fewer glowing projectile lights and no shadows from small lamps."],
 	["particles", "Ambient particles", [["off", "Off"], ["low", "Low"], ["high", "High"]],
 		"Embers, snow, spores and dust drifting around you."],
+	["depth_of_field", "Depth of field", [["off", "Off"], ["on", "On"]],
+		"On the Surface and in the Tavern, the distance and things close to the camera go softly out of focus."],
 ]
 const PRESET_VALUES := {
 	high = {render_scale = 100, upscaler = "off", antialiasing = "msaa2", shadows = "high", gi = "high",
 			ambient_occlusion = "high", indirect_light = "high", volumetric_fog = "high", glow = "on",
-			lights = "high", particles = "high"},
+			lights = "high", particles = "high", depth_of_field = "on"},
 	medium = {render_scale = 85, upscaler = "fsr", antialiasing = "fxaa", shadows = "medium", gi = "low",
 			ambient_occlusion = "low", indirect_light = "off", volumetric_fog = "low", glow = "on",
-			lights = "high", particles = "low"},
+			lights = "high", particles = "low", depth_of_field = "on"},
 	low = {render_scale = 67, upscaler = "fsr", antialiasing = "fxaa", shadows = "low", gi = "off",
 			ambient_occlusion = "off", indirect_light = "off", volumetric_fog = "off", glow = "off",
-			lights = "low", particles = "low"},
+			lights = "low", particles = "low", depth_of_field = "off"},
 }
 ## Ambient light is lifted a little without global illumination, so caves
 ## don't turn pitch black.

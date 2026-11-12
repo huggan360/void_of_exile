@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bd46spul2qdm0"
+path="res://.godot/imported/rock_slab.vox-6210dac6e34747c0994d609f6ea6c888.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/rock_slab.vox"
+dest_files=["res://.godot/imported/rock_slab.vox-6210dac6e34747c0994d609f6ea6c888.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

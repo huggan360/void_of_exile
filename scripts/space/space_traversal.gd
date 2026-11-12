@@ -1136,7 +1136,7 @@ func update_camera(delta: float) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if allow_capture else Input.MOUSE_MODE_VISIBLE
 	var sight := _crosshair as SpaceCrosshair
 	sight.mode = ""
-	if seat=="": sight.aim_center = sight.size*Vector2(0.5, 0.42 if shoulder else 0.5)
+	if seat=="": sight.aim_center = sight.size*0.5
 	if allow_capture:
 		if seat=="pilot" and _ship!=null and _ship.mode=="flying": sight.mode = "pilot"
 		elif seat.begins_with("turret") and _ship!=null and _ship.mode=="flying": sight.mode = "turret"
@@ -1160,7 +1160,7 @@ func update_camera(delta: float) -> void:
 	if want_fp or shoulder or (spacewalk and mode==CameraMode.ANGLED):
 		var at := head
 		if not want_fp:
-			at += view*Vector3(0.65, 0.25, 4.8 if shoulder else 6.5)
+			at += view*(Vector3(0.35, 1.05, 4.6) if shoulder else Vector3(0.65, 0.25, 6.5))  # shoulder: over the head
 			var ray := PhysicsRayQueryParameters3D.create(head, at, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 			ray.exclude = [player.get_rid()]
 			var hit := player.get_world_3d().direct_space_state.intersect_ray(ray)
@@ -1233,7 +1233,7 @@ func _seat_camera(delta: float) -> void:
 # --- Aiming on foot ---------------------------------------------------------------------
 
 func mouse_point() -> Vector3:
-	var mouse := player.get_viewport().get_visible_rect().size*Vector2(0.5, 0.42 if view_mode()==CameraMode.SHOULDER and not world.first_person_at(player.global_position) else 0.5) if free_look() else player.get_viewport().get_mouse_position()
+	var mouse := player.get_viewport().get_visible_rect().size*0.5 if free_look() else player.get_viewport().get_mouse_position()
 	var origin := player.camera.project_ray_origin(mouse)
 	var direction := player.camera.project_ray_normal(mouse)
 	if not free_look():
