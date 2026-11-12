@@ -20,8 +20,7 @@ signal leave_pressed
 signal unstuck_pressed
 signal quit_pressed
 
-const LOGO := preload("res://assets/branding/launch_logo_limited.png")
-const LOGO_SMALL := LOGO
+const LOGO := preload("res://assets/branding/logo.png")
 const FADE_TIME := 0.25
 
 var _backdrop := ColorRect.new()
@@ -67,7 +66,7 @@ func _ready() -> void:
 	_start.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_start)
 	var start_box := _column(_start)
-	var logo := _logo(LOGO, Vector2(820, 307))
+	var logo := _logo(LOGO, Vector2(340, 340))
 	_start_logo = logo
 	start_box.add_child(logo)
 	start_box.add_child(_spacer(12))
@@ -94,7 +93,7 @@ func _ready() -> void:
 	_pause.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_pause.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_pause)
-	var corner := _logo(LOGO_SMALL, Vector2(400, 150))
+	var corner := _logo(LOGO, Vector2(150, 150))
 	corner.position = Vector2(18, 12)
 	_pause.add_child(corner)
 	var pause_box := _column(_pause)
@@ -270,7 +269,7 @@ func _logo(texture: Texture2D, logo_size: Vector2) -> TextureRect:
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo.custom_minimum_size = logo_size
 	logo.size = logo_size
-	logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return logo
 

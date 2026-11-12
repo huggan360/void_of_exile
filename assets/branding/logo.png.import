@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crq5h3r7lhd0t"
-path="res://.godot/imported/launch_logo_limited.png-1c79af62fe771196be40fcd3e3654795.ctex"
+uid="uid://bhg6eitn6o3uq"
+path="res://.godot/imported/logo.png-e333fddd4522f2ca21b492a65c54f8f4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/branding/launch_logo_limited.png"
-dest_files=["res://.godot/imported/launch_logo_limited.png-1c79af62fe771196be40fcd3e3654795.ctex"]
+source_file="res://assets/branding/logo.png"
+dest_files=["res://.godot/imported/logo.png-e333fddd4522f2ca21b492a65c54f8f4.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

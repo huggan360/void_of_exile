@@ -42,10 +42,10 @@ func _ready() -> void:
 	_logo_group.modulate.a = 0.0
 	for is_shadow in [true, false]:
 		var logo := TextureRect.new()
-		logo.texture = preload("res://assets/branding/launch_logo_limited.png")
+		logo.texture = preload("res://assets/branding/logo.png")
 		logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_logo_group.add_child(logo)
 		logo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
