@@ -52,7 +52,8 @@ func enemy_killed(realm_id: String, definition: EnemyDef, pos: Vector3) -> void:
 			# A campaign's story portals stay until its whole chain is done.
 			for id: String in portals.keys():
 				if portals[id].instance == realm_id and not portals[id].get("story", false): despawn(id)
-			spawn(realm_id, pos, realm.record.dungeon, true)
+			# The Theory has its own way out and its Nexus portal: no exit where the Empress falls.
+			if not realm.world is TheoryWorld: spawn(realm_id, pos, realm.record.dungeon, true)
 			# Some bosses can open a follow-up (an encore): by chance, or always in a campaign.
 			var follow := str(Dungeons.definition(realm.record.dungeon).get("follow_up", ""))
 			var rule: Variant = definition.get("follow_up")

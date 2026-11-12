@@ -107,21 +107,40 @@ func sample(position: Vector3) -> Dictionary:
 		var local := puzzle.frame.affine_inverse()*position
 		if absf(local.x)<10.0 and absf(local.z)<11.0 and absf(local.y)<5.0:
 			return {frame=Transform3D(puzzle.frame.basis,puzzle.frame*Vector3(local.x,0,local.z)),zone="space",distance=absf(local.y)}
+	# Both paths run steadily toward -Z, so a segment's z gap is a lower bound on its
+	# distance: start at the segment level with the position and walk outward.
 	var best := INF
-	var frame := Transform3D.IDENTITY
-	var chosen := 0
+	var chosen := -1
+	var segment := 0
 	for path_index in paths.size():
-		var path: Dictionary = paths[path_index]
-		var points: PackedVector3Array = path.points
-		for i in points.size()-1:
-			var point := Geometry3D.get_closest_point_to_segment(position,points[i],points[i+1])
-			var d := point.distance_squared_to(position)
-			if d>=best: continue
-			best = d
-			var t := points[i].distance_to(point)/maxf(0.001,points[i].distance_to(points[i+1]))
-			frame = (path.frames[i] as Transform3D).interpolate_with(path.frames[i+1],t)
-			frame.origin = point
-			chosen = path_index
+		var points: PackedVector3Array = paths[path_index].points
+		var count := points.size()-1
+		var lo := 0
+		var hi := count
+		while lo<hi:
+			var mid := (lo+hi)/2
+			if points[mid+1].z>position.z: lo = mid+1
+			else: hi = mid
+		var start := mini(lo,count-1)
+		for step: int in [-1,1]:
+			var i := start if step==1 else start-1
+			while i>=0 and i<count:
+				var gap := maxf(0.0,maxf(points[i+1].z-position.z,position.z-points[i].z))
+				if gap*gap>=best: break
+				var d := Geometry3D.get_closest_point_to_segment(position,points[i],points[i+1]).distance_squared_to(position)
+				if d<best:
+					best = d
+					chosen = path_index
+					segment = i
+				i += step
+	var frame := Transform3D.IDENTITY
+	if chosen>=0:
+		var path: Dictionary = paths[chosen]
+		var a: Vector3 = path.points[segment]
+		var b: Vector3 = path.points[segment+1]
+		var point := Geometry3D.get_closest_point_to_segment(position,a,b)
+		frame = (path.frames[segment] as Transform3D).interpolate_with(path.frames[segment+1],a.distance_to(point)/maxf(0.001,a.distance_to(b)))
+		frame.origin = point
 	return {frame=frame,zone="fracture" if chosen==1 else "space",distance=sqrt(best)}
 
 static func ship_floor(position: Vector3,wreck: bool) -> float:
