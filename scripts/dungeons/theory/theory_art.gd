@@ -924,7 +924,9 @@ func _ribbon(layout: TheoryLayout,index: int) -> void:
 	_impact_enabled = true
 
 static func _ribbon_width(z: float) -> float:
-	if z>=-125.0: return 1.0+clampf((-122.0-z)/3.0,0.0,1.0)*2.0/3.0
+	# The road leaves the Aurora's airlock at its full 14 m (walls at +-7 m),
+	# so floor and rails meet the throat without open strips at the sides.
+	if z>=-125.0: return maxf(7.0/6.0,1.0+clampf((-122.0-z)/3.0,0.0,1.0)*2.0/3.0)
 	if z<=-147.0: return 1.0+clampf((z+151.0)/4.0,0.0,1.0)*2.0/3.0
 	return 5.0/3.0
 
