@@ -45,7 +45,7 @@ const ZOOM_DEFAULT := 38.0
 const ZOOM_SPEED := 16.0  # meters per second while I/O is held
 const ZOOM_SMOOTHING := 10.0
 const ORBIT_SPEED := 2.0  # radians per second
-const CAMERA_HEIGHT_SMOOTHING := 4.0
+const CAMERA_HEIGHT_SMOOTHING := 8.0  # spring stiffness of the overhead camera's height
 ## Physics layers: terrain is on 1, obstacles on 2. The camera only avoids terrain.
 const TERRAIN_LAYER := 1
 const OBSTACLE_LAYER := 2
@@ -150,6 +150,7 @@ var _zoom_target := camera_distance
 var _camera_reach := camera_distance  # actual distance after avoiding terrain
 var _visual_offset := 0.0
 var _camera_y := 0.0
+var _camera_y_speed := 0.0
 var _cooldown := 0.0
 var _aim_hold := 0.0
 var _aim_point := Vector3.ZERO
@@ -316,6 +317,7 @@ func place(pos: Vector3, p_terrain: VoxelTerrain, p_walkable := Callable()) -> v
 	frozen = true
 	_visual_offset = 0.0
 	_camera_y = pos.y + 1.0
+	_camera_y_speed = 0.0
 
 
 ## Collision is built apart from the visible terrain (a smaller viewer), so
@@ -760,6 +762,17 @@ func set_zoom(distance: float) -> void:
 	_camera_reach = distance
 
 
+## Critically damped spring: (value, speed) eased toward `target`. Unlike a
+## lerp it never jerks when the target jumps, so the small voxel steps of a
+## hill blend into one even incline. Trails a steady climb by 2 / stiffness seconds.
+static func spring_toward(value: float, speed: float, target: float, stiffness: float, delta: float) -> Vector2:
+	var x := stiffness * delta
+	var decay := 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
+	var change := value - target
+	var pull := (speed + stiffness * change) * delta
+	return Vector2(target + (change + pull) * decay, (speed - stiffness * pull) * decay)
+
+
 func _update_camera(delta: float) -> void:
 	if is_instance_valid(ground_view):
 		ground_view.update_camera(delta)
@@ -767,7 +780,9 @@ func _update_camera(delta: float) -> void:
 	# Follow the model's smoothed height, then ease the camera after it, so
 	# walking up a mountain moves the view gently instead of in steps.
 	var target_y := global_position.y + _visual_offset + 1.0
-	_camera_y = lerpf(_camera_y, target_y, minf(1.0, delta * CAMERA_HEIGHT_SMOOTHING))
+	var eased := spring_toward(_camera_y, _camera_y_speed, target_y, CAMERA_HEIGHT_SMOOTHING, delta)
+	_camera_y = eased.x
+	_camera_y_speed = eased.y
 	var target := Vector3(global_position.x, _camera_y, global_position.z)
 	var direction := Basis(Vector3.UP, camera_yaw) * Vector3(0, sin(CAMERA_PITCH), cos(CAMERA_PITCH))
 	# The camera keeps the zoom the player chose: it never pulls in because a

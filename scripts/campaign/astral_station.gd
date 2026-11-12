@@ -14,11 +14,15 @@ var _board_badge: QuestMarker
 var _parts_badge: QuestMarker
 
 static func plan(generator: IslandGenerator) -> Vector3:
+	var home := Vector2i(generator.villages[0].center) if not generator.villages.is_empty() else Vector2i.ZERO
+	# First choice: the open woodland glade nearest the capital (baked, see
+	# SurfaceMap.glades), so Orin and his rocket stand in the open.
+	var glade := _glade_site(generator, home)
+	if glade.is_finite(): return glade
 	var best := Vector3.INF
 	var best_score := INF
 	# No towns, walls, roads or shore in the clearing. Prefer a level
 	# clearing near the woodland heart, with a full ring of trees around it.
-	var home := Vector2i(generator.villages[0].center) if not generator.villages.is_empty() else Vector2i.ZERO
 	for oz in range(-180,181,12):
 		for ox in range(-180,181,12):
 			var x := home.x+ox
@@ -36,15 +40,7 @@ static func plan(generator: IslandGenerator) -> Vector3:
 			if not clear: continue
 			var score := (high-low)*30.0+Vector2(ox,oz).length()*0.06
 			if score<best_score:
-				# Check the complete footprint: nine samples can miss a narrow
-				# diagonal road, a small ruin or a creek between the corners.
-				for dz in range(-8,9,2):
-					if not clear: break
-					for dx in range(-9,10,2):
-						if generator.column(x+dx,z+dz).y!=Biomes.WOODS or generator.feature_at(x+dx,z+dz)!=null or generator.map.cell_flags(x+dx,z+dz)&IslandGenerator.BUSY or generator.map.cell_water(x+dx,z+dz)>0:
-							clear=false
-							break
-				if not clear: continue
+				if not _footprint_clear(generator,x,z): continue
 				best_score=score
 				best=Vector3(x,high+0.18,z)
 	if not best.is_finite():
@@ -52,6 +48,36 @@ static func plan(generator: IslandGenerator) -> Vector3:
 		return best
 	best.y = generator.ground_y(best.x, best.z)
 	return best
+
+## The nearest woods glade to `home` (within 400 m) that the whole station
+## fits in on fairly level ground; INF if none.
+static func _glade_site(generator: IslandGenerator, home: Vector2i) -> Vector3:
+	var best := Vector3.INF
+	var best_distance := 400.0
+	for g: Dictionary in generator.map.glades():
+		if int(g.biome)!=Biomes.WOODS or float(g.r)<13.0: continue
+		var at := Vector2(float(g.at[0]), float(g.at[1]))
+		var distance := at.distance_to(Vector2(home))
+		if distance>=best_distance or not _footprint_clear(generator, floori(at.x), floori(at.y), 1.6): continue
+		best = Vector3(at.x, 0, at.y)
+		best_distance = distance
+	if best.is_finite(): best.y = generator.ground_y(best.x, best.z)
+	return best
+
+## Every column of the footprint checked: nine samples can miss a narrow
+## diagonal road, a small ruin or a creek between the corners. `max_rise`
+## also asks for fairly level ground.
+static func _footprint_clear(generator: IslandGenerator, x: int, z: int, max_rise := INF) -> bool:
+	var low := INF
+	var high := -INF
+	for dz in range(-8,9,2):
+		for dx in range(-9,10,2):
+			var col := generator.column(x+dx,z+dz)
+			if col.y!=Biomes.WOODS or generator.feature_at(x+dx,z+dz)!=null or generator.map.cell_flags(x+dx,z+dz)&IslandGenerator.BUSY or generator.map.cell_water(x+dx,z+dz)>0:
+				return false
+			low = minf(low,col.x)
+			high = maxf(high,col.x)
+	return high-low<=max_rise
 
 static func contains(center: Vector3,point: Vector3,margin := 0.0) -> bool:
 	return absf(point.x-center.x)<HALF.x+margin and absf(point.z-center.z)<HALF.y+margin

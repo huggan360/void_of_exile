@@ -209,6 +209,7 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 			var mz := floori(z)
 			if map.cell_flags(mx, mz) & IslandGenerator.KEEP_OPEN or map.cell_water(mx, mz) > 0:
 				continue
+			if _kept_clear(world, x, z): continue
 			var b := map.cell_biome(mx, mz)
 			var forest := map.cell_flora(mx, mz)
 			var chance := 0.03 + forest * 0.11
@@ -232,6 +233,14 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 					elif pick < 0.7: kind = "vox:surface/bush_berry"
 					else: kind = "vox:surface/bush_flower"
 			_put(groups, kind, Vector3(x, y - 0.05, z), SurfaceMap.hash01(cx, cz, 95) * TAU, 0.75 + SurfaceMap.hash01(cx, cz, 96) * 0.5, Color.WHITE)
+
+
+## Bushes and logs keep off the spots trees keep off (arrival, portal,
+## Starfall Launchworks).
+static func _kept_clear(world: IslandWorld, x: float, z: float) -> bool:
+	for p: Vector3 in world._keep_clear:
+		if Vector2(p.x - x, p.z - z).length() < IslandWorld.KEEP_CLEAR_RADIUS: return true
+	return false
 
 
 static func _flower(h: float) -> String:

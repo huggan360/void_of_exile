@@ -442,7 +442,7 @@ func add_social(social: SocialClient, body_of: Callable) -> void:
 	_ui_root.move_child(_tooltip, -1)
 
 
-## Portals, the towns (each in its own color) and your home.
+## Portals, the towns (each in its own color), your home and the launch pad.
 func refresh_markers() -> void:
 	minimap.markers.clear()
 	if not is_instance_valid(_world):
@@ -454,6 +454,9 @@ func refresh_markers() -> void:
 			var home: bool = v.display_name == stats.home
 			minimap.markers.append({pos = Vector3(v.center.x, 0, v.center.y), color = v.map_color,
 				kind = "home" if home else "town"})
+		var pad := (_world as IslandWorld).launchpad_center()
+		if pad.is_finite():
+			minimap.markers.append({pos = pad + Vector3(-14, 0, -2), color = Color.WHITE, kind = "rocket"})
 	if quest_markers.is_valid():
 		for m: Dictionary in quest_markers.call():
 			minimap.markers.append(m)

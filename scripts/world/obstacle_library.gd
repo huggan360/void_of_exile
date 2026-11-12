@@ -41,6 +41,13 @@ class Prefab:
 	func is_fine() -> bool:
 		return is_decor() or prefab_name.get_file().begins_with("fine_")
 
+	## A palette slot's colour in `biome`: the biome's obstacle colours
+	## cover the low slots, the prefab's own palette the rest (the Surface
+	## models use more slots than a biome lists).
+	func slot_color(slot: int, biome: BiomeDef) -> Color:
+		if slot >= 1 and slot < biome.obstacle_colors.size(): return biome.obstacle_colors[slot]
+		return _palette.get_color(slot)
+
 	## [base mesh, glow mesh] with the slots filled in from a biome's colors.
 	func meshes_for(biome: BiomeDef) -> Array:
 		if not _meshes.has(biome.id):

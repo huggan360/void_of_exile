@@ -27,6 +27,9 @@ const TYPES := {
 	road = ["Old Road", 0, Color.BLACK],
 }
 const PATH_TYPES := ["lava_scar", "ravine", "road"]
+## The launch pad's ground around its centre: the moored ship and fence reach
+## 44 m west, the forecourt and boarding tower lie north (SurfaceLaunchpad).
+const LAUNCHPAD_AREA := Rect2i(-48, -38, 72, 60)
 
 var type := ""
 var display_name := ""
@@ -87,6 +90,8 @@ static func create(p_type: String, p_center: Vector2i, p_required: bool, p_base_
 		f.bounds = Rect2i(p_center - r, r * 2 + Vector2i.ONE)
 	elif p_type in PATH_TYPES:
 		f._build_path(rng)
+	elif p_type == "launchpad":
+		f.bounds = Rect2i(p_center + LAUNCHPAD_AREA.position, LAUNCHPAD_AREA.size)
 	else:
 		f.bounds = Rect2i(p_center - Vector2i.ONE * ceili(f.radius), Vector2i.ONE * ceili(f.radius) * 2 + Vector2i.ONE)
 	f._place_lights()
@@ -112,9 +117,10 @@ func is_structure() -> bool:
 	return not type in PATH_TYPES
 
 
-## Whether shape() changes the ground (baked towns don't).
+## Whether shape() changes the ground (baked towns and the launch pad, which
+## the Surface baker levels and paves, don't).
 func shapes_terrain() -> bool:
-	return true
+	return type != "launchpad"
 
 
 ## Road points (for placing lampposts along them).
@@ -137,28 +143,9 @@ func shape(x: int, z: int, col: Array) -> bool:
 	var h := base_height
 	match type:
 		"launchpad":
-			# A paved landing circle on level ground, a rune ring where the ship
-			# sets down, a low wall with a gap toward the city (north), and the
-			# meadow eased back up to its own height around it.
-			var blend := 10.0
-			if d > radius + blend:
-				return false
-			if d > radius:
-				col[0] = roundi(lerpf(h, float(col[0]), smoothstep(0.0, 1.0, (d - radius) / blend)))
-				return true
-			col[0] = h
-			col[1] = Blocks.PAVING
-			col[2] = Blocks.STONE
-			var north := p.y < c.y and absf(p.x - c.x) < 4.0
-			# The moored battleship lies east-west and runs out over the west
-			# rim (SurfaceLaunchpad), so the wall opens for her there.
-			var under_ship := p.x - c.x < -8.0 and p.y - c.y > -10.5
-			if d > radius - 1.4 and not north and not under_ship:
-				col.append_array([h + 1, h + 2, Blocks.RUIN_BRICK])
-			elif absf(d - 14.0) < 0.6 or absf(d - 6.0) < 0.5:
-				col[1] = Blocks.RUNE_BLUE
-			elif d < 14.0 and (absf(p.x - c.x) < 0.6 or absf(p.y - c.y) < 0.6):
-				col[1] = Blocks.OAK_PLANKS
+			# Only claims the ground SurfaceLaunchpad builds on (no trees, rocks
+			# or packs there); the baker levels and paves it.
+			return LAUNCHPAD_AREA.has_point(Vector2i(x, z) - center)
 		"woodland_lake":
 			var edge := radius * (0.88 + sin(atan2(p.y - c.y, p.x - c.x) * 3 + _seed) * 0.08)
 			if d > radius:
@@ -372,9 +359,7 @@ func _place_lights() -> void:
 		return
 	match type:
 		"launchpad":
-			for k in 6:
-				var a: float = k * TAU / 6.0 + 0.5
-				light_spots.append(Vector3(center.x + 0.5 + cos(a) * 18.0, 4.0, center.y + 0.5 + sin(a) * 18.0))
+			pass  # SurfaceLaunchpad hangs its own lanterns
 		"lava_scar":
 			for i in range(2, _path.size() - 2, 5):
 				light_spots.append(Vector3(_path[i].x, 1.0, _path[i].y))

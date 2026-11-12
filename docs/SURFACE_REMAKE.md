@@ -43,6 +43,27 @@ places trees, obstacles, packs and biome features.
 - The portal shatter effect skips the terrain on the Surface (too many voxels).
 - `realm/realm_layout.tscn` and `RealmLayout` are no longer used by the Surface.
 
+## Glades and the launch pad (2026-11-12)
+
+- `glades()` in the baker cuts ragged clearings into the thick woods (own random
+  stream, so the rest of the layout is unchanged): forest density drops to about
+  5% inside, woods glades get meadow ground. Listed in `surface.json` "glades"
+  ({at, r, biome}), read by `SurfaceMap.glades()`. Campaign anchors can use
+  `{glade = "<town>"}` (the clearing nearest that town) or
+  `{glade = "<town>", along = 0.4}` (a point on the way there); the Thornmaw
+  Bloom and its lily trail use them.
+- The Skyward Launch Pad's ground is levelled by the baker as a rounded
+  rectangle covering the whole build (ship and fence 44 m west, forecourt north),
+  flagged CLEAR (no trees, rocks or bushes) with a paved forecourt and a gravel
+  lane to the road. The `launchpad` RealmFeature no longer reshapes terrain; it
+  only claims `LAUNCHPAD_AREA` so packs and obstacles stay off it.
+- `SurfaceLaunchpad` has one stone boarding tower (walkable stairs round three
+  sides, a balcony at deck height, a gangway over the fence with a Board point)
+  instead of the two ladder gantries. The minimap shows a rocket there.
+- Known: in `materials()` every `put()` overwrites the one before, so Woods and
+  Jungle ground is all plain grass (no FOREST / MEADOW / MOSS_ROCK patches);
+  glades bypass this. Fixing it would change the whole woods' ground cover.
+
 ## Check
 
 `godot --headless --path . res://tools/surface/check_surface.tscn` builds the plan,

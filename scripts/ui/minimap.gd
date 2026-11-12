@@ -374,6 +374,8 @@ func _draw() -> void:
 							var d := absi(x) + absi(y)
 							if d <= r + 1:
 								_art_px(a + Vector2(x, y), Color(0.03, 0.03, 0.06) if d > r else m.color if d > 0 else Color(1, 1, 1))
+				"rocket":  # the launch pad: a little rocket, nose up
+					_draw_rocket(a)
 				"town":  # a square in the town's color
 					for y in range(-2, 3):
 						for x in range(-2, 3):
@@ -387,6 +389,35 @@ func _draw() -> void:
 	PixelArt.draw_tiny(self, ((size / PixelArt.SCALE * 0.5).floor() + north.floor() - Vector2(1, 2)) * PixelArt.SCALE,
 			"N", UIStyle.GOLD, PixelArt.SCALE)
 	_draw_facing_arrow()
+
+
+## The rocket marker: red nose and fins, white body, a blue porthole and a
+## flame, outlined in the map's ink.
+const ROCKET := [
+	"..R..",
+	".RRR.",
+	".WWW.",
+	".WBW.",
+	".WWW.",
+	"RWWWR",
+	"RRWRR",
+	".YOY.",
+	"..O..",
+]
+const ROCKET_COLORS := {R = Color("e4553f"), W = Color("f4efe4"), B = Color("6ec8ff"), Y = Color("ffd25a"), O = Color("ff8a3a")}
+
+func _draw_rocket(at: Vector2) -> void:
+	var ink := Color(0.03, 0.03, 0.06)
+	var lit := {}
+	for y in ROCKET.size():
+		for x in 5:
+			var c: String = ROCKET[y][x]
+			if c != ".": lit[Vector2(x - 2, y - 4)] = ROCKET_COLORS[c]
+	for px: Vector2 in lit:
+		for d: Vector2 in [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)]:
+			if not lit.has(px + d): _art_px(at + px + d, ink)
+	for px: Vector2 in lit:
+		_art_px(at + px, lit[px])
 
 
 ## Smooth white arrow at the character's spot, pointing the way they face.

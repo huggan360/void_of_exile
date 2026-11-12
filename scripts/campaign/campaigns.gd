@@ -325,11 +325,11 @@ const LIST := {
 			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain"},
 			{id = "trail", kind = "interact", world = "campaign", text = "Follow the stolen lilies through the eastern meadow (%d/%d)", verb = "Examine",
 				objects = [
-					{id = "lily_tracks", name = "Dragged lily stems", at = Vector3(150, 0, 45), found = "Chewed stems lead farther into the meadow."},
-					{id = "lily_petals", name = "Scattered moon-lily petals", at = Vector3(205, 0, 110), found = "The petals end at a clearing. Something huge is feeding here."},
+					{id = "lily_tracks", name = "Dragged lily stems", at = {glade = "Bramblebrook", along = 0.45}, found = "Chewed stems lead farther into the meadow."},
+					{id = "lily_petals", name = "Scattered moon-lily petals", at = {glade = "Bramblebrook", along = 0.8}, found = "The petals end at a clearing. Something huge is feeding here."},
 				]},
 			{id = "bloom", kind = "kill", world = "campaign", text = "Find what eats the lilies in the meadow beyond Bramblebrook", count = 1,
-				enemies = ["thornmaw_bloom"], pack = "thornmaw", gather = true, at = Vector3(250, 0, 155)},
+				enemies = ["thornmaw_bloom"], pack = "thornmaw", gather = true, at = {glade = "Bramblebrook"}},
 			{id = "bloom_chest", kind = "chest", world = "campaign", text = "Open the story chest the Thornmaw left behind",
 				at = "death", items = ["story_moon_lily", "story_clue"], until = "story_moon_lily"},
 			{id = "lily", kind = "hand_over", npc = "gerald", world = "hall", item = "story_moon_lily", text = "Bring the moon-lily back to Gerald",
@@ -764,7 +764,9 @@ static func unlocked(id: String, book: Dictionary) -> bool:
 
 ## Where an anchor lands in `world`: {village, offset}, {cabin: village}
 ## (a flat spot at the foot of the mountain nearest it), {summit: village}
-## (that mountain's top), {stronghold: biome name}, or a fixed Vector3
+## (that mountain's top), {stronghold: biome name}, {glade: village} (the
+## middle of the woodland clearing nearest that town; `along` 0..1 picks a
+## point on the way there from the town instead), or a fixed Vector3
 ## (the Tavern). The nearest open, walkable spot; INF if unknown.
 static func resolve(at: Variant, world: GameWorld) -> Vector3:
 	# The open-spot search is costly and the answer never moves for a world:
@@ -802,11 +804,29 @@ static func _resolve(at: Variant, world: GameWorld) -> Vector3:
 		for fort in island.generator.strongholds:
 			if Biomes.get_biome(fort.biome_id).biome_name.to_lower() == str(at.stronghold).to_lower():
 				want = Vector3(fort.center.x, 0, fort.center.y)
+	elif at.has("glade"):
+		want = _glade(island, str(at.glade), float(at.get("along", 1.0)))
 
 	if want == Vector3.INF:
 		return Vector3.INF
 	want += at.get("offset", Vector3.ZERO)
 	return open_spot(want, island)
+
+
+## The woodland clearing nearest a town (outside it), or a point `along` the
+## way there from the town's middle.
+static func _glade(island: IslandWorld, village: String, along: float) -> Vector3:
+	for v in island.generator.villages:
+		if v.display_name != village: continue
+		var home := Vector2(v.center) + Vector2(0.5, 0.5)
+		var best := Vector2.INF
+		for g: Dictionary in island.generator.map.glades():
+			var at := Vector2(float(g.at[0]), float(g.at[1]))
+			if at.distance_to(home) > v.radius + 40.0 and at.distance_to(home) < best.distance_to(home): best = at
+		if not best.is_finite(): return Vector3.INF
+		var spot := home.lerp(best, clampf(along, 0.0, 1.0))
+		return Vector3(spot.x, 0, spot.y)
+	return Vector3.INF
 
 
 ## Keep social objectives in the town, close to their plaza/house offset.

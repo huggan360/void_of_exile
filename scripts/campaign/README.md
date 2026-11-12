@@ -94,7 +94,9 @@ to step ids before resuming, preserving saves across its inserted trail step.
 pack. It uses the same Realm 1 island as the other campaigns. Only this pack's
 private realm carries `astral_station` in its realm record (including the client
 entry record); ordinary public realms and The Hidden Power are unchanged.
-`AstralStation.plan()` chooses one woodland clearing before terrain streaming.
+`AstralStation.plan()` chooses one woodland clearing before terrain streaming:
+the baked woods glade nearest the capital when the station fits there, else a
+level spot found by searching around the capital.
 The station footprint is reserved from packs, trees and decorative grass, and
 `IslandWorld.astral_anchor()` supplies identical positions to story actors,
 markers, the chest, boarding checks and the launch camera.

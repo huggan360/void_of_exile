@@ -141,6 +141,11 @@ static func apply_viewport(viewport: Viewport, values: Dictionary, base_scale: f
 			RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM][shadows]
 	RenderingServer.directional_soft_shadow_filter_set_quality(soft)
 	RenderingServer.positional_soft_shadow_filter_set_quality(soft)
+	# Depth of field: the default (Low) blurs at half resolution with few
+	# samples, which shimmers on fine voxel detail while the camera moves.
+	# Hexagon at High runs at full size with 24 samples; no jitter (it crawls without TAA).
+	RenderingServer.camera_attributes_set_dof_blur_bokeh_shape(RenderingServer.DOF_BOKEH_HEXAGON)
+	RenderingServer.camera_attributes_set_dof_blur_quality(RenderingServer.DOF_BLUR_QUALITY_HIGH, false)
 	# High keeps the project's own renderer settings (the original look).
 	var high_gi := level(values, "gi") >= 3
 	RenderingServer.gi_set_use_half_resolution(not high_gi or _project("global_illumination/gi/use_half_resolution", false))

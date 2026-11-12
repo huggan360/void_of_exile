@@ -4,7 +4,14 @@ extends SpatialController
 var camera_mode := 0
 var _focus: CameraAttributesPractical
 var _focus_camera: Camera3D
+var _focus_distance := -1.0
 var _see_through := 0.0
+## The over-the-shoulder camera's eye height, eased so it climbs and drops
+## with the hills instead of stepping with every voxel.
+const HEAD_STIFFNESS := 12.0
+const HEAD_MAX_LAG := 1.2
+var _head_y := NAN
+var _head_speed := 0.0
 var _hud: CanvasLayer
 var _sight: SpaceCrosshair
 
@@ -50,8 +57,18 @@ func update_camera(delta: float) -> void:
 	player.aura.visible = not fp and alive
 	_update_first_person_shield()
 	player.camera.fov = (78.0 if fp else 72.0) if free_look() else Player.CAMERA_FOV
-	if not free_look(): return
-	var head := player.global_position + Vector3.UP * (1.57 + player._visual_offset)
+	if not free_look():
+		_head_y = NAN
+		return
+	var head_y := player.global_position.y + 1.57 + player._visual_offset
+	if is_nan(_head_y) or absf(head_y - _head_y) > 6.0:  # first frame or a teleport
+		_head_y = head_y
+		_head_speed = 0.0
+	else:
+		var eased := Player.spring_toward(_head_y, _head_speed, head_y, HEAD_STIFFNESS, delta)
+		_head_y = clampf(eased.x, head_y - HEAD_MAX_LAG, head_y + HEAD_MAX_LAG)
+		_head_speed = eased.y
+	var head := Vector3(player.global_position.x, _head_y, player.global_position.z)
 	var view := Basis(Vector3.UP, player.camera_yaw) * Basis(Vector3.RIGHT, look_pitch)
 	var at := head
 	if not fp:
@@ -102,7 +119,13 @@ func _process(delta: float) -> void:
 			_focus.dof_blur_near_enabled = true
 			_focus.dof_blur_amount = 0.028
 		camera.attributes = _focus
-	var focus := camera.global_position.distance_to(player.global_position + Vector3.UP)
+	# Eased, so the blur bands don't breathe with every step, shake or hill.
+	var aim := camera.global_position.distance_to(player.global_position + Vector3.UP)
+	if _focus_distance < 0.0 or absf(aim - _focus_distance) > 20.0:
+		_focus_distance = aim
+	else:
+		_focus_distance = lerpf(_focus_distance, aim, 1.0 - exp(-4.0 * delta))
+	var focus := _focus_distance
 	# Overhead (focus ~38 m) the treetops a few meters above the character
 	# already soften and the top of the screen blurs; over the shoulder the
 	# same rules leave a few meters around the character sharp.

@@ -1549,14 +1549,32 @@ def settlements(W):
             best = (score, x, z)
     _, x, z = best
     pz, px = pix(x, z)
-    gz, gx, out = rect_pixels(x, z, 34, 34, 0.0, 12)
-    d = np.sqrt((gx - HALF + 0.5 - x) ** 2 + (gz - HALF + 0.5 - z) ** 2)
     target = round(float(W.rel[pz, px]))
-    inner = d <= 33
-    band = (d > 33) & (d < 45)
-    flatten(W, gz[inner], gx[inner], float(target), gz[band], gx[band], smoothstep(33, 45, d[band]))
+    # Level ground under everything SurfaceLaunchpad builds (pad space: the
+    # moored ship and its fence reach 44 m west, the forecourt with the
+    # boarding tower lies north, where the road comes in), as a rounded
+    # rectangle with a 12 m skirt, kept clear of trees, rocks and bushes.
+    ox, oz, hx, hz, round_r = -12.0, -9.0, 36.0, 31.0, 10.0
+    gz, gx, _ = rect_pixels(x + ox, z + oz, hx, hz, 0.0, 14)
+    lx = gx - HALF + 0.5 - x
+    lz = gz - HALF + 0.5 - z
+    qx = np.maximum(np.abs(lx - ox) - (hx - round_r), 0)
+    qz = np.maximum(np.abs(lz - oz) - (hz - round_r), 0)
+    out = np.hypot(qx, qz) - round_r
+    inner = out <= 0
+    band = (out > 0) & (out < 12)
+    flatten(W, gz[inner], gx[inner], float(target), gz[band], gx[band], smoothstep(0, 12, out[band]))
     W.occupied[gz[inner], gx[inner]] = 2
-    W.flags[gz[d < 40], gx[d < 40]] |= F_CLEAR
+    W.flags[gz[out < 7], gx[out < 7]] |= F_CLEAR
+    # The forecourt north of the fence is paved, edged with gravel, and a
+    # gravel lane runs up to where the road ends.
+    edge = np.random.default_rng(SEED + 5).random(lx.shape)
+    court = np.maximum(np.maximum(-30 - lx, lx - 17), np.maximum(-27 - lz, lz + 10))
+    lane = np.maximum(np.abs(lx) - 2.2, np.maximum(-38 - lz, lz + 26))
+    W.material[gz[(court <= 0) | (lane <= 0)], gx[(court <= 0) | (lane <= 0)]] = M_PLAZA
+    rim = ((court > 0) & (court < 1.6)) | ((lane > 0) & (lane < 1.2))
+    rim &= edge < 0.8
+    W.material[gz[rim], gx[rim]] = M_GRAVEL
     W.json["landmarks"].append({"type": "launchpad", "at": [int(round(x)), int(round(z))], "height": int(SEA + target)})
     taken.append((x, z, 60))
     W.taken = taken
@@ -1725,6 +1743,7 @@ def trails(W):
     """Forest trails between camps, lakes, waterfalls and lookouts; wooden
     stairs carry them up the stone terraces."""
     W.forest_hint = forest_hint(W)
+    glades(W)
     pois = []
     for wf in W.json["waterfalls"]:
         pois.append((wf["x"] + math.cos(wf["dir"] + 1.57) * (wf["width"] * 0.5 + 4), wf["z"] + math.sin(wf["dir"] + 1.57) * (wf["width"] * 0.5 + 4)))
@@ -1798,6 +1817,53 @@ def forest_hint(W):
     # Treeline on the mountains.
     d *= 1.0 - smoothstep(30.0, 48.0, W.rel)
     return d.astype(np.float32)
+
+
+def glades(W):
+    """Open clearings in the thick woods: a ragged ring of trees round a
+    meadow with only a lone tree or two. Listed in surface.json ("glades") so
+    the game can stage bosses, camps and people there. Uses its own random
+    stream, so the rest of the world keeps its layout."""
+    grng = random.Random(SEED * 31 + 7)
+    W.glade = np.zeros((N, N), bool)
+    busy = (W.flags & (F_ROAD | F_TOWN | F_FIELD | F_CLEAR | F_RIVER | F_LAKE)).astype(bool) | (W.occupied > 0) | ~W.land
+    cands = []
+    for gz in range(-HALF + 70, HALF - 70, 22):
+        for gx in range(-HALF + 70, HALF - 70, 22):
+            cands.append((gx + grng.uniform(-9, 9), gz + grng.uniform(-9, 9)))
+    grng.shuffle(cands)
+    out = []
+    for x, z in cands:
+        pz, px = pix(x, z)
+        cz, cx = to_coarse(x, z)
+        b = int(W.biome[pz, px])
+        if b not in (WOODS, JUNGLE, FOSEN, BLUELAY) or W.rough12[cz, cx] > 0.7 or W.wet_dist4[cz, cx] < 16:
+            continue
+        if W.rel[pz, px] < 1.5 or W.rel[pz, px] > 30:
+            continue
+        r = grng.uniform(14, 23)
+        reach = int(r + 6)
+        win = (slice(pz - reach, pz + reach + 1), slice(px - reach, px + reach + 1))
+        # Only where it is properly wooded, and nothing else claims the ground.
+        if W.forest_hint[win].mean() < 0.45 or busy[win].any():
+            continue
+        if any(math.hypot(x - g["at"][0], z - g["at"][1]) < 110 for g in out):
+            continue
+        if any(math.hypot(x - o[0], z - o[1]) < o[2] + r + 10 for o in W.taken):
+            continue
+        p1, p2 = grng.uniform(0, math.tau), grng.uniform(0, math.tau)
+        lz, lx = np.mgrid[-reach:reach + 1, -reach:reach + 1]
+        d = np.hypot(lx, lz)
+        a = np.arctan2(lz, lx)
+        edge = r * (1 + 0.16 * np.sin(3 * a + p1) + 0.08 * np.sin(5 * a + p2))
+        keep = 0.05 + 0.95 * smoothstep(edge * 0.7, edge * 1.25, d)
+        W.forest_hint[win] *= keep.astype(np.float32)
+        W.glade[win] |= d < edge * 0.8
+        out.append({"at": [round(x, 1), round(z, 1)], "r": round(r, 1), "biome": b})
+        if len(out) >= 60:
+            break
+    W.json["glades"] = out
+    log("  glades %d" % len(out))
 
 
 def fields(W):
@@ -1919,6 +1985,9 @@ def materials(W):
     def put(mask, value):
         m[free & mask] = value
 
+    # Glades in the woods are flower meadows.
+    m[free & W.glade & (b == WOODS)] = M_MEADOW
+    free = m == 0
     put((b == WOODS) & (forest > 0.62) & (n2 > -0.2), M_FOREST)
     put((b == WOODS) & (n > 0.25), M_MEADOW)
     put((b == WOODS) & (n2 > 0.55), M_MOSS_ROCK)

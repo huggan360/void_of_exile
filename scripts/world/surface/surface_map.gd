@@ -249,3 +249,8 @@ func strongholds() -> Array:
 
 func landmarks() -> Array:
 	return data.get("landmarks", [])
+
+## Open clearings in the woods: [{at: [x, z], r, biome}] (meters). Free
+## ground for campaign bosses, camps and people.
+func glades() -> Array:
+	return data.get("glades", [])

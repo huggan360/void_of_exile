@@ -65,7 +65,7 @@ func _start(obstacle: Obstacle, count: int, from: Vector3) -> void:
 	var colors := PackedColorArray()
 	for k in prefab.voxel_positions.size():
 		points.append(xform * prefab.voxel_positions[k])
-		colors.append(obstacle.biome.obstacle_colors[prefab.voxel_slots[k]])
+		colors.append(prefab.slot_color(prefab.voxel_slots[k], obstacle.biome))
 	# Chips from a hit start where the arrow struck.
 	_start_points(points, colors, prefab.voxel_size, count, from, xform.origin.y, count < 20)
 
