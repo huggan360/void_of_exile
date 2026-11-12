@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c78kuyok221nf"
+path="res://.godot/imported/body_glow.vox-234f1013cb25175840c7d39d0947130e.tscn"
+
+[deps]
+
+source_file="res://props/planet/lantern_tower/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-234f1013cb25175840c7d39d0947130e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

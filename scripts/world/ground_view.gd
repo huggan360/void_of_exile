@@ -2,10 +2,6 @@ class_name GroundView
 extends SpatialController
 ## Camera and aiming only: the Surface and Tavern keep their terrain movement.
 var camera_mode := 0
-var _focus: CameraAttributesPractical
-var _focus_camera: Camera3D
-var _focus_distance := -1.0
-var _see_through := 0.0
 ## The over-the-shoulder camera's eye height, eased so it climbs and drops
 ## with the hills instead of stepping with every voxel.
 const HEAD_STIFFNESS := 12.0
@@ -99,66 +95,15 @@ func aim_ray() -> Array:
 	if direction.is_zero_approx(): direction = -player.camera.global_basis.z
 	return [origin, direction]
 
-## Depth of field (Surface and Tavern, Graphics setting): the character is in
-## focus; the distance, and whatever stands between the camera and them
-## (treetops seen from overhead), go a little soft.
+## Depth of field and the see-through window (SpatialController).
 func _process(delta: float) -> void:
-	# The camera actually drawing the world (not always player.camera).
 	var camera := get_viewport().get_camera_3d()
-	_update_see_through(camera, delta)
-	if camera != _focus_camera and is_instance_valid(_focus_camera) and _focus_camera.attributes == _focus:
-		_focus_camera.attributes = null
-	_focus_camera = camera
-	if AppSettings.graphics.get("depth_of_field", "on") != "on" or not is_instance_valid(camera):
-		if _focus and is_instance_valid(camera) and camera.attributes == _focus: camera.attributes = null
-		return
-	if _focus == null or camera.attributes != _focus:
-		if _focus == null:
-			_focus = CameraAttributesPractical.new()
-			_focus.dof_blur_far_enabled = true
-			_focus.dof_blur_near_enabled = true
-			_focus.dof_blur_amount = 0.028
-		camera.attributes = _focus
-	# Eased, so the blur bands don't breathe with every step, shake or hill.
-	var aim := camera.global_position.distance_to(player.global_position + Vector3.UP)
-	if _focus_distance < 0.0 or absf(aim - _focus_distance) > 20.0:
-		_focus_distance = aim
-	else:
-		_focus_distance = lerpf(_focus_distance, aim, 1.0 - exp(-4.0 * delta))
-	var focus := _focus_distance
-	# Overhead (focus ~38 m) the treetops a few meters above the character
-	# already soften and the top of the screen blurs; over the shoulder the
-	# same rules leave a few meters around the character sharp.
-	_focus.dof_blur_far_distance = focus + maxf(26.0, focus * 0.6)
-	_focus.dof_blur_far_transition = maxf(30.0, focus)
-	_focus.dof_blur_near_distance = maxf(focus - maxf(4.0, focus * 0.15), focus * 0.5)
-	_focus.dof_blur_near_transition = maxf(3.0, focus * 0.3)
-
-
-## A soft round window opens around the character through whatever stands
-## between them and the camera (treetops, roofs, trunks, bushes), overhead and
-## over the shoulder: see voxel_model.gdshader.
-func _update_see_through(camera: Camera3D, delta: float) -> void:
-	var want := 1.0 if is_instance_valid(camera) and player.stats.hp > 0.0 and not player.interacting() else 0.0
-	_see_through = move_toward(_see_through, want, delta * 3.0)
-	if _see_through <= 0.0 or not is_instance_valid(camera):
-		RenderingServer.global_shader_parameter_set("see_through", Vector4.ZERO)
-		return
-	var body := player.global_position + Vector3.UP * 0.9
-	var viewport := get_viewport()
-	var scale := viewport.scaling_3d_scale if viewport is Viewport else 1.0
-	var at := camera.unproject_position(body) * scale
-	var depth := -(camera.global_transform.affine_inverse() * body).z
-	# Overhead a wide window; over the shoulder a smaller one round the body.
-	var share := 0.2 if camera_mode == 0 else 0.3
-	var radius := viewport.get_visible_rect().size.y * scale * share * _see_through
-	RenderingServer.global_shader_parameter_set("see_through", Vector4(at.x, at.y, radius, depth))
+	_update_see_through(camera, delta, 0.2 if camera_mode == 0 else 0.3)
+	_update_focus(camera, delta)
 
 
 func _exit_tree() -> void:
-	RenderingServer.global_shader_parameter_set("see_through", Vector4.ZERO)
-	if _focus and is_instance_valid(_focus_camera) and _focus_camera.attributes == _focus:
-		_focus_camera.attributes = null
+	_clear_view_effects()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if is_instance_valid(_fp_shield): _fp_shield.queue_free()
 	player.model.visible = true

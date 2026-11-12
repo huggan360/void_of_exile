@@ -53,6 +53,10 @@ see_through={
 "type": "vec4",
 "value": Vector4(0, 0, 0, 0)
 }
+lod_eye={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
 
 [voxel]
 

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bh24ng7q2f2co"
+path="res://.godot/imported/fine_sand_stone.vox-753bb97e3b31ce37089c6b4e997b5b19.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_sand_stone.vox"
+dest_files=["res://.godot/imported/fine_sand_stone.vox-753bb97e3b31ce37089c6b4e997b5b19.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

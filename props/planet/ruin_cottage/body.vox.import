@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ck2rak3cx5wgb"
+path="res://.godot/imported/body.vox-7d5ee36798e168a05c6d6ca66318054a.tscn"
+
+[deps]
+
+source_file="res://props/planet/ruin_cottage/body.vox"
+dest_files=["res://.godot/imported/body.vox-7d5ee36798e168a05c6d6ca66318054a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

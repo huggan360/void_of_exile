@@ -20,9 +20,20 @@ vec3 srgb_to_linear(vec3 c) {
 	return mix(pow((c + 0.055) / 1.055, vec3(2.4)), c / 12.92, lessThan(c, vec3(0.04045)));
 }
 
+// Per-instance detail bands for big batches (PlanetFlora): an instance whose
+// root is outside [lod_band.x, lod_band.y) metres from lod_eye (the player's
+// camera, also for its shadows) collapses to nothing, so one batch can hold
+// the full model near the crew and its coarse copy further out.
+global uniform vec3 lod_eye;
+instance uniform vec2 lod_band = vec2(-1.0, 1e9);
+
 void vertex() {
 	local_pos = VERTEX;
 	local_normal = NORMAL;
+	if (lod_band.x >= 0.0) {
+		float d = distance(MODEL_MATRIX[3].xyz, lod_eye);
+		if (d < lod_band.x || d >= lod_band.y) VERTEX = vec3(0.0);
+	}
 }
 
 // Overhead see-through: a soft round window around the character (GroundView

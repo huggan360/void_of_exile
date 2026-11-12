@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7d0i6fp65olj"
+path="res://.godot/imported/tombstones.vox-0cedac641cd46aa0dfd87d55f5bd884b.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/tombstones.vox"
+dest_files=["res://.godot/imported/tombstones.vox-0cedac641cd46aa0dfd87d55f5bd884b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

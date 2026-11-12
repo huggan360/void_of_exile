@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://28vcqx1uwmvv"
+path="res://.godot/imported/date_palm.vox-977980fc86e375015e61a6a1a775b154.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/date_palm.vox"
+dest_files=["res://.godot/imported/date_palm.vox-977980fc86e375015e61a6a1a775b154.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

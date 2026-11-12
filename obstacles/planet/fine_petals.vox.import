@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dto3pngxr7diu"
+path="res://.godot/imported/fine_petals.vox-e96496d592cae9fbc4ef1c67d71c20e2.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_petals.vox"
+dest_files=["res://.godot/imported/fine_petals.vox-e96496d592cae9fbc4ef1c67d71c20e2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

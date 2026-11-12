@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnpair566r68a"
+path="res://.godot/imported/body_glow.vox-7e20fbb00e0d3e9eea0b44226611f97c.tscn"
+
+[deps]
+
+source_file="res://props/planet/storm_tower/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-7e20fbb00e0d3e9eea0b44226611f97c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

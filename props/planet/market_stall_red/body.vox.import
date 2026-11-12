@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c7e7fgcgu1n5i"
+path="res://.godot/imported/body.vox-53aba39f40d0e24ab2a7aa7ab0407ada.tscn"
+
+[deps]
+
+source_file="res://props/planet/market_stall_red/body.vox"
+dest_files=["res://.godot/imported/body.vox-53aba39f40d0e24ab2a7aa7ab0407ada.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

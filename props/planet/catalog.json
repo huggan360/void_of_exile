@@ -1,0 +1,996 @@
+{
+ "nexus/bar": {
+  "foot": [
+   29.25,
+   16.25
+  ],
+  "kind": "house",
+  "sink": 0.125,
+  "size": [
+   30.25,
+   5.88,
+   17.25
+  ],
+  "voxel": 0.125
+ },
+ "nexus/barrel": {
+  "foot": [
+   1.25,
+   1.25
+  ],
+  "kind": "prop",
+  "sink": 0.125,
+  "size": [
+   1.5,
+   1.38,
+   1.5
+  ],
+  "voxel": 0.125
+ },
+ "nexus/bench": {
+  "foot": [
+   2.75,
+   0.75
+  ],
+  "kind": "prop",
+  "sink": 0.125,
+  "size": [
+   3.0,
+   1.62,
+   1.25
+  ],
+  "voxel": 0.125
+ },
+ "nexus/board": {
+  "foot": [
+   4.5,
+   0.75
+  ],
+  "kind": "prop",
+  "sink": 0.0,
+  "size": [
+   5.25,
+   4.88,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "nexus/chart_table": {
+  "foot": [
+   1.5,
+   1.5
+  ],
+  "kind": "prop",
+  "sink": 0.0,
+  "size": [
+   3.0,
+   1.38,
+   3.0
+  ],
+  "voxel": 0.125
+ },
+ "nexus/crate": {
+  "foot": [
+   1.25,
+   1.25
+  ],
+  "kind": "prop",
+  "sink": 0.0,
+  "size": [
+   1.25,
+   1.12,
+   1.25
+  ],
+  "voxel": 0.125
+ },
+ "nexus/deck": {
+  "foot": [
+   104.0,
+   104.0
+  ],
+  "kind": "deck",
+  "sink": 2.0,
+  "size": [
+   104.0,
+   2.0,
+   104.0
+  ],
+  "voxel": 0.5
+ },
+ "nexus/gate": {
+  "foot": [
+   5.75,
+   0.5
+  ],
+  "kind": "prop",
+  "sink": 0.0,
+  "size": [
+   6.0,
+   3.62,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "nexus/hearth": {
+  "foot": [
+   5.75,
+   5.5
+  ],
+  "kind": "prop",
+  "sink": 0.0,
+  "size": [
+   5.75,
+   1.75,
+   6.5
+  ],
+  "voxel": 0.125
+ },
+ "nexus/lamp": {
+  "foot": [
+   0.75,
+   0.75
+  ],
+  "kind": "prop",
+  "sink": 0.25,
+  "size": [
+   0.75,
+   3.75,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "nexus/lantern_tree": {
+  "foot": [
+   1.5,
+   1.5
+  ],
+  "kind": "prop",
+  "sink": 0.25,
+  "size": [
+   2.5,
+   4.25,
+   1.5
+  ],
+  "voxel": 0.125
+ },
+ "nexus/planter": {
+  "foot": [
+   2.5,
+   1.25
+  ],
+  "kind": "prop",
+  "sink": 0.0,
+  "size": [
+   2.25,
+   1.38,
+   1.0
+  ],
+  "voxel": 0.125
+ },
+ "nexus/rail": {
+  "foot": [
+   0.5,
+   0.5
+  ],
+  "kind": "prop",
+  "sink": 0.0,
+  "size": [
+   3.5,
+   2.38,
+   0.25
+  ],
+  "voxel": 0.125
+ },
+ "nexus/stall_green": {
+  "foot": [
+   3.75,
+   2.5
+  ],
+  "kind": "prop",
+  "sink": 0.25,
+  "size": [
+   4.25,
+   3.62,
+   3.0
+  ],
+  "voxel": 0.125
+ },
+ "nexus/stall_pink": {
+  "foot": [
+   3.75,
+   2.5
+  ],
+  "kind": "prop",
+  "sink": 0.25,
+  "size": [
+   4.25,
+   3.62,
+   3.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/adobe_house": {
+  "foot": [
+   5.0,
+   4.25
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   6.0,
+   5.12,
+   5.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/adobe_house_rose": {
+  "foot": [
+   5.0,
+   4.25
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   6.0,
+   5.12,
+   5.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/crypt": {
+  "foot": [
+   4.75,
+   6.5
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   5.5,
+   6.5,
+   7.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/crystal_hall": {
+  "foot": [
+   8.5,
+   9.0
+  ],
+  "kind": "landmark",
+  "sink": 2.0,
+  "size": [
+   10.0,
+   11.5,
+   10.0
+  ],
+  "voxel": 0.25
+ },
+ "planet/crystal_hut": {
+  "foot": [
+   4.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   5.0,
+   5.75,
+   5.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/crystal_hut_pink": {
+  "foot": [
+   4.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   5.0,
+   5.75,
+   5.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/fairy_tower": {
+  "foot": [
+   3.25,
+   3.5
+  ],
+  "kind": "house",
+  "sink": 1.25,
+  "size": [
+   4.0,
+   11.12,
+   4.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/fisher_house": {
+  "foot": [
+   5.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.25,
+  "size": [
+   6.25,
+   7.12,
+   5.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/hive_house": {
+  "foot": [
+   4.5,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 0.75,
+  "size": [
+   4.75,
+   4.5,
+   4.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/hive_spire": {
+  "foot": [
+   6.5,
+   6.5
+  ],
+  "kind": "landmark",
+  "sink": 0.75,
+  "size": [
+   6.75,
+   23.75,
+   6.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/lamp_green": {
+  "foot": [
+   0.75,
+   0.75
+  ],
+  "kind": "lamp",
+  "sink": 0.25,
+  "size": [
+   0.75,
+   3.75,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/lamp_pink": {
+  "foot": [
+   0.75,
+   0.75
+  ],
+  "kind": "lamp",
+  "sink": 0.25,
+  "size": [
+   0.75,
+   3.75,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/lamp_storm": {
+  "foot": [
+   0.75,
+   0.75
+  ],
+  "kind": "lamp",
+  "sink": 0.25,
+  "size": [
+   0.75,
+   3.75,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/lamp_teal": {
+  "foot": [
+   0.75,
+   0.75
+  ],
+  "kind": "lamp",
+  "sink": 0.25,
+  "size": [
+   0.75,
+   3.75,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/lamp_violet": {
+  "foot": [
+   0.75,
+   0.75
+  ],
+  "kind": "lamp",
+  "sink": 0.25,
+  "size": [
+   0.75,
+   3.75,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/lamp_warm": {
+  "foot": [
+   0.75,
+   0.75
+  ],
+  "kind": "lamp",
+  "sink": 0.25,
+  "size": [
+   0.75,
+   3.75,
+   0.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/lantern_tower": {
+  "foot": [
+   3.75,
+   3.75
+  ],
+  "kind": "landmark",
+  "sink": 1.25,
+  "size": [
+   5.0,
+   21.75,
+   5.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/lighthouse": {
+  "foot": [
+   4.5,
+   4.5
+  ],
+  "kind": "landmark",
+  "sink": 1.25,
+  "size": [
+   7.75,
+   23.38,
+   7.75
+  ],
+  "voxel": 0.125
+ },
+ "planet/market_stall_blue": {
+  "foot": [
+   3.75,
+   2.5
+  ],
+  "kind": "stall",
+  "sink": 0.25,
+  "size": [
+   4.25,
+   3.62,
+   3.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/market_stall_green": {
+  "foot": [
+   3.75,
+   2.5
+  ],
+  "kind": "stall",
+  "sink": 0.25,
+  "size": [
+   4.25,
+   3.62,
+   3.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/market_stall_red": {
+  "foot": [
+   3.75,
+   2.5
+  ],
+  "kind": "stall",
+  "sink": 0.25,
+  "size": [
+   4.25,
+   3.62,
+   3.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/market_stall_violet": {
+  "foot": [
+   3.75,
+   2.5
+  ],
+  "kind": "stall",
+  "sink": 0.25,
+  "size": [
+   4.25,
+   3.62,
+   3.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/moss_cottage": {
+  "foot": [
+   5.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.25,
+  "size": [
+   6.25,
+   7.12,
+   5.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/moss_cottage_blue": {
+  "foot": [
+   5.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.25,
+  "size": [
+   6.25,
+   7.12,
+   5.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/mushroom_house": {
+  "foot": [
+   4.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   6.5,
+   6.12,
+   6.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/mushroom_house_teal": {
+  "foot": [
+   4.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   6.5,
+   6.12,
+   6.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/observatory": {
+  "foot": [
+   8.75,
+   9.0
+  ],
+  "kind": "landmark",
+  "sink": 1.25,
+  "size": [
+   10.25,
+   10.38,
+   10.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/obsidian_hall": {
+  "foot": [
+   6.75,
+   5.75
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   6.75,
+   5.75,
+   5.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/obsidian_hut": {
+  "foot": [
+   4.5,
+   4.0
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   5.75,
+   5.75,
+   5.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/pad_crystal": {
+  "foot": [
+   47.5,
+   47.5
+  ],
+  "kind": "pad",
+  "sink": 4.0,
+  "size": [
+   58.5,
+   8.0,
+   58.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/pad_fungal": {
+  "foot": [
+   47.5,
+   47.5
+  ],
+  "kind": "pad",
+  "sink": 4.0,
+  "size": [
+   58.5,
+   8.0,
+   58.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/pad_obsidian": {
+  "foot": [
+   47.5,
+   47.5
+  ],
+  "kind": "pad",
+  "sink": 4.0,
+  "size": [
+   58.5,
+   8.0,
+   58.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/pad_rose": {
+  "foot": [
+   47.5,
+   47.5
+  ],
+  "kind": "pad",
+  "sink": 4.0,
+  "size": [
+   58.5,
+   8.0,
+   58.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/pad_sand": {
+  "foot": [
+   47.5,
+   47.5
+  ],
+  "kind": "pad",
+  "sink": 4.0,
+  "size": [
+   58.5,
+   8.0,
+   58.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/pad_stone": {
+  "foot": [
+   47.5,
+   47.5
+  ],
+  "kind": "pad",
+  "sink": 4.0,
+  "size": [
+   58.5,
+   8.0,
+   58.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/pad_timber": {
+  "foot": [
+   47.5,
+   47.5
+  ],
+  "kind": "pad",
+  "sink": 4.0,
+  "size": [
+   58.5,
+   8.0,
+   58.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/petal_cottage": {
+  "foot": [
+   4.75,
+   4.25
+  ],
+  "kind": "house",
+  "sink": 1.25,
+  "size": [
+   5.75,
+   6.38,
+   5.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/petal_cottage_lilac": {
+  "foot": [
+   4.75,
+   4.25
+  ],
+  "kind": "house",
+  "sink": 1.25,
+  "size": [
+   5.75,
+   6.38,
+   5.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/plaza_crystal": {
+  "foot": [
+   37.5,
+   37.5
+  ],
+  "kind": "plaza",
+  "sink": 2.5,
+  "size": [
+   37.5,
+   2.5,
+   37.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/plaza_dark": {
+  "foot": [
+   37.5,
+   37.5
+  ],
+  "kind": "plaza",
+  "sink": 2.5,
+  "size": [
+   37.5,
+   2.5,
+   37.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/plaza_moon": {
+  "foot": [
+   37.5,
+   37.5
+  ],
+  "kind": "plaza",
+  "sink": 2.5,
+  "size": [
+   37.5,
+   2.5,
+   37.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/plaza_rose": {
+  "foot": [
+   37.5,
+   37.5
+  ],
+  "kind": "plaza",
+  "sink": 2.5,
+  "size": [
+   37.5,
+   2.5,
+   37.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/plaza_sand": {
+  "foot": [
+   37.5,
+   37.5
+  ],
+  "kind": "plaza",
+  "sink": 2.5,
+  "size": [
+   37.5,
+   2.5,
+   37.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/plaza_stone": {
+  "foot": [
+   37.5,
+   37.5
+  ],
+  "kind": "plaza",
+  "sink": 2.5,
+  "size": [
+   37.5,
+   2.5,
+   37.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/plaza_violet": {
+  "foot": [
+   37.5,
+   37.5
+  ],
+  "kind": "plaza",
+  "sink": 2.5,
+  "size": [
+   37.5,
+   2.5,
+   37.5
+  ],
+  "voxel": 0.25
+ },
+ "planet/rose_shrine": {
+  "foot": [
+   4.5,
+   1.0
+  ],
+  "kind": "landmark",
+  "sink": 1.0,
+  "size": [
+   6.5,
+   9.12,
+   6.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/ruin_cottage": {
+  "foot": [
+   5.0,
+   4.25
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   6.0,
+   4.75,
+   5.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/sand_dome": {
+  "foot": [
+   4.75,
+   5.0
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   5.5,
+   4.62,
+   5.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/spore_hut": {
+  "foot": [
+   4.25,
+   4.5
+  ],
+  "kind": "house",
+  "sink": 1.0,
+  "size": [
+   6.5,
+   6.12,
+   6.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/stilt_hut": {
+  "foot": [
+   4.25,
+   5.25
+  ],
+  "kind": "house",
+  "sink": 0.5,
+  "size": [
+   5.25,
+   8.0,
+   5.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/stilt_hut_blue": {
+  "foot": [
+   4.25,
+   5.25
+  ],
+  "kind": "house",
+  "sink": 0.5,
+  "size": [
+   5.25,
+   8.0,
+   5.0
+  ],
+  "voxel": 0.125
+ },
+ "planet/storm_tower": {
+  "foot": [
+   3.75,
+   3.75
+  ],
+  "kind": "landmark",
+  "sink": 1.25,
+  "size": [
+   5.25,
+   27.0,
+   5.25
+  ],
+  "voxel": 0.125
+ },
+ "planet/treehouse": {
+  "foot": [
+   5.5,
+   4.5
+  ],
+  "kind": "landmark",
+  "sink": 1.0,
+  "size": [
+   14.0,
+   24.5,
+   14.0
+  ],
+  "voxel": 0.25
+ },
+ "planet/well": {
+  "foot": [
+   2.5,
+   2.5
+  ],
+  "kind": "well",
+  "sink": 0.25,
+  "size": [
+   3.0,
+   3.5,
+   2.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/well_dark": {
+  "foot": [
+   2.5,
+   2.5
+  ],
+  "kind": "well",
+  "sink": 0.25,
+  "size": [
+   3.0,
+   3.5,
+   2.5
+  ],
+  "voxel": 0.125
+ },
+ "planet/well_sand": {
+  "foot": [
+   2.5,
+   2.5
+  ],
+  "kind": "well",
+  "sink": 0.25,
+  "size": [
+   3.0,
+   3.5,
+   2.5
+  ],
+  "voxel": 0.125
+ }
+}

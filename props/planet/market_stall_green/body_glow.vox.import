@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dfi66e5mplkau"
+path="res://.godot/imported/body_glow.vox-91066ef4095bd1d5e42323c8292d4e94.tscn"
+
+[deps]
+
+source_file="res://props/planet/market_stall_green/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-91066ef4095bd1d5e42323c8292d4e94.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

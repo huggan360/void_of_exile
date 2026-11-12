@@ -50,19 +50,19 @@ static func can_descend(at: Vector3) -> bool:
 const PLANETS := [
 	{id = "verdance", name = "Verdance", region = "haven", center = Vector3(4200, 400, -3200), radius = 650.0,
 		pad = Vector3.UP, danger = 0, palette = ["3f9d4a", "8fd16a", "2c5d36", "f2d27a", "7fe8c7", "8fe0c0"],
-		terrain = {style = "hills", height = 46.0, size = 260.0},
+		terrain = {style = "hills", height = 46.0, size = 260.0, water = -9.0},
 		about = "Mossy forest world: giant glowing mushrooms, treehouse villages, rope bridges, fireflies."},
 	{id = "rosamund", name = "Rosamund", region = "haven", center = Vector3(-4600, -700, 2200), radius = 520.0,
 		pad = Vector3.UP, danger = 0, palette = ["e07fb5", "ffc6e2", "8a3f78", "8de0ff", "fff3b0", "ffb8de"],
-		terrain = {style = "terraces", height = 38.0, size = 210.0},
+		terrain = {style = "terraces", height = 38.0, size = 210.0, water = -8.0},
 		about = "Pink crystal meadows, candy-coloured trees, fairy shrines and floating petals."},
 	{id = "amberfall", name = "Amberfall", region = "haven", center = Vector3(2800, 900, 7400), radius = 760.0,
 		pad = Vector3.UP, danger = 1, palette = ["b07a34", "d9a85a", "6a3e18", "5fd18a", "fff0c8", "ffc27a"],
-		terrain = {style = "dunes", height = 42.0, size = 170.0}, air = {storm = 2.2},
+		terrain = {style = "dunes", height = 42.0, size = 170.0, water = -15.0}, air = {storm = 2.2},
 		about = "Amber dunes, honey lakes, lantern towers and a sleepy desert market."},
 	{id = "tidewell", name = "Tidewell", region = "haven", center = Vector3(-7400, 500, 8600), radius = 900.0,
 		pad = Vector3.UP, danger = 1, palette = ["2f86c9", "7fd6e8", "e8d6a0", "3f9d6a", "ffffff", "8ad2ff"],
-		terrain = {style = "islands", height = 34.0, size = 240.0, sea = true},
+		terrain = {style = "islands", height = 34.0, size = 240.0, sea = true, water = 0.0},
 		about = "Ocean world: an archipelago of small islands, a lighthouse and a fishing village on stilts."},
 	{id = "shardheart", name = "Shardheart", region = "shardfield", center = Vector3(3600, 0, 18800), radius = 300.0,
 		pad = Vector3.UP, danger = 2, palette = ["3a8a7a", "8af0d8", "1a2a34", "ff8ae0", "1a2030", "6af0c8"],
@@ -70,15 +70,15 @@ const PLANETS := [
 		about = "A hollow crystal planetoid hidden inside the Shardfield, humming and half-alive."},
 	{id = "hollowmoon", name = "Hollowmoon", region = "gloam", center = Vector3(-4200, 800, 26000), radius = 640.0,
 		pad = Vector3.UP, danger = 2, palette = ["7d818e", "b8b4a8", "3a3d48", "7dff6a", "1a1a22", "4a5a52"],
-		terrain = {style = "craters", height = 44.0, size = 150.0},
+		terrain = {style = "craters", height = 44.0, size = 150.0, water = -22.0},
 		about = "A dead grey moon: bone forests, a ruined observatory, cold green ghost-lights."},
 	{id = "mawgrave", name = "Mawgrave", region = "gloam", center = Vector3(5600, -900, 30500), radius = 950.0,
 		pad = Vector3.UP, danger = 3, palette = ["4a2a5a", "8a4aa0", "1a0f22", "ff5fd2", "7dff6a", "6a3a7a"],
-		terrain = {style = "fungal", height = 46.0, size = 260.0},
+		terrain = {style = "fungal", height = 46.0, size = 260.0, water = -11.0},
 		about = "Rotting violet fungal planet; the brood's hives swell out of the ground."},
 	{id = "pale_eye", name = "The Pale Eye", region = "gloam", center = Vector3(-600, 1800, 35500), radius = 1300.0,
 		pad = Vector3.UP, danger = 3, palette = ["4a5266", "a8b0c4", "14161e", "9ab0ff", "ff4a5a", "8090b8"],
-		terrain = {style = "spires", height = 110.0, size = 230.0},
+		terrain = {style = "spires", height = 110.0, size = 230.0, water = -18.0},
 		about = "Storm planet with a vast eye-shaped storm; obsidian spires and the end of the map."},
 	{id = "vesperis", name = "Vesperis", region = "haven", center = Vector3(-2400, 700, -6600), radius = 1000.0,
 		pad = Vector3.UP, danger = 0, palette = ["2c2638", "ffb86a", "1a1626", "ff6eb4", "6af0e0", "e8954a"],
@@ -100,53 +100,68 @@ const PLACES := {
 	"pale_eye": ["obsidian_crown", "storm_observatory", "eye_shrine", "last_beacon"],
 	"vesperis": [],
 }
-const PLACE_OFFSETS: Array[Vector2] = [Vector2(-46, -36), Vector2(56, -34), Vector2(-60, 62), Vector2(50, 92)]
-## Each planet's town (offsets from the pad like the places): its plaza, the
-## smith and the shipwright by a small shipyard pad where bought ships wait.
-## `style` village uses the realm's voxel houses, the others are alien and
-## built from the realm's voxel obstacles.
+## The four places lie scattered over each world's top (place_offset).
+const PLACE_REACH := Vector2(95.0, 300.0)
+## Each planet's town (`at`: arc metres from the pad, right and forward): its
+## plaza, the smith and the shipwright by a small shipyard pad where bought
+## ships wait, DOCK_GAP further out. PlanetSettlements builds it (and the
+## villages, settlements()) from the planet's own voxel houses.
 const TOWNS := {
-	verdance = {name = "Mossbrook", style = "village", houses = ["res://props/houses/woodland_0", "res://props/houses/woodland_1", "res://props/houses/woodland_2", "res://props/home/rose_cottage", "res://props/home/blue_bakery", "res://props/home/tall_townhouse"],
+	verdance = {at = Vector2(-170, 150), name = "Mossbrook", style = "village", houses = ["res://props/houses/woodland_0", "res://props/houses/woodland_1", "res://props/houses/woodland_2", "res://props/home/rose_cottage", "res://props/home/blue_bakery", "res://props/home/tall_townhouse"],
 		folk = ["npc_villager", "npc_gardener", "npc_baker", "moss_tortoise"], smith = "npc_smith", wright = "npc_traveler"},
-	rosamund = {name = "Petalgate", style = "village", houses = ["res://props/home/rose_cottage", "res://props/home/chapel", "res://props/home/magicians_house", "res://props/home/blossom_tree", "res://props/home/rose_cottage", "res://props/home/garden_bed"],
+	rosamund = {at = Vector2(165, 115), name = "Petalgate", style = "village", houses = ["res://props/home/rose_cottage", "res://props/home/chapel", "res://props/home/magicians_house", "res://props/home/blossom_tree", "res://props/home/rose_cottage", "res://props/home/garden_bed"],
 		folk = ["npc_magician", "spirit_purple", "npc_villager", "spirit_spark"], smith = "npc_smith", wright = "npc_magician"},
-	amberfall = {name = "Honeymarket", style = "village", houses = ["res://props/houses/desert_0", "res://props/houses/desert_1", "res://props/houses/desert_2", "res://props/houses/desert_0", "res://props/town/market", "res://props/town/market"],
+	amberfall = {at = Vector2(-150, -205), name = "Honeymarket", style = "village", houses = ["res://props/houses/desert_0", "res://props/houses/desert_1", "res://props/houses/desert_2", "res://props/houses/desert_0", "res://props/town/market", "res://props/town/market"],
 		folk = ["npc_traveler", "sun_priest", "genie_brown", "npc_baker"], smith = "npc_smith", wright = "genie_brown"},
-	tidewell = {name = "Saltstilts", style = "village", houses = ["res://props/houses/fosen_0", "res://props/houses/fosen_1", "res://props/houses/fosen_2", "res://props/houses/fosen_1", "res://props/town/well", "res://props/home/broad_lodge"],
+	tidewell = {at = Vector2(215, 70), name = "Saltstilts", style = "village", houses = ["res://props/houses/fosen_0", "res://props/houses/fosen_1", "res://props/houses/fosen_2", "res://props/houses/fosen_1", "res://props/town/well", "res://props/home/broad_lodge"],
 		folk = ["npc_villager", "tide_snail", "crab", "npc_traveler"], smith = "npc_smith", wright = "npc_traveler"},
-	shardheart = {name = "Lumen Spire", style = "crystal", houses = ["crystal_cluster", "ice_spike", "crystal_cluster", "obelisk"],
+	shardheart = {at = Vector2(95, 85), name = "Lumen Spire", style = "crystal", houses = ["crystal_cluster", "ice_spike", "crystal_cluster", "obelisk"],
 		folk = ["genie_blue", "spirit_blue", "runic_archivist", "prism_ray"], smith = "runic_archivist", wright = "genie_blue"},
-	hollowmoon = {name = "Ashveil", style = "ruins", houses = ["ruin_house", "ruin_wall", "ruin_house", "obelisk"],
+	hollowmoon = {at = Vector2(150, -150), name = "Ashveil", style = "ruins", houses = ["ruin_house", "ruin_wall", "ruin_house", "obelisk"],
 		folk = ["spirit_brown", "glacier_hermit", "spirit_blue", "nightbell_idol"], smith = "glacier_hermit", wright = "spirit_brown"},
-	mawgrave = {name = "Sporehollow", style = "fungal", houses = ["glowshroom", "glowshroom", "burnt_tree", "glowshroom"],
+	mawgrave = {at = Vector2(-205, 165), name = "Sporehollow", style = "fungal", houses = ["glowshroom", "glowshroom", "burnt_tree", "glowshroom"],
 		folk = ["genie_purple", "cave_shaman", "sporeback", "spirit_purple"], smith = "cave_shaman", wright = "genie_purple"},
-	pale_eye = {name = "The Obsidian Court", style = "obsidian", houses = ["obelisk", "pillar", "obelisk", "boulder"],
+	pale_eye = {at = Vector2(265, 215), name = "The Obsidian Court", style = "obsidian", houses = ["obelisk", "pillar", "obelisk", "boulder"],
 		folk = ["runic_archivist", "genie_purple", "sun_priest", "spirit_spark"], smith = "runic_archivist", wright = "sun_priest"},
 }
-const TOWN_OFFSET := Vector2(0, 180)
-const TOWN_RADIUS := 44.0
-const DOCK_OFFSET := Vector2(0, 268)
+const TOWN_RADIUS := 58.0
+const DOCK_GAP := 104.0
 const TOWN_SPOTS := {smith = Vector2(-13, 9), wright = Vector2(-20, 0), center = Vector2.ZERO}
 ## The boss strongholds (PlanetStrongholds): a walled fortress on a level
-## terrace cut into the planet's top, FORT_OFFSET from the pad (opposite the
-## town), sealed until its key is turned; the boss waits inside.
+## terrace cut into the planet's top, `at` arc metres from the pad (away from
+## the town, each world its own way), sealed until its key is turned; the
+## boss waits inside. Kept within ~0.3 rad of the top, where realm combat works.
 const FORTS := {
-	rosamund = {name = "The Rose Bastion", key = "key_rose_bastion", boss = "queen_briarrose", style = "rose"},
-	amberfall = {name = "The Amber Ziggurat", key = "key_amber_ziggurat", boss = "amber_colossus", style = "amber"},
-	hollowmoon = {name = "The Shattered Observatory", key = "key_shattered_observatory", boss = "selenarch", style = "moon"},
-	mawgrave = {name = "The Rotting Hive", key = "key_rotting_hive", boss = "brood_matriarch", style = "hive"},
-	pale_eye = {name = "The Stormeye Citadel", key = "key_stormeye_citadel", boss = "stormeye_tyrant", style = "storm"},
+	rosamund = {at = Vector2(-120, -95), name = "The Rose Bastion", key = "key_rose_bastion", boss = "queen_briarrose", style = "rose"},
+	amberfall = {at = Vector2(190, 90), name = "The Amber Ziggurat", key = "key_amber_ziggurat", boss = "amber_colossus", style = "amber"},
+	hollowmoon = {at = Vector2(-170, 60), name = "The Shattered Observatory", key = "key_shattered_observatory", boss = "selenarch", style = "moon"},
+	mawgrave = {at = Vector2(230, -150), name = "The Rotting Hive", key = "key_rotting_hive", boss = "brood_matriarch", style = "hive"},
+	pale_eye = {at = Vector2(-300, -230), name = "The Stormeye Citadel", key = "key_stormeye_citadel", boss = "stormeye_tyrant", style = "storm"},
 }
-const FORT_OFFSET := Vector2(0, -125)
 const FORT_FLAT := 56.0  # level ground around the fortress centre (m, past the corner towers), then FORT_BLEND
 const FORT_BLEND := 40.0
 ## Flat ground kept around the pad and each place (arc metres), then a blend.
 const PAD_FLAT := 34.0
-const PLACE_FLAT := 22.0
+const PLACE_FLAT := 26.0
 const FLAT_BLEND := 60.0
+## Villages by kind: [flat radius (m), houses]; the bigger ones get a plaza.
+const VILLAGE_KINDS := {hamlet = [22.0, 4], village = [32.0, 8], large = [44.0, 13]}
+const VILLAGE_BLEND := 50.0
+const VILLAGE_NAMES := {
+	verdance = ["Fernhollow", "Glimmerdell", "Mosswick", "Lanternroot", "Dewbrook", "Thistledown", "Brambleford"],
+	rosamund = ["Rosewhistle", "Candlebloom", "Sugarvale", "Petalford", "Lilacmere", "Honeysuckle"],
+	amberfall = ["Dunewell", "Saffron Rest", "Goldwind", "Emberdune", "Honeycomb Hollow", "Sandglass", "Ochre Gate"],
+	tidewell = ["Gullrock", "Pearlcove", "Driftwood Bay", "Kelpstead", "Saltmarsh", "Coralreach", "Wavecrest", "Shellby"],
+	shardheart = ["Prismhold", "Echo Nook", "Facet Rise", "Glasswhisper"],
+	hollowmoon = ["Gravelight", "Dustveil", "Cindermoor", "Paleford", "Hush", "Ashcombe"],
+	mawgrave = ["Rotmire", "Sporewick", "Gloomcap", "Velvetrot", "Mirebloom", "Fester Hollow", "Cankerdell", "Moldwater"],
+	pale_eye = ["Thunderhold", "Ravenspire", "Glasshallow", "Stormwatch", "Blackrain", "Shardholt", "Ironveil", "Gale Rest", "Duskanvil", "Cinderglass", "Hollowpeak"],
+}
 
 static var _noises := {}
 static var _flats := {}
+static var _settlements := {}
+static var _place_offsets := {}
 static var _ports := {}
 
 ## Where ships set down on a planet: every world has its landing pad and its
@@ -248,7 +263,8 @@ static func dock_crystal(p: Dictionary) -> Vector3:
 static func pad_frame(p: Dictionary) -> Transform3D:
 	var up: Vector3 = (p.pad as Vector3).normalized()
 	var right := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD))<0.95 else Vector3.RIGHT).normalized()
-	return Transform3D(Basis(right, up, right.cross(up)), p.center+up*float(p.radius))
+	# On its levelled ground (a few metres up on a sea world, base_level).
+	return Transform3D(Basis(right, up, right.cross(up)), p.center+up*(float(p.radius)+base_level(p)))
 
 ## A frame on the (flattened) ground `offset` metres from the pad, relative to
 ## the planet centre: walking the arc along the pad's right/forward axes.
@@ -261,24 +277,130 @@ static func place_frame(p: Dictionary, offset: Vector2) -> Transform3D:
 	var right := (pad.basis.x-normal*normal.dot(pad.basis.x)).normalized()
 	return Transform3D(Basis(right, normal, right.cross(normal)), normal*(radius+surface_height(p, normal)))
 
-## Unit directions (from the centre) that stay flat, with their flat radius.
+## Water on a planet: the height (m above the base radius) of its sea and
+## lakes, or NAN where it has none.
+static func water_level(p: Dictionary) -> float:
+	return float(p.terrain.get("water", NAN))
+
+## Whether the ground along `dir` is under water (or within `margin` m of it).
+static func underwater(p: Dictionary, dir: Vector3, margin := 0.0) -> bool:
+	var water := water_level(p)
+	return not is_nan(water) and surface_height(p, dir)<water+margin
+
+## The height the pad, town and places are levelled to: on a sea world a few
+## metres above the waves, so each settlement makes its own island.
+static func base_level(p: Dictionary) -> float:
+	var water := water_level(p)
+	return 0.0 if is_nan(water) else maxf(0.0, water+2.5)
+
+## The arc offset of planet `p`'s story place `index` (0..3): spread round
+## the top at their own angles and distances, clear of the town and fortress.
+static func place_offset(p: Dictionary, index: int) -> Vector2:
+	var id := str(p.id)
+	if not _place_offsets.has(id):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = absi(id.hash())+1777
+		var taken: Array = [[Vector2.ZERO, PAD_FLAT+30.0], [town_offset(p), TOWN_RADIUS+30.0], [dock_offset(p), PAD_FLAT+26.0]]
+		if FORTS.has(id): taken.append([fort_offset(p), FORT_FLAT+30.0])
+		var reach := Vector2(PLACE_REACH.x, minf(PLACE_REACH.y, float(p.radius)*0.55))
+		var out: Array[Vector2] = []
+		var turn := rng.randf()*TAU
+		for i in 4:
+			var best := Vector2.ZERO
+			var best_gap := -INF
+			for attempt in 40:
+				var a := turn+TAU*(i+rng.randf_range(-0.3, 0.3))/4.0
+				var at := Vector2.from_angle(a)*rng.randf_range(reach.x, reach.y)
+				var gap := INF
+				for t: Array in taken: gap = minf(gap, at.distance_to(t[0])-float(t[1]))
+				if gap>best_gap:
+					best_gap = gap
+					best = at
+				if gap>0.0: break
+			out.append(best)
+			taken.append([best, PLACE_FLAT+30.0])
+		_place_offsets[id] = out
+	return (_place_offsets[id] as Array)[clampi(index, 0, 3)]
+
+static func town_offset(p: Dictionary) -> Vector2:
+	return TOWNS.get(p.id, {}).get("at", Vector2(0, 180))
+
+## The shipyard pad: further out from the town, away from the landing pad.
+static func dock_offset(p: Dictionary) -> Vector2:
+	var town := town_offset(p)
+	return town+town.normalized()*DOCK_GAP
+
+static func fort_offset(p: Dictionary) -> Vector2:
+	return FORTS.get(p.id, {}).get("at", Vector2(0, -125))
+
+## Villages on planet `p` (not the main town): [{name, kind, dir, radius,
+## level, houses, index}], scattered over the whole world, deterministic, on
+## dry ground and well apart from the pad, town, places and fortress.
+static func settlements(p: Dictionary) -> Array:
+	var id := str(p.id)
+	if _settlements.has(id): return _settlements[id]
+	var out: Array = []
+	if p.get("city", false) or not TOWNS.has(id):
+		_settlements[id] = out
+		return out
+	var radius := float(p.radius)
+	var water := water_level(p)
+	var taken: Array = [[pad_frame(p).basis.y, PAD_FLAT], [place_frame_raw(p, town_offset(p)), TOWN_RADIUS], [place_frame_raw(p, dock_offset(p)), PAD_FLAT]]
+	for i in 4: taken.append([place_frame_raw(p, place_offset(p, i)), PLACE_FLAT])
+	if FORTS.has(id): taken.append([place_frame_raw(p, fort_offset(p)), FORT_FLAT])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = absi(id.hash())+4421
+	var names: Array = VILLAGE_NAMES.get(id, [])
+	var count := mini(names.size(), clampi(roundi(radius/120.0), 3, 11))
+	var cycle := ["large", "village", "hamlet", "village", "hamlet", "large", "hamlet", "village"]
+	for i in count:
+		var kind: String = cycle[i % cycle.size()]
+		var flat: float = VILLAGE_KINDS[kind][0]
+		for attempt in 200:
+			var dir := _random_dir(rng)
+			# Half of them on the side of the world the crew lands on.
+			if i % 2==0 and dir.y<0.1: dir.y = absf(dir.y)+0.1
+			dir = dir.normalized()
+			var ok := true
+			for t: Array in taken:
+				if acos(clampf(dir.dot(t[0]), -1.0, 1.0))*radius<flat+float(t[1])+VILLAGE_BLEND+20.0:
+					ok = false
+					break
+			if not ok: continue
+			var raw := _shape(p, dir*radius)
+			if not is_nan(water) and raw<water+(4.0 if str(p.terrain.style)=="islands" else 2.0): continue
+			var level := raw if is_nan(water) else maxf(raw, water+2.0)
+			out.append({name = str(names[i]), kind = kind, dir = dir, radius = flat, level = level, houses = int(VILLAGE_KINDS[kind][1]), index = i})
+			taken.append([dir, flat])
+			break
+	_settlements[id] = out
+	return out
+
+static func _random_dir(rng: RandomNumberGenerator) -> Vector3:
+	var z := rng.randf_range(-1.0, 1.0)
+	var a := rng.randf()*TAU
+	var r := sqrt(1.0-z*z)
+	return Vector3(cos(a)*r, sin(a)*r, z)
+
+## Ground kept level on planet `p`: [direction, flat radius, kind (0 a level
+## height, 1 the fortress plane), level (m) or plane distance, cos of the
+## whole reach (a quick reject), blend].
 static func _flat_spots(p: Dictionary) -> Array:
 	var id: String = p.id
 	if _flats.has(id): return _flats[id]
-	var pad := pad_frame(p)
 	var radius := float(p.radius)
-	var out: Array = [[pad.basis.y, PAD_FLAT]]
-	var offsets: Array[Vector2] = PLACE_OFFSETS.duplicate()
-	offsets.append_array([TOWN_OFFSET, DOCK_OFFSET])
-	for offset in offsets:
-		var distance := offset.length()
-		var tangent := (pad.basis.x*offset.x+pad.basis.z*offset.y).normalized()
-		var flat := TOWN_RADIUS+8.0 if offset==TOWN_OFFSET else PAD_FLAT if offset==DOCK_OFFSET else PLACE_FLAT
-		out.append([pad.basis.y*cos(distance/radius)+tangent*sin(distance/radius), flat])
+	var base := base_level(p)
+	var out: Array = []
+	var add := func(dir: Vector3, flat: float, kind: int, level: float, blend: float) -> void:
+		out.append([dir, flat, kind, level, cos(minf((flat+blend)/radius, PI)), blend])
+	add.call(pad_frame(p).basis.y, PAD_FLAT, 0, base, FLAT_BLEND)
+	for i in 4: add.call(place_frame_raw(p, place_offset(p, i)), PLACE_FLAT, 0, base, FLAT_BLEND)
+	add.call(place_frame_raw(p, town_offset(p)), TOWN_RADIUS+8.0, 0, base, FLAT_BLEND)
+	add.call(place_frame_raw(p, dock_offset(p)), PAD_FLAT, 0, base, FLAT_BLEND)
+	for v: Dictionary in settlements(p): add.call(v.dir, float(v.radius), 0, float(v.level), VILLAGE_BLEND)
 	if FORTS.has(id):
-		# Level (not following the sphere): [direction, radius, plane height above the centre].
-		var fort := place_frame_raw(p, FORT_OFFSET)
-		out.append([fort, FORT_FLAT, radius])
+		# Level (not following the sphere): the plane at the base radius.
+		add.call(place_frame_raw(p, fort_offset(p)), FORT_FLAT, 1, radius, FORT_BLEND)
 	_flats[id] = out
 	return out
 
@@ -295,10 +417,10 @@ static func place_frame_raw(p: Dictionary, offset: Vector2) -> Vector3:
 ## its main gate (-Z) facing the pad. Identity when it has none.
 static func fort_frame(p: Dictionary) -> Transform3D:
 	if not FORTS.has(p.id): return Transform3D()
-	var dir := place_frame_raw(p, FORT_OFFSET)
+	var dir := place_frame_raw(p, fort_offset(p))
 	var to_pad: Vector3 = pad_frame(p).basis.y-dir
 	var toward: Vector3 = to_pad-dir*to_pad.dot(dir)
-	if toward.length()<0.001: toward = place_frame(p, FORT_OFFSET).basis.z
+	if toward.length()<0.001: toward = place_frame(p, fort_offset(p)).basis.z
 	return Transform3D(Basis.looking_at(toward.normalized(), dir), dir*float(p.radius))
 
 static func _noise(p: Dictionary, layer: int) -> FastNoiseLite:
@@ -323,8 +445,15 @@ static func _noise(p: Dictionary, layer: int) -> FastNoiseLite:
 	_noises[key] = noise
 	return noise
 
-## Raw terrain shape in metres before flattening.
+## Terrain shape in metres before flattening. Lakes (not seas) keep a
+## shallow bed, no deeper than about 1.6 m, so the crew wades through them.
 static func _shape(p: Dictionary, at: Vector3) -> float:
+	var h := _raw_shape(p, at)
+	var water := float(p.terrain.get("water", NAN))
+	if is_nan(water) or p.terrain.get("sea", false) or h>water-0.6: return h
+	return water-0.6-(1.0-exp(-(water-0.6-h)/2.5))*1.0
+
+static func _raw_shape(p: Dictionary, at: Vector3) -> float:
 	var t: Dictionary = p.terrain
 	if str(t.style)=="city": return 0.0  # streets: a perfect sphere
 	var height := float(t.height)
@@ -358,26 +487,37 @@ static func _shape(p: Dictionary, at: Vector3) -> float:
 	return height*fbm
 
 ## Terrain height above the base radius along unit direction `dir` (metres).
-## Zero on the pad and the story places, blending out to full terrain.
+## Level on the pad, the places, the towns and villages, blending out to the
+## full terrain; the fortress terrace is a plane cut into the slope.
 static func surface_height(p: Dictionary, dir: Vector3) -> float:
 	if p.get("city", false): return 0.0
 	var radius := float(p.radius)
-	var raw := _shape(p, dir*radius)
-	var mask := 1.0
+	var h := _shape(p, dir*radius)
 	for flat: Array in _flat_spots(p):
-		if flat.size()>2: continue
-		var arc := acos(clampf(dir.dot(flat[0]), -1.0, 1.0))*radius
-		mask = minf(mask, smoothstep(float(flat[1]), float(flat[1])+FLAT_BLEND, arc))
-	var h := raw*mask
-	for flat: Array in _flat_spots(p):
-		if flat.size()<3: continue
-		# A fortress terrace: a level plane, cut into the slope and built up below it.
-		var arc := acos(clampf(dir.dot(flat[0]), -1.0, 1.0))*radius
-		var alignment: float = dir.dot(flat[0])
-		if arc>=float(flat[1])+FORT_BLEND or alignment<0.2: continue
-		var level := float(flat[2])/alignment-radius
-		h = lerpf(level, h, smoothstep(float(flat[1]), float(flat[1])+FORT_BLEND, arc))
+		var along: float = dir.dot(flat[0])
+		if along<float(flat[4]): continue
+		var arc := acos(clampf(along, -1.0, 1.0))*radius
+		var keep := smoothstep(float(flat[1]), float(flat[1])+float(flat[5]), arc)
+		if int(flat[2])==1:
+			if along<0.2: continue
+			h = lerpf(float(flat[3])/along-radius, h, keep)
+		else:
+			h = lerpf(float(flat[3]), h, keep)
 	return h
+
+## A frame on the ground of planet `p` (planet space) centred on unit
+## direction `dir`, up along it, turned `yaw`: lowered to the lowest ground
+## under a footprint of `half` metres, so no side of what stands there floats.
+static func ground_frame(p: Dictionary, dir: Vector3, yaw := 0.0, half := 0.0) -> Transform3D:
+	var radius := float(p.radius)
+	var right := dir.cross(Vector3.FORWARD if absf(dir.dot(Vector3.FORWARD))<0.95 else Vector3.RIGHT).normalized()
+	var forward := right.cross(dir)
+	var h := surface_height(p, dir)
+	if half>0.5:
+		for k in 4:
+			var t := (right if k<2 else forward)*(half if k % 2==0 else -half)
+			h = minf(h, surface_height(p, (dir*radius+t).normalized()))
+	return Transform3D(Basis(right, dir, right.cross(dir)).rotated(dir, yaw), dir*(radius+h))
 
 ## World-space ground point below or above `position` on planet `p`.
 static func surface_point(p: Dictionary, position: Vector3) -> Vector3:
@@ -387,9 +527,9 @@ static func surface_point(p: Dictionary, position: Vector3) -> Vector3:
 ## A frame (planet space) in planet `p`'s town: "center", "smith", "wright"
 ## (relative to the plaza) or "dock" (the shipyard pad).
 static func town_frame(p: Dictionary, which: String) -> Transform3D:
-	if which=="dock": return place_frame(p, DOCK_OFFSET)
-	if which=="wright": return place_frame(p, DOCK_OFFSET+TOWN_SPOTS.wright)
-	return place_frame(p, TOWN_OFFSET+(TOWN_SPOTS.get(which, Vector2.ZERO) as Vector2))
+	if which=="dock": return place_frame(p, dock_offset(p))
+	if which=="wright": return place_frame(p, dock_offset(p)+TOWN_SPOTS.wright)
+	return place_frame(p, town_offset(p)+(TOWN_SPOTS.get(which, Vector2.ZERO) as Vector2))
 
 static func berth_frame(index: int) -> Transform3D:
 	if index>=BERTHS:

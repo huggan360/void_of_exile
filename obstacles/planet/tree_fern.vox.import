@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dm27cli2dosoo"
+path="res://.godot/imported/tree_fern.vox-ed44c2b74f9997a914782ed9ec95233f.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/tree_fern.vox"
+dest_files=["res://.godot/imported/tree_fern.vox-ed44c2b74f9997a914782ed9ec95233f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

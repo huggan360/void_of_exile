@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d4hndx1qcpda0"
+path="res://.godot/imported/coral_pink.vox-6dc5fc5917e3891ccf0a5a516a57314a.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/coral_pink.vox"
+dest_files=["res://.godot/imported/coral_pink.vox-6dc5fc5917e3891ccf0a5a516a57314a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

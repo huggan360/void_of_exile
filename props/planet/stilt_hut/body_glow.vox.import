@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bw7ie0rdkhus0"
+path="res://.godot/imported/body_glow.vox-7c155ab4d9d4a8e3bf23c824fc11a5b3.tscn"
+
+[deps]
+
+source_file="res://props/planet/stilt_hut/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-7c155ab4d9d4a8e3bf23c824fc11a5b3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

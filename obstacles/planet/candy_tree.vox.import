@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ljduj6x7lxd5"
+path="res://.godot/imported/candy_tree.vox-27abe9f2994b14a2847d5dcea8ed068f.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/candy_tree.vox"
+dest_files=["res://.godot/imported/candy_tree.vox-27abe9f2994b14a2847d5dcea8ed068f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

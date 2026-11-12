@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bi885kbkcrvv1"
+path="res://.godot/imported/firefly_bush.vox-3452460393dce2d50d8568939a7f0f3a.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/firefly_bush.vox"
+dest_files=["res://.godot/imported/firefly_bush.vox-3452460393dce2d50d8568939a7f0f3a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

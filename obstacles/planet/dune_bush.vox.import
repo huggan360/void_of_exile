@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cfex02jtktn65"
+path="res://.godot/imported/dune_bush.vox-c929df72afe104b69a453a7220296397.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/dune_bush.vox"
+dest_files=["res://.godot/imported/dune_bush.vox-c929df72afe104b69a453a7220296397.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

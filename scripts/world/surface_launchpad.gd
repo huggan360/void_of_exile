@@ -64,6 +64,7 @@ class FenceBoarding extends InteractionTarget:
 
 	func available(player: Node3D) -> bool:
 		if not enabled or not is_instance_valid(player) or not is_inside_tree(): return false
+		if pad.moored_ship()==null: return false
 		var local := pad.to_local(player.global_position)
 		var near := SurfaceLaunchpad.nearest_on_fence(Vector2(local.x, local.z))
 		position = Vector3(near.x, local.y+1.0, near.y)
@@ -511,6 +512,31 @@ func _stall(art: NexusStation.Brush, at: Vector3) -> void:
 	art.box(base+Vector3(0.6, 1.62, 0), Vector3(0.5, 0.12, 0.2), BRASS)
 	for k in 3:
 		art.box(base+Vector3(2.7, 0.35+k*0.62, 0.4-k*0.15), Vector3(0.62, 0.6, 0.62), BIRCH.darkened(0.1*k), k==0)
+
+## The ship moored in the cradle (landed on the pad), or null: the boarding
+## points only offer "Board" while one is there.
+func moored_ship() -> SpaceShip:
+	var dock: SurfaceShipWorld = (world as IslandWorld).surface_ships if world is IslandWorld else null
+	if not is_instance_valid(dock): return null
+	var rest := dock.pad_pose().origin
+	for ship: SpaceShip in dock.ships.values():
+		if ship.mode=="landed" and ship.xform.origin.distance_to(rest)<12.0: return ship
+	return null
+
+var _moor_timer := 0.0
+
+func _process(delta: float) -> void:
+	_moor_timer -= delta
+	if _moor_timer>0.0: return
+	_moor_timer = 0.5
+	if is_instance_valid(_gangway_gate): _gangway_gate.enabled = moored_ship()!=null
+	# Offline your own ship waits in the cradle once Space is open (online the
+	# server moors it when Odessa brings one out of your fleet).
+	if Net.is_client() or not unlocked or not owned or not world is IslandWorld: return
+	var dock := (world as IslandWorld).surface_ships
+	if not is_instance_valid(dock) or not is_instance_valid(dock.local_player) or moored_ship()!=null: return
+	if dock.local_player.global_position.distance_to(global_position)>120.0 or SpaceLayout.pocket_at(dock.local_player.global_position)>=0: return
+	dock.ensure_ship({player_id = dock.local_player.player_id, peer_id = 0, name = "You", account_id = 0, pos = dock.local_player.global_position})
 
 func set_state(p_unlocked: bool, p_owned: bool) -> void:
 	unlocked = p_unlocked

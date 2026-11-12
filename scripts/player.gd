@@ -333,6 +333,8 @@ func _ground_solid() -> bool:
 ## collision streamed in): back on top.
 func _fall_guard() -> void:
 	if terrain == null or terrain.scale.is_equal_approx(Vector3.ONE) or not ground_height.is_valid(): return
+	# Aboard the moored ship the rooms lie far below the land: not fallen.
+	if is_instance_valid(spatial_controller) or SpaceLayout.pocket_at(global_position) >= 0: return
 	var ground: float = ground_height.call(global_position.x, global_position.z)
 	if global_position.y < ground - 2.5:
 		global_position.y = ground + 0.3

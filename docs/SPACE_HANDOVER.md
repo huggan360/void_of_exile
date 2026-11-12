@@ -57,14 +57,47 @@ All of the user's pass 3 notes are built (see the plan). Verified:
   `tools/test_planet_boss.tscn` (every fortress: flat, sealed, key, boss wakes, bullets,
   last phase; `--only=<planet>`).
 
+## Planets and Nexus remake (pass 5, 2026-11-12)
+
+- Camera in the Reach (`SpaceTraversal`): V toggles overhead and over the shoulder; first
+  person only where `SpaceWorld.first_person_at` says so: ship rooms, the Last Light Diner's
+  room, the Nexus's Lantern Bar (`NexusStation.BAR_ROOM`) and the Lantern City's cafes, bars
+  and shops (`CityLayout.indoors`). Seats keep their own views. The Theory is untouched.
+- Depth of field and the see-through window now live in `SpatialController`
+  (`_update_focus`, `_update_see_through`): the Surface (GroundView), every planet and the
+  Nexus deck use them on foot.
+- Models: `tools/space/make_planet_models.py` (run it, then `--import`) writes each planet's
+  own flora (`obstacles/planet/`), houses, landmarks, wells, lamps, stalls, plazas and seven
+  landing pads (`props/planet/`, sizes and plinth sink in `props/planet/catalog.json`) and
+  the Nexus pieces (`props/nexus/`: deck, bar shell, rails, gates, lamps, benches...).
+- Layout (`SpaceLayout`): each world's town (`TOWNS.at`), fortress (`FORTS.at`, kept within
+  ~0.3 rad of the top for realm combat) and four story places (`place_offset`, generated)
+  stand apart; `settlements()` scatters 3 to 11 villages (hamlet, village, large) over the
+  whole sphere on dry ground. All of them are levelled in `surface_height` (`_flat_spots`:
+  [dir, radius, kind, level, cos reach, blend]); villages keep their own ground height.
+  `ground_frame()` stands anything centred on its own spot, up from the centre, lowered to
+  the lowest ground under its footprint; buildings also sink their plinth (`PlanetProps`).
+- Water: `terrain.water` per planet (Tidewell's sea at 0, lakes elsewhere with beds kept
+  about 1.6 m deep so the crew wades), drawn by `shaders/planet_water.gdshader` (the
+  Surface's water on a sphere). Enemies and landings keep out of it.
+- Flora (`PlanetFlora`): groves and clearings, shore and reef sets, streamed in 220 m patches
+  round the camera; one batch holds the full model near (130 m) and the coarse copy beyond
+  (`lod_band` / global `lod_eye` in `voxel_model.gdshader`). Ground cover
+  (`PlanetGroundCover`): the Surface's grass and flowers tinted per world plus each world's
+  small things, tiles on worker threads, leaning away from the crew
+  (`surface_flora.gdshader` now bends along each plant's own up).
+- `SpacePlanet` builds the town, villages and landmarks only within 650 m of the camera
+  (`PlanetTown.build_town` / `build_village`, `PlanetProps.place_art`) and frees them past
+  850 m. `Net.VERSION` 0.14.0 (the layout changed for the server too).
+- Checks: `tools/space/check_layout.tscn` (spots per planet, overlaps),
+  `tools/space/check_planet_art.tscn` (builds every planet's art headless).
+
 ## Known gaps
 
 - `reach_kill` and `reach_repair` (Lantern Road, Shardfield tales) were not replayed online
   after the brood rework; the ambush now spawns outside the planet's air.
 - No pilot prediction online (input lag); ships vanish when the
   Reach unloads or the server restarts.
-- Landmarks at the story places are still primitive (box) art; the realm's voxel houses in
-  `props/houses` and `props/home` would fit them better.
 - Planet terrain is smooth (not block-stepped); the flora and props are voxel.
 - The voxel module prints `!is_inside_tree` errors from `direct_static_body.cpp` on the client;
   harmless, came with the engine.

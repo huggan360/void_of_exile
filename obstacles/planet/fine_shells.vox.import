@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://nawjaen5fvhw"
+path="res://.godot/imported/fine_shells.vox-ce6c866c7c3f1d30325377c9595b7599.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_shells.vox"
+dest_files=["res://.godot/imported/fine_shells.vox-ce6c866c7c3f1d30325377c9595b7599.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

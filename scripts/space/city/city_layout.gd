@@ -346,6 +346,23 @@ static func _venue(key: String, kind: String, frame: Transform3D, d: Dictionary,
 		if rnd(float(key.hash() % 1000)/1000.0, k)<0.35: v.patrons.append(k)
 	return v
 
+## Whether world-space `at` is inside one of the city's rooms (cafes, bars,
+## shops): the camera goes first person in there.
+static func indoors(at: Vector3) -> bool:
+	if not _cache.has("rooms"):
+		var rooms: Array = []
+		for d: Dictionary in DISTRICTS:
+			for v: Dictionary in venues(d):
+				var frame: Transform3D = v.frame
+				rooms.append([(planet().center as Vector3)+frame.origin, Transform3D(frame.basis, (planet().center as Vector3)+frame.origin).affine_inverse(), v.size])
+		_cache["rooms"] = rooms
+	for room: Array in _cache["rooms"]:
+		if (room[0] as Vector3).distance_squared_to(at)>150.0: continue
+		var local: Vector3 = (room[1] as Transform3D)*at
+		var size: Vector3 = room[2]
+		if absf(local.x)<size.x*0.5 and absf(local.z)<size.z*0.5-0.2 and local.y> -1.0 and local.y<size.y: return true
+	return false
+
 static func venue(key: String) -> Dictionary:
 	for d: Dictionary in DISTRICTS:
 		for v: Dictionary in venues(d):

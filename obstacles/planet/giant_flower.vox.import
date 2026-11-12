@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0w4hxbie2h3h"
+path="res://.godot/imported/giant_flower.vox-e3a84d677f1bb837dea8a98bff268ee5.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/giant_flower.vox"
+dest_files=["res://.godot/imported/giant_flower.vox-e3a84d677f1bb837dea8a98bff268ee5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

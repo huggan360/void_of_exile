@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://1h756pvq3wf0"
+path="res://.godot/imported/glow_cap_blue.vox-3e282813ab54dacb985de448db766bdb.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/glow_cap_blue.vox"
+dest_files=["res://.godot/imported/glow_cap_blue.vox-3e282813ab54dacb985de448db766bdb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

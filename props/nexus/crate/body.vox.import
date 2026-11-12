@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d2xepb3p8bgcp"
+path="res://.godot/imported/body.vox-7f3e60eca47bb7a9e6840e863b7fa6ea.tscn"
+
+[deps]
+
+source_file="res://props/nexus/crate/body.vox"
+dest_files=["res://.godot/imported/body.vox-7f3e60eca47bb7a9e6840e863b7fa6ea.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

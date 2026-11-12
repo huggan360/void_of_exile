@@ -22,7 +22,7 @@ static func find_site(p: Dictionary, near: Vector3, forward: Vector3) -> Diction
 	var heading := (forward-dir0*forward.dot(dir0)).normalized()
 	if heading.length()<0.5: heading = dir0.cross(Vector3.RIGHT).normalized()
 	if acos(clampf(dir0.dot(pad.basis.y), -1.0, 1.0))*radius<PAD_SNAP:
-		return {frame = _pose(p, pad.basis.y, heading, 0.0), pad = true}
+		return {frame = _pose(p, pad.basis.y, heading, SpaceLayout.base_level(p)), pad = true}
 	var side := heading.cross(dir0).normalized()
 	var ring := 0.0
 	while ring<=SEARCH:
@@ -40,7 +40,7 @@ static func find_site(p: Dictionary, near: Vector3, forward: Vector3) -> Diction
 static func _clear(p: Dictionary, dir: Vector3, heading: Vector3) -> float:
 	var radius := float(p.radius)
 	var h := SpaceLayout.surface_height(p, dir)
-	if bool(p.terrain.get("sea", false)) and h<1.2: return -INF
+	if SpaceLayout.underwater(p, dir, 1.2): return -INF
 	for flat: Array in SpaceLayout._flat_spots(p).slice(1):
 		if acos(clampf(dir.dot(flat[0]), -1.0, 1.0))*radius<float(flat[1])+FOOT: return -INF
 	var forward := (heading-dir*heading.dot(dir)).normalized()

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://djwgo1iorg32h"
+path="res://.godot/imported/barrel_cactus.vox-36094f0819ee955cd8b90e5c6115ba1e.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/barrel_cactus.vox"
+dest_files=["res://.godot/imported/barrel_cactus.vox-36094f0819ee955cd8b90e5c6115ba1e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

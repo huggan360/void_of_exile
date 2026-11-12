@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bb12yogl2sgdf"
+path="res://.godot/imported/fine_storm_sparks.vox-4f2b1ee5c4aa5c332e3ea56af26adc18.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_storm_sparks.vox"
+dest_files=["res://.godot/imported/fine_storm_sparks.vox-4f2b1ee5c4aa5c332e3ea56af26adc18.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

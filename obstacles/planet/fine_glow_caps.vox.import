@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyw5k4jnr8ul"
+path="res://.godot/imported/fine_glow_caps.vox-8c14df682baac2626fb647051a58bc1f.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_glow_caps.vox"
+dest_files=["res://.godot/imported/fine_glow_caps.vox-8c14df682baac2626fb647051a58bc1f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://783wruhh284v"
+path="res://.godot/imported/body.vox-3f85ad2bb252c06becd60e29b67b8653.tscn"
+
+[deps]
+
+source_file="res://props/planet/mushroom_house/body.vox"
+dest_files=["res://.godot/imported/body.vox-3f85ad2bb252c06becd60e29b67b8653.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

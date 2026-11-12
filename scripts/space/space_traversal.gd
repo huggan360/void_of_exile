@@ -1,8 +1,9 @@
 class_name SpaceTraversal
 extends SpatialController
 ## The local player in the Astral Reach. On foot: the Nexus deck and planets
-## use the usual angled camera (gravity follows the planet), ship rooms are
-## first person. Seated: the pilot flies the hull (chase camera, or cockpit
+## use the usual cameras, overhead or over the shoulder (V; gravity follows
+## the planet); ship rooms and buildings (bars, cafes, shops, the diner) are
+## always first person. Seated: the pilot flies the hull (chase camera, or cockpit
 ## when zoomed all the way in), gunners aim a turret, the map seat shows the
 ## space map. Z stands up, X lands or docks, M opens the space map.
 const INPUT_RATE := 0.05
@@ -107,7 +108,8 @@ func setup(actor: Player, place: SpaceWorld) -> SpaceTraversal:
 	_old_cull_mask = actor.camera.cull_mask
 	_old_safe_margin = actor.safe_margin
 	_old_mouse = Input.mouse_mode
-	camera_mode = CameraMode.FIRST_PERSON if place is SurfaceShipWorld else int(AppSettings.video.get("space_camera", CameraMode.ANGLED))
+	# First person is never a choice: only ship rooms and buildings force it.
+	camera_mode = CameraMode.FIRST_PERSON if place is SurfaceShipWorld else CameraMode.SHOULDER if int(AppSettings.video.get("space_camera", 0))==CameraMode.SHOULDER else CameraMode.ANGLED
 	return self
 
 func _ready() -> void:
@@ -197,6 +199,7 @@ func _process(delta: float) -> void:
 	if is_instance_valid(world.backdrop) and player.camera.environment==_prior_env:
 		player.camera.environment = world.backdrop.environment()
 	_update_air()
+	_view_effects(delta)
 	_ship = world.ship_of(player.player_id)
 	var lounge := Leisure.seat_spec(player.player_id)
 	var lounge_id := str(lounge.get("key", lounge.get("id", "")))
@@ -466,8 +469,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.physical_keycode==KEY_V and seat=="":
-		camera_mode = (view_mode()+1) % 3
-		if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position) in ["station", "diner"]: camera_mode = CameraMode.SHOULDER
+		if world is SurfaceShipWorld: return
+		camera_mode = CameraMode.SHOULDER if camera_mode==CameraMode.ANGLED else CameraMode.ANGLED
 		AppSettings.video.space_camera = camera_mode
 		AppSettings.save_preferences()
 		get_viewport().set_input_as_handled()
@@ -515,11 +518,21 @@ func land() -> void:
 func free_look() -> bool:
 	return view_mode()!=CameraMode.ANGLED or world.first_person_at(player.global_position)
 
-## The camera in use: the Nexus has no angled view, so there it is the
-## shoulder view unless first person was chosen.
+## The camera in use: first person inside ship rooms and buildings, else the
+## chosen overhead or shoulder view.
 func view_mode() -> CameraMode:
-	if camera_mode==CameraMode.ANGLED and world.zone_at(player.global_position) in ["station", "diner"]: return CameraMode.SHOULDER
-	return camera_mode
+	if world is SurfaceShipWorld or world.first_person_at(player.global_position): return CameraMode.FIRST_PERSON
+	return CameraMode.SHOULDER if camera_mode==CameraMode.SHOULDER else CameraMode.ANGLED
+
+## On foot on a planet or the Nexus deck, like on the Surface: depth of
+## field around the character and the see-through window over them.
+func _view_effects(delta: float) -> void:
+	var camera := get_viewport().get_camera_3d()
+	var zone := str(world.zone_at(player.global_position))
+	var ground := (zone.begins_with("planet:") or zone=="station") and seat=="" and city_seat=="" and _lounge_seat=="" \
+		and not spacewalk and not cinematic and first_person<0.5 and camera==player.camera
+	_update_see_through(camera, delta, (0.2 if view_mode()==CameraMode.ANGLED else 0.3) if ground else 0.0)
+	_update_focus(camera, delta, not ground)
 
 func _was_seated() -> bool:
 	return seat!=""
@@ -753,7 +766,12 @@ func physics_step(delta: float) -> void:
 	var dir := player.drunk_sway((player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(input.x, 0, input.y)).slide(up).normalized()*input.length(), up)
 	var speed := Player.BASE_SPEED*player.stats.move_speed_multiplier()*(Player.SHIELD_MOVE_SPEED if player.shield.active else Player.CHARGE_MOVE_SPEED if player._charging else 1.0)
 	var fall := minf(0.0, player.velocity.dot(up))-Player.GRAVITY*delta
-	player.velocity = dir*speed+player._knock.slide(up)+up*(-2.0 if player.is_on_floor() else fall)
+	# On the ground, walk along it: up and down hills the body keeps its feet
+	# instead of stepping off the slope every frame and dropping back.
+	var ground_up := player.get_floor_normal() if player.is_on_floor() else up
+	if player.is_on_floor() and ground_up.dot(up)>0.5 and not dir.is_zero_approx():
+		dir = dir.slide(ground_up).normalized()*dir.length()
+	player.velocity = dir*speed+player._knock.slide(up)+(-ground_up*1.5 if player.is_on_floor() else up*fall)
 	player._knock = player._knock.lerp(Vector3.ZERO, 1.0-exp(-Player.KNOCKBACK_DRAG*delta))
 	var before := player.global_position
 	player.move_and_slide()
@@ -1112,6 +1130,8 @@ func _draw_rope(points: Array[Vector3]) -> void:
 	_rope_mesh.surface_end()
 
 var _launch_shake_until := 0
+var _cam_last := Vector3.INF
+var _cam_lag := 0.0
 
 func launch_shake() -> void:
 	_launch_shake_until = Time.get_ticks_msec()+5000
@@ -1155,7 +1175,15 @@ func update_camera(delta: float) -> void:
 		return
 	var up := player.global_basis.y
 	var orbit := player.global_basis*Basis(Vector3.UP, player.camera_yaw)
-	var head := player.global_position+up*(1.57+player._visual_offset)
+	# The camera's height eases after the body's, so bumpy hills don't shake it
+	# (bigger steps are the model's glide, _visual_offset).
+	var rise := (player.global_position-_cam_last).dot(up) if _cam_last.is_finite() else 0.0
+	_cam_last = player.global_position
+	if absf(rise)<0.12 and seat=="" and not spacewalk: _cam_lag -= rise
+	else: _cam_lag = 0.0
+	_cam_lag = clampf(lerpf(_cam_lag, 0.0, 1.0-exp(-delta*7.0)), -1.0, 1.0)
+	var lift := player._visual_offset+_cam_lag
+	var head := player.global_position+up*(1.57+lift)
 	var view := orbit*Basis(Vector3.RIGHT, look_pitch)
 	if want_fp or shoulder or (spacewalk and mode==CameraMode.ANGLED):
 		var at := head
@@ -1170,7 +1198,7 @@ func update_camera(delta: float) -> void:
 		player.camera.fov = 78.0 if want_fp else 72.0
 		_shake_camera()
 		return
-	var target := player.global_position+up*(1.0+player._visual_offset)
+	var target := player.global_position+up*(1.0+lift)
 	var pitch := Player.CAMERA_PITCH
 	var at := target+orbit*Vector3(0, sin(pitch), cos(pitch))*player.camera_distance
 	# City rooms have solid ceilings; pull the angled camera inside when needed.
@@ -1428,6 +1456,7 @@ func _hide_hud(hidden: bool) -> void:
 	_overlay.visible = not hidden
 
 func _exit_tree() -> void:
+	_clear_view_effects()
 	player.set_meta("jetpack_attached",false)
 	player.set_meta("jetpack_flying",false)
 	player.set_meta("jet_on",false)

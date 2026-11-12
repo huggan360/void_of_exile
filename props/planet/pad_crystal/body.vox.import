@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkjjxx4ximsb7"
+path="res://.godot/imported/body.vox-cb47311c92a24b6ccccf7238bedd97b9.tscn"
+
+[deps]
+
+source_file="res://props/planet/pad_crystal/body.vox"
+dest_files=["res://.godot/imported/body.vox-cb47311c92a24b6ccccf7238bedd97b9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

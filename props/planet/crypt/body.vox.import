@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://hkpydonmamnc"
+path="res://.godot/imported/body.vox-5c433327f15c36cc11d8b2159a7abb1c.tscn"
+
+[deps]
+
+source_file="res://props/planet/crypt/body.vox"
+dest_files=["res://.godot/imported/body.vox-5c433327f15c36cc11d8b2159a7abb1c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

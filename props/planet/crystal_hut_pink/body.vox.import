@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cedyuidkserjq"
+path="res://.godot/imported/body.vox-da7fbcdff90952856cc0cdfe18ebd4e2.tscn"
+
+[deps]
+
+source_file="res://props/planet/crystal_hut_pink/body.vox"
+dest_files=["res://.godot/imported/body.vox-da7fbcdff90952856cc0cdfe18ebd4e2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

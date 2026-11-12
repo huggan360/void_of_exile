@@ -39,6 +39,7 @@ func _ready() -> void:
 		add_child(mesh)
 	if folder.ends_with("/bench"):
 		LeisureFurniture.bench_targets(self, "bench:town:"+str(spec.pos), Transform3D.IDENTITY, 0.8, 2.7)
+	if spec.solid_size == Vector3.ZERO: return  # floors (pads, plazas) bring their own
 	var body := StaticBody3D.new()
 	body.collision_layer = Player.OBSTACLE_LAYER
 	body.collision_mask = 0

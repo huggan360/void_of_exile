@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://iffl8g27pru8"
+path="res://.godot/imported/geode.vox-c2a4c73a8fdf0ecb7ec55af847eb7aff.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/geode.vox"
+dest_files=["res://.godot/imported/geode.vox-c2a4c73a8fdf0ecb7ec55af847eb7aff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

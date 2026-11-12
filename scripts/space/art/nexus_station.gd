@@ -1,8 +1,12 @@
 class_name NexusStation
 extends Node3D
-## Open timber tavern and six radial boarding walks.
+## The Astral Nexus: a round timber deck on its floating voxel rock, the
+## Lantern Bar, the hearth, the market, six radial boarding walks; its
+## furniture and fittings are voxel models (props/nexus).
 
 var anchors: Dictionary = {}
+## Inside the Lantern Bar (station space): the camera goes first person.
+const BAR_ROOM := AABB(Vector3(-14.5, -0.5, -35.0), Vector3(29.0, 5.6, 16.0))
 
 ## Shared primitive batches keep each sculpture to a handful of draw calls.
 class Brush extends RefCounted:
@@ -167,6 +171,41 @@ const BRASS := Color("d9ac60")
 const GREEN := Color("85efac")
 const PINK := Color("ef9ccf")
 
+## The deck's voxel props (props/nexus, tools/space/make_planet_models.py),
+## gathered per model and drawn as one batch each; `_solid` holds their
+## collision (and the deck's), the old primitive Brush only flat details.
+var _props := {}  # name -> [Transform3D]
+var _solid: Brush
+
+func _prop(name: String, frame: Transform3D) -> void:
+	if not _props.has(name): _props[name] = []
+	_props[name].append(frame)
+
+func _flush_props() -> void:
+	for name: String in _props:
+		var folder := "res://props/nexus/"+name
+		VillageHouse.warm_asset(folder)
+		var data: Dictionary = VillageHouse._cache[folder]
+		var frame: Array = data.rig.parts.body.frame_min
+		var size: float = data.rig.voxel_size
+		var local := Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*size), Vector3(frame[0], frame[1], frame[2])*size)
+		for i in 2:
+			if data.meshes[i]==null: continue
+			var multi := MultiMesh.new()
+			multi.transform_format = MultiMesh.TRANSFORM_3D
+			multi.mesh = data.meshes[i]
+			var list: Array = _props[name]
+			multi.instance_count = list.size()
+			for k in list.size(): multi.set_instance_transform(k, (list[k] as Transform3D)*local)
+			var node := MultiMeshInstance3D.new()
+			node.name = "Props_%s%s" % [name, "_glow" if i==1 else ""]
+			node.multimesh = multi
+			node.material_override = VoxModel.glow_material() if i==1 else VoxModel.material()
+			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if i==1 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			node.visibility_range_end = 2400.0
+			add_child(node)
+	_props.clear()
+
 func build(server: bool) -> void:
 	for child in get_children():
 		remove_child(child)
@@ -182,54 +221,46 @@ func build(server: bool) -> void:
 		gangways = [],
 	}
 	var art := Brush.new(self, server)
-	# The circular hull is continuous. Planks rise 2 cm above its collision top so the two
-	# faces never share a plane (that z-fight drew long jagged streaks across the deck).
-	art.round_part(Vector3(0, -1.1, 0), 51.5, 2.2, DARK, true)
-	if not server:
-		for row in range(-42, 43):
-			var z := row * 1.2
-			var half := sqrt(maxf(0, 51.2 * 51.2 - z * z))
-			var count := maxi(1, ceili(half * 2 / 5.0))
-			for column in count:
-				var width := half * 2 / count
-				art.box(Vector3(-half + (column + 0.5) * width, -0.06, z), Vector3(width - 0.035, 0.16, 1.15), WOOD.lightened(float((row + column * 3) % 5) * 0.025))
-	# Rail sections leave six clear mouths for boarding.
+	_solid = Brush.new(self, true)
+	# The deck: one voxel model of planks on its beam frame, its top a centimetre
+	# above the collision; the rail sections leave six clear mouths for boarding.
+	_solid.round_part(Vector3(0, -1.1, 0), 51.5, 2.2, DARK, true)
+	_prop("deck", Transform3D(Basis.IDENTITY, Vector3(0, -1.99, 0)))
 	for i in 96:
 		var angle := TAU * i / 96.0
 		if i % 16 < 2 or i % 16 > 14: continue
 		var frame := Transform3D(Basis(Vector3.UP, angle), Vector3(sin(angle), 0, cos(angle)) * 51)
-		art.part("box", frame.translated_local(Vector3(0, 1.2, 0)), Vector3(0.24, 2.4, 0.24), BRASS, true)
+		_prop("rail", frame)
+		_solid.part("box", frame.translated_local(Vector3(0, 1.2, 0)), Vector3(0.24, 2.4, 0.24), BRASS, true)
 		for height in [0.65, 2.2]:
-			art.part("box", frame.translated_local(Vector3(0, height, 0)), Vector3(3.5, 0.16, 0.18), WOOD, true)
+			_solid.part("box", frame.translated_local(Vector3(0, height, 0)), Vector3(3.5, 0.16, 0.18), WOOD, true)
 	for i in 6:
 		var angle := TAU * i / 6.0
 		var radial := Vector3(sin(angle), 0, cos(angle))
 		var frame := Transform3D(Basis(Vector3.UP, angle), radial * 54.4)
 		art.part("box", frame.translated_local(Vector3(0, -0.35, 0)), Vector3(6, 0.7, 10), WOOD, true)
+		for k in 9:
+			art.part("box", frame.translated_local(Vector3(-2.65+k*0.66, 0.012, 0)), Vector3(0.05, 0.03, 9.9), WOOD.darkened(0.3))
 		for side in [-1.0, 1.0]:
 			art.part("box", frame.translated_local(Vector3(side * 2.9, 1.1, 0)), Vector3(0.2, 2.2, 10), BRASS, true)
-			art.lantern(frame * Vector3(side * 2.8, 0, 3.5), 3.3)
+			_prop("lamp", Transform3D(frame.basis, frame * Vector3(side * 2.8, 0, 3.5)))
 			# The deck rail closes in on the walk, so nobody steps off beside it.
 			var mouth := Transform3D(Basis(Vector3.UP, angle), radial * 51.0)
-			art.part("box", mouth.translated_local(Vector3(side * 5.0, 1.2, 0)), Vector3(0.24, 2.4, 0.24), BRASS, true)
+			_prop("rail", Transform3D(mouth.basis, mouth * Vector3(side * 4.0, 0, 0)).scaled_local(Vector3(0.63, 1, 1)))
+			_solid.part("box", mouth.translated_local(Vector3(side * 5.0, 1.2, 0)), Vector3(0.24, 2.4, 0.24), BRASS, true)
 			for height in [0.65, 2.2]:
-				art.part("box", mouth.translated_local(Vector3(side * 4.0, height, 0)), Vector3(2.2, 0.16, 0.18), WOOD, true)
-		_berth_gate(art, frame.translated_local(Vector3(0, 0, 4.75)))
+				_solid.part("box", mouth.translated_local(Vector3(side * 4.0, height, 0)), Vector3(2.2, 0.16, 0.18), WOOD, true)
+		_berth_gate(frame.translated_local(Vector3(0, 0, 4.75)))
 		anchors.gangways.append(radial * 56.8)
 	_tavern(art)
 	_plaza(art, server)
 	if not server: _floating_rock()
 	# A standing-height shipwright's chart table, reachable from its front edge.
 	var table: Vector3 = anchors.command_table
-	art.round_part(table+Vector3.UP*0.46, 0.27, 0.92, DARK, true)
-	art.round_part(table+Vector3.UP*0.08, 0.68, 0.16, DARK, true)
-	art.round_part(table+Vector3.UP*1.0, 1.35, 0.16, WOOD, true)
-	art.round_part(table+Vector3.UP*1.09, 1.2, 0.025, Color("253f4c"), false, 0.15)
+	_prop("chart_table", Transform3D(Basis.IDENTITY, table))
+	_solid.round_part(table+Vector3.UP*0.46, 0.27, 0.92, DARK, true)
+	_solid.round_part(table+Vector3.UP*1.0, 1.35, 0.16, WOOD, true)
 	if not server:
-		for i in 16:
-			var angle := i*2.39996
-			var at := table+Vector3(cos(angle), 0, sin(angle))*sqrt(float(i)/16.0)*1.05
-			art.box(at+Vector3.UP*1.12, Vector3(0.055, 0.025, 0.055), GREEN if i%3 else PINK, false, 0.8)
 		var sign := SignBoard.make("SHIPWRIGHT", "brass", "helm", Color("ffe0a0"), 0.65)
 		sign.position = table+Vector3(-2.6, 1.65, 0)
 		add_child(sign)
@@ -246,22 +277,25 @@ func build(server: bool) -> void:
 	for i in 12:
 		var at := pad + Vector3(sin(i * TAU / 12) * 4.85, 0.1, cos(i * TAU / 12) * 4.85)
 		art.box(at, Vector3(0.4, 0.05, 0.4), GREEN, false, 1.6)
-	_board(art, anchors.campaign_board)
+	_board(anchors.campaign_board)
 	for i in 3:
-		_stall(art, stall_at(i), PINK if i % 2 else GREEN)
-	# Framed lantern trees replace the giant luminous cones on bare poles.
+		_stall(stall_at(i), "stall_pink" if i % 2 else "stall_green")
+	# Lantern trees round the deck.
 	for at: Vector3 in [Vector3(-33, 0, 19), Vector3(-10, 0, 35), Vector3(15, 0, 35), Vector3(39, 0, -3), Vector3(-40, 0, -4)]:
-		art.round_part(at+Vector3.UP*0.13, 0.6, 0.26, DARK, true)
-		art.box(at+Vector3.UP*1.55, Vector3(0.22, 3.1, 0.22), WOOD, true)
-		for side: float in [-1.0, 1.0]:
-			art.box(at+Vector3(side*0.45, 3.0, 0), Vector3(1.0, 0.12, 0.16), BRASS)
-			art.box(at+Vector3(side*0.85, 2.87, 0), Vector3(0.08, 0.3, 0.08), DARK)
-			art.hanging_lantern(at+Vector3(side*0.85, 2.15, 0))
-		art.box(at+Vector3.UP*3.15, Vector3(0.35, 0.13, 0.35), BRASS)
+		_prop("lantern_tree", Transform3D(Basis(Vector3.UP, atan2(at.x, at.z)), at))
+		_solid.round_part(at+Vector3.UP*0.13, 0.6, 0.26, DARK, true)
+		_solid.box(at+Vector3.UP*1.55, Vector3(0.3, 3.1, 0.3), WOOD, true)
 	for i in 16:
 		var angle := TAU * (i + 0.5) / 16
-		art.lantern(Vector3(sin(angle), 0, cos(angle)) * 44, 4.6)
+		_prop("lamp", Transform3D(Basis(Vector3.UP, angle), Vector3(sin(angle), 0, cos(angle)) * 44))
 	art.finish()
+	if not server:
+		_flush_props()
+		# The big voxel pieces on the local map: the deck, the bar's roof, the hearth.
+		preload("res://scripts/space/space_map_geometry.gd").publish_brush(self, {
+			cylinder = [[Transform3D(Basis.IDENTITY.scaled(Vector3(103, 2.2, 103)), Vector3(0, -1.1, 0)), WOOD, 0.0],
+				[Transform3D(Basis.IDENTITY.scaled(Vector3(5.4, 1.0, 5.4)), HEARTH+Vector3.UP*0.5), STONE, 0.0]],
+			box = [[Transform3D(Basis.IDENTITY.scaled(Vector3(29, 5.4, 16)), Vector3(0, 2.7, -27)), Color("4c655f"), 0.0]]})
 	if not server:
 		_hearth_fire()
 		_signpost(Vector3(-3.8, 0, 15.5))
@@ -279,21 +313,12 @@ func build(server: bool) -> void:
 
 ## A timber gate across the end of a boarding walk: the moored ship's ramp is
 ## just beyond it (SpaceShipView), so boarding happens over the gate.
-func _berth_gate(art: Brush, frame: Transform3D) -> void:
+func _berth_gate(frame: Transform3D) -> void:
+	_prop("gate", frame)
 	for side: float in [-1.0, 1.0]:
-		art.part("box", frame.translated_local(Vector3(side * 2.65, 1.35, 0)), Vector3(0.36, 2.7, 0.36), WOOD.darkened(0.15), true)
-		art.part("box", frame.translated_local(Vector3(side * 2.65, 2.78, 0)), Vector3(0.5, 0.16, 0.5), BRASS)
-		art.part("box", frame.translated_local(Vector3(side * 2.65, 2.92, 0)), Vector3(0.3, 0.12, 0.3), BRASS)
+		_solid.part("box", frame.translated_local(Vector3(side * 2.65, 1.35, 0)), Vector3(0.36, 2.7, 0.36), WOOD, true)
 	for height: float in [0.45, 1.15, 1.85]:
-		art.part("box", frame.translated_local(Vector3(0, height, 0)), Vector3(4.95, 0.18, 0.16), WOOD.lightened(0.05), true)
-	for i in 9:
-		var x := -2.0 + i * 0.5
-		art.part("box", frame.translated_local(Vector3(x, 1.05, 0.1)), Vector3(0.12, 1.9, 0.08), WOOD.lightened(0.1 + float(i % 3) * 0.04))
-		art.part("box", frame.translated_local(Vector3(x, 2.06, 0.1)), Vector3(0.08, 0.12, 0.08), BRASS)
-	# An arch over the gate with a lantern for the crew coming home.
-	art.part("box", frame.translated_local(Vector3(0, 3.35, 0)), Vector3(5.9, 0.28, 0.4), WOOD.darkened(0.1))
-	art.part("box", frame.translated_local(Vector3(0, 3.55, 0)), Vector3(3.2, 0.16, 0.3), BRASS)
-	art.hanging_lantern(frame * Vector3(0, 2.75, 0))
+		_solid.part("box", frame.translated_local(Vector3(0, height, 0)), Vector3(4.95, 0.18, 0.16), WOOD, true)
 
 func _facing(at: Vector3, toward: Vector3) -> Transform3D:
 	return Transform3D(Basis.looking_at((toward - at).normalized(), Vector3.UP), at)
@@ -304,13 +329,13 @@ func _tavern(art: Brush) -> void:
 	add_child(bar)
 	bar.build(art.server_only)
 
-func _board(art: Brush, at: Vector3) -> void:
+## The quest board: its notes face the deck (+Z).
+func _board(at: Vector3) -> void:
+	_prop("board", Transform3D(Basis(Vector3.UP, PI), at))
 	for side in [-1.0, 1.0]:
-		art.box(at + Vector3(side * 1.9, 2, 0), Vector3(0.45, 4, 0.5), DARK, true)
-	art.box(at + Vector3(0, 3.2, 0), Vector3(4.8, 3.1, 0.45), WOOD, true)
-	for i in 4:
-		art.box(at + Vector3(-1.6 + i * 1.05, 3.2 + (i % 2) * 0.3, 0.26), Vector3(0.8, 1.5, 0.04), Color("ffe4ad"))
-	art.lantern(at + Vector3(3, 0, 0), 4.0)
+		_solid.box(at + Vector3(side * 1.9, 2, 0), Vector3(0.45, 4, 0.5), DARK, true)
+	_solid.box(at + Vector3(0, 3.25, 0), Vector3(4.8, 3.0, 0.45), WOOD, true)
+	_prop("lamp", Transform3D(Basis.IDENTITY, at + Vector3(3, 0, 0)))
 
 ## The market stalls on the deck (each with a shopkeeper behind it, SpaceWorld).
 const STALL_SHOPS := ["general", "premium", "curio"]
@@ -319,16 +344,12 @@ static func stall_at(i: int) -> Vector3:
 	return Vector3(18 + i * 9, 0, -12 - i * 3)
 
 ## A stall: counter, awning (its front is +Z, the keeper stands behind at -Z).
-func _stall(art: Brush, at: Vector3, cloth: Color) -> void:
-	art.box(at + Vector3.UP * 0.55, Vector3(6, 1.1, 2), WOOD, true)
-	art.box(at + Vector3.UP * 1.13, Vector3(6.2, 0.08, 2.2), BRASS)
-	for side in [-1.0, 1.0]:
-		art.box(at + Vector3(side * 3, 2.6, -0.7), Vector3(0.25, 5.2, 0.25), DARK, true)
-	for i in 8:
-		art.box(at + Vector3(-2.8 + i * 0.8, 4.4, 0), Vector3(0.8, 0.16, 3.8), cloth if i % 2 else Color("ffe0ae"))
-		art.box(at + Vector3(-2.8 + i * 0.8, 4, 1.8), Vector3(0.8, 0.8, 0.15), cloth)
-	for i in 5:
-		art.crystal(at + Vector3(-2 + i, 1.17, 0.3), 0.5 + i % 2 * 0.3, GREEN if i % 2 else PINK)
+func _stall(at: Vector3, model: String) -> void:
+	_prop(model, Transform3D(Basis(Vector3.UP, PI), at))
+	_solid.box(at + Vector3(0, 0.55, 0.6), Vector3(3.4, 1.1, 0.5), WOOD, true)
+	for x in [-1.0, 1.0]:
+		for z in [-1.0, 1.0]:
+			_solid.box(at + Vector3(x * 1.75, 1.6, z * 1.1), Vector3(0.2, 3.2, 0.2), DARK, true)
 
 ## The island of stone the Nexus is built on, tapering to a crystal tip.
 const ROCK_DEPTH := 96.0
@@ -507,64 +528,49 @@ func _plaza(art: Brush, server: bool) -> void:
 		var long := i % 2 == 0
 		var frame := Transform3D(Basis(Vector3.UP, TAU * i / 8.0), spawn + Vector3.UP * 0.125)
 		art.part("box", frame.translated_local(Vector3(0, 0, 1.0 if long else 0.7)), Vector3(0.32, 0.02, 2.0 if long else 1.3), GREEN if long else BRASS, false, 0.8 if long else 0.0)
-	# The hearth: stone ring, ember bed and logs; the fire itself is a shader mesh.
-	art.round_part(HEARTH + Vector3.UP * 0.45, 2.7, 0.9, STONE, true)
-	art.round_part(HEARTH + Vector3.UP * 0.92, 2.25, 0.06, Color("1d2a24"), false, 0.6)
-	for i in 10:
-		var angle := TAU * i / 10.0
-		art.box(HEARTH + Vector3(sin(angle) * 2.5, 0.95, cos(angle) * 2.5), Vector3(0.9, 0.2, 0.9), STONE.lightened(0.12 * (i % 2)))
-	for i in 3:
-		var frame := Transform3D(Basis(Vector3.UP, i * PI / 3.0), HEARTH + Vector3.UP * 1.1)
-		art.part("box", frame, Vector3(0.38, 0.32, 3.0), Color("4a2e21"))
-	for i in 6:
-		var angle := TAU * (i + 0.5) / 6.0
-		art.crystal(HEARTH + Vector3(sin(angle) * 2.9, 0.3, cos(angle) * 2.9), 1.2 + (i % 2) * 0.5, GREEN if i % 3 else PINK)
-	# Curved benches around the fire; gaps face the spawn (+Z) and the inn (-Z).
+	# The hearth: a voxel stone ring, ember bed, logs and crystals; the fire
+	# itself is a shader mesh.
+	_prop("hearth", Transform3D(Basis.IDENTITY, HEARTH))
+	_solid.round_part(HEARTH + Vector3.UP * 0.45, 2.7, 0.9, STONE, true)
+	# Benches around the fire; gaps face the spawn (+Z) and the inn (-Z).
 	for i in 12:
 		var angle := TAU * (i + 0.5) / 12.0
 		if absf(sin(angle)) < 0.3: continue
 		var frame := Transform3D(Basis(Vector3.UP, angle), HEARTH + Vector3(sin(angle), 0, cos(angle)) * 5.4)
 		LeisureFurniture.bench_targets(self, "nexus:hearth_bench%d" % i, frame, 0.56, 2.7)
-		art.part("box", frame.translated_local(Vector3(0, 0.45, 0)), Vector3(2.7, 0.22, 0.9), WOOD, true)
-		art.part("box", frame.translated_local(Vector3(0, 0.95, 0.45)), Vector3(2.7, 0.8, 0.16), WOOD.darkened(0.15), true)
-		for side in [-1.1, 1.1]:
-			art.part("box", frame.translated_local(Vector3(side, 0.18, 0)), Vector3(0.2, 0.36, 0.7), DARK)
-	# Market clutter: barrels, crates, planters and little crystal trees.
+		_prop("bench", frame)
+		_solid.part("box", frame.translated_local(Vector3(0, 0.45, 0)), Vector3(2.7, 0.22, 0.9), WOOD, true)
+		_solid.part("box", frame.translated_local(Vector3(0, 0.95, 0.45)), Vector3(2.7, 0.8, 0.16), WOOD, true)
+	# Market clutter: barrels, crates and flower planters.
 	for at: Vector3 in [Vector3(10.5, 0, -5), Vector3(11.6, 0, -3.8), Vector3(10.2, 0, -3.3), Vector3(-30, 0, 4), Vector3(-31, 0, 5.3), Vector3(14, 0, -21)]:
-		art.round_part(at + Vector3.UP * 0.65, 0.55, 1.3, Color("7a4a2c"), true)
-		for band in [0.25, 1.05]:
-			art.round_part(at + Vector3.UP * band, 0.58, 0.1, BRASS)
+		_prop("barrel", Transform3D(Basis(Vector3.UP, at.x), at))
+		_solid.round_part(at + Vector3.UP * 0.65, 0.55, 1.3, WOOD, true)
 	for crate: Array in [[Vector3(-16, 0, -6), 1.2], [Vector3(-17.4, 0, -5.4), 1.0], [Vector3(-16.5, 1.2, -5.9), 0.8], [Vector3(41, 0, -10), 1.2], [Vector3(40, 0, -8.6), 0.9]]:
 		var at: Vector3 = crate[0]
 		var size: float = crate[1]
-		art.box(at + Vector3.UP * size * 0.5, Vector3.ONE * size, Color("a0703f"), true)
-		art.box(at + Vector3.UP * size * 0.5, Vector3(size + 0.04, size * 0.18, size + 0.04), DARK)
+		_prop("crate", Transform3D(Basis(Vector3.UP, at.z*0.7).scaled(Vector3.ONE*size/1.125), at))
+		_solid.box(at + Vector3.UP * size * 0.5, Vector3.ONE * size, WOOD, true)
 	for at: Vector3 in [Vector3(6.5, 0, 17.5), Vector3(-6.5, 0, 17.5), Vector3(13, 0, 9), Vector3(-7.5, 0, 24), Vector3(7.5, 0, 26), Vector3(19, 0, 4), Vector3(-22, 0, 15)]:
-		art.box(at + Vector3.UP * 0.4, Vector3(2.2, 0.8, 1.0), WOOD.darkened(0.1), true)
-		if server: continue
-		for j in 5:
-			var bloom := at + Vector3(-0.8 + j * 0.4, 0.95 + (j % 2) * 0.15, (j % 3 - 1) * 0.2)
-			art.part("sphere", Transform3D(Basis.IDENTITY, bloom), Vector3.ONE * (0.42 + (j % 2) * 0.12), PINK if j % 2 else Color("ffe08f"), false, 0.5)
-			art.part("sphere", Transform3D(Basis.IDENTITY, bloom + Vector3(0.1, -0.2, 0.25)), Vector3.ONE * 0.36, Color("5fae6e"))
+		_prop("planter", Transform3D(Basis.IDENTITY, at))
+		_solid.box(at + Vector3.UP * 0.4, Vector3(2.2, 0.8, 1.0), WOOD, true)
 	for at: Vector3 in [Vector3(8.5, 0, -12), Vector3(-8.5, 0, -12), Vector3(-19, 0, -2), Vector3(19, 0, 11)]:
-		art.round_part(at+Vector3.UP*0.14, 0.55, 0.28, STONE, true)
-		art.lantern(at, 4.0)
-		for j in 4:
-			var angle := j*PI*0.5
-			art.box(at+Vector3(sin(angle)*0.37, 0.36, cos(angle)*0.37), Vector3(0.28, 0.24, 0.28), Color("5b805c").lightened((j%2)*0.06))
+		_prop("lamp", Transform3D(Basis.IDENTITY, at))
+		_solid.round_part(at+Vector3.UP*1.6, 0.2, 3.2, DARK, true)
 	# Lantern posts around the plaza with fairy lights sagging between them.
 	# A ring around the hearth, pulled in on the west to clear the command table.
 	var posts: Array[Vector3] = [Vector3(4.8, 0, 9.5), Vector3(11.5, 0, 2.8), Vector3(11.5, 0, -6.8), Vector3(4.8, 0, -13.5),
 		Vector3(-4.8, 0, -13.5), Vector3(-11.5, 0, -6.8), Vector3(-8, 0, 6.5), Vector3(-4.8, 0, 9.5)]
-	for at in posts: art.lantern(at, 4.2)
+	for at in posts:
+		_prop("lamp", Transform3D(Basis.IDENTITY, at))
+		_solid.round_part(at+Vector3.UP*1.6, 0.2, 3.2, DARK, true)
 	if server: return
 	for i in posts.size():
-		var a := posts[i] + Vector3.UP * 2.94
-		var b := posts[(i + 1) % posts.size()] + Vector3.UP * 2.94
+		var a := posts[i] + Vector3.UP * 3.35
+		var b := posts[(i + 1) % posts.size()] + Vector3.UP * 3.35
 		for k in range(1, 12):
 			var t := k / 12.0
 			var at := a.lerp(b, t) + Vector3.DOWN * sin(t * PI) * 1.3
-			art.part("sphere", Transform3D(Basis.IDENTITY, at), Vector3.ONE * 0.2, [Color("ffd28b"), GREEN, PINK][k % 3], false, 2.6)
+			art.box(at, Vector3.ONE * 0.16, [Color("ffd28b"), GREEN, PINK][k % 3], false, 2.6)
 
 func _hearth_fire() -> void:
 	var fire := ShaderMaterial.new()

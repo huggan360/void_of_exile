@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnieho5fn58hl"
+path="res://.godot/imported/body_glow.vox-c584e84a6a63e2bf7ccfc223faef36a4.tscn"
+
+[deps]
+
+source_file="res://props/planet/fairy_tower/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-c584e84a6a63e2bf7ccfc223faef36a4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

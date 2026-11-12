@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dv0vp8v8ttspa"
+path="res://.godot/imported/shard_spire.vox-cda1e1288fb91f3e2f4d821244ce4da8.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/shard_spire.vox"
+dest_files=["res://.godot/imported/shard_spire.vox-cda1e1288fb91f3e2f4d821244ce4da8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

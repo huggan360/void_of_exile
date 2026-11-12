@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://30rgsr6p03ua"
+path="res://.godot/imported/rose_bush.vox-f715b17c1575aceb949a3a63cc5c5980.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/rose_bush.vox"
+dest_files=["res://.godot/imported/rose_bush.vox-f715b17c1575aceb949a3a63cc5c5980.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

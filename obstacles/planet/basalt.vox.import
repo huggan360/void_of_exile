@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c7ag0ifey1u5p"
+path="res://.godot/imported/basalt.vox-4e28b6c232faada76007b20b3b5a91f5.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/basalt.vox"
+dest_files=["res://.godot/imported/basalt.vox-4e28b6c232faada76007b20b3b5a91f5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

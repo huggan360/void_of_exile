@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://vxy2j1ce7es5"
+path="res://.godot/imported/beach_grass.vox-5a2131f473146691208f18603ef99aba.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/beach_grass.vox"
+dest_files=["res://.godot/imported/beach_grass.vox-5a2131f473146691208f18603ef99aba.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

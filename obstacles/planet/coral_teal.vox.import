@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://oml5hkpso774"
+path="res://.godot/imported/coral_teal.vox-2dce541f51a8b36b274e39660333569e.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/coral_teal.vox"
+dest_files=["res://.godot/imported/coral_teal.vox-2dce541f51a8b36b274e39660333569e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

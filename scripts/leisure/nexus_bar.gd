@@ -13,30 +13,26 @@ func build(server: bool) -> void:
 	var wood := Color("77513b")
 	var dark := Color("3c2c28")
 	var brass := Color("c79e62")
-	_block(art, Vector3(0, 1.9, -35), Vector3(29, 3.8, 0.3), dark)
+	# The shell (walls, window posts, the pitched roof) is one voxel model
+	# (props/nexus/bar, tools/space/make_planet_models.py); here only its solids.
+	if not server:
+		add_child(VillageHouse.new().setup({asset = "res://props/nexus/bar", pos = Vector3(0, -0.125, -27), yaw = 0.0, solid_size = Vector3.ZERO}))
+	art.solid(Vector3(0, 1.9, -35), Vector3(29, 3.8, 0.3))
 	# Waist-high sills and framed windows keep the bar open to the stars.
 	for side: float in [-1.0, 1.0]:
-		_block(art, Vector3(side*14.5, 0.55, -27), Vector3(0.3, 1.1, 16), wood)
-		_block(art, Vector3(side*14.5, 3.25, -27), Vector3(0.3, 1.1, 16), dark)
+		art.solid(Vector3(side*14.5, 0.55, -27), Vector3(0.3, 1.1, 16))
+		art.solid(Vector3(side*14.5, 3.25, -27), Vector3(0.3, 1.1, 16))
 		for z: float in [-34.5, -31, -27, -23, -19.5]:
-			_block(art, Vector3(side*14.5, 1.9, z), Vector3(0.4, 3.8, 0.22), wood)
+			art.solid(Vector3(side*14.5, 1.9, z), Vector3(0.4, 3.8, 0.22))
 		for z: float in [-32.75, -29, -25, -21.25]:
 			art.solid(Vector3(side*14.5, 1.9, z), Vector3(0.15, 1.6, 3.2))
-		for x: float in [side*8.0]:
-			_block(art, Vector3(x, 0.5, -19), Vector3(12.8, 1.0, 0.3), wood)
-			_block(art, Vector3(x, 3.3, -19), Vector3(12.8, 1.0, 0.3), dark)
+		art.solid(Vector3(side*8.0, 0.5, -19), Vector3(12.8, 1.0, 0.3))
+		art.solid(Vector3(side*8.0, 3.3, -19), Vector3(12.8, 1.0, 0.3))
 		for x: float in [side*1.65, side*6.0, side*10.5, side*14.4]:
-			_block(art, Vector3(x, 1.9, -19), Vector3(0.22, 3.8, 0.3), wood)
-		# Layered roof planks form two pitched slopes with a timber ridge.
+			art.solid(Vector3(x, 1.9, -19), Vector3(0.22, 3.8, 0.3))
 		for strip in 10:
 			var x := side*(strip+0.5)*1.5
-			var at := Vector3(x, 5.4-float(strip)*0.16, -27)
-			var basis := Basis(Vector3.FORWARD, side*0.106)
-			art.box(at, Vector3(1.55, 0.2, 17.4), Color("4c655f").lightened((strip%3)*0.025), 0, basis)
-			art.solid(at, Vector3(1.55, 0.2, 17.4), basis)
-	_block(art, Vector3(0, 5.48, -27), Vector3(0.28, 0.25, 17.6), dark)
-	for z: float in [-34.5, -27, -19.5]:
-		art.box(Vector3(0, 3.8, z), Vector3(29, 0.16, 0.2), wood)
+			art.solid(Vector3(x, 5.4-float(strip)*0.16, -27), Vector3(1.55, 0.2, 17.4), Basis(Vector3.FORWARD, side*0.106))
 	# The serving counter is below standing eye height, with a brass foot rail.
 	_block(art, Vector3(-3, 0.53, -30), Vector3(17, 1.06, 1.2), wood)
 	_block(art, Vector3(-3, 1.1, -30), Vector3(17.3, 0.14, 1.45), dark)

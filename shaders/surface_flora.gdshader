@@ -28,25 +28,30 @@ vec3 srgb_to_linear(vec3 c) {
 void vertex() {
 	tint = INSTANCE_CUSTOM.rgb;
 	vec3 root = MODEL_MATRIX[3].xyz;
+	// The plant's own up: world up on the Surface, away from the centre on a planet.
+	vec3 up = normalize(MODEL_MATRIX[1].xyz);
 	float scale_y = length(MODEL_MATRIX[1].xyz);
-	float t = clamp((VERTEX.y - root.y) / max(height * scale_y, 0.01), 0.0, 1.0);
+	float t = clamp(dot(VERTEX - root, up) / max(height * scale_y, 0.01), 0.0, 1.0);
 	float bend = t * t;
 	// Wind: slow gusts rolling across the land plus a quick flutter.
 	float gust = sin(TIME * 0.7 + root.x * 0.05 + root.z * 0.03) * 0.5 + 0.5;
 	vec2 wind = vec2(sin(TIME * 1.8 + root.x * 0.4 + root.z * 0.3), cos(TIME * 1.5 + root.z * 0.37)) * (0.35 + gust * 0.65);
 	vec3 offset = vec3(wind.x, 0.0, wind.y * 0.6) * 0.12 * sway * bend;
+	offset -= up * dot(offset, up);
 	// Lean away from characters walking through.
 	for (int i = 0; i < MAX_PUSHERS; i++) {
 		vec4 p = pushers[i];
 		if (p.w <= 0.0) continue;
-		vec2 away = root.xz - p.xz;
+		vec3 away = root - p.xyz;
+		float rise = dot(away, up);
+		away -= up * rise;
 		float d = length(away);
 		float reach = p.w + 0.35;
-		if (d < reach && abs(root.y - p.y) < 2.5) {
+		if (d < reach && abs(rise) < 2.5) {
 			float k = 1.0 - d / reach;
-			vec2 dir = d > 0.001 ? away / d : vec2(1.0, 0.0);
-			offset.xz += dir * k * 0.55 * bend * (0.4 + sway);
-			offset.y -= k * 0.3 * bend * height * scale_y * (0.3 + sway);
+			vec3 dir = d > 0.001 ? away / d : vec3(1.0, 0.0, 0.0);
+			offset += dir * k * 0.55 * bend * (0.4 + sway);
+			offset -= up * k * 0.3 * bend * height * scale_y * (0.3 + sway);
 		}
 	}
 	VERTEX += offset;

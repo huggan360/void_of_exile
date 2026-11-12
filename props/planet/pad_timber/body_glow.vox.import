@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://x5erq8w8dib"
+path="res://.godot/imported/body_glow.vox-845db26aeb6ea933d208d47c2d2bafa1.tscn"
+
+[deps]
+
+source_file="res://props/planet/pad_timber/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-845db26aeb6ea933d208d47c2d2bafa1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c6l20am57prcj"
+path="res://.godot/imported/body_glow.vox-463e50ee22d3b5e2f9bc78e32455c4f7.tscn"
+
+[deps]
+
+source_file="res://props/planet/spore_hut/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-463e50ee22d3b5e2f9bc78e32455c4f7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

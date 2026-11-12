@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cdc2yay15cqgp"
+path="res://.godot/imported/body.vox-f9dce5afe8d0e32df4248750c34d5651.tscn"
+
+[deps]
+
+source_file="res://props/planet/plaza_stone/body.vox"
+dest_files=["res://.godot/imported/body.vox-f9dce5afe8d0e32df4248750c34d5651.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

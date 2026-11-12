@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://s28sawphjcn5"
+path="res://.godot/imported/fine_ghost_sprouts.vox-48146765d7a9c3c9cd2c09cdefc30408.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_ghost_sprouts.vox"
+dest_files=["res://.godot/imported/fine_ghost_sprouts.vox-48146765d7a9c3c9cd2c09cdefc30408.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

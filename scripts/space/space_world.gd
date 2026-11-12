@@ -188,8 +188,15 @@ func sample_gravity(position: Vector3) -> Dictionary:
 		return {frame = Transform3D(Basis(right, up, right.cross(up)), surface), zone = "planet:"+str(p.id), distance = position.distance_to(surface)}
 	return {frame = Transform3D(Basis.IDENTITY, position), zone = "void", distance = 1e6}
 
+## First person only inside: ship rooms, the Last Light Diner, the Nexus's
+## Lantern Bar and the Lantern City's cafes, bars and shops.
 func first_person_at(position: Vector3) -> bool:
-	return SpaceLayout.pocket_at(position)>=0
+	if SpaceLayout.pocket_at(position)>=0: return true
+	var diner_offset: Vector3 = position-SpaceLayout.DINER
+	if absf(diner_offset.x)<20.0 and diner_offset.z> -21.0 and diner_offset.z<14.0 and diner_offset.y> -1.0 and diner_offset.y<8.0: return true  # the diner's room, not its deck and walks
+	if NexusStation.BAR_ROOM.has_point(position-SpaceLayout.NEXUS): return true
+	var p := SpaceLayout.planet_near(position)
+	return p.get("city", false) and CityLayout.indoors(position)
 
 ## Anywhere inside the Reach: spacewalkers float in open space on jetpacks.
 func is_walkable(position: Vector3) -> bool:
@@ -248,8 +255,9 @@ func enemy_blocked(pos: Vector3) -> bool:
 	var up: Vector3 = (pos-(p.center as Vector3)).normalized()
 	if up.y<cos(SpaceLayout.COMBAT_CAP+0.08): return true
 	for flat: Array in SpaceLayout._flat_spots(p).slice(1):
-		if flat.size()>2: continue  # the fortress terrace: its walls decide (below)
+		if int(flat[2])==1: continue  # the fortress terrace: its walls decide (below)
 		if acos(clampf(up.dot(flat[0]), -1.0, 1.0))*float(p.radius)<float(flat[1])+6.0: return true
+	if SpaceLayout.underwater(p, up, 0.5): return true
 	if is_instance_valid(gates) and gates.blocks_enemy(pos): return true
 	return PlanetFlora.blocked(p, pos-(p.center as Vector3), 0.3)
 

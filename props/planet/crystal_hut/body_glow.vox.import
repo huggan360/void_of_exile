@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ck7ggg7jnr8y0"
+path="res://.godot/imported/body_glow.vox-c51e0754e17bf1a73d1e88d0b4ecf60f.tscn"
+
+[deps]
+
+source_file="res://props/planet/crystal_hut/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-c51e0754e17bf1a73d1e88d0b4ecf60f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

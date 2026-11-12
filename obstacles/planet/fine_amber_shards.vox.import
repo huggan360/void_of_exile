@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d2n47vhv3xu6x"
+path="res://.godot/imported/fine_amber_shards.vox-6832305733bc3fac77a93f1cbc0c7ebf.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_amber_shards.vox"
+dest_files=["res://.godot/imported/fine_amber_shards.vox-6832305733bc3fac77a93f1cbc0c7ebf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

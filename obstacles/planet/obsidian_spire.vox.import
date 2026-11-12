@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7wnf065gt8ck"
+path="res://.godot/imported/obsidian_spire.vox-513d69486f52e271dae06959a4a88e60.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/obsidian_spire.vox"
+dest_files=["res://.godot/imported/obsidian_spire.vox-513d69486f52e271dae06959a4a88e60.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bxpfrwov3g7kt"
+path="res://.godot/imported/shard_spire_pink.vox-d434aae532cef2b264106528835a4d37.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/shard_spire_pink.vox"
+dest_files=["res://.godot/imported/shard_spire_pink.vox-d434aae532cef2b264106528835a4d37.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

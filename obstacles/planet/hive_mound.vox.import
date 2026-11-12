@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://qp8ph6q6mdo3"
+path="res://.godot/imported/hive_mound.vox-b8c52944834a81397d3ff6a827f095a4.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/hive_mound.vox"
+dest_files=["res://.godot/imported/hive_mound.vox-b8c52944834a81397d3ff6a827f095a4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

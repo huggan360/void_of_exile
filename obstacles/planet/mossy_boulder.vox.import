@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://47sr1ffy61mq"
+path="res://.godot/imported/mossy_boulder.vox-a837af959e6fa4bd4a7e14a46a2084d1.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/mossy_boulder.vox"
+dest_files=["res://.godot/imported/mossy_boulder.vox-a837af959e6fa4bd4a7e14a46a2084d1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

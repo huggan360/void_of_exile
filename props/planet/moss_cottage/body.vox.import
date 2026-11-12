@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dp68gas7nt4ru"
+path="res://.godot/imported/body.vox-4f6b8a2062e61dc2c85359d20bda523e.tscn"
+
+[deps]
+
+source_file="res://props/planet/moss_cottage/body.vox"
+dest_files=["res://.godot/imported/body.vox-4f6b8a2062e61dc2c85359d20bda523e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

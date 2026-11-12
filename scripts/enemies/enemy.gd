@@ -48,6 +48,7 @@ const BLINK_PUFF := 18
 var def: EnemyDef
 var pack: EnemyPack
 var director: EnemyDirector
+var _stand: Node3D  # the model's tilt on a planet (see _ready)
 var buffs := StatusEffects.new()
 var _status_flags := {}
 var _status_revision := -1
@@ -154,7 +155,15 @@ func _ready() -> void:
 	floor_snap_length = STEP_HEIGHT + 0.05
 	model = CreatureModel.new(def.model)
 	model.scale = Vector3.ONE * def.model_scale
-	add_child(model)
+	if director != null and director.world is SpaceWorld and not Net.is_server():
+		# On a planet the body keeps the realm's +Y (combat), but the model
+		# stands straight out from the planet's centre at its own feet.
+		_stand = Node3D.new()
+		_stand.name = "Stand"
+		add_child(_stand)
+		_stand.add_child(model)
+	else:
+		add_child(model)
 	if Net.is_server():
 		model.recorder = func(method: StringName, args: Array) -> void: Net.server.model_call(self, method, args)
 	var shape := CollisionShape3D.new()
@@ -188,6 +197,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if is_instance_valid(_stand):
+		var up := (director.world as SpaceWorld).surface_frame(global_position).basis.y.normalized()
+		_stand.basis = Basis(Quaternion(Vector3.UP, up)) if up.dot(Vector3.UP) < 0.99999 else Basis.IDENTITY
 	if not Net.is_server() and buffs.revision != _status_revision:
 		_sync_status_badges()
 	if _torch!=null and is_instance_valid(model):

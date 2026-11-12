@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cbdu24hpp1peh"
+path="res://.godot/imported/conch.vox-c3b356f1de209ef1d97c3479fb771501.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/conch.vox"
+dest_files=["res://.godot/imported/conch.vox-c3b356f1de209ef1d97c3479fb771501.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bsh8pwfu81ict"
+path="res://.godot/imported/moss_oak.vox-c3aaf8acc3c6da40916ac827b0859108.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/moss_oak.vox"
+dest_files=["res://.godot/imported/moss_oak.vox-c3aaf8acc3c6da40916ac827b0859108.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

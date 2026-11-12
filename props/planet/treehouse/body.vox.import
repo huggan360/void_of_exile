@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://4mu5veqg1uvw"
+path="res://.godot/imported/body.vox-0d0a6d714ffbc06a66679b607c3d43b9.tscn"
+
+[deps]
+
+source_file="res://props/planet/treehouse/body.vox"
+dest_files=["res://.godot/imported/body.vox-0d0a6d714ffbc06a66679b607c3d43b9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

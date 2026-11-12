@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cvpx477st4rdm"
+path="res://.godot/imported/body_glow.vox-49b5aa072fdf91f82ccf45130401a09f.tscn"
+
+[deps]
+
+source_file="res://props/planet/petal_cottage_lilac/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-49b5aa072fdf91f82ccf45130401a09f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

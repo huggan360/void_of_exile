@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cqgviqlx2t3w"
+path="res://.godot/imported/body_glow.vox-a5f0192d4b29d7ff301b4f4ff49ac051.tscn"
+
+[deps]
+
+source_file="res://props/planet/obsidian_hut/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-a5f0192d4b29d7ff301b4f4ff49ac051.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

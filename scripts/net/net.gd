@@ -32,7 +32,7 @@ extends Node
 enum Mode { OFFLINE, CLIENT, SERVER }
 
 const PROTOCOL := 7
-const VERSION := "0.13.0"
+const VERSION := "0.14.0"
 const DEFAULT_PORT := 24565
 ## UDP status queries (server list pings) go to the game port + this.
 const STATUS_PORT_OFFSET := 1

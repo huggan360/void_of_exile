@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cqfnr4w7ctsmr"
+path="res://.godot/imported/fine_pink_shards.vox-28ebf912b238e63aa65a813fa7559cbe.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_pink_shards.vox"
+dest_files=["res://.godot/imported/fine_pink_shards.vox-28ebf912b238e63aa65a813fa7559cbe.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bsv4h7e8xqd1p"
+path="res://.godot/imported/fine_moss_stone.vox-f832c6db7f391d3ff575bddf07eff3c4.tscn"
+
+[deps]
+
+source_file="res://obstacles/planet/fine_moss_stone.vox"
+dest_files=["res://.godot/imported/fine_moss_stone.vox-f832c6db7f391d3ff575bddf07eff3c4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

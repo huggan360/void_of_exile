@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b8y24ldpecawv"
+path="res://.godot/imported/body.vox-4f797a661e8d3a84039b64d0cd5b5f5a.tscn"
+
+[deps]
+
+source_file="res://props/planet/petal_cottage_lilac/body.vox"
+dest_files=["res://.godot/imported/body.vox-4f797a661e8d3a84039b64d0cd5b5f5a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

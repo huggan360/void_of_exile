@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d3giiluuk2vo"
+path="res://.godot/imported/body.vox-612ebcb1c5a734c00383abbae8a54675.tscn"
+
+[deps]
+
+source_file="res://props/planet/lamp_pink/body.vox"
+dest_files=["res://.godot/imported/body.vox-612ebcb1c5a734c00383abbae8a54675.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true
