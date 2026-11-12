@@ -60,9 +60,9 @@ places trees, obstacles, packs and biome features.
 - `SurfaceLaunchpad` has one stone boarding tower (walkable stairs round three
   sides, a balcony at deck height, a gangway over the fence with a Board point)
   instead of the two ladder gantries. The minimap shows a rocket there.
-- Known: in `materials()` every `put()` overwrites the one before, so Woods and
-  Jungle ground is all plain grass (no FOREST / MEADOW / MOSS_ROCK patches);
-  glades bypass this. Fixing it would change the whole woods' ground cover.
+- `materials()` rules are first-match-wins again (each `put()` used to overwrite
+  the one before, leaving all Woods ground plain grass). Woods are now about 25%
+  forest floor, 20% meadow, 6% mossy rock and 38% grass; the jungle 61% forest floor.
 
 ## Check
 

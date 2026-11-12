@@ -1983,7 +1983,10 @@ def materials(W):
     forest = W.forest_hint
 
     def put(mask, value):
+        """First match wins: later rules only fill what is still free."""
+        nonlocal free
         m[free & mask] = value
+        free = free & ~mask
 
     # Glades in the woods are flower meadows.
     m[free & W.glade & (b == WOODS)] = M_MEADOW
