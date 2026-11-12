@@ -35,6 +35,7 @@ var busy := false
 func _ready() -> void:
 	add_child(api)
 	profile.load(PROFILE)
+	_launcher_session()
 	api.base_url = url()
 	api.token = token()
 
@@ -183,6 +184,20 @@ func logout() -> void:
 		await refresh()
 	else:
 		changed.emit()
+
+
+## The launcher hands over its signed-in account as "username<TAB>token" in
+## VOID_LAUNCHER_SESSION (an environment variable, so it stays out of the
+## process list). It becomes the current saved login.
+func _launcher_session() -> void:
+	var parts := OS.get_environment("VOID_LAUNCHER_SESSION").split("\t")
+	if parts.size() != 2 or parts[0] == "" or parts[1] == "":
+		return
+	var logins := saved()
+	logins[parts[0]] = parts[1]
+	profile.set_value("account", "saved", logins)
+	profile.set_value("account", "username", parts[0])
+	_save()
 
 
 func _forget(user: String) -> void:
