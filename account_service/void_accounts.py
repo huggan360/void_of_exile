@@ -811,6 +811,69 @@ class Store:
                                  (account_id, limit)).fetchall()
         return [self.character_summary(r, dead=True) for r in rows]
 
+    # --- public profiles (website) ----------------------------------------------------
+
+    def public_stats(self):
+        db, now = self.db(), time.time()
+        one = lambda q, *a: db.execute(q, a).fetchone()[0]
+        return {"accounts": one("SELECT COUNT(*) FROM accounts"),
+                "characters": one("SELECT COUNT(*) FROM characters"),
+                "deaths": one("SELECT COUNT(*) FROM dead_characters"),
+                "online": one("SELECT COUNT(DISTINCT account_id) FROM characters WHERE lease_until>?"
+                              " AND lease_server IS NOT NULL", now),
+                "servers": one("SELECT COUNT(*) FROM servers WHERE last_seen>?", now - 30)}
+
+    def public_players(self, query="", sort="level", limit=100):
+        """Every account with its best living character, for the player list."""
+        now = time.time()
+        rows = self.db().execute(
+            "SELECT a.id, a.username, a.created, a.xp,"
+            " (SELECT MAX(level) FROM characters c WHERE c.account_id=a.id) AS best,"
+            " (SELECT class FROM characters c WHERE c.account_id=a.id ORDER BY level DESC, xp DESC LIMIT 1) AS cls,"
+            " (SELECT COUNT(*) FROM characters c WHERE c.account_id=a.id) AS alive,"
+            " (SELECT COUNT(*) FROM dead_characters d WHERE d.account_id=a.id) AS dead,"
+            " EXISTS(SELECT 1 FROM characters c WHERE c.account_id=a.id AND c.lease_until>?"
+            "  AND c.lease_server IS NOT NULL) AS online"
+            " FROM accounts a WHERE a.username LIKE ? ESCAPE '\\' LIMIT 2000",
+            (now, "%" + query.strip()[:24].replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%")).fetchall()
+        out = [{"username": r["username"], "created": r["created"], "account_level": account_progress(r["xp"], 0)["level"],
+                "account_xp": r["xp"], "best_level": r["best"] or 0, "best_class": r["cls"] or "",
+                "characters": r["alive"], "deaths": r["dead"], "online": bool(r["online"])} for r in rows]
+        keys = {"level": lambda r: (-r["account_xp"], r["username"].casefold()),
+                "name": lambda r: r["username"].casefold(),
+                "deaths": lambda r: (-r["deaths"], r["username"].casefold()),
+                "new": lambda r: -r["created"]}
+        return sorted(out, key=keys.get(sort, keys["level"]))[:max(1, min(int(limit), 500))]
+
+    def public_player(self, username):
+        row = self.db().execute("SELECT * FROM accounts WHERE username=?", (username.strip()[:24],)).fetchone()
+        if row is None:
+            raise ApiError(404, "No such player.")
+        progress = account_progress(row["xp"], 0)
+        dead = []
+        for d in self.graveyard(row["id"], 60):
+            d.pop("data", None)
+            d.pop("server", None)
+            dead.append(d)
+        return {"username": row["username"], "created": row["created"], "last_seen": row["last_login"],
+                "developer": bool(row["developer"]), "level": progress["level"], "xp": progress["xp"],
+                "into": progress["into"], "needed": progress["needed"], "dots": row["dots"],
+                "online": self.active_character(row["id"]) is not None,
+                "characters": [dict(c, last_server=None) for c in self.characters(row["id"])],
+                "graveyard": dead}
+
+    def public_deaths(self, limit=30):
+        rows = self.db().execute(
+            "SELECT d.*, a.username FROM dead_characters d JOIN accounts a ON a.id=d.account_id"
+            " ORDER BY d.died DESC LIMIT ?", (max(1, min(int(limit), 100)),)).fetchall()
+        out = []
+        for r in rows:
+            d = self.character_summary(r, dead=True)
+            d.pop("data", None)
+            d.pop("server", None)
+            out.append(dict(d, username=r["username"]))
+        return out
+
     def progress(self, account_id, base_slots):
         row = self.db().execute("SELECT xp FROM accounts WHERE id=?", (account_id,)).fetchone()
         return account_progress(row["xp"] if row else 0, base_slots)
@@ -1590,6 +1653,22 @@ class Handler(BaseHTTPRequestHandler):
                               max(0, int(body.get("account_xp", 0))), self.only_account, self.config["base_slots"])
 
 
+    # --- public, read-only (website) -------------------------------------------------
+
+    def api_public_stats(self, _body):
+        return self.store.public_stats()
+
+    def api_public_players(self, body):
+        return {"players": self.store.public_players(str(body.get("q", "")), str(body.get("sort", "level")),
+                                                      int(body.get("limit", 100) or 100))}
+
+    def api_public_player(self, body):
+        return self.store.public_player(str(body.get("name", "")))
+
+    def api_public_deaths(self, body):
+        return {"deaths": self.store.public_deaths(int(body.get("limit", 30) or 30))}
+
+
 ROUTES = {
     ("GET", "/status"): Handler.api_status,
     ("GET", ""): Handler.api_status,
@@ -1614,6 +1693,10 @@ ROUTES = {
     ("POST", "/graveyard/delete"): Handler.api_delete_dead,
     ("POST", "/singleplayer"): Handler.api_singleplayer,
     ("GET", "/servers"): Handler.api_servers,
+    ("GET", "/public/stats"): Handler.api_public_stats,
+    ("GET", "/public/players"): Handler.api_public_players,
+    ("GET", "/public/player"): Handler.api_public_player,
+    ("GET", "/public/deaths"): Handler.api_public_deaths,
     ("POST", "/server/heartbeat"): Handler.api_heartbeat,
     ("POST", "/server/claim"): Handler.api_claim,
     ("POST", "/server/save"): Handler.api_save,
