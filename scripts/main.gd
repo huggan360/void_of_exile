@@ -100,7 +100,7 @@ var _name_timer := 0.0
 func _ready() -> void:
 	# The game started as a Singleplayer server (see _start_singleplayer):
 	# exported builds can't be given another scene on the command line.
-	if "--dedicated" in OS.get_cmdline_user_args():
+	if "--dedicated" in OS.get_cmdline_user_args() or OS.get_executable_path().get_file().to_lower().begins_with("voidofexileserver"):
 		set_process(false)
 		set_process_unhandled_input(false)
 		get_tree().change_scene_to_file.call_deferred("res://scenes/server/dedicated.tscn")

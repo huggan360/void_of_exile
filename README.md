@@ -17,5 +17,8 @@ https://void.plainshow.se
 
 ## Related repos
 
-- [void_of_exile_launcher](https://github.com/huggan360/void_of_exile_launcher): the launcher (Linux, Windows, macOS)
+How they fit together: [docs/DEVELOPING.md](docs/DEVELOPING.md#the-repos).
+
+- [void_of_exile_server](https://github.com/huggan360/void_of_exile_server): the dedicated server's releases and how to host
+- [void_of_exile_launcher](https://github.com/huggan360/void_of_exile_launcher): the launcher (Linux, Windows, macOS): play, or host a server
 - `void_of_exile_account` (private): account server, website and release store

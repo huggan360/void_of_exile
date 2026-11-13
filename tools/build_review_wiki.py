@@ -131,7 +131,7 @@ for folder in sorted((SOURCE/'Divine').iterdir()):
 # Add explicit source provenance without embedding credentials or server connection settings.
 c['items']=list(items.values());c['divine_audit']=sets;c['media']=media;c['assets']=assets
 c['audit_notes']=[
- 'Snapshot of runtime definitions with checked-in server_config overrides applied. A separately running server can use different settings.',
+ 'Snapshot of the official game values (what every locked release server plays).',
  'Registered means Items.all() can create the item. Acquisition routes are shown separately. Artwork-only entries have no invented stats.',
  'Creature images use the actual rigs; projectile images use the actual mesh builders. These are still renders. Flight, trails, particles and hazards are described in parameters and actor source.',
  'Boss attack samples are extracted from Boss.shot() and Blue Dragon flame calls. Dynamic expressions are preserved, rather than guessed. Full actor source contains timings, movement, hazards, support summons and conditional changes.',

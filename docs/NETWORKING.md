@@ -5,7 +5,7 @@ Three parts:
 | Part | Where | What it does |
 |---|---|---|
 | Account service ("player sync") | Code in the `void_of_exile_account` repo (`server/void_accounts.py`, deploy with `deploy/deploy.sh accounts`). Runs on the Raspberry Pi `hugohansson@192.168.1.5`, `~/void_accounts`, systemd `void-accounts`; `void.plainshow.se/api/` -> `127.0.0.1:8095` | Accounts, logins, every character (alive and dead) with its items, and the list of running game servers |
-| Dedicated game server | Any PC: `tools/net/run_server.sh` (headless Godot, same project) | Realms, enemies and their AI, loot, XP, characters while they play |
+| Dedicated game server | Any PC: the launcher's Server page or a release from `void_of_exile_server` (the game's own export, locked) | Realms, enemies and their AI, loot, XP, characters while they play |
 | Client | The game | Log in (bottom left) -> **Singleplayer** or **Servers** -> play; change characters in the Tavern (top left) |
 
 ## Playing
@@ -60,12 +60,16 @@ Three parts:
 
 ## Running a server
 
-    tools/net/run_server.sh                      # uses server_config/ (created on first start)
-    tools/net/run_server.sh --set=gameplay.player_collision=true --port=24565
-    tools/net/run_server.sh --test               # godmode, full kits, nothing saved, weak bosses
+Players host from the launcher (Server) or with a release build; both are described in the
+[void_of_exile_server](https://github.com/huggan360/void_of_exile_server) repo, with every setting a host may
+change. Release servers are locked to the official game; see `docs/DEVELOPING.md` (The repos) for who trusts what.
 
+From the source (development, unlocked: tuning files in `server_config/`, `--test`):
+
+    $G --headless --path . res://scenes/server/dedicated.tscn -- [--config=<folder>] [--port=N] [--test]
+
+`server_config/` (default config folder from the source) is git-ignored: it holds your server key and saves.
 For players outside your network, forward **UDP 24565 and 24566** (game + status ping) on the router.
-Everything is configured in `server_config/` (see the README there).
 
 ## Accounts
 

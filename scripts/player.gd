@@ -36,6 +36,7 @@ const GRAVITY := 30.0
 const TURN_SPEED := 10.0
 const STEP_HEIGHT := 1.05  # climbs single 1 m blocks, walls of 2+ still block
 const STEP_SMOOTHING := 12.0  # how fast the model catches up after a step
+const STEP_TRY := 0.15  # a step lifts in these increments, only as high as the ledge
 
 const CAMERA_PITCH := deg_to_rad(72.0)
 const CAMERA_FOV := 35.0
@@ -401,7 +402,7 @@ func _physics_process(delta: float) -> void:
 
 	# Steps move the body instantly; let the model glide to the new height.
 	var dy := global_position.y - prev_y
-	if absf(dy) > 0.25:
+	if absf(dy) > 0.12:
 		_visual_offset -= dy
 	_visual_offset = lerpf(_visual_offset, 0.0, minf(1.0, delta * STEP_SMOOTHING))
 	model.position.y = _visual_offset
@@ -428,7 +429,14 @@ func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
 	elif dir != Vector3.ZERO:
 		var local_dir := global_basis.inverse()*dir if is_instance_valid(spatial_controller) else dir
 		facing = lerp_angle(facing, atan2(-local_dir.x, -local_dir.z), minf(1.0, delta * TURN_SPEED))
-	model.rotation.y = facing
+	if is_instance_valid(spatial_controller):
+		model.rotation.y = facing
+	else:
+		# Upright on flat ground: a lean or tilt left from flying in Space, a ship or
+		# a planet's curve never sticks (it used to until the game restarted).
+		model.rotation = Vector3(0.0, facing, 0.0)
+		if not global_basis.orthonormalized().is_equal_approx(Basis.IDENTITY):
+			global_basis = Basis.IDENTITY.scaled(global_basis.get_scale())
 	model.animate((velocity.slide(up_direction).length() if is_instance_valid(spatial_controller) else Vector2(velocity.x,velocity.z).length())/maxf(0.01,speed),delta)
 
 	_cooldown -= delta
@@ -753,14 +761,20 @@ func clear_spawn(place: GameWorld) -> void:
 
 
 ## Lifts the player onto a ledge up to `height` tall (along `normal`, the
-## local up) if there's room above it.
+## local up) if there's room above it, only as high as the ledge needs (the
+## Surface's 0.25 m voxels are small: a full lift there bounced the character
+## up and down while running over them).
 func _try_step_up(dir: Vector3, normal := Vector3.UP, height := STEP_HEIGHT) -> void:
-	var up := normal*height
-	if test_move(global_transform, up):
-		return  # no headroom
-	if test_move(global_transform.translated(up), dir.normalized() * 0.3):
-		return  # wall is taller than one block
-	global_position += up
+	var lift := STEP_TRY
+	while lift < height + 0.001:
+		var up := normal*minf(lift, height)
+		if test_move(global_transform, up):
+			return  # no headroom
+		if not test_move(global_transform.translated(up), dir.normalized() * 0.3):
+			global_position += up
+			return
+		lift += STEP_TRY
+	# The wall is taller than one block.
 
 
 func _update_zoom(delta: float) -> void:

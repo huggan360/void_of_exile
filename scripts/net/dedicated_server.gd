@@ -1,5 +1,5 @@
 extends Node
-## The dedicated server (run headless, see tools/net/run_server.sh):
+## The dedicated server (run headless; hosting and run scripts: the void_of_exile_server repo):
 ##
 ##     godot --headless --path <project> res://scenes/server/dedicated.tscn -- [--config=<folder>] [--port=N]
 ##         [--name=NAME] [--accounts=URL] [--godmode]   (override server.cfg for this run)
@@ -7,6 +7,10 @@ extends Node
 ##         [--set=section.key=value]   any server.cfg value, e.g. --set=gameplay.player_collision=true
 ##         [--singleplayer --key=SP_KEY --parent=PID]   run by the game for Singleplayer;
 ##         quits when the game (PID) is gone
+##     The server build (VoidOfExileServer, void_of_exile_server repo) is the game's own export
+##     renamed; it starts here by itself. Release builds are locked (ServerConfig.locked).
+##     VOID_ADMIN_TOKEN (environment): lets the launcher on this computer list and kick
+##     players over the status port (NetServer._admin).
 ##
 ## Loads the config folder (ServerConfig: server.cfg and the json files),
 ## puts its values into the game's definitions, builds every creature once,
@@ -27,9 +31,14 @@ func _ready() -> void:
 		if parts[0] == "set" and parts.size() > 1:
 			sets.append(parts[1])
 	var config := ServerConfig.load_from(args.get("config", ""))
+	if config.locked:
+		# Release builds play the official game: no test kits, godmode or tuning.
+		for flag in ["test", "godmode"]: args.erase(flag)
 	for entry: String in sets:  # --set=gameplay.player_collision=true
 		var kv := entry.split("=", true, 1)
 		var key := kv[0].split(".", true, 1)
+		if config.locked and key.size() == 2 and (key[0] == "network" or key[0] == "gameplay" and not key[1] in ServerConfig.LOCKED_FREE):
+			continue
 		if kv.size() == 2 and key.size() == 2:
 			config.global.set_value(key[0], key[1], str_to_var(kv[1]) if str_to_var(kv[1]) != null else kv[1])
 	if args.has("port"):

@@ -8,6 +8,6 @@ perf_logs/
 .codex/
 .agents/
 
-# Your own server: its config (server key) and world saves never go to git
-server_config/server.cfg
-server_config/data/
+# A server run from the source: its config (server key), tuning and world saves
+# (the server's files live in the void_of_exile_server repo)
+server_config/

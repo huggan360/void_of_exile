@@ -1,5 +1,35 @@
 # Developing Void of Exile
 
+## The repos
+
+| Repo | Holds | Ships as |
+| --- | --- | --- |
+| `void_of_exile` (this one, public) | The game, and the dedicated server's code (`scripts/net/`): one Godot project | `tools/release/publish.sh`: a game release here and a server release in `void_of_exile_server`, same version |
+| `void_of_exile_server` (public) | How to host, `run_server.sh`, `server.cfg.example`, dev tools (`dev/run_from_source.sh`, reference tuning) | Releases `v<version>`: the game's export renamed `VoidOfExileServer` (starts as a locked server by itself) |
+| `void_of_exile_launcher` (public) | The launcher: Game (install, update, play) and Server (install, settings, start/stop, players, kick, log) | A `v*` tag: GitHub Actions builds Linux, Windows, macOS; the website's download buttons follow it |
+| `void_of_exile_account` (private) | Account service (`server/void_accounts.py`), release store sync (`server/void_release.py`), website (`site/`) | `deploy/deploy.sh accounts|sync|site` to the Pi |
+
+```
+game repo --publish.sh--> GitHub release (game)    --+
+          \-------------> GitHub release (server) --+--> Pi sync: one chunk store --> launcher (Game / Server)
+launcher repo --tag--> Actions --> launcher zips --> website download buttons
+account repo --deploy.sh--> Pi: accounts API, release sync, website
+```
+
+Who trusts what:
+
+- The **account service** owns accounts, characters, items and Dots. Official servers have keys in its
+  `config.json` (`new-server-key`) and are trusted. Singleplayer servers and player-hosted servers (`host_` keys
+  the launcher asks for while signed in, one per account) are **untrusted**: every save is compared with the last
+  one (`Store._guard`: refused past `UNTRUSTED_REFUSE`, logged past `UNTRUSTED_FLAG`), Dots awards are capped, and
+  dismantling needs an item that was saved before. `void_accounts.py hosts | audit | revoke-host NAME`.
+- **Release servers are locked** (`ServerConfig.locked`, any exported build): the game's own values, no tuning
+  files, no `--test` or godmode; only the host's settings (`LOCKED_FREE`, the `[server]` section) change.
+  A server run from the source (the editor binary) is unlocked, for development.
+- **Developer commands** (`/give`, `/lvl`, `/max`) follow the developer flag the account service sends at claim.
+- The launcher talks to its server over the status port (`VRADMIN <token> players|kick <name>|stop`), only from
+  the same computer, with the token it sets in `VOID_ADMIN_TOKEN`.
+
 ## Machine
 
 | What | Where |
@@ -9,6 +39,7 @@
 | Linux release template | `~/Godot/templates/godot.linuxbsd.template_release.x86_64` |
 | Account server and website | `~/Godot/Projects/void_of_exile_account` |
 | Launcher | `~/Godot/Projects/void_of_exile_launcher` |
+| Server repo | `~/Godot/Projects/void_of_exile_server` |
 | Pi (accounts, website, release store) | `hugohansson@192.168.1.5` |
 
 ## Ground rules

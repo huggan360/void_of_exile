@@ -3,11 +3,13 @@
 A release goes from a commit on `main` to every player's launcher in one command.
 
 ```
-main (committed)  ->  tools/release/publish.sh  ->  GitHub release v<version>
+main (committed)  ->  tools/release/publish.sh  ->  GitHub release v<version> (game)
+                                                 +->  GitHub release v<version> in void_of_exile_server
                                                          |
                        Pi: void-release-sync.timer (every 5 min)
                                                          |
-         /srv/void/game/<platform>  +  chunk store  +  website wiki  +  /launcher/v1/latest
+   /srv/void/game/<platform>  +  chunk store (game and server)  +  website wiki
+                     +  /launcher/v1/latest (game)  +  /launcher/v1/server (server)
                                                          |
                          launcher: downloads only the chunks that changed
 ```
@@ -25,14 +27,15 @@ main (committed)  ->  tools/release/publish.sh  ->  GitHub release v<version>
 4. **The game must start before it ships.** At least: `--import` with no script errors, start the game, log in,
    enter the Tavern and the Surface. Online changes: one run against a local dedicated server (see
    `docs/DEVELOPING.md`).
-5. **Protocol and save changes go with the release.** If clients and servers no longer understand each other,
-   bump `Net.VERSION` (`scripts/net/net.gd`). If world coordinates or saved world state changed, bump
+5. **Protocol and save changes go with the release.** `Net.VERSION` (`scripts/net/net.gd`) is the release
+   version and must equal `release/release.json` (`publish.sh` refuses otherwise); bump `Net.PROTOCOL` when
+   clients and servers no longer understand each other. If world coordinates or saved world state changed, bump
    `WorldServer.LAYOUT_VERSION`. Restart the dedicated servers after the release so they run the same build.
 6. **The account server goes first.** If the new game needs new account endpoints, deploy the account server
    (`void_of_exile_account`: `deploy/deploy.sh accounts`) before publishing the game, and keep it working for
    the game version that is live now.
 7. **Only game files ship.** The export excludes `tools/`, `docs/`, `server_config/`, `release/`, staging art and
-   tests. Never add secrets, server keys or databases to the repo.
+   tests. Never add secrets, server keys or databases to the repo (`server_config/` is git-ignored).
 8. **Notes are short and plain.** A few short lines, no middle dots or bullet glyphs, no marketing words.
    The cover is a real in-game shot.
 
@@ -73,9 +76,11 @@ main (committed)  ->  tools/release/publish.sh  ->  GitHub release v<version>
    tools/release/publish.sh --now
    ```
 
-   It builds the Linux export, packs only the game, exports the wiki data (a Godot window opens for a few
-   seconds to render models), tags `v<version>` and creates the GitHub release. `--now` makes the Pi sync at
-   once instead of within five minutes.
+   It builds the Linux export, packs the game and the same files as `VoidOfExileServer`, exports the wiki data
+   (a Godot window opens for a few seconds to render models), tags `v<version>` and creates the game release
+   here and the server release in `huggan360/void_of_exile_server`. `--now` makes the Pi sync at once instead
+   of within five minutes. The server shares the game's chunks in the store, so hosting costs players almost
+   no extra download.
 
 5. Check that it is live:
 
@@ -99,7 +104,7 @@ Repo `huggan360/void_of_exile_launcher` (stock Godot 4.7.2). Bump the version in
 (`VERSION`), `project.godot` and `export_presets.cfg`, commit, then:
 
 ```sh
-git tag -a v1.0.3 -m "Launcher 1.0.3" && git push origin main v1.0.3
+git tag -a v1.1.0 -m "Launcher 1.1.0" && git push origin main v1.1.0
 ```
 
 GitHub Actions builds Linux, Windows and macOS and attaches the zips; the website's download buttons always
@@ -133,7 +138,8 @@ releases.
 | Release store on the Pi | `/srv/void/files/game` (`latest.json`, `manifests/`, `chunks/`), served at `/files/game/` |
 | The Pi's own game copy | `/srv/void/game/<platform>` (updated in place on every release) |
 | Sync tool | `void_of_exile_account/server/void_release.py`, systemd `void-release-sync.timer` |
-| Launcher API | `GET https://void.plainshow.se/launcher/v1/latest` and `/launcher/v1/releases` |
+| Launcher API | `GET https://void.plainshow.se/launcher/v1/latest`, `/launcher/v1/releases`, `/launcher/v1/server` |
+| Server releases | `huggan360/void_of_exile_server` (`server-latest.json`, `manifests/server-*` in the store) |
 
 ## Limits
 

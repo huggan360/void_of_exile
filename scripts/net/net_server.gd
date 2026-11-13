@@ -1413,15 +1413,61 @@ func _status_info() -> Dictionary:
 
 
 ## Status pings from server lists: "VRPING <nonce>" -> JSON with the nonce.
+## "VRADMIN <token> <command>" from this computer is the launcher (_admin).
 func _answer_status() -> void:
 	while _status.get_available_packet_count() > 0:
 		var packet := _status.get_packet().get_string_from_utf8()
+		if packet.begins_with("VRADMIN "):
+			_admin(packet.substr(8), _status.get_packet_ip(), _status.get_packet_port())
+			continue
 		if not packet.begins_with("VRPING"):
 			continue
 		var info := _status_info()
 		info.nonce = packet.substr(7)
 		_status.set_dest_address(_status.get_packet_ip(), _status.get_packet_port())
 		_status.put_packet(JSON.stringify(info).to_utf8_buffer())
+
+
+## The launcher that started this server: "<token> players" lists who is on,
+## "<token> kick <name>" sends one away, "<token> stop" saves and quits. Only from this computer, only with the
+## token it set (VOID_ADMIN_TOKEN).
+func _admin(text: String, ip: String, port: int) -> void:
+	var token := OS.get_environment("VOID_ADMIN_TOKEN")
+	var parts := text.split(" ", false, 2)
+	if token.length() < 16 or parts.size() < 2 or not ip in ["127.0.0.1", "::1", "::ffff:127.0.0.1"] or parts[0] != token:
+		return
+	var reply := {ok = true, info = _status_info()}
+	match parts[1]:
+		"players":
+			var list := []
+			for p: Dictionary in peers.values():
+				if not p.joined: continue
+				var stats := GameServer.character(p.player_id)
+				list.append({name = p.name, class_id = stats.class_id if stats else "", level = stats.level if stats else 0,
+					place = social._place_name(str(p.realm)), ping = roundi(float(p.get("rtt", 0.0)) * 1000.0), dead = p.dead})
+			reply.players = list
+		"stop":  # save everyone, then quit
+			print("[server] stopped by the host")
+			_status.set_dest_address(ip, port)
+			_status.put_packet(JSON.stringify(reply).to_utf8_buffer())
+			for peer_id: int in peers.keys():
+				Net.c_refused.rpc_id(peer_id, "The host stopped the server.")
+			await save_all()
+			get_tree().quit()
+			return
+		"kick":
+			var who := parts[2].strip_edges().to_lower() if parts.size() > 2 else ""
+			reply.ok = false
+			for peer_id: int in peers:
+				if str(peers[peer_id].get("name", "")).to_lower() == who:
+					print("[server] %s was kicked by the host" % peers[peer_id].name)
+					_refuse(peer_id, "The host removed you from the server.")
+					reply.ok = true
+					break
+		_:
+			reply.ok = false
+	_status.set_dest_address(ip, port)
+	_status.put_packet(JSON.stringify(reply).to_utf8_buffer())
 
 
 func _heartbeat() -> void:

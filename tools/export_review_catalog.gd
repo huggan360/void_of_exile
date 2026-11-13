@@ -106,14 +106,18 @@ func _export() -> void:
 	for id in Enemies.all_ids(): data.default_enemies.append(enemy_record(Enemies.get_def(id)))
 	for id in Biomes.COUNT: data.default_biomes.append(properties(Biomes.get_biome(id)))
 	for id in Enemies.PACKS: data.default_packs[str(id)] = encode(Enemies.pack(id))
+	# The official game: what every release server plays (locked, ServerConfig.locked),
+	# never a local server_config folder.
 	var config := ServerConfig.new()
-	config.dir = ProjectSettings.globalize_path("res://server_config/")
-	config.global.load("res://server_config/server.cfg")
-	config.enemies = read_json("res://server_config/enemies.json")
-	config.bosses = read_json("res://server_config/bosses.json")
-	config.loot = read_json("res://server_config/loot.json")
-	config.spawns = read_json("res://server_config/spawns.json")
-	config.player = read_json("res://server_config/player.json")
+	config.dir = OS.get_user_data_dir().path_join("wiki_server_config/")
+	DirAccess.make_dir_recursive_absolute(config.dir)
+	config.locked = true
+	config._load_global()
+	config.enemies = ServerConfig._default_enemies()
+	config.bosses = ServerConfig._default_bosses()
+	config.loot = ServerConfig._default_loot()
+	config.spawns = ServerConfig._default_spawns()
+	config.player = ServerConfig._default_player()
 	config.apply()
 	data.config = {enemies = encode(config.enemies), bosses = encode(config.bosses), loot = encode(config.loot),
 		spawns = encode(config.spawns), player = encode(config.player), gameplay = {}}

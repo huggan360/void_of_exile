@@ -19,6 +19,12 @@ extends RefCounted
 ## Missing files are written with the game's current values the first time
 ## the server starts, so every value is there to edit. Restart the server to
 ## apply changes.
+##
+## Release builds are locked (`locked`): the json files are not read and the
+## gameplay and network sections keep the game's values, so a server anyone
+## runs plays exactly like the official one. Only the host's own settings
+## (LOCKED_FREE: name, message, players, player contact, memory, port,
+## listing) can change. Working from the project (the editor) unlocks it.
 
 const DEFAULT_DIR := "res://server_config"
 
@@ -33,16 +39,23 @@ var player := {}
 var test_mode := false
 ## Run by the game for Singleplayer (one player, not announced anywhere).
 var singleplayer := false
+## A release build: the game itself can't be changed (see the top).
+var locked := false
+## What a locked server may still set in server.cfg's gameplay section.
+const LOCKED_FREE := ["player_collision"]
 
 
 static func load_from(folder: String) -> ServerConfig:
 	var config := ServerConfig.new()
+	config.locked = OS.has_feature("template")
 	var location := folder
 	if location == "":
 		location = OS.get_executable_path().get_base_dir().path_join("server_config") if OS.has_feature("template") else DEFAULT_DIR
 	config.dir = ProjectSettings.globalize_path(location).trim_suffix("/") + "/"
 	DirAccess.make_dir_recursive_absolute(config.dir)
 	config._load_global()
+	if config.locked:
+		return config  # the game's own values (the json files are ignored)
 	config.enemies = config._load_json("enemies.json", ServerConfig._default_enemies())
 	config.bosses = config._load_json("bosses.json", ServerConfig._default_bosses())
 	config.loot = config._load_json("loot.json", ServerConfig._default_loot())
@@ -206,6 +219,11 @@ func _load_global() -> void:
 				added = true
 	if added:
 		global.save(path)
+	if locked:
+		for key: String in defaults.gameplay:
+			if not key in LOCKED_FREE: global.set_value("gameplay", key, defaults.gameplay[key])
+		for key: String in defaults.network:
+			global.set_value("network", key, defaults.network[key])
 
 
 func _load_json(file: String, defaults: Dictionary) -> Dictionary:
