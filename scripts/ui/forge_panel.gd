@@ -52,7 +52,7 @@ func _ready() -> void:
 	_hint.custom_minimum_size.x = 300
 	box.add_child(_hint)
 	_button.text = "Dismantle"
-	UIStyle.button_styles(_button)
+	UIStyle.button_styles(_button, "red")
 	_button.focus_mode = Control.FOCUS_NONE
 	_button.custom_minimum_size = Vector2(220, 48)
 	_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

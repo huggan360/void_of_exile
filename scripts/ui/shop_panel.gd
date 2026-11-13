@@ -64,7 +64,7 @@ func _ready() -> void:
 	_picked.custom_minimum_size.x = 420
 	box.add_child(_picked)
 	_button.text = "Buy"
-	UIStyle.button_styles(_button)
+	UIStyle.button_styles(_button, "green")
 	_button.focus_mode = Control.FOCUS_NONE
 	_button.custom_minimum_size = Vector2(220, 48)
 	_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

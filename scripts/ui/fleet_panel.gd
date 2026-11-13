@@ -59,7 +59,7 @@ func _ready() -> void:
 	var buy_row := HBoxContainer.new()
 	buy_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	buy_row.add_theme_constant_override("separation", 12)
-	UIStyle.button_styles(_buy)
+	UIStyle.button_styles(_buy, "green")
 	_buy.text = "Buy a battleship"
 	_buy.custom_minimum_size = Vector2(220, 48)
 	_buy.focus_mode = Control.FOCUS_NONE

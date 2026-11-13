@@ -233,6 +233,10 @@ static func _skin_texture(kind: String) -> Texture2D:
 			return _skin_textures[kind]
 		var ivy := kind in ["ivy", "ivy_pressed", "ivy_popup", "ivy_panel", "panel"]
 		var path := texture_path("ui_ivy_button_pressed.png" if kind == "ivy_pressed" else "ui_ivy_panel.png" if ivy else "ui_stone_button_pressed.png" if kind == "stone_pressed" else "ui_stone_button.png")
+		# Coloured stones (black set): green for buying, red for destroying.
+		if kind in ["green", "green_pressed", "red", "red_pressed"]:
+			var colour := kind.get_slice("_", 0)
+			path = texture_path("ui_stone_button_pressed_%s.png" % colour if kind.ends_with("_pressed") else "ui_stone_button_%s.png" % colour)
 		var source: Texture2D = load(path)
 		var region := Rect2i(14, 12, 1223, 1219) if ivy else Rect2i(28, 152, 2116, 398)
 		if kind == "panel": region = Rect2i(326, 320, 600, 600)
@@ -319,13 +323,17 @@ static func slot(hovered := false) -> StyleBoxTexture:
 
 
 ## Pressed stone faces sink into their rim; equal total padding keeps layout fixed.
+## Skins: "stone" (default), "ivy", and the coloured stones "green" (buy) and
+## "red" (destroy, e.g. the forge's dismantle).
 static func button_styles(target: Button, skin := "stone") -> void:
-	# Moss keeps its own greens; stone gets the cool blue tint.
+	# Moss and the coloured stones keep their own colours; stone gets the cool blue tint.
 	var ivy := skin == "ivy"
-	var normal := _skin_box(skin, Color(0.86, 0.9, 0.86) if ivy else Color(0.74, 0.82, 0.95), 0)
-	var hover := normal
-	var pressed := _skin_box("ivy_pressed" if ivy else "stone_pressed", Color(0.86, 0.9, 0.86) if ivy else Color(0.74, 0.82, 0.95), 0)
-	var disabled := _skin_box(skin, Color(0.5, 0.54, 0.5) if ivy else Color(0.38, 0.44, 0.54), 0)
+	var coloured := skin in ["green", "red"]
+	var tint := Color(0.86, 0.9, 0.86) if ivy else Color.WHITE if coloured else Color(0.74, 0.82, 0.95)
+	var normal := _skin_box(skin, tint, 0)
+	var hover := _skin_box(skin, Color(1.15, 1.15, 1.15), 0) if coloured else normal
+	var pressed := _skin_box("ivy_pressed" if ivy else skin + "_pressed" if coloured else "stone_pressed", tint, 0)
+	var disabled := _skin_box(skin, Color(0.5, 0.54, 0.5) if ivy else Color(0.42, 0.42, 0.42) if coloured else Color(0.38, 0.44, 0.54), 0)
 	for s in [normal, hover, pressed, disabled]:
 		s.content_margin_left = 18
 		s.content_margin_right = 18
