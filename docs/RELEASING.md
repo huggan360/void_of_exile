@@ -138,11 +138,30 @@ releases.
 | Release store on the Pi | `/srv/void/files/game` (`latest.json`, `manifests/`, `chunks/`), served at `/files/game/` |
 | The Pi's own game copy | `/srv/void/game/<platform>` (updated in place on every release) |
 | Sync tool | `void_of_exile_account/server/void_release.py`, systemd `void-release-sync.timer` |
+| Launcher mirror | `/srv/void/files/launcher` (`latest.json`, zips, `VoidOfExileSetup.exe`), served at `/files/launcher/` |
+| Engine templates | `~/Godot/templates`, from the `engine-*` release (`tools/release/fetch_templates.sh`) |
 | Launcher API | `GET https://void.plainshow.se/launcher/v1/latest`, `/launcher/v1/releases`, `/launcher/v1/server` |
 | Server releases | `huggan360/void_of_exile_server` (`server-latest.json`, `manifests/server-*` in the store) |
 
+## Windows
+
+- **Engine template.** The game needs Godot 4.7.2 with the voxel module. The Windows release template is built on
+  GitHub Actions (`.github/workflows/engine_templates.yml`, run it by hand after an engine or module update) into
+  the release `engine-4.7.2-voxel-<commit>`; `tools/release/fetch_templates.sh` puts it in `~/Godot/templates`.
+  `publish.sh` builds Windows whenever that file is there (Linux only otherwise).
+- **Game files** install beside the launcher, by default `%LOCALAPPDATA%\Programs\Void of Exile\Game` and
+  `...\Server` (per user, so updates never need an admin prompt); Settings > Change folder moves them.
+- **Installer.** The website's Windows button gives `VoidOfExileSetup.exe`, an online installer from the launcher
+  repo (`installer/setup.nsi`) that fetches the newest launcher from the Pi (`/files/launcher/`, mirrored by
+  `void_release.py`), with Start menu and desktop shortcuts and an uninstaller. Launchers update themselves
+  through it.
+- **Signing.** Needs a code signing certificate (a `.pfx`). Launcher and installer: repo secrets
+  `WINDOWS_CERT_PFX` (base64) and `WINDOWS_CERT_PASSWORD` in the launcher repo. Game and server: run
+  `publish.sh` with `VOID_SIGN_PFX=<file> VOID_SIGN_PASS=<password>` (needs `osslsigncode`). Unsigned files
+  still work; Windows SmartScreen warns on the installer until it is signed and has built a reputation.
+
 ## Limits
 
-- The game uses a custom Godot build with the voxel module, and only a Linux release template exists, so only
-  `linux-x86_64` is published. Windows and macOS launchers show "Soon" until those templates are built.
-- The macOS launcher is ad-hoc signed and not notarized.
+- No macOS template yet: the macOS launcher shows "Soon" for the game. The macOS launcher is ad-hoc signed and
+  not notarized.
+- The game's Windows `.exe` shows Godot's icon in Explorer (`application/modify_resources` needs rcedit).
