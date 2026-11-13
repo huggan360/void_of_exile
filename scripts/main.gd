@@ -1775,7 +1775,7 @@ func _debug_online() -> void:
 			if child is DungeonPortal and not child.data.get("exit", false):
 				hud.interaction.update_prompt(player, false)
 				await RenderingServer.frame_post_draw
-				get_viewport().get_texture().get_image().save_png("/tmp/goblins_cave_online_portal.png")
+				get_viewport().get_texture().get_image().save_png(OS.get_user_data_dir().path_join("goblins_cave_online_portal.png"))
 				print("[test] interacting with ", child.data.id)
 				child.target.activate(player)
 				break
@@ -1787,7 +1787,7 @@ func _debug_online() -> void:
 			return
 		print("[test] dungeon arrived: ", world.realm_id, " rooms=", world.layout.rooms.size(), " boss room=", world.layout.boss)
 		await get_tree().create_timer(2.0).timeout
-		get_viewport().get_texture().get_image().save_png("/tmp/goblins_cave_online_spawn.png")
+		get_viewport().get_texture().get_image().save_png(OS.get_user_data_dir().path_join("goblins_cave_online_spawn.png"))
 		client.send_action("dungeon_test", ["boss"])
 		await get_tree().create_timer(1.0).timeout
 		while _traveling or player.frozen: await get_tree().process_frame
@@ -1796,7 +1796,7 @@ func _debug_online() -> void:
 		for candidate in Boss.all:
 			if candidate.def.id == "goblin_king": present = true
 		print("[test] dungeon boss present=", present, " pos=", player.global_position)
-		get_viewport().get_texture().get_image().save_png("/tmp/goblins_cave_online_boss.png")
+		get_viewport().get_texture().get_image().save_png(OS.get_user_data_dir().path_join("goblins_cave_online_boss.png"))
 		if not present:
 			get_tree().quit(5)
 			return

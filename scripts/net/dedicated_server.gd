@@ -103,9 +103,7 @@ func _process(delta: float) -> void:
 			get_tree().quit()
 
 
-## Whether the game that started us still runs (Linux: /proc; elsewhere the
-## server relies on the player's connection dropping).
+## Whether the game that started us still runs (Godot's own check: Linux,
+## Windows and macOS alike).
 func _parent_alive() -> bool:
-	if DirAccess.dir_exists_absolute("/proc/self"):
-		return DirAccess.dir_exists_absolute("/proc/%d" % _parent_pid)
-	return true
+	return OS.is_process_running(_parent_pid)

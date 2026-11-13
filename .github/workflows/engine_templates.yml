@@ -1,0 +1,53 @@
+# Builds the engine's Windows export template: Godot 4.7.2-stable with the voxel module, the same commits as
+# the editor in ~/Godot/godot_voxel_editor (VoxelEngine.get_version_git_hash(), Engine.get_version_info()).
+# Run it by hand (Actions > Engine templates > Run workflow) after an engine or voxel module update; the
+# template lands in the release ENGINE_TAG, where tools/release/fetch_templates.sh picks it up.
+name: Engine templates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GODOT_COMMIT: ed1daf0bf001b61586d9930840f2f1394092c079   # 4.7.2-stable
+  VOXEL_COMMIT: 4fa755eda714d4097498b13571700813c4249db6   # godot_voxel 1.7.0
+  ENGINE_TAG: engine-4.7.2-voxel-4fa755e
+
+jobs:
+  windows:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - name: Tools (MinGW with POSIX threads, SCons)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -yq mingw-w64 scons
+          sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+          sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+
+      - name: Godot and the voxel module
+        run: |
+          git init -q godot && cd godot
+          git fetch -q --depth 1 https://github.com/godotengine/godot.git "$GODOT_COMMIT" && git checkout -q FETCH_HEAD
+          git init -q modules/voxel && cd modules/voxel
+          git fetch -q --depth 1 https://github.com/Zylann/godot_voxel.git "$VOXEL_COMMIT" && git checkout -q FETCH_HEAD
+
+      - name: Build the release template
+        run: |
+          cd godot
+          scons platform=windows target=template_release arch=x86_64 use_mingw=yes production=yes lto=none \
+            accesskit=no -j"$(nproc)"
+          ls -la bin
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd godot/bin
+          gh release view "$ENGINE_TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create "$ENGINE_TAG" -R "$GITHUB_REPOSITORY" --prerelease --latest=false \
+              --title "Engine templates (Godot 4.7.2 + voxel ${VOXEL_COMMIT:0:7})" \
+              --notes "Export templates for the custom engine. Not a game release."
+          gh release upload "$ENGINE_TAG" -R "$GITHUB_REPOSITORY" --clobber godot.windows.template_release.x86_64*.exe

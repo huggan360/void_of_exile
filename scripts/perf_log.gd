@@ -34,7 +34,7 @@ func _ready() -> void:
 	if not "--perf-log" in OS.get_cmdline_user_args():
 		queue_free()
 		return
-	var dir := ProjectSettings.globalize_path("res://perf_logs")
+	var dir := ProjectSettings.globalize_path("user://perf_logs" if OS.has_feature("template") else "res://perf_logs")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var path := dir + "/perf_%s.log" % Time.get_datetime_string_from_system().replace(":", "-")
 	_file = FileAccess.open(path, FileAccess.WRITE)

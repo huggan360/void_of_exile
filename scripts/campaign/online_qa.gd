@@ -2,7 +2,7 @@ class_name OnlineQA
 extends Node
 ## Automated online review using the actual cards, scene buttons, story portals and loot requests.
 var main: Node
-var folder := "/home/hugo/Desktop/campaign5_check"
+var folder := OS.get_user_data_dir().path_join("campaign5_check")
 var number := 0
 var failed := false
 var args := {}
@@ -315,7 +315,7 @@ func bosses() -> void:
 		print("[qa boss] END ", id, " phases=", phases.keys(), " poses=", poses.keys(), " hazards=", peak_hazards, " helpers=", peak_helpers, " bullet_nodes=", peak_bullets)
 
 func party_test() -> void:
-	var control := str(args.get("qa-control", "/tmp/voidrealm_qa_p2"))
+	var control := str(args.get("qa-control", OS.get_user_data_dir().path_join("voidrealm_qa_p2")))
 	var previous := ""
 	while true:
 		var state := {realm = main.world.realm_id, pos = [main.player.position.x, main.player.position.y, main.player.position.z],

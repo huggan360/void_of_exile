@@ -50,7 +50,8 @@ static func load_from(folder: String) -> ServerConfig:
 	config.locked = OS.has_feature("template")
 	var location := folder
 	if location == "":
-		location = OS.get_executable_path().get_base_dir().path_join("server_config") if OS.has_feature("template") else DEFAULT_DIR
+		# A release build may be installed where it can't write (Program Files): the user folder.
+		location = "user://server_config" if OS.has_feature("template") else DEFAULT_DIR
 	config.dir = ProjectSettings.globalize_path(location).trim_suffix("/") + "/"
 	DirAccess.make_dir_recursive_absolute(config.dir)
 	config._load_global()
