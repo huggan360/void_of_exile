@@ -4,12 +4,19 @@ class_name TerrainCache
 ## ones load it (VoxelStreamSQLite). One file per world, game version and
 ## generator version, under user://cache/terrain/; the server keeps its own
 ## (singleplayer runs one beside the game). Old versions are deleted.
+##
+## Not on Windows: the voxel module's SQLite commits every saved batch with a
+## journal file and full disk syncs, which Windows (and its virus scanner) make
+## so slow that chunk loads queue behind the saves for minutes. Generating is
+## quick, so there the terrain is simply generated every visit.
 const DIR := "user://cache/terrain/"
 static var _open := {}  # file -> true while a terrain uses it
 
 ## A stream for world `name` built by the scripts/scenes in `sources`, or null
 ## if that file is already in use in this process (it then just generates).
 static func open(name: String, sources: Array) -> VoxelStream:
+	if OS.get_name() == "Windows":
+		return null
 	var stamp := ""
 	for path: String in sources:
 		stamp += str(FileAccess.get_modified_time(path) if FileAccess.file_exists(path) else 0)
@@ -22,6 +29,8 @@ static func open(name: String, sources: Array) -> VoxelStream:
 	var stream := VoxelStreamSQLite.new()
 	stream.database_path = ProjectSettings.globalize_path(file)
 	stream.save_generator_output = true
+	# Saved chunk keys stay in memory: asking for a chunk never saved doesn't touch the disk.
+	stream.set_key_cache_enabled(true)
 	stream.set_meta("cache_file", file)
 	_open[file] = true
 	return stream

@@ -766,21 +766,27 @@ func _start_singleplayer() -> void:
 	if _singleplayer_pid <= 0:
 		_join_failed("Singleplayer couldn't start.")
 		return
-	var started := await _wait_for_server(port, 40.0)
+	# The first start on a computer builds the world's caches (minutes on a slow disk); later ones are quick.
+	menus.show_joining("Singleplayer", "Starting your world (the first time on this computer takes a while)")
+	var started := await _wait_for_server(port, 180.0, _singleplayer_pid)
 	if token != _join_token: return
 	if not started:
-		_join_failed("Singleplayer didn't start.")
+		_join_failed("Singleplayer didn't start." if OS.is_process_running(_singleplayer_pid)
+				else "Singleplayer's server closed while starting. Its log is in the logs folder of the game's data.")
 		return
 	_traveling = false
 	_join_server("127.0.0.1", port, token)
 
 
-## Waits until a server answers its status ping (it's starting up).
-func _wait_for_server(port: int, timeout: float) -> bool:
+## Waits until a server answers its status ping (it's starting up); gives up
+## at once if its process (`pid`, when known) is gone.
+func _wait_for_server(port: int, timeout: float, pid := 0) -> bool:
 	var udp := PacketPeerUDP.new()
 	udp.set_dest_address("127.0.0.1", port + Net.STATUS_PORT_OFFSET)
 	var until := Time.get_ticks_msec() + int(timeout * 1000.0)
 	while Time.get_ticks_msec() < until:
+		if pid > 0 and not OS.is_process_running(pid):
+			break
 		udp.put_packet("VRPING 1".to_utf8_buffer())
 		await get_tree().create_timer(0.25).timeout
 		if udp.get_available_packet_count() > 0:
