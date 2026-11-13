@@ -145,9 +145,10 @@ releases.
 
 ## Windows
 
-- **Engine template.** The game needs Godot 4.7.2 with the voxel module. The Windows release template is built on
-  GitHub Actions (`.github/workflows/engine_templates.yml`, run it by hand after an engine or module update) into
-  the release `engine-4.7.2-voxel-<commit>`; `tools/release/fetch_templates.sh` puts it in `~/Godot/templates`.
+- **Engine template.** The game needs Godot 4.7.2 with the voxel module, at the commits pinned in
+  `.github/workflows/engine_templates.yml`. Build it on this PC with `tools/release/build_templates.sh`
+  (MinGW and SCons; about half an hour the first time, sources kept in `~/Godot/engine_src`), or run that workflow
+  on GitHub Actions and get it with `tools/release/fetch_templates.sh`. Either way it lands in `~/Godot/templates`.
   `publish.sh` builds Windows whenever that file is there (Linux only otherwise).
 - **Game files** install beside the launcher, by default `%LOCALAPPDATA%\Programs\Void of Exile\Game` and
   `...\Server` (per user, so updates never need an admin prompt); Settings > Change folder moves them.
