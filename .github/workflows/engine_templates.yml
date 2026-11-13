@@ -38,7 +38,7 @@ jobs:
         run: |
           cd godot
           scons platform=windows target=template_release arch=x86_64 use_mingw=yes production=yes lto=none \
-            accesskit=no -j"$(nproc)"
+            accesskit=no d3d12=no -j"$(nproc)"
           ls -la bin
 
       - name: Publish

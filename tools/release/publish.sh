@@ -57,42 +57,74 @@ trap 'git -C "$PROJECT" worktree remove --force "$TREE" >/dev/null 2>&1 || true'
 # The editor's import cache makes the clean import take seconds, not minutes.
 [[ -d .godot ]] && cp -a .godot "$TREE/"
 
-PLATFORM=linux-x86_64
-STAGE="$WORK/stage/VoidOfExile"
-mkdir -p "$STAGE"
 "$GODOT" --headless --path "$TREE" --import >"$WORK/import.log" 2>&1 || true
-"$GODOT" --headless --path "$TREE" --export-release Linux "$STAGE/VoidOfExile.x86_64" >"$WORK/export.log" 2>&1
-[[ -s "$STAGE/VoidOfExile.x86_64" && -s "$STAGE/VoidOfExile.pck" ]] || fail "export failed, see $WORK/export.log"
-chmod +x "$STAGE/VoidOfExile.x86_64"
 
-ARCHIVE="VoidOfExile-$VERSION-$PLATFORM.tar.gz"
-info "Packing $ARCHIVE"
-tar -C "$WORK/stage" -czf "$WORK/$ARCHIVE" VoidOfExile
+# Windows executables are signed when a certificate is set up (VOID_SIGN_PFX: a .pfx file,
+# VOID_SIGN_PASS: its password; needs osslsigncode). Without one they ship unsigned.
+sign_exe() {
+    [[ "$1" == *.exe && -n "${VOID_SIGN_PFX:-}" ]] || return 0
+    command -v osslsigncode >/dev/null || fail "VOID_SIGN_PFX is set but osslsigncode is missing"
+    osslsigncode sign -pkcs12 "$VOID_SIGN_PFX" -pass "${VOID_SIGN_PASS:-}" -n "Void of Exile" -i https://void.plainshow.se \
+        -h sha256 -t http://timestamp.digicert.com -in "$1" -out "$1.signed" >/dev/null && mv "$1.signed" "$1"
+}
 
-# The server: the same files under the server's name (a pck follows its
-# executable's name), so the launcher's chunks are shared with the game.
-SERVER_ARCHIVE="VoidOfExileServer-$VERSION-$PLATFORM.tar.gz"
-SSTAGE="$WORK/server_stage/VoidOfExileServer"
-mkdir -p "$SSTAGE" "$WORK/server"
-cp "$STAGE/VoidOfExile.x86_64" "$SSTAGE/VoidOfExileServer.x86_64"
-cp "$STAGE/VoidOfExile.pck" "$SSTAGE/VoidOfExileServer.pck"
-info "Packing $SERVER_ARCHIVE"
-tar -C "$WORK/server_stage" -czf "$WORK/server/$SERVER_ARCHIVE" VoidOfExileServer
-python3 - "$WORK/server/release.json" "$VERSION" "$SERVER_ARCHIVE" "$COMMIT" <<'PY'
+# Every platform with a template: "<platform> <export preset> <executable suffix>".
+WIN_TEMPLATE="${WIN_TEMPLATE:-$HOME/Godot/templates/godot.windows.template_release.x86_64.exe}"
+TARGETS=("linux-x86_64 Linux .x86_64")
+if [[ -f "$WIN_TEMPLATE" ]]; then
+    TARGETS+=("windows-x86_64 Windows .exe")
+else
+    echo "No Windows template at $WIN_TEMPLATE (tools/release/fetch_templates.sh): Linux only."
+fi
+ARCHIVES=()
+SERVER_ARCHIVES=()
+mkdir -p "$WORK/server"
+: >"$WORK/game_platforms.txt"
+: >"$WORK/server_platforms.txt"
+for target in "${TARGETS[@]}"; do
+    read -r PLATFORM PRESET EXT <<<"$target"
+    STAGE="$WORK/stage-$PLATFORM/VoidOfExile"
+    mkdir -p "$STAGE"
+    info "Exporting $PRESET"
+    "$GODOT" --headless --path "$TREE" --export-release "$PRESET" "$STAGE/VoidOfExile$EXT" >"$WORK/export-$PLATFORM.log" 2>&1
+    [[ -s "$STAGE/VoidOfExile$EXT" && -s "$STAGE/VoidOfExile.pck" ]] || fail "$PRESET export failed, see $WORK/export-$PLATFORM.log"
+    if [[ "$EXT" != .exe ]]; then chmod +x "$STAGE/VoidOfExile$EXT"; fi
+    sign_exe "$STAGE/VoidOfExile$EXT"
+    ARCHIVE="VoidOfExile-$VERSION-$PLATFORM.tar.gz"
+    info "Packing $ARCHIVE"
+    tar -C "$(dirname "$STAGE")" -czf "$WORK/$ARCHIVE" VoidOfExile
+    ARCHIVES+=("$ARCHIVE")
+    echo "$PLATFORM $ARCHIVE VoidOfExile$EXT" >>"$WORK/game_platforms.txt"
+
+    # The server: the same files under the server's name (a pck follows its
+    # executable's name), so the launcher's chunks are shared with the game.
+    SSTAGE="$WORK/server_stage-$PLATFORM/VoidOfExileServer"
+    mkdir -p "$SSTAGE"
+    cp "$STAGE/VoidOfExile$EXT" "$SSTAGE/VoidOfExileServer$EXT"
+    cp "$STAGE/VoidOfExile.pck" "$SSTAGE/VoidOfExileServer.pck"
+    SERVER_ARCHIVE="VoidOfExileServer-$VERSION-$PLATFORM.tar.gz"
+    info "Packing $SERVER_ARCHIVE"
+    tar -C "$(dirname "$SSTAGE")" -czf "$WORK/server/$SERVER_ARCHIVE" VoidOfExileServer
+    SERVER_ARCHIVES+=("$SERVER_ARCHIVE")
+    echo "$PLATFORM $SERVER_ARCHIVE VoidOfExileServer$EXT" >>"$WORK/server_platforms.txt"
+done
+python3 - "$WORK" "$VERSION" "$COMMIT" <<'PY'
 import json, sys
+work, version, commit = sys.argv[1:4]
+def platforms(name):
+    out = {}
+    for line in open("%s/%s" % (work, name)):
+        platform, archive, launch = line.split()
+        out[platform] = {"archive": archive, "launch": launch}
+    return out
 info = json.load(open("release/release.json"))
-out = {"version": sys.argv[2], "kind": "server", "date": info.get("date", ""), "commit": sys.argv[4],
-       "title": "Void of Exile server " + sys.argv[2],
-       "notes": ["The dedicated server for Void of Exile " + sys.argv[2]],
-       "platforms": {"linux-x86_64": {"archive": sys.argv[3], "launch": "VoidOfExileServer.x86_64"}}}
-json.dump(out, open(sys.argv[1], "w"), indent=2)
-PY
-python3 - "$WORK/release.json" "$VERSION" "$ARCHIVE" "$COMMIT" <<'PY'
-import json, sys
-info = json.load(open("release/release.json"))
-info["commit"] = sys.argv[4]
-info["platforms"] = {"linux-x86_64": {"archive": sys.argv[3], "launch": "VoidOfExile.x86_64"}}
-json.dump(info, open(sys.argv[1], "w"), indent=2)
+info["commit"] = commit
+info["platforms"] = platforms("game_platforms.txt")
+json.dump(info, open(work + "/release.json", "w"), indent=2)
+server = {"version": version, "kind": "server", "date": info.get("date", ""), "commit": commit,
+          "title": "Void of Exile server " + version, "notes": ["The dedicated server for Void of Exile " + version],
+          "platforms": platforms("server_platforms.txt")}
+json.dump(server, open(work + "/server/release.json", "w"), indent=2)
 PY
 cp release/cover.png "$WORK/cover.png"
 
@@ -136,7 +168,7 @@ print(json.dumps({"tag_name": "v" + i["version"], "name": "Void of Exile " + i["
     "body": "\n".join("- " + n for n in i.get("notes", [])), "prerelease": False, "make_latest": "true"}))')"
 RELEASE="$(api -X POST "https://api.github.com/repos/$REPO/releases" -d "$BODY")"
 UPLOAD="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["upload_url"].split("{")[0])' <<<"$RELEASE")"
-for f in "$ARCHIVE" release.json cover.png wiki.tar.gz; do
+for f in "${ARCHIVES[@]}" release.json cover.png wiki.tar.gz; do
     case "$f" in *.gz) type=application/gzip ;; *.json) type=application/json ;; *) type=image/png ;; esac
     api -X POST -H "Content-Type: $type" --data-binary @"$WORK/$f" "$UPLOAD?name=$f" >/dev/null
     echo "  uploaded $f"
@@ -152,7 +184,7 @@ print(json.dumps({"tag_name": "v" + v, "target_commitish": sys.argv[2], "name": 
     "prerelease": False, "make_latest": "true"}))' "$VERSION" "$SERVER_HEAD")"
 RELEASE="$(api -X POST "https://api.github.com/repos/$SERVER_REPO/releases" -d "$BODY")"
 UPLOAD="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["upload_url"].split("{")[0])' <<<"$RELEASE")"
-for f in "$SERVER_ARCHIVE" release.json; do
+for f in "${SERVER_ARCHIVES[@]}" release.json; do
     case "$f" in *.gz) type=application/gzip ;; *) type=application/json ;; esac
     api -X POST -H "Content-Type: $type" --data-binary @"$WORK/server/$f" "$UPLOAD?name=$f" >/dev/null
     echo "  uploaded $f"
