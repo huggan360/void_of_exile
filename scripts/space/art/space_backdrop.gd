@@ -11,10 +11,11 @@ const SUN_DIR := Vector3(-0.47, 0.32, -0.83)  # the far sun, drawn by the sky
 const SPACE_FOG := Color(0.004, 0.005, 0.011)
 const FOG_BEGIN := 2600.0
 const FOG_END := 15000.0
-const CELL := 5000.0  # asteroid batches, for distance culling
+const CELL := 3000.0  # asteroid batches, for distance culling and LOD
 
 static var _sky_environment: Environment
-static var _rocks: Array[ArrayMesh] = []
+var _rock_batches: Array = []  # [{multi, kind, shape, box, lod}]
+var _rock_timer := 0.0
 var _server := false
 var _dust: GPUParticles3D
 var _dust_material: ParticleProcessMaterial
@@ -156,11 +157,12 @@ func set_indoor() -> void:
 	env.ambient_light_energy = 0.2
 	env.tonemap_exposure = 0.78
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera==null: return
 	var eye := camera.global_position
 	_aim_sun(eye)
+	_update_rock_lods(eye, delta)
 	if is_instance_valid(_dust):
 		# Dust lives in world space; the emitter follows the eye in coarse steps.
 		_dust.global_position = eye.snapped(Vector3.ONE*20.0)
@@ -172,97 +174,39 @@ func _process(_delta: float) -> void:
 
 # --- Asteroids --------------------------------------------------------------------
 
-## A chunky rock: an icosphere pushed out by noise and drawn flat-shaded.
-func _rock_mesh(variant: int) -> ArrayMesh:
-	if _rocks.size() > variant: return _rocks[variant]
-	var noise := FastNoiseLite.new()
-	noise.seed = 824+variant*237
-	noise.frequency = 1.4
-	noise.fractal_octaves = 3
-	var warp := Vector3(1.0, 0.72+variant*0.08, 0.86)
-	var faces := _icosphere(2)
-	var vertices := PackedVector3Array()
-	var normals := PackedVector3Array()
-	var colors := PackedColorArray()
-	for tri in range(0, faces.size(), 3):
-		var points: Array[Vector3] = []
-		for k in 3:
-			var dir: Vector3 = faces[tri+k]
-			var lump := 0.82+noise.get_noise_3dv(dir*1.7)*0.32+absf(noise.get_noise_3dv(dir*5.0))*0.08
-			points.append(dir*warp*lump)
-		var n := (points[2]-points[0]).cross(points[1]-points[0]).normalized()
-		for k in 3:
-			vertices.append(points[k])
-			normals.append(n)
-			# Vertex alpha marks crystal seams for the rock shader.
-			var seam := 1.0 if noise.get_noise_3dv(faces[tri+k]*3.1)>0.38 else 0.0
-			colors.append(Color(1, 1, 1, seam))
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_COLOR] = colors
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	_rocks.append(mesh)
-	return mesh
-
-static func _icosphere(levels: int) -> PackedVector3Array:
-	var t := (1.0+sqrt(5.0))*0.5
-	var v: Array[Vector3] = [Vector3(-1, t, 0), Vector3(1, t, 0), Vector3(-1, -t, 0), Vector3(1, -t, 0), Vector3(0, -1, t), Vector3(0, 1, t),
-		Vector3(0, -1, -t), Vector3(0, 1, -t), Vector3(t, 0, -1), Vector3(t, 0, 1), Vector3(-t, 0, -1), Vector3(-t, 0, 1)]
-	var idx := [0, 11, 5, 0, 5, 1, 0, 1, 7, 0, 7, 10, 0, 10, 11, 1, 5, 9, 5, 11, 4, 11, 10, 2, 10, 7, 6, 7, 1, 8,
-		3, 9, 4, 3, 4, 2, 3, 2, 6, 3, 6, 8, 3, 8, 9, 4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9, 8, 1]
-	var tris := PackedVector3Array()
-	for i in idx: tris.append(v[i].normalized())
-	for l in levels:
-		var next := PackedVector3Array()
-		for i in range(0, tris.size(), 3):
-			var a := tris[i]
-			var b := tris[i+1]
-			var c := tris[i+2]
-			var ab := ((a+b)*0.5).normalized()
-			var bc := ((b+c)*0.5).normalized()
-			var ca := ((c+a)*0.5).normalized()
-			next.append_array(PackedVector3Array([a, ab, ca, b, bc, ab, c, ca, bc, ab, bc, ca]))
-		tris = next
-	return tris
-
+## Voxel rocks (AsteroidModels) batched per cell, kind and shape. Every batch
+## swaps its mesh for the LOD its distance calls for (_update_rock_lods); far
+## batches cull away by visibility range.
 func _asteroids() -> void:
+	_rock_batches.clear()
+	# Every shape at every LOD (about 0.2 s, under the loading screen) so no swap hitches later.
+	for kind: String in AsteroidModels.KINDS:
+		for shape in AsteroidModels.shape_count(kind):
+			for lod in AsteroidModels.LOD_COUNT: AsteroidModels.mesh(kind, shape, lod)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 52781
 	var material := ShaderMaterial.new()
 	material.shader = load("res://shaders/space_rock.gdshader")
-	# Batches per cell (and giants apart) so far parts of the field cull away.
 	var cells := {}
-	var crystal_cells := {}
 	for entry: Array in SpaceLayout.asteroids():
 		var at: Vector3 = entry[0]
 		var radius: float = entry[1]
 		var rotation := Basis.from_euler(Vector3(rng.randf()*TAU, rng.randf()*TAU, rng.randf()*TAU))
-		var variant := rng.randi_range(0, 2)
 		var giant := radius>150.0
-		var key := "%d:%d:%d:%s" % [floori(at.x/CELL), floori(at.y/CELL), floori(at.z/CELL), "g" if giant else str(variant)]
-		if not cells.has(key): cells[key] = {variant = variant, giant = giant, items = []}
+		var kind := "giant" if giant else "crystal" if entry[2] else "rock"
+		var shape := rng.randi_range(0, AsteroidModels.shape_count(kind)-1)
+		var cell := Vector3i((at/CELL).floor())
+		var key := "%s|%s|%d" % [cell, kind, shape]
+		if not cells.has(key): cells[key] = {kind = kind, shape = shape, items = [], box = AABB(at, Vector3.ZERO)}
 		var tone := Color("4d495e").lerp(Color("8b7470"), rng.randf()*0.65)
 		cells[key].items.append([Transform3D(rotation.scaled_local(Vector3.ONE*radius), at), tone, rng.randf()])
-		if entry[2]:
-			var ckey := "%d:%d:%d" % [floori(at.x/CELL), floori(at.y/CELL), floori(at.z/CELL)]
-			if not crystal_cells.has(ckey):
-				var holder := Node3D.new()
-				add_child(holder)
-				# Glowing spikes only up close: far off they sparkle into a blur.
-				crystal_cells[ckey] = NexusStation.Brush.new(holder, false, 3000.0)
-			for j in 4:
-				var size := Vector3(radius*0.24, radius*rng.randf_range(0.6, 1.3), radius*0.24)
-				var frame := Transform3D(rotation, at).translated_local(Vector3((j-1.5)*radius*0.22, radius*0.62, 0))
-				crystal_cells[ckey].part("cone", frame, size, Color("79e7c5") if variant % 2 else Color("e69cd5"), false, 1.7)
+		cells[key].box = (cells[key].box as AABB).merge(AABB(at-Vector3.ONE*radius, Vector3.ONE*radius*2.0))
 	for cell: Dictionary in cells.values():
 		var multi := MultiMesh.new()
 		multi.transform_format = MultiMesh.TRANSFORM_3D
 		multi.use_colors = true
 		multi.use_custom_data = true  # r: teal or pink crystal seams
-		multi.mesh = _rock_mesh(cell.variant)
+		multi.mesh = AsteroidModels.mesh(cell.kind, cell.shape, 2)
 		multi.instance_count = cell.items.size()
 		for i in cell.items.size():
 			multi.set_instance_transform(i, cell.items[i][0])
@@ -273,11 +217,25 @@ func _asteroids() -> void:
 		instance.material_override = material
 		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# Giants loom out of the dark from further away.
-		instance.visibility_range_end = 15000.0 if cell.giant else 9000.0
+		instance.visibility_range_end = 15000.0 if cell.kind == "giant" else 9000.0
 		instance.visibility_range_end_margin = 1500.0
 		instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 		add_child(instance)
-	for brush: NexusStation.Brush in crystal_cells.values(): brush.finish()
+		_rock_batches.append({multi = multi, kind = cell.kind, shape = cell.shape, box = cell.box, lod = 2})
+	_rock_timer = 0.0
+
+## Swaps each batch to the detail its nearest rock needs (a few times a second).
+func _update_rock_lods(eye: Vector3, delta: float) -> void:
+	_rock_timer -= delta
+	if _rock_timer>0.0: return
+	_rock_timer = 0.25
+	for batch: Dictionary in _rock_batches:
+		var box: AABB = batch.box
+		var d := eye.distance_to(eye.clamp(box.position, box.end))
+		var lod := AsteroidModels.lod_for(d, batch.kind == "giant")
+		if lod != int(batch.lod):
+			batch.lod = lod
+			(batch.multi as MultiMesh).mesh = AsteroidModels.mesh(batch.kind, batch.shape, lod)
 
 # --- Atmosphere of space -----------------------------------------------------------
 

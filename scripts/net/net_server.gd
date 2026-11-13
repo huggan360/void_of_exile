@@ -22,7 +22,9 @@ const MAX_HIT_RANGE := 45.0  # meters from the player to an enemy they report hi
 const HIT_SLACK := 1.25  # reported damage may be this much over the best possible roll
 const SNAP_BACK_GRACE := 0.25  # seconds after a correction or a jump before moves are checked
 const XP_PER_OBSTACLE := 3  # same as Main
-const SNAPSHOT_ENEMIES := 18  # enemies per snapshot packet (keeps each under the MTU)
+const SNAPSHOT_FLOATS := 240  # floats per snapshot packet (keeps each under the MTU)
+## Events that are only looks: sent unreliably so a lost packet never holds up shots and hits.
+const COSMETIC_EVENTS := ["shot", "db", "bv", "ft", "sh"]
 
 var config: ServerConfig
 var api := AccountApi.new()
@@ -55,6 +57,7 @@ var _status := PacketPeerUDP.new()
 var _beacon := PacketPeerUDP.new()
 var _beacon_timer := 0.0
 var _attack_keys := {}  # key -> attack dict (stripped, for the wire)
+var _wire_cache := {}  # hash of [attack, enemy, multiplier] -> [key, stripped attack]
 var _shares: Array = []  # [[shared_hits Array, id], ...] recent shared hit lists
 var _next_share := 1
 var _next_status_shot := 1
@@ -83,6 +86,7 @@ func start(p_config: ServerConfig) -> Error:
 	GameServer.bag_changed.connect(_on_bag_changed)
 	GameServer.bag_removed.connect(_on_bag_removed)
 	GameServer.xp_dropped.connect(_on_xp_dropped)
+	GameServer.xp_taken.connect(func(realm_id: String, orb_id: int) -> void: _to_realm(realm_id, Vector3.INF, ["xp-", realm_id, orb_id]))
 	GameServer.player_died.connect(_on_player_died)
 	GameServer.player_died.connect(func(player_id: int, _lost: int) -> void: campaigns.on_death(player_id))
 	dungeons.server = self
@@ -1126,14 +1130,22 @@ func hazard_event(boss: Node, ev: Array) -> void:
 
 func enemy_shot(bullets: Node, origin: Vector3, direction: Vector3, attack: Dictionary, source: Node, shot_y: float) -> void:
 	var def: EnemyDef = (source as Enemy).def if source is Enemy else null
-	var wire: Dictionary = _strip(attack)
 	var mult := config.damage_multiplier(def.id) if def else float(config.value("gameplay", "enemy_damage_multiplier", 1.0))
-	if mult != 1.0:
-		wire.damage_min = roundi(float(wire.get("damage_min", 5)) * mult)
-		wire.damage_max = roundi(float(wire.get("damage_max", 10)) * mult)
-	if def:
-		wire.by = def.enemy_name
-	var key := hash(wire)
+	# Volleys repeat the same attack: strip and key it once (native hash, no GDScript walk).
+	var raw := hash([attack, def.id if def else "", mult])
+	var cached: Array = _wire_cache.get(raw, [])
+	if cached.is_empty():
+		var stripped: Dictionary = _strip(attack)
+		if mult != 1.0:
+			stripped.damage_min = roundi(float(stripped.get("damage_min", 5)) * mult)
+			stripped.damage_max = roundi(float(stripped.get("damage_max", 10)) * mult)
+		if def:
+			stripped.by = def.enemy_name
+		cached = [hash(stripped), stripped]
+		if _wire_cache.size() > 4096: _wire_cache.clear()
+		_wire_cache[raw] = cached
+	var key: int = cached[0]
+	var wire: Dictionary = cached[1]
 	if not _attack_keys.has(key):
 		_attack_keys[key] = wire
 	var share := 0
@@ -1209,9 +1221,10 @@ func _on_bag_added(record: Dictionary) -> void:
 	_bag_realms[record.id] = record.realm
 	var only: int = by_player.get(record.viewer, -1) if record.viewer != GameServer.PUBLIC else 0
 	if only != -1:
-		# Story chests can appear far ahead of the party; they must already be
-		# known when approached, just like the realm-wide bag updates/removals.
-		_to_realm(record.realm, Vector3.INF if record.type == "story" else record.pos, ["bag+", _bag_wire(record)], 0, 0, only)
+		# Realm-wide, like the bag updates and removals: a player who was out of
+		# event range when it dropped (a big boss arena, arriving late) must still
+		# find it when they walk up (story chests also appear far ahead).
+		_to_realm(record.realm, Vector3.INF, ["bag+", _bag_wire(record)], 0, 0, only)
 
 
 func _on_bag_changed(bag_id: int) -> void:
@@ -1259,6 +1272,7 @@ func _to_peer(peer_id: int, ev: Array) -> void:
 
 func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 	var events: Array = []
+	var looks: Array = []
 	var here: Vector3 = p.pos
 	var interest := float(config.value("network", "interest_radius", 72.0))
 	var event_radius := float(config.value("network", "event_radius", 85.0))
@@ -1346,9 +1360,12 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 			if ev[1] == "b" and not p.sent_attacks.has(ev[4]):
 				p.sent_attacks[ev[4]] = true
 				events.append([ev[0], "ad", ev[4], _attack_keys[ev[4]]])
-			events.append(ev)
+			if ev[1] in COSMETIC_EVENTS: looks.append(ev)
+			else: events.append(ev)
 	if not events.is_empty():
 		Net.c_events.rpc_id(peer_id, events)
+	if not looks.is_empty():
+		Net.c_looks.rpc_id(peer_id, looks)
 	var stats := GameServer.character(p.player_id)
 	var me := [stats.hp, stats.mp, p.ack, GameServer.shield_up(p.player_id)] if stats else []
 	# Send each component separately: combining enemy+player slices exceeds
@@ -1358,13 +1375,20 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 			Net.c_boss_snapshot.rpc_id(peer_id, t, [boss_state])
 		else:
 			Net.c_snapshot.rpc_id(peer_id, t, PackedFloat32Array(), [boss_state], PackedFloat32Array(), [])
-	Net.c_snapshot.rpc_id(peer_id,t,PackedFloat32Array(),[],PackedFloat32Array(),me)
-	var per := SNAPSHOT_ENEMIES*Net.ENEMY_STRIDE
-	for at in range(0,snap.size(),per):
-		Net.c_snapshot.rpc_id(peer_id,t,snap.slice(at,at+per),[],PackedFloat32Array(),[])
-	var per_players := SNAPSHOT_ENEMIES*2*Net.PLAYER_STRIDE
-	for at in range(0,players.size(),per_players):
-		Net.c_snapshot.rpc_id(peer_id,t,PackedFloat32Array(),[],players.slice(at,at+per_players),[])
+	# Fill each packet up to the MTU: vitals, then enemies, then players. Most
+	# ticks this is one packet instead of three.
+	var e_at := 0
+	var p_at := 0
+	var first := true
+	while first or e_at < snap.size() or p_at < players.size():
+		var room := SNAPSHOT_FLOATS
+		var e_take := mini(snap.size() - e_at, room / Net.ENEMY_STRIDE * Net.ENEMY_STRIDE)
+		room -= e_take
+		var p_take := mini(players.size() - p_at, room / Net.PLAYER_STRIDE * Net.PLAYER_STRIDE)
+		Net.c_snapshot.rpc_id(peer_id, t, snap.slice(e_at, e_at + e_take), [], players.slice(p_at, p_at + p_take), me if first else [])
+		e_at += e_take
+		p_at += p_take
+		first = false
 
 
 

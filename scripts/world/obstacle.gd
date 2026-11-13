@@ -50,7 +50,7 @@ func _ready() -> void:
 		mi.material_override = VoxModel.glow_material() if i == 1 else VoxModel.material()
 		mi.position = prefab.mesh_offset()
 		mi.scale = Vector3.ONE * prefab.voxel_size
-		mi.visibility_range_end = DRAW_DISTANCE
+		mi.visibility_range_end = DRAW_DISTANCE * GraphicsSettings.view_scale()
 		mi.gi_mode = GeometryInstance3D.GI_MODE_DYNAMIC
 		_visual.add_child(mi)
 	if prefab.has_glow and drawn:

@@ -58,6 +58,8 @@ var _connect_left := CONNECT_TIMEOUT
 var _offset := 0.0  # server time - local time
 var _have_clock := false
 var _events: Array = []
+## Cosmetic events, unreliable (Net.c_looks), played on the same clock.
+var _looks: Array = []
 var _enemy_snaps := {}  # net id -> [[t, PackedFloat32Array], ...]
 var _player_snaps := {}  # player id -> [[t, PackedFloat32Array], ...]
 var _bosses := {}  # net id -> boss bar state
@@ -197,6 +199,7 @@ func clear_world() -> void:
 	_player_snaps.clear()
 	_bosses.clear()
 	_events.clear()
+	_looks.clear()
 	_shared.clear()
 	world = null
 	director = null
@@ -229,6 +232,9 @@ func _process(delta: float) -> void:
 			break
 		budget -= 1
 		_apply(_events.pop_front())
+	if not is_instance_valid(world): _looks.clear()
+	while not _looks.is_empty() and (_looks[0][0] <= rt or _looks.size() > 600):
+		_apply(_looks.pop_front())
 
 
 func on_snapshot(t: float, enemies: PackedFloat32Array, bosses: Array, players: PackedFloat32Array, me: Array) -> void:
@@ -271,6 +277,10 @@ func on_events(events: Array) -> void:
 			world.handle_event(ev[2])
 		else:
 			_events.append(ev)
+
+
+func on_looks(events: Array) -> void:
+	_looks.append_array(events)
 
 
 func _sync_clock(t: float) -> void:
@@ -459,6 +469,7 @@ func _apply(ev: Array) -> void:
 		"bag~": GameServer.net_bag_changed(int(ev[2]), Net.decode_items(ev[3]), bool(ev[4]) if ev.size() > 4 else false)
 		"bag-": GameServer.net_bag_removed(int(ev[2]))
 		"xp": GameServer.net_xp_dropped(ev[2], ev[3], ev[4])
+		"xp-": GameServer.net_xp_taken(str(ev[2]), int(ev[3]))
 		"buffs":
 			var pid := int(ev[2])
 			var age := maxf(0.0,Net.now()+_offset-float(ev[0]))

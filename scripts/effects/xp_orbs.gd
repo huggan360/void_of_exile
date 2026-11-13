@@ -40,6 +40,7 @@ func _ready() -> void:
 	mesh.surface_set_material(0, mat)
 	_mesh = mesh
 	GameServer.xp_dropped.connect(_on_xp_dropped)
+	GameServer.xp_taken.connect(_on_xp_taken)
 
 
 ## The server dropped orbs ([{id, value}]) at `pos`.
@@ -54,6 +55,16 @@ func _on_xp_dropped(p_realm_id: String, pos: Vector3, orbs: Array) -> void:
 		mi.global_position = pos
 		var out := Vector3.FORWARD.rotated(Vector3.UP, randf() * TAU) * randf_range(1.0, 3.5)
 		_orbs.append({node = mi, vel = out + Vector3.UP * randf_range(3.0, 6.0), id = orb.id, age = 0.0})
+
+
+## Someone picked an orb up: it vanishes for everyone else too.
+func _on_xp_taken(p_realm_id: String, orb_id: int) -> void:
+	if p_realm_id != realm_id:
+		return
+	for o in _orbs:
+		if o.id == orb_id:
+			o.age = LIFETIME + 1.0
+			return
 
 
 func clear() -> void:

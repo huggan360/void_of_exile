@@ -47,7 +47,11 @@ Three parts:
   values in `Dots` and `DISMANTLE_DOTS`, keep them in step). Also 250 the first time an account finishes a campaign and
   1000 for a pack (`/server/dots/award`).
 * **Developers** (`set-developer NAME`): may use `/give <player> <item id> [count]` on any server.
-* Graphics quality: Options -> Graphics (`GraphicsSettings`): Low / Medium / High presets plus per-feature settings.
+* Graphics quality: Options -> Graphics (`GraphicsSettings`): Low / Medium / High presets plus per-feature settings,
+  View distance among them (Short on Low, Medium on Medium, Far on High).
+* Friends: Join shows only for a friend on another server and always lands you in that server's Tavern; on the
+  same server use Go in the party list. Teleports and sends within the world you are in move you there
+  without loading the world again, and changing characters in the Tavern keeps the Tavern.
 
     python3 void_accounts.py set-developer p1          # (0 to revoke)
     python3 void_accounts.py grant-chests p1 12
@@ -97,7 +101,10 @@ Test accounts: `p1` / `12345` and `p2` / `12345`.
 * `scripts/net/net.gd` (autoload `Net`): modes, every RPC.
 * `scripts/net/net_server.gd`: joining (claims the character from the account service), realms, ticks
   (snapshots + events per player, interest radius), checks, saving, death, status ping, LAN beacon,
-  heartbeat.
+  heartbeat. Each tick packs vitals, enemies and players into as few snapshot packets as fit the MTU;
+  looks-only events (`COSMETIC_EVENTS`: others' shots, debris, damage numbers, shakes) go unreliably
+  (`Net.c_looks`) so a lost packet never holds up shots and hits. Enemy attacks are stripped and keyed
+  once per attack (`_wire_cache`). New bags and XP pickups (`xp-`) reach the whole realm.
 * `scripts/net/net_client.gd`: clock sync, interpolation, enemy mirrors (`Enemy.mirror`), remote players,
   replaying events, predicted hp/mp.
 * `scripts/net/realm_instance.gd`: one realm in its own physics world (SubViewport).

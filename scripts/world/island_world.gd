@@ -261,11 +261,13 @@ func launchpad_arrival() -> Vector3:
 func update_streaming(pos: Vector3, build_all_now := false) -> void:
 	if SpaceLayout.pocket_at(pos)>=0: pos = launchpad_center()
 	var center := _chunk_of(pos)
+	# The View distance setting trims the client's ring (the server keeps LOAD_RADIUS).
+	var radius := mini(LOAD_RADIUS, ceili(LOAD_RADIUS * GraphicsSettings.view_scale()))
 	if center != _center_chunk:
 		_center_chunk = center
 		_queue.clear()
-		for dz in range(-LOAD_RADIUS, LOAD_RADIUS + 1):
-			for dx in range(-LOAD_RADIUS, LOAD_RADIUS + 1):
+		for dz in range(-radius, radius + 1):
+			for dx in range(-radius, radius + 1):
 				var c := center + Vector2i(dx, dz)
 				if not _chunks.has(c):
 					_queue.append(c)
@@ -274,7 +276,7 @@ func update_streaming(pos: Vector3, build_all_now := false) -> void:
 			return (a - center).length_squared() < (b - center).length_squared())
 	var keep := {}
 	for c: Vector2i in _chunks:
-		if maxi(absi(c.x - center.x), absi(c.y - center.y)) <= LOAD_RADIUS + 1:
+		if maxi(absi(c.x - center.x), absi(c.y - center.y)) <= radius + 1:
 			keep[c] = true
 	_prune_chunks(keep, build_all_now)
 	_build_queued(build_all_now)

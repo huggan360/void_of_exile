@@ -31,7 +31,7 @@ extends Node
 
 enum Mode { OFFLINE, CLIENT, SERVER }
 
-const PROTOCOL := 7
+const PROTOCOL := 8
 const VERSION := "0.15.0"
 const DEFAULT_PORT := 24565
 ## UDP status queries (server list pings) go to the game port + this.
@@ -210,6 +210,13 @@ func c_boss_snapshot(t: float, bosses: Array) -> void:
 func c_events(events: Array) -> void:
 	if client:
 		client.on_events(events)
+
+
+## Cosmetic events (other players' shots, debris, damage numbers, shakes).
+@rpc("authority", "call_remote", "unreliable_ordered", 4)
+func c_looks(events: Array) -> void:
+	if client:
+		client.on_looks(events)
 
 
 @rpc("authority", "call_remote", "reliable")

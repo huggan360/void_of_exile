@@ -135,7 +135,8 @@ func _friends() -> void:
 			line.add_child(_button("Tell", func() -> void: chat.open("/t %s " % player_name)))
 		if social.is_leader():
 			line.add_child(_button("Invite", func() -> void: social.party_op("invite", player_name)))
-		if f.online and str(f.server) != "Singleplayer" and (f.get("joinable", false) or f.get("same_server", false)):
+		# Join is for a friend on another server ("Go" in the party list teleports on this one).
+		if f.online and str(f.server) != "Singleplayer" and f.get("joinable", false) and not f.get("same_server", false):
 			line.add_child(_button("Join", func() -> void: social.join_friend(player_name)))
 		line.add_child(_button("×", func() -> void: Account.remove_friend(player_name)))
 		_body.add_child(line)

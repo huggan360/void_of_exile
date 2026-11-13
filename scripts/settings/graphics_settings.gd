@@ -34,17 +34,19 @@ const FEATURES := [
 		"Embers, snow, spores and dust drifting around you."],
 	["depth_of_field", "Depth of field", [["off", "Off"], ["on", "On"]],
 		"On the Surface and in the Tavern, the distance and things close to the camera go softly out of focus."],
+	["view_distance", "View distance", [["short", "Short"], ["medium", "Medium"], ["far", "Far"]],
+		"How far terrain, trees, plants, rocks and planet towns are drawn on the Surface and on planets. Short helps weaker PCs the most. Takes full effect on the next load."],
 ]
 const PRESET_VALUES := {
 	high = {render_scale = 100, upscaler = "off", antialiasing = "msaa2", shadows = "high", gi = "high",
 			ambient_occlusion = "high", indirect_light = "high", volumetric_fog = "high", glow = "on",
-			lights = "high", particles = "high", depth_of_field = "on"},
+			lights = "high", particles = "high", depth_of_field = "on", view_distance = "far"},
 	medium = {render_scale = 85, upscaler = "fsr", antialiasing = "fxaa", shadows = "medium", gi = "low",
 			ambient_occlusion = "low", indirect_light = "off", volumetric_fog = "low", glow = "on",
-			lights = "high", particles = "low", depth_of_field = "on"},
+			lights = "high", particles = "low", depth_of_field = "on", view_distance = "medium"},
 	low = {render_scale = 67, upscaler = "fsr", antialiasing = "fxaa", shadows = "low", gi = "off",
 			ambient_occlusion = "off", indirect_light = "off", volumetric_fog = "off", glow = "off",
-			lights = "low", particles = "low", depth_of_field = "off"},
+			lights = "low", particles = "low", depth_of_field = "off", view_distance = "short"},
 }
 ## Ambient light is lifted a little without global illumination, so caves
 ## don't turn pitch black.
@@ -216,6 +218,15 @@ static func ambient_factor(values: Dictionary) -> float:
 
 static func particle_ratio(values: Dictionary) -> float:
 	return [0.0, 0.35, 0.35, 1.0][level(values, "particles")]
+
+
+## Multiplier for draw and streaming distances (Surface and planets). The
+## headless server always streams at full range.
+static func view_scale(values: Dictionary = {}) -> float:
+	if DisplayServer.get_name() == "headless":
+		return 1.0
+	var v: Dictionary = values if not values.is_empty() else AppSettings.graphics
+	return {"short": 0.6, "medium": 0.8}.get(str(v.get("view_distance", "far")), 1.0)
 
 
 ## How many enemy projectiles may carry a real light at once.

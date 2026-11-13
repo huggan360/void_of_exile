@@ -208,7 +208,7 @@ func _process(delta: float) -> void:
 	if _stream_timer>0.0: return
 	_stream_timer = STREAM_EVERY
 	var eye := global_transform.affine_inverse()*camera.global_position
-	var reach := OBSTACLE_RANGE+PATCH_ARC
+	var reach := OBSTACLE_RANGE*GraphicsSettings.view_scale()+PATCH_ARC
 	var want: Array = []
 	for key: Vector3i in _patches:
 		var d := eye.distance_to(_patches[key].center)
@@ -241,12 +241,14 @@ func _build_patch(patch: Dictionary) -> Node3D:
 		var list: Array = groups[name]
 		var meshes := prefab.meshes_for(biome)
 		var fine := prefab.is_fine()
+		var view := GraphicsSettings.view_scale()
+		var near := (45.0 if fine else NEAR)*view
 		for slot in 2:
 			if meshes[slot]==null: continue
 			holder.add_child(_batch(meshes[slot], list, prefab, 1.0, VoxModel.glow_material() if slot==1 else VoxModel.material(),
-				Vector2(0.0, 45.0 if fine else NEAR), (45.0 if fine else NEAR)+PATCH_ARC, slot==0 and not fine))
+				Vector2(0.0, near), near+PATCH_ARC, slot==0 and not fine))
 		if not fine:
-			holder.add_child(_batch(prefab.lod_mesh_for(biome), list, prefab, 2.0, VoxModel.material(), Vector2(NEAR, 1e9), OBSTACLE_RANGE+PATCH_ARC*0.5, true))
+			holder.add_child(_batch(prefab.lod_mesh_for(biome), list, prefab, 2.0, VoxModel.material(), Vector2(near, 1e9), OBSTACLE_RANGE*view+PATCH_ARC*0.5, true))
 	return holder
 
 func _batch(mesh: Mesh, list: Array, prefab: ObstacleLibrary.Prefab, coarse: float, mat: Material, band: Vector2, end: float, shadow: bool) -> MultiMeshInstance3D:

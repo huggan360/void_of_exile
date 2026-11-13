@@ -84,9 +84,7 @@ func join_friend(player_name: String) -> void:
 	var target := await Account.join_friend(player_name)
 	if target.is_empty():
 		return
-	if target.get("same_server", false) and Net.is_client():
-		teleport(player_name)
-	else:
+	if not (target.get("same_server", false) and Net.is_client()):
 		join_requested.emit(target)
 
 

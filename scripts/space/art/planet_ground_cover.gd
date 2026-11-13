@@ -98,9 +98,10 @@ func _clear_all() -> void:
 func _schedule(eye: Vector3) -> void:
 	var ground := eye.normalized()*_radius
 	var want := {}
+	var view := GraphicsSettings.view_scale()
 	for level in LEVELS.size():
 		var tile: float = LEVELS[level][0]
-		var reach: float = LEVELS[level][1]
+		var reach: float = LEVELS[level][1]*view
 		for face in 6:
 			var n: Vector3 = FACES[face]
 			if eye.normalized().dot(n)<0.3: continue
@@ -252,11 +253,12 @@ func _batch(kind: String, list: Array) -> MultiMeshInstance3D:
 	mmi.multimesh = mm
 	mmi.material_override = SurfaceFlora.material()
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if spec.shadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mmi.visibility_range_end = spec.far
+	var far: float = spec.far*GraphicsSettings.view_scale()
+	mmi.visibility_range_end = far
 	mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	mmi.set_instance_shader_parameter("sway", spec.sway)
 	mmi.set_instance_shader_parameter("height", spec.height)
-	mmi.set_instance_shader_parameter("fade_end", spec.far)
+	mmi.set_instance_shader_parameter("fade_end", far)
 	mmi.set_instance_shader_parameter("glow", spec.glow)
 	return mmi
 

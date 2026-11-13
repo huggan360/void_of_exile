@@ -67,12 +67,13 @@ static func build_trees(world: IslandWorld, root: Node3D, area: Rect2i, drawn: b
 		var biome := Biomes.get_biome(int(parts[1]))
 		var meshes := prefab.meshes_for(biome)
 		var local := Transform3D(Basis.from_scale(Vector3.ONE * prefab.voxel_size), prefab.mesh_offset())
+		var view := GraphicsSettings.view_scale()
 		for i in 2:
 			if meshes[i] == null: continue
 			root.add_child(_multi(meshes[i], groups[key], local, VoxModel.glow_material() if i == 1 else VoxModel.material(),
-				0.0, TREE_NEAR, i == 0))
+				0.0, TREE_NEAR * view, i == 0))
 		var far_local := Transform3D(Basis.from_scale(Vector3.ONE * prefab.voxel_size * 2.0), prefab.mesh_offset())
-		var far := _multi(prefab.lod_mesh_for(biome), groups[key], far_local, VoxModel.material(), TREE_NEAR - 6.0, TREE_FAR, true)
+		var far := _multi(prefab.lod_mesh_for(biome), groups[key], far_local, VoxModel.material(), TREE_NEAR * view - 6.0, TREE_FAR * view, true)
 		far.visibility_range_begin_margin = 6.0
 		far.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 		root.add_child(far)
@@ -318,11 +319,12 @@ static func build_kind(root: Node3D, kind: String, list: Array) -> void:
 	mmi.multimesh = mm
 	mmi.material_override = material()
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if spec.shadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mmi.visibility_range_end = spec.far
+	var far: float = spec.far * GraphicsSettings.view_scale()
+	mmi.visibility_range_end = far
 	mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	mmi.set_instance_shader_parameter("sway", spec.sway)
 	mmi.set_instance_shader_parameter("height", spec.height)
-	mmi.set_instance_shader_parameter("fade_end", spec.far)
+	mmi.set_instance_shader_parameter("fade_end", far)
 	mmi.set_instance_shader_parameter("glow", spec.glow)
 	root.add_child(mmi)
 

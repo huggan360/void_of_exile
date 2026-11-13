@@ -526,8 +526,12 @@ func teleport(p: Dictionary, to_name: String) -> bool:
 	return false
 
 
-## Sends a player somewhere (their game travels there).
+## Sends a player somewhere (their game travels there). A spot in the world
+## they are already in is a warp: no world reload.
 func send_to(player_id: int, place: String, pos := Vector3.INF) -> void:
+	if pos.is_finite() and str(record(player_id).get("realm", "")) == place:
+		warp(player_id, place, pos)
+		return
 	send(player_id, ["goto", place, pos])
 
 
@@ -538,7 +542,7 @@ func warp(player_id: int, realm_id: String, pos: Vector3) -> void:
 	if p.is_empty() or p.dead:
 		return
 	if p.realm != realm_id:
-		send_to(player_id, realm_id, pos)
+		send(player_id, ["goto", realm_id, pos])
 		return
 	p.pos = pos
 	p.grace = NetServer.SNAP_BACK_GRACE * 8.0

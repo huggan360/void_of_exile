@@ -43,6 +43,8 @@ signal bag_added(bag: Dictionary)
 signal bag_changed(bag_id: int)
 signal bag_removed(bag_id: int)
 signal xp_dropped(realm_id: String, pos: Vector3, orbs: Array)
+## An orb was picked up (by anyone): every client drops it from view.
+signal xp_taken(realm_id: String, orb_id: int)
 
 var HP_REGEN := 1.5  # per second, once you haven't been hurt for a while
 var HP_REGEN_DELAY := 4.0
@@ -657,6 +659,7 @@ func collect_xp(player_id: int, orb_id: int) -> bool:
 		return false
 	_orbs.erase(orb_id)
 	(p.stats as PlayerStats).add_xp(orb.value)
+	xp_taken.emit(orb.realm, orb_id)
 	return true
 
 
@@ -688,6 +691,10 @@ func net_bag_removed(bag_id: int) -> void:
 
 func net_xp_dropped(realm_id: String, pos: Vector3, orbs: Array) -> void:
 	xp_dropped.emit(realm_id, pos, orbs)
+
+
+func net_xp_taken(realm_id: String, orb_id: int) -> void:
+	xp_taken.emit(realm_id, orb_id)
 
 
 ## Server: the realm and position of a player ("" if not connected).

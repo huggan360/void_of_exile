@@ -39,6 +39,11 @@ Open space with round planets, reached by ship from the Surface's Skyward Launch
   `SpacePlanet` builds a town or village only within 650 m of the camera and frees it past 850 m. Flora streams
   in 220 m patches with full models near (130 m) and coarse copies beyond; ground cover is tiled on worker
   threads. Water per planet: Tidewell's sea, lakes elsewhere.
+- **Asteroids** (`SpaceLayout.asteroids()`, drawn by `SpaceBackdrop`): voxel rocks from `AsteroidModels`
+  (3 rock, 2 crystal and 2 giant shapes, each at three voxel resolutions), batched per 3 km cell; each batch
+  swaps to the LOD its nearest rock needs (full under 1.4 km, middle under 4.2 km, giants 2.5x further).
+- **View distance** (Options -> Graphics, `GraphicsSettings.view_scale()`): Short / Medium / Far scales
+  Surface flora, obstacles, the client's chunk ring and terrain, and planet flora, ground cover and towns.
 - **Combat** on each planet's top (`SpaceLayout.COMBAT_CAP`) works like the realm. 32 planet creatures, 3 to 4
   per planet with a god each (`scripts/enemies/space_enemies.gd`); gods drop their planet's fortress key.
 - **Fortresses** (`scripts/space/planet_strongholds.gd`): Rose Bastion (Queen Briarrose), Amber Ziggurat

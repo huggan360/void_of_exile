@@ -108,8 +108,9 @@ func _stream_sites(delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera==null: return
 	var eye := global_transform.affine_inverse()*camera.global_position
+	var view := GraphicsSettings.view_scale()
 	for site: Dictionary in _sites:
-		var d := eye.distance_to((site.dir as Vector3)*_radius)
+		var d := eye.distance_to((site.dir as Vector3)*_radius)/view
 		if site.node!=null and d>SITE_DROP:
 			(site.node as Node).queue_free()
 			site.node = null

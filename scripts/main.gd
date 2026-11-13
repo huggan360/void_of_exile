@@ -153,8 +153,14 @@ func _ready() -> void:
 	hud.add_social(social, _body_of)
 	hud.quest_markers = campaign.markers
 	social.goto.connect(func(place: String, at: Vector3) -> void:
-		if not _dead: travel.call_deferred(place, at))
+		if _dead: return
+		# Already there: move within the world instead of loading it again.
+		if at.is_finite() and is_instance_valid(world) and world.realm_id == place: _warp.call_deferred(at)
+		else: travel.call_deferred(place, at))
 	social.warp.connect(_warp)
+	AppSettings.graphics_changed.connect(func() -> void:
+		if is_instance_valid(world) and world is IslandWorld and is_instance_valid(player.terrain_viewer):
+			player.terrain_viewer.view_distance = roundi(128 * GraphicsSettings.view_scale()))
 	social.space_unlocked.connect(func() -> void:
 		hud.toasts.push("The way to Space is open! Find the Skyward Launch Pad south of Hearthwick.", UIStyle.GOLD, 10.0))
 	social.join_requested.connect(join_friend)
@@ -625,6 +631,8 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 		var spot := arrive + Vector3(off.x, 0.0, off.y)
 		if world.is_walkable(spot):
 			arrive = Vector3(spot.x, maxf(arrive.y, world.ground_height(spot.x, spot.z)), spot.z)
+	# View distance (Options -> Graphics) trims the Surface's terrain; small places keep it all.
+	player.terrain_viewer.view_distance = roundi(128 * GraphicsSettings.view_scale()) if world is IslandWorld else 128
 	_place_player(arrive)
 	player.set_spatial_world(world)
 	player.facing = PI  # face the camera on arrival
@@ -816,7 +824,7 @@ func join_friend(target: Dictionary) -> void:
 		menus.show_servers("Your previous server is still saving, or the character is unavailable. Try joining again.", UIStyle.HP_LIGHT)
 		return
 	Account.choose(character_id)
-	social.join_target = "" if target.get("party_invite", false) else str(target.username)
+	social.join_target = ""  # joining a server always starts in its Tavern
 	_join_server(str(target.address), int(target.port))
 
 
@@ -957,10 +965,18 @@ func _new_character() -> void:
 
 ## The switch completes under the loading screen; only the Tavern reveals
 ## the new character. Keep the dead model hidden until the old world is gone.
+## Switching in the Tavern keeps the Tavern: the server leaves us where we
+## stand, so only the character changes (no world rebuild).
 func _on_switched(character_id: int, class_id: String) -> void:
 	Account.choose(character_id)
 	Account.refresh()
 	var client := Net.client
+	if not _dead and is_instance_valid(world) and Campaigns.is_tavern(world.realm_id):
+		player.velocity = Vector3.ZERO
+		await _arrive()
+		_switching = false
+		hud.toasts.push("Now playing your %s" % PlayerClasses.display_name(class_id), PlayerClasses.get_def(class_id).color, 2.5)
+		return
 	var record: Dictionary = await client.enter("hall")
 	if not Net.is_client() or Net.client != client:
 		return
@@ -1144,7 +1160,10 @@ func _warp(at: Vector3) -> void:
 	_async_world_build = true
 	world.set_meta("asynchronous_load",true)
 	await transition.fade_in(world.display_name)
-	_place_player(Vector3(at.x, world.ground_height(at.x, at.z), at.z))
+	# Spatial worlds (Space, the Theory) give a full position; flat ones a spot on the ground.
+	var aboard := world is IslandWorld and SpaceLayout.pocket_at(at) >= 0 and is_instance_valid(world.surface_ships)
+	if aboard: player.set_spatial_world(world.surface_ships)
+	_place_player(at if world is SpatialWorld or aboard else Vector3(at.x, world.ground_height(at.x, at.z), at.z))
 	await _arrive(false)
 	hud.visible = had_hud
 
