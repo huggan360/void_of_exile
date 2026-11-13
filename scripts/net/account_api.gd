@@ -9,6 +9,7 @@ extends Node
 ##     if r.ok: ...r.data...  else: ...r.error...
 
 const TIMEOUT := 10.0
+const BUSY_RETRIES := 2
 
 ## e.g. "https://void.plainshow.se"
 var base_url := ""
@@ -19,7 +20,19 @@ var server_key := ""
 
 
 ## Returns {ok: bool, status: int, data: Dictionary, error: String}.
+## A busy account service (503 busy: its database was locked and nothing was
+## kept) is asked again a couple of times before giving up.
 func call_api(method: String, path: String, body: Dictionary = {}) -> Dictionary:
+	var r := await _call_once(method, path, body)
+	for attempt in BUSY_RETRIES:
+		if r.status != 503 or not r.data.get("busy", false) or not is_inside_tree():
+			break
+		await get_tree().create_timer(1.0 + attempt).timeout
+		r = await _call_once(method, path, body)
+	return r
+
+
+func _call_once(method: String, path: String, body: Dictionary) -> Dictionary:
 	if base_url == "":
 		return {ok = false, status = 0, data = {}, error = "No account server is set."}
 	var http := HTTPRequest.new()
@@ -45,5 +58,6 @@ func call_api(method: String, path: String, body: Dictionary = {}) -> Dictionary
 	if result[0] != HTTPRequest.RESULT_SUCCESS:
 		return {ok = false, status = 0, data = {}, error = "Couldn't reach the account server."}
 	if status < 200 or status >= 300:
-		return {ok = false, status = status, data = data, error = str(data.get("error", "Account server error %d." % status))}
+		var fallback := "The account server had a problem (%d). Please try again." % status if status >= 500 else "Account server error %d." % status
+		return {ok = false, status = status, data = data, error = str(data.get("error", fallback))}
 	return {ok = true, status = status, data = data, error = ""}

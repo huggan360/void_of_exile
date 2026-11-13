@@ -145,7 +145,8 @@ func _process(delta: float) -> void:
 		_beacon_timer = 2.0
 		_beacon.put_packet(JSON.stringify(_status_info()).to_utf8_buffer())
 	_heartbeat_timer -= delta
-	if _heartbeat_timer <= 0.0 and not config.singleplayer:
+	# Singleplayer too: the heartbeat keeps its characters' leases (it isn't listed).
+	if _heartbeat_timer <= 0.0:
 		_heartbeat_timer = float(config.value("accounts", "heartbeat_interval", 5.0))
 		_heartbeat()
 	_save_timer -= delta

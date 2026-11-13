@@ -285,7 +285,7 @@ static func _build() -> void:
 
 	var master := EnemyDef.new()
 	master.id = "goblin_master"
-	master.portal_drop = {dungeon = "goblins_cave", chance = 0.2}
+	master.portal_drop = {dungeon = "goblins_cave", chance = 0.4}
 	master.enemy_name = "Goblin Master"
 	master.model = "goblin_master"
 	master.body_height = 1.875
@@ -398,9 +398,9 @@ static func _build() -> void:
 	TheoryEnemies.build(_defs)
 	SpaceEnemies.build(_defs)
 	PlanetBosses.build(_defs)
-	_defs["sun_jackal"].portal_drop = {dungeon = "sunken_court", chance = 0.15}
+	_defs["sun_jackal"].portal_drop = {dungeon = "sunken_court", chance = 0.3}
 	_balance_gods()
-	_defs["furnace_maw"].portal_drop = {dungeon = "cinder_depths", chance = 0.15}
+	_defs["furnace_maw"].portal_drop = {dungeon = "cinder_depths", chance = 0.3}
 
 
 ## Crabs on the shore, green dragons in the jungle.

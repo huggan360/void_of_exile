@@ -151,7 +151,11 @@ func is_sealed() -> bool:
 
 
 func _notices(dist: float) -> bool:
-	return boss_def.wake_on == "near" and dist < def.aggro_radius
+	var reach := def.aggro_radius
+	# In a dungeon only a player in the boss's own room wakes it.
+	if is_instance_valid(director) and director.world is DungeonWorld:
+		reach = minf(reach, (director.world as DungeonWorld).room_reach(global_position))
+	return boss_def.wake_on == "near" and dist < reach
 
 
 ## Woken (by a player coming near, or a shot): the intro starts. Sealed

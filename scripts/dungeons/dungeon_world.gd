@@ -87,8 +87,21 @@ func _site(index: int, members: Array) -> void:
 	var key := "%s_room_%d" % [realm_id, index]
 	var specs: Array = []
 	for member in members: specs.append({enemy = member, min = 1, max = 1})
-	Enemies.pack_overrides[key] = {members = specs, respawn_time = -1.0, activate_radius = 42.0}
+	# A boss or miniboss wakes when you enter its room, not from the room next door.
+	var reach := room_reach(layout.point(index))
+	Enemies.pack_overrides[key] = {members = specs, respawn_time = -1.0, activate_radius = reach if is_finite(reach) else 42.0}
 	enemy_director.add_quest_site({id = key, pack = key, pos = layout.point(index), seed = int(record.seed) + index * 97})
+
+## How near a player must be to wake the boss or miniboss whose room holds
+## `pos`: the room itself (its clear core and the doorway). INF elsewhere.
+func room_reach(pos: Vector3) -> float:
+	for i in layout.rooms.size():
+		var room: Dictionary = layout.rooms[i]
+		if not str(room.kind) in ["boss", "miniboss"]: continue
+		var center := layout.point(i)
+		if Vector2(pos.x - center.x, pos.z - center.z).length() <= float(room.radius) + 4.0:
+			return float(room.radius) + 3.0
+	return INF
 
 ## A stone bowl of fire lighting a room (halls, volcanoes, the burning forest).
 func _brazier(at: Vector3) -> void:

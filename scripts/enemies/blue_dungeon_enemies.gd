@@ -82,5 +82,5 @@ static func build(defs: Dictionary) -> void:
 	keeper.xp = 950
 	keeper.portal_drop = {}
 	defs[keeper.id] = keeper
-	defs["blue_genie"].portal_drop = {dungeon = "azure_grotto", chance = 0.15}
-	defs["azure_medusa"].portal_drop = {dungeon = "drowned_spire", chance = 0.15}
+	defs["blue_genie"].portal_drop = {dungeon = "azure_grotto", chance = 0.3}
+	defs["azure_medusa"].portal_drop = {dungeon = "drowned_spire", chance = 0.3}

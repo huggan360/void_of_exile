@@ -637,7 +637,7 @@ const TREES := {
 }
 ## How thick each biome's forest grows (Fosen's tall firs are spread out so
 ## you can walk between them).
-const TREE_DENSITY := {Biomes.FOSEN: 0.4, Biomes.WOODS: 0.95}
+const TREE_DENSITY := {Biomes.FOSEN: 0.4, Biomes.WOODS: 0.855, Biomes.JUNGLE: 0.9}
 ## Near water: willows and reeds in the green biomes.
 const WATERSIDE := {"surface/willow": 3, "surface/birch": 1}
 
