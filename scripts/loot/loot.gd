@@ -40,7 +40,7 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 	var public_mod: Dictionary = modifiers.get(public_owner,{})
 	var public: Array[Item] = []
 	var personal := {}  # player id -> Array[Item]
-	for entry: Dictionary in def.loot:
+	for entry: Dictionary in _with_divine(def):
 		var sample := _make(entry, rng, biome_stat)
 		if sample == null or not _allowed(def, sample):
 			continue
@@ -53,7 +53,8 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 				else: public.append(upgraded)
 			continue
 		for p in eligible:
-			var chance: float = entry.chance * (1.0 if sample.is_divine() or p == top or eligible.size() == 1 else OTHERS_CHANCE)
+			var chance: float = Items.divine_chance(sample, def.id) if sample.is_divine() \
+					else entry.chance * (1.0 if p == top or eligible.size() == 1 else OTHERS_CHANCE)
 			var bonus: Dictionary = modifiers.get(p,{})
 			chance = minf(1.0,chance*(1.0+float(bonus.get("chance",0.0))))
 			if rng.randf() < chance:
@@ -83,6 +84,19 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 	for p in personal:
 		_pack(bags, personal[p], p)
 	return bags
+
+
+## The loot table plus every piece of the enemy's Divine set (and its listed
+## cross-set relics) that the table doesn't name. Divine chances come from
+## Items.divine_chance, not from the table.
+static func _with_divine(def: EnemyDef) -> Array:
+	var table: Array = def.loot.duplicate()
+	var named := {}
+	for entry: Dictionary in table:
+		if entry.has("item"): named[entry.item] = true
+	for id in Items.divine_ids_for(def.id) + Items.BOSS_DIVINE_EXTRAS.get(def.id, []):
+		if not named.has(id): table.append({item = id, chance = 0.0})
+	return table
 
 
 static func _make(entry: Dictionary, rng: RandomNumberGenerator, biome_stat: Variant = "magic") -> Item:

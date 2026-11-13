@@ -53,7 +53,7 @@ static func build(defs: Dictionary) -> void:
 		b.loot.assign([{item = "elixir_hp", chance = 1.0}, {item = "elixir_mp", chance = 1.0},
 			{pool = {tier = tiers[1]}, chance = 0.6}, {pool = {tier = tiers[2]}, chance = 0.3, personal = true},
 			{pool = {tier = mini(6, int(tiers[2])+1)}, chance = 0.08, personal = true},
-			{item = "elixir_of_"+str(spec[8]), chance = 0.6}, {item = "backpack", chance = 0.05}])
+			{item = "elixir_of_"+str(spec[8]), chance = 1.0}, {item = "backpack", chance = 0.05}])
 		defs[id] = b
 	defs["veil_herald"] = _herald()
 
@@ -79,7 +79,7 @@ static func _herald() -> BossDef:
 		{until = 0.0, defense = 8, variant = "shattered"}])
 	b.loot.assign([{item = "elixir_hp", chance = 1.0}, {item = "elixir_mp", chance = 1.0},
 		{pool = {tier = 5}, chance = 0.5}, {pool = {tier = 6}, chance = 0.12, personal = true},
-		{item = "elixir_of_magic", chance = 0.5}, {item = "backpack", chance = 0.04}])
+		{item = "elixir_of_mp", chance = 1.0}, {item = "backpack", chance = 0.04}])
 	return b
 
 ## A boss projectile with its authored model (creatures/boss_projectiles/<model>).

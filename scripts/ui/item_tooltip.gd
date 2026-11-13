@@ -53,8 +53,8 @@ func show_item(item: Item) -> void:
 				str(charge.get("name", str(charge.get("style", "power")).capitalize())), float(charge.get("mult", 2.0))], UIStyle.PROJECTILE))
 			numbers.append(TextMarkup.key_value("Hold right click", "1 s to full charge", UIStyle.PROJECTILE))
 			var style := str(charge.get("style", "power"))
-			var count := int(charge.get("count", 7 if style == "volley" else 6)) if style in ["volley", "stream", "burst", "serpent_fan"] else 2 if style == "helix" else 1 if style in ["arcane", "inferno", "singularity"] else item.shots
-			numbers.append(TextMarkup.key_value("Charged shots", "%d%s" % [count, " - equal shares" if style in ["stream", "burst", "helix", "serpent_fan"] else ""], UIStyle.PROJECTILE))
+			var count := int(charge.get("count", 7 if style == "volley" else 12 if style == "nova" else 6)) if style in ["volley", "stream", "burst", "serpent_fan", "nova"] else 2 if style == "helix" else 1 if style in ["arcane", "inferno", "singularity"] else item.shots
+			numbers.append(TextMarkup.key_value("Charged shots", "%d%s" % [count, " - equal shares" if style in ["stream", "burst", "helix", "serpent_fan", "nova"] else ""], UIStyle.PROJECTILE))
 	if not item.ring.is_empty():
 		var peak := roundi(item.ring.damage * (stats.spell_multiplier(item) if stats else 1.0))
 		numbers.append(TextMarkup.key_value("Warp ring", "%d–%d damage / pulse" % [roundi(peak * MagicRing.MIN_DAMAGE_SHARE), peak]))

@@ -65,7 +65,8 @@ const PLAYER_PROJECTILE_RANGE_MULTIPLIER := 0.6
 ## Right-click charged shot (G3+ and Divine bows). Empty = none.
 ## {style, mult, ...}: "power" (one big fast shot), "volley" (count, spread),
 ## "helix" (two big weaving shots), "serpent_fan" (piercing fan: count, spread),
-## "burst" (count, interval),
+## "burst" (count, interval), "nova" (a ring of `count` shots all round: range, wave, pierce),
+## "volley" also takes `wave` (neighbouring arrows weave in opposite phases),
 ## "singularity" (piercing arrow that collapses into a warp ring),
 ## "inferno" (fire bolt that bursts into flames on impact).
 @export var charge := {}

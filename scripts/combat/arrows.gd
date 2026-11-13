@@ -57,7 +57,7 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 	node.global_transform = Transform3D(_flight_basis(direction), origin).scaled_local(node.scale)
 	if p.get("glow",false): GameAudio.projectile_flight(node,bool(mods.get("visual",false)))
 	if p.get("trail", false) or trail_override != "":
-		node.add_child(_make_trail(weapon, trail_override))
+		node.add_child(_make_trail(weapon, trail_override if trail_override != "" else str(p.get("particles", ""))))
 	var spinner: Node3D = null
 	if mods.get("spiral", false):
 		spinner = _make_spiral(weapon)
@@ -68,7 +68,8 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 		travelled = 0.0, range = weapon.projectile_range() * mods.get("range", 1.0), stuck = false, life = 0.0,
 		damage = damage, weapon = weapon, phase = phase, hit = {}, hit_object = false,
 		wave_amp = mods.get("wave_amp", p.get("wave_amp", 0.0)), wave_freq = p.get("wave_freq", 0.0),
-		pierce = mods.get("pierce", p.get("pierce", false)), magic = p.get("style", "arrow") not in ["arrow", "trident"],
+		pierce = mods.get("pierce", p.get("pierce", false)),
+		magic = p.get("style", "arrow") not in ["arrow", "trident"] if mods.has("style") else bool(p.get("magic", p.get("style", "arrow") not in ["arrow", "trident"])),
 		secondary = mods.get("secondary", false), cone_deg = mods.get("cone_deg", 0.0),
 		base_scale = node.scale,
 		spinner = spinner, burst = mods.get("burst", ""), done = false, visual = mods.get("visual", false),
@@ -279,6 +280,55 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 				_box(lit, Vector3(side * 0.09, 0.09, -0.26), Vector3(0.055, 0.11, 0.08), c2)
 				_box(lit, Vector3(side * 0.07, -0.075, -0.44), Vector3(0.035, 0.09, 0.07), c2)
 				_box(lit, Vector3(side * 0.085, 0.02, -0.44), Vector3(0.035, 0.04, 0.025), Color.WHITE)
+		"fang":
+			# A dripping venom glob with two curved fangs in front.
+			_box(lit, Vector3(0, 0, 0.05), Vector3(0.2, 0.18, 0.26), c1)
+			_box(lit, Vector3(0, -0.06, 0.24), Vector3(0.12, 0.1, 0.16), c1.lerp(c2, 0.4))
+			_box(body, Vector3(0, -0.1, 0.4), Vector3(0.06, 0.06, 0.1), c2)
+			for side in [-1.0, 1.0]:
+				_box(lit, Vector3(side * 0.08, -0.02, -0.16), Vector3(0.05, 0.05, 0.16), Color("f2ffe0"))
+				_box(lit, Vector3(side * 0.05, -0.06, -0.27), Vector3(0.04, 0.05, 0.08), Color("f2ffe0"))
+		"crescent":
+			# A flat crescent, dark inside and burning at the rim, opening forwards.
+			for i in 9:
+				var a := lerpf(-1.25, 1.25, i / 8.0)
+				var at := Vector3(sin(a) * 0.32, 0, -cos(a) * 0.32 + 0.22)
+				var rim := absf(a) < 1.0
+				_box(lit if rim else body, at, Vector3(0.11, 0.06 if rim else 0.05, 0.11), c1 if rim else c2)
+				_box(body, at * Vector3(0.7, 1, 0.7) + Vector3(0, 0, 0.07), Vector3(0.08, 0.05, 0.08), c2)
+			_box(lit, Vector3(0, 0, -0.08), Vector3(0.09, 0.09, 0.09), c1.lightened(0.4))
+		"thorn":
+			# A crimson needle with thorns along it.
+			_box(body, Vector3(0, 0, 0.08), Vector3(0.05, 0.05, 0.7), c2)
+			_box(tip_tool, Vector3(0, 0, -0.32), Vector3(0.09, 0.09, 0.18), c1)
+			for k in 3:
+				var side := 1.0 if k % 2 == 0 else -1.0
+				_box(lit, Vector3(side * 0.06, 0.02, -0.08 + k * 0.17), Vector3(0.07, 0.03, 0.05), c1)
+			_box(lit, Vector3(0, 0, 0.42), Vector3(0.12, 0.12, 0.08), c1.darkened(0.2))
+		"heart":
+			# A big beating heart of blood.
+			for x: int in [-1, 0, 1]:
+				for y: int in [-1, 0, 1]:
+					var lobe := y == 1 and x != 0
+					if y == -1 and x != 0: continue
+					_box(lit if (x + y) % 2 == 0 else body, Vector3(x * 0.11 + (x * 0.03 if lobe else 0.0), y * 0.11, 0),
+						Vector3(0.12, 0.12, 0.16), c1 if lobe or (x == 0 and y == 0) else c1.darkened(0.25))
+			_box(body, Vector3(0, -0.21, 0), Vector3(0.07, 0.08, 0.1), c2)
+			_box(lit, Vector3(0.04, 0.1, -0.09), Vector3(0.05, 0.05, 0.04), Color("ffb0b0"))
+		"shard":
+			# Prismatic splinters that never agree on a colour.
+			var hues := [c1, c2, Color("6cc8ff"), Color("fff35c"), Color("b66bff")]
+			for i in 7:
+				var a := TAU * i / 7.0
+				_box(lit, Vector3(cos(a) * 0.1, sin(a) * 0.1, -0.1 + (i % 3) * 0.12), Vector3(0.06, 0.06, 0.22), hues[i % hues.size()])
+			_box(lit, Vector3(0, 0, -0.25), Vector3(0.08, 0.08, 0.16), Color.WHITE)
+		"cinder":
+			# A charred lump with a glowing core and a cracked crust.
+			_box(lit, Vector3.ZERO, Vector3(0.13, 0.13, 0.13), c1)
+			for d in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 1, 0), Vector3(0, -1, 0), Vector3(0, 0, 1)]:
+				_box(body, d * 0.09, Vector3(0.1, 0.1, 0.1), c2)
+			_box(lit, Vector3(0.09, 0.09, 0), Vector3(0.04, 0.04, 0.04), c1.lightened(0.3))
+			_box(lit, Vector3(-0.09, 0, 0.09), Vector3(0.04, 0.04, 0.04), c1)
 		"orb":
 			for x: int in [-1, 0, 1]:
 				for y: int in [-1, 0, 1]:
@@ -372,6 +422,33 @@ func _make_trail(weapon: Item, trail_override: String) -> GPUParticles3D:
 			pm.hue_variation_max = 1.0
 		"embers":
 			pm.color = Color(1.0, 0.5, 0.15)
+		"venom":  # drips fall away
+			pm.color = Color("9cf03a")
+			pm.gravity = Vector3(0, -6.0, 0)
+			pm.hue_variation_min = -0.03
+			pm.hue_variation_max = 0.03
+		"blood":
+			pm.color = Color("b8141e")
+			pm.gravity = Vector3(0, -7.0, 0)
+		"ash":  # smoke and sparks rise
+			pm.color = Color("5a5552")
+			pm.gravity = Vector3(0, 2.5, 0)
+			pm.hue_variation_min = -0.02
+			pm.hue_variation_max = 0.08
+		"eclipse":  # gold and dusk
+			pm.color = Color("ffb347")
+			pm.hue_variation_min = -0.12
+			pm.hue_variation_max = 0.0
+		"madness":
+			pm.color = Color("ff4fd8")
+			pm.hue_variation_min = -1.0
+			pm.hue_variation_max = 1.0
+		"petals":  # pink and teal, drifting
+			pm.color = Color("f06aa8")
+			pm.gravity = Vector3(0, -1.2, 0)
+			pm.spread = 45.0
+			pm.hue_variation_min = -0.5
+			pm.hue_variation_max = 0.0
 	var shrink := Curve.new()
 	shrink.add_point(Vector2(0, 1))
 	shrink.add_point(Vector2(1, 0))

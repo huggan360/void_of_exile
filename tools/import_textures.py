@@ -5,13 +5,16 @@ Default: ~/Documents/Voidrealm_textures. Unassigned divine sets stay art-only.
 import json,sys,zipfile
 from pathlib import Path
 from PIL import Image
-# Boss-assigned sets (keep in step with Items.DIVINE_SETS).
-LIVE_SETS = {"Spirit", "Iron", "The_Blue", "Frost", "Satan", "Holy_Divine", "Void", "Fallenwood", "Silver", "Dragon_Fire", "Storm"}
+# Boss-assigned sets (keep in step with Items.DIVINE_SETS). Every set is live now.
+LIVE_SETS = {"Spirit", "Iron", "The_Blue", "Frost", "Satan", "Holy_Divine", "Void", "Fallenwood", "Silver", "Dragon_Fire",
+             "Storm", "Venom", "Eclipse", "Blood", "Madness", "Cindrella", "Goldslinger", "Ash"}
 # Legacy source filenames -> runtime item ids.
 ALIASES = {"crucefix of thalao": "D_bonus_crucifix_ofthalao",
            "flame of the broken": "D_bonus_flame_ofthebroken","crucefix of the blue": "D_bonus_crucifix_oftheblue",
            "croucefix of satan": "D_bonus_crucifix_ofsatan",
-           "flame of the divine": "D_bonus_flame_ofthedivine"}
+           "flame of the divine": "D_bonus_flame_ofthedivine",
+           "crucefix of blood": "D_bonus_crucifix_ofblood", "croucefix of madness": "D_bonus_crucifix_ofmadness",
+           "flame of the cindrella": "D_bonus_flame_ofcindrella"}
 def flatten(path, size=(8,8)):
     with zipfile.ZipFile(path) as z:
         data=json.loads(z.read("data.json")); w,h=data["size_x"],data["size_y"]

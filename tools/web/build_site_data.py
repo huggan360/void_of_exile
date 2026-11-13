@@ -146,14 +146,15 @@ def main():
                             "pattern": spec.get("pattern"), "color": color(spec.get("color")),
                             "effects": [x.get("id") for x in spec.get("effects", []) if isinstance(x, dict)],
                             "image": image})
-        drops = []
-        for loot in e.get("loot") or []:
-            if isinstance(loot, dict) and loot.get("item") in items:
-                drops.append({"item": loot["item"], "chance": loot.get("chance")})
+        # The wiki shows what drops, never how often.
         divine = boss_sets.get(cid, "")
-        for i in sets.get(divine, []):
+        drops = [{"item": i} for i in sets.get(divine, []) if i in items]
+        for i in c.get("boss_divine_extras", {}).get(cid, []):
             if i in items and not any(d["item"] == i for d in drops):
-                drops.append({"item": i, "chance": None})
+                drops.append({"item": i})
+        for loot in e.get("loot") or []:
+            if isinstance(loot, dict) and loot.get("item") in items and not any(d["item"] == loot["item"] for d in drops):
+                drops.append({"item": loot["item"]})
         creatures.append({
             "id": cid, "name": e.get("enemy_name", cid), "boss": bool(e.get("is_boss")), "god": bool(e.get("is_god")),
             "hp": int(e.get("hp", 0)), "defense": int(e.get("defense", 0)), "xp": int(e.get("xp", 0)),

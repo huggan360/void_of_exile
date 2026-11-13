@@ -559,11 +559,24 @@ func _release_charge(weapon: Item, power: float) -> void:
 			_burst_left = count
 			_burst_timer = 0.0
 		"volley":
+			# "wave": neighbouring arrows weave in opposite phases, a crossing lattice.
 			var count: int = c.get("count", 7)
+			var wave: float = c.get("wave", 0.0)
 			for i in count:
 				var offset := ((count - 1) * 0.5 - i) * deg_to_rad(c.get("spread", 6.0))
-				_emit_charged(origin, direction.rotated(up_direction, offset), weapon, mult * weapon.shot_share(i, count), 0.0,
-						{speed = 1.3, size = 1.2, range = 1.2, spiral = i == count / 2})
+				var look := {speed = 1.3, size = 1.2, range = 1.2, spiral = i == count / 2}
+				if wave > 0.0: look.wave_amp = wave
+				_emit_charged(origin, direction.rotated(up_direction, offset), weapon, mult * weapon.shot_share(i, count),
+						PI * (i % 2) if wave > 0.0 else 0.0, look)
+		"nova":
+			# A ring of shots in every direction, each with an equal share.
+			var count: int = c.get("count", 12)
+			for i in count:
+				var turn := TAU * i / count
+				var look := {speed = 1.1, size = 1.35, range = float(c.get("range", 0.9)), spiral = i % 3 == 0,
+						pierce = c.get("pierce", true)}
+				if c.has("wave"): look.wave_amp = c.wave
+				_emit_charged(origin, direction.rotated(up_direction, turn), weapon, mult / count, PI * (i % 2), look)
 		"helix":
 			for i in 2:
 				_emit_charged(origin, direction, weapon, mult * 0.5, PI * i,

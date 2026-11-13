@@ -82,6 +82,18 @@ const DIVINE_SETS := {
 		"D_bonus_flame_ofthedivine"],
 	Void = ["D_bow_Darkmatter", "D_cloak_thevoid", "D_robe_ofthegalaxy", "D_trident_ofthevoid",
 		"D_wand_thewandofdarkness"],
+	Venom = ["D_bow_ofvenom", "D_wand_ofvenom", "D_trident_ofvenom", "D_spell_ofvenom", "D_cloak_ofvenom",
+		"D_robe_ofvenom", "D_bonus_crucifix_ofvenom", "D_bonus_flame_ofvenom", "D_bonus_eye_ofvenom",
+		"D_bonus_crystal_ofvenom", "D_bonus_talisman_ofvenom"],
+	Eclipse = ["D_bow_ofeclipse", "D_wand_ofeclipse", "D_trident_ofeclipse", "D_spell_ofeclipse", "D_cloak_ofeclipse",
+		"D_robe_ofeclipse", "D_bonus_crucifix_ofeclipse", "D_bonus_flame_ofeclipse", "D_bonus_eye_ofeclipse",
+		"D_bonus_crystal_ofeclipse", "D_bonus_talisman_ofeclipse"],
+	Blood = ["D_bow_Blood", "D_trident_ofblood", "D_wand_thewandofpower", "D_cloak_blood", "D_robe_robeofpower",
+		"D_bonus_crucifix_ofblood"],
+	Madness = ["D_trident_ofmadness", "D_cloak_unlimitedmadness", "D_bonus_crucifix_ofmadness"],
+	Cindrella = ["D_bow_Cindrella", "D_bonus_flame_ofcindrella"],
+	Goldslinger = ["D_cloak_goldslinger"],
+	Ash = ["D_wand_thewandofash"],
 }
 ## Encounters assigned a Divine set; unassigned enemies cannot drop Divine items.
 const BOSS_DIVINE_SET := {
@@ -91,6 +103,16 @@ const BOSS_DIVINE_SET := {
 	gilded_vizier = "Silver", magma_warden = "Dragon_Fire", pyre_ent = "Dragon_Fire",
 	goblin_king = "Fallenwood", blue_dragon = "The_Blue", rimeheart_prism = "Frost", vharok = "Satan",
 	scarab_regent = "Holy_Divine", hollow_crown = "Void",
+	# Sets matched to each boss's look; stronger bosses carry stronger sets.
+	thornmaw_bloom = "Cindrella", mad_farmer = "Ash", queen_briarrose = "Blood", amber_colossus = "Goldslinger",
+	selenarch = "Eclipse", brood_matriarch = "Venom", stormeye_tyrant = "Madness", veil_herald = "Madness",
+	void_empress = "Void",
+}
+## Sets two bosses share. The first boss favours even items, the second odd
+## ones: a boss drops its favourites 1% more often.
+const SHARED_SETS := {
+	Storm = ["abyssal_siren", "drowned_cantor"], Dragon_Fire = ["magma_warden", "pyre_ent"],
+	Void = ["hollow_crown", "void_empress"], Madness = ["stormeye_tyrant", "veil_herald"],
 }
 
 
@@ -104,6 +126,27 @@ const BOSS_DIVINE_EXTRAS := {
 ## The divine item ids a boss may drop ([] for everyone else).
 static func divine_ids_for(enemy_id: String) -> Array:
 	return DIVINE_SETS.get(BOSS_DIVINE_SET.get(enemy_id, ""), [])
+
+
+## Each eligible player's own chance at one Divine item from this boss. The
+## piece decides it: weapons and spells 5%, armour 6%, bonus relics 7%, and an
+## item with a drawback 1% more; a shared set's favourites 1% more again.
+## Relics from another set (BOSS_DIVINE_EXTRAS) are rarer extras at 60%.
+static func divine_chance(item: Item, enemy_id: String) -> float:
+	var chance := 0.05 if item.slot in ["weapon", "spell"] else 0.06 if item.slot == "armor" else 0.07
+	for value in item.bonuses.values():
+		if value < 0:
+			chance += 0.01
+			break
+	var set_name: String = BOSS_DIVINE_SET.get(enemy_id, "")
+	var ids: Array = DIVINE_SETS.get(set_name, [])
+	if not item.id in ids:
+		return chance * 0.6
+	if SHARED_SETS.has(set_name):
+		var bosses: Array = SHARED_SETS[set_name]
+		if bosses[ids.find(item.id) % bosses.size()] == enemy_id:
+			chance += 0.01
+	return chance
 const BONUS_KINDS := ["crucifix", "flame", "eye", "crystal", "talisman"]
 static var _catalog := {}
 
@@ -150,13 +193,20 @@ static func exists(id: String) -> bool:
 	return _catalog.has(id)
 
 
+## Spells only go up to G5, so they have their own scale: a pool's spell is
+## the one that matches its gear in strength (G5 spells only from G8 pools).
+const SPELL_TIER := [1, 1, 2, 3, 3, 4, 4, 5]
+
+
 ## A random graded item matching `pool` ({tier, slots}), or null.
 static func from_pool(pool: Dictionary, rng: RandomNumberGenerator) -> Item:
 	var slots: Array = pool.get("slots", ["weapon", "armor", "spell", "bonus"])
 	if _catalog.is_empty():
 		make("G1_bow")
+	var spell_tier: int = SPELL_TIER[clampi(int(pool.tier), 1, 8) - 1]
 	var matches: Array = _catalog.values().filter(func(i: Item) -> bool:
-		return i.tier == pool.tier and i.slot in slots and not i.is_consumable() and not i.is_divine())
+		if i.is_consumable() or i.is_divine() or not i.slot in slots: return false
+		return i.tier == (spell_tier if i.slot == "spell" else int(pool.tier)))
 	return null if matches.is_empty() else (matches[rng.randi() % matches.size()] as Item).duplicate(true) as Item
 
 
@@ -586,6 +636,7 @@ static func divine() -> Array[Item]:
 	_storm_set(out)
 	_iron_set(out)
 	_spirit_set(out)
+	DivineSets.build(out)
 
 	for item in out:
 		if item.is_weapon(): _weapon_attacks(item)
@@ -596,6 +647,7 @@ static func divine() -> Array[Item]:
 		# the Goblin King's rare scepter, are assigned by their set builder.
 		if item.id in ["D_bow_Blood", "D_cloak_blood"]:
 			item.drop_bag = "black"
+	DivineSets.finish(out)
 	var live := []
 	for ids: Array in DIVINE_SETS.values():
 		live.append_array(ids)
@@ -905,7 +957,17 @@ static func _weapon_attacks(item: Item) -> void:
 
 static func _ring_effects(item: Item) -> void:
 	if item.ring.is_empty(): return
-	if "frost" in item.id:
+	# Every Divine spell's ring does its own thing.
+	const DIVINE_RINGS := {
+		D_spell_oftheblue = [{id = "speed", amount = -4, duration = 3.0}],
+		D_spell_ofthedivine = [{id = "armour_broken", duration = 3.0}],
+		D_spell_ofstorm = [{id = "static", duration = 2.0}, {id = "speed", amount = -2, duration = 2.0}],
+		D_spell_ofvenom = [{id = "armour_broken", duration = 4.0}, {id = "speed", amount = -3, duration = 3.0}],
+		D_spell_ofeclipse = [{id = "quiet", duration = 3.0}],
+	}
+	if DIVINE_RINGS.has(item.id):
+		item.secondary_effects.assign(DIVINE_RINGS[item.id])
+	elif "frost" in item.id:
 		item.secondary_effects = [{id="static", duration=4.4}]
 	elif item.is_divine():
 		item.secondary_effects = [{id="armour_broken", duration=3.0}]

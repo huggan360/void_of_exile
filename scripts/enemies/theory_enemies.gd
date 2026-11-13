@@ -75,5 +75,5 @@ static func build(defs: Dictionary) -> void:
 	b.phases.assign([{until = 0.75, defense = 20}, {until = 0.5, defense = 20}, {until = 0.25, defense = 18, variant = "brood"},
 		{until = 0.0, defense = 12, variant = "unmade"}])
 	b.loot.assign([{item = "elixir_hp", chance = 1.0}, {item = "elixir_mp", chance = 1.0}, {pool = {tier = 5}, chance = 0.35},
-		{pool = {tier = 6}, chance = 0.1}, {item = "backpack", chance = 0.03}])
+		{pool = {tier = 6}, chance = 0.1}, {item = "elixir_of_dexterity", chance = 1.0}, {item = "backpack", chance = 0.03}])
 	defs[b.id] = b
