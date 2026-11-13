@@ -55,7 +55,7 @@ func _ready() -> void:
 	report.streamed_example = streamed_counts
 	report.streamed_missing = missed_counts
 	print("Whole-area candidate sites: ",sites.size(),"; chunk-enumerated sites: ",streamed.size())
-	var file := FileAccess.open("res://docs/realm_expansion/biome_enemy_report.json",FileAccess.WRITE)
+	var file := FileAccess.open("res://tools/previews/biome_enemy_report.json",FileAccess.WRITE)
 	file.store_string(JSON.stringify(report,"\t"))
 	print("Spawn audit exported: ",sites.size()," planned sites for example seed ",report.example_seed)
 	get_tree().quit()

@@ -15,5 +15,5 @@ func _ready() -> void:
 			if feature != null and feature.type == "woodland_lake":
 				color = Color("#447b96")
 			image.set_pixel(x, z, color.lightened(maxf(0, base.x - 12) * 0.002))
-	image.save_png("res://docs/realm_expansion/map_base.png")
+	image.save_png("res://tools/previews/map_base.png")
 	get_tree().quit()

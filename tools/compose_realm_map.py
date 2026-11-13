@@ -3,7 +3,7 @@
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
 import json
-r=Path(__file__).resolve().parents[1];folder=r/'docs/realm_expansion'
+r=Path(__file__).resolve().parents[1];folder=r/'tools/previews'
 plan=json.loads((folder/'seed_20261031.json').read_text())
 out=Image.new('RGB',(1360,1100),'#19232e');out.paste(Image.open(folder/'map_base.png').resize((1008,1008),Image.Resampling.NEAREST),(24,65));d=ImageDraw.Draw(out)
 def font(n,bold=False):return ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans'+('-Bold' if bold else '')+'.ttf',n)

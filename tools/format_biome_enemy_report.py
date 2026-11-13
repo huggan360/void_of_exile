@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-r=json.loads((ROOT/'docs/realm_expansion/biome_enemy_report.json').read_text())
+r=json.loads((ROOT/'tools/previews/biome_enemy_report.json').read_text())
 lines=[]
 def add(s=''):lines.append(s)
 def spirit_chances(entries):
@@ -67,6 +67,6 @@ for b in r['biomes']:
  add(f"| {b['name']} | {e.get('total_packs',0)} | {stream.get('total_packs',0)} | {e.get('god_enemies',0)} | {e.get('total_enemies',0)} |")
 add('\nSources: scripts/world/biomes.gd, island_generator.gd; scripts/enemies/enemies.gd, realm_enemy_expansion.gd, enemy_patrol.gd, enemy_director.gd. Native models: creatures/realm_expansion_03.json.\n')
 text='\n'.join(lines)+'\n'
-(ROOT/'docs/realm_expansion/BIOME_ENEMY_SPAWNS.md').write_text(text)
+(ROOT/'tools/previews/BIOME_ENEMY_SPAWNS.md').write_text(text)
 Path('/home/hugo/Documents/Voidrealm_textures/BIOME_ENEMY_SPAWNS.txt').write_text(text)
 print('Updated production spawn report with',len(manifest),'new creatures.')

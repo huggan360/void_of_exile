@@ -28,5 +28,5 @@ func _ready() -> void:
 	camera.current = true
 	await get_tree().create_timer(2).timeout
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://docs/realm_expansion/log_houses_engine.png")
+	get_viewport().get_texture().get_image().save_png("res://tools/previews/log_houses_engine.png")
 	get_tree().quit()

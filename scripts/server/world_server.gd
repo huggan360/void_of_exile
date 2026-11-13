@@ -9,8 +9,8 @@ extends Node
 ## the record of the realm it enters; a client keeps none of its own.
 
 const LAYOUT_VERSION := 7  # 7: the Surface remade in 0.25 m voxels (new map)
-## Every realm is the same island: the reviewed map (docs/realm_expansion/
-## seed_20261031.json), no longer a random one per realm.
+## Every realm is the same island: the reviewed map (seed
+## 20261031), no longer a random one per realm.
 const MAP_SEED := 20261031
 const SAVE_DIR := "user://server/realms/"
 

@@ -36,5 +36,5 @@ for i,(key,title,biome,color,forms) in enumerate(entries):
 draw.text((36,1429),'Rendered from the current game assets - 1 November 2026',font=font(17),fill='#8195aa')
 output=Path('/home/hugo/Desktop/Voidrealm Boss Preview.png')
 sheet.save(output)
-sheet.save(ROOT/'docs/realm_expansion/pixel_boss_preview.png')
+sheet.save(ROOT/'tools/previews/pixel_boss_preview.png')
 print(output)

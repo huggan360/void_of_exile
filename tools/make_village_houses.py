@@ -185,5 +185,5 @@ def main():
  sheet=Image.new('RGB',(1440,3*510),'#202832');d=ImageDraw.Draw(sheet)
  for i,(name,folder) in enumerate(names):
   sheet.paste(Image.open(folder/'preview.png'),(i%3*480,i//3*510));d.text((i%3*480+16,i//3*510+472),name.replace('_',' ').title(),font=ImageFont.truetype(BOLD,22),fill='white')
- sheet.save(ROOT/'docs/realm_expansion/detailed_houses.png');print('Generated nine two-storey voxel houses, three detailed town props and preview.')
+ sheet.save(ROOT/'tools/previews/detailed_houses.png');print('Generated nine two-storey voxel houses, three detailed town props and preview.')
 if __name__=='__main__':main()

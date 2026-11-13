@@ -4,7 +4,7 @@ Three parts:
 
 | Part | Where | What it does |
 |---|---|---|
-| Account service ("player sync") | Raspberry Pi `hugohansson@192.168.1.5`, `~/void_accounts`, systemd `void-accounts`, Apache vhost `void.plainshow.se` -> `127.0.0.1:8095` | Accounts, logins, every character (alive and dead) with its items, and the list of running game servers |
+| Account service ("player sync") | Code in the `void_of_exile_account` repo (`server/void_accounts.py`, deploy with `deploy/deploy.sh accounts`). Runs on the Raspberry Pi `hugohansson@192.168.1.5`, `~/void_accounts`, systemd `void-accounts`; `void.plainshow.se/api/` -> `127.0.0.1:8095` | Accounts, logins, every character (alive and dead) with its items, and the list of running game servers |
 | Dedicated game server | Any PC: `tools/net/run_server.sh` (headless Godot, same project) | Realms, enemies and their AI, loot, XP, characters while they play |
 | Client | The game | Log in (bottom left) -> **Singleplayer** or **Servers** -> play; change characters in the Tavern (top left) |
 

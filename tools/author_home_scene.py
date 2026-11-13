@@ -4,7 +4,7 @@
 Writes scenes/home/tavern.tscn: coastline, HomeRoad curves, plazas, buildings,
 gardens, trees, street furniture and residents. Re-running it REPLACES any
 editor changes to that scene, so only run it to start the layout over.
-Also writes docs/realm_expansion/tavern_plan.png, a top-down plan preview.
+Also writes tools/previews/tavern_plan.png, a top-down plan preview.
 """
 from pathlib import Path
 import math, json, random
@@ -628,6 +628,6 @@ try:
     for r in residents:
         cx, cz = (r['x'] + E) * S, (r['z'] + E) * S
         draw.ellipse([cx - 4, cz - 4, cx + 4, cz + 4], fill=(255, 0, 255) if r['stationary'] else (0, 255, 255))
-    img.save(ROOT / 'docs/realm_expansion/tavern_plan.png')
+    img.save(ROOT / 'tools/previews/tavern_plan.png')
 except ImportError:
     pass

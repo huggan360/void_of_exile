@@ -42,5 +42,5 @@ draw.text((36,1480),'LIVE = used by current boss attacks. RESERVE ART = authored
 draw.text((36,1517),'Close-ups are framed individually; dimensions show true voxel proportions. Animated rings, beams and arena hazards are separate effects.',font=font(20),fill='#8195aa')
 output=Path('/home/hugo/Desktop/Voidrealm Boss Projectile Overview.png')
 sheet.save(output)
-sheet.save(ROOT/'docs/realm_expansion/boss_projectile_overview.png')
+sheet.save(ROOT/'tools/previews/boss_projectile_overview.png')
 print(output)
