@@ -1,6 +1,7 @@
 class_name DivineSets
 ## The Divine sets of the planet bosses, the farm and the glade (Venom, Eclipse,
-## Blood, Madness, Cindrella, Goldslinger, Ash), each set's own stat leaning,
+## Blood, Stormeye, Madness, Cindrella, Goldslinger, Ash), extra pieces for
+## Silver and Satan, each set's own stat leaning,
 ## and the shot patterns, charged attacks, particles and magic of their gear.
 ##
 ## Items.divine() calls build() with the other sets, then finish() after the
@@ -8,7 +9,8 @@ class_name DivineSets
 ##
 ## Every set leans its own way: Iron and Silver hold the line, Storm and
 ## Venom are quick, Blood and Satan pay health for power, Madness gives a
-## little of everything and takes some defence, Eclipse and the Void are magic.
+## little of everything and takes some defence, Eclipse and the Void are magic,
+## Stormeye freezes and is magic and speed at once.
 
 const VENOM := Color("7fe02a")
 const VENOM_DARK := Color("2f5a12")
@@ -20,15 +22,25 @@ const MADNESS := Color("ff4fd8")
 const MADNESS_ALT := Color("6cff6a")
 const ASH := Color("ff7a2e")
 const ASH_DARK := Color("2c2a28")
+const STORMEYE := Color("9ab0ff")
+const STORMEYE_FROST := Color("a0e8ff")
+const STORMEYE_INK := Color("8c5adc")
+const STORMEYE_RED := Color("ff4a5a")
+const GOLD := Color("f0b030")
+const GOLD_DARK := Color("7a4a10")
+const SATAN := Color("e42e2e")
+const SATAN_DARK := Color("3a0a06")
 
 
 static func build(out: Array[Item]) -> void:
 	_venom(out)
 	_eclipse(out)
 	_blood(out)
+	_stormeye(out)
 	_madness(out)
 	_cindrella(out)
 	_ash(out)
+	_extras(out)
 
 
 ## Runs after Items._weapon_attacks: new shot looks, patterns and charges,
@@ -138,7 +150,47 @@ static func _blood(out: Array[Item]) -> void:
 	_relics(out, "ofblood", BLOOD)
 
 
-# --- Madness: Vaelith and the Veiled Herald. Everything, at a cost. -------------------
+# --- Stormeye: Vaelith, the Pale One. Frost, storm magic and the deep. --------------
+
+static func _stormeye(out: Array[Item]) -> void:
+	_weapon(out, "D_bow_ofthestormeye", "Bow of the Stormeye", "Bow", "Strung with a thread of lightning that never finished falling.",
+		{dexterity = 8, speed = 4, magic = 4}, ["Two freezing lances that cross", "Hits freeze for a moment and slow",
+		"Charged: Eye Lances, a lattice of 8 storm lances"], Vector2i(150, 175))
+	_weapon(out, "D_wand_ofthestormeye", "Wand of the Pale Eye", "Wand", "It looks back at whatever you point it at.",
+		{magic = 12, dexterity = 4}, ["One heavy magic sphere that pierces everything",
+		"Charged: The Stormeye, the sphere collapses into a ring of storm"], Vector2i(195, 230))
+	_weapon(out, "D_trident_ofthestormeye", "Trident of the Deep Arms", "Trident", "Pulled from one of the eight. It still flexes.",
+		{attack = 8, defense = 4}, ["Three ink-dark prongs that pierce and slow",
+		"Charged: Eight Arms, 8 prongs lashing out in every direction"], Vector2i(172, 202))
+	_spell(out, "D_spell_ofthestormeye", "Spell of the Stormeye", "A storm that has learned to sit still. For now.",
+		{magic = 28, mp = 90, speed = 3}, ["Warp ring rolls out three times", "Ring freezes and slows", "Shield costs 10% less MP"],
+		{shield_drain = 0.9}, STORMEYE)
+	out[-1].shield_tint = Color("101830")
+	out[-1].shield_arcs = STORMEYE
+	out[-1].shield_rainbow = 0.0
+	out[-1].warp = 0.09
+	out[-1].ring = {damage = 260, range = 14.0, speed = 10.0, cost = 55, cooldown = 1.5, pulses = 3}
+	out.append(Items._divine("D_cloak_ofthestormeye", "Cloak of the Pale One", "armor", "Cloak",
+		"White as the Eye, and just as hard to look at.", {}, ["Leaves a trail of storm sparks"], {trail = "stormeye"}, STORMEYE, 0.55))
+	out.append(Items._divine("D_robe_ofthestormeye", "Robe of the Stormeye", "armor", "Robe",
+		"The storm's quiet middle, woven into cloth.", {}, ["Magic recovers 20% faster"], {mp_regen = 1.2}, STORMEYE, 0.55))
+	_relics(out, "ofthestormeye", STORMEYE)
+
+
+# --- Extra pieces: Goldslinger (Aurum), Silver (the Gilded Vizier), Satan (Vharok). --
+
+static func _extras(out: Array[Item]) -> void:
+	_weapon(out, "D_bow_goldslinger", "Goldslinger's Repeater", "Bow", "Three strings, three coins, never a miss worth counting.",
+		{dexterity = 10, attack = 4}, ["Three quick golden shots", "Charged: Gold Rush, a burst of 10 shots"], Vector2i(64, 78))
+	out.append(Items._divine("D_robe_ofsilver", "Robe of the Silver Court", "armor", "Robe",
+		"Quicksilver thread. It pools back into shape after every blow.", {}, ["Magic recovers 15% faster"],
+		{mp_regen = 1.15}, Color("cadbea"), 0.45))
+	_weapon(out, "D_bow_ofsatan", "Hellstring", "Bow", "Strung with something that screams when drawn.",
+		{attack = 8, hp = -30}, ["Burning arrows", "Each hit heals you 1 HP",
+		"Charged: Brimstone, a burning ring that sets the ground alight"], Vector2i(140, 165), {lifesteal = 1})
+
+
+# --- Madness: the Veiled Herald. Everything, at a cost. --------------------------------
 
 static func _madness(out: Array[Item]) -> void:
 	_weapon(out, "D_trident_ofmadness", "Trident of Unlimited Madness", "Trident", "It laughs when it hits. You'll start laughing too.",
@@ -232,6 +284,39 @@ static func _signature(item: Item) -> void:
 			item.charge = {style = "nova", name = "Unlimited Madness", count = 16, range = 0.95, wave = 0.6, mult = 3.2}
 			_hits(item, [{id = "static", duration = 0.4}, {id = "speed", amount = -2, duration = 1.0}],
 				[{id = "static", duration = 2.5}, {id = "speed", amount = -4, duration = 3.0}])
+		"D_bow_ofthestormeye":
+			_look(p, "shard", STORMEYE_FROST, STORMEYE, "stormeye", 30.0, 25.0, 1.0)
+			item.shots = 2
+			item.spread_deg = 0.0
+			p.wave_amp = 0.4
+			p.wave_freq = 11.0
+			item.charge = {style = "volley", name = "Eye Lances", count = 8, spread = 5.0, wave = 0.5, mult = 2.5}
+			_hits(item, [{id = "static", duration = 0.3}, {id = "speed", amount = -2, duration = 1.0}],
+				[{id = "static", duration = 1.5}, {id = "speed", amount = -4, duration = 3.0}])
+		"D_wand_ofthestormeye":
+			_look(p, "orb", STORMEYE, STORMEYE_FROST, "stormeye", 19.0, 22.0, 1.5)
+			item.shots = 1
+			item.fire_rate = 0.8
+			p.wave_amp = 0.0
+			p.pierce = true
+			item.charge = {style = "singularity", name = "The Stormeye", mult = 2.2, ring_damage = 280, ring_range = 7.0}
+			_hits(item, [{id = "speed", amount = -2, duration = 1.0}], [{id = "static", duration = 2.0}])
+		"D_trident_ofthestormeye":
+			_look(p, "shard", STORMEYE_INK, STORMEYE_RED, "stormeye", 24.0, 18.0, 1.05)
+			p.pierce = true
+			item.charge = {style = "nova", name = "Eight Arms", count = 8, range = 0.9, wave = 0.3, mult = 3.0}
+			_hits(item, [{id = "speed", amount = -3, duration = 1.2}], [{id = "speed", amount = -5, duration = 3.0}])
+		"D_bow_goldslinger":
+			_look(p, "shard", GOLD, GOLD_DARK, "gold", 32.0, 24.0, 0.8)
+			item.shots = 3
+			item.spread_deg = 8.0
+			p.magic = false
+			item.charge = {style = "burst", name = "Gold Rush", count = 10, interval = 0.05, mult = 1.8}
+		"D_bow_ofsatan":
+			_look(p, "cinder", SATAN, SATAN_DARK, "embers", 28.0, 23.0, 1.1)
+			p.magic = false
+			item.charge = {style = "inferno", name = "Brimstone", mult = 2.6, ring_damage = 220, ring_range = 6.5}
+			_hits(item, [{id = "burning", duration = 2.0}], [{id = "burning", duration = 5.0}])
 		"D_bow_Cindrella":
 			p.particles = "petals"
 		"D_wand_thewandofash":
@@ -275,6 +360,8 @@ const STATS := {
 	D_robe_ofeclipse = {defense = 17, magic = 16, attack = 6, dexterity = 6},
 	D_robe_ofvenom = {defense = 16, magic = 12, dexterity = 10, speed = 3},
 	D_robe_robeofpower = {defense = 15, magic = 24, attack = 6, hp = -30},
+	D_robe_ofthestormeye = {defense = 17, magic = 16, speed = 5, mp = 50},
+	D_robe_ofsilver = {defense = 20, magic = 12, mp = 50, speed = -2},
 	# Cloaks
 	D_cloak_blood = {defense = 12, attack = 8, hp = 20},
 	D_cloak_burningman = {defense = 12, speed = 7, attack = 4},
@@ -286,6 +373,7 @@ const STATS := {
 	D_cloak_unlimitedmadness = {defense = 8, attack = 6, dexterity = 6, speed = 6, magic = 6, hp = -30},
 	D_cloak_ofeclipse = {defense = 14, attack = 6, dexterity = 6},
 	D_cloak_ofvenom = {defense = 13, dexterity = 8, speed = 5},
+	D_cloak_ofthestormeye = {defense = 14, speed = 6, dexterity = 6, magic = 4},
 	# Crucifixes
 	D_bonus_crucifix_ofsatan = {hp = -60, attack = 14, dexterity = 8, speed = 4},
 	D_bonus_crucifix_offrost = {defense = 8, hp = 40, dexterity = 4},
@@ -294,14 +382,17 @@ const STATS := {
 	D_bonus_crucifix_ofmadness = {attack = 4, dexterity = 4, speed = 4, magic = 4, hp = 20, defense = -8},
 	D_bonus_crucifix_ofeclipse = {defense = 6, hp = 30, magic = 6, attack = 4},
 	D_bonus_crucifix_ofvenom = {defense = 6, hp = 30, dexterity = 6},
+	D_bonus_crucifix_ofthestormeye = {defense = 6, hp = 30, magic = 5, speed = 3},
 	# Crystals
 	D_bonus_crystal_ofstorm = {magic = 9, mp = 40, speed = 3},
 	D_bonus_crystal_ofeclipse = {magic = 16, mp = 60, hp = -20},
 	D_bonus_crystal_ofvenom = {magic = 10, mp = 40, dexterity = 4},
+	D_bonus_crystal_ofthestormeye = {magic = 14, mp = 50, speed = 3, defense = -3},
 	# Eyes
 	D_bonus_eye_ofstorm = {dexterity = 8, speed = 3},
 	D_bonus_eye_ofeclipse = {dexterity = 10, attack = 4},
 	D_bonus_eye_ofvenom = {dexterity = 12, attack = 3, defense = -3},
+	D_bonus_eye_ofthestormeye = {dexterity = 9, magic = 5, speed = 4, hp = -20},
 	# Flames
 	D_bonus_flame_ofstorm = {attack = 6, speed = 3},
 	D_bonus_flame_ofeclipse = {attack = 10, magic = 6, hp = -20},
@@ -328,6 +419,9 @@ const RELICS := {
 	D_bonus_crucifix_ofblood = ["Crucifix of Blood", "Thorned rose-iron. It drinks a little from the hand that holds it."],
 	D_bonus_crucifix_ofmadness = ["Crucifix of Madness", "It is the wrong shape, and it changes when you look away."],
 	D_bonus_flame_ofcindrella = ["Flame of Cindrella", "A pink flame that dances to a song only it can hear."],
+	D_bonus_crucifix_ofthestormeye = ["Crucifix of the Pale Eye", "Cold iron round a sliver of the Eye. It blinks."],
+	D_bonus_crystal_ofthestormeye = ["Frozen Storm Crystal", "A thunderhead caught mid-roll. Your fingers go numb."],
+	D_bonus_eye_ofthestormeye = ["The Stormeye", "Vaelith's own, or one of them. It still looks for you."],
 }
 
 

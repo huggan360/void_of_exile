@@ -220,6 +220,7 @@ func _physics_process(delta: float) -> void:
 				_update_charge(before, delta)
 				_update_scheduled(delta)
 				_update_phase(delta)
+				_count_joiners(delta)
 				_check_abandon(delta)
 	_spin_angle = wrapf(_spin_angle + spin_rate * delta, 0.0, TAU)
 	if spin_rate != 0.0 or _spin_angle != 0.0:
@@ -239,6 +240,7 @@ func _begin_fight() -> void:
 	players_counted = maxi(1, GameServer.players_near(director.realm_id, global_position, boss_def.bar_radius))
 	max_hp = int(round(def.hp * (1.0 + boss_def.hp_per_extra_player * (players_counted - 1))))
 	hp = max_hp
+	_join_check = 1.0
 	state = State.ACTIVE
 	_lose_timer = 0.0
 	model.scale = Vector3.ONE * def.model_scale
@@ -866,6 +868,28 @@ func heal(amount: float, cap: int) -> void:
 	if state != State.ACTIVE:
 		return
 	hp = mini(cap, hp + int(round(amount)))
+
+
+var _join_check := 1.0
+
+## Players who join a running fight add their share of health (checked each
+## second). The share it has left stays the same; it never loses health this way.
+func _count_joiners(delta: float) -> void:
+	_join_check -= delta
+	if _join_check > 0.0: return
+	_join_check = 1.0
+	var near := GameServer.players_near(director.realm_id, global_position, boss_def.bar_radius)
+	if near <= players_counted: return
+	var added := int(round(def.hp * boss_def.hp_per_extra_player * (near - players_counted)))
+	players_counted = near
+	hp = mini(max_hp + added, int(round(float(hp) * (max_hp + added) / max_hp)))
+	max_hp += added
+	_hp_grew(added)
+
+
+## A boss whose parts were sized from its health can resize them here.
+func _hp_grew(_added: int) -> void:
+	pass
 
 
 func _check_abandon(delta: float) -> void:

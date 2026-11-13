@@ -16,7 +16,8 @@ extends EnemyDef
 ##   variant          the model's look for this phase (CreatureModel variants)
 ##
 ## Health: hp is for one player. Every other player close by when the fight
-## starts adds hp_per_extra_player of it (people who join later don't).
+## starts adds hp_per_extra_player of it; players who join later add their
+## share too (the health it has left grows with it), but it never shrinks.
 
 ## Players near it can wake it ("near"), only shooting it does ("hit"), or it
 ## sleeps inside a shell that must be broken first ("shell", see shell_model).

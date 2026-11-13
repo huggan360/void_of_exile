@@ -42,9 +42,13 @@ Open space with round planets, reached by ship from the Surface's Skyward Launch
 - **Combat** on each planet's top (`SpaceLayout.COMBAT_CAP`) works like the realm. 32 planet creatures, 3 to 4
   per planet with a god each (`scripts/enemies/space_enemies.gd`); gods drop their planet's fortress key.
 - **Fortresses** (`scripts/space/planet_strongholds.gd`): Rose Bastion (Queen Briarrose), Amber Ziggurat
-  (Aurum), Shattered Observatory (Selenarch), Rotting Hive (Brood Matriarch), Stormeye Citadel (Vaelith). Sealed
+  (Aurum), Shattered Observatory (Selenarch), Rotting Hive (Brood Matriarch), Stormeye Citadel (Vaelith), Veiled
+  Shrine on Shardheart (the Veiled Herald; mission 6 finds its key at the heart shrine). Sealed
   until a key is turned, barred while the boss fights, not saved between loads. Bosses in
-  `scripts/enemies/planet_bosses.gd` and `scripts/enemies/bosses/`.
+  `scripts/enemies/planet_bosses.gd` and `scripts/enemies/bosses/`: four stages each (100-75-50-25%), solo HP
+  36k / 52k / 68k / 84k / 100k (Veiled Herald 50k), each with a status-effect shot in its last stage. Vaelith's
+  second stage binds it to eight squid arms (`vaelith_arm` bodies, only hittable while down, hits pass to
+  Vaelith). Their projectile models come from `tools/make_space_boss_projectiles.py`.
 - **Camera**: V toggles overhead and over the shoulder; first person only indoors (ship rooms, the diner, the
   Nexus's Lantern Bar, the Lantern City's shops).
 - **Campaigns** (`scripts/campaign/`): the Reach tales run in private spaces. Mission 6, The Eye Behind the
@@ -62,4 +66,4 @@ Open space with round planets, reached by ship from the Surface's Skyward Launch
 ## Versions that matter here
 
 `WorldServer.LAYOUT_VERSION` (7 since the Surface remake) archives saved world progress when coordinates
-change. `Net.VERSION` (0.14.0) must match between clients and servers.
+change. `Net.VERSION` (0.15.0) must match between clients and servers.

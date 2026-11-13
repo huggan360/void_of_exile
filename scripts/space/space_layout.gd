@@ -137,6 +137,8 @@ const FORTS := {
 	hollowmoon = {at = Vector2(-170, 60), name = "The Shattered Observatory", key = "key_shattered_observatory", boss = "selenarch", style = "moon"},
 	mawgrave = {at = Vector2(230, -150), name = "The Rotting Hive", key = "key_rotting_hive", boss = "brood_matriarch", style = "hive"},
 	pale_eye = {at = Vector2(-300, -230), name = "The Stormeye Citadel", key = "key_stormeye_citadel", boss = "stormeye_tyrant", style = "storm"},
+	# The Veiled Herald's shrine (mission 6): across Shardheart's top from Lumen Spire.
+	shardheart = {at = Vector2(-77, -70), name = "The Veiled Shrine", key = "key_veiled_shrine", boss = "veil_herald", style = "veil"},
 }
 const FORT_FLAT := 56.0  # level ground around the fortress centre (m, past the corner towers), then FORT_BLEND
 const FORT_BLEND := 40.0

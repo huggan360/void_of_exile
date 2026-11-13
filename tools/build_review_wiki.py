@@ -87,7 +87,12 @@ for boss in c['enemies']:
  for n,phase in enumerate(boss.get('phases', []),1):
   route(phase.get('summon',{}).get('enemies',[]),boss['enemy_name']+' - phase '+str(n)+' summoned guards',boss=boss['id'],summon=phase.get('summon'))
  for helper in re.findall(r'spawn_support\(\s*"([^"]+)"',boss.get('actor_source','')):route([helper],boss['enemy_name']+' - summoned encounter helper',boss=boss['id'])
- for entry in boss['loot']:
+ pair=boss.get('stat_potions') or []
+ for stat in pair:
+  i=items.get('elixir_of_'+stat)
+  if i:i['acquisition'].append({'route':boss['enemy_name']+' - guaranteed boss stat elixir','enemy':boss['id'],'chance':.5,'allowed_stats':pair,'conditions':'Every player over the damage threshold gets one of '+' or '.join(pair)+' (50/50), always.'})
+ for entry in boss['loot']+boss.get('grade_rolls',[]):
+  if pair and str(entry.get('item','')).startswith('elixir_of_'):continue
   pool=entry.get('pool',{}); matches=[]
   if entry.get('item') in items:matches=[items[entry['item']]]
   elif entry.get('biome_stat'):matches=[i for i in items.values() if i['id'].startswith('elixir_of_')]
@@ -95,10 +100,10 @@ for boss in c['enemies']:
   valid=[]
   for i in matches:
    divine=i['id'].startswith('D_')
-   allowed=i['id'] in c['divine_sets'].get(c['boss_divine_sets'].get(boss['id']),[])+c['boss_divine_extras'].get(boss['id'],[]) if divine else bool(i['consumable']) or i['tier']<=(8 if boss['id']=='hollow_king' else 6 if boss['is_boss'] else 5 if boss['is_god'] else 4)
+   allowed=i['id'] in c['divine_sets'].get(c['boss_divine_sets'].get(boss['id']),[])+c['boss_divine_extras'].get(boss['id'],[]) if divine else bool(i['consumable']) or i['tier']<=boss.get('max_grade',6 if boss['is_boss'] else 5 if boss['is_god'] else 4)
    if allowed:valid.append(i)
   for i in valid:i['acquisition'].append({'route':boss['enemy_name']+' - '+('loot pool' if pool else 'biome-dependent stat potion' if entry.get('biome_stat') else 'direct drop'),'enemy':boss['id'],'chance':entry.get('chance'),'pool_size':len(valid) if pool else None,'conditions':'Choose one uniformly from this pool before rolling; modifiers may upgrade gear.' if pool else 'Stat chosen from the current biome.' if entry.get('biome_stat') else ''})
- if boss.get('dungeon_reward'):
+ if boss.get('dungeon_reward') and not pair:
   for stat in boss.get('dungeon_potions',[]):
    i=items.get('elixir_of_'+stat)
    if i:i['acquisition'].append({'route':boss['enemy_name']+' - extra dungeon potion reward','enemy':boss['id'],'chance':.95,'conditions':'Reward roll, then random allowed potion. Extra count is luck-dependent.','allowed_stats':boss['dungeon_potions'],'max_count':boss['dungeon_potion_max']})

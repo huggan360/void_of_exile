@@ -2,12 +2,15 @@ extends Boss
 ## Aurum, the Amber Colossus, in the Amber Ziggurat on Amberfall. A sandstone
 ## sphinx-beetle that slams, charges and drowns the ziggurat in honey.
 ##
-## 1 (100-65%)  amber volleys (three wide fans), slams (a ring of honey and a
+## 1 (100-75%)  amber volleys (three wide fans), slams (a ring of honey and a
 ##    shockwave around it), honey rain (pools that spit honey when they land).
-## 2 (65-30%)   "molten": sand walls (a line of shards across the arena with
+## 2 (75-50%)   "molten": sand walls (a line of shards across the arena with
 ##    one gap), charges that end in a burst, faster volleys.
-## 3 (30-0%)    "hive": the shell splits, mites pour out, amber boomerangs and
+## 3 (50-25%)   "hive": the shell splits, mites pour out, amber boomerangs and
 ##    a honey spiral join the walls.
+## 4 (25-0%)    "Amber Sun": lobbed resin that sticks (slowed hard for 2.5 s)
+##    and splits into honey, a turning sun of shards round it, and slams
+##    that come three in a row.
 const AMBER := Color("ffb84a")
 const HONEY := Color("ffd27a")
 var _turn := 0.0
@@ -21,17 +24,61 @@ func _phase_started(index: int) -> void:
 		2:
 			_mites(5)
 			set_cycle(13.0, [[0.6, _boomerangs], [2.8, _sand_wall], [5.0, _spiral], [8.5, _rush], [11.5, _honey_rain]])
+		3: set_cycle(14.0, [[0.6, _resin_lob], [2.4, _amber_sun], [6.8, _triple_slam], [9.5, _resin_lob], [11.0, _sand_wall]])
 
 func _threshold_reached(next: int) -> void:
 	if resting: return
 	begin_rest(func() -> void: _enter_phase(next),
-		"Molten honey cracks through the Colossus" if next==1 else "The shell splits: the hive inside wakes", "kneel")
+		["", "Molten honey cracks through the Colossus", "The shell splits: the hive inside wakes",
+			"The Colossus burns like an amber sun"][next], "kneel")
 
 func _shard(speed := 7.5) -> Dictionary:
 	return PlanetBosses.shot("amber_shard", "shard", AMBER, Vector2i(76, 102), speed, 24.0, 1.1)
 
 func _honey(speed := 5.0) -> Dictionary:
 	return PlanetBosses.shot("honey_orb", "orb", HONEY, Vector2i(55, 73), speed, 20.0, 1.2)
+
+## Sticky resin: a hit leaves you badly slowed.
+func _resin(speed := 6.0) -> Dictionary:
+	return PlanetBosses.shot("resin_blob", "orb", Color("ffb84a"), Vector2i(84, 108), speed, 24.0, 1.3,
+		{effects = [{id = "speed", amount = -6, duration = 2.5}], effect_source = "Aurum's resin"})
+
+## Resin lobbed at everyone; it stops short and splits into honey.
+func _resin_lob() -> void:
+	model.boss_pose("cast", 1.0)
+	var blob := _resin(6.5)
+	blob.terminal = {delay = 0.3, count = 8, attack = _honey(4.5)}
+	for p in players():
+		var to: Vector3 = p.global_position-global_position
+		to.y = 0.0
+		var b := blob.duplicate(true)
+		b.range = clampf(to.length(), 6.0, 22.0)
+		after(0.6, func() -> void: fire_fan(shot_origin(1.5), to.normalized(), 3, 14.0, b))
+
+## Three arms of shards and resin turning round it like a sun.
+func _amber_sun() -> void:
+	model.boss_pose("channel", 4.0)
+	pulse_glow(1.8, 3.8)
+	var start := randf()*TAU
+	var sense := 1.0 if randf()<0.5 else -1.0
+	for beat in 26:
+		after(0.4+beat*0.15, func() -> void:
+			for arm in 3:
+				var dir := Vector3.FORWARD.rotated(Vector3.UP, start+sense*beat*0.16+arm*TAU/3.0)
+				shoot(shot_origin(), dir, _shard(7.0))
+				if beat % 4==0: shoot(shot_origin(), dir.rotated(Vector3.UP, PI/3.0), _resin(5.0)))
+
+## Three slams in a row, each a little wider.
+func _triple_slam() -> void:
+	for k in 3:
+		after(k*1.5, func() -> void:
+			model.boss_pose("slam_windup", 1.0)
+			hazards.circle(global_position, 6.0+k*2.0, 1.0, Vector2i(119, 152), AMBER)
+			after(1.0, func() -> void:
+				model.boss_pose("slam_release", 0.4)
+				model.strike()
+				CameraShake.shake_from(self, global_position, 0.45, 30.0)
+				fire_ring(shot_origin(), 22+k*4, _honey(5.0+k*0.5), randf()*TAU, 0.0)))
 
 func _volley() -> void:
 	model.boss_pose("cast", 1.0)

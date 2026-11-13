@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bjkasib8qkvfm"
+path="res://.godot/imported/model.vox-04d07de91cd86015d2e6a5a7fde23d6e.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/eclipse_orb/model.vox"
+dest_files=["res://.godot/imported/model.vox-04d07de91cd86015d2e6a5a7fde23d6e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

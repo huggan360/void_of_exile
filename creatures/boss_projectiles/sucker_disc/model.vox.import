@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://db58mlgayjbts"
+path="res://.godot/imported/model.vox-3935065484b82ec09339dcb71eb80354.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/sucker_disc/model.vox"
+dest_files=["res://.godot/imported/model.vox-3935065484b82ec09339dcb71eb80354.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

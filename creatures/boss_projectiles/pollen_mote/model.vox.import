@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cnsmjh3emcyb"
+path="res://.godot/imported/model.vox-d90a157e6c6422040332e00a9d967538.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/pollen_mote/model.vox"
+dest_files=["res://.godot/imported/model.vox-d90a157e6c6422040332e00a9d967538.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

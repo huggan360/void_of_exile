@@ -2,12 +2,15 @@ extends Boss
 ## The Brood Matriarch, in the Rotting Hive on Mawgrave. A fungal hive queen
 ## with scythe arms: spores that burst into acid, pools, and endless brood.
 ##
-## 1 (100-65%)  spore bursts (clusters that split into acid lances), scythe
+## 1 (100-75%)  spore bursts (clusters that split into acid lances), scythe
 ##    sweeps (two crossing arcs of lances), acid pools under everyone.
-## 2 (65-30%)   "swarm": hard to hurt while her broodlings live, a spore
+## 2 (75-50%)   "swarm": hard to hurt while her broodlings live, a spore
 ##    spiral, and she calls more brood.
-## 3 (30-0%)    "rot": lunges across the hive, double rings of acid, the
+## 3 (50-25%)   "rot": lunges across the hive, double rings of acid, the
 ##    spores burst twice.
+## 4 (25-0%)    "Queen of Rot": acid-soaked eggs (armour broken for 4 s) laid
+##    in a spiral across the hive hatch into rings of lances, egg clutches
+##    are flung at everyone, and she lunges twice in a row.
 const PINK := Color("ff5fd2")
 const ACID := Color("7dff6a")
 var _turn := 0.0
@@ -23,6 +26,7 @@ func _phase_started(index: int) -> void:
 			status_text = "Shielded by her brood"
 			set_cycle(13.0, [[0.6, _spiral], [4.5, _scythes], [6.5, _pools], [8.5, _spores.bind(7)], [11.0, _brood.bind(3)]])
 		2: set_cycle(13.0, [[0.6, _lunge], [4.0, _double_ring], [6.0, _spores.bind(7)], [8.5, _lunge], [11.0, _pools]])
+		3: set_cycle(14.0, [[0.6, _egg_spiral], [4.5, _clutches], [6.5, _lunge], [9.5, _lunge], [12.0, _clutches]])
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
@@ -34,7 +38,7 @@ func _physics_process(delta: float) -> void:
 func _threshold_reached(next: int) -> void:
 	if resting: return
 	begin_rest(func() -> void: _enter_phase(next),
-		"Her egg sacs burst: the brood shields her" if next==1 else "The hive rots from within", "kneel")
+		["", "Her egg sacs burst: the brood shields her", "The hive rots from within", "The Queen of Rot lays her last clutch"][next], "kneel")
 
 func _lance(speed := 7.5) -> Dictionary:
 	return PlanetBosses.shot("acid_lance", "needle", ACID, Vector2i(120, 153), speed, 22.0, 1.0)
@@ -42,6 +46,33 @@ func _lance(speed := 7.5) -> Dictionary:
 func _spore(burst: int) -> Dictionary:
 	return PlanetBosses.shot("spore_cluster", "orb", PINK, Vector2i(162, 203), 4.5, 8.0, 1.6,
 		{terminal = {delay = 0.35, count = burst, attack = _lance(6.0)}})
+
+## Acid-soaked eggs: a hit breaks your armour for a while.
+func _egg(speed := 4.5) -> Dictionary:
+	return PlanetBosses.shot("brood_egg", "orb", PINK, Vector2i(120, 154), speed, 9.0, 1.4,
+		{effects = [{id = "armour_broken", duration = 4.0}], effect_source = "the Matriarch's eggs",
+		terminal = {delay = 0.5, count = 8, attack = _lance(5.5)}})
+
+## Eggs laid in a winding spiral; each hatches into a ring of lances.
+func _egg_spiral() -> void:
+	model.boss_pose("channel", 3.4)
+	var start := randf()*TAU
+	for beat in 12:
+		after(0.4+beat*0.25, func() -> void:
+			for arm in 3:
+				var egg := _egg(4.0)
+				egg.range = 5.0+beat*1.4
+				shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, start+beat*0.4+arm*TAU/3.0), egg))
+
+## Clutches of three eggs flung at everyone, landing at their feet.
+func _clutches() -> void:
+	model.boss_pose("cast", 1.0)
+	for p in players():
+		var to: Vector3 = p.global_position-global_position
+		to.y = 0.0
+		var egg := _egg(7.0)
+		egg.range = clampf(to.length(), 5.0, 22.0)
+		after(0.6, func() -> void: fire_fan(shot_origin(1.5), to.normalized(), 3, 18.0, egg))
 
 ## Spore clusters drift out and split into acid lances.
 func _spores(count: int) -> void:

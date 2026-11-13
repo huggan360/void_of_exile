@@ -152,14 +152,22 @@ def main():
         for i in c.get("boss_divine_extras", {}).get(cid, []):
             if i in items and not any(d["item"] == i for d in drops):
                 drops.append({"item": i})
+        pair = e.get("stat_potions") or []
+        for stat in pair:
+            if "elixir_of_" + stat in items:
+                drops.append({"item": "elixir_of_" + stat, "guaranteed_pair": True})
         for loot in e.get("loot") or []:
+            if pair and str((loot or {}).get("item", "")).startswith("elixir_of_"):
+                continue
             if isinstance(loot, dict) and loot.get("item") in items and not any(d["item"] == loot["item"] for d in drops):
                 drops.append({"item": loot["item"]})
         creatures.append({
             "id": cid, "name": e.get("enemy_name", cid), "boss": bool(e.get("is_boss")), "god": bool(e.get("is_god")),
             "hp": int(e.get("hp", 0)), "defense": int(e.get("defense", 0)), "xp": int(e.get("xp", 0)),
             "speed": e.get("move_speed"), "where": sorted(where.get(cid, [])), "set": divine,
-            "render": render, "attacks": attacks, "drops": drops})
+            "render": render, "attacks": attacks, "drops": drops, "stat_potions": pair,
+            "phases": len(e.get("phases") or []), "hp_per_extra_player": e.get("hp_per_extra_player"),
+            "max_grade": e.get("max_grade")})
 
     classes = []
     for cid, k in c["player_classes"].items():

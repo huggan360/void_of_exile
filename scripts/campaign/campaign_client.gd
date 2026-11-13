@@ -745,7 +745,7 @@ static func _reach_frame(spec: Dictionary) -> Transform3D:
 		"town": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.town_frame(p, "center")
 		"fort": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.fort_frame(p)
 		"pad": return SpaceLayout.pad_frame(p)
-		"herald": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.place_frame(p, EyeCampaign.herald_offset())
+		"herald": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.fort_frame(p)
 	return Transform3D(Basis.IDENTITY, center)
 
 

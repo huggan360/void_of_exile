@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bmd483gla5nt7"
+path="res://.godot/imported/model.vox-fd585770e8f9378e9314533bb954315c.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/arcane_sphere/model.vox"
+dest_files=["res://.godot/imported/model.vox-fd585770e8f9378e9314533bb954315c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

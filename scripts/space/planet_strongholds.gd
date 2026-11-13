@@ -18,6 +18,7 @@ const LOOKS := {
 	amber = {stone = "d9a85a", dark = "8a5a26", trim = "fff0c8", glow = "ffb84a", glow2 = "fff0a0", floor = "c89048", floor2 = "e8c078", bars = "ffb84a"},
 	moon = {stone = "8a8e9a", dark = "4a4d58", trim = "b8b4a8", glow = "7dff6a", glow2 = "c8ffd0", floor = "5a5d68", floor2 = "7d818e", bars = "7dff6a"},
 	hive = {stone = "5a3070", dark = "2a1530", trim = "8a4aa0", glow = "ff5fd2", glow2 = "7dff6a", floor = "3a2048", floor2 = "4a2a5a", bars = "ff5fd2"},
+	veil = {stone = "dfe8f4", dark = "5a6a88", trim = "ffffff", glow = "96beff", glow2 = "ff8ae0", floor = "c8d4e8", floor2 = "eef3fb", bars = "96beff"},
 	storm = {stone = "2a2d3a", dark = "14161e", trim = "4a5266", glow = "9ab0ff", glow2 = "ff4a5a", floor = "1e2029", floor2 = "2a2d3a", bars = "9ab0ff"},
 }
 var world: SpaceWorld
@@ -228,6 +229,10 @@ class FortArt extends RefCounted:
 							if Vector2(x-cos(a)*20.0, z-sin(a)*20.0).length()<1.8: color = c("glow2", 0.3) if k % 2 else c("trim")
 					"hive":
 						if absf(noise.get_noise_2d(x*1.5, z*1.5))<0.04: color = c("glow2", 0.5)
+					"veil":
+						# A veil of rings round a closed eye in the middle.
+						if absf(ring-8.0)<0.5 or absf(ring-16.0)<0.5 or absf(ring-24.0)<0.5: color = c("glow", 0.5)
+						elif ring<3.0: color = c("glow2", 0.6) if absi(z)<1 else c("trim")
 					"storm":
 						if x==0 or z==0 or absi(x)==absi(z):
 							if ring>5.0 and ring<27.0: color = c("glow", 0.55)
@@ -344,6 +349,14 @@ class FortArt extends RefCounted:
 						for y in h+1: put(at.x+x, top+4+y, at.y+z, c("stone").lightened(0.1) if y==h else c("dark"))
 						if r>1.5: put(at.x+x, top+3, at.y+z, c("glow2", 0.7) if posmod(x*7+z*3, 3)==0 else c("glow", 0.6))
 				lights.append([Vector3(at.x, top+2, at.y), c("glow"), 16.0, 1.3])
+			"veil":
+				# A pale crystal needle with a veil-light at its tip.
+				for k in 10:
+					var w := maxi(0, 1-k/5)
+					for x in range(-w, w+1):
+						for z in range(-w, w+1): put(at.x+x, top+k, at.y+z, c("trim") if k<6 else c("glow", 0.9))
+				put(at.x, top+10, at.y, c("glow2", 1.3))
+				lights.append([Vector3(at.x, top+10, at.y), c("glow"), 18.0, 1.3])
 			"storm":
 				# A tall obsidian spire with a crackling crystal at the tip.
 				for k in 12:
@@ -387,6 +400,10 @@ class FortArt extends RefCounted:
 							for y in 2:
 								if absi(dx)+absi(dz)+y<3: put(x+dx, y, z+dz, c("glow", 0.8))
 					if k % 4==0: lights.append([Vector3(x, 2, z), c("glow"), 9.0, 0.8])
+				"veil":
+					# Hanging veils: thin pale columns with a glowing hem.
+					for y in 4: put(x, y, z, c("trim") if y>0 else c("glow", 0.9))
+					if k % 4==0: lights.append([Vector3(x, 3, z), c("glow"), 10.0, 0.9])
 				"storm":
 					# Storm crystals leaning out of the floor.
 					for y in 5: put(x+(1 if y>2 else 0), y, z, c("glow", 1.0) if y>1 else c("dark"))

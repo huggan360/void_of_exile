@@ -365,10 +365,10 @@ func _on_enemy_killed(enemy: Enemy, world: SpaceWorld) -> void:
 		var run := campaigns._run_of(party)
 		if run.is_empty() or not matches(run) or run.status!="active": continue
 		var step := campaigns._step(run)
-		if step.kind=="reach_herald":
-			eye.campaigns = campaigns
-			eye.herald_killed(party, run, enemy)
-		elif step.kind=="reach_boss" and enemy.def.id==str(step.boss):
+		if step.kind=="reach_boss" and enemy.def.id==str(step.boss):
+			if enemy.def.id=="veil_herald":
+				eye.campaigns = campaigns
+				eye.herald_killed(party, run, enemy)
 			campaigns._advance(party, {})
 		elif step.kind=="reach_vesperis_boss" and enemy.def.id=="mad_farmer" and enemy.pack!=null:
 			var expected := "quest_%s_%s_farmer" % [run.id, run.get("attempt", "legacy")]

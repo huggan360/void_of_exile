@@ -443,6 +443,11 @@ func _make_trail(weapon: Item, trail_override: String) -> GPUParticles3D:
 			pm.color = Color("ff4fd8")
 			pm.hue_variation_min = -1.0
 			pm.hue_variation_max = 1.0
+		"stormeye":  # pale storm sparks, now and then red
+			pm.color = Color("a0e8ff")
+			pm.spread = 35.0
+			pm.hue_variation_min = -0.4
+			pm.hue_variation_max = 0.05
 		"petals":  # pink and teal, drifting
 			pm.color = Color("f06aa8")
 			pm.gravity = Vector3(0, -1.2, 0)

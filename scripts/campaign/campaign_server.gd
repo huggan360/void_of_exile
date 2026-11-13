@@ -239,12 +239,23 @@ func _fresh_run(id: String) -> Dictionary:
 func _migrate_run(run: Dictionary) -> void:
 	var revision := int(Campaigns.get_def(run.id).get("revision", 1))
 	if int(run.get("revision", 1)) >= revision: return
-	if run.id=="pale_eye" and str(run.get("status", ""))!="done":
+	if run.id=="pale_eye" and str(run.get("status", ""))!="done" and int(run.get("revision", 1))<2:
 		# Mission 6 was remade as the Reach's ending: restart unfinished runs.
 		run.step = 0
 		run.count = 0
 		run.done_objects = []
 		run.erase("reach_step")
+	elif run.id=="pale_eye" and str(run.get("status", ""))!="done":
+		# Revision 3: the Herald moved into the Veiled Shrine, whose key is
+		# found first. Keep progress; a run at the Herald goes to the key.
+		var old := ["captain", "ship", "lys", "stones", "tam", "shells", "hermit", "lens", "nyx", "shardheart", "herald",
+			"sigil", "eye", "vaelith", "home", "report"]
+		var index := int(run.get("step", 0))
+		if index>=0 and index<old.size():
+			run.step = Campaigns.step_index(run.id, "shrine_key" if old[index]=="herald" else old[index])
+			if old[index]=="herald":
+				run.count = 0
+				run.done_objects = []
 	if run.id=="hollowmoon" and str(run.get("status", ""))!="done":
 		# The old Hollow Moon quest used unrelated numeric objectives.
 		# Existing completed campaigns are never reset.

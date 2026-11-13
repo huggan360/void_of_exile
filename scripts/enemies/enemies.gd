@@ -45,7 +45,6 @@ static func pack(id: String) -> Dictionary:
 
 const PACKS := {
 	mad_farmer = {members = [], leader = {enemy = "mad_farmer", min_members = 0}, respawn_time = -1.0, activate_radius = 28.0},
-	veil_herald = {members = [], leader = {enemy = "veil_herald", min_members = 0}, respawn_time = -1.0, activate_radius = 34.0},
 	tide_heralds = {members = [{enemy = "genie_blue", min = 2, max = 3}, {enemy = "tide_snail", min = 2, max = 3}], respawn_time = -1.0, activate_radius = 30.0},
 	spire_keeper = {members = [], leader = {enemy = "spire_keeper", min_members = 0}, respawn_time = -1.0, activate_radius = 34.0},
 	dark_stalkers = {members = [{enemy = "gloam_bat", min = 2, max = 3}, {enemy = "bile_bandit", min = 2, max = 3}], respawn_time = -1.0, activate_radius = 30.0},

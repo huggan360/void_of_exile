@@ -15,6 +15,35 @@ class_name Loot
 
 const OTHERS_CHANCE := 0.9
 
+## Every boss's two stat elixirs: each player over its damage threshold always
+## gets one of them, 50/50. These replace any elixir_of_ entry in a boss's
+## table (and dungeon boss potions). 21 bosses, one pair of the 7 stats each.
+const BOSS_POTIONS := {
+	vharok = ["attack", "defense"], goblin_king = ["attack", "speed"], magma_warden = ["attack", "dexterity"],
+	stormeye_tyrant = ["attack", "magic"], hollow_king = ["attack", "hp"], pyre_ent = ["attack", "mp"],
+	amber_colossus = ["defense", "speed"], veil_herald = ["defense", "dexterity"], gilded_vizier = ["defense", "magic"],
+	scarab_regent = ["defense", "hp"], abyssal_siren = ["defense", "mp"],
+	mad_farmer = ["speed", "dexterity"], selenarch = ["speed", "magic"], thornmaw_bloom = ["speed", "hp"],
+	hollow_crown = ["speed", "mp"],
+	rimeheart_prism = ["dexterity", "magic"], void_empress = ["dexterity", "hp"], drowned_cantor = ["dexterity", "mp"],
+	queen_briarrose = ["magic", "hp"], blue_dragon = ["magic", "mp"],
+	brood_matriarch = ["hp", "mp"],
+}
+
+## The harder bosses roll extra high grades on top of their own table (each
+## roll on its own, so a lucky chest holds two G6 and a G7): grade 7 bosses
+## G6 30% and G7 15%, grade 8 bosses G6 40%, G7 30% and G8 15%. Every other
+## boss tops out at G6.
+const BOSS_GRADES := {
+	stormeye_tyrant = 8, brood_matriarch = 8, selenarch = 8, hollow_king = 8,
+	amber_colossus = 7, veil_herald = 7, vharok = 7, pyre_ent = 7, hollow_crown = 7, rimeheart_prism = 7,
+	drowned_cantor = 7, scarab_regent = 7, blue_dragon = 7, void_empress = 7,
+}
+const GRADE_ROLLS := {
+	7: [{pool = {tier = 6}, chance = 0.30}, {pool = {tier = 7}, chance = 0.15}],
+	8: [{pool = {tier = 6}, chance = 0.40}, {pool = {tier = 7}, chance = 0.30}, {pool = {tier = 8}, chance = 0.15}],
+}
+
 
 ## [{items: Array[Item], viewer: player id or GameServer.PUBLIC}] - one entry
 ## per bag. damage_by: player id -> damage dealt.
@@ -40,7 +69,10 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 	var public_mod: Dictionary = modifiers.get(public_owner,{})
 	var public: Array[Item] = []
 	var personal := {}  # player id -> Array[Item]
+	var pair: Array = BOSS_POTIONS.get(def.id, []) if def is BossDef else []
 	for entry: Dictionary in _with_divine(def):
+		if not pair.is_empty() and str(entry.get("item", "")).begins_with("elixir_of_"):
+			continue
 		var sample := _make(entry, rng, biome_stat)
 		if sample == null or not _allowed(def, sample):
 			continue
@@ -61,7 +93,11 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 				if not personal.has(p):
 					personal[p] = []
 				personal[p].append(upgrade(_make(entry, rng, biome_stat),float(bonus.get("tier",0.0)),rng))
-	if def.dungeon_reward:
+	for p in eligible:
+		if pair.is_empty(): break
+		if not personal.has(p): personal[p] = []
+		personal[p].append(Items.stat_elixir(str(pair[rng.randi_range(0, 1)])))
+	if def.dungeon_reward and pair.is_empty():
 		for p in eligible:
 			if rng.randf() < 0.95:
 				if not personal.has(p): personal[p] = []
@@ -86,11 +122,13 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 	return bags
 
 
-## The loot table plus every piece of the enemy's Divine set (and its listed
-## cross-set relics) that the table doesn't name. Divine chances come from
+## The loot table plus a harder boss's grade rolls (BOSS_GRADES) and every
+## piece of the enemy's Divine set (and its listed cross-set relics) that the
+## table doesn't name. Divine chances come from
 ## Items.divine_chance, not from the table.
 static func _with_divine(def: EnemyDef) -> Array:
 	var table: Array = def.loot.duplicate()
+	if def is BossDef: table.append_array(GRADE_ROLLS.get(BOSS_GRADES.get(def.id, 0), []))
 	var named := {}
 	for entry: Dictionary in table:
 		if entry.has("item"): named[entry.item] = true
@@ -115,7 +153,7 @@ static func _allowed(def: EnemyDef, item: Item) -> bool:
 		return item.id in Items.divine_ids_for(def.id) or item.id in Items.BOSS_DIVINE_EXTRAS.get(def.id, [])
 	if item.is_consumable():
 		return true
-	var cap := 8 if def.id == "hollow_king" else 6 if def is BossDef else 5 if def.is_god else 4
+	var cap: int = BOSS_GRADES.get(def.id, 6) if def is BossDef else 5 if def.is_god else 4
 	return item.tier <= cap
 
 

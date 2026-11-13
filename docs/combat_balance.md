@@ -159,3 +159,19 @@ passed. These cover the shared curve, diminishing returns, class save caps,
 MAG-before-Defence ordering, the minimum damage floor, no hit-based breaking,
 MP depletion, Burning bypass, magic blocking and projectile/shield collisions.
 Existing headless shutdown cleanup warnings remain; no full playthrough ran.
+
+## Boss stat elixirs and health
+
+Every boss has two stat elixirs (`Loot.BOSS_POTIONS`, one unique pair of the seven stats per boss). Each
+player over the boss's damage threshold always gets exactly one of the two, 50/50; `elixir_of_` entries in
+boss loot tables and the old dungeon boss potion rolls are ignored for bosses with a pair. Boss health grows by
+`hp_per_extra_player` (20%) for each extra player near when the fight starts, and for players who join later
+(checked each second; the share of health left stays the same).
+
+
+## Boss gear grades
+
+Bosses top out at G6. Harder ones (`Loot.BOSS_GRADES`) roll extra grades on top of their own table, each roll
+on its own: grade 7 bosses G6 30% and G7 15%; grade 8 bosses (Vaelith, the Brood Matriarch, Selenarch, the
+Hollow King) G6 40%, G7 30% and G8 15%. The goblin treasure cache rolls the Fallenwood Divine set at 30% of the
+usual chances (`Items.DIVINE_SOURCE_SCALE`).

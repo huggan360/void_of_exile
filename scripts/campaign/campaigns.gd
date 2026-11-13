@@ -124,7 +124,7 @@ const LIST := {
 	# | reach_kill | party cannons destroy `count` brood (`foe` kind or any); `ambush` spawns them near `target` | count, foe, target, ambush |
 	# | reach_repair | the party ship is crippled until every `objects` spot aboard is mended | objects [{id, name, seat}] |
 	# | reach_search | searching each object at a planet spot (`item`: a clue for the finder) | planet, objects [{id, name, spot, found, item}] |
-	# | reach_herald | the Veiled Herald (quest site on Shardheart, EyeCampaign) falls | |
+	# | reach_boss on shardheart | the Veiled Herald falls in the Veiled Shrine (EyeCampaign keeps where) | |
 	# | reach_relic_chest | someone takes the Eye Sigil from the Herald's story chest | |
 	# `score` on a step ("battle1", "battle3"): its battle music bed plays, layer 2 while its boss fights.
 	# Space Travels additionally uses reach_order, reach_tutorial_fly, reach_tutorial_ambush,
@@ -267,7 +267,7 @@ const LIST := {
 	# Shardheart (EyeCampaign) and Vaelith, the god behind the King, in the
 	# Stormeye Citadel. `score` steps play battle music (GameAudio).
 	pale_eye = {
-		id = "pale_eye", revision = 2, pack = "astral_frontier", requires = "hollowmoon", reach = true,
+		id = "pale_eye", revision = 3, pack = "astral_frontier", requires = "hollowmoon", reach = true,
 		title = "The Eye Behind the Stars", level = 48, xp = 15000,
 		blurb = "The King is dead, yet something still whispers from beyond the Shardfield. Follow the clues across the Reach, defeat its Herald and face the god who cast the spell.",
 		intro = "eye_prologue",
@@ -299,11 +299,15 @@ const LIST := {
 				cutscene = "eye_herald"},
 			{id = "nyx", kind = "talk", world = "astral", npc = "gloam_seer", shared = true,
 				text = "Show what the lens revealed to Seer Nyx beside the observatory",
-				say = "I saw it too. I have seen it every night since the King fell.|The pilgrim is no pilgrim. She is the [enemy]Veiled Herald[/enemy], the voice that carried the Pale One's whisper into the King's ear. She waits on [place]Shardheart[/place], the crystal heart hidden inside the Shardfield.|She keeps something for her master. A sigil, or a key. Take it from her.|And be careful. A herald is only ever a messenger. The one who sends her is still behind the stars."},
+				say = "I saw it too. I have seen it every night since the King fell.|The pilgrim is no pilgrim. She is the [enemy]Veiled Herald[/enemy], the voice that carried the Pale One's whisper into the King's ear. She waits on [place]Shardheart[/place], the crystal heart hidden inside the Shardfield, sealed in the [place]Veiled Shrine[/place].|Its key was hidden where the planet still sings: the [place]heart shrine[/place]. Find it and open her doors.|She keeps something for her master. A sigil, or a key. Take it from her.|And be careful. A herald is only ever a messenger. The one who sends her is still behind the stars."},
 			{id = "shardheart", kind = "reach_land", world = "astral", planet = "shardheart",
 				text = "Cross into the Shardfield and land on Shardheart"},
-			{id = "herald", kind = "reach_herald", world = "astral", score = "battle1",
-				text = "Find the Veiled Herald's shrine on Shardheart and defeat her"},
+			{id = "shrine_key", kind = "reach_search", world = "astral", planet = "shardheart",
+				text = "Search the heart shrine on Shardheart for the Veiled Shrine's key (%d/%d)",
+				objects = [{id = "key", name = "Heart shrine", spot = "heart_shrine", item = "key_veiled_shrine",
+					found = "Wrapped in white silk at the shrine's heart: a sliver of crystal humming one low note. [b]Veiled Shrine Key[/b] added to your bag."}]},
+			{id = "herald", kind = "reach_boss", world = "astral", planet = "shardheart", boss = "veil_herald", score = "battle1",
+				text = "Open the Veiled Shrine with its key and defeat the Veiled Herald"},
 			{id = "sigil", kind = "reach_relic_chest", world = "astral",
 				text = "Take the Eye Sigil from the Herald's Story Chest",
 				cutscene = "eye_revealed"},
@@ -317,8 +321,9 @@ const LIST := {
 				say = "We felt it here. Every lantern on the Nexus flickered at once, and then... quiet. A good quiet.|So the King was never the villain. Just the first one it found.|Rest now. The Reach is free, and for the first time in a long while, nothing is watching it but us.|...Tea?"},
 		],
 	},
+	# The space pack opens once The Hidden Power is told (its last tale, the Hollow Castle).
 	theory_of_everything = {
-		id="theory_of_everything",revision=1,pack="astral_frontier",title="Theory of Everything",level=40,
+		id="theory_of_everything",revision=1,pack="astral_frontier",requires="hollow_castle",title="Theory of Everything",level=40,
 		blurb="Help a woodland starwright finish his impossible ship. Board together, cross the chromatic void and restore a haunted vessel on the way to the Convergence.",
 		xp=8000,stars=[],side=[],
 		steps=[

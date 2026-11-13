@@ -2,12 +2,15 @@ extends Boss
 ## Queen Briarrose, the Rose Bastion on Rosamund. A fairy queen of petals and
 ## thorns: she never walks, she floats and fills the bastion with petals.
 ##
-## 1 (100-65%)  petal spirals (four arms, slowly turning), thorn volleys (three
+## 1 (100-75%)  petal spirals (four arms, slowly turning), thorn volleys (three
 ##    staggered fans), rose blooms (buds that burst into rings of petals).
-## 2 (65-30%)   "bloom": her sprites come, the spirals turn both ways at once,
+## 2 (75-50%)   "bloom": her sprites come, the spirals turn both ways at once,
 ##    thorn lanes cross the arena, the blooms grow.
-## 3 (30-0%)    "wilted": walls of petals with gaps, a whirling petal storm and
+## 3 (50-25%)   "wilted": walls of petals with gaps, a whirling petal storm and
 ##    thorns that erupt under everyone.
+## 4 (25-0%)    "The Last Rose": drowsy pollen (slowed for 3 s) drifts in clouds,
+##    a ring of roses grows round the bastion and each bursts into petals,
+##    and thorn cages close round everyone.
 const PINK := Color("ff6eb4")
 const ROSE := Color("ff9ccf")
 const THORN := Color("7dffb0")
@@ -21,17 +24,59 @@ func _phase_started(index: int) -> void:
 			_sprites(4)
 			set_cycle(13.0, [[0.8, _twin_spiral], [4.5, _thorn_lanes], [6.5, _blooms.bind(7)], [9.5, _thorns], [11.0, _sprites.bind(2)]])
 		2: set_cycle(12.0, [[0.6, _petal_wall], [3.0, _storm], [7.0, _eruptions], [8.5, _petal_wall], [10.5, _thorns]])
+		3: set_cycle(13.0, [[0.6, _pollen], [2.8, _rose_garden], [6.0, _thorn_cages], [7.5, _pollen], [9.5, _twin_spiral], [12.0, _thorns]])
 
 func _threshold_reached(next: int) -> void:
 	if resting: return
 	begin_rest(func() -> void: _enter_phase(next),
-		"The Queen's petals open wide" if next==1 else "The roses wilt... and the thorns wake", "kneel")
+		["", "The Queen's petals open wide", "The roses wilt... and the thorns wake", "The last rose opens: its pollen sleeps"][next], "kneel")
 
 func _petal(speed := 5.5) -> Dictionary:
 	return PlanetBosses.shot("rose_petal", "disc", ROSE, Vector2i(35, 48), speed, 22.0, 1.0)
 
 func _thorn(speed := 8.0) -> Dictionary:
 	return PlanetBosses.shot("thorn_spike", "needle", THORN, Vector2i(51, 68), speed, 20.0, 1.0)
+
+## Drowsy pollen: slow motes that leave you slowed.
+func _pollen_mote(speed := 3.6) -> Dictionary:
+	return PlanetBosses.shot("pollen_mote", "orb", Color("ffe08c"), Vector2i(48, 62), speed, 22.0, 1.2,
+		{effects = [{id = "speed", amount = -4, duration = 3.0}], effect_source = "Briarrose's pollen"})
+
+## Clouds of pollen drift out round her, each mote wandering.
+func _pollen() -> void:
+	model.boss_pose("channel", 2.4)
+	pulse_glow(1.4, 0.6)
+	for wave in 3:
+		after(0.5+wave*0.6, func() -> void:
+			var off := randf()*TAU
+			for k in 14:
+				var attack := _pollen_mote(randf_range(3.0, 4.2))
+				attack.turn = randf_range(-0.3, 0.3)
+				shoot(shot_origin(), Vector3.FORWARD.rotated(Vector3.UP, off+k*TAU/14.0), attack))
+
+## Six roses grow in a ring round the bastion, then each bursts into petals.
+func _rose_garden() -> void:
+	model.boss_pose("summon", 1.6)
+	var off := randf()*TAU
+	for k in 6:
+		var a := off+k*TAU/6.0
+		var at := in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*16.0, 24.0)
+		hazards.circle(at, 2.2, 1.4, Vector2i(70, 93), PINK)
+		after(1.4+k*0.12, func() -> void:
+			var o := at
+			o.y = shot_origin().y
+			fire_ring(o, 12, _petal(4.6), randf()*TAU, 0.0)
+			after(0.6, func() -> void: fire_ring(o, 10, _pollen_mote(3.4), randf()*TAU, 0.0)))
+
+## A square of thorn lanes closes round each player.
+func _thorn_cages() -> void:
+	for p in players():
+		var c := in_arena(p.global_position, 26.0)
+		for side in 4:
+			var dir := Vector3.FORWARD.rotated(Vector3.UP, side*PI*0.5)
+			var across := dir.cross(Vector3.UP)
+			hazards.lane(c+across*4.0, dir, 9.0, 1.4, 1.2, 0.4, Vector2i(80, 104), 0.4, THORN)
+		hazards.circle(c, 2.0, 1.8, Vector2i(88, 112), THORN)
 
 ## Arms of petals spiralling out of her gown.
 func _spiral(arms: int, sense: float) -> void:

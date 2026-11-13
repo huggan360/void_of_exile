@@ -52,6 +52,9 @@ func item_record(item: Item, live: bool) -> Dictionary:
 func enemy_record(def: EnemyDef) -> Dictionary:
 	var row := properties(def)
 	row.is_boss = def is BossDef
+	row.stat_potions = encode(Loot.BOSS_POTIONS.get(def.id, [])) if def is BossDef else []
+	row.max_grade = Loot.BOSS_GRADES.get(def.id, 6) if def is BossDef else 5 if def.is_god else 4
+	row.grade_rolls = encode(Loot.GRADE_ROLLS.get(Loot.BOSS_GRADES.get(def.id, 0), [])) if def is BossDef else []
 	if def is BossDef and def.actor_script != "":
 		row.actor_source = FileAccess.get_file_as_string(def.actor_script)
 		var script: GDScript = load(def.actor_script)
@@ -125,7 +128,8 @@ func _export() -> void:
 	for id in Enemies.pack_overrides:
 		if not pack_ids.has(id): pack_ids.append(id)
 	for id in pack_ids: data.packs[str(id)] = encode(Enemies.pack(str(id)))
-	data.loot_rules = {others_chance = Loot.OTHERS_CHANCE, public_bags = ["gray", "green"],
+	data.loot_rules = {others_chance = Loot.OTHERS_CHANCE, boss_potions = encode(Loot.BOSS_POTIONS),
+		boss_potion_rule = "Each player over the boss's damage threshold always gets one stat elixir: one of its two, 50/50.", public_bags = ["gray", "green"],
 		personal_bags = ["blue", "red", "purple", "white", "black"], source = "res://scripts/loot/loot.gd"}
 	data.projectile_manifest = JSON.parse_string(FileAccess.get_file_as_string("res://creatures/boss_projectiles/manifest.json"))
 	DirAccess.make_dir_recursive_absolute(output.get_base_dir())

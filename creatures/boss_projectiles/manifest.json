@@ -178,5 +178,95 @@
       80
     ],
     "voxel_size": 0.012
+  },
+  {
+    "id": "frost_shard",
+    "folder": "creatures/boss_projectiles/frost_shard",
+    "size": [
+      56,
+      56,
+      112
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "dizzy_bubble",
+    "folder": "creatures/boss_projectiles/dizzy_bubble",
+    "size": [
+      64,
+      64,
+      64
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "arcane_sphere",
+    "folder": "creatures/boss_projectiles/arcane_sphere",
+    "size": [
+      104,
+      80,
+      104
+    ],
+    "voxel_size": 0.014
+  },
+  {
+    "id": "abyss_ink",
+    "folder": "creatures/boss_projectiles/abyss_ink",
+    "size": [
+      48,
+      48,
+      80
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "sucker_disc",
+    "folder": "creatures/boss_projectiles/sucker_disc",
+    "size": [
+      96,
+      24,
+      96
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "pollen_mote",
+    "folder": "creatures/boss_projectiles/pollen_mote",
+    "size": [
+      64,
+      64,
+      64
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "resin_blob",
+    "folder": "creatures/boss_projectiles/resin_blob",
+    "size": [
+      64,
+      48,
+      64
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "eclipse_orb",
+    "folder": "creatures/boss_projectiles/eclipse_orb",
+    "size": [
+      104,
+      104,
+      80
+    ],
+    "voxel_size": 0.013
+  },
+  {
+    "id": "brood_egg",
+    "folder": "creatures/boss_projectiles/brood_egg",
+    "size": [
+      56,
+      48,
+      64
+    ],
+    "voxel_size": 0.012
   }
 ]

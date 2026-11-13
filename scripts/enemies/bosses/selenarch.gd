@@ -3,12 +3,15 @@ extends Boss
 ## floating astronomer-lich with an orrery of little moons: it fights with
 ## orbits, curving ghost-lights and beams of cold moonlight.
 ##
-## 1 (100-65%)  orreries (two rings of moons orbiting it, opposite ways),
+## 1 (100-75%)  orreries (two rings of moons orbiting it, opposite ways),
 ##    ghost-light fans that curve in from both sides, crescent bursts.
-## 2 (65-30%)   "eclipse": moonbeams sweep the floor, ghost rings with gaps,
+## 2 (75-50%)   "eclipse": moonbeams sweep the floor, ghost rings with gaps,
 ##    and it blinks across the observatory.
-## 3 (30-0%)    "void": twice the beams, turning faster, falling stars that
+## 3 (50-25%)   "void": twice the beams, turning faster, falling stars that
 ##    burst into rings, and its ghosts come to help.
+## 4 (25-0%)    "Total Eclipse": black moons (silenced for 1.5 s) circle the
+##    whole observatory and then fall inward, it blinks three times in a row
+##    leaving rings behind, and a slow cross of beams turns over everything.
 const MOON := Color("c8ffd0")
 const GHOST := Color("7dff6a")
 var _turn := 0.0
@@ -24,6 +27,7 @@ func _phase_started(index: int) -> void:
 		2:
 			_ghosts(3)
 			set_cycle(14.0, [[0.6, _beams.bind(6, 0.6)], [2.5, _stars], [5.5, _blink], [6.5, _ghost_ring], [9.0, _orrery], [11.5, _stars]])
+		3: set_cycle(15.0, [[0.6, _beams.bind(4, 0.3)], [1.2, _eclipse_halo], [5.0, _blink_chain], [9.0, _crescents], [10.5, _eclipse_halo], [13.0, _wisps]])
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
@@ -32,13 +36,40 @@ func _physics_process(delta: float) -> void:
 func _threshold_reached(next: int) -> void:
 	if resting: return
 	begin_rest(func() -> void: _enter_phase(next),
-		"The moon behind Selenarch goes dark" if next==1 else "Its ribs open on a green star", "kneel")
+		["", "The moon behind Selenarch goes dark", "Its ribs open on a green star", "Total eclipse: the stars go out"][next], "kneel")
 
 func _moon(speed := 5.5) -> Dictionary:
 	return PlanetBosses.shot("moon_shard", "crescent", MOON, Vector2i(105, 136), speed, 22.0, 1.0)
 
 func _wisp(speed := 5.0) -> Dictionary:
 	return PlanetBosses.shot("ghost_wisp", "orb", GHOST, Vector2i(77, 102), speed, 24.0, 1.1)
+
+## Black moons: a hit silences you for a moment.
+func _eclipse(speed := 5.0) -> Dictionary:
+	return PlanetBosses.shot("eclipse_orb", "orb", GHOST, Vector2i(96, 124), speed, 24.0, 1.3,
+		{effects = [{id = "quiet", duration = 1.5}], effect_source = "Selenarch's eclipse"})
+
+## A ring of black moons circles the whole observatory, then falls inward.
+func _eclipse_halo() -> void:
+	model.boss_pose("summon", 1.6)
+	pulse_glow(2.0, 1.0)
+	var off := randf()*TAU
+	var orbit := _eclipse(6.0)
+	fire_orbit(encounter_center, 22.0, 14, 6.0, 0.35, 1.0 if randf()<0.5 else -1.0, orbit, off)
+	after(2.6, func() -> void:
+		for k in 14:
+			var a := off+k*TAU/14.0+0.5
+			var o := in_arena(encounter_center+Vector3(cos(a), 0, sin(a))*22.0, 24.0)
+			o.y = shot_origin().y
+			var inward := (encounter_center-o)
+			inward.y = 0.0
+			shoot(o, inward.normalized(), _eclipse(4.6)))
+
+## Three blinks in a row, each leaving a ring of moons and black moons.
+func _blink_chain() -> void:
+	for k in 3:
+		after(k*1.2, _blink)
+		after(k*1.2+1.1, func() -> void: fire_ring(shot_origin(), 10, _eclipse(4.2), randf()*TAU, 0.0))
 
 ## Two rings of moons orbit it, one each way, then fly loose.
 func _orrery() -> void:

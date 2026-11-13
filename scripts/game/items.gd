@@ -70,14 +70,14 @@ const DIVINE_SETS := {
 	Spirit = ["D_wand_thewandofthespitit"],
 	Iron = ["D_bow_ofiron", "D_wand_ofiron", "D_trident_ofiron", "D_cloak_ofiron", "D_robe_ofiron", "D_spell_ofiron", "D_bonus_crucifix_ofiron"],
 	Storm = ["D_bonus_crucifix_ofstorm", "D_bonus_crystal_ofstorm", "D_bonus_eye_ofstorm", "D_bonus_flame_ofstorm", "D_bonus_talisman_ofstorm", "D_bow_ofstorm", "D_cloak_ofstorm", "D_robe_ofstorm", "D_spell_ofstorm", "D_trident_ofstorm", "D_wand_ofstorm"],
-	Silver = ["D_cloak_silvershield", "D_wand_thewandofsteel", "D_bonus_crucifix_ofthalao"],
+	Silver = ["D_cloak_silvershield", "D_wand_thewandofsteel", "D_bonus_crucifix_ofthalao", "D_robe_ofsilver"],
 	Dragon_Fire = ["D_bow_dragon", "D_cloak_burningman", "D_robe_ofthedragonsbreath", "D_bonus_flame_ofthebroken"],
 	Fallenwood = ["D_bow_Fallenwoods", "D_trident_ofthefallenwood", "D_wand_thewandofthefallenwood"],
 	The_Blue = BLUE_DIVINE_IDS,
 	Frost = ["D_bow_offrost", "D_wand_offrost", "D_trident_offrost", "D_spell_offrost", "D_cloak_offrost",
 		"D_robe_offrost", "D_bonus_crucifix_offrost", "D_bonus_flame_offrost", "D_bonus_eye_offrost",
 		"D_bonus_crystal_offrost", "D_bonus_talisman_offrost"],
-	Satan = ["D_trident_ofsatan", "D_wand_thewandofsatan", "D_bonus_crucifix_ofsatan"],
+	Satan = ["D_trident_ofsatan", "D_wand_thewandofsatan", "D_bonus_crucifix_ofsatan", "D_bow_ofsatan"],
 	Holy_Divine = ["D_spell_ofthedivine", "D_trident_ofthedivine", "D_wand_thewandofthedivine",
 		"D_bonus_flame_ofthedivine"],
 	Void = ["D_bow_Darkmatter", "D_cloak_thevoid", "D_robe_ofthegalaxy", "D_trident_ofthevoid",
@@ -90,9 +90,12 @@ const DIVINE_SETS := {
 		"D_bonus_crystal_ofeclipse", "D_bonus_talisman_ofeclipse"],
 	Blood = ["D_bow_Blood", "D_trident_ofblood", "D_wand_thewandofpower", "D_cloak_blood", "D_robe_robeofpower",
 		"D_bonus_crucifix_ofblood"],
+	Stormeye = ["D_bow_ofthestormeye", "D_wand_ofthestormeye", "D_trident_ofthestormeye", "D_spell_ofthestormeye",
+		"D_cloak_ofthestormeye", "D_robe_ofthestormeye", "D_bonus_crucifix_ofthestormeye", "D_bonus_eye_ofthestormeye",
+		"D_bonus_crystal_ofthestormeye"],
 	Madness = ["D_trident_ofmadness", "D_cloak_unlimitedmadness", "D_bonus_crucifix_ofmadness"],
 	Cindrella = ["D_bow_Cindrella", "D_bonus_flame_ofcindrella"],
-	Goldslinger = ["D_cloak_goldslinger"],
+	Goldslinger = ["D_cloak_goldslinger", "D_bow_goldslinger"],
 	Ash = ["D_wand_thewandofash"],
 }
 ## Encounters assigned a Divine set; unassigned enemies cannot drop Divine items.
@@ -101,18 +104,18 @@ const BOSS_DIVINE_SET := {
 	hollow_king = "Iron",
 	abyssal_siren = "Storm", drowned_cantor = "Storm",
 	gilded_vizier = "Silver", magma_warden = "Dragon_Fire", pyre_ent = "Dragon_Fire",
-	goblin_king = "Fallenwood", blue_dragon = "The_Blue", rimeheart_prism = "Frost", vharok = "Satan",
+	goblin_king = "Fallenwood", goblin_treasure = "Fallenwood", blue_dragon = "The_Blue", rimeheart_prism = "Frost", vharok = "Satan",
 	scarab_regent = "Holy_Divine", hollow_crown = "Void",
 	# Sets matched to each boss's look; stronger bosses carry stronger sets.
 	thornmaw_bloom = "Cindrella", mad_farmer = "Ash", queen_briarrose = "Blood", amber_colossus = "Goldslinger",
-	selenarch = "Eclipse", brood_matriarch = "Venom", stormeye_tyrant = "Madness", veil_herald = "Madness",
+	selenarch = "Eclipse", brood_matriarch = "Venom", stormeye_tyrant = "Stormeye", veil_herald = "Madness",
 	void_empress = "Void",
 }
 ## Sets two bosses share. The first boss favours even items, the second odd
 ## ones: a boss drops its favourites 1% more often.
 const SHARED_SETS := {
 	Storm = ["abyssal_siren", "drowned_cantor"], Dragon_Fire = ["magma_warden", "pyre_ent"],
-	Void = ["hollow_crown", "void_empress"], Madness = ["stormeye_tyrant", "veil_herald"],
+	Void = ["hollow_crown", "void_empress"],
 }
 
 
@@ -128,12 +131,16 @@ static func divine_ids_for(enemy_id: String) -> Array:
 	return DIVINE_SETS.get(BOSS_DIVINE_SET.get(enemy_id, ""), [])
 
 
+## Divine sources that aren't bosses roll the set at a fraction of the
+## usual chances (the goblin treasure cache: about 5% for any Fallenwood piece).
+const DIVINE_SOURCE_SCALE := {goblin_treasure = 0.3}
+
 ## Each eligible player's own chance at one Divine item from this boss. The
 ## piece decides it: weapons and spells 5%, armour 6%, bonus relics 7%, and an
 ## item with a drawback 1% more; a shared set's favourites 1% more again.
 ## Relics from another set (BOSS_DIVINE_EXTRAS) are rarer extras at 60%.
 static func divine_chance(item: Item, enemy_id: String) -> float:
-	var chance := 0.05 if item.slot in ["weapon", "spell"] else 0.06 if item.slot == "armor" else 0.07
+	var chance: float = (0.05 if item.slot in ["weapon", "spell"] else 0.06 if item.slot == "armor" else 0.07) * DIVINE_SOURCE_SCALE.get(enemy_id, 1.0)
 	for value in item.bonuses.values():
 		if value < 0:
 			chance += 0.01
@@ -214,7 +221,7 @@ static func from_pool(pool: Dictionary, rng: RandomNumberGenerator) -> Item:
 ## on this character (+2 speed/dexterity, +4 attack/defence/magic, +20 health/magic points). Gods and
 ## bosses drop them, in blue bags. [name, amount, liquid color]
 const STAT_ELIXIRS := {
-	attack = ["Attack", 1, Color("#e04848")], defense = ["Defence", 4, Color("#3c3c4a")],
+	attack = ["Attack", 1, Color("#3cc854")], defense = ["Defence", 4, Color("#3c3c4a")],
 	speed = ["Speed", 2, Color("#48c8e0")], dexterity = ["Dexterity", 2, Color("#e08a30")],
 	magic = ["Magic", 4, Color("#a050e8")], hp = ["Health", 20, Color("#ff5070")],
 	mp = ["Magic Points", 20, Color("#ffd040")],
@@ -261,6 +268,8 @@ const GATE_KEYS := {
 		"Grown, not forged: violet chitin that twitches now and then."],
 	key_stormeye_citadel = ["Stormeye Key", "The Stormeye Citadel",
 		"Obsidian with a blue spark trapped inside. Your hair stands up holding it."],
+	key_veiled_shrine = ["Veiled Shrine Key", "The Veiled Shrine",
+		"A sliver of Shardheart's crystal wrapped in white silk. It hums the note the shrines stopped singing."],
 }
 
 
@@ -964,6 +973,7 @@ static func _ring_effects(item: Item) -> void:
 		D_spell_ofstorm = [{id = "static", duration = 2.0}, {id = "speed", amount = -2, duration = 2.0}],
 		D_spell_ofvenom = [{id = "armour_broken", duration = 4.0}, {id = "speed", amount = -3, duration = 3.0}],
 		D_spell_ofeclipse = [{id = "quiet", duration = 3.0}],
+		D_spell_ofthestormeye = [{id = "static", duration = 1.8}, {id = "speed", amount = -3, duration = 3.0}],
 	}
 	if DIVINE_RINGS.has(item.id):
 		item.secondary_effects.assign(DIVINE_RINGS[item.id])

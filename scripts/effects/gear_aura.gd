@@ -78,6 +78,10 @@ func refresh(stats: PlayerStats) -> void:
 			_trail_mat.color = Color("ffb347")
 			_trail_mat.hue_variation_min = -0.12
 			_trail_mat.hue_variation_max = 0.0
+		"stormeye":
+			_trail_mat.color = Color("a0e8ff")
+			_trail_mat.hue_variation_min = -0.4
+			_trail_mat.hue_variation_max = 0.05
 		"rainbow":
 			_trail_mat.color = Color(1.0, 0.4, 0.4)
 			_trail_mat.hue_variation_min = -1.0
