@@ -77,21 +77,16 @@ func descend(pid: int) -> void:
 	if not p.is_empty(): p.port = {kind = "descend"}
 
 
-## A campaign Tavern's realm gate: back to the same spot in that tale's Space
-## if that is where the character was (and Space is open to them). The main
-## Tavern's gate always leads to the Surface. Returns the destination.
+## The realm gate into a tale's Space (CampaignServer.private_destination):
+## back to the same spot there if that is where the character last was.
+## The gate never leads to Space otherwise. Returns the destination.
 func redirect(p: Dictionary, destination: String) -> String:
 	if not (Campaigns.is_tavern(str(p.get("realm", ""))) or str(p.get("realm", "")) == ""): return destination
-	if not Campaigns.is_campaign_realm(destination): return destination
+	if not SpaceWorld.is_space(destination): return destination
 	var stats := GameServer.character(p.player_id)
-	if stats == null or str(stats.travel.get("last", "")) != "space": return destination
-	var space := str(stats.travel.get("space", SpaceWorld.REALM))
-	# A private Space belongs to its campaign: only while that tale is yours.
-	if space != SpaceWorld.REALM and not server.campaigns.may_enter(p, surface_for(space)): space = SpaceWorld.REALM
-	if space_for(destination) != space and destination != "realm_1": return destination
-	if not server._astral_unlocked(p): return destination
-	p.port = {kind = "return"}
-	return space
+	if stats and str(stats.travel.get("last", "")) == "space" and str(stats.travel.get("space", "")) == destination:
+		p.port = {kind = "return"}
+	return destination
 
 
 ## Arrival hooks once the realm is known: sets record.arrival_pos (and

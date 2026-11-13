@@ -47,6 +47,9 @@ var _music := {}
 var _music_key := ""
 var _music_layer := {}
 var _music_layer_key := ""
+## A Reach tale step's score ("battle1", "battle3"), set by CampaignClient:
+## its bed plays while the step lasts, its second layer while the boss fights.
+var reach_score := ""
 var _music_encounter := ""
 var _music_defeated := {}
 var _gear_signature := ""
@@ -914,6 +917,9 @@ func _music_plan() -> Dictionary:
 			var radius := 140.0 if _music_key == "music.battle1.layer1" else 110.0
 			if distance <= radius:
 				return {bed = "music.battle1.layer1", layer = "music.battle1.layer2" if fighting else "", encounter = encounter}
+	if _world is SpaceWorld and reach_score != "":
+		var scored := fighting and active.boss_def.id in ["veil_herald", "stormeye_tyrant"]
+		return {bed = "music.%s.layer1" % reach_score, layer = "music.%s.layer2" % reach_score if scored else "", encounter = encounter}
 	# Unscored bosses keep ambience, with music faded away through their death.
 	return {} if active != null else {bed = normal}
 

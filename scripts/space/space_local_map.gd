@@ -226,11 +226,20 @@ func _mark(at: Vector3, color: Color, label := "") -> void:
 	draw_circle(point,2.8,color)
 	if label!="": draw_string(UIStyle.font(),point+Vector2(5,-3),label,HORIZONTAL_ALIGNMENT_LEFT,-1,11,color)
 
-func _quest(at: Vector3) -> void:
+## The Surface minimap's quest badge: a pixel diamond with an ink rim and a white heart.
+func _quest(at: Vector3, kind := "quest") -> void:
 	if not planet.is_empty() and at.distance_to(planet.center)>float(planet.radius)+500.0: return
 	var point := _point(at)
 	point = size*0.5+(point-size*0.5).limit_length(size.x*MAP_EDGE*0.43)
-	draw_colored_polygon(PackedVector2Array([point+Vector2(0,-6),point+Vector2(6,0),point+Vector2(0,6),point+Vector2(-6,0)]),Color("ffdb56"))
+	var px := float(PixelArt.SCALE)
+	var cell := (point/px).floor()
+	var r := 3 if kind=="quest" else 2
+	var color := QuestGuide.MAIN_COLOR if kind=="quest" else QuestGuide.SIDE_COLOR
+	for y in range(-r-1,r+2):
+		for x in range(-r-1,r+2):
+			var d := absi(x)+absi(y)
+			if d<=r+1:
+				draw_rect(Rect2((cell+Vector2(x,y))*px,Vector2.ONE*px),Color(0.03,0.03,0.06) if d>r else color if d>0 else Color.WHITE)
 
 func _draw() -> void:
 	if not is_instance_valid(world) or not is_instance_valid(player): return
@@ -246,7 +255,7 @@ func _draw() -> void:
 	for marker: Dictionary in world.my_marks():
 		if str(marker.get("kind",""))!="zone": _quest(marker.pos)
 	for marker: Dictionary in extra_markers:
-		if str(marker.get("kind","")) in ["quest","side"]: _quest(marker.pos)
+		if str(marker.get("kind","")) in ["quest","side"]: _quest(marker.pos,str(marker.kind))
 	var forward := -player.global_basis.z.rotated(player.up_direction,player.facing)
 	var facing := Vector2(forward.dot(right),forward.dot(back)).normalized()
 	if facing.length_squared()<0.01: facing = Vector2.UP

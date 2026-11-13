@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dqcdse41gly80"
+path="res://.godot/imported/halo_1_glow.vox-317a2c19998eceffc5c8ea59702dd946.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/source_64/halo_1_glow.vox"
+dest_files=["res://.godot/imported/halo_1_glow.vox-317a2c19998eceffc5c8ea59702dd946.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

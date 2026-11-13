@@ -239,6 +239,12 @@ func _fresh_run(id: String) -> Dictionary:
 func _migrate_run(run: Dictionary) -> void:
 	var revision := int(Campaigns.get_def(run.id).get("revision", 1))
 	if int(run.get("revision", 1)) >= revision: return
+	if run.id=="pale_eye" and str(run.get("status", ""))!="done":
+		# Mission 6 was remade as the Reach's ending: restart unfinished runs.
+		run.step = 0
+		run.count = 0
+		run.done_objects = []
+		run.erase("reach_step")
 	if run.id=="hollowmoon" and str(run.get("status", ""))!="done":
 		# The old Hollow Moon quest used unrelated numeric objectives.
 		# Existing completed campaigns are never reset.
@@ -386,14 +392,17 @@ func start(p: Dictionary, id: String, restart := false) -> void:
 			if fresh and def.has("intro"):
 				server.social.send(pid, ["camp_intro", def.intro])
 		elif _step(run).get("world", "") == SpaceWorld.REALM:
-			if id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]:
+			if id in ReachCampaign.PRIVATE:
 				# Both stories run in party-owned private Space worlds:
 				# individual bosses, loot and ships cannot leak between parties.
 				server.social.send_to(pid, PortServer.space_for(party.campaign.realm))
+				# A Reach tale's opening film plays wherever the party is.
+				if fresh and def.has("intro"):
+					server.social.send(pid, ["camp_intro", Campaigns.CUTSCENES.get(def.intro, {}) if def.intro is String else def.intro])
 			else:
 				server.social.system(pid, "The tale begins at the [place]Nexus[/place] in Space. Launch a battleship from the Skyward Launch Pad south of Hearthwick.")
 		else:
-			server.social.system(pid, "The [place]Chronicle Gate[/place] south of the fountain is open to your party.")
+			server.social.system(pid, "The [place]realm gate[/place] north of the Grand Tavern now leads into your party's tale.")
 
 
 func _pause(party: Dictionary, reason: String) -> void:
@@ -426,7 +435,7 @@ func _end(party: Dictionary, reason: String) -> void:
 	astral.ending(party,run)
 	if reach.matches(run): reach.step_ended(party)
 	var places := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
-	if party.campaign.id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]: places.append(PortServer.space_for(str(party.campaign.realm)))
+	if party.campaign.id in ReachCampaign.PRIVATE: places.append(PortServer.space_for(str(party.campaign.realm)))
 	_scenes.erase(party.id)
 	_to_party(party, ["camp_scene_end"])
 	if book(party.campaign.account).active == party.campaign.id:
@@ -467,7 +476,7 @@ func left_party(p: Dictionary, party: Dictionary) -> void:
 	var run := _run_of(party)
 	if party.campaign.is_empty(): return
 	var occupied := [party.campaign.realm, party.campaign.tavern, party.campaign.get("castle", ""), run.get("dungeon", ""), run.get("encore", "")]
-	if not party.campaign.is_empty() and party.campaign.id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]: occupied.append(PortServer.space_for(str(party.campaign.realm)))
+	if not party.campaign.is_empty() and party.campaign.id in ReachCampaign.PRIVATE: occupied.append(PortServer.space_for(str(party.campaign.realm)))
 	if not party.campaign.is_empty() and p.realm in occupied:
 		server.social.send_to(p.player_id, "hall")
 
@@ -475,7 +484,7 @@ func left_party(p: Dictionary, party: Dictionary) -> void:
 func joined_party(p: Dictionary, party: Dictionary) -> void:
 	_restore_items(p, _run_of(party))
 	if home_for(p) != "":
-		if party.campaign.id in ["first_light", "lantern_road", "shardfield", "hollowmoon"]:
+		if party.campaign.id in ReachCampaign.PRIVATE:
 			server.social.send_to(p.player_id, PortServer.space_for(str(party.campaign.realm)))
 		else:
 			server.social.send_to(p.player_id, party.campaign.tavern)
@@ -494,8 +503,22 @@ func home_for(p: Dictionary) -> String:
 	return str(party.campaign.tavern)
 
 
-## The Chronicle Gate leads into the party's world only while a campaign is
-## being played (a finished one can be played on in, but not entered again).
+## The realm gate and every way to the public Surface or Space lead a party
+## in an active tale into its own worlds: its Space while the quest is up
+## there, else its realm. Anyone else keeps `destination`.
+func private_destination(p: Dictionary, destination: String) -> String:
+	if not destination in ["realm_1", "campaign", SpaceWorld.REALM]: return destination
+	var party := server.social.party_for(p.player_id)
+	var run := _run_of(party)
+	if run.is_empty() or run.status != "active": return destination
+	var realm := str(party.campaign.realm)
+	if destination == SpaceWorld.REALM: return PortServer.space_for(realm)
+	var goal := str(_objective_location(party, run, _step(run)).get("world", realm))
+	return goal if SpaceWorld.is_space(goal) else realm
+
+
+## Only while a campaign is being played (a finished one can be played on in,
+## but not entered again).
 func realm_for(p: Dictionary) -> Array:
 	var party := server.social.party_for(p.player_id)
 	var run := _run_of(party)

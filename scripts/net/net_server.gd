@@ -419,13 +419,16 @@ func on_enter(peer_id: int, destination: String) -> void:
 	# A dungeon return preserves the actual source Tavern as well.
 	if not dungeon_return and destination == "hall" and campaigns.home_for(p) != "":
 		destination = campaigns.home_for(p)
-	if destination == "campaign":  # the Chronicle Gate: your party's campaign realm
+	# Everyone shares the one realm gate. A party in an active tale only ever
+	# travels its own private worlds: the gate, dungeon exits and portals to
+	# the public Surface or Space lead into the tale's realm or Space instead.
+	destination = campaigns.private_destination(p, destination)
+	if destination == "campaign":
 		var found := campaigns.realm_for(p)
 		if found[0] == "":
 			Net.c_entered.rpc_id(peer_id, {error = found[1]})
 			return
 		destination = found[0]
-	# Resolve the Chronicle Gate first so a private Space can be resumed too.
 	destination = surface_port.redirect(p, destination)
 	if ChambersWorld.is_chambers(destination):
 		if p.account_id == 0:

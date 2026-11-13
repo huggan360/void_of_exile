@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bax77m1rw7wao"
+path="res://.godot/imported/head_shattered_glow.vox-03c9be1b9c9a69b922d38b4f41fdaa5b.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/source_64/head_shattered_glow.vox"
+dest_files=["res://.godot/imported/head_shattered_glow.vox-03c9be1b9c9a69b922d38b4f41fdaa5b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

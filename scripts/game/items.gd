@@ -250,6 +250,13 @@ const STORY_ITEMS := {
 	story_candle = ["Wick's Candle", "Story item - readable", "A stub of black wax that never lights.",
 		"Scratched into the wax, in a shaking hand:|[i]Don't turn around. Don't answer. Don't read the map in the dark.[/i]"],
 	story_sun_seal = ["Sun Seal", "Story item", "Gold, stamped with the Scarab Regent's sign. It hums in the heat.", ""],
+	story_pilgrim_page = ["Pilgrim's Page", "Story item - readable", "White vellum, left under Rosamund's wishing stones. Warm, as if someone had just been holding it.",
+		"[i]Close your eyes, little king, and I will keep mine open for you.|What you cannot bear to do, I will whisper until you can.|All glory to the Eye that never closes.[/i]"],
+	story_tide_chart = ["Royal Tide Chart", "Story item - readable", "A star chart of the King's old navy, washed up at Tidewell's shell shrine.",
+		"The Haven, the Shardfield and the Gloam, drawn in royal blue.|One place inside the Shardfield has been scratched out, very carefully, again and again."],
+	story_astrolabe_lens = ["Astrolabe Lens", "Story item", "The great lens of Hollowmoon's fallen astrolabe. Held over the Royal Tide Chart, the scratches burn away.", ""],
+	story_eye_sigil = ["The Eye Sigil", "Story item - readable", "Taken from the Veiled Herald. A cold disc of pale crystal with a closed eye carved into it. Sometimes the eye moves.",
+		"[enemy]Vaelith[/enemy]. The Pale One. The Eye behind the stars.|It found a kind king and whispered until he was hollow.|It waits in the [place]Stormeye Citadel[/place] on the Pale Eye. The Sigil knows the way in."],
 	story_ice_card = ["Rime Card", "Story item - readable", "A card of frost that never melts.",
 		"Where the frost sleeps, the [b]Crown of the Rime[/b] keeps watch.|A hidden entity waits in its stronghold, guarding a piece of what was torn.|Only the key of the peaks will open its gates."],
 }

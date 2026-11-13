@@ -86,9 +86,6 @@ func refresh() -> void:
 	_spawned.clear()
 	_hook_gerald()
 	_hook_chronicler()
-	# The Chronicle Gate in the shared Tavern swirls only during an active campaign.
-	if _world is HallWorld and is_instance_valid((_world as HallWorld).campaign_portal):
-		(_world as HallWorld).campaign_portal.set_active(camp.get("status", "") == "active")
 	if _world is CastleWorld and not camp.is_empty():
 		_spawn_castle_exit(camp)
 	# Gerald is available in both the public and private Tavern.
@@ -148,7 +145,7 @@ func _objective_points(step: Dictionary, camp: Dictionary, here_campaign: bool, 
 		return [goal.pos]
 	var in_hall := Campaigns.is_tavern(_world.realm_id)
 	if step.world == "campaign" and in_hall:
-		return [_chronicle_gate()]  # it all starts through the gate
+		return [_realm_gate()]  # it all starts through the gate
 	if step.world == "hall" and not in_hall or step.world == "campaign" and not here_campaign:
 		return []
 	match str(step.kind):
@@ -194,7 +191,15 @@ func _route_points(destination: String, camp: Dictionary) -> Array:
 	var realm := str(camp.get("realm", ""))
 	var castle := str(camp.get("castle", Campaigns.castle_id(int(camp.get("owner", 0)), str(camp.get("id", "")))))
 	var links: Array = camp.get("links", []).duplicate()
-	links.append_array([{from = "hall", to = realm}, {from = realm, to = "hall"}, {from = realm, to = castle}, {from = castle, to = realm}])
+	var gate := gate_world(camp)
+	var space := PortServer.space_for(realm)
+	links.append_array([{from = "hall", to = gate}, {from = realm, to = "hall"}, {from = realm, to = castle}, {from = castle, to = realm},
+		{from = space, to = realm}, {from = realm, to = space}])
+	# Up from the Surface's launch pad; down by the Nexus surface shuttle.
+	if _world is IslandWorld and (_world as IslandWorld).launchpad_center().is_finite():
+		links.append({from = here, to = PortServer.space_for(here), pos = (_world as IslandWorld).launchpad_center()})
+	if _world is SpaceWorld and is_instance_valid((_world as SpaceWorld).station):
+		links.append({from = here, to = PortServer.surface_for(here), pos = (_world as SpaceWorld).station.anchors.rocket_pad.origin})
 	if _world is DungeonWorld:
 		var origin := str((_world as DungeonWorld).record.get("origin", "hall"))
 		links.append({from = here, to = origin, pos = _world.spawn_point + Vector3(0, 0, 4)})
@@ -219,7 +224,7 @@ func _route_points(destination: String, camp: Dictionary) -> Array:
 	for node in _world.get_children():
 		if node is Portal and node.active:
 			var to := str(node.destination)
-			if to == "campaign": to = realm
+			if to in ["campaign", "realm_1"] and Campaigns.is_tavern(_world.realm_id): to = gate
 			if to == "castle": to = castle
 			if _route_world(to) == hop: out.append(node.global_position)
 	return out
@@ -342,11 +347,15 @@ static func _villager_key(target: InteractionTarget) -> String:
 	return "%s@%d,%d" % [target.title, int(npc.spec.pos.x), int(npc.spec.pos.z)]
 
 
-func _chronicle_gate() -> Vector3:
-	for child in _world.get_children():
-		if child is Portal and (child as Portal).destination == "campaign":
-			return child.global_position
-	return Vector3.ZERO
+func _realm_gate() -> Vector3:
+	return (_world as HallWorld).realm_portal.global_position if _world is HallWorld and is_instance_valid((_world as HallWorld).realm_portal) else Vector3.INF
+
+
+## Where the realm gate takes this party (CampaignServer.private_destination):
+## its Space while the main quest is up there, else its realm.
+static func gate_world(camp: Dictionary) -> String:
+	var goal := str(camp.get("objective", {}).get("world", ""))
+	return goal if SpaceWorld.is_space(goal) else str(camp.get("realm", ""))
 
 
 # --- In the world ------------------------------------------------------------------------
@@ -629,6 +638,8 @@ func _on_fog(realm_id: String, cells: Array) -> void:
 ## The opening plays once everyone has arrived in the party's Tavern.
 func _process(_delta: float) -> void:
 	astral_launch.update(social.campaign_state(),_world)
+	var story := social.campaign_state()
+	GameAudio.reach_score = str(Campaigns.step_def(str(story.get("id", "")), int(story.get("step", 0))).get("score", "")) if _world is SpaceWorld else ""
 	if _world is TheoryWorld:
 		var camp := social.campaign_state()
 		var key := str(Campaigns.step_def(str(camp.get("id","")),int(camp.get("step",0))).get("id",""))
@@ -668,28 +679,74 @@ func _show_full_map() -> void:
 
 
 ## A cutscene with a stage: its scene is loaded far below this world for the
-## shots (named by its markers) and freed when it ends.
+## shots (named by its markers) and freed when it ends. Shots and actors can
+## also stand at real places of the Reach (`space`, see _reach_frame), and
+## `actors` put people in either for the length of the film.
 func _staged(script: Dictionary) -> Dictionary:
-	if not script.has("stage") or not ResourceLoader.exists(str(script.stage)):
-		var plain := script.duplicate(true)
-		_village_shots(plain)
-		return plain
-	var stage: Node3D = load(str(script.stage)).instantiate()
-	stage.position = script.get("stage_offset", Vector3(0, -600, 0))
-	main.add_child(stage)
-	cinematic.finished.connect(stage.queue_free, CONNECT_ONE_SHOT)
 	var out := script.duplicate(true)
 	_village_shots(out)
+	var stage: Node3D = null
+	if script.has("stage") and ResourceLoader.exists(str(script.stage)):
+		stage = load(str(script.stage)).instantiate()
+		stage.position = script.get("stage_offset", Vector3(0, -600, 0))
+		main.add_child(stage)
+		cinematic.finished.connect(stage.queue_free, CONNECT_ONE_SHOT)
+		# Warm light where the films look, whatever the world's own sky is.
+		for spot: Vector3 in script.get("stage_lights", []):
+			var lamp := OmniLight3D.new()
+			lamp.light_color = Color("ffd9a0")
+			lamp.light_energy = 2.2
+			lamp.omni_range = 45.0
+			lamp.position = spot
+			stage.add_child(lamp)
 	var mark := func(name: String) -> Vector3:
-		var node := stage.find_child(name, true, false) as Node3D
-		return node.global_position if node else stage.global_position
+		var node := stage.find_child(name, true, false) as Node3D if stage else null
+		return node.global_position if node else (stage.global_position if stage else main.player.global_position)
 	for shot: Dictionary in out.shots:
 		if shot.has("from_marker"):
 			shot.from = mark.call(shot.from_marker)
 			shot.to = mark.call(shot.to_marker)
 			shot.look_from = mark.call(shot.look_marker)
 			shot.look_to = shot.look_from
+		elif shot.has("stage_at"):
+			var origin: Vector3 = stage.global_position if stage else Vector3.ZERO
+			shot.from = origin+(shot.stage_at.from as Vector3)
+			shot.to = origin+(shot.stage_at.to as Vector3)
+			shot.look_from = origin+(shot.stage_at.look as Vector3)
+			shot.look_to = shot.look_from
+		elif shot.has("space"):
+			var frame := _reach_frame(shot.space)
+			shot.from = frame*(shot.space.from as Vector3)
+			shot.to = frame*(shot.space.get("to", shot.space.from) as Vector3)
+			shot.look_from = frame*(shot.space.look as Vector3)
+			shot.look_to = frame*(shot.space.get("look_to", shot.space.look) as Vector3)
+	if script.has("actors"):
+		var cast := CutsceneActors.new()
+		main.add_child(cast)
+		cinematic.finished.connect(cast.queue_free, CONNECT_ONE_SHOT)
+		for actor: Dictionary in script.actors:
+			var frame: Transform3D
+			if actor.has("stage"):
+				frame = Transform3D(Basis.IDENTITY, (stage.global_position if stage else Vector3.ZERO)+(actor.stage as Vector3))
+			else:
+				var place := _reach_frame(actor.space)
+				frame = Transform3D(place.basis, place*(actor.space.get("at_local", Vector3.ZERO) as Vector3))
+			cast.add(str(actor.model), frame, actor)
 	return out
+
+
+## A place of the Reach as a world frame (x right, y up from the ground, -z
+## toward the pad for a fortress): {planet, at = "town" | "fort" | "pad" |
+## "herald" | "orbit"}. Orbit is the planet's centre with world axes.
+static func _reach_frame(spec: Dictionary) -> Transform3D:
+	var p := SpaceLayout.planet(str(spec.planet))
+	var center: Vector3 = p.get("center", Vector3.ZERO)
+	match str(spec.get("at", "orbit")):
+		"town": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.town_frame(p, "center")
+		"fort": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.fort_frame(p)
+		"pad": return SpaceLayout.pad_frame(p)
+		"herald": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.place_frame(p, EyeCampaign.herald_offset())
+	return Transform3D(Basis.IDENTITY, center)
 
 
 ## Shots over towns ({village}): a slow glide down toward each town's heart,

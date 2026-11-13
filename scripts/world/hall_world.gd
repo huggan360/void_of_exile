@@ -13,8 +13,7 @@ var _footprints := PackedByteArray()  # per column: 0 open, 1 prop or tree, 2 bu
 var _map_fountain := Vector2.ZERO
 ## A party's private copy for its campaign: both gates lead into its realm.
 var campaign_tavern := false
-## The Chronicle Gate south of the fountain: lit only while your party plays a campaign.
-var campaign_portal: Portal
+var realm_portal: Portal
 ## The chapel market (ShopKeeper) on the cobbled MarketSquare before the chapel:
 ## two rows of red and white stalls facing each other across the walk to the
 ## chapel door, each keeper standing inside their stall behind the counter.
@@ -54,11 +53,9 @@ func _ready() -> void:
 	if has_node("Spawn"): spawn_point = $Spawn.position
 	var gate_position: Vector3 = $RealmGate.position if has_node("RealmGate") else Vector3(0, 10, -60)
 	var gate_facing: Vector3 = -$RealmGate.basis.z if has_node("RealmGate") else Vector3.BACK
-	_add_portal(gate_position, gate_facing, "realm_1", Color(0.45, 0.25, 1.0), Color(0.2, 0.85, 1.0))
-	# The Chronicle Gate: into your party's own realm, while it plays a campaign.
-	if has_node("CampaignGate"):
-		campaign_portal = _add_portal($CampaignGate.position, -$CampaignGate.basis.z, "campaign", Color(1.0, 0.7, 0.2), Color(1.0, 0.35, 0.6))
-		campaign_portal.set_active(false)
+	# One gate for everyone: the server sends each traveller to the public
+	# Surface, or into their party's own realm or Space while a tale plays.
+	realm_portal = _add_portal(gate_position, gate_facing, "realm_1", Color(0.45, 0.25, 1.0), Color(0.2, 0.85, 1.0))
 	# The Chambers Gate: into the account's own vault hall.
 	if has_node("ChambersGate"):
 		var gate := _add_portal($ChambersGate.position, -$ChambersGate.basis.z, "chambers", Color(0.85, 0.2, 0.25), Color(1.0, 0.75, 0.35))

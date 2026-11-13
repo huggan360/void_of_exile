@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cxphf8bw45i4f"
+path="res://.godot/imported/model.vox-ba354b7c3f9535cb655e2455b22957ef.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/pale_tear/model.vox"
+dest_files=["res://.godot/imported/model.vox-ba354b7c3f9535cb655e2455b22957ef.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

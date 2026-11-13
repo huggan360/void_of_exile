@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://3oxib0wtwo70"
+path="res://.godot/imported/arm_r.vox-5a9f393d46deb15dcddf16037c74d2c8.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-5a9f393d46deb15dcddf16037c74d2c8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -79,7 +79,7 @@ func interact(p: Dictionary, id: String) -> void:
 			realm = realm.record.get("origin", "hall"), pos = realm.record.get("origin_pos", Vector3.INF)})
 		var origin := str(point.realm)
 		var back: Vector3 = point.pos
-		if not Campaigns.is_tavern(origin) and not server.realms.has(origin):
+		if not Campaigns.is_tavern(origin) and not Campaigns.is_campaign_realm(origin) and not server.realms.has(origin):
 			origin = "hall"
 			back = Vector3.INF
 		grants[p.player_id] = origin

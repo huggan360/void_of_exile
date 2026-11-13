@@ -4,12 +4,13 @@ class_name PlanetBosses
 ## creatures that drop nothing). Their fights live in scripts/enemies/bosses/.
 
 ## id: [name, planet, height m, hp, defense, xp, burst colour, phase variants, stat potion]
+## The Stormeye Tyrant is the Pale One itself, the god behind the King (mission 6).
 const BOSSES := {
 	queen_briarrose = ["Queen Briarrose", "rosamund", 7.5, 16000, 10, 1600, "ff6eb4", ["bloom", "wilted"], "magic"],
 	amber_colossus = ["Aurum, the Amber Colossus", "amberfall", 9.0, 24000, 14, 2400, "ffb84a", ["molten", "hive"], "defense"],
 	selenarch = ["Selenarch, the Moon-Eater", "hollowmoon", 8.0, 32000, 18, 3200, "7dff6a", ["eclipse", "void"], "speed"],
 	brood_matriarch = ["The Brood Matriarch", "mawgrave", 8.5, 40000, 22, 4000, "ff5fd2", ["swarm", "rot"], "hp"],
-	stormeye_tyrant = ["The Stormeye Tyrant", "pale_eye", 9.5, 48000, 26, 4800, "9ab0ff", ["tempest", "cataclysm"], "attack"],
+	stormeye_tyrant = ["Vaelith, the Stormeye Tyrant", "pale_eye", 9.5, 48000, 26, 4800, "9ab0ff", ["tempest", "cataclysm"], "attack"],
 }
 ## Planet creatures that come when a boss calls (copies without loot or XP).
 const THRALLS := ["petal_sprite", "quartz_hopper", "honey_mite", "amber_scarab", "lantern_ghost", "bone_crawler",
@@ -54,6 +55,32 @@ static func build(defs: Dictionary) -> void:
 			{pool = {tier = mini(6, int(tiers[2])+1)}, chance = 0.08, personal = true},
 			{item = "elixir_of_"+str(spec[8]), chance = 0.6}, {item = "backpack", chance = 0.05}])
 		defs[id] = b
+	defs["veil_herald"] = _herald()
+
+## Mission 6's mini boss (The Eye Behind the Stars): wakes when the party
+## comes near its shrine on Shardheart, like the Mad Farmer; 25000 hp plus a
+## share for every extra player near it.
+static func _herald() -> BossDef:
+	var b := RealmBosses._boss("veil_herald", "The Veiled Herald", "veil_herald", "", "veil_herald")
+	b.wake_on = "near"
+	b.hp = 25000
+	b.defense = 14
+	b.xp = 2500
+	b.body_height = 7.0
+	b.hit_radius = 1.7
+	b.aggro_radius = 18.0
+	b.bar_radius = 34.0
+	b.abandon_radius = 38.0
+	b.keep_distance = 9.0
+	b.leash = 24.0
+	b.intro_time = 7.0
+	b.burst_color = Color("96beff")
+	b.phases.assign([{until = 0.65, defense = 14}, {until = 0.3, defense = 12, variant = "unveiled"},
+		{until = 0.0, defense = 8, variant = "shattered"}])
+	b.loot.assign([{item = "elixir_hp", chance = 1.0}, {item = "elixir_mp", chance = 1.0},
+		{pool = {tier = 5}, chance = 0.5}, {pool = {tier = 6}, chance = 0.12, personal = true},
+		{item = "elixir_of_magic", chance = 0.5}, {item = "backpack", chance = 0.04}])
+	return b
 
 ## A boss projectile with its authored model (creatures/boss_projectiles/<model>).
 static func shot(model: String, style: String, color: Color, damage: Vector2i, speed: float, range_m: float,

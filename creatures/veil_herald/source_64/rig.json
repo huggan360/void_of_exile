@@ -1,0 +1,522 @@
+{
+  "voxel_size": 0.1206896551724138,
+  "parts": {
+    "veil_tail_0_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        6,
+        9,
+        6
+      ]
+    },
+    "veil_tail_2_1": {
+      "frame_min": [
+        -3,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "halo_1": {
+      "frame_min": [
+        -22,
+        -9,
+        -21
+      ],
+      "frame_size": [
+        43,
+        19,
+        43
+      ],
+      "glow": true
+    },
+    "halo_1_shattered": {
+      "frame_min": [
+        -22,
+        -9,
+        -21
+      ],
+      "frame_size": [
+        43,
+        19,
+        43
+      ],
+      "glow": true
+    },
+    "veil_tail_2_2": {
+      "frame_min": [
+        -3,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "veil_tail_0_1": {
+      "frame_min": [
+        -3,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "arm_r_shattered": {
+      "frame_min": [
+        -1,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        13,
+        30,
+        11
+      ],
+      "glow": true
+    },
+    "arm_r_unveiled": {
+      "frame_min": [
+        -1,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        13,
+        30,
+        11
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -1,
+        -28,
+        -8
+      ],
+      "frame_size": [
+        13,
+        30,
+        11
+      ],
+      "glow": true
+    },
+    "veil_tail_0_2": {
+      "frame_min": [
+        -3,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "body_shattered": {
+      "frame_min": [
+        -15,
+        4,
+        -14
+      ],
+      "frame_size": [
+        31,
+        39,
+        27
+      ],
+      "glow": true
+    },
+    "body": {
+      "frame_min": [
+        -15,
+        4,
+        -14
+      ],
+      "frame_size": [
+        31,
+        39,
+        27
+      ],
+      "glow": true
+    },
+    "body_unveiled": {
+      "frame_min": [
+        -15,
+        4,
+        -14
+      ],
+      "frame_size": [
+        31,
+        39,
+        27
+      ],
+      "glow": true
+    },
+    "veil_tail_1_2": {
+      "frame_min": [
+        -3,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "head_unveiled": {
+      "frame_min": [
+        -8,
+        -8,
+        -7
+      ],
+      "frame_size": [
+        17,
+        27,
+        13
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -8,
+        -8,
+        -7
+      ],
+      "frame_size": [
+        17,
+        27,
+        13
+      ],
+      "glow": true
+    },
+    "head_shattered": {
+      "frame_min": [
+        -8,
+        -8,
+        -7
+      ],
+      "frame_size": [
+        17,
+        27,
+        13
+      ],
+      "glow": true
+    },
+    "halo_0": {
+      "frame_min": [
+        -20,
+        -10,
+        -21
+      ],
+      "frame_size": [
+        43,
+        21,
+        43
+      ],
+      "glow": true
+    },
+    "halo_0_shattered": {
+      "frame_min": [
+        -20,
+        -10,
+        -21
+      ],
+      "frame_size": [
+        43,
+        21,
+        43
+      ],
+      "glow": true
+    },
+    "veil_tail_1_1": {
+      "frame_min": [
+        -3,
+        -7,
+        -1
+      ],
+      "frame_size": [
+        6,
+        8,
+        4
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -12,
+        -27,
+        -9
+      ],
+      "frame_size": [
+        14,
+        29,
+        12
+      ]
+    },
+    "veil_tail_1_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        6,
+        9,
+        6
+      ]
+    },
+    "veil_tail_2_0": {
+      "frame_min": [
+        -3,
+        -7,
+        -2
+      ],
+      "frame_size": [
+        6,
+        9,
+        6
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0.0,
+        42.0,
+        0.0
+      ],
+      "role": "head",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -7.0,
+        37.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        7.0,
+        37.0,
+        0.0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "veil_tail_0_0": {
+      "part": "veil_tail_0_0",
+      "pivot": [
+        -6.0,
+        22.0,
+        6.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "veil_tail_0_1": {
+      "part": "veil_tail_0_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "veil_tail_0_0"
+    },
+    "veil_tail_0_2": {
+      "part": "veil_tail_0_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "veil_tail_0_1"
+    },
+    "veil_tail_1_0": {
+      "part": "veil_tail_1_0",
+      "pivot": [
+        0.0,
+        22.0,
+        6.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "veil_tail_1_1": {
+      "part": "veil_tail_1_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "veil_tail_1_0"
+    },
+    "veil_tail_1_2": {
+      "part": "veil_tail_1_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "veil_tail_1_1"
+    },
+    "veil_tail_2_0": {
+      "part": "veil_tail_2_0",
+      "pivot": [
+        6.0,
+        22.0,
+        6.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 0,
+      "segments": 3
+    },
+    "veil_tail_2_1": {
+      "part": "veil_tail_2_1",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 1,
+      "segments": 3,
+      "parent_limb": "veil_tail_2_0"
+    },
+    "veil_tail_2_2": {
+      "part": "veil_tail_2_2",
+      "pivot": [
+        0.0,
+        -6.0,
+        2.0
+      ],
+      "role": "tail_chain",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false,
+      "segment": 2,
+      "segments": 3,
+      "parent_limb": "veil_tail_2_1"
+    },
+    "halo_0": {
+      "part": "halo_0",
+      "pivot": [
+        0.0,
+        22.0,
+        0.0
+      ],
+      "role": "",
+      "phase": 1,
+      "yaw": 0,
+      "throws": false
+    },
+    "halo_1": {
+      "part": "halo_1",
+      "pivot": [
+        0.0,
+        30.0,
+        0.0
+      ],
+      "role": "",
+      "phase": -1,
+      "yaw": 0,
+      "throws": false
+    }
+  },
+  "variants": {
+    "unveiled": {
+      "body": "body_unveiled",
+      "head": "head_unveiled",
+      "arm_r": "arm_r_unveiled"
+    },
+    "shattered": {
+      "body": "body_shattered",
+      "head": "head_shattered",
+      "arm_r": "arm_r_shattered",
+      "halo_0": "halo_0_shattered",
+      "halo_1": "halo_1_shattered"
+    }
+  },
+  "hand": [
+    0.0,
+    38.0,
+    -20.0
+  ],
+  "hover": 0,
+  "bob": 0.05,
+  "waddle": 0.02,
+  "flap_rate": 1.6,
+  "pixel_art": true,
+  "material_jitter": 0.0,
+  "glow_strength": 1.8,
+  "design_grid": [
+    64,
+    64,
+    64
+  ],
+  "upscale": 1,
+  "height_m": 7.0,
+  "animation_style": "wraith"
+}

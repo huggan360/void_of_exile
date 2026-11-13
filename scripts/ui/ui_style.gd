@@ -107,6 +107,16 @@ static func bold() -> Font:
 	return _bold
 
 
+## The same serif, slanted, for [i] text (so it keeps the size and face of
+## the words around it).
+static func italic() -> Font:
+	if _italic == null:
+		_italic = FontVariation.new()
+		_italic.base_font = font()
+		_italic.variation_transform = Transform2D(Vector2(1, 0), Vector2(-0.2, 1), Vector2.ZERO)
+	return _italic
+
+
 static func _font_file() -> FontFile:
 	if _file == null:
 		_file = load("res://fonts/BreeSerif.ttf")
@@ -171,10 +181,7 @@ static func theme() -> Theme:
 			_theme.set_constant("shadow_outline_size", type, 0)
 		_theme.set_font("bold_font", "RichTextLabel", bold())
 		_theme.set_font("normal_font", "RichTextLabel", font())
-		_italic = FontVariation.new()
-		_italic.base_font = font()
-		_italic.variation_transform = Transform2D(Vector2(1, 0), Vector2(-0.2, 1), Vector2.ZERO)
-		_theme.set_font("italics_font", "RichTextLabel", _italic)
+		_theme.set_font("italics_font", "RichTextLabel", italic())
 		_theme.set_color("default_color", "RichTextLabel", TEXT)
 		_theme.set_color("font_color", "Label", TEXT)
 		for type in ["LineEdit", "TextEdit"]:
@@ -377,6 +384,8 @@ static func dialogue_separator() -> HSeparator:
 static func dialogue_text(target: RichTextLabel) -> void:
 	target.add_theme_font_size_override("normal_font_size", 28)
 	target.add_theme_font_size_override("bold_font_size", 28)
+	target.add_theme_font_override("italics_font", italic())
+	target.add_theme_font_size_override("italics_font_size", 28)
 	target.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
 	target.add_theme_constant_override("shadow_offset_x", 2)
 	target.add_theme_constant_override("shadow_offset_y", 2)

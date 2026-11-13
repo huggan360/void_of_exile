@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://010qqx3eybdq"
+path="res://.godot/imported/arm_r_shattered_glow.vox-1923c07b8cd52af9f27c72ebdf00eaf6.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/source_64/arm_r_shattered_glow.vox"
+dest_files=["res://.godot/imported/arm_r_shattered_glow.vox-1923c07b8cd52af9f27c72ebdf00eaf6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

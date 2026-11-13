@@ -215,7 +215,7 @@ func _where(step: Dictionary) -> String:
 		"campaign":
 			if Campaigns.is_campaign_realm(place):
 				return ""
-			return "Chronicle Gate" if step.get("kind", "") == "enter" and Campaigns.is_tavern(place) else "Campaign realm"
+			return "Realm gate" if step.get("kind", "") == "enter" and Campaigns.is_tavern(place) else "Campaign realm"
 		"castle":
 			return "Hollow Castle" if not Campaigns.is_castle(place) else ""
 		"dungeon":
@@ -252,7 +252,7 @@ func _quest_text(text: String) -> String:
 			var titled := words[0] in ["Captain", "Quartermaster", "Elder", "Keeper", "Seer", "Warden", "Wizard", "Starwright", "Scrapper", "Fisher", "Old"]
 			if words.size()>1 and words[0]!="The":
 				_terms[str(words[1] if titled else words[0]).trim_suffix(",")] = "npc"
-		for name: String in ["The Tavern", "Tavern", "Surface", "Chronicle Gate", "Hollow Castle", "Nexus", "Aurora", "Starfall Launchworks", "Chromatic Expanse", "Unravelling", "Convergence"]:
+		for name: String in ["The Tavern", "Tavern", "Surface", "Realm gate", "Hollow Castle", "Nexus", "Aurora", "Starfall Launchworks", "Chromatic Expanse", "Unravelling", "Convergence"]:
 			_terms[name] = "place"
 		var names: Array = _terms.keys()
 		names.sort_custom(func(a: String, b: String) -> bool: return a.length()>b.length())

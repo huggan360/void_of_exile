@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bfqtr8xbl7tuj"
+path="res://.godot/imported/arm_r_unveiled_glow.vox-87e4e29c35952a8c15ca2ea9a5abb887.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/source_64/arm_r_unveiled_glow.vox"
+dest_files=["res://.godot/imported/arm_r_unveiled_glow.vox-87e4e29c35952a8c15ca2ea9a5abb887.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

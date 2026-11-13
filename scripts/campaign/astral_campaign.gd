@@ -86,7 +86,7 @@ func tick(party: Dictionary,run: Dictionary) -> void:
 		# Anyone of the party arriving in the Reach ends the tale, even after
 		# the dungeon itself has closed behind them.
 		for pid: int in party.members:
-			if str(campaigns.server.social.record(pid).get("realm",""))==SpaceWorld.REALM:
+			if SpaceWorld.is_space(str(campaigns.server.social.record(pid).get("realm",""))):
 				campaigns._advance(party,{})
 				return
 	var realm: RealmInstance=campaigns.server.realms.get(str(run.get("dungeon","")))
@@ -257,6 +257,10 @@ func entered(party: Dictionary,run: Dictionary,p: Dictionary) -> void:
 		if all_arrived:
 			_cancel_flight(run)
 			state.boarded=[]
+	elif p.realm==party.campaign.realm and str(campaigns._step(run).id)=="beyond":
+		# The Empress has fallen: coming home to the launch site tells the tale.
+		# Orin's rocket never flies back into the cleared Theory.
+		campaigns._advance(party,{})
 	elif p.realm==party.campaign.realm and campaigns._step(run).world=="dungeon":
 		keep(party,run)
 		_cancel_flight(run)

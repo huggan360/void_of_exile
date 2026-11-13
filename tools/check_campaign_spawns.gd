@@ -132,18 +132,17 @@ func _run() -> void:
 	verify(not client._route_points("hall", route).is_empty(), "Realm route marks the Tavern exit")
 	var hall: HallWorld = load("res://scenes/home/tavern.tscn").instantiate()
 	add_child(hall)
-	for destination: String in ["realm_1", "campaign", "chambers"]:
+	for destination: String in ["realm_1", "chambers"]:
 		verify(hall.get_children().any(func(node: Node) -> bool: return node is Portal and node.destination == destination),
 			"Public Tavern includes %s gate" % destination)
-	hall.campaign_portal.set_active(true)
 	client._world = hall
-	verify(client._route_points("dng_route", route) == [hall.campaign_portal.global_position], "Tavern routes to dungeon through the Chronicle Gate")
+	verify(client._route_points("dng_route", route) == [hall.realm_portal.global_position], "Tavern routes to dungeon through the realm gate")
 	check_world_point(hall, Campaigns.npc_position("gerald", "hall", hall), "lily_thief/Gerald")
 	var private_hall: HallWorld = load("res://scenes/home/tavern.tscn").instantiate()
 	private_hall.campaign_tavern = true
 	private_hall.realm_id = private_tavern
 	add_child(private_hall)
-	for destination: String in ["realm_1", "campaign", "chambers"]:
+	for destination: String in ["realm_1", "chambers"]:
 		verify(private_hall.get_children().any(func(node: Node) -> bool: return node is Portal and node.destination == destination),
 			"Private Tavern includes %s gate" % destination)
 	var chambers := ChambersWorld.new({id = ChambersWorld.id_for(account_id), chambers = true, chests = 0})
@@ -153,9 +152,8 @@ func _run() -> void:
 	verify(client._route_points(private_tavern, {realm = world.realm_id, castle = "cst_46_hidden_power"}) == [chamber_return.global_position],
 		"Chambers route points to its return gate on the private Tavern route")
 	client._world = private_hall
-	private_hall.campaign_portal.set_active(true)
-	verify(client._route_points(world.realm_id, route) == [private_hall.campaign_portal.global_position],
-		"Private Tavern Chronicle Gate leads to the campaign realm")
+	verify(client._route_points(world.realm_id, route) == [private_hall.realm_portal.global_position],
+		"Private Tavern realm gate leads to the campaign realm")
 	var castle: CastleWorld = load("res://scenes/castle/hollow_castle.tscn").instantiate()
 	castle.server_build = true
 	add_child(castle)

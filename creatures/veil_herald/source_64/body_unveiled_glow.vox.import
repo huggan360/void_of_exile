@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://12ngy7lymbhr"
+path="res://.godot/imported/body_unveiled_glow.vox-ed2d397607c0c7176c1a7c5c14a2214b.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/source_64/body_unveiled_glow.vox"
+dest_files=["res://.godot/imported/body_unveiled_glow.vox-ed2d397607c0c7176c1a7c5c14a2214b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -349,7 +349,8 @@ static func place_name(destination: String) -> String:
 		return "The Space"
 	if destination == "castle" or Campaigns.is_castle(destination):
 		return "The Hollow Castle"
-	return "Campaign" if destination == "campaign" or Campaigns.is_campaign_realm(destination) else "The Surface"
+	# A tale's private realm is still the Surface to the player.
+	return "The Surface"
 
 
 ## Goes to another place: a jump to lightspeed into the loading screen, the
@@ -422,8 +423,14 @@ func travel(destination: String, at := Vector3.INF, cinematic_departure := false
 	var original_client := Net.client
 	var original_generation := _world_generation
 	if not _args.has("qa-quick"):
-		if leaving_tavern: await transition.jump_in(place_name(destination))
-		else: await transition.fade_in(place_name(destination))
+		# The realm gate and public worlds lead a party in an active tale into
+		# its own Surface or Space (CampaignServer.private_destination).
+		var shown := destination
+		var camp := social.campaign_state()
+		if destination in ["realm_1", "campaign"] and str(camp.get("status", "")) == "active":
+			shown = CampaignClient.gate_world(camp)
+		if leaving_tavern: await transition.jump_in(place_name(shown))
+		else: await transition.fade_in(place_name(shown))
 	if original_client!=Net.client or original_generation!=_world_generation: return
 	var record := {}
 	if Net.is_client():
@@ -1531,7 +1538,7 @@ func _destroy_test() -> void:
 # --- Online test (see the header) ---------------------------------------------------
 
 ## --social-test: chat, then the demo campaign alone as party leader: its
-## start, Gerald, the Chronicle Gate and the first lily bed. Prints all chat.
+## start, Gerald, the realm gate and the first lily bed. Prints all chat.
 func _social_test() -> void:
 	social.line_added.connect(func(l: Dictionary) -> void: print("[chat] %s %s: %s" % [l.channel, l.from, l.text]))
 	var pause := func(t: float) -> void: await get_tree().create_timer(t).timeout

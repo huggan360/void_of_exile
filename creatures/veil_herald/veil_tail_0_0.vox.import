@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dinf87emumoi4"
+path="res://.godot/imported/veil_tail_0_0.vox-63011d0ab178a2a999e7d32066090196.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/veil_tail_0_0.vox"
+dest_files=["res://.godot/imported/veil_tail_0_0.vox-63011d0ab178a2a999e7d32066090196.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

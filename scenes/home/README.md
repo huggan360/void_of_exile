@@ -11,7 +11,7 @@ North to south: the **realm gate** on the northern headland, then the **Grand Ta
 - **Plazas** (`HomePlaza` markers): round paved squares with a `radius` and a `pattern` (rings, tiles, cobble).
 - **EditorGround**: a top-down preview of the baked ground. Click **Rebuild Preview** in its Inspector after you move the coastline, a road or a plaza.
 - **Buildings, Gardens, StreetFurniture, Trees**: prefab instances that you can move or rotate. A prefab's front (door, forge, bench seat) faces its local -Z. Nodes named `Lantern*` also get a warm light.
-- **Spawn** and **RealmGate** markers. The gate faces along the marker's -Z.
+- **Spawn**, **RealmGate** and **ChambersGate** markers. A gate faces along its marker's -Z. The one realm gate serves everyone: the server sends each traveller to the public Surface, or into their party's own realm or Space while a tale plays.
 - **Residents**: marker position, role, name, stationary flag and greeting. The smith, magician and innkeeper have interaction prompts.
 
 Navigation, the minimap and the ground decoration (grass tufts, flowers, beach pebbles) are all derived from the scene. Keep residents outside building and prop colliders.

@@ -123,7 +123,10 @@ const LIST := {
 	# | reach_dock | a party ship docks at the Nexus | |
 	# | reach_kill | party cannons destroy `count` brood (`foe` kind or any); `ambush` spawns them near `target` | count, foe, target, ambush |
 	# | reach_repair | the party ship is crippled until every `objects` spot aboard is mended | objects [{id, name, seat}] |
-	# | reach_search | searching each object at a planet spot | planet, objects [{id, name, spot, found}] |
+	# | reach_search | searching each object at a planet spot (`item`: a clue for the finder) | planet, objects [{id, name, spot, found, item}] |
+	# | reach_herald | the Veiled Herald (quest site on Shardheart, EyeCampaign) falls | |
+	# | reach_relic_chest | someone takes the Eye Sigil from the Herald's story chest | |
+	# `score` on a step ("battle1", "battle3"): its battle music bed plays, layer 2 while its boss fights.
 	# Space Travels additionally uses reach_order, reach_tutorial_fly, reach_tutorial_ambush,
 	# reach_tutorial_repair, reach_port, reach_boss and reach_party_nexus.
 	# talk steps with world "astral" use the Reach NPCS.
@@ -259,29 +262,59 @@ const LIST := {
 				say = "You did it. Even the little lights over the jukebox have stopped flickering.|The Matriarch is gone, the coffee's hot, and there are still two open ports for travellers with nowhere left to fly.|At the end of the universe, it's nice to know someone will always find their way home. Come back any time, starsailors."},
 		],
 	},
+	# Mission 6 keeps the original id (saves and unlocks); remade as the
+	# Reach's ending: a mystery across the whole map, the Veiled Herald on
+	# Shardheart (EyeCampaign) and Vaelith, the god behind the King, in the
+	# Stormeye Citadel. `score` steps play battle music (GameAudio).
 	pale_eye = {
-		id = "pale_eye", revision = 1, pack = "astral_frontier", requires = "hollowmoon", reach = true,
-		title = "Under the Pale Eye", level = 48, xp = 12000,
-		blurb = "Burn the hives of Mawgrave and fly into the storm at the end of the map.",
-		stars = [{id = "complete", text = "Finish the tale"}, {id = "time", text = "Finish within 40 minutes", seconds = 2400},
+		id = "pale_eye", revision = 2, pack = "astral_frontier", requires = "hollowmoon", reach = true,
+		title = "The Eye Behind the Stars", level = 48, xp = 15000,
+		blurb = "The King is dead, yet something still whispers from beyond the Shardfield. Follow the clues across the Reach, defeat its Herald and face the god who cast the spell.",
+		intro = "eye_prologue",
+		stars = [{id = "complete", text = "Close the Eye"}, {id = "time", text = "Finish within 75 minutes", seconds = 4500},
 			{id = "no_deaths", text = "Nobody falls"}],
 		steps = [
-			{id = "captain", kind = "talk", world = "astral", npc = "isolde", shared = true, text = "Captain Isolde's last orders",
-				say = "Every ship of the Nexus is with you, in spirit and in biscuits.|Burn the hives on [place]Mawgrave[/place] first, or the mother will have an army. Then the storm."},
+			{id = "captain", kind = "talk", world = "astral", npc = "isolde", shared = true,
+				text = "Speak to Captain Isolde at the Nexus",
+				say = "You came. Good. Sit, the tea's still hot.|Since you brought down the King, the Reach has been... listening. Shrines gone quiet. Lighthouses seeing ships that aren't there. Old Seer Nyx won't sleep.|A king doesn't wake up one morning and turn on his own people. Somebody [i]asked[/i] him to. Somebody he couldn't refuse.|Start with [place]Rosamund[/place]. Keeper Lys tends the petal shrine there. Her shrines were the first to stop singing."},
 			{id = "ship", kind = "reach_ship", world = "astral", text = "Board a party ship"},
-			{id = "maw", kind = "reach_fly", world = "astral", target = "planet:mawgrave", range = 800.0, text = "Fly deep into the Gloam to Mawgrave"},
-			{id = "swarm", kind = "reach_kill", world = "astral", count = 10, target = "planet:mawgrave", ambush = 10, text = "Break the swarm over Mawgrave (%d/%d)"},
-			{id = "land", kind = "reach_land", world = "astral", planet = "mawgrave", text = "Land on Mawgrave"},
-			{id = "hives", kind = "reach_search", world = "astral", planet = "mawgrave", text = "Set Orin's lantern charges in the hives (%d/%d)",
-				objects = [{id = "h_a", name = "Brood hive", spot = "brood_hive", found = "The charge glows green and the hive shrinks back."},
-					{id = "h_b", name = "Brood hive", spot = "hollow_nest", found = "Something inside screams and goes still."},
-					{id = "h_c", name = "Brood hive", spot = "spore_garden", found = "The last charge catches. Mawgrave burns with green fire."}]},
-			{id = "eye", kind = "reach_fly", world = "astral", target = "planet:pale_eye", range = 900.0, text = "Fly into the storm of the Pale Eye"},
-			{id = "mother", kind = "reach_kill", world = "astral", count = 12, target = "planet:pale_eye", ambush = 12,
-				text = "Destroy the Mother's last brood under the Eye (%d/%d)"},
+			{id = "lys", kind = "talk", world = "astral", npc = "lys", shared = true,
+				text = "Fly to Rosamund and speak to Keeper Lys at the petal shrine",
+				say = "The shrines stopped singing on the very night the King fell. Not before. [i]After.[/i]|As if something far away had been holding its breath, and finally let it out.|A pilgrim came that night, all in white, with no face under her veil. She knelt at the [place]wishing stones[/place] and left something there. I was too frightened to look."},
+			{id = "stones", kind = "reach_search", world = "astral", planet = "rosamund", text = "Search the wishing stones on Rosamund (%d/%d)",
+				objects = [{id = "page", name = "Wishing stones", spot = "wishing_stones", item = "story_pilgrim_page",
+					found = "Under the smallest stone: a page of white vellum, warm to the touch. [b]Pilgrim's Page[/b] added to your bag."}]},
+			{id = "tam", kind = "talk", world = "astral", npc = "tam", shared = true,
+				text = "Fly to Tidewell and ask Tam of the Lighthouse about the pilgrim",
+				say = "White veil? Aye. I've seen her ship. Every night, lamp-lit and silent, sailing straight into the [place]Shardfield[/place].|Funny thing. My lamp never reaches it. The light just... slides off.|The tide brought something in this morning. Washed up at the [place]shell shrine[/place]. Old charts from the King's own navy, still sealed. Take a look, I won't touch them."},
+			{id = "shells", kind = "reach_search", world = "astral", planet = "tidewell", text = "Search the shell shrine on Tidewell (%d/%d)",
+				objects = [{id = "chart", name = "Shell shrine", spot = "shell_shrine", item = "story_tide_chart",
+					found = "A sealed tube of royal blue. Inside, a star chart with one place scratched out. [b]Royal Tide Chart[/b] added to your bag."}]},
+			{id = "hermit", kind = "talk", world = "astral", npc = "hermit", shared = true,
+				text = "Bring the page and the chart to the Hollow Hermit on Hollowmoon",
+				say = "Let me see. Hm. Hmmm.|The page is a prayer. Not to the King. [i]To the thing that whispered to him.[/i] It calls itself the [enemy]Pale One[/enemy]. The Eye that never closes.|And the chart... someone scratched out one place, very carefully. To read what is under the scratches you'll need the old observatory's lens.|It fell with the [place]great astrolabe[/place], out past the bone trees. Bring it here."},
+			{id = "lens", kind = "reach_search", world = "astral", planet = "hollowmoon", text = "Recover the lens from the fallen astrolabe on Hollowmoon (%d/%d)",
+				objects = [{id = "lens", name = "Fallen astrolabe", spot = "fallen_astrolabe", item = "story_astrolabe_lens",
+					found = "The lens is cold and whole. Held up to the chart, the scratches burn away... [b]Astrolabe Lens[/b] added to your bag."}],
+				cutscene = "eye_herald"},
+			{id = "nyx", kind = "talk", world = "astral", npc = "gloam_seer", shared = true,
+				text = "Show what the lens revealed to Seer Nyx beside the observatory",
+				say = "I saw it too. I have seen it every night since the King fell.|The pilgrim is no pilgrim. She is the [enemy]Veiled Herald[/enemy], the voice that carried the Pale One's whisper into the King's ear. She waits on [place]Shardheart[/place], the crystal heart hidden inside the Shardfield.|She keeps something for her master. A sigil, or a key. Take it from her.|And be careful. A herald is only ever a messenger. The one who sends her is still behind the stars."},
+			{id = "shardheart", kind = "reach_land", world = "astral", planet = "shardheart",
+				text = "Cross into the Shardfield and land on Shardheart"},
+			{id = "herald", kind = "reach_herald", world = "astral", score = "battle1",
+				text = "Find the Veiled Herald's shrine on Shardheart and defeat her"},
+			{id = "sigil", kind = "reach_relic_chest", world = "astral",
+				text = "Take the Eye Sigil from the Herald's Story Chest",
+				cutscene = "eye_revealed"},
+			{id = "eye", kind = "reach_land", world = "astral", planet = "pale_eye", score = "battle3",
+				text = "Fly beyond the Shardfield to the Pale Eye and land"},
+			{id = "vaelith", kind = "reach_boss", world = "astral", planet = "pale_eye", boss = "stormeye_tyrant", score = "battle3",
+				text = "Open the Stormeye Citadel with its key and defeat Vaelith, the Pale One",
+				cutscene = "eye_closed"},
 			{id = "home", kind = "reach_dock", world = "astral", text = "Come home to the Nexus"},
-			{id = "report", kind = "talk", world = "astral", npc = "isolde", final = true, shared = true, text = "Come home to Captain Isolde",
-				say = "The storm is breaking up. We can see stars behind the Eye for the first time in nine years.|You crossed a theory, a field of shards and the dark itself. The Nexus is yours, for as long as you like.|...Tea?"},
+			{id = "report", kind = "talk", world = "astral", npc = "isolde", final = true, shared = true, text = "Tell Captain Isolde the Eye is closed",
+				say = "We felt it here. Every lantern on the Nexus flickered at once, and then... quiet. A good quiet.|So the King was never the villain. Just the first one it found.|Rest now. The Reach is free, and for the first time in a long while, nothing is watching it but us.|...Tea?"},
 		],
 	},
 	theory_of_everything = {
@@ -289,7 +322,7 @@ const LIST := {
 		blurb="Help a woodland starwright finish his impossible ship. Board together, cross the chromatic void and restore a haunted vessel on the way to the Convergence.",
 		xp=8000,stars=[],side=[],
 		steps=[
-			{id="realm",kind="enter",world="campaign",text="Return to the Surface through the Chronicle Gate"},
+			{id="realm",kind="enter",world="campaign",text="Return to the Surface through the realm gate"},
 			{id="mechanic",kind="talk",world="campaign",npc="astral_mechanic",shared=true,
 				text="Find Orin at Starfall Launchworks in the woods",
 				say="You found my little clearing! [place]Starfall Launchworks[/place], first port to a very unreasonable sky.|My ship needs a [b]starcoil[/b], a [b]spellsteel nozzle[/b] and an [b]aether heart[/b]. My supply chest is beside me. Bring all three to me.|Once she is ready, every member of your party must board. Nobody gets left in the trees."},
@@ -322,7 +355,7 @@ const LIST := {
 		steps = [
 			{id = "gerald", kind = "talk", npc = "gerald", world = "hall", text = "Talk to Gerald in the Tavern garden",
 				say = "Gone! The last of my moon-lilies, [b]gone[/b]!|Something with [enemy]teeth[/enemy] drags them off at night, out past the realm gate.|The meadow beyond [place]Bramblebrook[/place], I'd wager. Please, find it, and bring me back one living lily!"},
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate north of the Grand Tavern"},
 			{id = "trail", kind = "interact", world = "campaign", text = "Follow the stolen lilies through the eastern meadow (%d/%d)", verb = "Examine",
 				objects = [
 					{id = "lily_tracks", name = "Dragged lily stems", at = {glade = "Bramblebrook", along = 0.45}, found = "Chewed stems lead farther into the meadow."},
@@ -387,7 +420,7 @@ const LIST := {
 			{id = "no_wipes", text = "Win the stronghold on the first try"},
 		],
 		steps = [
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain and travel north to Snowbell"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate north of the Grand Tavern and travel north to Snowbell"},
 			{id = "ask", kind = "ask_around", world = "campaign", village = "Snowbell", chance = 0.15, flee = true, reveal = "tobias",
 				text = "Ask the people of Snowbell about the crown mark",
 				yes = "Shh! Not so loud. [npc]Tobias[/npc] the trapper. Talk to him, not me.",
@@ -423,7 +456,7 @@ const LIST := {
 			{id = "no_wipes", text = "Never lose the whole party"},
 		],
 		steps = [
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain and travel south to Sunveil"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate north of the Grand Tavern and travel south to Sunveil"},
 			{id = "zahra", kind = "talk", npc = "zahra", world = "campaign", text = "Find Zahra the caravan master in Sunveil",
 				say = "Two map pieces and a crown mark? Then you're hunting the [place]Sunken Court[/place].|My caravan carried its old [b]sun seal[/b] until [enemy]dune raiders[/enemy] took it last night, out in the dunes.|Get it back and I'll tell you what it opens."},
 			{id = "raiders", kind = "kill", world = "campaign", text = "Defeat the dune raiders in the dunes (%d/%d)", count = 5,
@@ -461,7 +494,7 @@ const LIST := {
 			{id = "no_wipes", text = "Never lose the whole party"},
 		],
 		steps = [
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain and head for the lands of Doom"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate north of the Grand Tavern and head for the lands of Doom"},
 			{id = "kael", kind = "talk", npc = "kael", world = "campaign", gather = true, text = "Find Brother Kael outside the Cinder Bastion",
 				say = "Pilgrims, with a map that burns in my hands. Hm.|The fourth edge lies beneath the mountain of fire, guarded by its [enemy]Warden[/enemy], and beyond it a forest that never stops burning.|First, prove you mean no harm: relight the three [b]oath-braziers[/b] the cultists put out."},
 			{id = "braziers", kind = "interact", world = "campaign", text = "Relight the oath-braziers around the Bastion (%d/%d)", verb = "Relight",
@@ -503,7 +536,7 @@ const LIST := {
 			{id = "side", text = "Help Oskar the diver"},
 		],
 		steps = [
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain and go to the blue shores of Bluelay"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate north of the Grand Tavern and go to the blue shores of Bluelay"},
 			{id = "mirela", kind = "talk", npc = "mirela", world = "campaign", gather = true, text = "Find Mirela of the Tides by the Azure Crucible",
 				say = "Four pieces, and the fifth sank with the [place]Drowned Spire[/place]. I hear it every night.|Two seals hold the Spire down: the [enemy]Siren[/enemy]'s pearl in the grotto, and the [enemy]Cantor[/enemy]'s bells in the tower.|The tide-heralds guard the grotto's mouth. Break them, and the water will let you in."},
 			{id = "heralds", kind = "kill", world = "campaign", text = "Break the tide-heralds on the shore (%d/%d)", count = 5,
@@ -559,7 +592,7 @@ const LIST := {
 			{id = "no_wipes", text = "Never lose the whole party"},
 		],
 		steps = [
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain and go into the Deep Dark"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate north of the Grand Tavern and go into the Deep Dark"},
 			{id = "wick", kind = "talk", npc = "wick", world = "campaign", gather = true, text = "Find Old Wick the lamplighter at the edge of the dark",
 				say = "Shh. Keep your voices down. In here, they [b]listen[/b].|Before the throne will open, the stones must hear you. Four of them, out in the black. Put your ear to each.|Whatever they say... don't answer. And if you hear breathing behind you, don't turn around."},
 			{id = "stones", kind = "interact", world = "campaign", text = "Listen at the whispering stones in the dark (%d/%d)", verb = "Listen",
@@ -605,7 +638,7 @@ const LIST := {
 			{id = "no_wipes", text = "Never lose the whole party"},
 		],
 		steps = [
-			{id = "gate", kind = "enter", world = "campaign", text = "Step through the Chronicle Gate south of the fountain and go to Hearthwick, the heart of the realm"},
+			{id = "gate", kind = "enter", world = "campaign", text = "Step through the realm gate north of the Grand Tavern and go to Hearthwick, the heart of the realm"},
 			{id = "aurelian", kind = "talk", npc = "aurelian", world = "campaign", shared = true, gather = true,
 				text = "Find Aurelian the Old Wizard in Hearthwick",
 				say = "So the Stranger showed you. I felt it, the moment the sixth piece touched the map.|He is no stranger. He is the [enemy]Hollow King[/enemy], and he has been feeding on this realm for a thousand years.|I am old, but I can still open one door. Step through it, end him, and bring me his [b]heart[/b]. It must not keep beating."},
@@ -643,6 +676,97 @@ const _TOWNS := {
 ## Cutscenes a step can play when it ends (CampaignCinematic scripts). stage: a
 ## scene loaded far below the world just for the shots; shots name its markers.
 const CUTSCENES := {
+	# Mission 6's films, shot in real places: the Reach's planets (`space`,
+	# CampaignClient._reach_frame) and the Hollow Castle as a stage.
+	eye_prologue = {
+		title = "The Eye Behind the Stars", anywhere = true,
+		loading = {title = "Long Ago", subtitle = "Before the King turned", seconds = 3.5},
+		stage = "res://scenes/castle/hollow_castle.tscn", stage_offset = Vector3(0, 12000, 0),
+		stage_lights = [Vector3(0, 8, -70), Vector3(0, 8, -46), Vector3(0, 9, -20), Vector3(0, 10, 70)],
+		shots = [
+			{space = {planet = "rosamund", at = "town", from = Vector3(70, 60, 95), to = Vector3(28, 18, 42), look = Vector3(0, 4, 0)}, duration = 9.0,
+				cards = [{text = "Once, the kingdom knew only peace.", at = 0.8, hold = 3.4}, {text = "Lanterns at every door. Music round every fountain.", at = 4.6, hold = 3.8}]},
+			{space = {planet = "rosamund", at = "town", from = Vector3(-7, 3.2, 14), to = Vector3(-3, 2.6, 9), look = Vector3(0, 2.2, 4)}, duration = 8.0,
+				cards = [{text = "And a young [b]King[/b] who walked among his people.", at = 0.6, hold = 3.4}, {text = "He knew every name. Every face.", at = 4.4, hold = 3.0}]},
+			{stage_at = {from = Vector3(7, 5, -58), to = Vector3(2.5, 3.8, -66), look = Vector3(0, 3.2, -74)}, duration = 9.0,
+				cards = [{text = "Then, one night, a visitor came to his throne.", at = 0.6, hold = 3.6}, {text = "[i]A pilgrim, veiled in white, with no face beneath the veil.[/i]", at = 4.6, hold = 3.8}]},
+			{space = {planet = "pale_eye", at = "orbit", from = Vector3(1500, 900, -3400), to = Vector3(900, 650, -2500), look = Vector3(0, 300, 0)}, duration = 9.0,
+				cards = [{text = "She whispered a name that was not hers.", at = 0.6, hold = 3.4}, {text = "And far beyond the stars, something [enemy]opened its eye[/enemy].", at = 4.4, hold = 4.0}]},
+			{from_marker = "ShotBridgeFrom", to_marker = "ShotBridgeTo", look_marker = "ShotBridgeLook", duration = 9.0,
+				cards = [{text = "The King gave the order the next morning.", at = 0.6, hold = 3.4}, {text = "His own knights. His own people.", at = 4.6, hold = 3.8}]},
+			{from_marker = "ShotHallFrom", to_marker = "ShotHallTo", look_marker = "ShotHallLook", duration = 8.0,
+				cards = [{text = "What sat on the throne after that was not a man.", at = 0.6, hold = 3.4}, {text = "We called him [enemy]the Hollow King[/enemy]. You brought him down.", at = 4.2, hold = 3.4}]},
+			{space = {planet = "pale_eye", at = "fort", from = Vector3(0, 48, -130), to = Vector3(0, 22, -58), look = Vector3(0, 8, 0)}, duration = 10.0,
+				cards = [{text = "But a spell has a [i]caster[/i].", at = 0.8, hold = 3.2}, {text = "And the one who cast it is still watching. Still [enemy]hungry[/enemy].", at = 4.4, hold = 4.6}]},
+		],
+		actors = [
+			{model = "city_noble", space = {planet = "rosamund", at = "town", at_local = Vector3(0, 0, 4)}, scale = 1.15, yaw = PI},
+			{model = "npc_villager", space = {planet = "rosamund", at = "town"}, walk = [7.0, 0.35]},
+			{model = "npc_baker", space = {planet = "rosamund", at = "town"}, walk = [10.0, -0.28]},
+			{model = "city_dancer", space = {planet = "rosamund", at = "town"}, walk = [4.5, 0.6]},
+			{model = "city_kid", space = {planet = "rosamund", at = "town"}, walk = [6.0, -0.5]},
+			{model = "npc_gardener", space = {planet = "rosamund", at = "town"}, walk = [12.0, 0.22]},
+			{model = "city_noble", stage = Vector3(0, 2, -74.1), scale = 1.15, yaw = PI},
+			{model = "veil_herald", stage = Vector3(3.5, 1.0, -71.0), scale = 0.6, yaw = 0.86},
+			{model = "castle_knight", stage = Vector3(-4, 0.15, 88), march = Vector3(0, 0, -22)},
+			{model = "castle_knight", stage = Vector3(0, 0.15, 88), march = Vector3(0, 0, -22)},
+			{model = "castle_knight", stage = Vector3(4, 0.15, 88), march = Vector3(0, 0, -22)},
+			{model = "hollow_king", stage = Vector3(0, 0, -30), yaw = PI},
+			{model = "stormeye_tyrant", space = {planet = "pale_eye", at = "fort", at_local = Vector3(0, 3, 0)}, variant = "tempest"},
+		],
+	},
+	eye_herald = {
+		title = "Under the Scratches", anywhere = true,
+		loading = {title = "Under the Scratches", subtitle = "Read through the astrolabe lens", seconds = 2.5},
+		shots = [
+			{space = {planet = "shardheart", at = "orbit", from = Vector3(-650, 260, -760), to = Vector3(-430, 170, -500), look = Vector3(0, 0, 0)}, duration = 8.0,
+				cards = [{text = "Under the scratches: a crystal world hidden in the [place]Shardfield[/place].", at = 0.6, hold = 4.6}]},
+			{space = {planet = "shardheart", at = "herald", from = Vector3(0, 30, -62), to = Vector3(0, 9, -22), look = Vector3(0, 5, 0)}, duration = 9.0,
+				cards = [{text = "And on it, the pilgrim in white.", at = 0.6, hold = 3.4}, {text = "[enemy]Waiting.[/enemy]", at = 4.6, hold = 3.4}]},
+		],
+		actors = [
+			{model = "veil_herald", space = {planet = "shardheart", at = "herald", at_local = Vector3(0, 1.5, 0)}},
+		],
+	},
+	eye_revealed = {
+		title = "The Eye Sigil", anywhere = true,
+		loading = {title = "The Last Clue", subtitle = "The Eye Sigil wakes in your hands", seconds = 2.5},
+		shots = [
+			{space = {planet = "pale_eye", at = "orbit", from = Vector3(1500, 900, -3400), to = Vector3(800, 600, -2300), look = Vector3(0, 300, 0)}, duration = 8.0,
+				cards = [{text = "The Sigil burns cold. It shows you where it came from.", at = 0.6, hold = 3.6}, {text = "Beyond the Shardfield, inside the storm of [place]the Pale Eye[/place]...", at = 4.4, hold = 3.4}]},
+			{space = {planet = "pale_eye", at = "fort", from = Vector3(0, 60, -160), to = Vector3(0, 24, -62), look = Vector3(0, 8, 0)}, duration = 8.0,
+				cards = [{text = "...behind the walls of the [place]Stormeye Citadel[/place].", at = 0.6, hold = 4.0}]},
+			{space = {planet = "pale_eye", at = "fort", from = Vector3(14, 14, -32), to = Vector3(6, 11, -20), look = Vector3(0, 9, 0)}, duration = 10.0,
+				cards = [{text = "[enemy][b]VAELITH, THE PALE ONE[/b][/enemy]", at = 0.6, hold = 3.6}, {text = "[i]Little ones. You broke my King. Come, then. Break your eyes on me.[/i]", at = 4.6, hold = 4.8}]},
+		],
+		actors = [
+			{model = "stormeye_tyrant", space = {planet = "pale_eye", at = "fort", at_local = Vector3(0, 3, 0)}, variant = "tempest"},
+		],
+	},
+	eye_closed = {
+		title = "The Eye Closes", anywhere = true,
+		loading = {title = "The Eye Closes", subtitle = "And the Reach breathes again", seconds = 2.5},
+		shots = [
+			{space = {planet = "pale_eye", at = "orbit", from = Vector3(900, 650, -2500), to = Vector3(1600, 1000, -3600), look = Vector3(0, 300, 0)}, duration = 8.0,
+				cards = [{text = "Far beyond the stars, an eye closes. This time, for good.", at = 0.6, hold = 4.0}, {text = "The spell that took the King breaks with it.", at = 4.8, hold = 2.8}]},
+			{space = {planet = "rosamund", at = "town", from = Vector3(-8, 3.5, 16), to = Vector3(40, 26, 60), look = Vector3(0, 3, 0)}, duration = 11.0,
+				cards = [{text = "In Rosamund the shrines sing again.", at = 0.8, hold = 3.4}, {text = "And someone lights a lantern for the old King.", at = 4.6, hold = 3.6}]},
+			{space = {planet = "verdance", at = "town", from = Vector3(60, 50, 80), to = Vector3(110, 90, 150), look = Vector3(0, 4, 0)}, duration = 8.0,
+				cards = [{text = "[place]The Astral Frontier[/place] is free.", at = 1.0, hold = 5.0}]},
+		],
+		actors = [
+			{model = "npc_villager", space = {planet = "rosamund", at = "town"}, walk = [7.0, 0.35]},
+			{model = "npc_baker", space = {planet = "rosamund", at = "town"}, walk = [10.0, -0.28]},
+			{model = "city_dancer", space = {planet = "rosamund", at = "town"}, walk = [4.5, 0.6]},
+			{model = "city_kid", space = {planet = "rosamund", at = "town"}, walk = [6.0, -0.5]},
+			{model = "npc_gardener", space = {planet = "rosamund", at = "town"}, walk = [12.0, 0.22]},
+			{model = "npc_villager", space = {planet = "verdance", at = "town"}, walk = [7.0, 0.35]},
+			{model = "npc_baker", space = {planet = "verdance", at = "town"}, walk = [10.0, -0.28]},
+			{model = "city_dancer", space = {planet = "verdance", at = "town"}, walk = [4.5, 0.6]},
+			{model = "city_kid", space = {planet = "verdance", at = "town"}, walk = [6.0, -0.5]},
+			{model = "npc_gardener", space = {planet = "verdance", at = "town"}, walk = [12.0, 0.22]},
+		],
+	},
 	towns = _TOWNS,
 	starwright_three_worlds = {
 		title = "Three Worlds, Three Ship Parts", anywhere = true,

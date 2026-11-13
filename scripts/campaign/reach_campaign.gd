@@ -9,12 +9,15 @@ const ShardfieldScript = preload("res://scripts/campaign/shardfield_campaign.gd"
 const RestaurantScript = preload("res://scripts/campaign/restaurant_campaign.gd")
 var missing_parts = ShardfieldScript.new()
 var last_light = RestaurantScript.new()
+var eye := EyeCampaign.new()
 var _hooked_worlds := {}  # realm id -> instance id, so each private Reach is hooked only once
 
-## Reworked Reach missions 2-5 use party-owned private Space instances.
+## Reworked Reach missions 2-6 use party-owned private Space instances.
 ## Remaining Reach tales continue in the shared world until reworked.
+const PRIVATE := ["first_light", "lantern_road", "shardfield", "hollowmoon", "pale_eye"]
+
 static func space_realm(party: Dictionary) -> String:
-	if party.get("campaign", {}).get("id", "") in ["first_light", "lantern_road", "shardfield", "hollowmoon"]:
+	if party.get("campaign", {}).get("id", "") in PRIVATE:
 		return PortServer.space_for(str(party.campaign.realm))
 	return SpaceWorld.REALM
 
@@ -81,6 +84,9 @@ func tick(party: Dictionary, run: Dictionary) -> void:
 	if run.id=="hollowmoon":
 		last_light.campaigns = campaigns
 		if last_light.tick(party, run, step, world, ships): return
+	if run.id=="pale_eye":
+		eye.campaigns = campaigns
+		if eye.tick(party, run, step, world): return
 	var fresh := int(run.get("reach_step", -1))!=int(run.step)
 	if fresh:
 		run.reach_step = int(run.step)
@@ -253,6 +259,7 @@ func _publish(party: Dictionary, run: Dictionary, step: Dictionary, world: Space
 	var marks: Array = []
 	if run.id=="shardfield": marks.append_array(missing_parts.markers(party, run, step, world))
 	if run.id=="hollowmoon": marks.append_array(last_light.markers(step))
+	if run.id=="pale_eye": marks.append_array(eye.markers(run, step))
 	match str(step.kind):
 		"reach_vesperis_port":
 			for pad: Dictionary in CityLayout.all_pads():
@@ -358,7 +365,10 @@ func _on_enemy_killed(enemy: Enemy, world: SpaceWorld) -> void:
 		var run := campaigns._run_of(party)
 		if run.is_empty() or not matches(run) or run.status!="active": continue
 		var step := campaigns._step(run)
-		if step.kind=="reach_boss" and enemy.def.id==str(step.boss):
+		if step.kind=="reach_herald":
+			eye.campaigns = campaigns
+			eye.herald_killed(party, run, enemy)
+		elif step.kind=="reach_boss" and enemy.def.id==str(step.boss):
 			campaigns._advance(party, {})
 		elif step.kind=="reach_vesperis_boss" and enemy.def.id=="mad_farmer" and enemy.pack!=null:
 			var expected := "quest_%s_%s_farmer" % [run.id, run.get("attempt", "legacy")]
@@ -464,6 +474,10 @@ func action(party: Dictionary, run: Dictionary, p: Dictionary, objective: String
 				run.done_objects.append(id)
 				run.count = int(run.count)+1
 				for pid: int in party.members: campaigns.server.social.system(pid, str(o.get("found", "Found.")))
+				# A clue goes into the finder's bag.
+				if o.has("item"):
+					var finder := GameServer.character(int(p.player_id))
+					if finder: finder.give([Items.make(str(o.item))])
 				if int(run.count)>=step.objects.size(): campaigns._advance(party, p)
 				else: campaigns.server.social.broadcast(party)
 				return true

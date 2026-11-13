@@ -63,6 +63,8 @@ func _ready() -> void:
 	_text.add_theme_font_override("bold_font",UIStyle.bold())
 	_text.add_theme_font_size_override("normal_font_size",24)
 	_text.add_theme_font_size_override("bold_font_size",24)
+	_text.add_theme_font_override("italics_font",UIStyle.italic())
+	_text.add_theme_font_size_override("italics_font_size",24)
 	_text.add_theme_color_override("default_color",UIStyle.TEXT)
 	_card.add_child(_text)
 	_loading = _screen_panel(Color(.018,.02,.035))

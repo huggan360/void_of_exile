@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkerrhm661mpg"
+path="res://.godot/imported/halo_0_shattered.vox-0bb4823f7fe9385e04893af85dcb882f.tscn"
+
+[deps]
+
+source_file="res://creatures/veil_herald/halo_0_shattered.vox"
+dest_files=["res://.godot/imported/halo_0_shattered.vox-0bb4823f7fe9385e04893af85dcb882f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true
