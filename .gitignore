@@ -7,3 +7,7 @@ perf_logs/
 .aws/
 .codex/
 .agents/
+
+# Your own server: its config (server key) and world saves never go to git
+server_config/server.cfg
+server_config/data/
