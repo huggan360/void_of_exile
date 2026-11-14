@@ -1,15 +1,12 @@
 {
-  "version": "26.0-beta",
-  "title": "The First Descent",
-  "date": "2026-11-13",
+  "version": "26.1-beta",
+  "title": "Every Tale Begins",
+  "date": "2026-11-14",
   "notes": [
-    "First public beta",
-    "The Surface, a hand-baked voxel world",
-    "The Astral Reach: ships, planets and the Nexus",
-    "Theory of Everything and the Hollow Empress",
-    "21 bosses, 19 Divine sets",
-    "Chambers vault, Dots and the forge",
-    "Friends, parties and dedicated servers",
-    "Host your own server from the launcher"
+    "Every chapter now opens with its own film",
+    "What the Realm Remembers: the story of the realm, at the end of The Lily Thief",
+    "Films stream their places in before they show them, with focus blur and a film look",
+    "The Surface loads around you several times faster",
+    "No more stutter when walking into a town"
   ]
 }
