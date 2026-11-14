@@ -105,6 +105,8 @@ func _ready() -> void:
 		set_process_unhandled_input(false)
 		get_tree().change_scene_to_file.call_deferred("res://scenes/server/dedicated.tscn")
 		return
+	# The project is still called "Voxel Realms" (its data folder keeps that name); players see the game's.
+	get_window().title = "Void of Exile"
 	get_tree().node_added.connect(_readable_world_label)
 	add_child(WorldLabels.new())
 	_setup_input()
