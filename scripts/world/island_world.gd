@@ -18,6 +18,7 @@ const BURNING_CHANCE_DOOM := 0.55
 const BURNING_CHANCE := 0.3
 const CHUNK := 32
 const LOAD_RADIUS := 4  # chunks around the player that are kept built (~128 m)
+const TOWN_PATHS_AHEAD := 320.0  # m: start a town's walking grid this far out
 const STREAM_BUDGET_USEC := 1000
 const UNLOADS_PER_FRAME := 1
 const BUILD_TILE := 4
@@ -34,6 +35,8 @@ var _portal_pos := Vector3.ZERO
 var _keep_clear: Array[Vector3] = []
 var _buildings_by_chunk := {}
 var _town_navigation := {}
+## Town walking grids being built on worker threads: village -> {task, holder}.
+var _town_jobs := {}
 var _village_plans := {}
 var _services_by_chunk := {}
 var _npcs_by_chunk := {}
@@ -48,6 +51,9 @@ var _chunks := {}  # Vector2i -> Node3D holding that chunk's content
 var _queue: Array[Vector2i] = []
 var _build_steps: Array[Callable] = []
 var _building_root: Node3D
+## Grass and flowers are gathered on worker threads, one task per chunk:
+## {c, root, groups, task}. Their meshes are built on the main thread after.
+var _decor_jobs: Array[Dictionary] = []
 var _server_centers: Array[Vector2i] = []
 var _server_want := {}
 var _center_chunk := Vector2i(1 << 30, 0)
@@ -164,6 +170,8 @@ func _place_townsfolk(village: VillageFeature) -> void:
 
 
 func _warm_stream_assets() -> void:
+	# The C++ terrain generator's tables (shared, built once) while loading.
+	generator.terrain_generator()
 	# VOX parsing and meshing belong to world loading, not a walk into town.
 	for buildings in _buildings_by_chunk.values():
 		for building in buildings: VillageHouse.warm_asset(str(building.asset))
@@ -178,14 +186,26 @@ func _warm_stream_assets() -> void:
 	if not server_build:
 		VoxelFire.warm(1.0)
 		VoxelFire.warm(1.4)
+	# The arrival town's walking grid, while loading (the rest build on workers).
+	if not server_build and not Net.is_server() and not _village_plans.is_empty():
+		var first: String = _towns_by_distance(spawn_point)[0]
+		_town_navigation[first] = TownNavigation.new(_village_plans[first], self)
 
 func _ready() -> void:
 	if not get_meta("assets_prepared",false): _warm_stream_assets()
 	var r := half_extent * IslandGenerator.FINE
 	var sources: Array = generator.map.sources + ["res://scripts/world/realm_feature.gd", "res://scripts/world/surface/surface_map.gd",
-		"res://scripts/world/surface/surface_blocks.gd", "res://scripts/world/stronghold_feature.gd"]
-	_add_terrain(generator, AABB(Vector3(-r, -32, -r), Vector3(r * 2, (IslandGenerator.MAX_HEIGHT + 8) * IslandGenerator.FINE, r * 2)),
-		"surface_fine_%d" % generator.realm_seed, sources, SurfaceBlocks.mesher())
+		"res://scripts/world/surface/surface_blocks.gd", "res://scripts/world/stronghold_feature.gd",
+		"res://scripts/world/island_generator.gd"]
+	# The C++ generator makes terrain as fast as the disk cache gives it back,
+	# so it needs none (and the GDScript one's old cache files go).
+	var voxels := generator.terrain_generator()
+	var cache := "surface_fine_%d" % generator.realm_seed
+	if voxels != generator:
+		TerrainCache.drop(cache)
+		cache = ""
+	_add_terrain(voxels, AABB(Vector3(-r, -32, -r), Vector3(r * 2, (IslandGenerator.MAX_HEIGHT + 8) * IslandGenerator.FINE, r * 2)),
+		cache, sources, SurfaceBlocks.mesher())
 	terrain.scale = Vector3.ONE / IslandGenerator.FINE
 	terrain.mesh_block_size = 32
 	terrain.max_view_distance = 640
@@ -265,6 +285,7 @@ func update_streaming(pos: Vector3, build_all_now := false) -> void:
 	var radius := mini(LOAD_RADIUS, ceili(LOAD_RADIUS * GraphicsSettings.view_scale()))
 	if center != _center_chunk:
 		_center_chunk = center
+		if not server_build and not Net.is_server(): _start_town_navigation(pos)
 		_queue.clear()
 		for dz in range(-radius, radius + 1):
 			for dx in range(-radius, radius + 1):
@@ -359,6 +380,7 @@ func _prune_chunks(keep: Dictionary, all_now: bool) -> void:
 
 func _build_queued(build_all_now: bool) -> void:
 	var deadline := Time.get_ticks_usec() + (3000 if get_meta("asynchronous_load",false) else STREAM_BUDGET_USEC)
+	_collect_decor()
 	while not _queue.is_empty() or not _build_steps.is_empty():
 		if _build_steps.is_empty():
 			_start_chunk(_queue.pop_front())
@@ -368,9 +390,12 @@ func _build_queued(build_all_now: bool) -> void:
 			step.call()
 			if FrameTrace.enabled: FrameTrace.record("stream/"+str(step.get_method()),started)
 		if not build_all_now and Time.get_ticks_usec() >= deadline: break
+	if build_all_now:
+		_collect_decor(true)
+		while not _build_steps.is_empty(): _build_steps.pop_front().call()
 
 func is_presentation_ready() -> bool:
-	return super.is_presentation_ready() and _queue.is_empty() and _build_steps.is_empty()
+	return super.is_presentation_ready() and _queue.is_empty() and _build_steps.is_empty() and _decor_jobs.is_empty()
 
 
 
@@ -539,6 +564,8 @@ func _build_chunk(c: Vector2i) -> void:
 	if _chunks.has(c): return
 	_start_chunk(c)
 	while not _build_steps.is_empty(): _build_steps.pop_front().call()
+	_collect_decor(true)
+	while not _build_steps.is_empty(): _build_steps.pop_front().call()
 
 
 func _start_chunk(c: Vector2i) -> void:
@@ -558,12 +585,14 @@ func _start_chunk(c: Vector2i) -> void:
 	for camp: Dictionary in _camps_by_chunk.get(c, []):
 		_build_steps.append(_build_camp.bind(root, camp))
 	if not server_build:
-		_build_steps.append(_build_water.bind(root, c, area))
-		var decor_groups := {}
-		for z in range(0, CHUNK, FLORA_TILE):
-			for x in range(0, CHUNK, FLORA_TILE):
-				_build_steps.append(_gather_decor.bind(decor_groups, Rect2i(area.position + Vector2i(x, z), Vector2i(FLORA_TILE, FLORA_TILE))))
-		_build_steps.append(_finish_decor.bind(root, decor_groups))
+		# Shared lookups and materials exist before any worker reads them.
+		SurfaceFlora.prepare(generator.map)
+		SurfaceWater.material()
+		SurfaceWater.fall_material()
+		var groups := {}
+		var built := {}
+		_decor_jobs.append({c = c, root = root, groups = groups, built = built,
+			task = WorkerThreadPool.add_task(_gather_chunk_decor.bind(groups, built, area), false, "surface decor")})
 		for tree: Dictionary in _town_trees_by_chunk.get(c, []):
 			_build_steps.append(_build_town_tree.bind(root, tree))
 		for service: Dictionary in _services_by_chunk.get(c, []):
@@ -601,9 +630,7 @@ func _build_service(root: Node3D, service: Dictionary) -> void:
 
 
 func _build_resident(root: Node3D, resident: Dictionary) -> void:
-	if not _town_navigation.has(resident.village):
-		_town_navigation[resident.village] = TownNavigation.new(_village_plans[resident.village], self)
-	var npc := TownNPC.new().setup(resident, _town_navigation[resident.village])
+	var npc := TownNPC.new().setup(resident, town_navigation(resident.village))
 	root.add_child(npc)
 	npc.add_child(_talk_target(resident))
 
@@ -643,8 +670,72 @@ func _build_lamps(root: Node3D, c: Vector2i) -> void:
 
 ## Grass, flowers, crops, reeds, bushes, small stones (SurfaceFlora): one
 ## MultiMesh per kind in the chunk. No collision; clients only.
-func _gather_decor(groups: Dictionary, area: Rect2i) -> void:
-	SurfaceFlora.gather(self, area, groups)
+## Leaving (or freed): no worker may still be reading this world.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_PREDELETE:
+		for job: Dictionary in _decor_jobs: WorkerThreadPool.wait_for_task_completion(job.task)
+		_decor_jobs.clear()
+		for village: String in _town_jobs.keys(): town_navigation(village)
+
+
+## A town's walking grid (some 15 000 ground samples) is built on a worker
+## thread once you come within TOWN_PATHS_AHEAD of it, so walking into a town
+## never stalls (a teleport straight into one still waits for it).
+func _start_town_navigation(near: Vector3) -> void:
+	for village: String in _village_plans:
+		if _town_navigation.has(village) or _town_jobs.has(village): continue
+		var plan: VillageFeature = _village_plans[village]
+		if Vector2(plan.center).distance_to(Vector2(near.x, near.z)) > TOWN_PATHS_AHEAD: continue
+		var holder := {}
+		_town_jobs[village] = {holder = holder, task = WorkerThreadPool.add_task(func() -> void:
+			holder.navigation = TownNavigation.new(plan, self), false, "town paths")}
+
+
+func _towns_by_distance(from: Vector3) -> Array:
+	var order: Array = _village_plans.keys()
+	var away := func(name: String) -> float:
+		return Vector2((_village_plans[name] as VillageFeature).center).distance_squared_to(Vector2(from.x, from.z))
+	order.sort_custom(func(a: String, b: String) -> bool: return away.call(a) < away.call(b))
+	return order
+
+
+## A town's walking grid (waits for its worker if it is still building).
+func town_navigation(village: String) -> TownNavigation:
+	if not _town_navigation.has(village):
+		if _town_jobs.has(village):
+			var job: Dictionary = _town_jobs[village]
+			WorkerThreadPool.wait_for_task_completion(job.task)
+			_town_jobs.erase(village)
+			_town_navigation[village] = job.holder.navigation
+		elif _village_plans.has(village):
+			_town_navigation[village] = TownNavigation.new(_village_plans[village], self)
+		else:
+			return null
+	return _town_navigation[village]
+
+
+## Worker thread: a chunk's river and lake mesh and every flora tile (only
+## reads the baked map; the main thread adds them to the chunk).
+func _gather_chunk_decor(groups: Dictionary, built: Dictionary, area: Rect2i) -> void:
+	built.water = SurfaceWater.build_chunk(generator.map, area)
+	for z in range(0, CHUNK, FLORA_TILE):
+		for x in range(0, CHUNK, FLORA_TILE):
+			SurfaceFlora.gather(self, Rect2i(area.position + Vector2i(x, z), Vector2i(FLORA_TILE, FLORA_TILE)), groups)
+
+
+## Gathered chunks get their plant meshes built (dropped if the chunk went).
+## `wait`: finish every job now (a chunk built at once).
+func _collect_decor(wait := false) -> void:
+	for i in range(_decor_jobs.size() - 1, -1, -1):
+		var job: Dictionary = _decor_jobs[i]
+		if not wait and not WorkerThreadPool.is_task_completed(job.task): continue
+		WorkerThreadPool.wait_for_task_completion(job.task)
+		_decor_jobs.remove_at(i)
+		var water: Node3D = job.built.get("water")
+		if _chunks.get(job.c) == job.root and is_instance_valid(job.root):
+			_add_water_chunk(job.root, job.c, water)
+			_finish_decor(job.root, job.groups)
+		elif water: water.queue_free()
 
 
 func _finish_decor(root: Node3D, groups: Dictionary) -> void:
@@ -658,9 +749,8 @@ func _build_trees(root: Node3D, area: Rect2i) -> void:
 	SurfaceFlora.build_trees(self, root, area, not server_build)
 
 
-## Rivers, lakes and waterfalls in this chunk.
-func _build_water(root: Node3D, c: Vector2i, area: Rect2i) -> void:
-	var water := SurfaceWater.build_chunk(generator.map, area)
+## Rivers, lakes (built on a worker) and waterfalls in this chunk.
+func _add_water_chunk(root: Node3D, c: Vector2i, water: Node3D) -> void:
 	if water: root.add_child(water)
 	for fall: Dictionary in _falls_by_chunk.get(c, []):
 		if float(fall.top) - float(fall.bottom) > 1.6:

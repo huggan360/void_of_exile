@@ -1,18 +1,19 @@
 class_name CutsceneActors
 extends Node3D
 ## The people of a film (a cutscene's `actors`), standing in the real places
-## its shots visit: the stage (the Hollow Castle) or a planet of the Reach.
-## Made by CampaignClient._staged, freed when the film ends. Each actor
+## its shots visit: the stage (the Hollow Castle), the Surface or a planet of
+## the Reach. Made by FilmSet, freed with it when the film ends. Each actor
 ## idles, walks a circle (`walk` = [radius, speed]) or marches to and fro
 ## along `march` (a local offset), so the places do not look frozen.
 var _actors: Array = []  # [model, centre, walk, march, basis, time]
 
-func add(model_id: String, frame: Transform3D, spec: Dictionary) -> void:
+func add(model_id: String, frame: Transform3D, spec: Dictionary) -> CreatureModel:
 	var model := CreatureModel.new(model_id)
 	add_child(model)
 	model.global_transform = Transform3D(frame.basis.rotated(frame.basis.y.normalized(), float(spec.get("yaw", 0.0))).scaled_local(Vector3.ONE*float(spec.get("scale", 1.0))), frame.origin)
 	if spec.has("variant"): model.set_variant(str(spec.variant))
 	_actors.append([model, frame, spec.get("walk", []), spec.get("march", Vector3.ZERO), randf()*TAU])
+	return model
 
 func _process(delta: float) -> void:
 	for a: Array in _actors:

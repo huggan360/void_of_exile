@@ -21,8 +21,14 @@ A 2048 x 2048 m world in 0.25 m voxels, baked offline and streamed in.
 
 The terrain node is scaled by 1/4, so the voxel terrain works in voxels and the game in meters.
 
+Voxels come from the engine's C++ `SurfaceVoxelGenerator` (engine/modules/voxel_surface, a port of
+`IslandGenerator._generate_block`, configured by `IslandGenerator.native_config()`); an engine without it
+falls back to the GDScript generator and its disk cache. Change both together and run
+`tools/check_surface_generator.tscn` (every voxel must match). Grass, flowers and water chunks are gathered on
+worker threads, and town walking grids are built ahead on workers; `tools/bench_surface_stream.tscn` times it.
+
 To change the Surface: edit the baker (or the models tool, then run both), run
-`python3 tools/surface/bake_surface.py`; the terrain cache notices the new files. `SEED` in the baker shapes the
+`python3 tools/surface/bake_surface.py`. `SEED` in the baker shapes the
 land, `WorldServer.MAP_SEED` places trees, obstacles, packs and features. Campaign anchors can name
 `{glade = "<town>"}` or `{glade = "<town>", along = 0.4}`.
 

@@ -69,7 +69,7 @@ func update(world: GameWorld, player: Player, social: SocialClient, delta: float
 	var occupied := {}
 	for ref: WeakRef in targets:
 		var target := ref.get_ref() as InteractionTarget
-		if not is_instance_valid(target) or not target.enabled or not target.is_visible_in_tree(): continue
+		if not is_instance_valid(target) or not target.is_inside_tree() or not target.enabled or not target.is_visible_in_tree(): continue
 		if target.global_position.distance_to(player.global_position)>160.0: continue
 		var cell := Vector3i(target.global_position.round())
 		if occupied.has(cell): continue

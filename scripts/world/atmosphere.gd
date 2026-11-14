@@ -199,6 +199,7 @@ func _apply() -> void:
 ## Only the world is filtered: CanvasLayer 0 precedes the HUD's layer 1.
 func _setup_grade() -> void:
 	_grade_layer.layer = 0
+	_grade_layer.add_to_group("film_keep")  # the world grade stays on under films
 	add_child(_grade_layer)
 	var screen := _grade_screen
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

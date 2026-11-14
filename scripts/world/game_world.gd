@@ -138,7 +138,9 @@ func _add_terrain(generator: VoxelGenerator, bounds: AABB, cache := "", sources:
 	terrain = VoxelTerrain.new()
 	terrain.generator = generator
 	if cache != "":
-		var stream := TerrainCache.open(cache, sources+[(generator.get_script() as Script).resource_path])
+		# A script generator's own file is part of the cache key (a C++ one has none).
+		var script := generator.get_script() as Script
+		var stream := TerrainCache.open(cache, sources+([script.resource_path] if script else []))
 		if stream:
 			terrain.stream = stream
 			terrain.tree_exiting.connect(func() -> void: TerrainCache.close(stream))

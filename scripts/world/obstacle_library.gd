@@ -91,11 +91,21 @@ class Prefab:
 
 
 static var _cache := {}
+static var _cache_lock := Mutex.new()
 
 
 static func get_prefab(prefab_name: String) -> Prefab:
-	if _cache.has(prefab_name):
-		return _cache[prefab_name]
+	var cached: Variant = _cache.get(prefab_name)
+	if cached != null:
+		return cached
+	# Town walking grids read prefabs on worker threads: one loader at a time.
+	_cache_lock.lock()
+	var prefab := _load_prefab(prefab_name) if not _cache.has(prefab_name) else _cache[prefab_name] as Prefab
+	_cache_lock.unlock()
+	return prefab
+
+
+static func _load_prefab(prefab_name: String) -> Prefab:
 	var data := VoxModel.load_vox(DIR + prefab_name + ".vox")
 	var p := Prefab.new()
 	p.prefab_name = prefab_name

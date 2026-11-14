@@ -231,6 +231,82 @@ func water_y(x: float, z: float) -> float:
 
 # --- Voxels -----------------------------------------------------------------------------
 
+## One configured C++ generator per seed, shared by every realm (it only reads).
+static var _natives := {}
+static var _natives_lock := Mutex.new()
+
+
+## The terrain's generator: the engine's C++ SurfaceVoxelGenerator when this
+## build has it (engine/modules/voxel_surface), else this script. Both make
+## exactly the same voxels (tools/check_surface_generator.tscn).
+func terrain_generator() -> VoxelGenerator:
+	if not ClassDB.class_exists(&"SurfaceVoxelGenerator"): return self
+	_natives_lock.lock()
+	var native: VoxelGenerator = _natives.get(realm_seed)
+	if native == null:
+		native = ClassDB.instantiate(&"SurfaceVoxelGenerator")
+		if native.call(&"configure", native_config()): _natives[realm_seed] = native
+		else:
+			push_error("SurfaceVoxelGenerator: bad configuration; using the GDScript generator.")
+			native = self
+	_natives_lock.unlock()
+	return native
+
+
+## Everything the C++ generator reads: the map layers, the block tables, the
+## names its column rules use, the overlays and every feature-shaped column
+## (features are GDScript, so their columns are worked out here, once).
+func native_config() -> Dictionary:
+	var biome_top := PackedInt32Array()
+	var biome_under := PackedInt32Array()
+	for b: BiomeDef in _biomes:
+		biome_top.append(b.top_block)
+		biome_under.append(b.under_block)
+	var overlay_keys := PackedInt32Array()
+	var overlay_values: Array = []
+	for key: Vector2i in map.overlays:
+		overlay_keys.append_array([key.x, key.y])
+		overlay_values.append(map.overlays[key])
+	# Per 16 x 16 m cell, 256 offsets (z * 16 + x; -1 = not shaped) into
+	# values: [height, top block, under block, segment count, y0, y1, block, ...].
+	var cells := PackedInt32Array()
+	var index := PackedInt32Array()
+	var values := PackedInt32Array()
+	for key: Vector2i in _shape_grid:
+		cells.append_array([key.x, key.y])
+		for z in 16:
+			for x in 16:
+				var d: Variant = _feature_detail((key.x << FEATURE_CELL_SHIFT) + x, (key.y << FEATURE_CELL_SHIFT) + z)
+				if d == null:
+					index.append(-1)
+					continue
+				index.append(values.size())
+				values.append_array([int(d[0]), int(d[2]), int(d[3]), (d.size() - 4) / 3])
+				for i in range(4, d.size() - 2, 3):
+					values.append_array([int(d[i]), int(d[i + 1]), int(d[i + 2])])
+	return {
+		height = map.height, water = map.water, ground = map.ground, biome = map.biome, flora = map.flora,
+		flags = map.flags, shape = map.shape, tiles = map.tiles,
+		layers = LAYERS, layer_default = [SurfaceBlocks.GRASS, SurfaceBlocks.SOIL, 3],
+		biome_top = biome_top, biome_under = biome_under, deep = _deep,
+		overlay_keys = overlay_keys, overlay_values = overlay_values,
+		feature_cells = cells, feature_index = index, feature_values = values,
+		names = {
+			max_height_voxels = MAX_HEIGHT * FINE, outside_ground = SurfaceMap.Mat.SEAFLOOR, outside_biome = Biomes.OCEAN,
+			mat_default = SurfaceMap.Mat.DEFAULT, mat_blue_moss = SurfaceMap.Mat.BLUE_MOSS, mat_ash = SurfaceMap.Mat.ASH,
+			mat_lava = SurfaceMap.Mat.LAVA, mat_farm = SurfaceMap.Mat.FARM,
+			flag_road = SurfaceMap.ROAD, flag_trail = SurfaceMap.TRAIL, flag_town = SurfaceMap.TOWN,
+			flag_river = SurfaceMap.RIVER, flag_bridge = SurfaceMap.BRIDGE, busy = BUSY,
+			shape_cliff = SurfaceMap.CLIFF, shape_vines = SurfaceMap.VINES, shape_rocky = SurfaceMap.ROCKY,
+			grass = SurfaceBlocks.GRASS, grass_lush = SurfaceBlocks.GRASS_LUSH, meadow = SurfaceBlocks.MEADOW,
+			yard = SurfaceBlocks.YARD, dirt_road = SurfaceBlocks.DIRT_ROAD, gravel_fine = SurfaceBlocks.GRAVEL_FINE,
+			riverbed = SurfaceBlocks.RIVERBED, blue_glow = Blocks.BLUE_GLOW, ember = Blocks.EMBER,
+			dirt_path = SurfaceBlocks.DIRT_PATH, soil = SurfaceBlocks.SOIL, river_stone = SurfaceBlocks.RIVER_STONE,
+			vine = SurfaceBlocks.VINE, vine_flower = SurfaceBlocks.VINE_FLOWER, strata_grey = SurfaceBlocks.STRATA_GREY,
+		},
+	}
+
+
 func _generate_block(out_buffer: VoxelBuffer, origin: Vector3i, lod: int) -> void:
 	if lod != 0:
 		return

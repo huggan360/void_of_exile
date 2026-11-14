@@ -1,0 +1,146 @@
+extends RefCounted
+## The Hidden Power's films: each chapter's opening, the Sixth Piece and the
+## towns' cheer. Format: scripts/cinematic/README.md.
+## Surface shots stand at a `place` (a Campaigns.resolve anchor); their
+## from/to/look are metres from it, heights above its ground.
+const FILMS := {
+	lily_intro = {
+		title = "The Lily Thief", campaign = "lily_thief", world = "tavern",
+		shots = [
+			{from = Vector3(46, 32, 96), to = Vector3(26, 22, 74), look_from = Vector3(0, 10, 40), look_to = Vector3(0, 10, 46), duration = 8.5,
+				cards = [{text = "[place]The Tavern[/place] sleeps.", at = 1.0, hold = 2.6},
+					{text = "But every night, something creeps through [npc]Gerald[/npc]'s garden.", at = 4.2, hold = 3.4}]},
+			{from = Vector3(-20, 14, 26), to = Vector3(-14, 12.5, 52), look_from = Vector3(-9.5, 10, 36), look_to = Vector3(-9.5, 10, 58), duration = 8.0,
+				cards = [{text = "And every morning, another bed of moon-lilies is gone.", at = 0.8, hold = 3.0},
+					{text = "Nibbled to the stalk. Something with teeth.", at = 4.6, hold = 2.6}]},
+			{from = Vector3(9, 13.5, 20), to = Vector3(6.5, 12, 28.5), look_from = Vector3(3, 11.2, 36), look_to = Vector3(3, 11.2, 36), duration = 9.0,
+				cards = [{text = "Gerald has stopped sleeping.", at = 0.7, hold = 2.4},
+					{text = "He has started sharpening his trowel.", at = 3.4, hold = 2.4},
+					{text = "Go and talk to [npc]Gerald[/npc].", at = 6.3, hold = 2.2}]},
+		],
+	},
+	frozen_whisper_intro = {
+		title = "The Frozen Whisper", campaign = "frozen_whisper", world = "surface",
+		look = {warmth = -0.35},
+		shots = [
+			{place = {village = "Snowbell"}, from = Vector3(64, 42, 72), to = Vector3(36, 24, 44), look = Vector3(0, 4, 0), duration = 9.5,
+				cards = [{text = "North of everything warm lies [place]Snowbell[/place].", at = 1.0, hold = 3.0},
+					{text = "This winter its bells have rung for the dead three times.", at = 5.0, hold = 3.4}]},
+			{place = {summit = "Snowbell"}, from = Vector3(46, 26, 52), to = Vector3(26, 15, 32), look = Vector3(0, 2, 0), duration = 9.0,
+				cards = [{text = "Up on the peaks, a trapper saw lanterns where nobody lives.", at = 0.8, hold = 3.4},
+					{text = "Beside them, cut into the ice: the crown mark.", at = 5.0, hold = 3.0}]},
+			{place = {stronghold = "Fosen"}, from = Vector3(0, 52, 150), to = Vector3(0, 30, 100), look = Vector3(0, 8, 0), duration = 10.0,
+				cards = [{text = "Under the frost, the [enemy]Crown of the Rime[/enemy] keeps the second piece of the map.", at = 0.8, hold = 3.8},
+					{text = "Ask around Snowbell. Ask gently. People there run from questions.", at = 5.4, hold = 3.6}]},
+		],
+	},
+	sunken_court_intro = {
+		title = "The Sunken Court", campaign = "sunken_court", world = "surface",
+		look = {warmth = 0.45},
+		shots = [
+			{place = {village = "Sunveil"}, from = Vector3(-58, 40, 64), to = Vector3(-32, 22, 38), look = Vector3(0, 3, 0), duration = 9.5,
+				cards = [{text = "In the south, the sand keeps what it swallows.", at = 1.0, hold = 3.0},
+					{text = "[place]Sunveil[/place] trades in silk, spice and secrets.", at = 4.8, hold = 3.4}]},
+			{place = {village = "Sunveil", offset = Vector3(62, 0, -26)}, from = Vector3(32, 18, 34), to = Vector3(17, 9, 18), look = Vector3(0, 1, 0), duration = 9.0,
+				cards = [{text = "Somewhere beneath these dunes lies a royal court that sank in a single night.", at = 0.8, hold = 3.6},
+					{text = "Only one seal opens it. Yesterday, raiders took it from a caravan.", at = 5.2, hold = 3.2}]},
+			{place = {stronghold = "Desert"}, from = Vector3(0, 46, 136), to = Vector3(0, 28, 92), look = Vector3(0, 6, 0), duration = 10.0,
+				cards = [{text = "The [enemy]Scarab Regent[/enemy] still holds court in the dark down there.", at = 0.8, hold = 3.6},
+					{text = "And a blind man in Sunveil swears he can hear it breathing.", at = 5.2, hold = 3.6}]},
+		],
+	},
+	ember_oath_intro = {
+		title = "The Ember Oath", campaign = "ember_oath", world = "surface",
+		look = {warmth = 0.6, contrast = 1.1},
+		shots = [
+			{place = {stronghold = "Doom"}, from = Vector3(0, 72, 210), to = Vector3(0, 42, 146), look = Vector3(0, 10, 0), duration = 10.0,
+				cards = [{text = "In the lands of [place]Doom[/place], the ground is never cold.", at = 1.0, hold = 3.2},
+					{text = "The [place]Cinder Bastion[/place] stands where the fire is oldest.", at = 5.2, hold = 3.6}]},
+			{place = {stronghold = "Doom", offset = Vector3(-90, 0, 85)}, from = Vector3(13, 8, 15), to = Vector3(7, 4.5, 8), look = Vector3(0, 1.5, 0), duration = 8.5,
+				cards = [{text = "Three oath-braziers once burned around it. Now they are ash.", at = 0.8, hold = 3.2},
+					{text = "Someone would like them to stay that way.", at = 4.8, hold = 3.0}]},
+			{place = {stronghold = "Doom", offset = Vector3(0, 0, 58)}, from = Vector3(16, 11, 24), to = Vector3(8, 6, 14), look = Vector3(0, 2, 0), duration = 9.0,
+				cards = [{text = "[npc]Brother Kael[/npc] guards the last of the oath.", at = 0.8, hold = 3.0},
+					{text = "He will ask you to swear it. Think before you do.", at = 4.6, hold = 3.6}]},
+		],
+	},
+	drowned_choir_intro = {
+		title = "The Drowned Choir", campaign = "drowned_choir", world = "surface",
+		look = {warmth = -0.25},
+		shots = [
+			{place = {stronghold = "Bluelay"}, from = Vector3(0, 42, 196), to = Vector3(0, 22, 134), look = Vector3(0, 6, 0), duration = 10.0,
+				cards = [{text = "On the shores of [place]Bluelay[/place], the sea sings at night.", at = 1.0, hold = 3.2},
+					{text = "Not the waves. Voices.", at = 5.2, hold = 3.4}]},
+			{place = {stronghold = "Bluelay", offset = Vector3(0, 0, 180)}, from = Vector3(17, 10, 19), to = Vector3(9, 5.5, 10), look = Vector3(0, 1.5, 0), duration = 9.0,
+				cards = [{text = "Bells lie drowned along the shore, and something still rings them.", at = 0.8, hold = 3.4},
+					{text = "A choir went under the water long ago. It never stopped singing.", at = 5.0, hold = 3.4}]},
+			{place = {stronghold = "Bluelay", offset = Vector3(0, 0, 62)}, from = Vector3(-20, 14, 28), to = Vector3(-10, 7, 16), look = Vector3(0, 2.5, 0), duration = 9.0,
+				cards = [{text = "[npc]Mirela of the Tides[/npc] knows how to quiet them.", at = 0.8, hold = 3.0},
+					{text = "The fifth piece of the map went down with the choir.", at = 4.6, hold = 3.6}]},
+		],
+	},
+	hollow_hour_intro = {
+		title = "The Hollow Hour", campaign = "hollow_hour", world = "surface",
+		look = {warmth = -0.5, vignette = 0.75, contrast = 1.1},
+		shots = [
+			{place = {stronghold = "The Deep Dark", offset = Vector3(0, 0, 64)}, from = Vector3(0, 32, 124), to = Vector3(0, 16, 80), look = Vector3(0, 3, 0), duration = 10.0,
+				cards = [{text = "At the edge of the [place]Deep Dark[/place], one lamp is still burning.", at = 1.0, hold = 3.2},
+					{text = "[npc]Old Wick[/npc] has kept it lit for forty years.", at = 5.2, hold = 3.4}]},
+			{place = {stronghold = "The Deep Dark", offset = Vector3(-105, 0, 65)}, from = Vector3(11, 6, 13), to = Vector3(6, 3.5, 7), look = Vector3(0, 1.5, 0), duration = 9.0,
+				cards = [{text = "Out in the dark, the stones whisper.", at = 0.8, hold = 3.0},
+					{text = "[i]Don't listen to them. And don't turn around.[/i]", at = 4.6, hold = 3.6}]},
+			{place = {stronghold = "The Deep Dark"}, from = Vector3(0, 56, 156), to = Vector3(0, 30, 104), look = Vector3(0, 8, 0), duration = 10.0,
+				cards = [{text = "Beyond them sits the [enemy]Hollow Throne[/enemy], and on it, the [enemy]Hollow Crown[/enemy].", at = 0.8, hold = 3.8},
+					{text = "It keeps the last piece of the map. It will not give it up.", at = 5.4, hold = 3.6}]},
+		],
+	},
+	hollow_castle_intro = {
+		title = "The Hollow Castle", campaign = "hollow_castle", world = "surface",
+		stage = "res://scenes/castle/hollow_castle.tscn", stage_offset = Vector3(0, -600, 0),
+		look = {vignette = 0.6, contrast = 1.08},
+		shots = [
+			{place = {village = "Hearthwick"}, from = Vector3(74, 52, 84), to = Vector3(42, 28, 48), look = Vector3(0, 4, 0), duration = 10.0,
+				cards = [{text = "Six pieces. One map. It shows a castle that was never on any chart.", at = 1.0, hold = 3.6},
+					{text = "In [place]Hearthwick[/place], an old wizard has been waiting for you.", at = 5.4, hold = 3.6}]},
+			{place = {village = "Hearthwick", offset = Vector3(-6, 0, 8)}, from = Vector3(-14, 6, 16), to = Vector3(-7, 3.5, 9), look = Vector3(0, 2, 0), duration = 8.0,
+				cards = [{text = "[npc]Aurelian[/npc] can open the way. Once.", at = 0.8, hold = 3.0},
+					{text = "Whoever goes through must be ready to finish it.", at = 4.4, hold = 3.0}]},
+			{from_marker = "ShotThroneFrom", to_marker = "ShotThroneTo", look_marker = "ShotThroneLook", duration = 10.0, sound = "boss_intro",
+				cards = [{text = "He is still on his throne.", at = 1.2, hold = 3.0},
+					{text = "[enemy][b]The Hollow King.[/b][/enemy] End it.", at = 5.0, hold = 4.0}]},
+		],
+		actors = [
+			{model = "hollow_king", stage = Vector3(0, 2, -74.1), scale = 0.85, yaw = PI, pose = "sit"},
+		],
+	},
+	# Read aloud by the Stranger at the end of The Hollow Hour.
+	hollow_castle = {
+		title = "The Sixth Piece", world = "any", show_map = true,
+		loading = {title = "The Sixth Piece", subtitle = "Read aloud, by the Stranger"},
+		stage = "res://scenes/castle/hollow_castle.tscn", stage_offset = Vector3(0, -600, 0),
+		look = {vignette = 0.6},
+		shots = [
+			{from_marker = "ShotBridgeFrom", to_marker = "ShotBridgeTo", look_marker = "ShotBridgeLook", duration = 10.0,
+				cards = [{text = "[i]Whoever gathers these six pieces has done exactly what I wanted.[/i]", at = 1.0, hold = 3.6},
+					{text = "[i]The power was never hidden. It was [enemy]waiting[/enemy]. For a bearer.[/i]", at = 5.4, hold = 3.6}]},
+			{from_marker = "ShotHallFrom", to_marker = "ShotHallTo", look_marker = "ShotHallLook", duration = 10.0,
+				cards = [{text = "[i]Every step you took, you carried me with you. Lily by lily. Bell by bell.[/i]", at = 0.8, hold = 3.8},
+					{text = "[i]Come to my castle. Bring the map. [b]Bring your friends.[/b][/i]", at = 5.4, hold = 3.6}]},
+			{from_marker = "ShotThroneFrom", to_marker = "ShotThroneTo", look_marker = "ShotThroneLook", duration = 11.0, sound = "boss_intro",
+				cards = [{text = "[i]The throne has been cold for a thousand years.[/i]", at = 1.0, hold = 3.2},
+					{text = "[enemy][b]I am so very hungry.[/b][/enemy]", at = 5.2, hold = 4.6}]},
+		],
+	},
+	# The end of The Hidden Power: one slow shot over each town.
+	towns = {
+		title = "The Realm Breathes", world = "surface", fireworks = true,
+		look = {warmth = 0.3},
+		shots = [
+			{village = "Hearthwick", duration = 7.5, cards = [{text = "The Hollow King is gone.", at = 1.0, hold = 3.4}]},
+			{village = "Bramblebrook", duration = 7.0, cards = [{text = "In [place]Bramblebrook[/place], Gerald's moon-lilies bloom again.", at = 0.8, hold = 3.6}]},
+			{village = "Snowbell", duration = 7.0, cards = [{text = "In [place]Snowbell[/place], the bells ring all night.", at = 0.8, hold = 3.6}]},
+			{village = "Sunveil", duration = 8.0, cards = [{text = "And in [place]Sunveil[/place], nobody whispers anymore.", at = 0.8, hold = 3.0},
+				{text = "The realm remembers who saved it.", at = 4.6, hold = 2.8}]},
+		],
+	},
+}

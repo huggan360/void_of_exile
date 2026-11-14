@@ -1,0 +1,4 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://tools/bench_surface_stream.gd" id="1"]
+[node name="BenchSurfaceStream" type="Node3D"]
+script = ExtResource("1")

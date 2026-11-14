@@ -11,7 +11,7 @@ extends Node
 ## completion (unlocking the next) and a copy of that world in their book.
 ##
 ## Clients get the campaign in the party state (summary()), plus
-## ["camp_intro", script], ["camp_list", runs], ["camp_scene", scene],
+## ["camp_intro", film id (Cutscenes)], ["camp_list", runs], ["camp_scene", scene],
 ## ["camp_scene_page", n], ["camp_scene_end"], ["camp_answer", key, text,
 ## fled] and ["camp_done", result].
 
@@ -398,18 +398,16 @@ func start(p: Dictionary, id: String, restart := false) -> void:
 	for pid: int in party.members:
 		server.social.system(pid, ("%s began [b]%s[/b]." if fresh else "%s resumed [b]%s[/b].") % [p.name, def.title])
 		# Only a story that starts in the Tavern brings the party to its private one.
+		# A tale's opening film: each client holds it until the party is where it is shot.
+		if fresh and Cutscenes.has(Cutscenes.intro_of(id)):
+			server.social.send(pid, ["camp_intro", Cutscenes.intro_of(id)])
 		if in_tavern:
 			server.social.send_to(pid, party.campaign.tavern)
-			if fresh and def.has("intro"):
-				server.social.send(pid, ["camp_intro", def.intro])
 		elif _step(run).get("world", "") == SpaceWorld.REALM:
 			if id in ReachCampaign.PRIVATE:
 				# Both stories run in party-owned private Space worlds:
 				# individual bosses, loot and ships cannot leak between parties.
 				server.social.send_to(pid, PortServer.space_for(party.campaign.realm))
-				# A Reach tale's opening film plays wherever the party is.
-				if fresh and def.has("intro"):
-					server.social.send(pid, ["camp_intro", Campaigns.CUTSCENES.get(def.intro, {}) if def.intro is String else def.intro])
 			else:
 				server.social.system(pid, "The tale begins at the [place]Nexus[/place] in Space. Launch a battleship from the Skyward Launch Pad south of Hearthwick.")
 		else:
@@ -1063,7 +1061,7 @@ func _advance(party: Dictionary, p: Dictionary, side := false) -> void:
 				run.erase(field)
 		run.step = Campaigns.step_index(run.id, step.next) if step.has("next") else int(run.step) + 1
 		if step.has("cutscene"):
-			_to_party(party, ["camp_intro", Campaigns.CUTSCENES[step.cutscene]])
+			_to_party(party, ["camp_intro", str(step.cutscene)])
 		if step.get("final", false) or run.step >= def.steps.size() or run.step < 0:
 			_finish(party)
 			return

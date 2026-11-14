@@ -102,7 +102,8 @@ func _update_focus(camera: Camera3D, delta: float, off := false) -> void:
 ## as a share of the screen height; 0 closes it.
 func _update_see_through(camera: Camera3D, delta: float, share: float) -> void:
 	var want := 1.0 if share > 0.0 and is_instance_valid(camera) and player.stats.hp > 0.0 and not player.interacting() else 0.0
-	_see_through = move_toward(_see_through, want, delta * 3.0)
+	# A cut to another camera closes the window at once (it never fades over a film).
+	_see_through = move_toward(_see_through, want, delta * 3.0) if want > 0.0 or camera == player.camera else 0.0
 	if _see_through <= 0.0 or not is_instance_valid(camera):
 		RenderingServer.global_shader_parameter_set("see_through", Vector4.ZERO)
 		return

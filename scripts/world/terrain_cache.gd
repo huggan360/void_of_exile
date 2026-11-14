@@ -11,11 +11,12 @@ class_name TerrainCache
 ## quick, so there the terrain is simply generated every visit.
 const DIR := "user://cache/terrain/"
 static var _open := {}  # file -> true while a terrain uses it
+static var enabled := true  # off: every world generates its terrain each visit
 
 ## A stream for world `name` built by the scripts/scenes in `sources`, or null
 ## if that file is already in use in this process (it then just generates).
 static func open(name: String, sources: Array) -> VoxelStream:
-	if OS.get_name() == "Windows":
+	if OS.get_name() == "Windows" or not enabled:
 		return null
 	var stamp := ""
 	for path: String in sources:
@@ -38,6 +39,14 @@ static func open(name: String, sources: Array) -> VoxelStream:
 ## The world that used `stream` is gone: its file may be opened again.
 static func close(stream: VoxelStream) -> void:
 	if stream and stream.has_meta("cache_file"): _open.erase(str(stream.get_meta("cache_file")))
+
+## Every saved copy of world `name` goes (its terrain is no longer cached).
+static func drop(name: String) -> void:
+	if not DirAccess.dir_exists_absolute(DIR): return
+	var role := "server" if Net.is_server() else "game"
+	for old in DirAccess.get_files_at(DIR):
+		if old.begins_with("%s_%s_" % [role, name]) and old.ends_with(".sqlite") and not _open.has(DIR+old):
+			DirAccess.remove_absolute(DIR+old)
 
 ## Copies for older versions of the same world go.
 static func _prune(role: String, name: String, keep: String) -> void:

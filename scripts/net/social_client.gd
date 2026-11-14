@@ -13,7 +13,7 @@ signal party_changed
 signal invited(leader: String)
 signal campaigns_listed(runs: Dictionary)
 signal goto(place: String, pos: Vector3)
-signal intro(script: Dictionary)
+signal intro(film: Variant)  # a Cutscenes id (or, from an older server, the film)
 signal campaign_done(result: Dictionary)
 signal pack_done(bonus: Dictionary)
 signal fog(realm_id: String, cells: Array)

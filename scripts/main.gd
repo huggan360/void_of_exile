@@ -211,6 +211,12 @@ func _ready() -> void:
 		watcher.key = key
 		add_child(watcher)
 		return
+	if _args.has("watch-cutscene"):
+		var cutscene_watcher = load("res://tools/cutscene_watch/cutscene_watcher.gd").new()
+		cutscene_watcher.game = self
+		cutscene_watcher.key = str(_args["watch-cutscene"])
+		add_child(cutscene_watcher)
+		return
 	if _args.has("online"):
 		_load_world("hall")
 		_debug_online()
@@ -1220,7 +1226,9 @@ func _process(delta: float) -> void:
 				_place_player(player.global_position)
 				player.model.visible = true
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		(world as IslandWorld).update_streaming(player.global_position)
+		# A film streams the Surface round its own camera (CampaignCinematic).
+		var focus := campaign.cinematic.stream_point()
+		(world as IslandWorld).update_streaming(focus if focus.is_finite() else player.global_position)
 	GameAudio.set_context(player,world)
 	var biome := world.biome_at(player.global_position)
 	atmosphere.blend_to(biome, delta)

@@ -14,7 +14,8 @@ var _world: GameWorld
 var _key := ""
 var _spawned: Array[Node] = []
 var _pending_fog := {}  # realm id -> [cells], until that world loads
-var _pending_intro := {}  # the opening cinematic, once we're in the party's Tavern
+var _starting := false  # holding up the map before a film
+var _films: Array = []  # films waiting until the party is where they are shot (Cutscenes.plays_in)
 var _dialog: SceneDialog
 var _scene_speaker: TownNPC
 var _route_badges := {}
@@ -35,7 +36,7 @@ func _ready() -> void:
 		if is_instance_valid(main.hud) and not main._traveling:
 			main.hud.visible = true)
 	social.party_changed.connect(refresh)
-	social.intro.connect(func(script: Dictionary) -> void: _pending_intro = script)
+	social.intro.connect(func(film: Variant) -> void: _films.append(Cutscenes.film(film)))
 	social.campaign_done.connect(_results)
 	social.pack_done.connect(_pack_card)
 	social.fog.connect(_on_fog)
@@ -458,9 +459,9 @@ func _spawn_npc(npc: String, camp: Dictionary) -> void:
 	var island := _world as IslandWorld
 	if at == Vector3.INF or island == null:
 		return
-	var navigation: TownNavigation = island._town_navigation.get(str(info.at.get("village", info.at.get("cabin", ""))))
-	if navigation == null and not island._town_navigation.is_empty():
-		navigation = island._town_navigation.values()[0]
+	var navigation: TownNavigation = island.town_navigation(str(info.at.get("village", info.at.get("cabin", ""))))
+	if navigation == null and not island.generator.villages.is_empty():
+		navigation = island.town_navigation(island.generator.villages[0].display_name)
 	var model := str(info.get("model", "npc_gardener"))
 	var toward := _world.spawn_point - at
 	if navigation:
@@ -655,16 +656,31 @@ func _process(_delta: float) -> void:
 		var chest := int(camp.get("chest", 0))
 		if chest > 0 and camp.get("objective", {}).get("world", "") == _world.realm_id and GameServer.bag(chest).is_empty():
 			social.campaign(["sync_chest"])
-	if _pending_intro.is_empty() or main._traveling or main._dead or main.player.frozen or not is_instance_valid(_world):
+	if _starting or cinematic.is_playing() or main._traveling or main._dead or main.player.frozen:
 		return
-	if not _world.realm_id.begins_with("ctav_") and not _pending_intro.get("anywhere", false):
-		return
-	var script := _pending_intro
-	_pending_intro = {}
+	var index := _film_here()
+	if index<0: return
+	var film: Dictionary = _films.pop_at(index)
 	main.hud.visible = false
-	if script.get("show_map", false):
+	if film.get("show_map", false):
+		_starting = true
 		await _show_full_map()
-	cinematic.play(main.player, _staged(script))
+		_starting = false
+	play_film(film)
+
+
+## Plays a film (Cutscenes) here and now: its set is built in this world.
+func play_film(film: Dictionary) -> void:
+	var film_set := FilmSet.new()
+	main.add_child(film_set)
+	cinematic.play(main.player, film_set.prepare(film, _world, main.player), film_set)
+
+
+## The first waiting film that can play in this world (-1: none).
+func _film_here() -> int:
+	for i in _films.size():
+		if Cutscenes.plays_in(_films[i], _world): return i
+	return -1
 
 
 ## The six map pieces fitted together, held up for a few seconds.
@@ -676,117 +692,6 @@ func _show_full_map() -> void:
 	if is_instance_valid(StoryReader._layer):
 		for child in StoryReader._layer._ui_root.get_children():
 			child.queue_free()
-
-
-## A cutscene with a stage: its scene is loaded far below this world for the
-## shots (named by its markers) and freed when it ends. Shots and actors can
-## also stand at real places of the Reach (`space`, see _reach_frame), and
-## `actors` put people in either for the length of the film.
-func _staged(script: Dictionary) -> Dictionary:
-	var out := script.duplicate(true)
-	_village_shots(out)
-	var stage: Node3D = null
-	if script.has("stage") and ResourceLoader.exists(str(script.stage)):
-		stage = load(str(script.stage)).instantiate()
-		stage.position = script.get("stage_offset", Vector3(0, -600, 0))
-		main.add_child(stage)
-		cinematic.finished.connect(stage.queue_free, CONNECT_ONE_SHOT)
-		# Warm light where the films look, whatever the world's own sky is.
-		for spot: Vector3 in script.get("stage_lights", []):
-			var lamp := OmniLight3D.new()
-			lamp.light_color = Color("ffd9a0")
-			lamp.light_energy = 2.2
-			lamp.omni_range = 45.0
-			lamp.position = spot
-			stage.add_child(lamp)
-	var mark := func(name: String) -> Vector3:
-		var node := stage.find_child(name, true, false) as Node3D if stage else null
-		return node.global_position if node else (stage.global_position if stage else main.player.global_position)
-	for shot: Dictionary in out.shots:
-		if shot.has("from_marker"):
-			shot.from = mark.call(shot.from_marker)
-			shot.to = mark.call(shot.to_marker)
-			shot.look_from = mark.call(shot.look_marker)
-			shot.look_to = shot.look_from
-		elif shot.has("stage_at"):
-			var origin: Vector3 = stage.global_position if stage else Vector3.ZERO
-			shot.from = origin+(shot.stage_at.from as Vector3)
-			shot.to = origin+(shot.stage_at.to as Vector3)
-			shot.look_from = origin+(shot.stage_at.look as Vector3)
-			shot.look_to = shot.look_from
-		elif shot.has("space"):
-			var frame := _reach_frame(shot.space)
-			shot.from = frame*(shot.space.from as Vector3)
-			shot.to = frame*(shot.space.get("to", shot.space.from) as Vector3)
-			shot.look_from = frame*(shot.space.look as Vector3)
-			shot.look_to = frame*(shot.space.get("look_to", shot.space.look) as Vector3)
-	if script.has("actors"):
-		var cast := CutsceneActors.new()
-		main.add_child(cast)
-		cinematic.finished.connect(cast.queue_free, CONNECT_ONE_SHOT)
-		for actor: Dictionary in script.actors:
-			var frame: Transform3D
-			if actor.has("stage"):
-				frame = Transform3D(Basis.IDENTITY, (stage.global_position if stage else Vector3.ZERO)+(actor.stage as Vector3))
-			else:
-				var place := _reach_frame(actor.space)
-				frame = Transform3D(place.basis, place*(actor.space.get("at_local", Vector3.ZERO) as Vector3))
-			cast.add(str(actor.model), frame, actor)
-	return out
-
-
-## A place of the Reach as a world frame (x right, y up from the ground, -z
-## toward the pad for a fortress): {planet, at = "town" | "fort" | "pad" |
-## "herald" | "orbit"}. Orbit is the planet's centre with world axes.
-static func _reach_frame(spec: Dictionary) -> Transform3D:
-	var p := SpaceLayout.planet(str(spec.planet))
-	var center: Vector3 = p.get("center", Vector3.ZERO)
-	match str(spec.get("at", "orbit")):
-		"town": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.town_frame(p, "center")
-		"fort": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.fort_frame(p)
-		"pad": return SpaceLayout.pad_frame(p)
-		"herald": return Transform3D(Basis.IDENTITY, center)*SpaceLayout.fort_frame(p)
-	return Transform3D(Basis.IDENTITY, center)
-
-
-## Shots over towns ({village}): a slow glide down toward each town's heart,
-## with fireworks over it when the cutscene asks for them.
-func _village_shots(script: Dictionary) -> void:
-	for shot: Dictionary in script.get("shots", []):
-		if not shot.has("village"):
-			continue
-		var c := Campaigns.resolve({village = shot.village}, _world)
-		if c == Vector3.INF:
-			c = main.player.global_position
-		shot.from = c + Vector3(38, 28, 38)
-		shot.to = c + Vector3(16, 14, 22)
-		shot.look_from = c + Vector3.UP * 3.0
-		shot.look_to = shot.look_from
-		if script.get("fireworks", false):
-			_fireworks(c + Vector3.UP * 16.0)
-
-
-func _fireworks(at: Vector3) -> void:
-	for color: Color in [Color("ffd35a"), Color("ff6a8a"), Color("7ee0ff"), Color("b58cff")]:
-		var burst := CPUParticles3D.new()
-		burst.amount = 60
-		burst.lifetime = 1.6
-		burst.explosiveness = 0.95
-		burst.direction = Vector3.UP
-		burst.spread = 180.0
-		burst.initial_velocity_min = 6.0
-		burst.initial_velocity_max = 11.0
-		burst.gravity = Vector3(0, -4, 0)
-		var dot := BoxMesh.new()
-		dot.size = Vector3.ONE * 0.25
-		var glow := StandardMaterial3D.new()
-		glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		glow.albedo_color = color
-		dot.material = glow
-		burst.mesh = dot
-		burst.position = at + Vector3(randf_range(-8, 8), randf_range(-3, 4), randf_range(-8, 8))
-		main.add_child(burst)
-		cinematic.finished.connect(burst.queue_free, CONNECT_ONE_SHOT)
 
 
 ## The first time a whole pack is told: its own card, after the tale's.
@@ -821,7 +726,7 @@ func _pack_card(bonus: Dictionary) -> void:
 ## The end: the five stars, which were earned, and the time (after any cutscene).
 func _results(result: Dictionary) -> void:
 	await get_tree().process_frame
-	while cinematic.is_playing() or not _pending_intro.is_empty():
+	while cinematic.is_playing() or _film_here()>=0:
 		await get_tree().create_timer(0.5).timeout
 	var def := Campaigns.get_def(str(result.id))
 	var panel := PanelContainer.new()

@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+import importlib.util
+import os
+
+Import("env")
+Import("env_modules")
+
+env_surface = env_modules.Clone()
+
+# Compile with exactly the voxel module's defines: they change the layout of
+# the classes we derive from. Its common.py is the single source of them.
+voxel_dir = Dir("#modules/voxel").abspath
+spec = importlib.util.spec_from_file_location("voxel_common_for_surface", os.path.join(voxel_dir, "common.py"))
+voxel_common = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(voxel_common)
+probe = env_surface.Clone()
+voxel_common.get_sources(probe, env.editor_build)  # only for its defines; adds no sources
+env_surface.Append(CPPDEFINES=probe["CPPDEFINES"])
+env_surface.Append(CPPPATH=["#modules/voxel"])
+env_surface.Append(CPPDEFINES=["ZN_GODOT"])
+
+env_surface.add_source_files(env.modules_sources, "*.cpp")

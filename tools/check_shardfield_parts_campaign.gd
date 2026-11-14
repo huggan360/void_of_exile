@@ -23,8 +23,8 @@ func _run() -> void:
 	check(ids==["commission", "buy_core", "amber_key", "aurum", "amber_regulator",
 		"fisher", "keeper", "tidal_stabilizer", "return_parts"], "nine-step three-planet arc")
 	check(steps[0].get("cutscene", "")=="starwright_three_worlds", "talking to Fen triggers planet tour")
-	var script: Dictionary = Campaigns.CUTSCENES.get("starwright_three_worlds", {})
-	check(bool(script.get("anywhere", false)) and script.get("shots", []).size()==3,
+	var script: Dictionary = Cutscenes.film("starwright_three_worlds")
+	check(script.get("world", "")=="space" and script.get("shots", []).size()==3,
 		"actual three-world space flyover with 3 shots")
 	for planet_id: String in ["vesperis", "amberfall", "tidewell"]:
 		check(not SpaceLayout.planet(planet_id).is_empty(), "destination exists: "+planet_id)

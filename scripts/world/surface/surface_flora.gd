@@ -269,9 +269,14 @@ static func _trail_edge(map: SurfaceMap, mx: int, mz: int) -> bool:
 	return false
 
 
+## Call on the main thread before gathering on workers: builds the shared
+## field index once, so gather() only ever reads.
+static func prepare(map: SurfaceMap) -> void:
+	_index_fields(map)
+
+
 static func _index_fields(map: SurfaceMap) -> void:
 	if _fields_ready: return
-	_fields_ready = true
 	for f: Dictionary in map.data.get("fields", []):
 		var c := Vector2(f.center[0], f.center[1])
 		var reach := Vector2(f.half[0], f.half[1]).length()
@@ -280,6 +285,7 @@ static func _index_fields(map: SurfaceMap) -> void:
 				var key := Vector2i(cx, cz)
 				if not _fields.has(key): _fields[key] = []
 				_fields[key].append(f)
+	_fields_ready = true
 
 
 static func _crop(mx: int, mz: int) -> String:

@@ -58,10 +58,8 @@ chest. Ambient goblins are held back in a pack world until The Lily Thief is don
   use `encounter_position` to stay beyond town perimeters; members stay within 20 m of the marker.
 - kill steps: `any = true` counts every authored pack member (mixed ambush packs).
   Pack identity is checked on the server, so chasing enemies away from the marker cannot strand a quest.
-- `cutscene` (a key of `Campaigns.CUTSCENES`): played for the whole party when the step ends, anywhere. A cutscene can
-  `show_map` (the six pieces fitted together first) and have a `stage`: a scene (e.g. the castle,
-  res://scenes/castle/hollow_castle.tscn) loaded at `stage_offset` far below the world just for the shots, whose shots
-  name its markers (`from_marker`, `to_marker`, `look_marker`). The campaign-complete splash waits for it.
+- `cutscene` (a film id, `Cutscenes`; see scripts/cinematic/README.md): played for the whole party when the step ends.
+  A campaign's `intro` (a film id) opens it with its chapter card. Films wait until the party is in the world they are shot in.
 - `hidden = true` on a campaign: it doesn't appear in the book until the one it requires is told (The Hollow Castle).
 - Interact objects can have a `look`: "bell", "stone" (whispering monolith), or brazier ids.
 - `pack_end = true` (a pack's last campaign): after its cutscene everyone is sent to the Tavern, the pack's realm and

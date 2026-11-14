@@ -91,23 +91,6 @@ const NPCS := {
 		at = {stronghold = "Doom", offset = Vector3(0, 0, 58)}, model = "npc_smith"},
 }
 
-const _LILY_INTRO := {
-	title = "The Lily Thief",
-	loading = {title = "The Lily Thief", subtitle = "The Hidden Power  -  part one", seconds = 3.0},
-	shots = [
-		{from = Vector3(46, 32, 96), to = Vector3(26, 22, 74), look_from = Vector3(0, 10, 40), look_to = Vector3(0, 10, 46), duration = 7.5,
-			cards = [{text = "[place]The Tavern[/place] sleeps.", at = 0.8, hold = 2.6},
-				{text = "But every night, something creeps through [npc]Gerald[/npc]'s garden.", at = 3.8, hold = 3.4}]},
-		{from = Vector3(-20, 14, 26), to = Vector3(-14, 12.5, 52), look_from = Vector3(-9.5, 10, 36), look_to = Vector3(-9.5, 10, 58), duration = 7.0,
-			cards = [{text = "And every morning, another bed of moon-lilies is gone.", at = 0.6, hold = 3.0},
-				{text = "Nibbled to the stalk. Something with teeth.", at = 3.9, hold = 2.9}]},
-		{from = Vector3(9, 13.5, 20), to = Vector3(6.5, 12, 28.5), look_from = Vector3(3, 11.2, 36), look_to = Vector3(3, 11.2, 36), duration = 8.0,
-			cards = [{text = "Gerald has stopped sleeping.", at = 0.5, hold = 2.4},
-				{text = "He has started sharpening his trowel.", at = 3.0, hold = 2.4},
-				{text = "Go and talk to [npc]Gerald[/npc].", at = 5.6, hold = 2.3}]},
-	],
-}
-
 ## Step kinds (see README): talk, enter, interact, collect, kill, chest,
 ## hand_over, ask_around, set_home, dungeon, vote. Optional on any step:
 ## next (step id to go to after it), gather (pull the party together at its
@@ -134,7 +117,7 @@ const LIST := {
 	# Mission 2 retains the original id to preserve existing saves and unlocks.
 	first_light = {
 		id = "first_light", revision = 2, pack = "astral_frontier", requires = "theory_of_everything", reach = true,
-		title = "Space Travels", level = 40, xp = 6000,
+		title = "Space Travels", level = 40, xp = 6000, intro = "first_light_intro",
 		blurb = "Learn to command a battleship, survive a skiff ambush, mend your hull, explore Petalgate and open the Rose Bastion.",
 		stars = [{id = "complete", text = "Finish the voyage"}, {id = "time", text = "Finish within 40 minutes", seconds = 2400},
 			{id = "no_deaths", text = "Nobody falls"}],
@@ -166,7 +149,7 @@ const LIST := {
 	# prerequisite for Through the Shardfield.
 	lantern_road = {
 		id = "lantern_road", revision = 2, pack = "astral_frontier", requires = "first_light", reach = true,
-		title = "Vesperis", level = 42, xp = 7000,
+		title = "Vesperis", level = 42, xp = 7000, intro = "lantern_road_intro",
 		blurb = "Visit the wizard of Lanternheart, share two beers each at a proper city pub, and recover his stolen starball from a shotgun-wielding farmer.",
 		stars = [{id = "complete", text = "Recover the stolen starball"}, {id = "time", text = "Finish within 40 minutes", seconds = 2400},
 			{id = "no_deaths", text = "Nobody falls"}],
@@ -193,7 +176,7 @@ const LIST := {
 	# Mission 4 keeps the legacy id for existing saves and the next unlock.
 	shardfield = {
 		id = "shardfield", revision = 2, pack = "astral_frontier", requires = "lantern_road", reach = true,
-		title = "The Starwright's Missing Parts", level = 44, xp = 8000,
+		title = "The Starwright's Missing Parts", level = 44, xp = 8000, intro = "shardfield_intro",
 		blurb = "Three planets, three missing ship components, and an amber giant between you and a working star engine.",
 		stars = [{id = "complete", text = "Return all three ship parts"}, {id = "time", text = "Finish within 50 minutes", seconds = 3000},
 			{id = "no_deaths", text = "Nobody falls"}],
@@ -232,7 +215,7 @@ const LIST := {
 	# the pre-existing Last Light Diner beyond the Shardfield.
 	hollowmoon = {
 		id = "hollowmoon", revision = 2, pack = "astral_frontier", requires = "shardfield", reach = true,
-		title = "The Restaurant at the End of the Universe", level = 46, xp = 9000,
+		title = "The Restaurant at the End of the Universe", level = 46, xp = 9000, intro = "hollowmoon_intro",
 		blurb = "Cross the Shardfield, seek a neon diner hidden in the Gloam, share a beer, and repay its host by defeating the Brood Matriarch.",
 		stars = [{id = "complete", text = "Return to the Last Light host"}, {id = "time", text = "Finish within 50 minutes", seconds = 3000},
 			{id = "no_deaths", text = "Nobody falls"}],
@@ -323,7 +306,7 @@ const LIST := {
 	},
 	# The space pack opens once The Hidden Power is told (its last tale, the Hollow Castle).
 	theory_of_everything = {
-		id="theory_of_everything",revision=1,pack="astral_frontier",requires="hollow_castle",title="Theory of Everything",level=40,
+		id="theory_of_everything",revision=1,pack="astral_frontier",requires="hollow_castle",title="Theory of Everything",level=40,intro="theory_of_everything_intro",
 		blurb="Help a woodland starwright finish his impossible ship. Board together, cross the chromatic void and restore a haunted vessel on the way to the Convergence.",
 		xp=8000,stars=[],side=[],
 		steps=[
@@ -349,7 +332,7 @@ const LIST := {
 	lily_thief = {
 		id = "lily_thief", revision = 2, pack = "hidden_power", title = "The Lily Thief", level = 1,
 		blurb = "Every night something creeps through Gerald's garden, and every morning another bed of moon-lilies is gone. Find out what has teeth enough to eat them.",
-		intro = _LILY_INTRO, xp = 600,
+		intro = "lily_intro", xp = 600,
 		stars = [
 			{id = "complete", text = "Finish the tale"},
 			{id = "time", text = "Finish within 35 minutes", seconds = 2100},
@@ -401,7 +384,7 @@ const LIST := {
 				text = "Give the necklace back to Maribel in Bramblebrook",
 				lack = "Whoever carries my necklace, please...",
 				say = "My grandmother's necklace! Thank you, thank you all!"},
-			{id = "farewell", kind = "talk", npc = "maribel", world = "campaign", shared = true, reward = "dexterity", final = true,
+			{id = "farewell", kind = "talk", npc = "maribel", world = "campaign", shared = true, reward = "dexterity", final = true, cutscene = "realm_history",
 				text = "Hear what Maribel knows",
 				say = "Your torn map... my grandmother wore that crown mark until the day she died.|She said a [b]secret force[/b] lives up in the [place]mountains[/place], and that we must never speak of it.|I've said too much already. Take these for your trouble... and forget my name!"},
 		],
@@ -414,7 +397,7 @@ const LIST := {
 		],
 	},
 	frozen_whisper = {
-		id = "frozen_whisper", pack = "hidden_power", requires = "lily_thief", title = "The Frozen Whisper", level = 8,
+		id = "frozen_whisper", pack = "hidden_power", requires = "lily_thief", title = "The Frozen Whisper", level = 8, intro = "frozen_whisper_intro",
 		blurb = "The crown mark leads north, to Snowbell and the frozen peaks. Somebody there knows of the hidden power, if you can find them before they run.",
 		xp = 1200, ice_open = true,
 		stars = [
@@ -450,7 +433,7 @@ const LIST := {
 		side = [],
 	},
 	sunken_court = {
-		id = "sunken_court", pack = "hidden_power", requires = "frozen_whisper", title = "The Sunken Court", level = 12,
+		id = "sunken_court", pack = "hidden_power", requires = "frozen_whisper", title = "The Sunken Court", level = 12, intro = "sunken_court_intro",
 		blurb = "South, where the Scarab Regent's court was swallowed by the sand. A caravan robbed, a seal that opens what should stay shut, and a blind man who sees too much.",
 		xp = 1800,
 		stars = [
@@ -488,7 +471,7 @@ const LIST := {
 		side = [],
 	},
 	ember_oath = {
-		id = "ember_oath", pack = "hidden_power", requires = "sunken_court", title = "The Ember Oath", level = 16,
+		id = "ember_oath", pack = "hidden_power", requires = "sunken_court", title = "The Ember Oath", level = 16, intro = "ember_oath_intro",
 		blurb = "Into the lands of Doom, beneath a mountain of fire and on into the burning forest beyond. An oath sworn in embers, and a choice that can't be taken back.",
 		xp = 2600,
 		stars = [
@@ -530,7 +513,7 @@ const LIST := {
 		side = [],
 	},
 	drowned_choir = {
-		id = "drowned_choir", revision = 2, pack = "hidden_power", requires = "ember_oath", title = "The Drowned Choir", level = 20,
+		id = "drowned_choir", revision = 2, pack = "hidden_power", requires = "ember_oath", title = "The Drowned Choir", level = 20, intro = "drowned_choir_intro",
 		blurb = "Under the blue waters a choir still sings, and two seals hold it down: the Siren's pearl and the Cantor's bells. The fifth piece of the map sank with them.",
 		xp = 3400,
 		stars = [
@@ -586,7 +569,7 @@ const LIST := {
 		],
 	},
 	hollow_hour = {
-		id = "hollow_hour", revision = 2, pack = "hidden_power", requires = "drowned_choir", title = "The Hollow Hour", level = 24,
+		id = "hollow_hour", revision = 2, pack = "hidden_power", requires = "drowned_choir", title = "The Hollow Hour", level = 24, intro = "hollow_hour_intro",
 		blurb = "The last piece of the map waits in the Deep Dark. Take a lamplighter's advice: don't listen to the stones, and don't turn around.",
 		xp = 5000,
 		stars = [
@@ -632,7 +615,7 @@ const LIST := {
 		side = [],
 	},
 	hollow_castle = {
-		id = "hollow_castle", pack = "hidden_power", requires = "hollow_hour", title = "The Hollow Castle", level = 30,
+		id = "hollow_castle", pack = "hidden_power", requires = "hollow_hour", title = "The Hollow Castle", level = 30, intro = "hollow_castle_intro",
 		hidden = true, pack_end = true, xp = 8000,
 		blurb = "The map led you here. The castle has been waiting, and so has its king.",
 		stars = [
@@ -662,171 +645,6 @@ const LIST := {
 				say = "It's still warm. Give it here.|There. Stone, all the way through now. He's gone.|Listen... do you hear that? The whole realm is breathing again."},
 		],
 		side = [],
-	},
-}
-
-
-## The towns cheer (the end of The Hidden Power): one slow shot over each.
-const _TOWNS := {
-	title = "The Realm Breathes", anywhere = true, fireworks = true,
-	shots = [
-		{village = "Hearthwick", duration = 6.5, cards = [{text = "The Hollow King is gone.", at = 0.6, hold = 3.0}]},
-		{village = "Bramblebrook", duration = 6.0, cards = [{text = "In [place]Bramblebrook[/place], Gerald's moon-lilies bloom again.", at = 0.5, hold = 3.2}]},
-		{village = "Snowbell", duration = 6.0, cards = [{text = "In [place]Snowbell[/place], the bells ring all night.", at = 0.5, hold = 3.2}]},
-		{village = "Sunveil", duration = 6.5, cards = [{text = "And in [place]Sunveil[/place], nobody whispers anymore.", at = 0.5, hold = 3.0},
-			{text = "The realm remembers who saved it.", at = 3.8, hold = 2.4}]},
-	],
-}
-
-## Cutscenes a step can play when it ends (CampaignCinematic scripts). stage: a
-## scene loaded far below the world just for the shots; shots name its markers.
-const CUTSCENES := {
-	# Mission 6's films, shot in real places: the Reach's planets (`space`,
-	# CampaignClient._reach_frame) and the Hollow Castle as a stage.
-	eye_prologue = {
-		title = "The Eye Behind the Stars", anywhere = true,
-		loading = {title = "Long Ago", subtitle = "Before the King turned", seconds = 3.5},
-		stage = "res://scenes/castle/hollow_castle.tscn", stage_offset = Vector3(0, 12000, 0),
-		stage_lights = [Vector3(0, 8, -70), Vector3(0, 8, -46), Vector3(0, 9, -20), Vector3(0, 10, 70)],
-		shots = [
-			{space = {planet = "rosamund", at = "town", from = Vector3(70, 60, 95), to = Vector3(28, 18, 42), look = Vector3(0, 4, 0)}, duration = 9.0,
-				cards = [{text = "Once, the kingdom knew only peace.", at = 0.8, hold = 3.4}, {text = "Lanterns at every door. Music round every fountain.", at = 4.6, hold = 3.8}]},
-			{space = {planet = "rosamund", at = "town", from = Vector3(-7, 3.2, 14), to = Vector3(-3, 2.6, 9), look = Vector3(0, 2.2, 4)}, duration = 8.0,
-				cards = [{text = "And a young [b]King[/b] who walked among his people.", at = 0.6, hold = 3.4}, {text = "He knew every name. Every face.", at = 4.4, hold = 3.0}]},
-			{stage_at = {from = Vector3(7, 5, -58), to = Vector3(2.5, 3.8, -66), look = Vector3(0, 3.2, -74)}, duration = 9.0,
-				cards = [{text = "Then, one night, a visitor came to his throne.", at = 0.6, hold = 3.6}, {text = "[i]A pilgrim, veiled in white, with no face beneath the veil.[/i]", at = 4.6, hold = 3.8}]},
-			{space = {planet = "pale_eye", at = "orbit", from = Vector3(1500, 900, -3400), to = Vector3(900, 650, -2500), look = Vector3(0, 300, 0)}, duration = 9.0,
-				cards = [{text = "She whispered a name that was not hers.", at = 0.6, hold = 3.4}, {text = "And far beyond the stars, something [enemy]opened its eye[/enemy].", at = 4.4, hold = 4.0}]},
-			{from_marker = "ShotBridgeFrom", to_marker = "ShotBridgeTo", look_marker = "ShotBridgeLook", duration = 9.0,
-				cards = [{text = "The King gave the order the next morning.", at = 0.6, hold = 3.4}, {text = "His own knights. His own people.", at = 4.6, hold = 3.8}]},
-			{from_marker = "ShotHallFrom", to_marker = "ShotHallTo", look_marker = "ShotHallLook", duration = 8.0,
-				cards = [{text = "What sat on the throne after that was not a man.", at = 0.6, hold = 3.4}, {text = "We called him [enemy]the Hollow King[/enemy]. You brought him down.", at = 4.2, hold = 3.4}]},
-			{space = {planet = "pale_eye", at = "fort", from = Vector3(0, 48, -130), to = Vector3(0, 22, -58), look = Vector3(0, 8, 0)}, duration = 10.0,
-				cards = [{text = "But a spell has a [i]caster[/i].", at = 0.8, hold = 3.2}, {text = "And the one who cast it is still watching. Still [enemy]hungry[/enemy].", at = 4.4, hold = 4.6}]},
-		],
-		actors = [
-			{model = "city_noble", space = {planet = "rosamund", at = "town", at_local = Vector3(0, 0, 4)}, scale = 1.15, yaw = PI},
-			{model = "npc_villager", space = {planet = "rosamund", at = "town"}, walk = [7.0, 0.35]},
-			{model = "npc_baker", space = {planet = "rosamund", at = "town"}, walk = [10.0, -0.28]},
-			{model = "city_dancer", space = {planet = "rosamund", at = "town"}, walk = [4.5, 0.6]},
-			{model = "city_kid", space = {planet = "rosamund", at = "town"}, walk = [6.0, -0.5]},
-			{model = "npc_gardener", space = {planet = "rosamund", at = "town"}, walk = [12.0, 0.22]},
-			{model = "city_noble", stage = Vector3(0, 2, -74.1), scale = 1.15, yaw = PI},
-			{model = "veil_herald", stage = Vector3(3.5, 1.0, -71.0), scale = 0.6, yaw = 0.86},
-			{model = "castle_knight", stage = Vector3(-4, 0.15, 88), march = Vector3(0, 0, -22)},
-			{model = "castle_knight", stage = Vector3(0, 0.15, 88), march = Vector3(0, 0, -22)},
-			{model = "castle_knight", stage = Vector3(4, 0.15, 88), march = Vector3(0, 0, -22)},
-			{model = "hollow_king", stage = Vector3(0, 0, -30), yaw = PI},
-			{model = "stormeye_tyrant", space = {planet = "pale_eye", at = "fort", at_local = Vector3(0, 3, 0)}, variant = "tempest"},
-		],
-	},
-	eye_herald = {
-		title = "Under the Scratches", anywhere = true,
-		loading = {title = "Under the Scratches", subtitle = "Read through the astrolabe lens", seconds = 2.5},
-		shots = [
-			{space = {planet = "shardheart", at = "orbit", from = Vector3(-650, 260, -760), to = Vector3(-430, 170, -500), look = Vector3(0, 0, 0)}, duration = 8.0,
-				cards = [{text = "Under the scratches: a crystal world hidden in the [place]Shardfield[/place].", at = 0.6, hold = 4.6}]},
-			{space = {planet = "shardheart", at = "herald", from = Vector3(0, 30, -62), to = Vector3(0, 9, -22), look = Vector3(0, 5, 0)}, duration = 9.0,
-				cards = [{text = "And on it, the pilgrim in white.", at = 0.6, hold = 3.4}, {text = "[enemy]Waiting.[/enemy]", at = 4.6, hold = 3.4}]},
-		],
-		actors = [
-			{model = "veil_herald", space = {planet = "shardheart", at = "herald", at_local = Vector3(0, 1.5, 0)}},
-		],
-	},
-	eye_revealed = {
-		title = "The Eye Sigil", anywhere = true,
-		loading = {title = "The Last Clue", subtitle = "The Eye Sigil wakes in your hands", seconds = 2.5},
-		shots = [
-			{space = {planet = "pale_eye", at = "orbit", from = Vector3(1500, 900, -3400), to = Vector3(800, 600, -2300), look = Vector3(0, 300, 0)}, duration = 8.0,
-				cards = [{text = "The Sigil burns cold. It shows you where it came from.", at = 0.6, hold = 3.6}, {text = "Beyond the Shardfield, inside the storm of [place]the Pale Eye[/place]...", at = 4.4, hold = 3.4}]},
-			{space = {planet = "pale_eye", at = "fort", from = Vector3(0, 60, -160), to = Vector3(0, 24, -62), look = Vector3(0, 8, 0)}, duration = 8.0,
-				cards = [{text = "...behind the walls of the [place]Stormeye Citadel[/place].", at = 0.6, hold = 4.0}]},
-			{space = {planet = "pale_eye", at = "fort", from = Vector3(14, 14, -32), to = Vector3(6, 11, -20), look = Vector3(0, 9, 0)}, duration = 10.0,
-				cards = [{text = "[enemy][b]VAELITH, THE PALE ONE[/b][/enemy]", at = 0.6, hold = 3.6}, {text = "[i]Little ones. You broke my King. Come, then. Break your eyes on me.[/i]", at = 4.6, hold = 4.8}]},
-		],
-		actors = [
-			{model = "stormeye_tyrant", space = {planet = "pale_eye", at = "fort", at_local = Vector3(0, 3, 0)}, variant = "tempest"},
-		],
-	},
-	eye_closed = {
-		title = "The Eye Closes", anywhere = true,
-		loading = {title = "The Eye Closes", subtitle = "And the Reach breathes again", seconds = 2.5},
-		shots = [
-			{space = {planet = "pale_eye", at = "orbit", from = Vector3(900, 650, -2500), to = Vector3(1600, 1000, -3600), look = Vector3(0, 300, 0)}, duration = 8.0,
-				cards = [{text = "Far beyond the stars, an eye closes. This time, for good.", at = 0.6, hold = 4.0}, {text = "The spell that took the King breaks with it.", at = 4.8, hold = 2.8}]},
-			{space = {planet = "rosamund", at = "town", from = Vector3(-8, 3.5, 16), to = Vector3(40, 26, 60), look = Vector3(0, 3, 0)}, duration = 11.0,
-				cards = [{text = "In Rosamund the shrines sing again.", at = 0.8, hold = 3.4}, {text = "And someone lights a lantern for the old King.", at = 4.6, hold = 3.6}]},
-			{space = {planet = "verdance", at = "town", from = Vector3(60, 50, 80), to = Vector3(110, 90, 150), look = Vector3(0, 4, 0)}, duration = 8.0,
-				cards = [{text = "[place]The Astral Frontier[/place] is free.", at = 1.0, hold = 5.0}]},
-		],
-		actors = [
-			{model = "npc_villager", space = {planet = "rosamund", at = "town"}, walk = [7.0, 0.35]},
-			{model = "npc_baker", space = {planet = "rosamund", at = "town"}, walk = [10.0, -0.28]},
-			{model = "city_dancer", space = {planet = "rosamund", at = "town"}, walk = [4.5, 0.6]},
-			{model = "city_kid", space = {planet = "rosamund", at = "town"}, walk = [6.0, -0.5]},
-			{model = "npc_gardener", space = {planet = "rosamund", at = "town"}, walk = [12.0, 0.22]},
-			{model = "npc_villager", space = {planet = "verdance", at = "town"}, walk = [7.0, 0.35]},
-			{model = "npc_baker", space = {planet = "verdance", at = "town"}, walk = [10.0, -0.28]},
-			{model = "city_dancer", space = {planet = "verdance", at = "town"}, walk = [4.5, 0.6]},
-			{model = "city_kid", space = {planet = "verdance", at = "town"}, walk = [6.0, -0.5]},
-			{model = "npc_gardener", space = {planet = "verdance", at = "town"}, walk = [12.0, 0.22]},
-		],
-	},
-	towns = _TOWNS,
-	starwright_three_worlds = {
-		title = "Three Worlds, Three Ship Parts", anywhere = true,
-		loading = {title = "Three Worlds, Three Ship Parts", subtitle = "Starwright Fen's chart of the Astral Reach", seconds = 2.0},
-		shots = [
-			{from = Vector3(-1450, 1380, -4950),
-				to = Vector3(-1670, 1180, -5300),
-				look_from = Vector3(-2400, 700, -6600), look_to = Vector3(-2400, 700, -6600),
-				duration = 8.0,
-				cards = [{text = "[place]Vesperis[/place] - the Lantern City. Scrapper Nix sells a [b]Navigation Core[/b] for [b]500 Dots[/b].", at = 0.6, hold = 5.3}]},
-			{from = Vector3(4050, 1680, 8650),
-				to = Vector3(3720, 1430, 8420),
-				look_from = Vector3(2800, 900, 7400), look_to = Vector3(2800, 900, 7400),
-				duration = 8.0,
-				cards = [{text = "[place]Amberfall[/place] - get the key in Honeymarket, defeat [enemy]Aurum[/enemy], and take the [b]Amber Regulator[/b].", at = 0.5, hold = 5.4}]},
-			{from = Vector3(-8750, 1300, 10100),
-				to = Vector3(-8380, 1080, 9780),
-				look_from = Vector3(-7400, 500, 8600), look_to = Vector3(-7400, 500, 8600),
-				duration = 9.0,
-				cards = [{text = "[place]Tidewell[/place] - question the fishermen and lighthouse keeper, then search the Shell Shrine for the [b]Tidal Stabilizer[/b].", at = 0.5, hold = 6.0}]},
-		],
-	},
-	# A true flyover of the already-built, permanent Last Light Diner.
-	# This reveals what to LOOK FOR, while the star chart still withholds
-	# the exact position until the crew physically discovers it.
-	last_light_reveal = {
-		title = "The Last Light", anywhere = true,
-		loading = {title = "A Light Beyond the Shardfield", subtitle = "Seer Nyx's glimpse of the outer Gloam", seconds = 2.0},
-		shots = [
-			{from = Vector3(16210, 135, 34720), to = Vector3(16125, 85, 34610),
-				look_from = Vector3(16000, 0, 34500), look_to = Vector3(16000, 0, 34500), duration = 7.5,
-				cards = [{text = "A lonely rock drifts beyond the [place]Shardfield[/place]. One neon sign refuses to go dark.", at = 0.6, hold = 5.4}]},
-			{from = Vector3(16080, 44, 34595), to = Vector3(16055, 25, 34558),
-				look_from = Vector3(16000, 5, 34505), look_to = Vector3(16000, 5, 34505), duration = 8.0,
-				cards = [{text = "[place]LAST LIGHT DINER[/place] - chrome booths, hot coffee, and [b]two[/b] docking gangways.", at = 0.8, hold = 5.6}]},
-			{from = Vector3(15945, 22, 34555), to = Vector3(15975, 12, 34536),
-				look_from = Vector3(16000, 2, 34500), look_to = Vector3(16000, 2, 34500), duration = 7.5,
-				cards = [{text = "The chart only knows a [b]large yellow search sphere[/b]. Find this sign, dock, and finish a beer.", at = 0.5, hold = 5.5}]},
-		],
-	},
-	hollow_castle = {
-		title = "The Sixth Piece", anywhere = true, show_map = true,
-		loading = {title = "The Sixth Piece", subtitle = "Read aloud, by the Stranger", seconds = 3.5},
-		stage = "res://scenes/castle/hollow_castle.tscn", stage_offset = Vector3(0, -600, 0),
-		shots = [
-			{from_marker = "ShotBridgeFrom", to_marker = "ShotBridgeTo", look_marker = "ShotBridgeLook", duration = 9.0,
-				cards = [{text = "[i]Whoever gathers these six pieces has done exactly what I wanted.[/i]", at = 0.8, hold = 3.6},
-					{text = "[i]The power was never hidden. It was [enemy]waiting[/enemy]. For a bearer.[/i]", at = 4.8, hold = 3.6}]},
-			{from_marker = "ShotHallFrom", to_marker = "ShotHallTo", look_marker = "ShotHallLook", duration = 9.0,
-				cards = [{text = "[i]Every step you took, you carried me with you. Lily by lily. Bell by bell.[/i]", at = 0.6, hold = 3.8},
-					{text = "[i]Come to my castle. Bring the map. [b]Bring your friends.[/b][/i]", at = 4.8, hold = 3.6}]},
-			{from_marker = "ShotThroneFrom", to_marker = "ShotThroneTo", look_marker = "ShotThroneLook", duration = 10.0,
-				cards = [{text = "[i]The throne has been cold for a thousand years.[/i]", at = 0.8, hold = 3.2},
-					{text = "[enemy][b]I am so very hungry.[/b][/enemy]", at = 4.6, hold = 4.4}]},
-		],
 	},
 }
 

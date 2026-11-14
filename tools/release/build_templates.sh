@@ -4,6 +4,8 @@
 # (Arch: sudo pacman -S scons mingw-w64-gcc). The GitHub workflow does the same thing when this PC can't.
 #   tools/release/build_templates.sh              # Windows
 #   tools/release/build_templates.sh windows linux
+#   tools/release/build_templates.sh editor       # ~/Godot/godot_voxel_editor (the old one is kept as .old)
+# Every build includes this repo's engine modules (engine/modules: the Surface's C++ voxel generator).
 # Sources go to ~/Godot/engine_src (reused next time), templates to ~/Godot/templates (the old one is kept
 # as <name>.old).
 set -Eeuo pipefail
@@ -16,6 +18,7 @@ SRC="${SRC:-$HOME/Godot/engine_src}"
 DEST="${DEST:-$HOME/Godot/templates}"
 PLATFORMS=("${@:-windows}")
 JOBS="${JOBS:-$(nproc)}"
+MODULES="custom_modules=$HERE/engine/modules"
 
 checkout() {  # <dir> <repo url> <commit>
     mkdir -p "$1"
@@ -35,12 +38,19 @@ for platform in "${PLATFORMS[@]}"; do
     case "$platform" in
         windows)
             scons platform=windows target=template_release arch=x86_64 use_mingw=yes production=yes lto=none \
-                accesskit=no d3d12=no -j"$JOBS"
+                accesskit=no d3d12=no "$MODULES" -j"$JOBS"
             out=godot.windows.template_release.x86_64.exe ;;
         linux)
-            scons platform=linuxbsd target=template_release arch=x86_64 production=yes lto=none accesskit=no -j"$JOBS"
+            scons platform=linuxbsd target=template_release arch=x86_64 production=yes lto=none accesskit=no "$MODULES" -j"$JOBS"
             out=godot.linuxbsd.template_release.x86_64 ;;
-        *) echo "unknown platform $platform (windows, linux)" >&2; exit 2 ;;
+        editor)
+            scons platform=linuxbsd target=editor arch=x86_64 production=yes lto=none accesskit=no "$MODULES" -j"$JOBS"
+            editor="$(dirname "$DEST")/godot_voxel_editor"
+            [[ -f "$editor" ]] && cp -p "$editor" "$editor.old"
+            cp bin/godot.linuxbsd.editor.x86_64 "$editor"
+            echo "built $editor ($(du -h "$editor" | cut -f1))"
+            continue ;;
+        *) echo "unknown platform $platform (windows, linux, editor)" >&2; exit 2 ;;
     esac
     [[ -f "$DEST/$out" ]] && cp -p "$DEST/$out" "$DEST/$out.old"
     cp "bin/$out" "$DEST/$out"

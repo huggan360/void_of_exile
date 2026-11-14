@@ -23,9 +23,9 @@ func _run() -> void:
 		"nine ordered steps: dark planet, discover diner, beer, boss and return")
 	check(steps[0].planet=="hollowmoon" and steps[1].npc=="gloam_seer",
 		"Seer Nyx waits on a Gloam planet behind the Shardfield")
-	check(steps[1].cutscene=="last_light_reveal" and Campaigns.CUTSCENES.last_light_reveal.shots.size()==3,
+	check(steps[1].cutscene=="last_light_reveal" and Cutscenes.film("last_light_reveal").shots.size()==3,
 		"the seer conversation triggers a three-shot diner flyover")
-	check(bool(Campaigns.CUTSCENES.last_light_reveal.anywhere), "diner cinematic works in the private Space world")
+	check(Cutscenes.film("last_light_reveal").world=="space", "diner cinematic works in the private Space world")
 	check(Campaigns.NPCS.has("lastlight_host") and bool(Campaigns.NPCS.lastlight_host.at.diner),
 		"mission uses the existing permanent Last Light host model")
 	check(SpaceLayout.DINER==Vector3(16000, 0, 34500) and SpaceLayout.DINER_RADIUS>30,

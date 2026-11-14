@@ -98,8 +98,10 @@ func aim_ray() -> Array:
 ## Depth of field and the see-through window (SpatialController).
 func _process(delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
-	_update_see_through(camera, delta, 0.2 if camera_mode == 0 else 0.3)
-	_update_focus(camera, delta)
+	# Films and other cinematics film with their own camera: no window, their own focus.
+	var own := camera == player.camera
+	_update_see_through(camera, delta, (0.2 if camera_mode == 0 else 0.3) if own else 0.0)
+	_update_focus(camera, delta, not own)
 
 
 func _exit_tree() -> void:
