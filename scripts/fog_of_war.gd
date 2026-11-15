@@ -28,6 +28,7 @@ var _strongholds: Array[StrongholdFeature] = []
 var regional := false
 var _volume: FogVolume
 var _volume_material := ShaderMaterial.new()
+var _quad := QuadMesh.new()  # the screen-space fog, used when there is no volume
 var _revealed_forts := {}
 
 ## Seconds between sending the explored map to the GPU. The clear circle
@@ -43,9 +44,8 @@ const SOFT_EDGE := 0.5
 
 
 func _ready() -> void:
-	var quad := QuadMesh.new()
-	quad.size = Vector2(2, 2)  # the shader stretches it over the screen
-	mesh = quad
+	_quad.size = Vector2(2, 2)  # the shader stretches it over the screen
+	mesh = _quad
 	extra_cull_margin = 16384.0  # never frustum-culled
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_material.shader = preload("res://shaders/fog_of_war.gdshader")
@@ -80,7 +80,10 @@ func uses_volume() -> bool:
 func _choose_look() -> void:
 	var volume := uses_volume()
 	_volume.visible = volume
-	layers = 0 if volume else 1
+	# Drop the quad rather than zero its layers: under Forward+ a layer change
+	# leaves every light (the quad spans the world) holding it, and freeing
+	# those lights then reports "indexing did not unpair geometries from light".
+	mesh = null if volume else _quad
 
 
 ## Starts a fresh, fully hidden map. half_extent: playable size from the

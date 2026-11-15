@@ -166,10 +166,12 @@ func retire(root: Node) -> void:
 func _process(_delta: float) -> void:
 	var deadline := Time.get_ticks_usec()+800
 	while not _retired.is_empty() and Time.get_ticks_usec()<deadline:
-		var node: Node = _retired.back()
-		if not is_instance_valid(node):
+		# Untyped first: a node freed elsewhere can't be assigned to a Node.
+		var entry: Variant = _retired.back()
+		if not is_instance_valid(entry):
 			_retired.pop_back()
 			continue
+		var node: Node = entry
 		if node.get_child_count()>0:
 			var child: Node = node.get_child(node.get_child_count()-1)
 			node.remove_child(child)
