@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://hrew5qiyqbuc"
+path="res://.godot/imported/leg.vox-f5c09fdd2f277eb3ee676c237441707c.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_knight/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-f5c09fdd2f277eb3ee676c237441707c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

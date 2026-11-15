@@ -1,174 +1,118 @@
 {
-  "voxel_size": 0.035,
+  "voxel_size": 0.2,
   "parts": {
-    "knee_r": {
+    "body": {
       "frame_min": [
-        -16,
-        -48,
-        -32
+        -12,
+        6,
+        -7
       ],
-      "frame_size": [
-        32,
-        56,
-        48
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        -4,
+        -10,
+        -4
       ]
     },
-    "knee_l": {
+    "knee": {
       "frame_min": [
-        -16,
-        -48,
-        -32
-      ],
-      "frame_size": [
-        32,
-        56,
-        48
+        -4,
+        -11,
+        -6
       ]
     },
     "arm_l": {
       "frame_min": [
-        -32,
-        -72,
-        -40
-      ],
-      "frame_size": [
-        64,
-        88,
-        64
-      ]
-    },
-    "leg_r": {
-      "frame_min": [
-        -16,
-        -40,
-        -24
-      ],
-      "frame_size": [
-        32,
-        48,
-        40
+        -5,
+        -18,
+        -6
       ]
     },
     "arm_r": {
       "frame_min": [
-        -32,
-        -80,
-        -32
-      ],
-      "frame_size": [
-        64,
-        152,
-        56
-      ]
-    },
-    "leg_l": {
-      "frame_min": [
-        -16,
-        -40,
-        -24
-      ],
-      "frame_size": [
-        32,
-        48,
-        40
-      ]
-    },
-    "body": {
-      "frame_min": [
-        -32,
-        96,
-        -32
-      ],
-      "frame_size": [
-        64,
-        152,
-        64
+        -4,
+        -33,
+        -7
       ],
       "glow": true
     }
   },
   "limbs": {
-    "arm_l": {
-      "part": "arm_l",
-      "pivot": [
-        -48,
-        168,
-        0
-      ],
-      "role": "arm",
-      "phase": 1,
-      "yaw": 0
-    },
     "leg_l": {
-      "part": "leg_l",
+      "part": "leg",
       "pivot": [
-        -16,
-        96,
+        -3,
+        17,
         0
       ],
       "role": "leg",
-      "phase": -1,
-      "yaw": 0
+      "phase": 1
     },
     "knee_l": {
-      "part": "knee_l",
+      "part": "knee",
       "pivot": [
         0,
-        -40,
+        -7,
+        0
+      ],
+      "role": "knee",
+      "phase": 1,
+      "parent_limb": "leg_l"
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        3,
+        17,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "knee_r": {
+      "part": "knee",
+      "pivot": [
+        0,
+        -7,
         0
       ],
       "role": "knee",
       "phase": -1,
-      "yaw": 0,
-      "parent_limb": "leg_l"
+      "parent_limb": "leg_r"
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -8,
+        29,
+        0
+      ],
+      "role": "arm",
+      "phase": 1
     },
     "arm_r": {
       "part": "arm_r",
       "pivot": [
-        48,
-        168,
+        8,
+        29,
         0
       ],
       "role": "arm",
-      "phase": -1,
-      "yaw": 0
-    },
-    "leg_r": {
-      "part": "leg_r",
-      "pivot": [
-        16,
-        96,
-        0
-      ],
-      "role": "leg",
-      "phase": 1,
-      "yaw": 0
-    },
-    "knee_r": {
-      "part": "knee_r",
-      "pivot": [
-        0,
-        -40,
-        0
-      ],
-      "role": "knee",
-      "phase": 1,
-      "yaw": 0,
-      "parent_limb": "leg_r"
+      "phase": -1
     }
   },
-  "variants": {},
   "hand": [
-    56,
-    112,
-    -24
+    0,
+    -25,
+    -4
   ],
+  "animation_style": "knight",
+  "variants": {},
+  "flap_rate": 1.4,
+  "hand_limb": "arm_r",
   "hover": 0,
   "bob": 0,
-  "waddle": 0,
-  "flap_rate": 1.4,
-  "pixel_art": true,
-  "material_jitter": 0.0,
-  "glow_strength": 1.1,
-  "animation_style": "knight"
+  "waddle": 0
 }

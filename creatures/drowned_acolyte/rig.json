@@ -1,41 +1,26 @@
 {
-  "voxel_size": 0.11,
+  "voxel_size": 0.075,
   "parts": {
     "body": {
       "frame_min": [
-        -5,
-        1,
-        -5
-      ],
-      "frame_size": [
-        10,
-        18,
-        8
+        -6,
+        -3,
+        -6
       ],
       "glow": true
     },
     "arm": {
       "frame_min": [
-        -1,
-        -6,
-        -1
-      ],
-      "frame_size": [
-        2,
-        6,
-        2
+        -3,
+        -10,
+        -3
       ]
     },
     "weapon": {
       "frame_min": [
-        -2,
-        -8,
-        -5
-      ],
-      "frame_size": [
-        5,
-        17,
-        6
+        -3,
+        -18,
+        -7
       ],
       "glow": true
     }
@@ -45,29 +30,32 @@
       "part": "arm",
       "pivot": [
         -4,
-        13,
+        21,
         0
       ],
       "role": "arm",
-      "phase": -1
+      "phase": 1,
+      "throws": false
     },
     "arm_r": {
       "part": "weapon",
       "pivot": [
         4,
-        13,
+        21,
         0
       ],
       "role": "arm",
-      "phase": 1
+      "phase": -1,
+      "throws": true
     }
   },
   "hand": [
-    3,
-    8,
-    -3
+    0,
+    4,
+    -4
   ],
-  "bob": 0.035,
-  "waddle": 0.15,
-  "hover": 0
+  "hand_limb": "arm_r",
+  "hover": 0,
+  "bob": 0.03,
+  "waddle": 0.12
 }

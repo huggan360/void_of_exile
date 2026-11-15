@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dgnwrkrgrlddm"
+path="res://.godot/imported/arm_r_glow.vox-725102454a7bd0458d5f6ace66d6553b.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_champion/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-725102454a7bd0458d5f6ace66d6553b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

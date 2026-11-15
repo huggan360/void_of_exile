@@ -1,73 +1,88 @@
 {
-  "voxel_size": 0.15,
+  "voxel_size": 0.1,
   "parts": {
     "body": {
       "frame_min": [
-        -5,
-        1,
+        -9,
+        8,
         -7
-      ],
-      "frame_size": [
-        10,
-        19,
-        10
       ],
       "glow": true
     },
+    "leg": {
+      "frame_min": [
+        -3,
+        -12,
+        -4
+      ]
+    },
     "arm": {
       "frame_min": [
-        -1,
-        -6,
-        -1
-      ],
-      "frame_size": [
-        2,
-        6,
-        2
+        -3,
+        -11,
+        -3
       ]
     },
     "weapon": {
       "frame_min": [
-        -2,
-        -8,
-        -5
-      ],
-      "frame_size": [
-        5,
-        17,
-        6
+        -3,
+        -20,
+        -4
       ],
       "glow": true
     }
   },
   "limbs": {
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -2,
+        11,
+        0
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        2,
+        11,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    },
     "arm_l": {
       "part": "arm",
       "pivot": [
-        -4,
-        13,
+        -6,
+        21,
         0
       ],
       "role": "arm",
-      "phase": -1
+      "phase": 1,
+      "throws": false
     },
     "arm_r": {
       "part": "weapon",
       "pivot": [
-        4,
-        13,
+        6,
+        21,
         0
       ],
       "role": "arm",
-      "phase": 1
+      "phase": -1,
+      "throws": true
     }
   },
   "hand": [
-    3,
-    8,
-    -3
+    0,
+    11,
+    -1
   ],
-  "bob": 0.035,
-  "waddle": 0.15,
-  "hover": 0
+  "hand_limb": "arm_r",
+  "hover": 0,
+  "bob": 0.0,
+  "waddle": 0.08
 }

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://esu17qlgo5pg"
+path="res://.godot/imported/knee.vox-70d0dd1fb5d829f8ab79601faac83784.tscn"
+
+[deps]
+
+source_file="res://creatures/castle_knight/knee.vox"
+dest_files=["res://.godot/imported/knee.vox-70d0dd1fb5d829f8ab79601faac83784.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

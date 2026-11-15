@@ -1,131 +1,98 @@
 {
-  "voxel_size": 0.035,
+  "voxel_size": 0.06,
   "parts": {
     "body": {
       "frame_min": [
-        -12,
-        5,
-        -25
-      ],
-      "frame_size": [
-        24,
-        21,
-        44
+        -9,
+        2,
+        -16
       ],
       "glow": true
     },
     "leg_l": {
       "frame_min": [
-        -11,
-        -13,
-        -3
-      ],
-      "frame_size": [
-        14,
-        16,
-        7
+        -7,
+        -8,
+        -2
       ]
     },
     "leg_r": {
       "frame_min": [
-        -3,
-        -13,
-        -3
-      ],
-      "frame_size": [
-        14,
-        16,
-        7
+        -2,
+        -8,
+        -2
       ]
     }
   },
   "limbs": {
     "leg_l_0": {
-      "part": "leg_r",
-      "pivot": [
-        9,
-        12,
-        -8
-      ],
-      "role": "leg",
-      "phase": -1,
-      "yaw": 0,
-      "axis": "y",
-      "amount": 0.5
-    },
-    "leg_r_0": {
       "part": "leg_l",
       "pivot": [
-        -9,
-        12,
-        -8
+        -5,
+        6,
+        -5
       ],
       "role": "leg",
-      "phase": 1,
-      "yaw": 0,
-      "axis": "y",
-      "amount": 0.5
+      "phase": -1
     },
     "leg_l_1": {
-      "part": "leg_r",
-      "pivot": [
-        9,
-        12,
-        2
-      ],
-      "role": "leg",
-      "phase": 1,
-      "yaw": 0,
-      "axis": "y",
-      "amount": 0.5
-    },
-    "leg_r_1": {
       "part": "leg_l",
       "pivot": [
-        -9,
-        12,
-        2
+        -5,
+        6,
+        1
       ],
       "role": "leg",
-      "phase": -1,
-      "yaw": 0,
-      "axis": "y",
-      "amount": 0.5
+      "phase": 1
     },
     "leg_l_2": {
-      "part": "leg_r",
-      "pivot": [
-        9,
-        12,
-        12
-      ],
-      "role": "leg",
-      "phase": -1,
-      "yaw": 0,
-      "axis": "y",
-      "amount": 0.5
-    },
-    "leg_r_2": {
       "part": "leg_l",
       "pivot": [
-        -9,
-        12,
-        12
+        -5,
+        6,
+        7
       ],
       "role": "leg",
-      "phase": 1,
-      "yaw": 0,
-      "axis": "y",
-      "amount": 0.5
+      "phase": -1
+    },
+    "leg_r_0": {
+      "part": "leg_r",
+      "pivot": [
+        5,
+        6,
+        -5
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r_1": {
+      "part": "leg_r",
+      "pivot": [
+        5,
+        6,
+        1
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "leg_r_2": {
+      "part": "leg_r",
+      "pivot": [
+        5,
+        6,
+        7
+      ],
+      "role": "leg",
+      "phase": 1
     }
   },
   "hand": [
     0,
-    15,
-    -20
+    16,
+    3
   ],
-  "waddle": 0,
+  "variants": {},
   "hover": 0,
   "bob": 0.07,
-  "variants": {}
+  "waddle": 0.0
 }

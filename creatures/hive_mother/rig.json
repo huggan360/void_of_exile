@@ -1,121 +1,71 @@
 {
-  "voxel_size": 0.017578125,
+  "voxel_size": 0.12,
   "parts": {
+    "body": {
+      "frame_min": [
+        -11,
+        -2,
+        -9
+      ],
+      "glow": true
+    },
     "head": {
       "frame_min": [
-        -56,
-        -32,
-        -48
-      ],
-      "frame_size": [
-        112,
-        104,
-        112
-      ],
-      "glow": true
-    },
-    "arm_r_0": {
-      "frame_min": [
-        0,
-        -32,
-        -32
-      ],
-      "frame_size": [
-        40,
-        48,
-        48
-      ],
-      "glow": true
-    },
-    "arm_l_1": {
-      "frame_min": [
-        -24,
-        -32,
-        -32
-      ],
-      "frame_size": [
-        40,
-        48,
-        48
-      ],
-      "glow": true
-    },
-    "arm_l_2": {
-      "frame_min": [
-        -24,
-        -32,
-        -32
-      ],
-      "frame_size": [
-        40,
-        48,
-        48
+        -5,
+        -3,
+        -6
       ],
       "glow": true
     },
     "jaw": {
       "frame_min": [
-        -16,
-        -16,
-        -24
-      ],
-      "frame_size": [
-        32,
-        16,
-        32
-      ]
-    },
-    "arm_r_1": {
-      "frame_min": [
-        0,
-        -32,
-        -32
-      ],
-      "frame_size": [
-        40,
-        48,
-        48
-      ],
-      "glow": true
-    },
-    "arm_r_2": {
-      "frame_min": [
-        0,
-        -32,
-        -32
-      ],
-      "frame_size": [
-        40,
-        48,
-        48
-      ],
-      "glow": true
-    },
-    "body": {
-      "frame_min": [
-        -96,
-        0,
-        -72
-      ],
-      "frame_size": [
-        192,
-        184,
-        176
+        -4,
+        -3,
+        -7
       ],
       "glow": true
     },
     "arm_l_0": {
       "frame_min": [
-        -24,
-        -32,
-        -32
-      ],
-      "frame_size": [
-        40,
-        48,
-        48
-      ],
-      "glow": true
+        -7,
+        -12,
+        -9
+      ]
+    },
+    "arm_l_1": {
+      "frame_min": [
+        -7,
+        -11,
+        -9
+      ]
+    },
+    "arm_l_2": {
+      "frame_min": [
+        -7,
+        -10,
+        -9
+      ]
+    },
+    "arm_r_0": {
+      "frame_min": [
+        -2,
+        -12,
+        -9
+      ]
+    },
+    "arm_r_1": {
+      "frame_min": [
+        -2,
+        -11,
+        -9
+      ]
+    },
+    "arm_r_2": {
+      "frame_min": [
+        -2,
+        -10,
+        -9
+      ]
     }
   },
   "limbs": {
@@ -123,112 +73,93 @@
       "part": "head",
       "pivot": [
         0,
-        184,
-        -16
+        28,
+        -2
       ],
       "role": "head",
-      "phase": 1,
-      "yaw": 0,
-      "throws": false
+      "phase": 1
     },
     "jaw": {
       "part": "jaw",
       "pivot": [
         0,
-        -16,
-        -16
+        -1,
+        -2
       ],
       "role": "jaw",
       "phase": 1,
-      "yaw": 0,
-      "throws": false,
       "parent_limb": "head"
     },
     "arm_l_0": {
       "part": "arm_l_0",
       "pivot": [
-        -48,
-        152,
-        -16
+        -5,
+        24,
+        -2
       ],
       "role": "arm",
-      "phase": -1,
-      "yaw": 0,
-      "throws": false
+      "phase": 1
     },
     "arm_l_1": {
       "part": "arm_l_1",
       "pivot": [
-        -48,
-        120,
-        -16
+        -5,
+        20,
+        -2
       ],
       "role": "arm",
-      "phase": -1,
-      "yaw": 0,
-      "throws": false
+      "phase": 1
     },
     "arm_l_2": {
       "part": "arm_l_2",
       "pivot": [
-        -48,
-        88,
-        -16
+        -5,
+        16,
+        -2
       ],
       "role": "arm",
-      "phase": -1,
-      "yaw": 0,
-      "throws": false
+      "phase": 1
     },
     "arm_r_0": {
       "part": "arm_r_0",
       "pivot": [
-        48,
-        152,
-        -16
+        5,
+        24,
+        -2
       ],
       "role": "arm",
-      "phase": 1,
-      "yaw": 0,
-      "throws": false
+      "phase": -1
     },
     "arm_r_1": {
       "part": "arm_r_1",
       "pivot": [
-        48,
-        120,
-        -16
+        5,
+        20,
+        -2
       ],
       "role": "arm",
-      "phase": 1,
-      "yaw": 0,
-      "throws": false
+      "phase": -1
     },
     "arm_r_2": {
       "part": "arm_r_2",
       "pivot": [
-        48,
-        88,
-        -16
+        5,
+        16,
+        -2
       ],
       "role": "arm",
-      "phase": 1,
-      "yaw": 0,
-      "throws": false
+      "phase": -1
     }
   },
-  "variants": {},
   "hand": [
     0,
-    128,
-    -56
+    25,
+    -8
   ],
+  "animation_style": "xeno_queen",
+  "variants": {},
+  "flap_rate": 2.5,
   "hover": 0,
   "bob": 0.012,
-  "waddle": 0.035,
-  "flap_rate": 2.5,
-  "pixel_art": true,
-  "material_jitter": 0.0,
-  "glow_strength": 2.8,
-  "animation_style": "xeno_queen"
+  "waddle": 0.035
 }

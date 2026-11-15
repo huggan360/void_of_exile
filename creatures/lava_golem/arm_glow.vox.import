@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b6on3kb88imjs"
+path="res://.godot/imported/arm_glow.vox-6553f875e987b7470676c0780aeecfa2.tscn"
+
+[deps]
+
+source_file="res://creatures/lava_golem/arm_glow.vox"
+dest_files=["res://.godot/imported/arm_glow.vox-6553f875e987b7470676c0780aeecfa2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

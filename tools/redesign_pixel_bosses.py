@@ -332,6 +332,7 @@ def wraith():
   p=(round(math.cos(a)*9),21+round(math.sin(a)*9),4);q=(round(math.cos(b)*9),21+round(math.sin(b)*9),4)
   line(halo,p,q,'accent');line(fractured,(p[0],p[1],5),(q[0],q[1],5),'glow_core' if i%3==0 else 'accent')
   line(unbound,p,q,'glow_core' if i%2==0 else 'light')
+ # The halo's pivot and spin axis are set afterwards by tools/remake_monsters.py (fix_hollow_crown_halo).
  parts.update(halo=halo,halo_fractured=fractured,halo_unbound=unbound);limbs['halo']=limb('halo',(0,0,0),'')
  save('hollow_crown','The Hollow Crown','void',parts,limbs,{'fractured_court':{'body':'body_fractured','halo':'halo_fractured'},'unbound':{'body':'body_unbound','halo':'halo_unbound'}},(0,17,-5),hover=.55)
 

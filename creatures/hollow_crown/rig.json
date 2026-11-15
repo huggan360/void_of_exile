@@ -66,9 +66,9 @@
     },
     "halo_fractured": {
       "frame_min": [
-        -72,
-        96,
-        32
+        -76,
+        -76,
+        -4
       ],
       "frame_size": [
         152,
@@ -79,9 +79,9 @@
     },
     "halo_unbound": {
       "frame_min": [
-        -72,
-        96,
-        32
+        -76,
+        -76,
+        -4
       ],
       "frame_size": [
         152,
@@ -92,9 +92,9 @@
     },
     "halo": {
       "frame_min": [
-        -72,
-        96,
-        32
+        -76,
+        -76,
+        -4
       ],
       "frame_size": [
         152,
@@ -131,13 +131,14 @@
     "halo": {
       "part": "halo",
       "pivot": [
-        0,
-        0,
-        0
+        4,
+        172,
+        36
       ],
       "role": "",
       "phase": 1,
-      "yaw": 0
+      "yaw": 0,
+      "axis": "z"
     }
   },
   "variants": {

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dmc14f7gr4iet"
+path="res://.godot/imported/model.vox-4b11c4923dd3c75e0910ff47de0eb10b.tscn"
+
+[deps]
+
+source_file="res://creatures/lava_golem/model.vox"
+dest_files=["res://.godot/imported/model.vox-4b11c4923dd3c75e0910ff47de0eb10b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

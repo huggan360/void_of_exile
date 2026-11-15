@@ -716,7 +716,9 @@ func _animate_wraith(delta: float) -> void:
 		if m.role=="arm":
 			targets[node] = Vector3(raise,m.yaw,side*spread)
 		elif m.role=="":
-			node.rotation.y = m.yaw+_halo_angle
+			# A ring behind the head (axis "z") turns like a wheel on its own centre.
+			if m.axis=="z": node.rotation = Vector3(0.0,m.yaw,_halo_angle)
+			else: node.rotation.y = m.yaw+_halo_angle
 	_settle(delta,pose=="implode",Vector3(-lean,0.0,0.0),sink,0.9,targets)
 
 
