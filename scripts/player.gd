@@ -36,6 +36,9 @@ const GRAVITY := 30.0
 const TURN_SPEED := 10.0
 const STEP_HEIGHT := 1.05  # climbs single 1 m blocks, walls of 2+ still block
 const STEP_SMOOTHING := 12.0  # how fast the model catches up after a step
+## The model follows the body over steps on a soft spring (its stiffness):
+## it eases into and out of each bump instead of popping.
+const STEP_SPRING := 15.0
 const STEP_TRY := 0.15  # a step lifts in these increments, only as high as the ledge
 
 const CAMERA_PITCH := deg_to_rad(72.0)
@@ -150,6 +153,7 @@ var last_hit_by := ""
 var _zoom_target := camera_distance
 var _camera_reach := camera_distance  # actual distance after avoiding terrain
 var _visual_offset := 0.0
+var _visual_speed := 0.0
 var _camera_y := 0.0
 var _camera_y_speed := 0.0
 var _cooldown := 0.0
@@ -317,6 +321,7 @@ func place(pos: Vector3, p_terrain: VoxelTerrain, p_walkable := Callable()) -> v
 	walkable = p_walkable
 	frozen = true
 	_visual_offset = 0.0
+	_visual_speed = 0.0
 	_camera_y = pos.y + 1.0
 	_camera_y_speed = 0.0
 
@@ -400,15 +405,25 @@ func _physics_process(delta: float) -> void:
 		_try_step_up(dir)
 	if FrameTrace.enabled: FrameTrace.record("player/slide", t_slide)
 
-	# Steps move the body instantly; let the model glide to the new height.
-	var dy := global_position.y - prev_y
-	if absf(dy) > 0.12:
-		_visual_offset -= dy
-	_visual_offset = lerpf(_visual_offset, 0.0, minf(1.0, delta * STEP_SMOOTHING))
-	model.position.y = _visual_offset
+	glide_steps(global_position.y - prev_y, delta)
 
 	_update_camera(delta)
 	_update_combat(delta,dir,speed)
+
+
+## Steps, floor snaps and bumps move the body in jumps (`rise` this frame);
+## the model, and the camera with it, glides to the new height on a
+## critically damped spring: no pop at the start, no overshoot at the end.
+func glide_steps(rise: float, delta: float) -> void:
+	if absf(rise) > 0.12: _visual_offset -= rise
+	var left := delta
+	while left > 0.0:  # small steps keep the spring steady at low frame rates
+		var dt := minf(left, 1.0 / 120.0)
+		_visual_speed += (-STEP_SPRING * STEP_SPRING * _visual_offset - 2.0 * STEP_SPRING * _visual_speed) * dt
+		_visual_offset += _visual_speed * dt
+		left -= dt
+	_visual_offset = clampf(_visual_offset, -1.5, 1.5)
+	model.position.y = _visual_offset
 
 
 func _update_combat(delta: float,dir: Vector3,speed: float) -> void:

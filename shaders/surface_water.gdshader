@@ -6,8 +6,8 @@ shader_type spatial;
 // is a flow map: two layers of normal maps scrolled along the current (vertex
 // colour: rg = direction, b = speed) in two phases that cross-fade with a
 // noise offset, so a river keeps running without its waves stretching or
-// pulsing. Foam streaks ride the current, thicken on fast water and gather
-// softly along the banks. Lakes and the sea (no current) drift with the wind.
+// pulsing. Foam streaks ride the current and thicken on fast water; a thin
+// soft line marks the banks. Lakes and the sea (no current) drift with the wind.
 render_mode cull_disabled, shadows_disabled;
 
 uniform vec3 shallow_color : source_color = vec3(0.26, 0.62, 0.6);
@@ -15,7 +15,7 @@ uniform vec3 deep_color : source_color = vec3(0.03, 0.18, 0.28);
 uniform vec3 foam_color : source_color = vec3(0.92, 0.96, 1.0);
 uniform float clarity = 2.0;      // meters until the water looks deep
 uniform float refraction = 0.04;
-uniform float bank_foam = 0.35;   // meters of water depth where bank foam shows
+uniform float bank_foam = 0.1;    // meters of water depth where the thin bank line shows
 uniform bool use_flow = true;
 uniform vec2 wind = vec2(0.22, 0.1);
 uniform float scale = 0.18;       // ripple tiles per meter
@@ -76,12 +76,15 @@ void fragment() {
 	float streaks = mix(texture(foam_noise, uv * 1.6 + shift1 * 1.6 + vec2(0.21, 0.63)).r,
 			texture(foam_noise, uv * 1.6 + shift0 * 1.6).r, w0);
 	float along = smoothstep(0.62 - speed * 0.22, 0.85, streaks) * k * (0.25 + speed * 0.75);
-	float edge = (1.0 - smoothstep(0.0, bank_foam, thick)) * smoothstep(0.35, 0.7, streaks + 0.15);
-	float foam = clamp(along * 0.8 + edge * 0.7, 0.0, 0.85);
-	color = mix(color, foam_color, foam);
+	// Only a thin, soft line right where the water meets the bank: stones and
+	// shelves just under the surface stay water, not white blotches.
+	float edge = (1.0 - smoothstep(0.0, bank_foam, thick)) * smoothstep(0.45, 0.8, streaks + 0.1) * 0.35;
+	float foam = clamp(along * 0.8 + edge, 0.0, 0.85);
+	color = mix(color, mix(foam_color, shallow_color, 0.25), foam);
 
 	ALBEDO = color;
 	ROUGHNESS = mix(0.03, 0.3, foam);
 	SPECULAR = 0.6;
-	ALPHA = clamp(smoothstep(0.0, 0.06, thick) + foam, 0.0, 1.0);  // soft edges where it meets the shore
+	// Soft edges where it meets the shore; the current's streaks show on any water.
+	ALPHA = clamp(smoothstep(0.0, 0.06, thick) + along * 0.6, 0.0, 1.0);
 }

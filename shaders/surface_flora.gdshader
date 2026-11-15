@@ -3,7 +3,8 @@ shader_type spatial;
 // plants that sway in the wind and lean away from whoever walks through them
 // (`pushers`: world x, y, z and radius of the player, other players and
 // enemies near the camera, set every frame on the client). They fade out by
-// dithering toward fade_end so a chunk never pops.
+// dithering toward fade_end so a chunk never pops; their shadows don't dither
+// (a dithered shadow map is patchy) and end at fade_end.
 render_mode cull_disabled, world_vertex_coords;
 
 const int MAX_PUSHERS = 24;
@@ -14,6 +15,7 @@ instance uniform float fade_end = 45.0;
 instance uniform float glow = 0.0;
 
 varying vec3 tint;
+varying float view_distance;  // from the player's camera, also in the shadow pass
 
 float hash3(vec3 p) {
 	p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
@@ -55,6 +57,9 @@ void vertex() {
 		}
 	}
 	VERTEX += offset;
+	// The main camera even when drawing the sun's shadow map (where VERTEX in
+	// fragment() is the shadow camera's, far away).
+	view_distance = distance(VERTEX, MAIN_CAM_INV_VIEW_MATRIX[3].xyz);
 }
 
 // Overhead see-through: a soft round window around the character (GroundView
@@ -84,10 +89,11 @@ void cut_see_through(vec2 frag, float view_depth) {
 
 void fragment() {
 	if (!IN_SHADOW_PASS) cut_see_through(FRAGCOORD.xy, -VERTEX.z);
-	// Dither away near the end of the draw distance.
-	float dist = length(VERTEX);
-	float fade = clamp((fade_end - dist) / (fade_end * 0.22), 0.0, 1.0);
-	if (hash3(vec3(floor(FRAGCOORD.xy), 1.7)) > fade) discard;
+	// Dither away near the end of the draw distance (the shadow just ends).
+	float fade = clamp((fade_end - view_distance) / (fade_end * 0.22), 0.0, 1.0);
+	if (IN_SHADOW_PASS) {
+		if (fade <= 0.0) discard;
+	} else if (hash3(vec3(floor(FRAGCOORD.xy), 1.7)) > fade) discard;
 	vec3 color = srgb_to_linear(COLOR.rgb) * (tint == vec3(0.0) ? vec3(1.0) : tint);
 	ALBEDO = glow > 0.0 ? color * 0.45 : color;
 	EMISSION = color * glow;

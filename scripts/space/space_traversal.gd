@@ -766,25 +766,28 @@ func physics_step(delta: float) -> void:
 	var dir := player.drunk_sway((player.global_basis*Basis(Vector3.UP, player.camera_yaw)*Vector3(input.x, 0, input.y)).slide(up).normalized()*input.length(), up)
 	var speed := Player.BASE_SPEED*player.stats.move_speed_multiplier()*(Player.SHIELD_MOVE_SPEED if player.shield.active else Player.CHARGE_MOVE_SPEED if player._charging else 1.0)
 	var fall := minf(0.0, player.velocity.dot(up))-Player.GRAVITY*delta
-	# On the ground, walk along it: up and down hills the body keeps its feet
+	# A planet's open ground isn't a collider for us (PlanetTerrain): the feet
+	# follow its height function, smooth up and down every slope. Floors of
+	# fortresses, pads and towns are colliders as before.
+	var land := _walks_land(state)
+	var on_land := land and not player.is_on_floor() and _above_land(player.global_position)<LAND_SNAP and player.velocity.dot(up)<=0.5
+	# On a collider floor, walk along it: up and down the body keeps its feet
 	# instead of stepping off the slope every frame and dropping back.
 	var ground_up := player.get_floor_normal() if player.is_on_floor() else up
 	if player.is_on_floor() and ground_up.dot(up)>0.5 and not dir.is_zero_approx():
 		dir = dir.slide(ground_up).normalized()*dir.length()
-	player.velocity = dir*speed+player._knock.slide(up)+(-ground_up*1.5 if player.is_on_floor() else up*fall)
+	player.velocity = dir*speed+player._knock.slide(up)+(-ground_up*1.5 if player.is_on_floor() else Vector3.ZERO if on_land else up*fall)
 	player._knock = player._knock.lerp(Vector3.ZERO, 1.0-exp(-Player.KNOCKBACK_DRAG*delta))
 	var before := player.global_position
 	player.move_and_slide()
+	if land and not player.is_on_floor(): _follow_land(before, on_land)
 	# Step up only when a ledge really stopped us (not on every steep bit of hill).
 	var made := (player.global_position-before).slide(up).length()
-	if not dir.is_zero_approx() and player.is_on_floor() and player.is_on_wall() and made<speed*delta*0.5:
+	if not dir.is_zero_approx() and (player.is_on_floor() or on_land) and player.is_on_wall() and made<speed*delta*0.5:
 		player._try_step_up(dir, up, STEP_UP)
 	# Steps, floor snaps and little catches on hilly ground move the body in
 	# jumps; the model (and the camera with it) glide to the new height.
-	var rise := (player.global_position-before).dot(up)
-	if absf(rise)>0.12: player._visual_offset -= rise
-	player._visual_offset = clampf(lerpf(player._visual_offset, 0.0, minf(1.0, delta*Player.STEP_SMOOTHING)), -1.5, 1.5)
-	player.model.position.y = player._visual_offset
+	player.glide_steps((player.global_position-before).dot(up), delta)
 	var query := PhysicsRayQueryParameters3D.create(player.global_position+up*0.5, player.global_position-up*1.2, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 	query.exclude = [player.get_rid()]
 	var ground := player.get_world_3d().direct_space_state.intersect_ray(query)
@@ -801,6 +804,36 @@ func physics_step(delta: float) -> void:
 			player.facing = atan2(-local_dir.x, -local_dir.z)
 		player.model.rotation.y = player.facing
 		player.model.animate(dir.length(), delta)
+
+## Feet this close above a planet's ground (m) stay on it, down any walkable slope.
+const LAND_SNAP := 0.45
+## Steeper ground than this (rise over run, 60 degrees) can't be walked up.
+const LAND_MAX_SLOPE := 1.73
+
+## On foot on a planet's own ground (not the Lantern City's sphere, a deck or a ship).
+func _walks_land(state: Dictionary) -> bool:
+	var zone := str(state.zone)
+	return zone.begins_with("planet:") and zone!="planet:"+CityLayout.ID
+
+## Height (m) of a point above the planet's ground under it.
+func _above_land(at: Vector3) -> float:
+	var frame := world.surface_frame(at)
+	return (at-frame.origin).dot(frame.basis.y)
+
+## After the move: below the ground, or standing on it, the feet go to its
+## surface; a slope too steep to climb sends you back where you were.
+func _follow_land(before: Vector3, was_on_land: bool) -> void:
+	var frame := world.surface_frame(player.global_position)
+	var above := (player.global_position-frame.origin).dot(frame.basis.y)
+	if above>=0.0 and not (was_on_land and above<LAND_SNAP): return
+	var landed := player.global_position-frame.basis.y*above
+	var run := (landed-before).slide(frame.basis.y).length()
+	var climb := (landed-before).dot(frame.basis.y)
+	if was_on_land and run>0.001 and climb>run*LAND_MAX_SLOPE:
+		player.global_position = before
+		return
+	player.global_position = landed
+	player.velocity = player.velocity.slide(frame.basis.y)
 
 # --- Outside on the jetpack ------------------------------------------------------------
 
@@ -1145,6 +1178,7 @@ func _shake_camera() -> void:
 func update_camera(delta: float) -> void:
 	if seat!="" or city_seat!="" or spacewalk or _descent or cinematic or player.frozen:
 		player._visual_offset = 0.0  # the walking glide only (physics_step)
+		player._visual_speed = 0.0
 		player.model.position.y = 0.0
 	var in_chair := seat.begins_with("chair") or city_seat!="" or _lounge_seat!=""
 	var mode := view_mode()

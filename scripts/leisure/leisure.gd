@@ -335,6 +335,7 @@ func apply_seat(actor: Player, delta: float) -> bool:
 	actor.global_transform = Transform3D(spec.get("basis", Basis.IDENTITY), spec.pos)
 	actor.velocity = Vector3.ZERO
 	actor._visual_offset = 0.0
+	actor._visual_speed = 0.0
 	actor.model.position.y = 0.0
 	actor.up_direction = actor.global_basis.y
 	actor.facing = float(spec.get("yaw", 0.0))

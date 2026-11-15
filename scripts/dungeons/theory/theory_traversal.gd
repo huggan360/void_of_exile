@@ -196,9 +196,7 @@ func physics_step(delta: float) -> void:
 		player.global_position = _checkpoint if _checkpoint.distance_to(recovery)<2.0 else recovery
 		player.velocity = Vector3.ZERO
 	var step := (player.global_position-previous).dot(up)
-	if absf(step)>0.22: player._visual_offset -= step
-	player._visual_offset = lerpf(player._visual_offset,0.0,1.0-exp(-delta*12.0))
-	player.model.position.y = player._visual_offset
+	player.glide_steps(step if absf(step)>0.22 else 0.0, delta)
 	_walk_speed = (player.global_position-previous).slide(up).length()/maxf(delta,0.001) if player.is_on_floor() and dir.length_squared()>0.01 and not player.controls_locked() and not player.interacting() else 0.0
 	update_camera(delta)
 	player._update_combat(delta,dir,speed)

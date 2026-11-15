@@ -163,9 +163,7 @@ func _show(c: Chunk, on: bool) -> void:
 		c.node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(c.node)
 	if c.node: c.node.visible = on
-	if not on and c.body:
-		c.body.queue_free()
-		c.body = null
+	if not on and c.body: _free_body(c)
 
 func _collide(c: Chunk, body: Vector3) -> void:
 	if planet.get("city", false): return
@@ -181,17 +179,25 @@ func _collide(c: Chunk, body: Vector3) -> void:
 		collision.shape = shape
 		c.body.add_child(collision)
 		add_child(c.body)
+		# The local player walks on the ground's own height function instead
+		# (SpaceTraversal): triangle edges here would snag its feet on slopes.
+		# Enemies, rays and everything else still use these colliders.
+		if focus is PhysicsBody3D: (focus as PhysicsBody3D).add_collision_exception_with(c.body)
 	elif not near and c.body:
-		c.body.queue_free()
-		c.body = null
+		_free_body(c)
+
+func _free_body(c: Chunk) -> void:
+	if c.body == null: return
+	if is_instance_valid(focus) and focus is PhysicsBody3D: (focus as PhysicsBody3D).remove_collision_exception_with(c.body)
+	c.body.queue_free()
+	c.body = null
 
 func _drop(c: Chunk) -> void:
 	for child: Chunk in c.children: _drop(child)
 	c.children.clear()
 	if c.node: c.node.queue_free()
-	if c.body: c.body.queue_free()
+	_free_body(c)
 	c.node = null
-	c.body = null
 
 func _request(c: Chunk) -> void:
 	if c.task>=0 or not c.arrays.is_empty() or _active.size()>=MAX_TASKS: return
