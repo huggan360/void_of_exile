@@ -10,6 +10,7 @@ const CACHE_VERSION := 1
 const CACHE_DIR := "user://cache/vox/"
 static var _material: ShaderMaterial
 static var _glow_material: ShaderMaterial
+static var _shot_materials: Array[ShaderMaterial] = [null, null]
 static var _memory := {}
 static var _lock := Mutex.new()
 
@@ -78,6 +79,16 @@ static func material() -> ShaderMaterial:
 		_material = ShaderMaterial.new()
 		_material.shader = preload("res://shaders/voxel_model.gdshader")
 	return _material
+
+
+## material() / glow_material() for projectiles: never cut by the see-through window.
+static func shot_material(glow := false) -> ShaderMaterial:
+	var index := 1 if glow else 0
+	if _shot_materials[index] == null:
+		var shot := (glow_material() if glow else material()).duplicate() as ShaderMaterial
+		shot.set_shader_parameter("see_through_cut", false)
+		_shot_materials[index] = shot
+	return _shot_materials[index]
 
 
 ## Like material(), but the colors glow (crystals, runes, glowing mushrooms).

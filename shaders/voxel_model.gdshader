@@ -41,6 +41,8 @@ void vertex() {
 // view depth). What stands in front of the character there dissolves with
 // a fine dither toward the rim; shadows are untouched.
 global uniform vec4 see_through;
+// Off for projectiles: a shot must never vanish in the window.
+uniform bool see_through_cut = true;
 
 // Interleaved gradient noise: a fine, even per-pixel dither.
 float dither(vec2 p) {
@@ -62,7 +64,7 @@ void cut_see_through(vec2 frag, float view_depth) {
 }
 
 void fragment() {
-	if (!IN_SHADOW_PASS) cut_see_through(FRAGCOORD.xy, -VERTEX.z);
+	if (!IN_SHADOW_PASS && see_through_cut) cut_see_through(FRAGCOORD.xy, -VERTEX.z);
 	// Models are built in voxel units, so flooring gives the voxel this pixel belongs to.
 	vec3 voxel = floor(local_pos - local_normal * 0.5);
 	float h = hash3(voxel) - 0.5;

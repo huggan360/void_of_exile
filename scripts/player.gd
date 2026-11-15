@@ -40,6 +40,11 @@ const STEP_SMOOTHING := 12.0  # how fast the model catches up after a step
 ## it eases into and out of each bump instead of popping.
 const STEP_SPRING := 15.0
 const STEP_TRY := 0.15  # a step lifts in these increments, only as high as the ledge
+## On the Surface's 0.25 m voxels the body climbs in hops; standing on that
+## terrain the model (and the camera with it) follows the ground smoothed over
+## this many metres instead, so a slope reads as a slope.
+const SMOOTH_GROUND := 1.0
+const TERRAIN_GRACE := 0.25  # seconds the smoothing holds through a hop off a ledge
 
 const CAMERA_PITCH := deg_to_rad(72.0)
 const CAMERA_FOV := 35.0
@@ -92,6 +97,8 @@ var frozen := true
 var walkable := Callable()
 ## func(x, z) -> ground surface height; arrows aim this high plus SHOT_HEIGHT.
 var ground_height := Callable()
+var smooth_ground := false  # the world's ground_height is its walkable terrain (the Surface)
+var _on_terrain := 0.0
 ## func(position) -> true when standing there burns (lava pits).
 var hazard := Callable()
 ## func(position) -> true on a road or street (faster walking).
@@ -322,6 +329,7 @@ func place(pos: Vector3, p_terrain: VoxelTerrain, p_walkable := Callable()) -> v
 	frozen = true
 	_visual_offset = 0.0
 	_visual_speed = 0.0
+	_on_terrain = 0.0
 	_camera_y = pos.y + 1.0
 	_camera_y_speed = 0.0
 
@@ -400,12 +408,20 @@ func _physics_process(delta: float) -> void:
 
 	var prev_y := global_position.y
 	var t_slide := Time.get_ticks_usec() if FrameTrace.enabled else 0
+	var before := global_position
 	move_and_slide()
-	if dir != Vector3.ZERO and is_on_floor() and is_on_wall():
-		_try_step_up(dir)
+	if dir != Vector3.ZERO and is_on_floor() and is_on_wall() and _try_step_up(dir):
+		# Walk on with what the ledge cut short this frame, so climbing never stalls.
+		var flat := Vector2(velocity.x, velocity.z).length() * delta
+		var left := 1.0 - Vector2(global_position.x - before.x, global_position.z - before.z).length() / maxf(flat, 0.0001)
+		if left > 0.05:
+			var kept := velocity
+			velocity = Vector3(velocity.x * left, 0.0, velocity.z * left)
+			move_and_slide()
+			velocity = kept
 	if FrameTrace.enabled: FrameTrace.record("player/slide", t_slide)
 
-	glide_steps(global_position.y - prev_y, delta)
+	glide_steps(global_position.y - prev_y, delta, _terrain_footing(delta))
 
 	_update_camera(delta)
 	_update_combat(delta,dir,speed)
@@ -414,16 +430,52 @@ func _physics_process(delta: float) -> void:
 ## Steps, floor snaps and bumps move the body in jumps (`rise` this frame);
 ## the model, and the camera with it, glides to the new height on a
 ## critically damped spring: no pop at the start, no overshoot at the end.
-func glide_steps(rise: float, delta: float) -> void:
-	if absf(rise) > 0.12: _visual_offset -= rise
+## With a `ground` height (see _terrain_footing) every rise is a hop and the
+## model springs toward that ground instead of toward the body.
+func glide_steps(rise: float, delta: float, ground := NAN) -> void:
+	var target := 0.0
+	if not is_nan(ground):
+		_visual_offset -= rise
+		target = ground - global_position.y
+	elif absf(rise) > 0.12: _visual_offset -= rise
 	var left := delta
 	while left > 0.0:  # small steps keep the spring steady at low frame rates
 		var dt := minf(left, 1.0 / 120.0)
-		_visual_speed += (-STEP_SPRING * STEP_SPRING * _visual_offset - 2.0 * STEP_SPRING * _visual_speed) * dt
+		_visual_speed += (-STEP_SPRING * STEP_SPRING * (_visual_offset - target) - 2.0 * STEP_SPRING * _visual_speed) * dt
 		_visual_offset += _visual_speed * dt
 		left -= dt
 	_visual_offset = clampf(_visual_offset, -1.5, 1.5)
 	model.position.y = _visual_offset
+
+
+## The smoothed Surface ground under the body while it stands on the terrain
+## itself (not a rock, a house or a ship's deck), else NAN.
+func _terrain_footing(delta: float) -> float:
+	if not smooth_ground or not ground_height.is_valid(): return NAN
+	if is_on_floor(): _on_terrain = TERRAIN_GRACE if _standing_on_terrain() else 0.0
+	else: _on_terrain -= delta
+	if _on_terrain <= 0.0: return NAN
+	var ground := _smooth_ground(global_position.x, global_position.z)
+	return ground if absf(ground - global_position.y) < STEP_HEIGHT else NAN
+
+
+func _standing_on_terrain() -> bool:
+	var ray := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.4, global_position + Vector3.DOWN * 0.5, TERRAIN_LAYER | OBSTACLE_LAYER, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
+	return not hit.is_empty() and PhysicsServer3D.body_get_collision_layer(hit.rid) & TERRAIN_LAYER != 0
+
+
+## Column tops sampled every SMOOTH_GROUND m (at column centres) and blended.
+func _smooth_ground(x: float, z: float) -> float:
+	var gx := (x - 0.125) / SMOOTH_GROUND
+	var gz := (z - 0.125) / SMOOTH_GROUND
+	var x0 := floorf(gx)
+	var z0 := floorf(gz)
+	var ax := x0 * SMOOTH_GROUND + 0.125
+	var az := z0 * SMOOTH_GROUND + 0.125
+	var near := lerpf(float(ground_height.call(ax, az)), float(ground_height.call(ax + SMOOTH_GROUND, az)), gx - x0)
+	var far := lerpf(float(ground_height.call(ax, az + SMOOTH_GROUND)), float(ground_height.call(ax + SMOOTH_GROUND, az + SMOOTH_GROUND)), gx - x0)
+	return lerpf(near, far, gz - z0)
 
 
 func _update_combat(delta: float,dir: Vector3,speed: float) -> void:
@@ -796,17 +848,17 @@ func clear_spawn(place: GameWorld) -> void:
 ## local up) if there's room above it, only as high as the ledge needs (the
 ## Surface's 0.25 m voxels are small: a full lift there bounced the character
 ## up and down while running over them).
-func _try_step_up(dir: Vector3, normal := Vector3.UP, height := STEP_HEIGHT) -> void:
+func _try_step_up(dir: Vector3, normal := Vector3.UP, height := STEP_HEIGHT) -> bool:
 	var lift := STEP_TRY
 	while lift < height + 0.001:
 		var up := normal*minf(lift, height)
 		if test_move(global_transform, up):
-			return  # no headroom
+			return false  # no headroom
 		if not test_move(global_transform.translated(up), dir.normalized() * 0.3):
 			global_position += up
-			return
+			return true
 		lift += STEP_TRY
-	# The wall is taller than one block.
+	return false  # the wall is taller than one block
 
 
 func _update_zoom(delta: float) -> void:

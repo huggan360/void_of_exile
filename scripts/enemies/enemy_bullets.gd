@@ -820,6 +820,7 @@ func _voxel_projectile(attack: Dictionary) -> Mesh:
 	material.shader = preload("res://shaders/voxel_model.gdshader")
 	material.set_shader_parameter("glow_strength",float(attack.get("projectile_glow",0.6 if attack.get("style", "pellet") == "pellet" else 1.5)))
 	if attack.get("pixel_projectile",false): material.set_shader_parameter("jitter",0.0)
+	material.set_shader_parameter("see_through_cut", false)
 	mesh.surface_set_material(0, material)
 	_meshes[key] = mesh
 	return mesh

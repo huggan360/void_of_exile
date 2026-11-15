@@ -49,7 +49,7 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 			continue
 		var mi := MeshInstance3D.new()
 		mi.mesh = meshes[i]
-		mi.material_override = VoxModel.glow_material() if i == 1 else VoxModel.material()
+		mi.material_override = VoxModel.shot_material(i == 1)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		node.add_child(mi)
 	node.scale = Vector3.ONE * p.get("size", 1.0) * mods.get("size", 1.0)

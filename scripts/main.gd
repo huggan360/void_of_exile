@@ -622,6 +622,7 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 	loot_bags.show_realm(world.realm_id, world)
 	xp_orbs.realm_id = world.realm_id
 	player.ground_height = world.ground_height
+	player.smooth_ground = world is IslandWorld
 	player.hazard = world.is_hazard
 	player.road = world.is_road
 	xp_orbs.ground_height = world.ground_height
