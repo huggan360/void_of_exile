@@ -295,7 +295,7 @@ static func _fire(parent: Node, p: GPUParticles3D, pos: Vector3, basis := Basis(
 	parent.add_child(p)
 	p.global_transform = Transform3D(basis, pos)
 	p.emitting = true
-	p.finished.connect(p.queue_free)
+	p.get_tree().create_timer(p.lifetime + 0.3).timeout.connect(p.queue_free)  # `finished` never comes off screen
 
 
 static func _can_spawn(parent: Node) -> bool:

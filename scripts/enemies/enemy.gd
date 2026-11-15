@@ -378,10 +378,13 @@ func _physics_step(delta: float) -> void:
 		velocity.y = 0.0 if is_on_floor() else velocity.y - GRAVITY * delta
 		var prev_y := global_position.y
 		var t_slide := Time.get_ticks_usec() if FrameTrace.enabled else 0
-		move_and_slide()
+		var held: bool = director.world.has_method("hold_enemy")
+		# Held to the ground and standing still: there is nothing for the physics to slide.
+		if not (held and velocity.x == 0.0 and velocity.z == 0.0):
+			move_and_slide()
 		if FrameTrace.enabled: FrameTrace.record("enemies/slide", t_slide)
 		# Worlds without walkable collision everywhere (planets on the server) hold their enemies to the ground.
-		if director.world.has_method("hold_enemy"): director.world.hold_enemy(self)
+		if held: director.world.hold_enemy(self)
 		if move != Vector3.ZERO and is_on_floor() and is_on_wall():
 			_try_step_up(move)
 		dy = global_position.y - prev_y

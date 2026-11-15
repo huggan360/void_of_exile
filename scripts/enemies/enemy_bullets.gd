@@ -41,6 +41,9 @@ const PLAYER_HEIGHT := 1.7
 const SETTLE_DISTANCE := 3.0  # shots from above reach shot height by here
 const MAGIC_HALO := 0.5  # radius of the warped space around magic shots (x size)
 const RETURN_REHIT := 0.6
+## Shots in flight that may carry a warp halo / a voxel trail (the rest fly bare).
+const MAX_HALOS := 18
+const MAX_TRAILS := 36
 
 ## Players that can be hit: the local player. Online every client flies the
 ## enemies' shots itself and only checks its own player; the server sends
@@ -94,11 +97,17 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 	if attack.get("magic",false) or attack.get("style","")=="fireball": GameAudio.projectile_flight(mi)
 	mi.look_at(origin + direction, Vector3.FORWARD if absf(direction.y) > 0.99 else Vector3.UP)
 	var magic: bool = attack.get("magic", false)
-	if magic:
+	# In a crowded volley only so many shots get their own warp halo and voxel
+	# trail: each is a particle system or a screen-reading pass of its own.
+	var dressed := _dressed_shots()
+	if magic and dressed.x < MAX_HALOS:
 		mi.add_child(_halo(attack.get("size", 1.0), attack.get("color", Color.WHITE)))
+		mi.set_meta("halo", true)
 	var fireball: bool = attack.get("style", "") == "fireball"
 	var trail: GPUParticles3D = null
-	if attack.get("pixel_projectile",false):
+	if attack.get("pixel_projectile",false) and dressed.y >= MAX_TRAILS:
+		pass
+	elif attack.get("pixel_projectile",false):
 		trail = _pixel_trail(attack)
 		mi.add_child(trail)
 	elif fireball:
@@ -135,6 +144,15 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 		returns = attack.get("returns", 0.0), turn = attack.get("turn", 0.0), returned = false, hit_at = {}, contract = -1.0,
 		blocked = false, hit_object = false, clashed_waves = [], slope = _slope(origin, direction, attack, shot_y),
 	})
+
+
+## How many shots in flight have a halo (x) and a trail (y).
+func _dressed_shots() -> Vector2i:
+	var out := Vector2i.ZERO
+	for s in _shots:
+		if s.trail != null: out.y += 1
+		if (s.node as Node).has_meta("halo"): out.x += 1
+	return out
 
 
 ## Colored, low-resolution shot silhouettes for all five live bosses.
@@ -708,7 +726,9 @@ func _burn_out(s: Dictionary) -> void:
 	add_child(burst)
 	burst.global_position = pos
 	burst.emitting = true
-	burst.finished.connect(burst.queue_free)
+	# A timer, not `finished`: a one-shot that never draws (off screen, a
+	# headless client) never finishes, and the bursts piled up by the hundred.
+	get_tree().create_timer(burst.lifetime + 0.3).timeout.connect(burst.queue_free)
 
 
 ## A small ball of warped space around a magic shot (the same look as the warp shield).

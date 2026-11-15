@@ -195,6 +195,15 @@ func ground_height(_x: float, _z: float) -> float:
 func is_walkable(pos: Vector3) -> bool:
 	return layout.open(floori(pos.x), floori(pos.z))
 
+## Enemies walk the flat floor without terrain collision (the layout grid in
+## is_walkable already keeps them out of the walls): sliding a capsule over the
+## fine 0.25 m voxels cost most of a frame with a room or two awake.
+func hold_enemy(enemy: CharacterBody3D) -> void:
+	if enemy.collision_mask & Player.TERRAIN_LAYER:
+		enemy.collision_mask &= ~Player.TERRAIN_LAYER
+	enemy.global_position.y = 1.0
+	enemy.velocity.y = 0.0
+
 ## Lava cracks apply Burning through the authoritative environment update.
 func is_hazard(pos: Vector3) -> bool:
 	return layout.is_crack(floori(pos.x), floori(pos.z))

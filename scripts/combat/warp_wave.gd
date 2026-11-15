@@ -140,4 +140,4 @@ func _spark(pos: Vector3, spark_color: Color) -> void:
 	get_parent().add_child(p)
 	p.global_position = pos
 	p.emitting = true
-	p.finished.connect(p.queue_free)
+	p.get_tree().create_timer(p.lifetime + 0.3).timeout.connect(p.queue_free)  # `finished` never comes off screen
