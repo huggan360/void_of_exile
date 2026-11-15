@@ -53,10 +53,11 @@ func _call_once(method: String, path: String, body: Dictionary) -> Dictionary:
 	var result: Array = await http.request_completed
 	http.queue_free()
 	var status: int = result[1]
-	var parsed: Variant = JSON.parse_string((result[3] as PackedByteArray).get_string_from_utf8())
-	var data: Dictionary = parsed if parsed is Dictionary else {}
 	if result[0] != HTTPRequest.RESULT_SUCCESS:
 		return {ok = false, status = 0, data = {}, error = "Couldn't reach the account server."}
+	# Quietly: an error page or an empty reply isn't JSON (no engine error spam).
+	var json := JSON.new()
+	var data: Dictionary = json.data if json.parse((result[3] as PackedByteArray).get_string_from_utf8()) == OK and json.data is Dictionary else {}
 	if status < 200 or status >= 300:
 		var fallback := "The account server had a problem (%d). Please try again." % status if status >= 500 else "Account server error %d." % status
 		return {ok = false, status = status, data = data, error = str(data.get("error", fallback))}

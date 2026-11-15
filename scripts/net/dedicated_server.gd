@@ -103,7 +103,18 @@ func _process(delta: float) -> void:
 			get_tree().quit()
 
 
-## Whether the game that started us still runs (Godot's own check: Linux,
-## Windows and macOS alike).
+## The game beats here every few seconds while its singleplayer server runs
+## (Main._beat_singleplayer): "<game pid> <unix time>".
+const HEARTBEAT := "user://singleplayer/game_alive"
+const HEARTBEAT_STALE := 15.0  # seconds without a beat: the game is gone
+
+## Whether the game that started us still runs. OS.is_process_running only
+## knows our own children (Linux and Windows alike), never our parent: on
+## Linux /proc tells at once, elsewhere the game's heartbeat file does.
 func _parent_alive() -> bool:
-	return OS.is_process_running(_parent_pid)
+	if DirAccess.dir_exists_absolute("/proc/self"):
+		return DirAccess.dir_exists_absolute("/proc/%d" % _parent_pid)
+	var beat := FileAccess.get_file_as_string(HEARTBEAT).split(" ")
+	if beat.size() < 2 or int(beat[0]) != _parent_pid:
+		return Time.get_ticks_msec() < 60000  # starting up: the game beats soon
+	return Time.get_unix_time_from_system() - float(beat[1]) < HEARTBEAT_STALE

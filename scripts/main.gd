@@ -86,6 +86,7 @@ var _connecting := false
 var _join_token := 0
 var _join_singleplayer := false
 var _singleplayer_pid := 0
+var _beat_at := 0  # next singleplayer heartbeat (msec)
 var _death_record := {}
 
 var _args := {}
@@ -770,6 +771,7 @@ func _start_singleplayer() -> void:
 		args.append("--headless")
 	args.append_array(["--", "--dedicated", "--singleplayer", "--key=" + key,
 			"--port=%d" % port, "--parent=%d" % OS.get_process_id(), "--accounts=" + Account.url()])
+	_beat_singleplayer()
 	_singleplayer_pid = OS.create_process(OS.get_executable_path(), args) if key != "" else 0
 	if _singleplayer_pid <= 0:
 		_join_failed("Singleplayer couldn't start.")
@@ -784,6 +786,15 @@ func _start_singleplayer() -> void:
 		return
 	_traveling = false
 	_join_server("127.0.0.1", port, token)
+
+
+## Tells our singleplayer server we still run (it can't ask the system about
+## its parent everywhere): DedicatedServer.HEARTBEAT, every 2 s while it runs.
+func _beat_singleplayer() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://singleplayer"))
+	var file := FileAccess.open(preload("res://scripts/net/dedicated_server.gd").HEARTBEAT, FileAccess.WRITE)
+	if file: file.store_string("%d %d" % [OS.get_process_id(), int(Time.get_unix_time_from_system())])
+	_beat_at = Time.get_ticks_msec() + 2000
 
 
 ## Waits until a server answers its status ping (it's starting up); gives up
@@ -1197,6 +1208,7 @@ func _color_names() -> void:
 
 
 func _process(delta: float) -> void:
+	if _singleplayer_pid > 0 and Time.get_ticks_msec() >= _beat_at: _beat_singleplayer()
 	if not is_instance_valid(world) or _preparing_world:
 		if is_instance_valid(world): GameAudio.set_context(player,world)
 		return
