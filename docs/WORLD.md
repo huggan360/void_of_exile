@@ -74,6 +74,19 @@ Open space with round planets, reached by ship from the Surface's Skyward Launch
 - Planet terrain is smooth, not block-stepped; flora and props are voxel.
 - The voxel module prints harmless `!is_inside_tree` errors from `direct_static_body.cpp` on clients.
 
+## Light
+
+- **Ambient occlusion**: the voxel meshers bake corner shading into every block (free), and SSAO adds contact
+  shadows under creatures and props (Options -> Graphics -> Ambient occlusion).
+- **Volumetric light** (`scripts/effects/volumetric_light.gd`, owned by the Atmosphere; Options -> Graphics ->
+  Volumetric light, Off / Low / Medium / High). Two layers: a thin sun haze round the player
+  (`shaders/sun_haze.gdshader`, a FogVolume in the engine's volumetric fog) that the sun's shadows cut into
+  beams and lamps glow in, on the Surface, in the Tavern and on planet ground; and `SunShafts`
+  (`scripts/effects/sun_shafts.gd`, compute shaders `shaders/sun_shafts*.glsl`), rays from the sun past
+  anything against the sky, at a quarter (High: half) of the screen, skipped when the camera faces away from
+  the sun. SpaceBackdrop reports the Haven sun each frame. With the setting on, distance fog also takes the
+  sky's colour and a glow toward the sun.
+
 ## Versions that matter here
 
 `WorldServer.LAYOUT_VERSION` (7 since the Surface remake) archives saved world progress when coordinates

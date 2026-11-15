@@ -24,8 +24,8 @@ const FEATURES := [
 		"Soft contact shadows in corners and under objects (SSAO)."],
 	["indirect_light", "Screen-space indirect light", [["off", "Off"], ["low", "Low"], ["high", "High"]],
 		"Colored light bouncing between nearby surfaces (SSIL)."],
-	["volumetric_fog", "Volumetric fog", [["off", "Off"], ["low", "Low"], ["high", "High"]],
-		"Light shafts and glowing haze in caves and dark biomes."],
+	["volumetric_fog", "Volumetric light", [["off", "Off"], ["low", "Low"], ["medium", "Medium"], ["high", "High"]],
+		"Sunbeams through trees and windows, rays across the sky, glowing haze round lamps and in dark biomes. Low costs little; High is sharpest."],
 	["glow", "Glow / bloom", [["off", "Off"], ["on", "On"]],
 		"Bright magic, lava and loot beams bleed light."],
 	["lights", "Dynamic lights", [["low", "Low"], ["high", "High"]],
@@ -42,7 +42,7 @@ const PRESET_VALUES := {
 			ambient_occlusion = "high", indirect_light = "high", volumetric_fog = "high", glow = "on",
 			lights = "high", particles = "high", depth_of_field = "on", view_distance = "far"},
 	medium = {render_scale = 85, upscaler = "fsr", antialiasing = "fxaa", shadows = "medium", gi = "low",
-			ambient_occlusion = "low", indirect_light = "off", volumetric_fog = "low", glow = "on",
+			ambient_occlusion = "low", indirect_light = "off", volumetric_fog = "medium", glow = "on",
 			lights = "high", particles = "low", depth_of_field = "on", view_distance = "medium"},
 	low = {render_scale = 67, upscaler = "fsr", antialiasing = "fxaa", shadows = "low", gi = "off",
 			ambient_occlusion = "off", indirect_light = "off", volumetric_fog = "off", glow = "off",
@@ -164,12 +164,13 @@ static func apply_viewport(viewport: Viewport, values: Dictionary, base_scale: f
 	var high_ssil := level(values, "indirect_light") >= 3
 	RenderingServer.environment_set_ssil_quality(_project("environment/ssil/quality", 2) if high_ssil
 			else RenderingServer.ENV_SSIL_QUALITY_VERY_LOW, true, 0.5, 4 if high_ssil else 2, 50.0, 300.0)
-	var high_fog := level(values, "volumetric_fog") >= 3
+	# Froxel grid per quality: Low 40 x 40 x 40, Medium 48, High 64 (filtered).
+	var fog := level(values, "volumetric_fog")
 	var fog_size: int = _project("environment/volumetric_fog/volume_size", 64)
 	var fog_depth: int = _project("environment/volumetric_fog/volume_depth", 64)
-	RenderingServer.environment_set_volumetric_fog_volume_size(fog_size if high_fog else fog_size * 5 / 8,
-			fog_depth if high_fog else fog_depth * 5 / 8)
-	RenderingServer.environment_set_volumetric_fog_filter_active(high_fog and _project("environment/volumetric_fog/use_filter", 1) != 0)
+	var fog_share: float = [0.625, 0.625, 0.75, 1.0][fog]
+	RenderingServer.environment_set_volumetric_fog_volume_size(int(fog_size * fog_share), int(fog_depth * fog_share))
+	RenderingServer.environment_set_volumetric_fog_filter_active(fog >= 2 and _project("environment/volumetric_fog/use_filter", 1) != 0)
 
 
 static func _project(setting: String, fallback: Variant) -> Variant:
@@ -195,6 +196,15 @@ static func apply_atmosphere(env: Environment, sun: DirectionalLight3D, values: 
 	env.ssao_enabled = level(values, "ambient_occlusion") > 0
 	env.ssil_enabled = level(values, "indirect_light") > 0
 	env.glow_enabled = values.glow == "on"
+	# Volumetric light: a little forward scattering, so beams glow when you
+	# look toward the sun but still read from the overhead camera; distance
+	# fog picks up the sky's colour and a warm glow toward the sun, layering
+	# the far land (free, and off with the setting for a fair comparison).
+	var volumetric := volumetric_fog_allowed(values)
+	env.volumetric_fog_anisotropy = 0.3
+	env.volumetric_fog_length = volumetric_length(values)
+	env.fog_aerial_perspective = 0.35 if volumetric else 0.0
+	env.fog_sun_scatter = 0.25 if volumetric else 0.0
 	# A small sun disc: soft contact-hardening edges without the grain a wide
 	# penumbra gets over large outdoor scenes at these filter sample counts.
 	sun.light_angular_distance = 0.5
@@ -210,6 +220,12 @@ static func apply_atmosphere(env: Environment, sun: DirectionalLight3D, values: 
 
 static func volumetric_fog_allowed(values: Dictionary) -> bool:
 	return level(values, "volumetric_fog") > 0
+
+
+## How far from the camera volumetric fog is drawn (the froxels thin out
+## with distance, so more reach costs detail near by, not time).
+static func volumetric_length(values: Dictionary) -> float:
+	return [64.0, 64.0, 96.0, 128.0][level(values, "volumetric_fog")]
 
 
 static func ambient_factor(values: Dictionary) -> float:

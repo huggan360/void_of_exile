@@ -133,6 +133,10 @@ func set_air(air: Dictionary, amount: float, up := Vector3.UP) -> void:
 	env.fog_density = lerpf(1.0, 0.75, k)
 	env.ambient_light_color = Color("8e9cbc").lerp(sky.lerp(Color.WHITE, 0.5), k)
 	env.ambient_light_energy = lerpf(0.24, 0.3, k)
+	# On the ground the sun haze (VolumetricLight) needs the volumetric fog;
+	# space itself has nothing to light up but the on-screen sun shafts.
+	env.volumetric_fog_enabled = k > 0.3 and GraphicsSettings.volumetric_fog_allowed(AppSettings.graphics)
+	env.volumetric_fog_density = 0.0
 	env.tonemap_exposure = lerpf(0.78, 0.66, k)
 	if bool(air.get("city", false)):
 		# The amber sunset sky remains visible, without tinting every interior.
@@ -162,6 +166,7 @@ func _process(delta: float) -> void:
 	if camera==null: return
 	var eye := camera.global_position
 	_aim_sun(eye)
+	VolumetricLight.use_space_sun(_sun, _light.light_color if is_instance_valid(_light) else Color("ffdfab"), _air_amount)
 	_update_rock_lods(eye, delta)
 	if is_instance_valid(_dust):
 		# Dust lives in world space; the emitter follows the eye in coarse steps.

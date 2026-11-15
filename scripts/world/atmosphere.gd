@@ -30,6 +30,8 @@ var env := Environment.new()
 var sun := DirectionalLight3D.new()
 var particles := GPUParticles3D.new()
 var fog_of_war: FogOfWar
+## Sun haze and on-screen sun shafts (Options -> Graphics -> Volumetric light).
+var volumetric := VolumetricLight.new()
 ## Debug: force fog of war off (F4).
 var fog_of_war_hidden := false
 
@@ -73,6 +75,9 @@ func _ready() -> void:
 	# fog too, not just the lamps: lava and crystals get visible halos.
 	env.volumetric_fog_gi_inject = 0.5
 	env.volumetric_fog_length = 80.0
+	volumetric.sun = sun
+	add_child(volumetric)
+	world_env.compositor = volumetric.compositor
 
 	# Contact shadows and bounce are tuned centrally in GraphicsSettings so
 	# the camera environments in space and the realms use the same treatment.
@@ -172,8 +177,10 @@ func _apply() -> void:
 	env.fog_light_color = c.fog_color
 	env.fog_density = c.fog_density
 	var fog_volume := fog_of_war != null and fog_of_war.visible and fog_of_war.uses_volume()
-	env.volumetric_fog_enabled = (c.volumetric_fog_density > 0.001 or fog_volume) and GraphicsSettings.volumetric_fog_allowed(graphics)
-	env.volumetric_fog_length = 140.0 if fog_volume else 80.0
+	# The sun haze (VolumetricLight) needs the volumetric fog on wherever the sun shines.
+	var haze := c.sun_energy > 0.05 and VolumetricLight.haze_allowed(graphics)
+	env.volumetric_fog_enabled = (c.volumetric_fog_density > 0.001 or fog_volume or haze) and GraphicsSettings.volumetric_fog_allowed(graphics)
+	env.volumetric_fog_length = maxf(140.0 if fog_volume else 80.0, GraphicsSettings.volumetric_length(graphics))
 	env.volumetric_fog_density = c.volumetric_fog_density
 	env.volumetric_fog_albedo = c.fog_color.lightened(0.4)
 	sun.light_color = c.sun_color
@@ -272,8 +279,9 @@ func _setup_particles() -> void:
 	particles.draw_pass_1 = quad
 
 
-## Particles follow this node (the player).
+## Particles and the sun haze follow this node (the player).
 func attach_particles(to: Node3D) -> void:
+	volumetric.anchor = to
 	if particles.get_parent():
 		particles.reparent(to, false)
 	else:

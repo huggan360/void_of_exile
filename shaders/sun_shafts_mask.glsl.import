@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://2g1wemypm55d"
+path="res://.godot/imported/sun_shafts_mask.glsl-234d38f3825143774df1d0eca839c3a5.res"
+
+[deps]
+
+source_file="res://shaders/sun_shafts_mask.glsl"
+dest_files=["res://.godot/imported/sun_shafts_mask.glsl-234d38f3825143774df1d0eca839c3a5.res"]
+
+[params]
+
