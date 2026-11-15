@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b4364s8ds5uxi"
+path="res://.godot/imported/body.vox-b82382a1547bd0ec7307e523da016437.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_moonpaw/body.vox"
+dest_files=["res://.godot/imported/body.vox-b82382a1547bd0ec7307e523da016437.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

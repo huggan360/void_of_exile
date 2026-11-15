@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bxr2ijbckl6dc"
+path="res://.godot/imported/model.vox-7e924d19e355ee1a064e0f53e514a28b.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_lilyhop/model.vox"
+dest_files=["res://.godot/imported/model.vox-7e924d19e355ee1a064e0f53e514a28b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

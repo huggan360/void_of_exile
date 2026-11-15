@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d2b5w3g3gug8i"
+path="res://.godot/imported/foot.vox-37eefbff0513b6b0f192dc1fa7051529.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_ember_kit/foot.vox"
+dest_files=["res://.godot/imported/foot.vox-37eefbff0513b6b0f192dc1fa7051529.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

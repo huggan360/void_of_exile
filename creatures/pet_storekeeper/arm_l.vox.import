@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://qldrd1d7wmuw"
+path="res://.godot/imported/arm_l.vox-db23ce20c94e595c23c18a7c0a757efe.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_storekeeper/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-db23ce20c94e595c23c18a7c0a757efe.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

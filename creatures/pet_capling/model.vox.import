@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cuph6j11wl2o4"
+path="res://.godot/imported/model.vox-95b7cf5da09585b91ea4f92ec0198cba.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_capling/model.vox"
+dest_files=["res://.godot/imported/model.vox-95b7cf5da09585b91ea4f92ec0198cba.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

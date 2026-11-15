@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cpqf2hrw6fu3s"
+path="res://.godot/imported/wing_r.vox-db4027a24389b6fe76ac613eba7ef8fa.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_hoot/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-db4027a24389b6fe76ac613eba7ef8fa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

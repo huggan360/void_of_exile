@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dqkawuprbeefr"
+path="res://.godot/imported/tendril_2.vox-70aef91cb4badfb6a31588f0261709b2.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_nebula_jelly/tendril_2.vox"
+dest_files=["res://.godot/imported/tendril_2.vox-70aef91cb4badfb6a31588f0261709b2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

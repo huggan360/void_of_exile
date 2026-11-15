@@ -193,6 +193,7 @@ static func all() -> Array[Item]:
 	for stat in STAT_ELIXIRS:
 		out.append(stat_elixir(stat))
 	out.append(backpack())
+	out.append(pet_egg())
 	for id in GATE_KEYS:
 		out.append(gate_key(id))
 	for id in STORY_ITEMS:
@@ -1062,3 +1063,16 @@ static func _iron_set(out: Array[Item]) -> void:
 	out[-1].shield_arcs = Color("f4eaff")
 	out.append(_divine("D_bonus_crucifix_ofiron", "Seal of the Last King", "bonus", "Crucifix",
 		"A pale cross hammered into black iron.", {defense = 8, attack = 8, magic = 8, hp = 60}, [], {}))
+
+
+static func pet_egg() -> Item:
+	var item := Item.new()
+	item.id = "pet_egg"
+	item.item_name = "Pet Egg"
+	item.slot = "pet"
+	item.kind = "Egg"
+	item.stack_max = 8
+	item.drop_bag = "blue"
+	item.lore = "Something small is dreaming inside."
+	item.abilities = PackedStringArray(["Hatch at the Hatching Nest in your Pet Yard", "Hatches a random common pet with two abilities"])
+	return item

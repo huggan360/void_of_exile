@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dvs03flt244po"
+path="res://.godot/imported/foot.vox-6c7d2a4fc657925f4ebc106e5176dadc.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_lilyhop/foot.vox"
+dest_files=["res://.godot/imported/foot.vox-6c7d2a4fc657925f4ebc106e5176dadc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

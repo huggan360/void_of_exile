@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7ncukdftnyml"
+path="res://.godot/imported/model.vox-b6cad69c3f73592fb4206bd36e769d36.tscn"
+
+[deps]
+
+source_file="res://props/pets/food_bowl/model.vox"
+dest_files=["res://.godot/imported/model.vox-b6cad69c3f73592fb4206bd36e769d36.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

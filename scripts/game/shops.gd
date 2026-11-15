@@ -12,6 +12,8 @@ class_name Shops
 ##  shops: {id: {stock: [{id, base, price, off, left (-1 = plenty)}]}}, families: {family: name}}
 
 const DEFS := {
+	pets = {name = "Pet Store", title = "Pet Eggs", model = "pet_storekeeper", color = "e8c983",
+		hello = ["An egg for a new friend.", "Take your egg to the Hatching Nest.", "The meadow has room to play."]},
 	wizard = {name = "The Wizard", title = "Wands, spells and robes", model = "npc_magician", color = "9a8aff",
 		hello = ["Wands that hum, spells that sing.", "Mind the robes, they bite.", "Magic for every pocket!"]},
 	priest = {name = "The Priest", title = "Crucifixes, robes and blessings", model = "city_elder", color = "fff0c8",
@@ -107,5 +109,6 @@ static func fallback() -> Dictionary:
 			for tier in range(2, 6):
 				list.append({id = "G%d_%s" % [tier, family], base = base[tier], price = base[tier], off = 0, left = -1})
 		shops[shop] = {stock = list}
+	shops.pets = {stock = [{id = "pet_egg", base = 350, price = 350, off = 0, left = -1}]}
 	var t := Time.get_unix_time_from_system()
 	return {now = t, ends = t+7200.0, offers = [], shops = shops, families = {}}

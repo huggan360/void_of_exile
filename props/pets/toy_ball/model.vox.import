@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bcllqoe7wu0di"
+path="res://.godot/imported/model.vox-1304ac3b23e7ee0b17ae52527a02f0dc.tscn"
+
+[deps]
+
+source_file="res://props/pets/toy_ball/model.vox"
+dest_files=["res://.godot/imported/model.vox-1304ac3b23e7ee0b17ae52527a02f0dc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

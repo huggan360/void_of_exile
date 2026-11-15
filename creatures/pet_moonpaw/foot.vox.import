@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://fibigmv1g8vg"
+path="res://.godot/imported/foot.vox-44b1d594f1d5b525c1c1b1ed33d0810d.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_moonpaw/foot.vox"
+dest_files=["res://.godot/imported/foot.vox-44b1d594f1d5b525c1c1b1ed33d0810d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

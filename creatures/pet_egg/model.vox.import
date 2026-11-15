@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cbfo1pigkusmp"
+path="res://.godot/imported/model.vox-193272967ccd542ea5a5564251057227.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_egg/model.vox"
+dest_files=["res://.godot/imported/model.vox-193272967ccd542ea5a5564251057227.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

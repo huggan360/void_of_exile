@@ -120,7 +120,7 @@ func is_divine() -> bool:
 
 ## Only the Archer is playable in this pass. Other gear is collectible for future classes.
 func usable_by(class_id: String) -> bool:
-	return PlayerClasses.allows(class_id, self)
+	return slot == "pet" or PlayerClasses.allows(class_id, self)
 
 
 func is_weapon() -> bool:
@@ -164,12 +164,13 @@ func soulbound() -> bool:
 
 ## "G3", "D" for Divine, nothing for consumables and keys.
 func badge() -> String:
-	if is_consumable() or is_key() or is_story():
+	if slot == "pet" or is_consumable() or is_key() or is_story():
 		return ""
 	return "D" if is_divine() else "G%d" % tier
 
 
 func grade_name() -> String:
+	if slot == "pet": return "Pet item"
 	if is_consumable():
 		return "Consumable"
 	if is_key():

@@ -65,7 +65,7 @@ const GRADE_ROLLS := {
 static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerator, biome_stat: Variant = "magic",
 		max_hp := 0, modifiers: Dictionary = {}) -> Array[Dictionary]:
 	var bags: Array[Dictionary] = []
-	if damage_by.is_empty() or def.loot.is_empty():
+	if damage_by.is_empty():
 		return bags
 	var health := max_hp if max_hp > 0 else def.hp
 	var eligible := damage_by.keys().filter(func(p: int) -> bool:
@@ -121,6 +121,10 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 						if rng.randf() < luck: count += 1
 				for potion in count:
 					personal[p].append(Items.stat_elixir(str(def.dungeon_potions[rng.randi_range(0, def.dungeon_potions.size() - 1)])))
+	# Eggs always belong to the top damage dealer, without loot bonuses.
+	if public_owner != 0 and rng.randf() < (0.02 if def is BossDef else 0.0015):
+		if not personal.has(public_owner): personal[public_owner] = []
+		personal[public_owner].append(Items.make("pet_egg"))
 	# Story items never compete with ordinary loot for a chest or tier.
 	var story := public.filter(func(item: Item) -> bool: return item.is_story())
 	public = public.filter(func(item: Item) -> bool: return not item.is_story())

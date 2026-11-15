@@ -272,7 +272,7 @@ func enter_realm(player_id: int, realm_id: String) -> Dictionary:
 	if _players.has(player_id):
 		_players[player_id].realm = realm_id
 	if SpaceWorld.is_space(realm_id): return {id = realm_id, seed = 0, destroyed = [], space = true}
-	return {} if realm_id == "hall" or Dungeons.is_dungeon(realm_id) or ChambersWorld.is_chambers(realm_id) \
+	return {} if realm_id == "hall" or Dungeons.is_dungeon(realm_id) or ChambersWorld.is_chambers(realm_id) or PetYardWorld.is_pet_yard(realm_id) \
 			else WorldServer.get_or_create_realm(realm_id)
 
 

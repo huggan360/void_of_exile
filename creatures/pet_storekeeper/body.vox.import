@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bairypsawohvu"
+path="res://.godot/imported/body.vox-94f8c8609f3e379fa872ac90ebf1df4f.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_storekeeper/body.vox"
+dest_files=["res://.godot/imported/body.vox-94f8c8609f3e379fa872ac90ebf1df4f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

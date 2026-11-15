@@ -1,0 +1,93 @@
+{
+  "voxel_size": 0.025,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -7,
+        0,
+        -9
+      ]
+    },
+    "ear_l": {
+      "frame_min": [
+        -8,
+        -4,
+        -3
+      ]
+    },
+    "ear_r": {
+      "frame_min": [
+        -3,
+        -4,
+        -3
+      ]
+    },
+    "foot": {
+      "frame_min": [
+        -4,
+        -4,
+        -5
+      ]
+    }
+  },
+  "limbs": {
+    "ear_l": {
+      "part": "ear_l",
+      "pivot": [
+        -3,
+        13,
+        -0.5
+      ],
+      "role": "sway",
+      "phase": -1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "ear_r": {
+      "part": "ear_r",
+      "pivot": [
+        3,
+        13,
+        -0.5
+      ],
+      "role": "sway",
+      "phase": 1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "leg_l": {
+      "part": "foot",
+      "pivot": [
+        -3.8,
+        3,
+        0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "leg_r": {
+      "part": "foot",
+      "pivot": [
+        3.8,
+        3,
+        0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "amount": 0.55,
+      "throws": false
+    }
+  },
+  "hand": [
+    0,
+    13,
+    -8
+  ],
+  "hover": 0,
+  "bob": 0,
+  "waddle": 0.18,
+  "gait": "hop",
+  "flap_rate": 2.5
+}

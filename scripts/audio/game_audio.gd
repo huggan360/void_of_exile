@@ -889,7 +889,7 @@ func _music_world_key() -> String:
 
 
 func _music_plan() -> Dictionary:
-	var normal := "music.space_theme" if _world is SpaceWorld else "music.tavern" if Campaigns.is_tavern(_world.realm_id) \
+	var normal := "music.space_theme" if _world is SpaceWorld else "music.tavern" if Campaigns.is_tavern(_world.realm_id) or _world is PetYardWorld \
 		else "music.surface" if _world is IslandWorld else "music.chamber" if _world is ChambersWorld else "music.japanese"
 	# Give the death cue space until the next character/world. (Not the
 	# model's visibility: first person hides it while you are alive.)

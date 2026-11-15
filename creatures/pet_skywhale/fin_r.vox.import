@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cljca3j3iqmbi"
+path="res://.godot/imported/fin_r.vox-addf2ed8dbf4fa77deb846dabb3257d0.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_skywhale/fin_r.vox"
+dest_files=["res://.godot/imported/fin_r.vox-addf2ed8dbf4fa77deb846dabb3257d0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

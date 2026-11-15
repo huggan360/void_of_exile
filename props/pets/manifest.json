@@ -1,0 +1,843 @@
+{
+  "pets": {
+    "duck": {
+      "folder": "creatures/pet_duck",
+      "height_m": 0.55,
+      "voxel_size": 0.027500000000000004,
+      "frame_min": [
+        -9,
+        0,
+        -10
+      ],
+      "frame_size": [
+        18,
+        20,
+        20
+      ],
+      "parts": [
+        "body",
+        "foot",
+        "wing_l",
+        "wing_r",
+        "tail"
+      ],
+      "limbs": [
+        "leg_l",
+        "leg_r",
+        "wing_l",
+        "wing_r",
+        "tail"
+      ],
+      "glow_parts": [],
+      "gait": "waddle"
+    },
+    "puffbun": {
+      "folder": "creatures/pet_puffbun",
+      "height_m": 0.5,
+      "voxel_size": 0.025,
+      "frame_min": [
+        -10,
+        0,
+        -8
+      ],
+      "frame_size": [
+        20,
+        20,
+        16
+      ],
+      "parts": [
+        "body",
+        "ear_l",
+        "ear_r",
+        "foot"
+      ],
+      "limbs": [
+        "ear_l",
+        "ear_r",
+        "leg_l",
+        "leg_r"
+      ],
+      "glow_parts": [],
+      "gait": "hop"
+    },
+    "gloop": {
+      "folder": "creatures/pet_gloop",
+      "height_m": 0.45000000000000007,
+      "voxel_size": 0.03214285714285715,
+      "frame_min": [
+        -8,
+        0,
+        -7
+      ],
+      "frame_size": [
+        16,
+        14,
+        13
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "gait": "squash"
+    },
+    "ember_kit": {
+      "folder": "creatures/pet_ember_kit",
+      "height_m": 0.6,
+      "voxel_size": 0.03333333333333333,
+      "frame_min": [
+        -6,
+        0,
+        -9
+      ],
+      "frame_size": [
+        12,
+        18,
+        23
+      ],
+      "parts": [
+        "body",
+        "foot",
+        "tail"
+      ],
+      "limbs": [
+        "leg_front_l",
+        "leg_front_r",
+        "leg_back_l",
+        "leg_back_r",
+        "tail"
+      ],
+      "glow_parts": [
+        "tail"
+      ],
+      "gait": "trot"
+    },
+    "cinderling": {
+      "folder": "creatures/pet_cinderling",
+      "height_m": 0.7,
+      "voxel_size": 0.03888888888888889,
+      "frame_min": [
+        -13,
+        0,
+        -12
+      ],
+      "frame_size": [
+        26,
+        18,
+        24
+      ],
+      "parts": [
+        "body",
+        "foot",
+        "wing_l",
+        "wing_r",
+        "tail"
+      ],
+      "limbs": [
+        "leg_l",
+        "leg_r",
+        "wing_l",
+        "wing_r",
+        "tail"
+      ],
+      "glow_parts": [],
+      "gait": "flap"
+    },
+    "hoot": {
+      "folder": "creatures/pet_hoot",
+      "height_m": 0.5,
+      "voxel_size": 0.029411764705882353,
+      "frame_min": [
+        -10,
+        0,
+        -8
+      ],
+      "frame_size": [
+        20,
+        17,
+        13
+      ],
+      "parts": [
+        "body",
+        "wing_l",
+        "wing_r",
+        "foot"
+      ],
+      "limbs": [
+        "wing_l",
+        "wing_r",
+        "leg_l",
+        "leg_r"
+      ],
+      "glow_parts": [],
+      "gait": "glide"
+    },
+    "lilyhop": {
+      "folder": "creatures/pet_lilyhop",
+      "height_m": 0.45,
+      "voxel_size": 0.028125,
+      "frame_min": [
+        -8,
+        0,
+        -7
+      ],
+      "frame_size": [
+        16,
+        16,
+        15
+      ],
+      "parts": [
+        "body",
+        "foot"
+      ],
+      "limbs": [
+        "leg_front_l",
+        "leg_front_r",
+        "leg_back_l",
+        "leg_back_r"
+      ],
+      "glow_parts": [],
+      "gait": "leap"
+    },
+    "mossback": {
+      "folder": "creatures/pet_mossback",
+      "height_m": 0.45,
+      "voxel_size": 0.028125,
+      "frame_min": [
+        -7,
+        0,
+        -9
+      ],
+      "frame_size": [
+        14,
+        16,
+        18
+      ],
+      "parts": [
+        "body",
+        "foot",
+        "tail"
+      ],
+      "limbs": [
+        "leg_front_l",
+        "leg_front_r",
+        "leg_back_l",
+        "leg_back_r",
+        "tail"
+      ],
+      "glow_parts": [],
+      "gait": "plod"
+    },
+    "wisp": {
+      "folder": "creatures/pet_wisp",
+      "height_m": 0.6,
+      "voxel_size": 0.031578947368421054,
+      "frame_min": [
+        -7,
+        0,
+        -5
+      ],
+      "frame_size": [
+        14,
+        19,
+        9
+      ],
+      "parts": [
+        "body",
+        "arm_l",
+        "arm_r"
+      ],
+      "limbs": [
+        "arm_l",
+        "arm_r"
+      ],
+      "glow_parts": [
+        "body"
+      ],
+      "gait": "float"
+    },
+    "shardling": {
+      "folder": "creatures/pet_shardling",
+      "height_m": 0.75,
+      "voxel_size": 0.039473684210526314,
+      "frame_min": [
+        -8,
+        0,
+        -6
+      ],
+      "frame_size": [
+        16,
+        19,
+        11
+      ],
+      "parts": [
+        "body",
+        "foot",
+        "arm_l",
+        "arm_r"
+      ],
+      "limbs": [
+        "leg_l",
+        "leg_r",
+        "arm_l",
+        "arm_r"
+      ],
+      "glow_parts": [
+        "body"
+      ],
+      "gait": "stomp"
+    },
+    "moonpaw": {
+      "folder": "creatures/pet_moonpaw",
+      "height_m": 0.5,
+      "voxel_size": 0.027777777777777776,
+      "frame_min": [
+        -6,
+        0,
+        -9
+      ],
+      "frame_size": [
+        12,
+        18,
+        21
+      ],
+      "parts": [
+        "body",
+        "foot",
+        "tail"
+      ],
+      "limbs": [
+        "leg_front_l",
+        "leg_front_r",
+        "leg_back_l",
+        "leg_back_r",
+        "tail"
+      ],
+      "glow_parts": [],
+      "gait": "trot"
+    },
+    "axie": {
+      "folder": "creatures/pet_axie",
+      "height_m": 0.4,
+      "voxel_size": 0.028571428571428574,
+      "frame_min": [
+        -10,
+        0,
+        -8
+      ],
+      "frame_size": [
+        20,
+        14,
+        24
+      ],
+      "parts": [
+        "body",
+        "gill_l",
+        "gill_r",
+        "foot",
+        "tail"
+      ],
+      "limbs": [
+        "gill_l",
+        "gill_r",
+        "leg_front_l",
+        "leg_front_r",
+        "leg_back_l",
+        "leg_back_r",
+        "tail"
+      ],
+      "glow_parts": [],
+      "gait": "wiggle"
+    },
+    "capling": {
+      "folder": "creatures/pet_capling",
+      "height_m": 0.5,
+      "voxel_size": 0.029411764705882353,
+      "frame_min": [
+        -9,
+        0,
+        -10
+      ],
+      "frame_size": [
+        18,
+        17,
+        18
+      ],
+      "parts": [
+        "body",
+        "foot",
+        "arm_l",
+        "arm_r"
+      ],
+      "limbs": [
+        "leg_l",
+        "leg_r",
+        "arm_l",
+        "arm_r"
+      ],
+      "glow_parts": [],
+      "gait": "hop"
+    },
+    "nebula_jelly": {
+      "folder": "creatures/pet_nebula_jelly",
+      "height_m": 0.8,
+      "voxel_size": 0.034782608695652174,
+      "frame_min": [
+        -9,
+        0,
+        -7
+      ],
+      "frame_size": [
+        18,
+        23,
+        14
+      ],
+      "parts": [
+        "body",
+        "tendril_0",
+        "tendril_1",
+        "tendril_2",
+        "tendril_3",
+        "tendril_4"
+      ],
+      "limbs": [
+        "tendril_0",
+        "tendril_1",
+        "tendril_2",
+        "tendril_3",
+        "tendril_4"
+      ],
+      "glow_parts": [
+        "body",
+        "tendril_0",
+        "tendril_1",
+        "tendril_2",
+        "tendril_3",
+        "tendril_4"
+      ],
+      "gait": "pulse"
+    },
+    "skywhale": {
+      "folder": "creatures/pet_skywhale",
+      "height_m": 0.7,
+      "voxel_size": 0.05384615384615384,
+      "frame_min": [
+        -14,
+        0,
+        -10
+      ],
+      "frame_size": [
+        28,
+        13,
+        25
+      ],
+      "parts": [
+        "body",
+        "fin_l",
+        "fin_r",
+        "tail"
+      ],
+      "limbs": [
+        "fin_l",
+        "fin_r",
+        "tail"
+      ],
+      "glow_parts": [],
+      "gait": "swim"
+    }
+  },
+  "npcs": {
+    "caretaker": {
+      "folder": "creatures/caretaker",
+      "height_m": 1.7500000000000002,
+      "voxel_size": 0.07,
+      "frame_min": [
+        -8,
+        0,
+        -7
+      ],
+      "frame_size": [
+        16,
+        25,
+        15
+      ],
+      "parts": [
+        "body",
+        "arm_l",
+        "arm_r",
+        "leg"
+      ],
+      "limbs": [
+        "arm_l",
+        "arm_r",
+        "leg_l",
+        "leg_r"
+      ],
+      "glow_parts": []
+    },
+    "pet_storekeeper": {
+      "folder": "creatures/pet_storekeeper",
+      "height_m": 1.7,
+      "voxel_size": 0.07083333333333333,
+      "frame_min": [
+        -6,
+        0,
+        -6
+      ],
+      "frame_size": [
+        15,
+        24,
+        11
+      ],
+      "parts": [
+        "body",
+        "arm_l",
+        "arm_r",
+        "leg"
+      ],
+      "limbs": [
+        "arm_l",
+        "arm_r",
+        "leg_l",
+        "leg_r"
+      ],
+      "glow_parts": []
+    }
+  },
+  "props": {
+    "hatching_nest": {
+      "folder": "props/pets/hatching_nest",
+      "height_m": 1.08,
+      "voxel_size": 0.09,
+      "frame_min": [
+        -15,
+        0,
+        -13
+      ],
+      "frame_size": [
+        30,
+        12,
+        26
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        1.7,
+        0.55,
+        1.45
+      ],
+      "solid_offset": [
+        0,
+        0.275,
+        0
+      ]
+    },
+    "pet_store": {
+      "folder": "props/pets/pet_store",
+      "height_m": 2.9000000000000004,
+      "voxel_size": 0.1,
+      "frame_min": [
+        -26,
+        0,
+        -17
+      ],
+      "frame_size": [
+        44,
+        29,
+        30
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        3.3,
+        1.3,
+        1.7
+      ],
+      "solid_offset": [
+        0,
+        0.65,
+        0
+      ]
+    },
+    "caretaker_cottage": {
+      "folder": "props/pets/caretaker_cottage",
+      "height_m": 5.2,
+      "voxel_size": 0.1,
+      "frame_min": [
+        -25,
+        0,
+        -23
+      ],
+      "frame_size": [
+        50,
+        52,
+        46
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [
+        "body"
+      ],
+      "solid_size": [
+        4.4,
+        3.9,
+        3.6
+      ],
+      "solid_offset": [
+        0,
+        1.95,
+        0
+      ]
+    },
+    "food_bowl": {
+      "folder": "props/pets/food_bowl",
+      "height_m": 0.22499999999999998,
+      "voxel_size": 0.045,
+      "frame_min": [
+        -6,
+        0,
+        -6
+      ],
+      "frame_size": [
+        12,
+        5,
+        12
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        0,
+        0,
+        0
+      ],
+      "solid_offset": [
+        0,
+        0.0,
+        0
+      ]
+    },
+    "pet_fence": {
+      "folder": "props/pets/pet_fence",
+      "height_m": 1.28,
+      "voxel_size": 0.08,
+      "frame_min": [
+        -16,
+        0,
+        -2
+      ],
+      "frame_size": [
+        32,
+        16,
+        4
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        2.4,
+        1.2,
+        0.24
+      ],
+      "solid_offset": [
+        0,
+        0.6,
+        0
+      ]
+    },
+    "pet_gate": {
+      "folder": "props/pets/pet_gate",
+      "height_m": 1.28,
+      "voxel_size": 0.08,
+      "frame_min": [
+        -16,
+        0,
+        -2
+      ],
+      "frame_size": [
+        32,
+        16,
+        4
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        2.4,
+        1.2,
+        0.24
+      ],
+      "solid_offset": [
+        0,
+        0.6,
+        0
+      ]
+    },
+    "egg_crate": {
+      "folder": "props/pets/egg_crate",
+      "height_m": 0.5950000000000001,
+      "voxel_size": 0.085,
+      "frame_min": [
+        -5,
+        0,
+        -4
+      ],
+      "frame_size": [
+        10,
+        7,
+        8
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        0.85,
+        0.45,
+        0.7
+      ],
+      "solid_offset": [
+        0,
+        0.225,
+        0
+      ]
+    },
+    "toy_ball": {
+      "folder": "props/pets/toy_ball",
+      "height_m": 0.32,
+      "voxel_size": 0.04,
+      "frame_min": [
+        -4,
+        0,
+        -5
+      ],
+      "frame_size": [
+        8,
+        8,
+        9
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        0,
+        0,
+        0
+      ],
+      "solid_offset": [
+        0,
+        0.0,
+        0
+      ]
+    },
+    "lantern_post": {
+      "folder": "props/pets/lantern_post",
+      "height_m": 2.25,
+      "voxel_size": 0.075,
+      "frame_min": [
+        -3,
+        0,
+        -5
+      ],
+      "frame_size": [
+        14,
+        30,
+        10
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [
+        "body"
+      ],
+      "solid_size": [
+        0.3,
+        2.2,
+        0.3
+      ],
+      "solid_offset": [
+        0,
+        1.1,
+        0
+      ]
+    },
+    "little_bridge": {
+      "folder": "props/pets/little_bridge",
+      "height_m": 1.4000000000000001,
+      "voxel_size": 0.1,
+      "frame_min": [
+        -10,
+        0,
+        -19
+      ],
+      "frame_size": [
+        20,
+        14,
+        38
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        0,
+        0,
+        0
+      ],
+      "solid_offset": [
+        0,
+        0.0,
+        0
+      ]
+    },
+    "pet_egg": {
+      "folder": "props/pets/pet_egg",
+      "height_m": 0.42000000000000004,
+      "voxel_size": 0.035,
+      "frame_min": [
+        -4,
+        0,
+        -4
+      ],
+      "frame_size": [
+        8,
+        12,
+        8
+      ],
+      "parts": [
+        "body"
+      ],
+      "limbs": [],
+      "glow_parts": [],
+      "solid_size": [
+        0,
+        0,
+        0
+      ],
+      "solid_offset": [
+        0,
+        0.0,
+        0
+      ]
+    }
+  }
+}

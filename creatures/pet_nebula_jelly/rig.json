@@ -1,0 +1,125 @@
+{
+  "voxel_size": 0.034782608695652174,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -10,
+        9,
+        -8
+      ],
+      "glow": true
+    },
+    "tendril_0": {
+      "frame_min": [
+        -3,
+        -11,
+        -2
+      ],
+      "glow": true
+    },
+    "tendril_1": {
+      "frame_min": [
+        -3,
+        -12,
+        -2
+      ],
+      "glow": true
+    },
+    "tendril_2": {
+      "frame_min": [
+        -3,
+        -13,
+        -2
+      ],
+      "glow": true
+    },
+    "tendril_3": {
+      "frame_min": [
+        -3,
+        -11,
+        -2
+      ],
+      "glow": true
+    },
+    "tendril_4": {
+      "frame_min": [
+        -3,
+        -12,
+        -2
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "tendril_0": {
+      "part": "tendril_0",
+      "pivot": [
+        -4,
+        12,
+        0
+      ],
+      "role": "sway",
+      "phase": -1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "tendril_1": {
+      "part": "tendril_1",
+      "pivot": [
+        -2,
+        12,
+        3
+      ],
+      "role": "sway",
+      "phase": 1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "tendril_2": {
+      "part": "tendril_2",
+      "pivot": [
+        0,
+        12,
+        0
+      ],
+      "role": "sway",
+      "phase": -1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "tendril_3": {
+      "part": "tendril_3",
+      "pivot": [
+        2,
+        12,
+        3
+      ],
+      "role": "sway",
+      "phase": 1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "tendril_4": {
+      "part": "tendril_4",
+      "pivot": [
+        4,
+        12,
+        0
+      ],
+      "role": "sway",
+      "phase": -1,
+      "amount": 0.55,
+      "throws": false
+    }
+  },
+  "hand": [
+    0,
+    15,
+    -7
+  ],
+  "hover": 0,
+  "bob": 0,
+  "waddle": 0.18,
+  "gait": "pulse",
+  "flap_rate": 2.5
+}

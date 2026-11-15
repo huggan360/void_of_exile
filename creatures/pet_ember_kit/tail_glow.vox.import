@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bdq78n6gxohjn"
+path="res://.godot/imported/tail_glow.vox-35a42c6900df758f135265524ce4f109.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_ember_kit/tail_glow.vox"
+dest_files=["res://.godot/imported/tail_glow.vox-35a42c6900df758f135265524ce4f109.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

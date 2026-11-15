@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://db8ui1g8dxy31"
+path="res://.godot/imported/model.vox-ffcbba162b2bc277067242a874702b9f.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_shardling/model.vox"
+dest_files=["res://.godot/imported/model.vox-ffcbba162b2bc277067242a874702b9f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

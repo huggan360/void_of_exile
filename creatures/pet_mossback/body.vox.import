@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://co0k4x6vvkika"
+path="res://.godot/imported/body.vox-481c6584f493931949b637a896506cc3.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_mossback/body.vox"
+dest_files=["res://.godot/imported/body.vox-481c6584f493931949b637a896506cc3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

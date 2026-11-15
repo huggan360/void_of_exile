@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://df7jhawaqf8of"
+path="res://.godot/imported/model.vox-a238ea15cd16888cbf03c8253ca5e43b.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_hoot/model.vox"
+dest_files=["res://.godot/imported/model.vox-a238ea15cd16888cbf03c8253ca5e43b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

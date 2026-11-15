@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dxr8ya0h54ywj"
+path="res://.godot/imported/body.vox-16d2868494f13c51b79a45f0bbf0f1ff.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_wisp/body.vox"
+dest_files=["res://.godot/imported/body.vox-16d2868494f13c51b79a45f0bbf0f1ff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

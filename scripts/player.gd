@@ -199,7 +199,7 @@ func set_spatial_world(place: GameWorld) -> void:
 		spatial_controller = (place as SpatialWorld).make_controller(self)
 		if spatial_controller!=null: add_child(spatial_controller)
 
-	if place is HallWorld or place is IslandWorld or place is ChambersWorld:
+	if place is HallWorld or place is IslandWorld or place is ChambersWorld or place is PetYardWorld:
 		ground_view = GroundView.new()
 		ground_view.player = self
 		add_child(ground_view)

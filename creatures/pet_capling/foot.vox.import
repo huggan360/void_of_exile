@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bycjvn3tu6vn3"
+path="res://.godot/imported/foot.vox-a52a027393e7d054cce1a7b07144082c.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_capling/foot.vox"
+dest_files=["res://.godot/imported/foot.vox-a52a027393e7d054cce1a7b07144082c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

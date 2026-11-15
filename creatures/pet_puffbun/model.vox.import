@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://drek70lq4itma"
+path="res://.godot/imported/model.vox-d63dfc60efb2b19168d7d4706a34ee0d.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_puffbun/model.vox"
+dest_files=["res://.godot/imported/model.vox-d63dfc60efb2b19168d7d4706a34ee0d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

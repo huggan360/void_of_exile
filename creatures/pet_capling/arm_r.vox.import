@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bxlxylheq27va"
+path="res://.godot/imported/arm_r.vox-e57b7a19f843a99149c10077e40c197f.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_capling/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-e57b7a19f843a99149c10077e40c197f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dsnc1pobjcu0p"
+path="res://.godot/imported/model.vox-7d38dadc55f169d04fb1222dfa5e48fa.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_ember_kit/model.vox"
+dest_files=["res://.godot/imported/model.vox-7d38dadc55f169d04fb1222dfa5e48fa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

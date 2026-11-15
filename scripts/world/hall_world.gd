@@ -65,6 +65,13 @@ func _ready() -> void:
 			sign.position = Vector3(0, 4.6, 0.06 if k==0 else -0.06)
 			sign.rotation.y = k*PI
 			gate.add_child(sign)
+	if has_node("PetYardGate"):
+		var gate := _add_portal($PetYardGate.position, -$PetYardGate.basis.z, "pet_yard", Color("71b58a"), Color("ffe3a0"))
+		for k in 2:
+			var sign := SignBoard.make("Pet Yard", "brass", "door", Color(0, 0, 0, 0), 0.8)
+			sign.position = Vector3(0, 4.6, 0.06 if k==0 else -0.06)
+			sign.rotation.y = k*PI
+			gate.add_child(sign)
 	_build_market()
 	if navigation==null: _prepare_navigation()
 	if has_node("Residents"):

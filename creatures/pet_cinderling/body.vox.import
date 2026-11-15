@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cgbreavippodg"
+path="res://.godot/imported/body.vox-adbb8933e0ac542f5d3b8d4c4ae233a3.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_cinderling/body.vox"
+dest_files=["res://.godot/imported/body.vox-adbb8933e0ac542f5d3b8d4c4ae233a3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

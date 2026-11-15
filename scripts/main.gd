@@ -361,6 +361,8 @@ static func place_name(destination: String) -> String:
 		return "Dungeon"
 	if Campaigns.is_tavern(destination):
 		return "The Tavern"
+	if PetYardWorld.is_pet_yard(destination):
+		return "Pet Yard"
 	if ChambersWorld.is_chambers(destination):
 		return "Chambers"
 	if SpaceWorld.is_space(destination):
@@ -422,6 +424,9 @@ func set_port_arrival(kind: String) -> void:
 
 func travel(destination: String, at := Vector3.INF, cinematic_departure := false) -> void:
 	if _traveling or _dead:
+		return
+	if PetYardWorld.is_pet_yard(destination) and not Net.is_client():
+		hud.toasts.push("The Pet Yard opens when you play online or in Singleplayer.", UIStyle.HP_LIGHT, 3.0)
 		return
 	if ChambersWorld.is_chambers(destination) and not Net.is_client():
 		hud.toasts.push("The Chambers open when you play online or in Singleplayer.", UIStyle.HP_LIGHT, 3.0)
@@ -576,7 +581,7 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 	if online_record.has("dungeon"): record = online_record
 	if Net.is_client():
 		destination = str(record.get("id", destination))
-	if prepared==null and not Campaigns.is_tavern(destination) and not record.get("chambers", false) and not record.get("space", false) and str(record.get("dungeon",""))!="theory_of_everything":
+	if prepared==null and not Campaigns.is_tavern(destination) and not record.get("pet_yard", false) and not record.get("chambers", false) and not record.get("space", false) and str(record.get("dungeon",""))!="theory_of_everything":
 		_preload_creatures()
 	if prepared!=null:
 		world = prepared
@@ -586,6 +591,8 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 			(world as HallWorld).campaign_tavern = true
 			world.realm_id = destination
 			world.display_name = str(record.get("name", world.display_name))
+	elif record.get("pet_yard", false) or PetYardWorld.is_pet_yard(destination):
+		world = PetYardWorld.new(record)
 	elif record.get("chambers", false):
 		world = ChambersWorld.new(record)
 	elif record.get("space", false):
@@ -654,7 +661,7 @@ func _load_world(destination: String, online_record := {}, spawn_resolver := Cal
 	hud.picker.enabled = Net.is_client() and Campaigns.is_tavern(world.realm_id)
 	hud.quest_banner.place = world.realm_id
 	# The Hollow Castle is meant to be seen whole: no fog of war inside it.
-	atmosphere.fog_of_war_hidden = world is CastleWorld or world is ChambersWorld or world is SpatialWorld
+	atmosphere.fog_of_war_hidden = world is CastleWorld or world is ChambersWorld or world is PetYardWorld or world is SpatialWorld
 	campaign.set_world(world)
 	hud.toasts.push("Entered %s" % world.display_name, Color(0.75, 0.55, 1.0), 2.5)
 

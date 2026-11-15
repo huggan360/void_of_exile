@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://v2f3eyn84ceg"
+path="res://.godot/imported/body.vox-c46e6b9cf3d640a676141e1c8d765115.tscn"
+
+[deps]
+
+source_file="res://props/pets/pet_fence/body.vox"
+dest_files=["res://.godot/imported/body.vox-c46e6b9cf3d640a676141e1c8d765115.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

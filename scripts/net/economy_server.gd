@@ -274,6 +274,7 @@ func spend(p: Dictionary, amount: int, source: String) -> bool:
 
 
 func _persist_spend(p: Dictionary, amount: int, source: String) -> void:
+	if server.config.test_mode or server.api.base_url == "": return
 	var r := await server.api.call_api("POST", "/server/dots/award", {character_id = p.character_id, amount = -amount})
 	if r.ok:
 		p.dots = int(r.data.get("dots", p.dots))

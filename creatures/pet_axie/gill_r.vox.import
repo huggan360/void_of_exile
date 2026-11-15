@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cmrfs2cqts07x"
+path="res://.godot/imported/gill_r.vox-d749c944b918e28b214cc057b753bafd.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_axie/gill_r.vox"
+dest_files=["res://.godot/imported/gill_r.vox-d749c944b918e28b214cc057b753bafd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

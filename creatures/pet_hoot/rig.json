@@ -1,0 +1,93 @@
+{
+  "voxel_size": 0.029411764705882353,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -8,
+        0,
+        -9
+      ]
+    },
+    "wing_l": {
+      "frame_min": [
+        -6,
+        -7,
+        -4
+      ]
+    },
+    "wing_r": {
+      "frame_min": [
+        -2,
+        -7,
+        -4
+      ]
+    },
+    "foot": {
+      "frame_min": [
+        -4,
+        -3,
+        -5
+      ]
+    }
+  },
+  "limbs": {
+    "wing_l": {
+      "part": "wing_l",
+      "pivot": [
+        -4.9,
+        9,
+        0
+      ],
+      "role": "wing",
+      "phase": 1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "wing_r": {
+      "part": "wing_r",
+      "pivot": [
+        4.9,
+        9,
+        0
+      ],
+      "role": "wing",
+      "phase": -1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "leg_l": {
+      "part": "foot",
+      "pivot": [
+        -2.5,
+        2,
+        0
+      ],
+      "role": "leg",
+      "phase": 1,
+      "amount": 0.55,
+      "throws": false
+    },
+    "leg_r": {
+      "part": "foot",
+      "pivot": [
+        2.5,
+        2,
+        0
+      ],
+      "role": "leg",
+      "phase": -1,
+      "amount": 0.55,
+      "throws": false
+    }
+  },
+  "hand": [
+    0,
+    11,
+    -8
+  ],
+  "hover": 0,
+  "bob": 0,
+  "waddle": 0.18,
+  "gait": "glide",
+  "flap_rate": 1.8
+}

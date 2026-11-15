@@ -1,0 +1,21 @@
+{
+  "voxel_size": 0.1,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -27,
+        -1,
+        -18
+      ]
+    }
+  },
+  "limbs": {},
+  "hand": [
+    0,
+    19,
+    -17
+  ],
+  "hover": 0,
+  "bob": 0,
+  "waddle": 0.18
+}

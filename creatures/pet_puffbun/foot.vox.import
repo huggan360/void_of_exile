@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://x1ho30ya6il7"
+path="res://.godot/imported/foot.vox-917f5053623c71a7bad6c22e8cc2eb7c.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_puffbun/foot.vox"
+dest_files=["res://.godot/imported/foot.vox-917f5053623c71a7bad6c22e8cc2eb7c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dsuh1sp0w17qs"
+path="res://.godot/imported/body.vox-652b5466e616ec4a44d75a091e818692.tscn"
+
+[deps]
+
+source_file="res://props/pets/little_bridge/body.vox"
+dest_files=["res://.godot/imported/body.vox-652b5466e616ec4a44d75a091e818692.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

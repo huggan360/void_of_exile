@@ -39,6 +39,7 @@ func prepare(destination: String, record: Dictionary) -> GameWorld:
 		detached = packed.instantiate() as GameWorld
 		detached.realm_id = str(record.id)
 		detached.display_name = str(record.get("name","The Hollow Castle"))
+	elif record.get("pet_yard",false) or PetYardWorld.is_pet_yard(destination): kind = "pet_yard"
 	elif record.get("chambers",false): kind = "chambers"
 	elif record.get("space",false): kind = "space"
 	elif record.has("dungeon"): kind = "dungeon"
@@ -94,6 +95,7 @@ func _prepare(kind: String, record: Dictionary, detached: GameWorld, layout: Dic
 	match kind:
 		"island": result = IslandWorld.new(record,layout)
 		"dungeon": result = Dungeons.create_world(record)
+		"pet_yard": result = PetYardWorld.new(record)
 		"chambers": result = ChambersWorld.new(record)
 		"space": result = SpaceWorld.new(record)
 	_set_progress(0.18)

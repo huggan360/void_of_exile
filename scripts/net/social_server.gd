@@ -493,6 +493,8 @@ func _state(party: Dictionary) -> Dictionary:
 func _place_name(realm_id: String) -> String:
 	if realm_id == "hall":
 		return "Tavern"
+	if PetYardWorld.is_pet_yard(realm_id):
+		return "Pet Yard"
 	if Campaigns.is_tavern(realm_id):
 		return "Campaign Tavern"
 	if Campaigns.is_campaign_realm(realm_id):
@@ -511,6 +513,8 @@ func teleport(p: Dictionary, to_name: String) -> bool:
 		system(p.player_id, "%s isn't on this server." % to_name if to_name != "" else "Write /tp <name>.")
 	elif o == p or o.realm == "" or o.dead:
 		system(p.player_id, "You can't go to %s right now." % o.name)
+	elif PetYardWorld.is_pet_yard(o.realm):
+		system(p.player_id, "%s is in their Pet Yard." % o.name)
 	elif ChambersWorld.is_chambers(o.realm):
 		system(p.player_id, "%s is in their Chambers." % o.name)
 	elif p.realm != o.realm and o.realm != "hall" and (Campaigns.is_campaign_realm(o.realm) or Campaigns.is_tavern(o.realm) or Campaigns.is_castle(o.realm)) and not server.campaigns.may_enter(p, o.realm):
@@ -557,6 +561,7 @@ func warp(player_id: int, realm_id: String, pos: Vector3) -> void:
 func _fog_key(p: Dictionary) -> String:
 	if Campaigns.is_campaign_realm(p.realm):
 		return p.realm
+	if PetYardWorld.is_pet_yard(p.realm): return ""
 	if p.realm != "" and not Campaigns.is_tavern(p.realm) and party_of.has(p.player_id):
 		return "%s|%d" % [p.realm, party_of[p.player_id]]
 	return ""

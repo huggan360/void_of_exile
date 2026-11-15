@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bgu7d7jrww0at"
+path="res://.godot/imported/arm_l.vox-f598ad983b93082210b7f22f2330d5db.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_shardling/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-f598ad983b93082210b7f22f2330d5db.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

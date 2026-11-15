@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0qqxsmlmvr4d"
+path="res://.godot/imported/model.vox-365c03caea2c49f26bb5f97a5f9f5c7d.tscn"
+
+[deps]
+
+source_file="res://props/pets/caretaker_cottage/model.vox"
+dest_files=["res://.godot/imported/model.vox-365c03caea2c49f26bb5f97a5f9f5c7d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

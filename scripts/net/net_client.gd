@@ -64,6 +64,7 @@ var _enemy_snaps := {}  # net id -> [[t, PackedFloat32Array], ...]
 var _player_snaps := {}  # player id -> [[t, PackedFloat32Array], ...]
 var _bosses := {}  # net id -> boss bar state
 var _mirrors := {}  # net id -> Enemy
+var _pet_followers := {}  # player id -> PetFollower
 var _remote := {}  # player id -> RemotePlayer
 var _attacks := {}  # key -> attack
 var _shared := {}  # share id -> Array (hit list shared by pieces of one attack)
@@ -73,6 +74,12 @@ var _cache_frame := -1
 var _send_timer := 0.0
 var _seq := 0
 var _pending: Array = []  # [{seq, hp, mp}] predicted changes the server hasn't confirmed
+
+
+func _init() -> void:
+	social_event.connect(func(ev: Array) -> void:
+		if ev.size() == 2 and str(ev[0]) == "pets" and ev[1] is Dictionary: PetsClient.receive(ev[1]))
+	PetsClient.changed.connect(_sync_local_pet)
 
 
 func start(p_address: String, p_port: int, p_token: String, p_character_id: int, p_name: String) -> void:
@@ -96,6 +103,7 @@ func stop() -> void:
 	if _peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
 		_peer.close()
 	connected = false
+	PetsClient.receive(PetDefs.empty_state())
 
 
 func _on_connected() -> void:
@@ -184,9 +192,13 @@ func attach_world(p_world: GameWorld, p_bullets: EnemyBullets, p_arrows: Arrows,
 	director = world.get("enemy_director") as EnemyDirector
 	if director:
 		director.remote = true
+	_sync_local_pet()
 
 
 func clear_world() -> void:
+	for follower: PetFollower in _pet_followers.values():
+		if is_instance_valid(follower): follower.queue_free()
+	_pet_followers.clear()
 	for m in _mirrors.values():
 		if is_instance_valid(m):
 			m.queue_free()
@@ -479,8 +491,10 @@ func _apply(ev: Array) -> void:
 			var age := maxf(0.0,Net.now()+_offset-float(ev[0]))
 			if stats and pid == stats.player_id: stats.buffs.replace_wire(ev[3],age)
 			elif _remote.has(pid): (_remote[pid] as RemotePlayer).buffs.replace_wire(ev[3],age)
-		"p+": _remote_player(int(ev[2]), str(ev[3]), str(ev[4]))
+		"p+": _remote_player(int(ev[2]), str(ev[3]), str(ev[4]), ev[5] if ev.size() > 5 else {})
+		"pet_pulse": _pet_pulse(ev)
 		"p-":
+			_set_pet(int(ev[2]), null, {})
 			var r: Node = _remote.get(int(ev[2]))
 			if is_instance_valid(r):
 				r.queue_free()
@@ -562,7 +576,7 @@ func _hazard(ev: Array) -> void:
 		"hzclr": boss.hazards.clear()
 
 
-func _remote_player(pid: int, player_name: String, gear: String) -> void:
+func _remote_player(pid: int, player_name: String, gear: String, looks: Dictionary = {}) -> void:
 	if not is_instance_valid(world):
 		return
 	var r: RemotePlayer = _remote.get(pid)
@@ -575,7 +589,8 @@ func _remote_player(pid: int, player_name: String, gear: String) -> void:
 		if not s.is_empty():
 			r.global_position = s[0]
 		_remote[pid] = r
-	r.set_look(player_name, gear)
+	r.set_look(player_name, gear.get_slice("|", 0) + "|" + gear.get_slice("|", 1))
+	_set_pet(pid, r, looks.get("pet", {}))
 
 
 func _weapon(id: String) -> Item:
@@ -692,3 +707,33 @@ func _bind_status_tokens(original: Dictionary, tokens: Dictionary, path := "") -
 		attack.terminal = attack.terminal.duplicate()
 		attack.terminal.attack = _bind_status_tokens(attack.terminal.attack,tokens,path+"t")
 	return attack
+
+
+# Equipped companions are owned by the current world, like remote players.
+func _sync_local_pet() -> void:
+	if not is_instance_valid(world) or not is_instance_valid(player): return
+	var pet := PetDefs.find(PetsClient.state, int(PetsClient.state.get("equipped", 0)))
+	_set_pet(int(info.get("player_id", 0)), player, pet)
+
+func _set_pet(pid: int, actor: Node3D, pet: Dictionary) -> void:
+	var old: PetFollower = _pet_followers.get(pid)
+	if is_instance_valid(old):
+		if not pet.is_empty() and old.pet.get("species") == pet.get("species") and old.pet.get("rarity") == pet.get("rarity") and old.follow_target == actor: return
+		old.queue_free()
+	_pet_followers.erase(pid)
+	if pet.is_empty() or actor == null or not is_instance_valid(world): return
+	var follower := PetFollower.new(pet, actor, world)
+	world.add_child(follower)
+	_pet_followers[pid] = follower
+
+func _pet_pulse(ev: Array) -> void:
+	if ev.size() < 6 or not is_instance_valid(world): return
+	var pid := int(ev[2])
+	var follower: PetFollower = _pet_followers.get(pid)
+	var actor: Node3D = player if pid == int(info.get("player_id", 0)) else _remote.get(pid)
+	if not is_instance_valid(actor): return
+	var start := follower.beam_origin() if is_instance_valid(follower) else actor.global_position + Vector3.UP * 0.5
+	if ev.size() > 6 and ev[6] is Vector3: start = ev[6]
+	var end: Vector3 = ev[4]
+	if not end.is_finite(): end = actor.global_position + actor.global_basis.y * 0.9
+	PetBeam.spawn(world, start, end, str(ev[3]))

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ctjexekfmei7s"
+path="res://.godot/imported/body.vox-ceb392e4f6f976ea939669a240a9ceca.tscn"
+
+[deps]
+
+source_file="res://creatures/pet_nebula_jelly/body.vox"
+dest_files=["res://.godot/imported/body.vox-ceb392e4f6f976ea939669a240a9ceca.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

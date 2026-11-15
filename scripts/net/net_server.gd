@@ -34,6 +34,7 @@ var dungeons := DungeonServer.new()
 ## Campaigns and their quests.
 var campaigns := CampaignServer.new()
 var economy := EconomyServer.new()
+var pets := PetServer.new()
 ## The Skyward Launch Pad and the way between the Surface and Space.
 var surface_port := PortServer.new()
 var fleet := FleetServer.new()
@@ -44,6 +45,8 @@ var peers := {}
 var by_player := {}
 ## realm id -> RealmInstance
 var realms := {}
+## Scene-free home layouts, with no enemy simulation.
+var _pet_yards := {}
 ## net id -> Enemy, every realm
 var enemies := {}
 ## realm id -> [{pos, ev, enemy, peer}] waiting to be sent this tick
@@ -97,6 +100,8 @@ func start(p_config: ServerConfig) -> Error:
 	add_child(campaigns)
 	economy.server = self
 	add_child(economy)
+	pets.server = self
+	add_child(pets)
 	fleet.server = self
 	add_child(fleet)
 	surface_port.server = self
@@ -221,11 +226,18 @@ func on_hello(peer_id: int, protocol: int, token: String, character_id: int, acc
 	if not peers.has(peer_id):
 		GameServer.remove_player(player_id)
 		return
+	await pets.load_account(p)
+	if not peers.has(peer_id):
+		await pets.leave(p)
+		GameServer.remove_player(player_id)
+		api.call_api("POST", "/server/release", {character_id = character_id})
+		return
 	campaigns.migrate_story_inventory(p, p.get("story_migration", []))
 	p.erase("story_migration")
 	p.joined = true
 	by_player[player_id] = peer_id
 	economy.send_shops.call_deferred(p)
+	pets.send_state.call_deferred(p)
 	stats.changed.connect(_on_stats_changed.bind(peer_id))
 	stats.leveled_up.connect(func(level: int, gains: Dictionary) -> void:
 		_to_peer(peer_id, ["lvl", level, gains]))
@@ -315,6 +327,7 @@ func _switch_character(peer_id: int, p: Dictionary, token: String, character_id:
 	campaigns._keep_items(social.party_for(p.player_id))
 	p.switching = true
 	var old_id: int = p.character_id
+	await pets.save_account(p)
 	if not p.dead:
 		await _save_record(p)
 		await api.call_api("POST", "/server/release", {character_id = old_id})
@@ -334,6 +347,7 @@ func _switch_character(peer_id: int, p: Dictionary, token: String, character_id:
 	p.character_id = character_id
 	p.dead = false
 	_take_character(p, stats, r.data)
+	await pets.load_account(p)
 	GameServer.revive(p.player_id)
 	campaigns._restore_items(p, campaigns._run_of(social.party_for(p.player_id)))
 	_send_character(peer_id)
@@ -360,6 +374,7 @@ func _on_peer_left(peer_id: int) -> void:
 	_leave_realm(p)
 	social.on_left(p)
 	campaigns.on_left(p)
+	await pets.leave(p)
 	if not p.dead and not p.switching:
 		await _save_record(p)
 		await api.call_api("POST", "/server/release", {character_id = p.character_id})
@@ -402,6 +417,8 @@ func _grave(p: Dictionary, stats: PlayerStats) -> Array:
 
 ## Saves and lets go of everyone (the server is stopping).
 func save_all() -> void:
+	for p: Dictionary in peers.values():
+		if p.joined: await pets.save_account(p)
 	await fleet.save_all()
 	for party: Dictionary in social.parties.values(): campaigns._keep_world(party)
 	await campaigns.flush()
@@ -435,7 +452,16 @@ func on_enter(peer_id: int, destination: String) -> void:
 			return
 		destination = found[0]
 	destination = surface_port.redirect(p, destination)
-	if ChambersWorld.is_chambers(destination):
+	if PetYardWorld.is_pet_yard(destination):
+		if int(p.account_id) <= 0:
+			Net.c_entered.rpc_id(peer_id, {error = "The Pet Yard needs an account."})
+			return
+		var own_yard := PetYardWorld.id_for(int(p.account_id))
+		if destination != "pet_yard" and destination != own_yard:
+			Net.c_entered.rpc_id(peer_id, {error = "That Pet Yard belongs to another account."})
+			return
+		record = {id = own_yard, pet_yard = true, name = "Your Pet Yard", arrival_pos = PetYardWorld.SPAWN_POINT}
+	elif ChambersWorld.is_chambers(destination):
 		if p.account_id == 0:
 			Net.c_entered.rpc_id(peer_id, {error = "The Chambers need an account."})
 			return
@@ -487,6 +513,12 @@ func on_enter(peer_id: int, destination: String) -> void:
 			Net.c_entered.rpc_id(peer_id, {error = "Every realm is full right now. Try again in a moment."})
 			return
 	_leave_realm(p)
+	if record.get("pet_yard", false) and not _pet_yards.has(record.id):
+		var yard := PetYardWorld.new(record)
+		yard.server_build = true
+		_pet_yards[record.id] = yard
+		add_child(yard)
+		GameServer.set_environment(yard)
 	if realm:
 		record = {id = realm.realm_id, seed = realm.record.seed, destroyed = realm.record.destroyed.duplicate(),
 			name = realm.record.get("name", ""), layout_version = realm.record.get("layout_version", 1),
@@ -535,7 +567,9 @@ func on_enter(peer_id: int, destination: String) -> void:
 	if realm:
 		for g: Dictionary in realm.graves:
 			_to_peer(peer_id, ["grave", g.pos, g.title, false])
-	if record.get("chambers", false):
+	if record.get("pet_yard", false):
+		social.system(p.player_id, "Your Pet Yard. The Caretaker and Pet Store are by the nest.")
+	elif record.get("chambers", false):
 		social.system(p.player_id, "Your Chambers: %d chests, shared by every character of your account." % record.chests)
 	else: social.system(p.player_id, ("Welcome to [place]the Tavern[/place], %s." % p.name if record.id == "hall" else
 			"Back at [place]the Tavern[/place]. Your party's tale goes on.") if realm == null else
@@ -558,6 +592,13 @@ func _leave_realm(p: Dictionary) -> void:
 		realm.world.surface_ships.player_left(p.player_id)
 	if realm:
 		realm.remove_player(p.player_id)
+	if _pet_yards.has(p.realm):
+		var occupied := false
+		for other: Dictionary in peers.values():
+			if other.player_id != p.player_id and other.realm == p.realm: occupied = true
+		if not occupied:
+			_pet_yards[p.realm].queue_free()
+			_pet_yards.erase(p.realm)
 	p.realm = ""
 
 
@@ -676,6 +717,11 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		speed = 0.0
 		if GameServer.intro_locked(p.player_id): flags = flags & ~1
 	var active_realm: RealmInstance = realms.get(p.realm)
+	if _pet_yards.has(p.realm):
+		var yard: PetYardWorld = _pet_yards[p.realm]
+		if not pos.is_finite() or not yard.clear_segment(p.pos, pos) or absf(pos.y - yard.ground_height(pos.x, pos.z)) > 3.0:
+			Net.c_correct.rpc_id(peer_id, p.pos)
+			return
 	var lounge_seat := Leisure.seat_spec(int(p.player_id), active_realm.world if active_realm else null)
 	if not lounge_seat.is_empty():
 		pos = lounge_seat.pos
@@ -766,6 +812,9 @@ func on_action(peer_id: int, kind: String, args: Array) -> void:
 	if Leisure.hands_busy(pid):
 		if kind in ["hit", "ring", "obstacle", "obstacle_hit"]: return
 		if kind=="shield" and (args.is_empty() or bool(args[0])): return
+	if kind in ["pet_hatch", "pet_feed", "pet_merge", "pet_equip"]:
+		pets.on_action(p, kind, args)
+		return
 	if kind=="leisure":
 		var lounge: RealmInstance = realms.get(str(p.realm))
 		Leisure.action(p, args, lounge.world if lounge else null)
@@ -886,12 +935,12 @@ func on_pong(peer_id: int, t: float) -> void:
 func _unstuck(peer_id: int, p: Dictionary, pos: Vector3, spawn := false) -> void:
 	var t := Net.now()
 	var realm: RealmInstance = realms.get(p.realm)
+	var place: GameWorld = realm.world if realm else _pet_yards.get(p.realm)
 	var allowed: bool = p.get("spawn_fix", false) if spawn else t - float(p.get("unstuck_at", -100.0)) >= Unstuck.COOLDOWN - 0.5
 	if spawn: p.spawn_fix = false
-	var ok := realm != null and allowed and pos.is_finite() and pos.distance_to(p.pos) <= Unstuck.MAX_DISTANCE + 3.0 \
+	var ok := place != null and allowed and pos.is_finite() and pos.distance_to(p.pos) <= Unstuck.MAX_DISTANCE + 3.0 \
 			and (spawn or not GameServer.intro_locked(p.player_id))
 	if ok:
-		var place: GameWorld = realm.world
 		if place is IslandWorld and SpaceLayout.pocket_at(p.pos) >= 0: place = (place as IslandWorld).surface_ships
 		if place is SpatialWorld:
 			ok = (place as SpatialWorld).barrier_between(p.pos, pos).is_empty() and place.is_walkable(pos)
@@ -904,7 +953,7 @@ func _unstuck(peer_id: int, p: Dictionary, pos: Vector3, spawn := false) -> void
 	p.pos = pos
 	p.grace = SNAP_BACK_GRACE * 4.0
 	p.moved_at = t
-	if realm.proxies.has(p.player_id): realm.proxies[p.player_id].global_position = pos
+	if realm and realm.proxies.has(p.player_id): realm.proxies[p.player_id].global_position = pos
 	GameServer.report_position(p.player_id, p.realm, pos)
 	Net.c_correct.rpc_id(peer_id, pos)
 
@@ -989,6 +1038,7 @@ func _on_player_died(player_id: int, lost: int) -> void:
 		grave.push_front(Net.now())
 		Net.c_events.rpc_id(peer_id, [grave])
 	print("[server] %s's character #%d died (level %d, killed by %s)" % [p.name, p.character_id, stats.level, killed_by])
+	await pets.save_account(p)
 	var data := stats.to_data()
 	var r := await api.call_api("POST", "/server/die", {character_id = p.character_id, data = data,
 			killed_by = killed_by, realm = realm_id, account_xp = p.acct_pending if not config.test_mode else 0})
@@ -1328,7 +1378,7 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 		seen_players[o.player_id] = true
 		var gear := _gear_key(o.player_id)
 		if p.known_players.get(o.player_id, "") != gear:
-			events.append([t, "p+", o.player_id, o.name, gear])
+			events.append([t, "p+", o.player_id, o.name, gear, {pet = pets.looks(o)}])
 		var other_stats := GameServer.character(o.player_id)
 		if other_stats and p.known_effects.get(o.player_id,-1) != other_stats.buffs.revision:
 			events.append([t,"buffs",o.player_id,other_stats.buffs.wire()])
@@ -1401,7 +1451,8 @@ func _gear_key(player_id: int) -> String:
 	var ids := []
 	for slot in PlayerStats.GEAR_SLOTS:
 		ids.append(stats.gear[slot].id if stats.gear[slot] else "")
-	return stats.class_id + "|" + ",".join(ids)
+	var p: Dictionary = peers.get(by_player.get(player_id, 0), {})
+	return stats.class_id + "|" + ",".join(ids) + "|" + JSON.stringify(pets.looks(p))
 
 
 # --- Finding the server -----------------------------------------------------------
