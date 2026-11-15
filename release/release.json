@@ -1,12 +1,13 @@
 {
-  "version": "26.1-beta",
-  "title": "Every Tale Begins",
-  "date": "2026-11-14",
+  "version": "26.2-beta",
+  "title": "Into the Deep",
+  "date": "2026-11-15",
   "notes": [
-    "Every chapter now opens with its own film",
-    "What the Realm Remembers: the story of the realm, at the end of The Lily Thief",
-    "Films stream their places in before they show them, with focus blur and a film look",
-    "The Surface loads around you several times faster",
-    "No more stutter when walking into a town"
+    "Eight new dungeons below the Surface, from the Sporewomb to the Starless Sepulchre",
+    "Eight new bosses and eight Divine sets",
+    "Monsters remade with a new look",
+    "Sunbeams and light haze, with a new Volumetric fog setting",
+    "New music for the Surface, the Chambers, Afterlife and the realm history film",
+    "Smoother fights when the screen is full of shots"
   ]
 }
