@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cqvqqm4c1bhsv"
+path="res://.godot/imported/body_abyss.vox-15371f92d81019997fcf24a4a551e1e1.tscn"
+
+[deps]
+
+source_file="res://creatures/captain_saltmourn/body_abyss.vox"
+dest_files=["res://.godot/imported/body_abyss.vox-15371f92d81019997fcf24a4a551e1e1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

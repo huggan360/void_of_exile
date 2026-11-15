@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cl8pegtrcpg3v"
+path="res://.godot/imported/jaw.vox-f1a5aa02fa54b0e1b294434b271910e5.tscn"
+
+[deps]
+
+source_file="res://creatures/mother_mycora/jaw.vox"
+dest_files=["res://.godot/imported/jaw.vox-f1a5aa02fa54b0e1b294434b271910e5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dti7ocgyqu73n"
+path="res://.godot/imported/model.vox-25884101f322776394aba7b067784791.tscn"
+
+[deps]
+
+source_file="res://creatures/glowcap_sprite/model.vox"
+dest_files=["res://.godot/imported/model.vox-25884101f322776394aba7b067784791.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

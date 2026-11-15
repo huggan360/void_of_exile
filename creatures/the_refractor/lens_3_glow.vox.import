@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cmkb0w1d4wwe7"
+path="res://.godot/imported/lens_3_glow.vox-49621ea07dda05cc67c180d1030b6e75.tscn"
+
+[deps]
+
+source_file="res://creatures/the_refractor/lens_3_glow.vox"
+dest_files=["res://.godot/imported/lens_3_glow.vox-49621ea07dda05cc67c180d1030b6e75.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

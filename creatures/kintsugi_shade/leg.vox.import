@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cy84ge7wxl44h"
+path="res://.godot/imported/leg.vox-0dc41fd956536f24c2d4e61eb7cfade3.tscn"
+
+[deps]
+
+source_file="res://creatures/kintsugi_shade/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-0dc41fd956536f24c2d4e61eb7cfade3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

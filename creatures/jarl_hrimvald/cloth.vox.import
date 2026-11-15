@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dit8p04yostti"
+path="res://.godot/imported/cloth.vox-410265e0d1e9031c479e611eaa93b34b.tscn"
+
+[deps]
+
+source_file="res://creatures/jarl_hrimvald/cloth.vox"
+dest_files=["res://.godot/imported/cloth.vox-410265e0d1e9031c479e611eaa93b34b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

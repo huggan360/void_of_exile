@@ -1,0 +1,213 @@
+{
+  "voxel_size": 0.07,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -14,
+        10,
+        -6
+      ],
+      "glow": true
+    },
+    "lens_0": {
+      "frame_min": [
+        -7,
+        -7,
+        -2
+      ],
+      "glow": true
+    },
+    "lens_1": {
+      "frame_min": [
+        -6,
+        -6,
+        -2
+      ],
+      "glow": true
+    },
+    "lens_2": {
+      "frame_min": [
+        -7,
+        -7,
+        -2
+      ],
+      "glow": true
+    },
+    "lens_3": {
+      "frame_min": [
+        -6,
+        -6,
+        -2
+      ],
+      "glow": true
+    },
+    "lens_4": {
+      "frame_min": [
+        -7,
+        -7,
+        -2
+      ],
+      "glow": true
+    },
+    "lens_5": {
+      "frame_min": [
+        -6,
+        -6,
+        -2
+      ],
+      "glow": true
+    },
+    "lens_6": {
+      "frame_min": [
+        -7,
+        -7,
+        -2
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -3,
+        -2,
+        -3
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -4,
+        -13,
+        -4
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -2,
+        -13,
+        -4
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "lens_0": {
+      "part": "lens_0",
+      "pivot": [
+        0,
+        39,
+        1
+      ],
+      "role": "sway",
+      "phase": 1,
+      "amount": 0.4
+    },
+    "lens_1": {
+      "part": "lens_1",
+      "pivot": [
+        -11,
+        32,
+        3
+      ],
+      "role": "sway",
+      "phase": -1,
+      "amount": 0.4
+    },
+    "lens_2": {
+      "part": "lens_2",
+      "pivot": [
+        -15,
+        20,
+        1
+      ],
+      "role": "sway",
+      "phase": 1,
+      "amount": 0.4
+    },
+    "lens_3": {
+      "part": "lens_3",
+      "pivot": [
+        -6,
+        10,
+        3
+      ],
+      "role": "sway",
+      "phase": -1,
+      "amount": 0.4
+    },
+    "lens_4": {
+      "part": "lens_4",
+      "pivot": [
+        7,
+        9,
+        1
+      ],
+      "role": "sway",
+      "phase": 1,
+      "amount": 0.4
+    },
+    "lens_5": {
+      "part": "lens_5",
+      "pivot": [
+        14,
+        20,
+        3
+      ],
+      "role": "sway",
+      "phase": -1,
+      "amount": 0.4
+    },
+    "lens_6": {
+      "part": "lens_6",
+      "pivot": [
+        12,
+        33,
+        1
+      ],
+      "role": "sway",
+      "phase": 1,
+      "amount": 0.4
+    },
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        41,
+        1
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -10,
+        17,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        10,
+        17,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    }
+  },
+  "hand": [
+    1,
+    -11,
+    -1
+  ],
+  "hover": 0.07,
+  "bob": 0.035,
+  "waddle": 0,
+  "hand_limb": "arm_r"
+}

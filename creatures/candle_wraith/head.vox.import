@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://6txf23lnt2cc"
+path="res://.godot/imported/head.vox-139e2dab65eec2d84a6aa0ffd7e7a92c.tscn"
+
+[deps]
+
+source_file="res://creatures/candle_wraith/head.vox"
+dest_files=["res://.godot/imported/head.vox-139e2dab65eec2d84a6aa0ffd7e7a92c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

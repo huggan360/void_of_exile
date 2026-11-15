@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://k1tst2apj5ei"
+path="res://.godot/imported/head.vox-858fd4abba253de982a092d16f21b2e2.tscn"
+
+[deps]
+
+source_file="res://creatures/mother_mycora/head.vox"
+dest_files=["res://.godot/imported/head.vox-858fd4abba253de982a092d16f21b2e2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://3ds2aiwa2swt"
+path="res://.godot/imported/head_glow.vox-fde96302c008571e1fa4b9e382597fa5.tscn"
+
+[deps]
+
+source_file="res://creatures/temple_skink/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-fde96302c008571e1fa4b9e382597fa5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

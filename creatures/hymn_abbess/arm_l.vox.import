@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://yoejy04oce6b"
+path="res://.godot/imported/arm_l.vox-fdfdd7f55248d619f917896a36dd2ae9.tscn"
+
+[deps]
+
+source_file="res://creatures/hymn_abbess/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-fdfdd7f55248d619f917896a36dd2ae9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

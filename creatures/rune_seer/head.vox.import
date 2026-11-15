@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://t1mocswuqjln"
+path="res://.godot/imported/head.vox-e6f3eb9d70e155ab0c0ba51d227eceeb.tscn"
+
+[deps]
+
+source_file="res://creatures/rune_seer/head.vox"
+dest_files=["res://.godot/imported/head.vox-e6f3eb9d70e155ab0c0ba51d227eceeb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

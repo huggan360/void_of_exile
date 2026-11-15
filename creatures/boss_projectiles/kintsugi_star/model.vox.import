@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://h87tiaf7p2s3"
+path="res://.godot/imported/model.vox-1b750b681cdec66591af02413cd2b113.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/kintsugi_star/model.vox"
+dest_files=["res://.godot/imported/model.vox-1b750b681cdec66591af02413cd2b113.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

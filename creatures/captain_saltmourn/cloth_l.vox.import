@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://tfo2btg3iqpb"
+path="res://.godot/imported/cloth_l.vox-e8f794ccf1617a22f5d33b580b21604c.tscn"
+
+[deps]
+
+source_file="res://creatures/captain_saltmourn/cloth_l.vox"
+dest_files=["res://.godot/imported/cloth_l.vox-e8f794ccf1617a22f5d33b580b21604c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

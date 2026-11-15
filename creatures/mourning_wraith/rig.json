@@ -1,0 +1,114 @@
+{
+  "voxel_size": 0.075,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -7,
+        -1,
+        -6
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -5,
+        -4,
+        -5
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -4,
+        -16,
+        -5
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -3,
+        -16,
+        -5
+      ],
+      "glow": true
+    },
+    "veil_l": {
+      "frame_min": [
+        -4,
+        -13,
+        -3
+      ]
+    },
+    "veil_r": {
+      "frame_min": [
+        -3,
+        -13,
+        -3
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        30,
+        -1
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -4,
+        26,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        4,
+        26,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "veil_l": {
+      "part": "veil_l",
+      "pivot": [
+        -3,
+        12,
+        2
+      ],
+      "role": "cloth",
+      "phase": 1
+    },
+    "veil_r": {
+      "part": "veil_r",
+      "pivot": [
+        3,
+        12,
+        2
+      ],
+      "role": "cloth",
+      "phase": -1
+    }
+  },
+  "hand": [
+    0,
+    -14,
+    -3
+  ],
+  "hand_limb": "arm_r",
+  "hover": 0.2,
+  "bob": 0.04,
+  "waddle": 0
+}

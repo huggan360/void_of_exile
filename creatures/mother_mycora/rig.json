@@ -1,0 +1,202 @@
+{
+  "voxel_size": 0.085,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -15,
+        0,
+        -10
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -30,
+        -7,
+        -16
+      ],
+      "glow": true
+    },
+    "body_bloom": {
+      "frame_min": [
+        -15,
+        0,
+        -10
+      ],
+      "glow": true
+    },
+    "head_bloom": {
+      "frame_min": [
+        -30,
+        -7,
+        -16
+      ],
+      "glow": true
+    },
+    "body_rot": {
+      "frame_min": [
+        -15,
+        0,
+        -10
+      ],
+      "glow": true
+    },
+    "head_rot": {
+      "frame_min": [
+        -30,
+        -7,
+        -16
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -5,
+        -3,
+        -5
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -5,
+        -21,
+        -7
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -3,
+        -21,
+        -7
+      ],
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        -5,
+        -6,
+        -8
+      ]
+    },
+    "cloth_l": {
+      "frame_min": [
+        -6,
+        -20,
+        -3
+      ]
+    },
+    "cloth_r": {
+      "frame_min": [
+        -3,
+        -20,
+        -3
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        47,
+        -1
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -3,
+        -9
+      ],
+      "role": "jaw",
+      "phase": 1.0,
+      "parent_limb": "head"
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -9,
+        40,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        9,
+        40,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -6,
+        5,
+        0
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        6,
+        5,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "cloth_l": {
+      "part": "cloth_l",
+      "pivot": [
+        -7,
+        25,
+        6
+      ],
+      "role": "cloth",
+      "phase": 1
+    },
+    "cloth_r": {
+      "part": "cloth_r",
+      "pivot": [
+        7,
+        25,
+        6
+      ],
+      "role": "cloth",
+      "phase": -1
+    }
+  },
+  "hand": [
+    2,
+    -16,
+    -4
+  ],
+  "animation_style": "cantor",
+  "hand_limb": "arm_r",
+  "glow_strength": 1.2,
+  "waddle": 0.07,
+  "bob": 0.018,
+  "variants": {
+    "bloom": {
+      "body": "body_bloom",
+      "head": "head_bloom"
+    },
+    "rot": {
+      "body": "body_rot",
+      "head": "head_rot"
+    }
+  }
+}

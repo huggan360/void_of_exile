@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://buv0gho3gur2p"
+path="res://.godot/imported/head_glow.vox-39e4409ec5c7c3b229186e489ef449b7.tscn"
+
+[deps]
+
+source_file="res://creatures/mourning_wraith/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-39e4409ec5c7c3b229186e489ef449b7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

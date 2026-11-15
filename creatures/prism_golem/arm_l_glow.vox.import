@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://du4ulrc4ve1gl"
+path="res://.godot/imported/arm_l_glow.vox-71d20d9c2fdd261cd7cc58cb0812c969.tscn"
+
+[deps]
+
+source_file="res://creatures/prism_golem/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-71d20d9c2fdd261cd7cc58cb0812c969.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://86lowbqbjmf4"
+path="res://.godot/imported/model.vox-e88a1d9df3d75c1cc413c278d62e9ccf.tscn"
+
+[deps]
+
+source_file="res://creatures/rime_hound/model.vox"
+dest_files=["res://.godot/imported/model.vox-e88a1d9df3d75c1cc413c278d62e9ccf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

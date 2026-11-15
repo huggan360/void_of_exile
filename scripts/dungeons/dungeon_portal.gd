@@ -21,6 +21,7 @@ var _close_opening := 1.0
 var _style: Dictionary
 var _suction: MultiMeshInstance3D
 var _motes: Array[Vector3] = []  # per mote: start angle, start radius, progress 0..1
+var _dressing: DungeonPortalStyles  # portal_hole.shape: the Surface dungeons' own doors
 
 func _init(p_data: Dictionary = {}) -> void:
 	data = p_data
@@ -33,6 +34,11 @@ func _ready() -> void:
 	_style = definition.portal_hole
 	_build_hole()
 	_build_suction()
+	if _style.has("shape") and not Net.is_server():
+		_surface.set_shader_parameter("glow_color", _style.get("glow", Color.WHITE))
+		_surface.set_shader_parameter("glow_amount", 0.9)
+		_dressing = DungeonPortalStyles.new(_style)
+		add_child(_dressing)
 	target = InteractionTarget.new()
 	target.title = "Return to the Realm" if data.get("exit", false) else definition.name
 	target.description = "Return to the realm this cave opened from." if data.get("exit", false) else "Difficulty [b]%.1f/10[/b] - %s - common loot up to G%d" % [definition.rating, definition.get("damage_hint", "enemies hit hard" if definition.rating >= 7.0 else "enemies hit moderately"), definition.common_tier]
@@ -183,6 +189,7 @@ func _process(delta: float) -> void:
 			queue_free()
 			return
 	_update_suction(delta, opening)
+	if _dressing: _dressing.update(delta, opening, growth)
 	_surface.set_shader_parameter("opening", opening)
 	_surface.set_shader_parameter("flash", flash)
 	var voxel: float = _style.voxel

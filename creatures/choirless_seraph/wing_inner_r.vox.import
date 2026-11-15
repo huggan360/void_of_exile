@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dlsyl5rg8t146"
+path="res://.godot/imported/wing_inner_r.vox-6aa9f8775509bcab4afa806a801e0cda.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/wing_inner_r.vox"
+dest_files=["res://.godot/imported/wing_inner_r.vox-6aa9f8775509bcab4afa806a801e0cda.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

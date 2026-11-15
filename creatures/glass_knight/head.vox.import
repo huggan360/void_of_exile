@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d4unqm13iic"
+path="res://.godot/imported/head.vox-327acbfcdd48846e5eb86be506fd92a5.tscn"
+
+[deps]
+
+source_file="res://creatures/glass_knight/head.vox"
+dest_files=["res://.godot/imported/head.vox-327acbfcdd48846e5eb86be506fd92a5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

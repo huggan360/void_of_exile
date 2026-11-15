@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://gp0i5ihu00pv"
+path="res://.godot/imported/arm_l_radiant_glow.vox-12e3c75e2ff3d873b50c80bd56c0ee2e.tscn"
+
+[deps]
+
+source_file="res://creatures/ixalith/arm_l_radiant_glow.vox"
+dest_files=["res://.godot/imported/arm_l_radiant_glow.vox-12e3c75e2ff3d873b50c80bd56c0ee2e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

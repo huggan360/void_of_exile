@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cna7rdf8eneul"
+path="res://.godot/imported/root_r.vox-68e31faaf1dc01559c0f0d23bbeb383b.tscn"
+
+[deps]
+
+source_file="res://creatures/grave_creeper/root_r.vox"
+dest_files=["res://.godot/imported/root_r.vox-68e31faaf1dc01559c0f0d23bbeb383b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

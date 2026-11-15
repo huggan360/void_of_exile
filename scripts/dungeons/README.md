@@ -45,3 +45,4 @@ Validation is offline: headless import, `tools/check_dungeons.tscn`, and a short
 - `follow_up` (dungeon id): its boss opens a follow-up portal by the boss's `follow_up.chance` (default 0.5); campaign
   story dungeons always open theirs, and keep both story portals until the follow-up is cleared.
 - Dungeons: goblins_cave 2.5/10, sunken_court 4/10 (hall), cinder_depths 5/10 (volcano) -> cinder_depths_encore 7/10 (arena).
+- Surface dungeons (0.25 m voxels, glow framework): see docs/dungeons/SURFACE_DUNGEONS.md.

@@ -7,7 +7,8 @@ from pathlib import Path
 from PIL import Image
 # Boss-assigned sets (keep in step with Items.DIVINE_SETS). Every set is live now.
 LIVE_SETS = {"Spirit", "Iron", "The_Blue", "Frost", "Satan", "Holy_Divine", "Void", "Fallenwood", "Silver", "Dragon_Fire",
-             "Storm", "Venom", "Eclipse", "Blood", "Madness", "Cindrella", "Goldslinger", "Ash"}
+             "Storm", "Venom", "Eclipse", "Blood", "Madness", "Cindrella", "Goldslinger", "Ash",
+             "Mycelium", "Saltmourn", "Jade", "Afterlife", "Barrow", "Prism", "Requiem", "Unmade"}
 # Legacy source filenames -> runtime item ids.
 ALIASES = {"crucefix of thalao": "D_bonus_crucifix_ofthalao",
            "flame of the broken": "D_bonus_flame_ofthebroken","crucefix of the blue": "D_bonus_crucifix_oftheblue",

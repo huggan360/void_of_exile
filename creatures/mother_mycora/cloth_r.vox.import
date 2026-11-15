@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b4oe5xqldl0rk"
+path="res://.godot/imported/cloth_r.vox-e3d283ce1f084431ed46a84825b4c9c6.tscn"
+
+[deps]
+
+source_file="res://creatures/mother_mycora/cloth_r.vox"
+dest_files=["res://.godot/imported/cloth_r.vox-e3d283ce1f084431ed46a84825b4c9c6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

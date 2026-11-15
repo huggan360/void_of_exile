@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bsse28hw8r3ce"
+path="res://.godot/imported/leg_l_1.vox-f3f759ba0b84d486eba71a965fda7e06.tscn"
+
+[deps]
+
+source_file="res://creatures/rime_hound/leg_l_1.vox"
+dest_files=["res://.godot/imported/leg_l_1.vox-f3f759ba0b84d486eba71a965fda7e06.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

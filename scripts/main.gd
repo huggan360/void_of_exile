@@ -196,7 +196,10 @@ func _ready() -> void:
 		return
 	if _args.has("watch-dungeon"):
 		GameServer.debug_godmode = true
-		_load_world("dng_goblins_cave_preview", Dungeons.record("dng_goblins_cave_preview", "goblins_cave", int(_args.get("seed", "4217"))))
+		var watched := str(_args["watch-dungeon"])
+		if not Dungeons.DEFINITIONS.has(watched) or watched == "theory_of_everything": watched = "goblins_cave"
+		var preview := "dng_%s_preview" % watched
+		_load_world(preview, Dungeons.record(preview, watched, int(_args.get("seed", "4217"))))
 		var watcher = load("res://tools/boss_watch/goblin_watcher.gd").new()
 		watcher.game = self
 		add_child(watcher)
@@ -669,6 +672,14 @@ func _on_shot(origin: Vector3, direction: Vector3, damage: int, weapon: Item, ph
 func _on_shot_burst(pos: Vector3, burst: String, weapon: Item, hit_object: bool) -> void:
 	if hit_object: GameAudio.play("magic_explosion", pos, {cooldown = 0.12})
 	var c: Dictionary = weapon.charge
+	if burst == "refract":
+		# The prism splits into a ring of shards, every one a share of a shot.
+		var count := int(c.get("count", 10))
+		for i in count:
+			var dir := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / count + randf() * 0.2)
+			_on_shot(pos + dir * 0.4, dir, int(round(stats.roll_damage() * float(c.get("shard_mult", 0.5)))), weapon, PI * (i % 2),
+				{secondary = true, speed = 0.9, size = 0.9, range = 0.45})
+		return
 	var blast := Item.new()  # a one-off "spell" describing the ring
 	blast.ring = {damage = c.get("ring_damage", 150), range = c.get("ring_range", 6.0), speed = 14.0}
 	blast.id = weapon.id

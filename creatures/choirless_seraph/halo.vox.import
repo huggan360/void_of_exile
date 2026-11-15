@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dog878iev3n3d"
+path="res://.godot/imported/halo.vox-aeba07e598f662e54949ef141965e8d7.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/halo.vox"
+dest_files=["res://.godot/imported/halo.vox-aeba07e598f662e54949ef141965e8d7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

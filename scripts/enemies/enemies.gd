@@ -396,6 +396,7 @@ static func _build() -> void:
 	CourtEnemies.build(_defs)
 	BlueDungeonEnemies.build(_defs)
 	TheoryEnemies.build(_defs)
+	SurfaceDungeonEnemies.build(_defs)
 	SpaceEnemies.build(_defs)
 	PlanetBosses.build(_defs)
 	_defs["sun_jackal"].portal_drop = {dungeon = "sunken_court", chance = 0.3}

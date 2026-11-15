@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ciwp78p1w1n4t"
+path="res://.godot/imported/arm_r3.vox-2d809e31576700538a5e8719afea8f29.tscn"
+
+[deps]
+
+source_file="res://creatures/oblivara/arm_r3.vox"
+dest_files=["res://.godot/imported/arm_r3.vox-2d809e31576700538a5e8719afea8f29.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

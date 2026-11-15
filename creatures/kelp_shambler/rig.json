@@ -1,0 +1,154 @@
+{
+  "voxel_size": 0.075,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -10,
+        1,
+        -7
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -7,
+        -5,
+        -6
+      ],
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        -5,
+        -7,
+        -8
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -5,
+        -19,
+        -5
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        -4,
+        -19,
+        -5
+      ]
+    },
+    "kelp_0": {
+      "frame_min": [
+        -3,
+        -22,
+        -3
+      ]
+    },
+    "kelp_1": {
+      "frame_min": [
+        -3,
+        -22,
+        -3
+      ]
+    },
+    "kelp_2": {
+      "frame_min": [
+        -3,
+        -22,
+        -3
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        27,
+        -3
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -4,
+        6,
+        0
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        4,
+        6,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -7,
+        24,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        7,
+        24,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "kelp_0": {
+      "part": "kelp_0",
+      "pivot": [
+        -5,
+        24,
+        5
+      ],
+      "role": "sway",
+      "phase": 1
+    },
+    "kelp_1": {
+      "part": "kelp_1",
+      "pivot": [
+        5,
+        26,
+        4
+      ],
+      "role": "sway",
+      "phase": -1
+    },
+    "kelp_2": {
+      "part": "kelp_2",
+      "pivot": [
+        0,
+        29,
+        5
+      ],
+      "role": "sway",
+      "phase": 1
+    }
+  },
+  "hand": [
+    0,
+    -15,
+    -3
+  ],
+  "hand_limb": "arm_r",
+  "waddle": 0.17,
+  "bob": 0.025
+}

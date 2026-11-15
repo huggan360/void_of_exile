@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b8uvxai85f2ds"
+path="res://.godot/imported/body_glow.vox-51598d3ea59dbe33aa1038cde05f6f65.tscn"
+
+[deps]
+
+source_file="res://creatures/grave_creeper/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-51598d3ea59dbe33aa1038cde05f6f65.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

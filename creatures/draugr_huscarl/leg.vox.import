@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bhyvnqqpcsasv"
+path="res://.godot/imported/leg.vox-5d8d8a8e2285c2ee346bde22598b70a1.tscn"
+
+[deps]
+
+source_file="res://creatures/draugr_huscarl/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-5d8d8a8e2285c2ee346bde22598b70a1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

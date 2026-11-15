@@ -1,0 +1,106 @@
+{
+  "voxel_size": 0.07,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -12,
+        3,
+        -9
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -6,
+        -12,
+        -5
+      ],
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        -4,
+        -13,
+        -6
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -15,
+        -24,
+        -9
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -5,
+        -28,
+        -6
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        40,
+        0
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -4,
+        12,
+        0
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        4,
+        12,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -8,
+        33,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false,
+      "amount": 0.5
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        8,
+        33,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    }
+  },
+  "hand": [
+    0,
+    -28,
+    -5
+  ],
+  "hand_limb": "arm_r",
+  "waddle": 0.07
+}

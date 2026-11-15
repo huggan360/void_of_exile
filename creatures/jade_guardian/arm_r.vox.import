@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://busyyt8ax5cim"
+path="res://.godot/imported/arm_r.vox-0cff908a3c3fb2611329e7e125dbd4ef.tscn"
+
+[deps]
+
+source_file="res://creatures/jade_guardian/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-0cff908a3c3fb2611329e7e125dbd4ef.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://kc7ik7wvhhjl"
+path="res://.godot/imported/body.vox-2d1eb6c2c7f45c530fbb57c3551ede3b.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_deckhand/body.vox"
+dest_files=["res://.godot/imported/body.vox-2d1eb6c2c7f45c530fbb57c3551ede3b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

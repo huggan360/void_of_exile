@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c76eyrln58quq"
+path="res://.godot/imported/model.vox-ca92e1a765e814fd800adfca786e534c.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/frost_rune/model.vox"
+dest_files=["res://.godot/imported/model.vox-ca92e1a765e814fd800adfca786e534c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

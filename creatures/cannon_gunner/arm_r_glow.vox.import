@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c221pv4hfint7"
+path="res://.godot/imported/arm_r_glow.vox-6e8b4cd96eaeebefa731e497d5edce1b.tscn"
+
+[deps]
+
+source_file="res://creatures/cannon_gunner/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-6e8b4cd96eaeebefa731e497d5edce1b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

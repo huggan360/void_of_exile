@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://crsvks2kyw885"
+path="res://.godot/imported/halo.vox-de3d3ef12773ff904464c8330013c0bb.tscn"
+
+[deps]
+
+source_file="res://creatures/oblivara/halo.vox"
+dest_files=["res://.godot/imported/halo.vox-de3d3ef12773ff904464c8330013c0bb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

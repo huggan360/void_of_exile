@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bvtdeh60d5ka7"
+path="res://.godot/imported/model.vox-edfd3e771c560f4ec48999c5084141cb.tscn"
+
+[deps]
+
+source_file="res://creatures/captain_saltmourn/model.vox"
+dest_files=["res://.godot/imported/model.vox-edfd3e771c560f4ec48999c5084141cb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

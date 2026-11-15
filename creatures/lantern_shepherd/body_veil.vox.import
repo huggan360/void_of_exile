@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://3fh1bm5lcyki"
+path="res://.godot/imported/body_veil.vox-0a1bc7c327cc7843d377034e7d529955.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_shepherd/body_veil.vox"
+dest_files=["res://.godot/imported/body_veil.vox-0a1bc7c327cc7843d377034e7d529955.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

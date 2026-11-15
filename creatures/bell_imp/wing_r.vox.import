@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dpyd3cumgjnbd"
+path="res://.godot/imported/wing_r.vox-c292519350b4337d9c0c110764b157ca.tscn"
+
+[deps]
+
+source_file="res://creatures/bell_imp/wing_r.vox"
+dest_files=["res://.godot/imported/wing_r.vox-c292519350b4337d9c0c110764b157ca.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

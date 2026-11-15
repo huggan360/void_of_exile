@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ix55v1nvkdaf"
+path="res://.godot/imported/body.vox-8e1325b4acfb4fd033814198d45e0552.tscn"
+
+[deps]
+
+source_file="res://creatures/spore_puffling/body.vox"
+dest_files=["res://.godot/imported/body.vox-8e1325b4acfb4fd033814198d45e0552.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

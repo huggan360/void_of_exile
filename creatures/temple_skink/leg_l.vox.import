@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://48tnrovjftfo"
+path="res://.godot/imported/leg_l.vox-67be8e3d6d07233725f94362088fe449.tscn"
+
+[deps]
+
+source_file="res://creatures/temple_skink/leg_l.vox"
+dest_files=["res://.godot/imported/leg_l.vox-67be8e3d6d07233725f94362088fe449.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

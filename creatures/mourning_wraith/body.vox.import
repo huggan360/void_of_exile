@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cnkxcyx2e75ta"
+path="res://.godot/imported/body.vox-51a4f09a5206ba51b2f61996afd0826e.tscn"
+
+[deps]
+
+source_file="res://creatures/mourning_wraith/body.vox"
+dest_files=["res://.godot/imported/body.vox-51a4f09a5206ba51b2f61996afd0826e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

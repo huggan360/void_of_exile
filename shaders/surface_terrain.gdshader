@@ -24,6 +24,10 @@ const int ICE = 11;
 const int STRATA = 12;  // a/b/c layered rock bands, d = mineral flecks, e = moss on tops
 const int PLANKS = 13;  // a/b boards, c = seams, d = nails
 const int LEAVES = 14;  // a/b/c leaves, d = flowers
+const int VEIN = 15;  // a/b/c rock, d and e = glowing veins that wander through it (dungeons)
+const int PANES = 16;  // stained glass: a/b/c/d glowing panes in a dark lead frame e
+
+#include "res://shaders/include/glow_ripple.gdshaderinc"
 
 uniform sampler2D palette : filter_nearest;
 uniform float atlas_width = 256.0;
@@ -207,6 +211,24 @@ void fragment() {
 		col *= 0.93 + 0.14 * r;
 		if (r2 < 0.025) col = cd;
 		if (top && patch + r * 0.3 > 0.72) col = ce;  // moss settles on ledges
+	} else if (style == VEIN) {
+		col = r < 0.5 ? ca : (r < 0.85 ? cb : cc);
+		// Thin glowing lines where a 3D pattern crosses its middle: veins that
+		// run across faces and around corners.
+		vec3 q = world_pos * 0.7;
+		float v1 = abs(fbm2(q.xz + q.y * 0.6) - 0.5);
+		float v2 = abs(fbm2(q.zy * 1.3 + 7.1) - 0.5);
+		if (v1 < 0.022) { col = cd; glow = 1.0; }
+		else if (v2 < 0.016) { col = ce; glow = 0.8; }
+		else if (r2 < 0.02) { col = cd; glow = 0.6; }
+	} else if (style == PANES) {
+		vec2 g = face_world * 2.0;
+		vec2 pane = floor(g + vec2(0.0, floor(g.x) * 0.5));
+		vec2 inside = fract(g + vec2(0.0, floor(g.x) * 0.5));
+		float h4 = hash2(pane);
+		col = h4 < 0.3 ? ca : (h4 < 0.6 ? cb : (h4 < 0.85 ? cc : cd));
+		glow = 0.55 + 0.45 * hash2(pane + 2.7);
+		if (inside.x < 0.09 || inside.y < 0.09 || !side) { col = ce; glow = 0.0; }
 	} else if (style == PLANKS) {
 		float along = an.x > 0.5 ? world_pos.z : world_pos.x;
 		float across = an.x > 0.5 ? world_pos.x : world_pos.z;
@@ -231,6 +253,10 @@ void fragment() {
 	float edge = 1.0 - smoothstep(0.0, 0.12, min(to_edge.x, to_edge.y));
 	vec3 ao = srgb_to_linear(COLOR.rgb);
 	ALBEDO = col * (1.0 - edge_darkness * edge) * ao;
-	EMISSION = col * glow * emission;
+	EMISSION = col * glow * emission * (1.0 + gr_level);
+	if (glow > 0.0 && gr_count > 0) {
+		vec3 ripple = glow_ripples(world_pos);
+		EMISSION += (col * 0.5 + ripple) * length(ripple) * glow * emission * 0.6;
+	}
 	ROUGHNESS = info.b;
 }

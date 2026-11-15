@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://o86adctxbc0b"
+path="res://.godot/imported/head.vox-fff21f7d6799ca0cdb47e2bc8438d705.tscn"
+
+[deps]
+
+source_file="res://creatures/astral_reaver/head.vox"
+dest_files=["res://.godot/imported/head.vox-fff21f7d6799ca0cdb47e2bc8438d705.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

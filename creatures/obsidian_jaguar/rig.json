@@ -1,0 +1,133 @@
+{
+  "voxel_size": 0.045,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -13,
+        12,
+        -20
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -10,
+        -8,
+        -13
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -7,
+        -4,
+        -9
+      ]
+    },
+    "leg_front": {
+      "frame_min": [
+        -6,
+        -24,
+        -10
+      ],
+      "glow": true
+    },
+    "leg_back": {
+      "frame_min": [
+        -6,
+        -24,
+        -10
+      ],
+      "glow": true
+    },
+    "tail": {
+      "frame_min": [
+        -4,
+        -10,
+        -4
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        35,
+        -21
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -4,
+        -4
+      ],
+      "role": "jaw",
+      "phase": 1.0,
+      "parent_limb": "head"
+    },
+    "leg_front_l": {
+      "part": "leg_front",
+      "pivot": [
+        -9,
+        22,
+        -11
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "leg_front_r": {
+      "part": "leg_front",
+      "pivot": [
+        9,
+        22,
+        -11
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_back_l": {
+      "part": "leg_back",
+      "pivot": [
+        -9,
+        22,
+        20
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_back_r": {
+      "part": "leg_back",
+      "pivot": [
+        9,
+        22,
+        20
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        0,
+        27,
+        25
+      ],
+      "role": "tail",
+      "phase": 1.0
+    }
+  },
+  "hand": [
+    0,
+    34,
+    -32
+  ],
+  "waddle": 0.08,
+  "bob": 0.015,
+  "glow_strength": 0.9
+}

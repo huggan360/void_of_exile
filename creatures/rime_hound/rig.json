@@ -1,0 +1,125 @@
+{
+  "voxel_size": 0.05,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -7,
+        6,
+        -14
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -5,
+        -6,
+        -11
+      ],
+      "glow": true
+    },
+    "leg_l_0": {
+      "frame_min": [
+        -3,
+        -12,
+        -6
+      ]
+    },
+    "leg_r_0": {
+      "frame_min": [
+        -3,
+        -12,
+        -6
+      ]
+    },
+    "leg_l_1": {
+      "frame_min": [
+        -3,
+        -12,
+        -6
+      ]
+    },
+    "leg_r_1": {
+      "frame_min": [
+        -3,
+        -12,
+        -6
+      ]
+    },
+    "tail": {
+      "frame_min": [
+        -4,
+        -6,
+        -4
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        17,
+        -12
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "leg_l_0": {
+      "part": "leg_l_0",
+      "pivot": [
+        -4,
+        11,
+        -7
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "leg_r_0": {
+      "part": "leg_r_0",
+      "pivot": [
+        4,
+        11,
+        -7
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_l_1": {
+      "part": "leg_l_1",
+      "pivot": [
+        -4,
+        11,
+        11
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r_1": {
+      "part": "leg_r_1",
+      "pivot": [
+        4,
+        11,
+        11
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        0,
+        15,
+        13
+      ],
+      "role": "tail",
+      "phase": 1.0
+    }
+  },
+  "hand": [
+    0,
+    16,
+    -21
+  ],
+  "waddle": 0.08
+}

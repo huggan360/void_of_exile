@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dl73svny66533"
+path="res://.godot/imported/leg.vox-93cd70885af5ab58ef1ec2972cb54311.tscn"
+
+[deps]
+
+source_file="res://creatures/first_mate_grisk/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-93cd70885af5ab58ef1ec2972cb54311.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

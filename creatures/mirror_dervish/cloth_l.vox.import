@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cs02ubxyqhj48"
+path="res://.godot/imported/cloth_l.vox-282377552a2e5be9ac0e96d849710c64.tscn"
+
+[deps]
+
+source_file="res://creatures/mirror_dervish/cloth_l.vox"
+dest_files=["res://.godot/imported/cloth_l.vox-282377552a2e5be9ac0e96d849710c64.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

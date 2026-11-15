@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://t8getn0ysdrp"
+path="res://.godot/imported/body.vox-67fcd98778a6a995acf0bd6bd5fc466a.tscn"
+
+[deps]
+
+source_file="res://creatures/mirror_dervish/body.vox"
+dest_files=["res://.godot/imported/body.vox-67fcd98778a6a995acf0bd6bd5fc466a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

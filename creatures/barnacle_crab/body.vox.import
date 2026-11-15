@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ctynl7u074rae"
+path="res://.godot/imported/body.vox-57364854711775277f415848bbea24d0.tscn"
+
+[deps]
+
+source_file="res://creatures/barnacle_crab/body.vox"
+dest_files=["res://.godot/imported/body.vox-57364854711775277f415848bbea24d0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

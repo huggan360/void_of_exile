@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chvjrtotiev3a"
+path="res://.godot/imported/tail.vox-79b6ecc758276d8df546074ff328876d.tscn"
+
+[deps]
+
+source_file="res://creatures/plume_wisp/tail.vox"
+dest_files=["res://.godot/imported/tail.vox-79b6ecc758276d8df546074ff328876d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

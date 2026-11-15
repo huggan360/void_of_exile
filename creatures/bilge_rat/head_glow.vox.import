@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://srvv7imyny78"
+path="res://.godot/imported/head_glow.vox-60f81655139451f4586474d38aa935c2.tscn"
+
+[deps]
+
+source_file="res://creatures/bilge_rat/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-60f81655139451f4586474d38aa935c2.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

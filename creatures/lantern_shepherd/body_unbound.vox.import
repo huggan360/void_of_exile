@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cedc0ves5ktik"
+path="res://.godot/imported/body_unbound.vox-24c8933d9a149d072fb13a0e1ae8cd02.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_shepherd/body_unbound.vox"
+dest_files=["res://.godot/imported/body_unbound.vox-24c8933d9a149d072fb13a0e1ae8cd02.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

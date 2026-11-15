@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cej4jkbs37vy2"
+path="res://.godot/imported/jaw_abyss.vox-afa8750fdd535589e5eec1b2d005665f.tscn"
+
+[deps]
+
+source_file="res://creatures/captain_saltmourn/jaw_abyss.vox"
+dest_files=["res://.godot/imported/jaw_abyss.vox-afa8750fdd535589e5eec1b2d005665f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

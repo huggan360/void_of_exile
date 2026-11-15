@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cxd5kudrxpile"
+path="res://.godot/imported/model.vox-1c953103e9070c835eecd85c56256aca.tscn"
+
+[deps]
+
+source_file="res://creatures/oblivara/model.vox"
+dest_files=["res://.godot/imported/model.vox-1c953103e9070c835eecd85c56256aca.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

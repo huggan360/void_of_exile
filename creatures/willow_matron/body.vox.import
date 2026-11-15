@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c60o42llwdbsk"
+path="res://.godot/imported/body.vox-81a500dbb4828600dcd8d492c3863666.tscn"
+
+[deps]
+
+source_file="res://creatures/willow_matron/body.vox"
+dest_files=["res://.godot/imported/body.vox-81a500dbb4828600dcd8d492c3863666.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

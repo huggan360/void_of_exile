@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b5xfoi2wkubdl"
+path="res://.godot/imported/arm_l.vox-f92da9697d2a08bf6dc9af52ac99cc9b.tscn"
+
+[deps]
+
+source_file="res://creatures/drowned_deckhand/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-f92da9697d2a08bf6dc9af52ac99cc9b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

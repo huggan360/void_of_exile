@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bo7307tdjmifi"
+path="res://.godot/imported/head_glow.vox-9cafb8c818fe724a9cabd4ea81e4c89f.tscn"
+
+[deps]
+
+source_file="res://creatures/vine_strangler/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-9cafb8c818fe724a9cabd4ea81e4c89f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

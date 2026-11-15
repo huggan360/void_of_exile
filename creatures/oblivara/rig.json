@@ -1,0 +1,273 @@
+{
+  "voxel_size": 0.11,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -19,
+        -1,
+        -13
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -8,
+        -8,
+        -7
+      ],
+      "glow": true
+    },
+    "body_awakened": {
+      "frame_min": [
+        -19,
+        -1,
+        -13
+      ],
+      "glow": true
+    },
+    "head_awakened": {
+      "frame_min": [
+        -8,
+        -8,
+        -7
+      ],
+      "glow": true
+    },
+    "body_unmade": {
+      "frame_min": [
+        -19,
+        -1,
+        -13
+      ],
+      "glow": true
+    },
+    "head_unmade": {
+      "frame_min": [
+        -8,
+        -8,
+        -7
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -4,
+        -4,
+        -3
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -8,
+        -17,
+        -5
+      ],
+      "glow": true
+    },
+    "arm_l2": {
+      "frame_min": [
+        -17,
+        -7,
+        -5
+      ],
+      "glow": true
+    },
+    "arm_l3": {
+      "frame_min": [
+        -15,
+        -19,
+        -5
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -3,
+        -17,
+        -5
+      ],
+      "glow": true
+    },
+    "arm_r2": {
+      "frame_min": [
+        -3,
+        -7,
+        -5
+      ],
+      "glow": true
+    },
+    "arm_r3": {
+      "frame_min": [
+        -3,
+        -19,
+        -5
+      ],
+      "glow": true
+    },
+    "halo": {
+      "frame_min": [
+        -15,
+        -16,
+        -2
+      ],
+      "glow": true
+    },
+    "cloth_l": {
+      "frame_min": [
+        -5,
+        -23,
+        -3
+      ],
+      "glow": true
+    },
+    "cloth_r": {
+      "frame_min": [
+        -3,
+        -23,
+        -3
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        59,
+        -1
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -4,
+        -2
+      ],
+      "role": "jaw",
+      "phase": 1.0,
+      "parent_limb": "head"
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -9,
+        48,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_l2": {
+      "part": "arm_l2",
+      "pivot": [
+        -8,
+        51,
+        2
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_l3": {
+      "part": "arm_l3",
+      "pivot": [
+        -8,
+        42,
+        1
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        9,
+        48,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "arm_r2": {
+      "part": "arm_r2",
+      "pivot": [
+        8,
+        51,
+        2
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": false
+    },
+    "arm_r3": {
+      "part": "arm_r3",
+      "pivot": [
+        8,
+        42,
+        1
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": false
+    },
+    "halo": {
+      "part": "halo",
+      "pivot": [
+        0,
+        59,
+        7
+      ],
+      "role": "sway",
+      "phase": 1.0
+    },
+    "cloth_l": {
+      "part": "cloth_l",
+      "pivot": [
+        -6,
+        23,
+        5
+      ],
+      "role": "cloth",
+      "phase": 1
+    },
+    "cloth_r": {
+      "part": "cloth_r",
+      "pivot": [
+        6,
+        23,
+        5
+      ],
+      "role": "cloth",
+      "phase": -1
+    }
+  },
+  "hand": [
+    5,
+    -14,
+    -3
+  ],
+  "animation_style": "cantor",
+  "hand_limb": "arm_r",
+  "hover": 0.24,
+  "bob": 0.025,
+  "waddle": 0,
+  "glow_strength": 1.2,
+  "variants": {
+    "awakened": {
+      "body": "body_awakened",
+      "head": "head_awakened"
+    },
+    "unmade": {
+      "body": "body_unmade",
+      "head": "head_unmade"
+    }
+  }
+}

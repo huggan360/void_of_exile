@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cne2aenyqyv2m"
+path="res://.godot/imported/tendril_3.vox-d075e37cd383d05ad67b0a5241f50f24.tscn"
+
+[deps]
+
+source_file="res://creatures/willow_matron/tendril_3.vox"
+dest_files=["res://.godot/imported/tendril_3.vox-d075e37cd383d05ad67b0a5241f50f24.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

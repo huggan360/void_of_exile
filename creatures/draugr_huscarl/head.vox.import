@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bys7a07pjioas"
+path="res://.godot/imported/head.vox-ffc0f2d3f0f2aa2fd65a69fed242f9ae.tscn"
+
+[deps]
+
+source_file="res://creatures/draugr_huscarl/head.vox"
+dest_files=["res://.godot/imported/head.vox-ffc0f2d3f0f2aa2fd65a69fed242f9ae.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

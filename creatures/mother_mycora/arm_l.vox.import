@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cb7kf6r8yse62"
+path="res://.godot/imported/arm_l.vox-3b63b2795e4e4087cc5cee16113b796f.tscn"
+
+[deps]
+
+source_file="res://creatures/mother_mycora/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-3b63b2795e4e4087cc5cee16113b796f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c8edckbey4v8s"
+path="res://.godot/imported/arm_l.vox-fd72e52bf942b7b116bbfa0cac7b9fe3.tscn"
+
+[deps]
+
+source_file="res://creatures/mirror_dervish/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-fd72e52bf942b7b116bbfa0cac7b9fe3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cvhqvkeka5mnc"
+path="res://.godot/imported/head_thaw_glow.vox-f100bfbcef6209dec999b605dfede22f.tscn"
+
+[deps]
+
+source_file="res://creatures/jarl_hrimvald/head_thaw_glow.vox"
+dest_files=["res://.godot/imported/head_thaw_glow.vox-f100bfbcef6209dec999b605dfede22f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

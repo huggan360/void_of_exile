@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cw8tctphf1jd"
+path="res://.godot/imported/head_wrath.vox-0686c75f5da80da2fd360a6800fd8011.tscn"
+
+[deps]
+
+source_file="res://creatures/jarl_hrimvald/head_wrath.vox"
+dest_files=["res://.godot/imported/head_wrath.vox-0686c75f5da80da2fd360a6800fd8011.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ctd50hcpad6ue"
+path="res://.godot/imported/halo_glow.vox-74f3152cbff56df76d25449f4dc95611.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/halo_glow.vox"
+dest_files=["res://.godot/imported/halo_glow.vox-74f3152cbff56df76d25449f4dc95611.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

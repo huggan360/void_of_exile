@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://72oyo4t14xon"
+path="res://.godot/imported/head.vox-2a5c0d1ef9cafb9b313a1ae2c2b82fb3.tscn"
+
+[deps]
+
+source_file="res://creatures/cannon_gunner/head.vox"
+dest_files=["res://.godot/imported/head.vox-2a5c0d1ef9cafb9b313a1ae2c2b82fb3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

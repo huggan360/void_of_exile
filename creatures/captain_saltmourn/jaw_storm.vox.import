@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyyh762uiah3o"
+path="res://.godot/imported/jaw_storm.vox-532cf93e20db5e2a802a11eaaf58036a.tscn"
+
+[deps]
+
+source_file="res://creatures/captain_saltmourn/jaw_storm.vox"
+dest_files=["res://.godot/imported/jaw_storm.vox-532cf93e20db5e2a802a11eaaf58036a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

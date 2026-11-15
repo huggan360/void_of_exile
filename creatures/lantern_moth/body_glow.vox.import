@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cgnw3r0n7h24w"
+path="res://.godot/imported/body_glow.vox-2b87c3891f09954deb4afe2ea65cc867.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_moth/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-2b87c3891f09954deb4afe2ea65cc867.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

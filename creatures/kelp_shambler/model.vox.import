@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dlf1cjdmlllmq"
+path="res://.godot/imported/model.vox-8fa2c6b441739da6d444f872aa3bc775.tscn"
+
+[deps]
+
+source_file="res://creatures/kelp_shambler/model.vox"
+dest_files=["res://.godot/imported/model.vox-8fa2c6b441739da6d444f872aa3bc775.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

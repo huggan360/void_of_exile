@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bubugfqx8d6g2"
+path="res://.godot/imported/head_glow.vox-22fcd6b22fc6f962559523792a9917bd.tscn"
+
+[deps]
+
+source_file="res://creatures/kintsugi_shade/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-22fcd6b22fc6f962559523792a9917bd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

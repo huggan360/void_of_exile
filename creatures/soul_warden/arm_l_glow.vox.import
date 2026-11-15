@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://xbw7ta4kist8"
+path="res://.godot/imported/arm_l_glow.vox-a5b3ce1a1fac4e83acf2f0cdeab249f4.tscn"
+
+[deps]
+
+source_file="res://creatures/soul_warden/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-a5b3ce1a1fac4e83acf2f0cdeab249f4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

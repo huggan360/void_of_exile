@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bmsx2m51yntkn"
+path="res://.godot/imported/body.vox-1c89924e3a26ea0824dbc36d7cb7b2bf.tscn"
+
+[deps]
+
+source_file="res://creatures/kintsugi_shade/body.vox"
+dest_files=["res://.godot/imported/body.vox-1c89924e3a26ea0824dbc36d7cb7b2bf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

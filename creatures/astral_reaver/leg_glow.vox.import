@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cyb20fob2rrwd"
+path="res://.godot/imported/leg_glow.vox-b1c99b7946b483e684ccdf5e0991a52d.tscn"
+
+[deps]
+
+source_file="res://creatures/astral_reaver/leg_glow.vox"
+dest_files=["res://.godot/imported/leg_glow.vox-b1c99b7946b483e684ccdf5e0991a52d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

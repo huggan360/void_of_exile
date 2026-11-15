@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dqpwg6bpoqa2x"
+path="res://.godot/imported/arm_r_glow.vox-c49ce858a883ee97aa4bf032053ce765.tscn"
+
+[deps]
+
+source_file="res://creatures/astral_reaver/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-c49ce858a883ee97aa4bf032053ce765.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

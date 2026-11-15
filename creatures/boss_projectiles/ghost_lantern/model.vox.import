@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ox1yfmxcp5j"
+path="res://.godot/imported/model.vox-2701ee945304a89e5980ff7b0ab6ed5b.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/ghost_lantern/model.vox"
+dest_files=["res://.godot/imported/model.vox-2701ee945304a89e5980ff7b0ab6ed5b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

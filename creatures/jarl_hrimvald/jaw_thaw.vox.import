@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://0ig2l2xcvlue"
+path="res://.godot/imported/jaw_thaw.vox-c23d394454f060be030311d4f1d6da34.tscn"
+
+[deps]
+
+source_file="res://creatures/jarl_hrimvald/jaw_thaw.vox"
+dest_files=["res://.godot/imported/jaw_thaw.vox-c23d394454f060be030311d4f1d6da34.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

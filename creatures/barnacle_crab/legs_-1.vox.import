@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0bs8vk12rn5v"
+path="res://.godot/imported/legs_-1.vox-ebc0bae8347e153565cdb99d33b45efc.tscn"
+
+[deps]
+
+source_file="res://creatures/barnacle_crab/legs_-1.vox"
+dest_files=["res://.godot/imported/legs_-1.vox-ebc0bae8347e153565cdb99d33b45efc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

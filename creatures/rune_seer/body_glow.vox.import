@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bykoeketumbl4"
+path="res://.godot/imported/body_glow.vox-1b4ebb2c68b4bedb35a2eeb4189e384a.tscn"
+
+[deps]
+
+source_file="res://creatures/rune_seer/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-1b4ebb2c68b4bedb35a2eeb4189e384a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

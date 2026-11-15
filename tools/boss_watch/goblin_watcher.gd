@@ -1,5 +1,6 @@
 extends Node
-## Offline fight viewer: the live generated cave, enemies and encounter.
+## Offline fight viewer: the live generated dungeon, enemies and encounter
+## (any dungeon: main.gd --watch-dungeon=<id>, tools/boss_watch/dungeon_scene.gd).
 var game: Node3D
 var boss: Boss
 var clock := 0.0
@@ -31,10 +32,10 @@ func _start() -> void:
 	_label.add_theme_font_size_override("font_size", 22)
 	layer.add_child(_label)
 	for actor in game.world.enemy_director.enemies():
-		if actor.def.id == "goblin_king": boss = actor
+		if actor.def.id == game.world.definition.boss: boss = actor
 	while not is_instance_valid(boss):
 		for actor in game.world.enemy_director.enemies():
-			if actor.def.id == "goblin_king": boss = actor
+			if actor.def.id == game.world.definition.boss: boss = actor
 		await get_tree().create_timer(0.1).timeout
 	if game._args.has("out"):
 		await get_tree().create_timer(4.0).timeout

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dcl1d62y524gm"
+path="res://.godot/imported/leg_1.vox-bdf272f1bb99febca6bbe53ccf5d82de.tscn"
+
+[deps]
+
+source_file="res://creatures/mycelid_crawler/leg_1.vox"
+dest_files=["res://.godot/imported/leg_1.vox-bdf272f1bb99febca6bbe53ccf5d82de.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

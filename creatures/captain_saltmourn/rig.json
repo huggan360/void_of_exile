@@ -1,0 +1,215 @@
+{
+  "voxel_size": 0.08,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -16,
+        3,
+        -10
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -17,
+        -6,
+        -10
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -11,
+        -19,
+        -7
+      ]
+    },
+    "body_storm": {
+      "frame_min": [
+        -16,
+        3,
+        -10
+      ],
+      "glow": true
+    },
+    "head_storm": {
+      "frame_min": [
+        -17,
+        -6,
+        -10
+      ],
+      "glow": true
+    },
+    "jaw_storm": {
+      "frame_min": [
+        -11,
+        -19,
+        -7
+      ]
+    },
+    "body_abyss": {
+      "frame_min": [
+        -16,
+        3,
+        -10
+      ]
+    },
+    "head_abyss": {
+      "frame_min": [
+        -17,
+        -6,
+        -10
+      ],
+      "glow": true
+    },
+    "jaw_abyss": {
+      "frame_min": [
+        -11,
+        -19,
+        -7
+      ]
+    },
+    "leg": {
+      "frame_min": [
+        -5,
+        -16,
+        -9
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -7,
+        -37,
+        -9
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        -5,
+        -22,
+        -7
+      ],
+      "glow": true
+    },
+    "cloth_l": {
+      "frame_min": [
+        -5,
+        -16,
+        -3
+      ]
+    },
+    "cloth_r": {
+      "frame_min": [
+        -3,
+        -16,
+        -3
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        47,
+        -1
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -3,
+        -2
+      ],
+      "role": "jaw",
+      "phase": 1.0,
+      "parent_limb": "head"
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -5,
+        15,
+        0
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        5,
+        15,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -11,
+        41,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        11,
+        41,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "cloth_l": {
+      "part": "cloth_l",
+      "pivot": [
+        -8,
+        22,
+        8
+      ],
+      "role": "cloth",
+      "phase": 1
+    },
+    "cloth_r": {
+      "part": "cloth_r",
+      "pivot": [
+        8,
+        22,
+        8
+      ],
+      "role": "cloth",
+      "phase": -1
+    }
+  },
+  "hand": [
+    0,
+    -18,
+    -2
+  ],
+  "animation_style": "cantor",
+  "hand_limb": "arm_r",
+  "glow_strength": 1.2,
+  "waddle": 0.08,
+  "bob": 0.015,
+  "variants": {
+    "storm": {
+      "body": "body_storm",
+      "head": "head_storm",
+      "jaw": "jaw_storm"
+    },
+    "abyss": {
+      "body": "body_abyss",
+      "head": "head_abyss",
+      "jaw": "jaw_abyss"
+    }
+  }
+}

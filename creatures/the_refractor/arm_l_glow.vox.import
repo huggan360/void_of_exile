@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://oxwrqk2517w3"
+path="res://.godot/imported/arm_l_glow.vox-09070f4a8909bb314e6537e7505da37d.tscn"
+
+[deps]
+
+source_file="res://creatures/the_refractor/arm_l_glow.vox"
+dest_files=["res://.godot/imported/arm_l_glow.vox-09070f4a8909bb314e6537e7505da37d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

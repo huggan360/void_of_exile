@@ -1,0 +1,362 @@
+{
+  "voxel_size": 0.095,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -13,
+        0,
+        -10
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -6,
+        -8,
+        -7
+      ]
+    },
+    "wing_upper_l": {
+      "frame_min": [
+        -35,
+        -5,
+        -2
+      ]
+    },
+    "wing_lower_l": {
+      "frame_min": [
+        -35,
+        -18,
+        -2
+      ]
+    },
+    "wing_upper_r": {
+      "frame_min": [
+        -2,
+        -5,
+        -2
+      ]
+    },
+    "wing_lower_r": {
+      "frame_min": [
+        -2,
+        -18,
+        -2
+      ]
+    },
+    "body_kindled": {
+      "frame_min": [
+        -13,
+        0,
+        -10
+      ],
+      "glow": true
+    },
+    "head_kindled": {
+      "frame_min": [
+        -6,
+        -8,
+        -7
+      ],
+      "glow": true
+    },
+    "wing_upper_l_kindled": {
+      "frame_min": [
+        -35,
+        -5,
+        -2
+      ],
+      "glow": true
+    },
+    "wing_lower_l_kindled": {
+      "frame_min": [
+        -35,
+        -18,
+        -2
+      ],
+      "glow": true
+    },
+    "wing_upper_r_kindled": {
+      "frame_min": [
+        -2,
+        -5,
+        -2
+      ],
+      "glow": true
+    },
+    "wing_lower_r_kindled": {
+      "frame_min": [
+        -2,
+        -18,
+        -2
+      ],
+      "glow": true
+    },
+    "body_hollow": {
+      "frame_min": [
+        -13,
+        0,
+        -10
+      ],
+      "glow": true
+    },
+    "head_hollow": {
+      "frame_min": [
+        -6,
+        -8,
+        -7
+      ],
+      "glow": true
+    },
+    "wing_upper_l_hollow": {
+      "frame_min": [
+        -35,
+        -5,
+        -2
+      ]
+    },
+    "wing_lower_l_hollow": {
+      "frame_min": [
+        -35,
+        -18,
+        -2
+      ]
+    },
+    "wing_upper_r_hollow": {
+      "frame_min": [
+        -2,
+        -5,
+        -2
+      ]
+    },
+    "wing_lower_r_hollow": {
+      "frame_min": [
+        -2,
+        -18,
+        -2
+      ]
+    },
+    "jaw": {
+      "frame_min": [
+        -4,
+        -5,
+        -3
+      ]
+    },
+    "wing_inner_l": {
+      "frame_min": [
+        -21,
+        -3,
+        -3
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -5,
+        -19,
+        -4
+      ]
+    },
+    "cloth_l": {
+      "frame_min": [
+        -5,
+        -30,
+        -3
+      ]
+    },
+    "wing_inner_r": {
+      "frame_min": [
+        -3,
+        -3,
+        -3
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        -5,
+        -28,
+        -4
+      ]
+    },
+    "cloth_r": {
+      "frame_min": [
+        -3,
+        -30,
+        -3
+      ]
+    },
+    "halo": {
+      "frame_min": [
+        -13,
+        -16,
+        -4
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        55,
+        -1
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -4,
+        -3
+      ],
+      "role": "jaw",
+      "phase": 1.0,
+      "parent_limb": "head"
+    },
+    "wing_upper_l": {
+      "part": "wing_upper_l",
+      "pivot": [
+        -7,
+        46,
+        4
+      ],
+      "role": "wing",
+      "phase": 1
+    },
+    "wing_lower_l": {
+      "part": "wing_lower_l",
+      "pivot": [
+        -7,
+        39,
+        4
+      ],
+      "role": "wing",
+      "phase": 1
+    },
+    "wing_inner_l": {
+      "part": "wing_inner_l",
+      "pivot": [
+        -5,
+        48,
+        2
+      ],
+      "role": "wing",
+      "phase": 1
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -9,
+        47,
+        -1
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "cloth_l": {
+      "part": "cloth_l",
+      "pivot": [
+        -5,
+        33,
+        4
+      ],
+      "role": "cloth",
+      "phase": 1
+    },
+    "wing_upper_r": {
+      "part": "wing_upper_r",
+      "pivot": [
+        7,
+        46,
+        4
+      ],
+      "role": "wing",
+      "phase": -1
+    },
+    "wing_lower_r": {
+      "part": "wing_lower_r",
+      "pivot": [
+        7,
+        39,
+        4
+      ],
+      "role": "wing",
+      "phase": -1
+    },
+    "wing_inner_r": {
+      "part": "wing_inner_r",
+      "pivot": [
+        5,
+        48,
+        2
+      ],
+      "role": "wing",
+      "phase": -1
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        9,
+        47,
+        -1
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "cloth_r": {
+      "part": "cloth_r",
+      "pivot": [
+        5,
+        33,
+        4
+      ],
+      "role": "cloth",
+      "phase": -1
+    },
+    "halo": {
+      "part": "halo",
+      "pivot": [
+        0,
+        56,
+        0
+      ],
+      "role": "sway",
+      "phase": 1.0
+    }
+  },
+  "hand": [
+    0,
+    9,
+    -1
+  ],
+  "animation_style": "cantor",
+  "hand_limb": "arm_r",
+  "hover": 0.28,
+  "bob": 0.045,
+  "waddle": 0,
+  "flap_rate": 1.25,
+  "glow_strength": 1.2,
+  "variants": {
+    "kindled": {
+      "body": "body_kindled",
+      "head": "head_kindled",
+      "wing_upper_l": "wing_upper_l_kindled",
+      "wing_upper_r": "wing_upper_r_kindled",
+      "wing_lower_l": "wing_lower_l_kindled",
+      "wing_lower_r": "wing_lower_r_kindled"
+    },
+    "hollow": {
+      "body": "body_hollow",
+      "head": "head_hollow",
+      "wing_upper_l": "wing_upper_l_hollow",
+      "wing_upper_r": "wing_upper_r_hollow",
+      "wing_lower_l": "wing_lower_l_hollow",
+      "wing_lower_r": "wing_lower_r_hollow"
+    }
+  }
+}

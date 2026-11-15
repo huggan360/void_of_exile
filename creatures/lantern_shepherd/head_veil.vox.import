@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cdvmx0tfwfje6"
+path="res://.godot/imported/head_veil.vox-08d7521606d16f62df88209159228ac4.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_shepherd/head_veil.vox"
+dest_files=["res://.godot/imported/head_veil.vox-08d7521606d16f62df88209159228ac4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

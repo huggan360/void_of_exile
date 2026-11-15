@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bgcp6bscutis8"
+path="res://.godot/imported/model.vox-b4c86d7bc96ffd8be496c1bdba48d981.tscn"
+
+[deps]
+
+source_file="res://creatures/shroom_brute/model.vox"
+dest_files=["res://.godot/imported/model.vox-b4c86d7bc96ffd8be496c1bdba48d981.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

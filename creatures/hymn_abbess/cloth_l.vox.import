@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://byd1dka01pe3d"
+path="res://.godot/imported/cloth_l.vox-1a2247a92fe75cf2896e10a36fee1b16.tscn"
+
+[deps]
+
+source_file="res://creatures/hymn_abbess/cloth_l.vox"
+dest_files=["res://.godot/imported/cloth_l.vox-1a2247a92fe75cf2896e10a36fee1b16.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

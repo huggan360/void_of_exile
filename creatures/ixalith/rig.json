@@ -1,0 +1,195 @@
+{
+  "voxel_size": 0.09,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -17,
+        -1,
+        -14
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -9,
+        -5,
+        -12
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -32,
+        -17,
+        -4
+      ],
+      "glow": true
+    },
+    "arm_r": {
+      "frame_min": [
+        -3,
+        -17,
+        -4
+      ],
+      "glow": true
+    },
+    "body_radiant": {
+      "frame_min": [
+        -17,
+        -1,
+        -14
+      ],
+      "glow": true
+    },
+    "head_radiant": {
+      "frame_min": [
+        -9,
+        -5,
+        -12
+      ],
+      "glow": true
+    },
+    "arm_l_radiant": {
+      "frame_min": [
+        -32,
+        -17,
+        -4
+      ],
+      "glow": true
+    },
+    "arm_r_radiant": {
+      "frame_min": [
+        -3,
+        -17,
+        -4
+      ],
+      "glow": true
+    },
+    "body_molted": {
+      "frame_min": [
+        -17,
+        -1,
+        -14
+      ],
+      "glow": true
+    },
+    "head_molted": {
+      "frame_min": [
+        -9,
+        -5,
+        -12
+      ],
+      "glow": true
+    },
+    "arm_l_molted": {
+      "frame_min": [
+        -32,
+        -17,
+        -4
+      ],
+      "glow": true
+    },
+    "arm_r_molted": {
+      "frame_min": [
+        -3,
+        -17,
+        -4
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -5,
+        -4,
+        -11
+      ]
+    },
+    "tail": {
+      "frame_min": [
+        -4,
+        -5,
+        -4
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        53,
+        -1
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -2,
+        -2
+      ],
+      "role": "jaw",
+      "phase": 1.0,
+      "parent_limb": "head"
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -4,
+        44,
+        1
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        4,
+        44,
+        1
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        6,
+        5,
+        9
+      ],
+      "role": "tail",
+      "phase": 1.0
+    }
+  },
+  "hand": [
+    31,
+    2,
+    7
+  ],
+  "animation_style": "cantor",
+  "hand_limb": "arm_r",
+  "hover": 0.02,
+  "bob": 0.015,
+  "waddle": 0,
+  "glow_strength": 1.2,
+  "variants": {
+    "radiant": {
+      "body": "body_radiant",
+      "head": "head_radiant",
+      "arm_l": "arm_l_radiant",
+      "arm_r": "arm_r_radiant"
+    },
+    "molted": {
+      "body": "body_molted",
+      "head": "head_molted",
+      "arm_l": "arm_l_molted",
+      "arm_r": "arm_r_molted"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://y77l2yaj8axd"
+path="res://.godot/imported/body_glow.vox-eb3fbf1e3934dd420966c5629101d84d.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-eb3fbf1e3934dd420966c5629101d84d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

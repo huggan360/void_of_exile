@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://db7ipkjndjijr"
+path="res://.godot/imported/body_wrath.vox-5e30a2c29579cfc925c64efd59cd1261.tscn"
+
+[deps]
+
+source_file="res://creatures/jarl_hrimvald/body_wrath.vox"
+dest_files=["res://.godot/imported/body_wrath.vox-5e30a2c29579cfc925c64efd59cd1261.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

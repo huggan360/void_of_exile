@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bmtu1pe67j2s3"
+path="res://.godot/imported/head_hollow_glow.vox-ea401ce05e1c9acdd4046d7294e924bd.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/head_hollow_glow.vox"
+dest_files=["res://.godot/imported/head_hollow_glow.vox-ea401ce05e1c9acdd4046d7294e924bd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

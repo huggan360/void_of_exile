@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bng6i5i601eig"
+path="res://.godot/imported/body.vox-cc9f14ff75f300b8dc02653a4fdd69dd.tscn"
+
+[deps]
+
+source_file="res://creatures/rune_seer/body.vox"
+dest_files=["res://.godot/imported/body.vox-cc9f14ff75f300b8dc02653a4fdd69dd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

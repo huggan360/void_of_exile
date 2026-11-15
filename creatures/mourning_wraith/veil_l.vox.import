@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://clrko8fo33470"
+path="res://.godot/imported/veil_l.vox-650f862a280b424a60623265c0315a81.tscn"
+
+[deps]
+
+source_file="res://creatures/mourning_wraith/veil_l.vox"
+dest_files=["res://.godot/imported/veil_l.vox-650f862a280b424a60623265c0315a81.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

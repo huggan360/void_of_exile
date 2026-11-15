@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://to85fchs1sqf"
+path="res://.godot/imported/arm_l.vox-8da4cfa3030de3eb95cde34852d2c97b.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_shepherd/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-8da4cfa3030de3eb95cde34852d2c97b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

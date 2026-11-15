@@ -5,6 +5,14 @@ var _points: Array[Transform3D] = []
 var _colors := PackedColorArray()
 var _prepared := PackedFloat32Array()
 var _rng := RandomNumberGenerator.new()
+## Fine themes (FineScenery): glowing voxels, drawn with shaders/glow_flora.gdshader.
+var _glow_points: Array[Transform3D] = []
+var _glow_colors := PackedColorArray()
+var _glow_custom := PackedColorArray()
+var _glow_prepared := PackedFloat32Array()
+## Where glowing plants grow (GlowRipples chatter), and their material once published.
+var glow_points := PackedVector3Array()
+var glow_material: ShaderMaterial
 const STONE := Color("51594e")
 const MOSS := Color("4c7139")
 const WOOD := Color("60432c")
@@ -25,6 +33,8 @@ func prepare(layout: DungeonLayout, theme := "moss_cave") -> void:
 		"burning_forest": props = [_burning_tree, _stump, _burning_tree, _ember_rock, _burning_tree, _stump]
 		"blue_grotto": props = [_crystal, _coral, _crystal, _shells, _kelp, _coral]
 		"drowned_spire": props = [_blue_pillar, _bell, _pews, _kelp, _blue_pillar, _shells]
+	var fine: FineScenery = FineScenery.new(self, _rng, theme) if theme in FineScenery.THEMES else null
+	if fine: props = fine.props()
 	for index in layout.rooms.size():
 		var room: Dictionary = layout.rooms[index]
 		var center := layout.point(index)
@@ -34,10 +44,21 @@ func prepare(layout: DungeonLayout, theme := "moss_cave") -> void:
 			var at := center + Vector3(cos(angle), 0, sin(angle)) * (float(room.radius) - 2.0)
 			props[(index + corner) % 6].call(at)
 		# Halls get pillars along their walls; the forest ring burns all round.
-		if theme in ["sand_hall", "burning_forest", "drowned_spire"] and room.radius >= 10:
+		if (theme in ["sand_hall", "burning_forest", "drowned_spire"] or (fine and theme in FineScenery.RINGED)) and room.radius >= 10:
 			for k in 8:
-				var a := TAU * k / 8.0
+				# Fine rings turn half a step so they leave the lamps on the x axis alone.
+				var a := TAU * k / 8.0 + (PI / 8.0 if fine else 0.0)
 				props[0].call(center + Vector3(cos(a), 0, sin(a)) * (float(room.radius) - 1.5))
+		# The lamps whose lights DungeonWorld adds (room center +- (radius - 2) on x).
+		if fine:
+			for side in [-1.0, 1.0]:
+				fine.lamp(center + Vector3(side * (float(room.radius) - 2.0), 0, 0))
+	if fine:
+		for cell: Vector2i in layout.floor_cells:
+			for normal: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				if layout.open(cell.x + normal.x, cell.y + normal.y) or _rng.randf() > float(FineScenery.GROWTH[theme]): continue
+				var n := Vector3(normal.x, 0, normal.y)
+				fine.wall_growth(Vector3(cell.x + 0.5, 1.0, cell.y + 0.5) + n * 0.3, n, Vector3(-n.z, 0, n.x))
 	# Grow tendrils from the floor, following actual wall faces rather than
 	# crossing an opening. Every sample comes from the layout seed.
 	for cell: Vector2i in (layout.floor_cells if theme == "moss_cave" else {}):
@@ -55,6 +76,15 @@ func prepare(layout: DungeonLayout, theme := "moss_cave") -> void:
 						Vector3(0.2, 0.09, 0.2), MOSS.lightened(_rng.randf() * 0.18))
 			for k in 5:
 				_voxel(base - n * k * 0.14 + tangent * _rng.randf_range(-0.2, 0.2), Vector3(0.22, 0.045, 0.22), MOSS.darkened(0.12))
+	_glow_prepared.resize(_glow_points.size() * 20)
+	for i in _glow_points.size():
+		var t := _glow_points[i]
+		var c := _glow_colors[i]
+		var d := _glow_custom[i]
+		var values := [t.basis.x.x, t.basis.y.x, t.basis.z.x, t.origin.x, t.basis.x.y, t.basis.y.y, t.basis.z.y, t.origin.y,
+			t.basis.x.z, t.basis.y.z, t.basis.z.z, t.origin.z, c.r, c.g, c.b, c.a, d.r, d.g, d.b, d.a]
+		for j in 20: _glow_prepared[i * 20 + j] = values[j]
+	_glow_points.clear()
 	_prepared.resize(_points.size()*16)
 	for i in _points.size():
 		var t := _points[i]
@@ -84,10 +114,38 @@ func publish() -> void:
 	visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(visual)
 	_prepared.clear()
+	if _glow_prepared.is_empty(): return
+	var glowing := MultiMesh.new()
+	glowing.transform_format = MultiMesh.TRANSFORM_3D
+	glowing.use_colors = true
+	glowing.use_custom_data = true
+	glowing.mesh = BoxMesh.new()
+	glowing.instance_count = _glow_prepared.size() / 20
+	glowing.buffer = _glow_prepared
+	var lit := MultiMeshInstance3D.new()
+	lit.multimesh = glowing
+	glow_material = ShaderMaterial.new()
+	glow_material.shader = preload("res://shaders/glow_flora.gdshader")
+	lit.material_override = glow_material
+	lit.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(lit)
+	_glow_prepared.clear()
 
 func _voxel(at: Vector3, size: Vector3, color: Color) -> void:
 	_points.append(Transform3D(Basis.IDENTITY.scaled(size), at))
 	_colors.append(color)
+
+
+## A glowing voxel (fine themes): `amount` how much it glows (0..1), `rate`
+## its blinks per second, `rest` its glow between blinks.
+func glow(at: Vector3, size: Vector3, color: Color, amount := 1.0, rate := 0.3, rest := 0.5) -> void:
+	_glow_points.append(Transform3D(Basis.IDENTITY.scaled(size), at))
+	_glow_colors.append(color)
+	_glow_custom.append(Color(_rng.randf(), amount, rate, rest))
+
+
+func glow_point(at: Vector3) -> void:
+	glow_points.append(at)
 
 # --- The Sunken Court -------------------------------------------------------------
 

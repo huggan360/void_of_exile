@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cd8m5fj7c4tfu"
+path="res://.godot/imported/wing_l.vox-2748ad8cffa3231e03c556122ded03c0.tscn"
+
+[deps]
+
+source_file="res://creatures/star_eater/wing_l.vox"
+dest_files=["res://.godot/imported/wing_l.vox-2748ad8cffa3231e03c556122ded03c0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

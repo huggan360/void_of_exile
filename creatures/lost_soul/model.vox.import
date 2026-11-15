@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://kb0vynpjd2rf"
+path="res://.godot/imported/model.vox-095dfc8c93563765b6880e97c3111c3c.tscn"
+
+[deps]
+
+source_file="res://creatures/lost_soul/model.vox"
+dest_files=["res://.godot/imported/model.vox-095dfc8c93563765b6880e97c3111c3c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dbcitnc1h82h3"
+path="res://.godot/imported/body.vox-719b9fe88b7bd29720c66d7d5ef55fe8.tscn"
+
+[deps]
+
+source_file="res://creatures/jade_guardian/body.vox"
+dest_files=["res://.godot/imported/body.vox-719b9fe88b7bd29720c66d7d5ef55fe8.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

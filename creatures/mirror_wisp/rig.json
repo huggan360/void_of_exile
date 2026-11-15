@@ -1,0 +1,41 @@
+{
+  "voxel_size": 0.045,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -11,
+        1,
+        -6
+      ],
+      "glow": true
+    },
+    "tail": {
+      "frame_min": [
+        -3,
+        -5,
+        -3
+      ],
+      "glow": true
+    }
+  },
+  "limbs": {
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        0,
+        3,
+        0
+      ],
+      "role": "sway",
+      "phase": 1.0
+    }
+  },
+  "hand": [
+    0,
+    17,
+    -5
+  ],
+  "hover": 0.1,
+  "bob": 0.045,
+  "waddle": 0
+}

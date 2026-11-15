@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b8yl536gwevh4"
+path="res://.godot/imported/model.vox-b6aec90ec9da5c9bb9b66ce0306aef2a.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/brine_hook/model.vox"
+dest_files=["res://.godot/imported/model.vox-b6aec90ec9da5c9bb9b66ce0306aef2a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bi1xb8ncj5rfi"
+path="res://.godot/imported/head.vox-f6af75ae005addb37f2e08352ca34ff9.tscn"
+
+[deps]
+
+source_file="res://creatures/hymn_abbess/head.vox"
+dest_files=["res://.godot/imported/head.vox-f6af75ae005addb37f2e08352ca34ff9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

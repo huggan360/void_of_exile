@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c0ucj51j3l866"
+path="res://.godot/imported/jaw_refracted.vox-aa2c06c81e01f4dce242498ee7f6a153.tscn"
+
+[deps]
+
+source_file="res://creatures/solenne/jaw_refracted.vox"
+dest_files=["res://.godot/imported/jaw_refracted.vox-aa2c06c81e01f4dce242498ee7f6a153.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

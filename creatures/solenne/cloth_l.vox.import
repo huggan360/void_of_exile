@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://duqafc0hotlv7"
+path="res://.godot/imported/cloth_l.vox-724c915805f001721bc55c055cd2d5ec.tscn"
+
+[deps]
+
+source_file="res://creatures/solenne/cloth_l.vox"
+dest_files=["res://.godot/imported/cloth_l.vox-724c915805f001721bc55c055cd2d5ec.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

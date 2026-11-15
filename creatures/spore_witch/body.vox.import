@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dbipwatga0faa"
+path="res://.godot/imported/body.vox-1d6a4126c8fec4c671a1486f2e09c52c.tscn"
+
+[deps]
+
+source_file="res://creatures/spore_witch/body.vox"
+dest_files=["res://.godot/imported/body.vox-1d6a4126c8fec4c671a1486f2e09c52c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

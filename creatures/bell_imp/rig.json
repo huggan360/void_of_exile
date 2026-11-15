@@ -1,0 +1,155 @@
+{
+  "voxel_size": 0.04,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -7,
+        3,
+        -7
+      ]
+    },
+    "head": {
+      "frame_min": [
+        -9,
+        -4,
+        -7
+      ],
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        -4,
+        -7,
+        -6
+      ]
+    },
+    "arm_l": {
+      "frame_min": [
+        -4,
+        -8,
+        -7
+      ]
+    },
+    "wing_l": {
+      "frame_min": [
+        -11,
+        -6,
+        -2
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        -6,
+        -14,
+        -11
+      ]
+    },
+    "wing_r": {
+      "frame_min": [
+        -2,
+        -6,
+        -2
+      ]
+    },
+    "tail": {
+      "frame_min": [
+        -2,
+        -5,
+        -2
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        16,
+        -2
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        6,
+        0
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        3,
+        6,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -6,
+        14,
+        0
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "wing_l": {
+      "part": "wing_l",
+      "pivot": [
+        -4,
+        14,
+        4
+      ],
+      "role": "wing",
+      "phase": 1
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        6,
+        14,
+        0
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "wing_r": {
+      "part": "wing_r",
+      "pivot": [
+        4,
+        14,
+        4
+      ],
+      "role": "wing",
+      "phase": -1
+    },
+    "tail": {
+      "part": "tail",
+      "pivot": [
+        0,
+        9,
+        4
+      ],
+      "role": "tail",
+      "phase": 1.0
+    }
+  },
+  "hand": [
+    0,
+    -12,
+    -4
+  ],
+  "hand_limb": "arm_r",
+  "waddle": 0.35,
+  "bob": 0,
+  "flap_rate": 4.0
+}

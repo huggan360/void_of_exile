@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dw0en4lnigcsf"
+path="res://.godot/imported/body.vox-765da683911a05d7fdd7aeaf4dd19f4d.tscn"
+
+[deps]
+
+source_file="res://creatures/temple_skink/body.vox"
+dest_files=["res://.godot/imported/body.vox-765da683911a05d7fdd7aeaf4dd19f4d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dgb08sv654tih"
+path="res://.godot/imported/body_thaw.vox-c0cc66737d1b125bf5d47eb9b8b25124.tscn"
+
+[deps]
+
+source_file="res://creatures/jarl_hrimvald/body_thaw.vox"
+dest_files=["res://.godot/imported/body_thaw.vox-c0cc66737d1b125bf5d47eb9b8b25124.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

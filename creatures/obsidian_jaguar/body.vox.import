@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ctkqqvnp8av4v"
+path="res://.godot/imported/body.vox-84b799a2d25c7046900656703f75b42e.tscn"
+
+[deps]
+
+source_file="res://creatures/obsidian_jaguar/body.vox"
+dest_files=["res://.godot/imported/body.vox-84b799a2d25c7046900656703f75b42e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

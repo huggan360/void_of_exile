@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b6w7paab6gwiy"
+path="res://.godot/imported/wing_r_glow.vox-0a5942282d884c6870e73a7332f01e35.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_moth/wing_r_glow.vox"
+dest_files=["res://.godot/imported/wing_r_glow.vox-0a5942282d884c6870e73a7332f01e35.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

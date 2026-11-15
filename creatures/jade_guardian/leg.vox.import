@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cfw14xmj6efra"
+path="res://.godot/imported/leg.vox-077c07234039056b73ffc89c285c3205.tscn"
+
+[deps]
+
+source_file="res://creatures/jade_guardian/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-077c07234039056b73ffc89c285c3205.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

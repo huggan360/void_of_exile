@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dml82alhws7n5"
+path="res://.godot/imported/leg.vox-a715184cc5cda46f1387dcbf261afa16.tscn"
+
+[deps]
+
+source_file="res://creatures/astral_reaver/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-a715184cc5cda46f1387dcbf261afa16.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

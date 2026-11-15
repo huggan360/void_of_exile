@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dlrbin3bi3oh2"
+path="res://.godot/imported/leg.vox-7d8b0a327e180efb661da5b22af387f6.tscn"
+
+[deps]
+
+source_file="res://creatures/shroom_brute/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-7d8b0a327e180efb661da5b22af387f6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

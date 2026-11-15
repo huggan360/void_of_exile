@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c5oydcurcpfkb"
+path="res://.godot/imported/model.vox-5bafc91ef435af127d9fb31fa0f33b74.tscn"
+
+[deps]
+
+source_file="res://creatures/serpent_priest/model.vox"
+dest_files=["res://.godot/imported/model.vox-5bafc91ef435af127d9fb31fa0f33b74.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

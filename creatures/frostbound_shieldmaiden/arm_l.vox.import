@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ctbjkqsp3pkvq"
+path="res://.godot/imported/arm_l.vox-8c2a07f898bdc5141546088b0e69ebbf.tscn"
+
+[deps]
+
+source_file="res://creatures/frostbound_shieldmaiden/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-8c2a07f898bdc5141546088b0e69ebbf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

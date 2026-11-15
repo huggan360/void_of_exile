@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bjuvx8tayu8o6"
+path="res://.godot/imported/leg.vox-aeca97b3bc4796fe38e4c95d430b2f6a.tscn"
+
+[deps]
+
+source_file="res://creatures/spore_witch/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-aeca97b3bc4796fe38e4c95d430b2f6a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

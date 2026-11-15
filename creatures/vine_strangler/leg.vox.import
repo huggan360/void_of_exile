@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ct50ct55rf8lp"
+path="res://.godot/imported/leg.vox-6dff6bedf2c0100d5c2c953ec0d570ab.tscn"
+
+[deps]
+
+source_file="res://creatures/vine_strangler/leg.vox"
+dest_files=["res://.godot/imported/leg.vox-6dff6bedf2c0100d5c2c953ec0d570ab.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

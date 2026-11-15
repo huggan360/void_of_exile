@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bt76ec1nj1iry"
+path="res://.godot/imported/arm_r_glow.vox-fcf8ac1c25bc869bd53332ac8cfccaaa.tscn"
+
+[deps]
+
+source_file="res://creatures/ixalith/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-fcf8ac1c25bc869bd53332ac8cfccaaa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

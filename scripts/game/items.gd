@@ -97,6 +97,16 @@ const DIVINE_SETS := {
 	Cindrella = ["D_bow_Cindrella", "D_bonus_flame_ofcindrella"],
 	Goldslinger = ["D_cloak_goldslinger", "D_bow_goldslinger"],
 	Ash = ["D_wand_thewandofash"],
+	# The Surface dungeons (DungeonDivineSets).
+	Mycelium = ["D_wand_ofmycelium", "D_bonus_talisman_ofmycelium"],
+	Saltmourn = ["D_bow_ofsaltmourn", "D_trident_ofsaltmourn", "D_cloak_ofsaltmourn"],
+	Jade = ["D_wand_ofjade", "D_cloak_ofjade", "D_bonus_eye_ofjade"],
+	Afterlife = ["D_wand_oftheafterlife", "D_cloak_oftheafterlife", "D_bonus_talisman_oftheafterlife"],
+	Barrow = ["D_trident_ofthebarrow", "D_cloak_ofthebarrow", "D_robe_ofthebarrow", "D_bonus_crucifix_ofthebarrow"],
+	Prism = ["D_bow_ofprism", "D_spell_ofprism", "D_robe_ofprism", "D_bonus_crystal_ofprism"],
+	Requiem = ["D_wand_ofrequiem", "D_bow_ofrequiem", "D_robe_ofrequiem", "D_spell_ofrequiem", "D_bonus_flame_ofrequiem"],
+	Unmade = ["D_bow_oftheunmade", "D_wand_oftheunmade", "D_trident_oftheunmade", "D_cloak_oftheunmade",
+		"D_robe_oftheunmade", "D_bonus_eye_oftheunmade"],
 }
 ## Encounters assigned a Divine set; unassigned enemies cannot drop Divine items.
 const BOSS_DIVINE_SET := {
@@ -110,6 +120,9 @@ const BOSS_DIVINE_SET := {
 	thornmaw_bloom = "Cindrella", mad_farmer = "Ash", queen_briarrose = "Blood", amber_colossus = "Goldslinger",
 	selenarch = "Eclipse", brood_matriarch = "Venom", stormeye_tyrant = "Stormeye", veil_herald = "Madness",
 	void_empress = "Void",
+	# The Surface dungeons.
+	mother_mycora = "Mycelium", captain_saltmourn = "Saltmourn", ixalith = "Jade", lantern_shepherd = "Afterlife",
+	jarl_hrimvald = "Barrow", solenne = "Prism", choirless_seraph = "Requiem", oblivara = "Unmade",
 }
 ## Sets two bosses share. The first boss favours even items, the second odd
 ## ones: a boss drops its favourites 1% more often.
@@ -133,7 +146,10 @@ static func divine_ids_for(enemy_id: String) -> Array:
 
 ## Divine sources that aren't bosses roll the set at a fraction of the
 ## usual chances (the goblin treasure cache: about 5% for any Fallenwood piece).
-const DIVINE_SOURCE_SCALE := {goblin_treasure = 0.3}
+const DIVINE_SOURCE_SCALE := {goblin_treasure = 0.3,
+	# The Surface dungeons: the harder the dungeon, the rarer each piece.
+	ixalith = 0.9, lantern_shepherd = 0.9, jarl_hrimvald = 0.8, solenne = 0.7, choirless_seraph = 0.6, oblivara = 0.5,
+}
 
 ## Each eligible player's own chance at one Divine item from this boss. The
 ## piece decides it: weapons and spells 5%, armour 6%, bonus relics 7%, and an
@@ -646,6 +662,7 @@ static func divine() -> Array[Item]:
 	_iron_set(out)
 	_spirit_set(out)
 	DivineSets.build(out)
+	DungeonDivineSets.build(out)
 
 	for item in out:
 		if item.is_weapon(): _weapon_attacks(item)
@@ -657,6 +674,7 @@ static func divine() -> Array[Item]:
 		if item.id in ["D_bow_Blood", "D_cloak_blood"]:
 			item.drop_bag = "black"
 	DivineSets.finish(out)
+	DungeonDivineSets.finish(out)
 	var live := []
 	for ids: Array in DIVINE_SETS.values():
 		live.append_array(ids)

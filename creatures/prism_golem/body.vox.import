@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d4nqb5lgrt3vh"
+path="res://.godot/imported/body.vox-5fc01669bfb88f7f87b2b3430e40d220.tscn"
+
+[deps]
+
+source_file="res://creatures/prism_golem/body.vox"
+dest_files=["res://.godot/imported/body.vox-5fc01669bfb88f7f87b2b3430e40d220.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

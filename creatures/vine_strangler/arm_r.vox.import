@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://duaut5q1y7oj6"
+path="res://.godot/imported/arm_r.vox-1afda7d279214ecf931a0ee2931a23bf.tscn"
+
+[deps]
+
+source_file="res://creatures/vine_strangler/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-1afda7d279214ecf931a0ee2931a23bf.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

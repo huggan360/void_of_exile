@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bcvtgedo4x81w"
+path="res://.godot/imported/arm_r.vox-d401467c00bfc322d939ba3027d9187e.tscn"
+
+[deps]
+
+source_file="res://creatures/barrow_wight/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-d401467c00bfc322d939ba3027d9187e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

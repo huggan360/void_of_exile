@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwjwth1najjhc"
+path="res://.godot/imported/arm_l.vox-26727f36123dbe23471e31aeb2082d7b.tscn"
+
+[deps]
+
+source_file="res://creatures/first_mate_grisk/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-26727f36123dbe23471e31aeb2082d7b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

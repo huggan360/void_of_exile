@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bxlhhaylk5e4"
+path="res://.godot/imported/arm_l_molted_glow.vox-4c72f09611c17e0f1b5ac82e5edfc236.tscn"
+
+[deps]
+
+source_file="res://creatures/ixalith/arm_l_molted_glow.vox"
+dest_files=["res://.godot/imported/arm_l_molted_glow.vox-4c72f09611c17e0f1b5ac82e5edfc236.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

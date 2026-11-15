@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ducyd06nwihhf"
+path="res://.godot/imported/body_kindled_glow.vox-9c750bac47b95c3ace6ee9c0ae1e7164.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/body_kindled_glow.vox"
+dest_files=["res://.godot/imported/body_kindled_glow.vox-9c750bac47b95c3ace6ee9c0ae1e7164.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

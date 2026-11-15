@@ -10,6 +10,8 @@ var server_build := false
 var _biome: BiomeDef
 var theme: Dictionary
 var _prepared_scenery: DungeonScenery
+## Client only: blinking and rippling light in fine themes (GlowRipples).
+var glow: GlowRipples
 
 func _init(p_record: Dictionary) -> void:
 	record = p_record
@@ -44,7 +46,11 @@ func prepare_load() -> void:
 	add_child(_prepared_scenery)
 
 func _ready() -> void:
-	_add_terrain(DungeonGenerator.new(layout, theme), AABB(Vector3(-half_extent, -8, -half_extent), Vector3(half_extent * 2, 24, half_extent * 2)))
+	var fine: bool = definition.get("fine", false)
+	if fine:
+		_add_fine_terrain()
+	else:
+		_add_terrain(DungeonGenerator.new(layout, theme), AABB(Vector3(-half_extent, -8, -half_extent), Vector3(half_extent * 2, 24, half_extent * 2)))
 	enemy_director.world = self
 	enemy_director.realm_id = realm_id
 	enemy_director.remote = Net.is_client()
@@ -56,6 +62,7 @@ func _ready() -> void:
 			var scenery := DungeonScenery.new()
 			scenery.build(layout, str(definition.get("theme", "moss_cave")))
 			add_child(scenery)
+		if fine: _add_glow()
 		if definition.get("theme", "moss_cave") == "moss_cave":
 			var fireflies := DungeonFireflies.new()
 			fireflies.build(layout)
@@ -66,7 +73,9 @@ func _ready() -> void:
 		if not server_build and not Net.is_server():
 			for side in [-1.0, 1.0]:
 				var pos := at + Vector3(side * (room.radius - 2), 0, 0)
-				if definition.get("theme", "moss_cave") == "moss_cave": _mushroom(pos)
+				# Fine themes draw their own lamps (DungeonScenery.lamp_spots); only the light is here.
+				if fine: _add_light(pos + Vector3.UP * 2.4, theme.light, 2.0, 18.0)
+				elif definition.get("theme", "moss_cave") == "moss_cave": _mushroom(pos)
 				else: _brazier(pos)
 		match room.kind:
 			"spawn":
@@ -82,6 +91,39 @@ func _ready() -> void:
 				if rng.randf() < 0.65: members.append(definition.mid_enemies[rng.randi_range(0, definition.mid_enemies.size() - 1)])
 				_site(i, members)
 	print("[dungeon] %s seed=%d rooms=%d branches=%d treasure=%d miniboss=%d boss=%s" % [realm_id, record.seed, layout.rooms.size(), layout.edges.size(), layout.treasure, layout.miniboss, layout.boss])
+
+## The Surface's 0.25 m voxels and blocks (FineDungeonGenerator).
+func _add_fine_terrain() -> void:
+	var f := FineDungeonGenerator.FINE
+	# Bounds on whole 32-voxel mesh blocks, or the voxel module can't mesh the edges.
+	var r := ceili((half_extent + 2) * f / 32.0) * 32
+	_add_terrain(FineDungeonGenerator.new(layout, theme), AABB(Vector3(-r, -32, -r), Vector3(r * 2, 96, r * 2)), "", [],
+		SurfaceBlocks.mesher())
+	terrain.scale = Vector3.ONE / f
+	terrain.mesh_block_size = 32
+	terrain.max_view_distance = 320
+	var format := VoxelFormat.new()
+	format.set_channel_depth(VoxelBuffer.CHANNEL_TYPE, VoxelBuffer.DEPTH_8_BIT)
+	terrain.format = format
+	if not Net.is_server():
+		# Its own copy: the ripples written into it never reach the Surface's.
+		terrain.material_override = SurfaceBlocks.material().duplicate()
+
+
+func _add_glow() -> void:
+	glow = GlowRipples.new()
+	var look: Dictionary = theme.get("glow", {})
+	for c: Color in look.get("colors", []): glow.chatter_colors.append(c)
+	glow.chatter_every = look.get("every", glow.chatter_every)
+	add_child(glow)
+	if terrain.material_override is ShaderMaterial: glow.watch(terrain.material_override)
+	var scenery: DungeonScenery = _prepared_scenery if is_instance_valid(_prepared_scenery) else null
+	for child in get_children():
+		if child is DungeonScenery: scenery = child
+	if scenery:
+		glow.chatter_points = scenery.glow_points
+		if scenery.glow_material: glow.watch(scenery.glow_material)
+
 
 func _site(index: int, members: Array) -> void:
 	var key := "%s_room_%d" % [realm_id, index]

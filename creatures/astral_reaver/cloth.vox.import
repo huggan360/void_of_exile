@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dvyoddh48xdxn"
+path="res://.godot/imported/cloth.vox-8c7723b611dc50aeca1b62989f9e7118.tscn"
+
+[deps]
+
+source_file="res://creatures/astral_reaver/cloth.vox"
+dest_files=["res://.godot/imported/cloth.vox-8c7723b611dc50aeca1b62989f9e7118.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

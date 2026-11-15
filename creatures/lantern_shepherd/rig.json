@@ -1,0 +1,176 @@
+{
+  "voxel_size": 0.09,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -16,
+        -1,
+        -11
+      ],
+      "glow": true
+    },
+    "head": {
+      "frame_min": [
+        -13,
+        -12,
+        -5
+      ],
+      "glow": true
+    },
+    "body_veil": {
+      "frame_min": [
+        -16,
+        -1,
+        -11
+      ],
+      "glow": true
+    },
+    "head_veil": {
+      "frame_min": [
+        -13,
+        -12,
+        -5
+      ],
+      "glow": true
+    },
+    "body_unbound": {
+      "frame_min": [
+        -16,
+        -1,
+        -11
+      ],
+      "glow": true
+    },
+    "head_unbound": {
+      "frame_min": [
+        -13,
+        -12,
+        -5
+      ],
+      "glow": true
+    },
+    "jaw": {
+      "frame_min": [
+        -3,
+        -3,
+        -3
+      ],
+      "glow": true
+    },
+    "arm_l": {
+      "frame_min": [
+        -4,
+        -19,
+        -5
+      ]
+    },
+    "arm_r": {
+      "frame_min": [
+        -3,
+        -43,
+        -6
+      ],
+      "glow": true
+    },
+    "veil_l": {
+      "frame_min": [
+        -8,
+        -28,
+        -2
+      ]
+    },
+    "veil_r": {
+      "frame_min": [
+        -2,
+        -28,
+        -2
+      ]
+    }
+  },
+  "limbs": {
+    "head": {
+      "part": "head",
+      "pivot": [
+        0,
+        51,
+        0
+      ],
+      "role": "head",
+      "phase": 1.0
+    },
+    "jaw": {
+      "part": "jaw",
+      "pivot": [
+        0,
+        -3,
+        -1
+      ],
+      "role": "jaw",
+      "phase": 1.0,
+      "parent_limb": "head"
+    },
+    "arm_l": {
+      "part": "arm_l",
+      "pivot": [
+        -7,
+        45,
+        -1
+      ],
+      "role": "arm",
+      "phase": 1,
+      "throws": false
+    },
+    "arm_r": {
+      "part": "arm_r",
+      "pivot": [
+        7,
+        45,
+        -1
+      ],
+      "role": "arm",
+      "phase": -1,
+      "throws": true
+    },
+    "veil_l": {
+      "part": "veil_l",
+      "pivot": [
+        -3,
+        37,
+        2
+      ],
+      "role": "cloth",
+      "phase": 1
+    },
+    "veil_r": {
+      "part": "veil_r",
+      "pivot": [
+        3,
+        37,
+        2
+      ],
+      "role": "cloth",
+      "phase": -1
+    }
+  },
+  "hand": [
+    9,
+    0,
+    -1
+  ],
+  "animation_style": "cantor",
+  "hand_limb": "arm_r",
+  "hover": 0.13,
+  "bob": 0.025,
+  "waddle": 0,
+  "glow_strength": 1.2,
+  "variants": {
+    "veil": {
+      "body": "body_veil",
+      "head": "head_veil"
+    },
+    "unbound": {
+      "body": "body_unbound",
+      "head": "head_unbound"
+    }
+  }
+}

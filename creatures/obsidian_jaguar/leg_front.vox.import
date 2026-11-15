@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dxvo4clp2m4f2"
+path="res://.godot/imported/leg_front.vox-e03eae0a9a8c1eb54075a6aa8181826c.tscn"
+
+[deps]
+
+source_file="res://creatures/obsidian_jaguar/leg_front.vox"
+dest_files=["res://.godot/imported/leg_front.vox-e03eae0a9a8c1eb54075a6aa8181826c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

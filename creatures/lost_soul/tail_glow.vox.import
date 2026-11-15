@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dyw8g4va1rm3j"
+path="res://.godot/imported/tail_glow.vox-fb8621831a7977a245341d2977e08340.tscn"
+
+[deps]
+
+source_file="res://creatures/lost_soul/tail_glow.vox"
+dest_files=["res://.godot/imported/tail_glow.vox-fb8621831a7977a245341d2977e08340.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

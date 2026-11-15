@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cv6u6docexafp"
+path="res://.godot/imported/wing_lower_l_kindled.vox-1f1ee8c57319b7fd8229f6d2b493e835.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/wing_lower_l_kindled.vox"
+dest_files=["res://.godot/imported/wing_lower_l_kindled.vox-1f1ee8c57319b7fd8229f6d2b493e835.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -329,6 +329,60 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 				_box(body, d * 0.09, Vector3(0.1, 0.1, 0.1), c2)
 			_box(lit, Vector3(0.09, 0.09, 0), Vector3(0.04, 0.04, 0.04), c1.lightened(0.3))
 			_box(lit, Vector3(-0.09, 0, 0.09), Vector3(0.04, 0.04, 0.04), c1)
+		"spore":
+			# A soft puffball with glowing teal pores.
+			for x: int in [-1, 0, 1]:
+				for y: int in [-1, 0, 1]:
+					for z: int in [-1, 0, 1]:
+						if absi(x) + absi(y) + absi(z) > 2: continue
+						var pore := (x + y * 2 + z * 3) % 4 == 0 and not (x == 0 and y == 0 and z == 0)
+						_box(lit if pore else body, Vector3(x, y, z) * 0.11, Vector3.ONE * 0.12, c2 if pore else c1)
+			_box(lit, Vector3(0, 0.17, 0), Vector3(0.06, 0.06, 0.06), Color("fff0c0"))
+		"cannonball":
+			for x: int in [-1, 0, 1]:
+				for y: int in [-1, 0, 1]:
+					for z: int in [-1, 0, 1]:
+						if absi(x) + absi(y) + absi(z) <= 2:
+							_box(body, Vector3(x, y, z) * 0.1, Vector3.ONE * 0.1, c1.lightened(0.15 if y == 1 else 0.0))
+			_box(body, Vector3(0, 0.12, 0.08), Vector3(0.03, 0.08, 0.03), Color("6a5a40"))  # the fuse
+			_box(lit, Vector3(0, 0.18, 0.09), Vector3(0.06, 0.06, 0.06), c2)
+		"feather":
+			_box(lit, Vector3(0, 0, 0.05), Vector3(0.03, 0.03, 0.8), c2)
+			for i in 6:
+				var z := -0.25 + i * 0.1
+				var w := 0.16 - absf(i - 2.5) * 0.03
+				_box(lit, Vector3(0.05, 0, z), Vector3(w, 0.02, 0.09), c1 if i % 2 else c1.lightened(0.25))
+				_box(lit, Vector3(-0.05, 0, z), Vector3(w, 0.02, 0.09), c1.darkened(0.1) if i % 2 else c1)
+		"wisp":
+			# A little soul flame: a bright head and a tail that fades back.
+			_box(lit, Vector3(0, 0, -0.12), Vector3(0.14, 0.14, 0.14), c1.lightened(0.35))
+			for i in 4:
+				var k := i / 4.0
+				_box(lit, Vector3(sin(i * 1.7) * 0.03, 0, 0.0 + i * 0.09), Vector3.ONE * (0.11 - k * 0.07), c1.lerp(c2, k))
+		"icespear":
+			_box(body, Vector3(0, 0, 0.15), Vector3(0.05, 0.05, 0.85), Color("4a5262"))
+			_box(tip_tool, Vector3(0, 0, -0.3), Vector3(0.34, 0.06, 0.07), c2)
+			for x in [-0.15, 0.0, 0.15]:
+				_box(tip_tool, Vector3(x, 0, -0.45 - (0.06 if x == 0.0 else 0.0)), Vector3(0.07, 0.07, 0.28), c1)
+		"pane":
+			# A diamond of stained glass in a lead frame.
+			var glass := [c1, c2, Color("4a6ae0"), Color("f0c04a")]
+			for i in 4:
+				var a := i * PI * 0.5
+				_box(lit, Vector3(cos(a) * 0.09, 0, sin(a) * 0.09), Vector3(0.11, 0.03, 0.11), glass[i])
+			_box(body, Vector3.ZERO, Vector3(0.3, 0.02, 0.025), Color("18161c"))
+			_box(body, Vector3.ZERO, Vector3(0.025, 0.02, 0.3), Color("18161c"))
+		"candle":
+			_box(lit, Vector3(0, 0, -0.1), Vector3(0.1, 0.1, 0.14), Color("fff6e0"))
+			_box(lit, Vector3(0, 0, 0.02), Vector3(0.15, 0.15, 0.12), c1)
+			_box(lit, Vector3(0, 0, 0.14), Vector3(0.1, 0.1, 0.14), c2)
+			_box(body, Vector3(0, -0.08, 0.2), Vector3(0.05, 0.05, 0.08), Color("ece6d8"))
+		"star":
+			_box(lit, Vector3.ZERO, Vector3(0.1, 0.1, 0.1), Color("fffbe8"))
+			for i in 5:
+				var a := i * TAU / 5.0
+				_box(lit, Vector3(cos(a) * 0.12, sin(a) * 0.12, 0), Vector3(0.07, 0.07, 0.07), c1)
+				_box(body, Vector3(cos(a) * 0.2, sin(a) * 0.2, 0.02), Vector3(0.05, 0.05, 0.05), c2)
 		"orb":
 			for x: int in [-1, 0, 1]:
 				for y: int in [-1, 0, 1]:
@@ -448,6 +502,41 @@ func _make_trail(weapon: Item, trail_override: String) -> GPUParticles3D:
 			pm.spread = 35.0
 			pm.hue_variation_min = -0.4
 			pm.hue_variation_max = 0.05
+		"spores":  # gold motes that drift up
+			pm.color = Color("ffc04a")
+			pm.gravity = Vector3(0, 0.8, 0)
+			pm.spread = 40.0
+			pm.hue_variation_min = -0.05
+			pm.hue_variation_max = 0.25
+		"brine":  # spray that falls away
+			pm.color = Color("a8f0e8")
+			pm.gravity = Vector3(0, -5.0, 0)
+		"jade":
+			pm.color = Color("4fd88a")
+			pm.hue_variation_min = 0.0
+			pm.hue_variation_max = 0.12
+		"souls":  # cyan and pink, rising
+			pm.color = Color("5ff0ff")
+			pm.gravity = Vector3(0, 1.5, 0)
+			pm.hue_variation_min = 0.0
+			pm.hue_variation_max = 0.3
+		"frost":
+			pm.color = Color("d8f4ff")
+			pm.gravity = Vector3(0, -1.0, 0)
+		"prism":  # every color
+			pm.color = Color("ff8af0")
+			pm.hue_variation_min = -1.0
+			pm.hue_variation_max = 1.0
+		"wax":  # violet smoke and falling wax
+			pm.color = Color("c070ff")
+			pm.gravity = Vector3(0, -2.0, 0)
+			pm.hue_variation_min = -0.05
+			pm.hue_variation_max = 0.05
+		"stardust":  # gold and white
+			pm.color = Color("ffc24a")
+			pm.spread = 30.0
+			pm.hue_variation_min = 0.0
+			pm.hue_variation_max = 0.06
 		"petals":  # pink and teal, drifting
 			pm.color = Color("f06aa8")
 			pm.gravity = Vector3(0, -1.2, 0)

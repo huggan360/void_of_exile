@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d1b2doo77w1v2"
+path="res://.godot/imported/body_awakened.vox-d076806c8ceddd706b84393863d01648.tscn"
+
+[deps]
+
+source_file="res://creatures/oblivara/body_awakened.vox"
+dest_files=["res://.godot/imported/body_awakened.vox-d076806c8ceddd706b84393863d01648.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,49 @@
+{
+  "voxel_size": 0.045,
+  "parts": {
+    "body": {
+      "frame_min": [
+        -11,
+        2,
+        -10
+      ],
+      "glow": true
+    },
+    "leg": {
+      "frame_min": [
+        -4,
+        -6,
+        -6
+      ]
+    }
+  },
+  "limbs": {
+    "leg_l": {
+      "part": "leg",
+      "pivot": [
+        -3,
+        5,
+        0
+      ],
+      "role": "leg",
+      "phase": 1
+    },
+    "leg_r": {
+      "part": "leg",
+      "pivot": [
+        3,
+        5,
+        0
+      ],
+      "role": "leg",
+      "phase": -1
+    }
+  },
+  "hand": [
+    0,
+    10,
+    -8
+  ],
+  "waddle": 0.65,
+  "bob": 0.01
+}

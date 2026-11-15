@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://uhhaqfi1jk73"
+path="res://.godot/imported/arm_r_glow.vox-7ac0e03756ef64ba2efa7c6af383da14.tscn"
+
+[deps]
+
+source_file="res://creatures/glass_knight/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-7ac0e03756ef64ba2efa7c6af383da14.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -28,6 +28,10 @@ const BOSS_POTIONS := {
 	rimeheart_prism = ["dexterity", "magic"], void_empress = ["dexterity", "hp"], drowned_cantor = ["dexterity", "mp"],
 	queen_briarrose = ["magic", "hp"], blue_dragon = ["magic", "mp"],
 	brood_matriarch = ["hp", "mp"],
+	# The Surface dungeons (Oblivara rolls one to three of any stat instead: EnemyDef.dungeon_potions).
+	mother_mycora = ["hp", "mp"], captain_saltmourn = ["attack", "dexterity"], ixalith = ["magic", "speed"],
+	lantern_shepherd = ["speed", "dexterity"], jarl_hrimvald = ["defense", "attack"], solenne = ["magic", "mp"],
+	choirless_seraph = ["attack", "mp"],
 }
 
 ## The harder bosses roll extra high grades on top of their own table (each
@@ -38,10 +42,19 @@ const BOSS_GRADES := {
 	stormeye_tyrant = 8, brood_matriarch = 8, selenarch = 8, hollow_king = 8,
 	amber_colossus = 7, veil_herald = 7, vharok = 7, pyre_ent = 7, hollow_crown = 7, rimeheart_prism = 7,
 	drowned_cantor = 7, scarab_regent = 7, blue_dragon = 7, void_empress = 7,
+	# The Surface dungeons, by rating.
+	mother_mycora = 4, captain_saltmourn = 5, ixalith = 6, lantern_shepherd = 6, jarl_hrimvald = 7, solenne = 8,
+	choirless_seraph = 9, oblivara = 10,
 }
 const GRADE_ROLLS := {
 	7: [{pool = {tier = 6}, chance = 0.30}, {pool = {tier = 7}, chance = 0.15}],
 	8: [{pool = {tier = 6}, chance = 0.40}, {pool = {tier = 7}, chance = 0.30}, {pool = {tier = 8}, chance = 0.15}],
+	# The Surface dungeons' own: 3.5 and 4.5 rated bosses top out at G5/G6, the 9/10 and 10/10 at G8 twice.
+	4: [{pool = {tier = 4}, chance = 0.60}, {pool = {tier = 5}, chance = 0.15}],
+	5: [{pool = {tier = 5}, chance = 0.40}, {pool = {tier = 6}, chance = 0.08}],
+	6: [{pool = {tier = 5}, chance = 0.40}, {pool = {tier = 6}, chance = 0.25}],
+	9: [{pool = {tier = 6}, chance = 0.50}, {pool = {tier = 7}, chance = 0.40}, {pool = {tier = 8}, chance = 0.25}],
+	10: [{pool = {tier = 7}, chance = 0.60}, {pool = {tier = 8}, chance = 0.45}, {pool = {tier = 8}, chance = 0.25}],
 }
 
 
@@ -153,7 +166,8 @@ static func _allowed(def: EnemyDef, item: Item) -> bool:
 		return item.id in Items.divine_ids_for(def.id) or item.id in Items.BOSS_DIVINE_EXTRAS.get(def.id, [])
 	if item.is_consumable():
 		return true
-	var cap: int = BOSS_GRADES.get(def.id, 6) if def is BossDef else 5 if def.is_god else 4
+	# Grades below 7 (the gentler Surface dungeons) only name their own roll table; bosses cap at G6 or more.
+	var cap: int = maxi(BOSS_GRADES.get(def.id, 6), 6) if def is BossDef else 5 if def.is_god else 4
 	return item.tier <= cap
 
 

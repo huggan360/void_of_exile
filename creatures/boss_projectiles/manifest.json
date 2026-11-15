@@ -268,5 +268,235 @@
       64
     ],
     "voxel_size": 0.012
+  },
+  {
+    "id": "mycelium_seed",
+    "folder": "creatures/boss_projectiles/mycelium_seed",
+    "size": [
+      88,
+      40,
+      144
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "cannonball",
+    "folder": "creatures/boss_projectiles/cannonball",
+    "size": [
+      72,
+      88,
+      120
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "ghost_lantern",
+    "folder": "creatures/boss_projectiles/ghost_lantern",
+    "size": [
+      64,
+      104,
+      64
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "brine_hook",
+    "folder": "creatures/boss_projectiles/brine_hook",
+    "size": [
+      112,
+      48,
+      112
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "jade_fang",
+    "folder": "creatures/boss_projectiles/jade_fang",
+    "size": [
+      64,
+      40,
+      120
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "gold_plume",
+    "folder": "creatures/boss_projectiles/gold_plume",
+    "size": [
+      64,
+      24,
+      136
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "sun_glyph",
+    "folder": "creatures/boss_projectiles/sun_glyph",
+    "size": [
+      96,
+      32,
+      96
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "soul_wisp",
+    "folder": "creatures/boss_projectiles/soul_wisp",
+    "size": [
+      48,
+      40,
+      128
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "moth_scale",
+    "folder": "creatures/boss_projectiles/moth_scale",
+    "size": [
+      80,
+      40,
+      120
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "lantern_flame",
+    "folder": "creatures/boss_projectiles/lantern_flame",
+    "size": [
+      64,
+      88,
+      64
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "ice_axe",
+    "folder": "creatures/boss_projectiles/ice_axe",
+    "size": [
+      120,
+      32,
+      96
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "frost_rune",
+    "folder": "creatures/boss_projectiles/frost_rune",
+    "size": [
+      64,
+      40,
+      88
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "crow_feather",
+    "folder": "creatures/boss_projectiles/crow_feather",
+    "size": [
+      64,
+      24,
+      136
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "glass_shard",
+    "folder": "creatures/boss_projectiles/glass_shard",
+    "size": [
+      64,
+      32,
+      128
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "lens_disc",
+    "folder": "creatures/boss_projectiles/lens_disc",
+    "size": [
+      96,
+      32,
+      96
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "prism_ray",
+    "folder": "creatures/boss_projectiles/prism_ray",
+    "size": [
+      40,
+      24,
+      184
+    ],
+    "voxel_size": 0.009
+  },
+  {
+    "id": "wax_tear",
+    "folder": "creatures/boss_projectiles/wax_tear",
+    "size": [
+      56,
+      40,
+      96
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "glass_pane",
+    "folder": "creatures/boss_projectiles/glass_pane",
+    "size": [
+      80,
+      32,
+      104
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "candle_flame",
+    "folder": "creatures/boss_projectiles/candle_flame",
+    "size": [
+      32,
+      120,
+      56
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "kintsugi_star",
+    "folder": "creatures/boss_projectiles/kintsugi_star",
+    "size": [
+      112,
+      32,
+      104
+    ],
+    "voxel_size": 0.012
+  },
+  {
+    "id": "void_shard",
+    "folder": "creatures/boss_projectiles/void_shard",
+    "size": [
+      64,
+      48,
+      120
+    ],
+    "voxel_size": 0.011
+  },
+  {
+    "id": "gold_seam",
+    "folder": "creatures/boss_projectiles/gold_seam",
+    "size": [
+      104,
+      24,
+      160
+    ],
+    "voxel_size": 0.01
+  },
+  {
+    "id": "fallen_star",
+    "folder": "creatures/boss_projectiles/fallen_star",
+    "size": [
+      96,
+      32,
+      184
+    ],
+    "voxel_size": 0.014
   }
 ]

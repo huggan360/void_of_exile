@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bvhocl2tp2683"
+path="res://.godot/imported/model.vox-3185ae12715460f54c0223633ef90dc4.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/crow_feather/model.vox"
+dest_files=["res://.godot/imported/model.vox-3185ae12715460f54c0223633ef90dc4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

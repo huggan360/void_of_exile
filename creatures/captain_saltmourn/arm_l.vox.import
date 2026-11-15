@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b7emv388dup3f"
+path="res://.godot/imported/arm_l.vox-1b0b356ffe95918c846331b83d90e50a.tscn"
+
+[deps]
+
+source_file="res://creatures/captain_saltmourn/arm_l.vox"
+dest_files=["res://.godot/imported/arm_l.vox-1b0b356ffe95918c846331b83d90e50a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

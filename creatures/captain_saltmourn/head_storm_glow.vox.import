@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bs1t0o0br2xge"
+path="res://.godot/imported/head_storm_glow.vox-052512628b476e14abb9e8e79725d43a.tscn"
+
+[deps]
+
+source_file="res://creatures/captain_saltmourn/head_storm_glow.vox"
+dest_files=["res://.godot/imported/head_storm_glow.vox-052512628b476e14abb9e8e79725d43a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

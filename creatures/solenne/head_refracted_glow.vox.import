@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bybt5784oyj16"
+path="res://.godot/imported/head_refracted_glow.vox-0d57745fc9758cecdbbb98b4f791874b.tscn"
+
+[deps]
+
+source_file="res://creatures/solenne/head_refracted_glow.vox"
+dest_files=["res://.godot/imported/head_refracted_glow.vox-0d57745fc9758cecdbbb98b4f791874b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

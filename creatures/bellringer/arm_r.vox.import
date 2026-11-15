@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://by510cjf066h"
+path="res://.godot/imported/arm_r.vox-dd0d57ce59f9c973f9f4a206f699e71d.tscn"
+
+[deps]
+
+source_file="res://creatures/bellringer/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-dd0d57ce59f9c973f9f4a206f699e71d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

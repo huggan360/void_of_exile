@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cfvoysystvmwo"
+path="res://.godot/imported/arm_r.vox-0cb5c1d72af7cfc3cfddc718d3a54d9b.tscn"
+
+[deps]
+
+source_file="res://creatures/shroom_brute/arm_r.vox"
+dest_files=["res://.godot/imported/arm_r.vox-0cb5c1d72af7cfc3cfddc718d3a54d9b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

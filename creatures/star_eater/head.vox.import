@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://chrn4eyt7h86h"
+path="res://.godot/imported/head.vox-057fbf8ef35b3922ed3f2c1d7fa110c6.tscn"
+
+[deps]
+
+source_file="res://creatures/star_eater/head.vox"
+dest_files=["res://.godot/imported/head.vox-057fbf8ef35b3922ed3f2c1d7fa110c6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

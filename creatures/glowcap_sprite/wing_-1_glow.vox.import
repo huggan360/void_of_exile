@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dtgk55hj5p15s"
+path="res://.godot/imported/wing_-1_glow.vox-5100020bdcd88d59e2964aca5ec5f823.tscn"
+
+[deps]
+
+source_file="res://creatures/glowcap_sprite/wing_-1_glow.vox"
+dest_files=["res://.godot/imported/wing_-1_glow.vox-5100020bdcd88d59e2964aca5ec5f823.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

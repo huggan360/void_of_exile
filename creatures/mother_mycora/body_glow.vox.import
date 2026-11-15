@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dug10vj2l2tcv"
+path="res://.godot/imported/body_glow.vox-497d26e05450fc4cb9c39ee7b1ff78c1.tscn"
+
+[deps]
+
+source_file="res://creatures/mother_mycora/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-497d26e05450fc4cb9c39ee7b1ff78c1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

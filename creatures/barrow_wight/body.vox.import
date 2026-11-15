@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://yvwbo3ngt2iv"
+path="res://.godot/imported/body.vox-812131b6acdda071afea01225fbe39d0.tscn"
+
+[deps]
+
+source_file="res://creatures/barrow_wight/body.vox"
+dest_files=["res://.godot/imported/body.vox-812131b6acdda071afea01225fbe39d0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

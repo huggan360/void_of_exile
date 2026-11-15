@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bqm6ocdhj8mc1"
+path="res://.godot/imported/body_refracted.vox-5f0f5e0a7e62489d7b3c1ef76d471922.tscn"
+
+[deps]
+
+source_file="res://creatures/solenne/body_refracted.vox"
+dest_files=["res://.godot/imported/body_refracted.vox-5f0f5e0a7e62489d7b3c1ef76d471922.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

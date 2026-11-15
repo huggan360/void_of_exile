@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwr23wwa5vwyi"
+path="res://.godot/imported/cloth_l.vox-37cf747879c7ef035788e3f62e44c695.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/cloth_l.vox"
+dest_files=["res://.godot/imported/cloth_l.vox-37cf747879c7ef035788e3f62e44c695.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

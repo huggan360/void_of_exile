@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cvkx7fdilcps"
+path="res://.godot/imported/arm_r_glow.vox-67dc0efaffc1c69b6bf231be96d3601b.tscn"
+
+[deps]
+
+source_file="res://creatures/oblivara/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-67dc0efaffc1c69b6bf231be96d3601b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

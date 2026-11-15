@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cl6ccbyi1a1e"
+path="res://.godot/imported/cloth_l.vox-96be2789a64cbd922168e22686458f20.tscn"
+
+[deps]
+
+source_file="res://creatures/oblivara/cloth_l.vox"
+dest_files=["res://.godot/imported/cloth_l.vox-96be2789a64cbd922168e22686458f20.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

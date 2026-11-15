@@ -8,7 +8,7 @@ class_name SurfaceBlocks
 ## A palette: [style, [color a, b, c, d, e], emission, roughness]; the styles
 ## are the shader's (Blocks.Style plus STRATA, PLANKS, LEAVES).
 
-enum Style { STRATA = 12, PLANKS = 13, LEAVES = 14 }
+enum Style { STRATA = 12, PLANKS = 13, LEAVES = 14, VEIN = 15, PANES = 16 }
 
 enum {
 	GRASS = Blocks.COUNT, GRASS_LUSH, GRASS_DRY, MEADOW, FOREST_FLOOR, MOSS, SOIL, DIRT_PATH,
@@ -17,6 +17,15 @@ enum {
 	ASH_FINE, BASALT, DESERT_FINE, DEEP_SAND_FINE, BLUE_MOSS_FINE, DEEP_STONE_FINE, JUNGLE_FINE,
 	PLANKS, SEAFLOOR_FINE, CRACKED_EARTH, BLACK_SAND, YARD, ROAD_SAND, ROAD_ASH, ROAD_SNOW,
 	GRAVEL_FINE, MOSS_ROCK, VINE, VINE_FLOWER, ROOTS, ICE_FINE,
+	# The fine dungeons' own (Dungeons.THEMES, FineDungeonGenerator).
+	SPORE_LOAM, MYCELIUM, FUNGAL_ROCK, SHELF_CAP,
+	WET_PLANKS, WET_SAND, BARNACLE_ROCK, KELP_TOP, TIDE_POOL,
+	JADE_TILE, JADE_BRICK, TEMPLE_STONE, GOLD_GLYPH, JUNGLE_MOSS,
+	SOUL_LOAM, SPIRIT_MOSS, GHOST_STONE, PALE_STONE, SOUL_POOL,
+	GLACIER, BARROW_STONE, RUNE_ICE, FROST_FLAG,
+	GLASS_SAND, GLASS_VEIN, GLASS_CLEAR, GLASS_TILE,
+	BASALT_TILE, CATHEDRAL_BRICK, STAINED_GLASS,
+	KINTSUGI, STARFIELD, MOON_DUST, VOID_TILE,
 	COUNT,
 }
 
@@ -65,6 +74,48 @@ const TEXTURES := {
 	VINE_FLOWER: [Style.LEAVES, [Color("447e34"), Color("508c3a"), Color("5c9a42"), Color("d878b0"), Color("447e34")], 0.0, 0.9],
 	ROOTS: [S.SPECKLE, [Color("5a3e28"), Color("4e3624"), Color("6a4a30"), Color("7a6040"), Color.BLACK], 0.0, 0.95],
 	ICE_FINE: [S.ICE, [Color("b8d8ec"), Color("a4cce4"), Color("e4f4ff"), Color.BLACK, Color.BLACK], 0.0, 0.15],
+	# The Sporewomb: loam dusted with glowing spores, pale mycelium, amber-veined rock, shelf fungus.
+	SPORE_LOAM: [S.MOSS, [Color("4a3626"), Color("553d2a"), Color("3e2e22"), Color("ffc04a"), Color("2e2219")], 2.0, 0.95],
+	MYCELIUM: [S.GRASS, [Color("cfc6ae"), Color("b8ae94"), Color("e2dccb"), Color("6fe0d0"), Color("4a3626")], 0.0, 0.9],
+	FUNGAL_ROCK: [Style.VEIN, [Color("5a4a3c"), Color("4e4034"), Color("665443"), Color("ffb347"), Color("4fd8c8")], 2.2, 0.9],
+	SHELF_CAP: [S.MOSS, [Color("b8742e"), Color("a2652a"), Color("c98a3c"), Color("6fe8d6"), Color("5a4a3c")], 2.5, 0.85],
+	# Saltbone Wreck: wet planks and sand, barnacled rock, kelp, glowing tide pools.
+	WET_PLANKS: [Style.PLANKS, [Color("5a4330"), Color("4c3828"), Color("2a2018"), Color("6a7a70"), Color.BLACK], 0.0, 0.6],
+	WET_SAND: [S.SAND, [Color("8a8068"), Color("7c735e"), Color("6a634f"), Color("c8d0c0"), Color.BLACK], 0.0, 0.7],
+	BARNACLE_ROCK: [Style.STRATA, [Color("4a5450"), Color("3e4744"), Color("56605a"), Color("d8d4c4"), Color("3f6a4a")], 0.0, 0.8],
+	KELP_TOP: [Style.LEAVES, [Color("2f4a2a"), Color("3a5a30"), Color("48663a"), Color("8ad8b0"), Color("2f4a2a")], 0.0, 0.7],
+	TIDE_POOL: [S.CRYSTAL, [Color("1f6a6a"), Color("2a8a84"), Color("6af0e0"), Color.BLACK, Color.BLACK], 1.2, 0.1],
+	# The Jade Ziggurat: jade tiles and bricks, mossy limestone, gold glyphs.
+	JADE_TILE: [S.TILES, [Color("3f8a6a"), Color("357a5c"), Color("1f4a38"), Color.BLACK, Color("d8b04a")], 0.0, 0.5],
+	JADE_BRICK: [S.BRICK, [Color("4a9a74"), Color("3c8462"), Color("244a3a"), Color("5aa882"), Color("3c8462")], 0.0, 0.55],
+	TEMPLE_STONE: [Style.STRATA, [Color("a8a088"), Color("9a927a"), Color("b8b098"), Color("d8b04a"), Color("4f8a3a")], 0.0, 0.85],
+	GOLD_GLYPH: [Style.VEIN, [Color("3f8a6a"), Color("357a5c"), Color("4a9a74"), Color("ffd060"), Color("6af0a0")], 2.5, 0.5],
+	JUNGLE_MOSS: [S.MOSS, [Color("3f7a2e"), Color("4a8a34"), Color("56963c"), Color("ff7ab0"), Color("3e5a34")], 1.0, 0.9],
+	# Afterlife: dark loam full of soul light, spirit moss, veined ghost stone, pale arches, soul pools.
+	SOUL_LOAM: [S.MOSS, [Color("1c1a2e"), Color("221f38"), Color("2a2542"), Color("5ff0ff"), Color("151322")], 3.0, 0.95],
+	SPIRIT_MOSS: [S.GRASS, [Color("1f3a44"), Color("24424e"), Color("2a3158"), Color("d070ff"), Color("1c1a2e")], 0.0, 0.9],
+	GHOST_STONE: [Style.VEIN, [Color("2c2a44"), Color("25233a"), Color("34314f"), Color("5ff0ff"), Color("e070ff")], 3.0, 0.85],
+	PALE_STONE: [Style.STRATA, [Color("8f8ca8"), Color("7f7c98"), Color("a09cb8"), Color("c8f8ff"), Color("4a5a8a")], 0.0, 0.8],
+	SOUL_POOL: [S.CRYSTAL, [Color("123048"), Color("1a4a66"), Color("8ff8ff"), Color.BLACK, Color.BLACK], 2.0, 0.1],
+	# Rimewake Barrow: glacier ice, frosted barrow stone, rune veins, frozen flagstones.
+	GLACIER: [S.CRYSTAL, [Color("5a98c8"), Color("7ab4dc"), Color("d0f0ff"), Color.BLACK, Color.BLACK], 0.6, 0.15],
+	BARROW_STONE: [Style.STRATA, [Color("4a5262"), Color("3e4554"), Color("566072"), Color("a8d8ff"), Color("e8f0f8")], 0.0, 0.85],
+	RUNE_ICE: [Style.VEIN, [Color("3a4a62"), Color("334156"), Color("44566e"), Color("6ad0ff"), Color("a0ffd8")], 2.5, 0.6],
+	FROST_FLAG: [S.TILES, [Color("5a6474"), Color("4e5868"), Color("2a303a"), Color.BLACK, Color("dfe8f0")], 0.0, 0.6],
+	# The Glass Labyrinth: white-gold sand, glass with rainbow light running in it, clear glass, glass tiles.
+	GLASS_SAND: [S.SAND, [Color("f0e2c0"), Color("e6d6b0"), Color("d8c69c"), Color("ffffff"), Color.BLACK], 0.0, 0.85],
+	GLASS_VEIN: [Style.VEIN, [Color("d8c89a"), Color("e6dab0"), Color("c8b888"), Color("ff8af0"), Color("7af0ff")], 2.0, 0.15],
+	GLASS_CLEAR: [S.ICE, [Color("cfe6ee"), Color("e2f2f6"), Color("ffffff"), Color.BLACK, Color.BLACK], 0.0, 0.05],
+	GLASS_TILE: [S.TILES, [Color("e8dcc0"), Color("dccfae"), Color("b8a888"), Color.BLACK, Color("ffe08a")], 0.0, 0.3],
+	# The Unlit Cathedral: black basalt tiles and bricks, stained glass.
+	BASALT_TILE: [S.TILES, [Color("2a2830"), Color("24222a"), Color("121116"), Color.BLACK, Color("8a5ab8")], 0.0, 0.5],
+	CATHEDRAL_BRICK: [S.BRICK, [Color("2e2c36"), Color("26242e"), Color("141318"), Color("3a3844"), Color("26242e")], 0.0, 0.8],
+	STAINED_GLASS: [Style.PANES, [Color("e04a8a"), Color("8a4ae0"), Color("4a6ae0"), Color("f0c04a"), Color("18161c")], 3.0, 0.2],
+	# The Starless Sepulchre: black stone mended with gold, starfield walls, moon dust, void tiles.
+	KINTSUGI: [Style.VEIN, [Color("141218"), Color("18161e"), Color("1e1b26"), Color("ffc24a"), Color("fff0b0")], 3.5, 0.4],
+	STARFIELD: [Style.VEIN, [Color("0a0a14"), Color("0e0e1a"), Color("121222"), Color("ffffff"), Color("8a7aff")], 2.0, 0.6],
+	MOON_DUST: [S.SAND, [Color("d8d4e0"), Color("ccc8d6"), Color("bab6c6"), Color("ffffff"), Color.BLACK], 0.0, 0.9],
+	VOID_TILE: [S.TILES, [Color("1c1a24"), Color("17151e"), Color("6a5428"), Color.BLACK, Color("ffc24a")], 0.0, 0.4],
 }
 
 ## Walk-through blocks (ivy on the walls).

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b37vfy8r3qegf"
+path="res://.godot/imported/arm_r_glow.vox-dca88f72015a21956edd60489c94924a.tscn"
+
+[deps]
+
+source_file="res://creatures/serpent_priest/arm_r_glow.vox"
+dest_files=["res://.godot/imported/arm_r_glow.vox-dca88f72015a21956edd60489c94924a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

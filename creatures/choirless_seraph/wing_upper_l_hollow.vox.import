@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dgqevb5pid7d"
+path="res://.godot/imported/wing_upper_l_hollow.vox-3a64422702084243d4c5ab28a160279a.tscn"
+
+[deps]
+
+source_file="res://creatures/choirless_seraph/wing_upper_l_hollow.vox"
+dest_files=["res://.godot/imported/wing_upper_l_hollow.vox-3a64422702084243d4c5ab28a160279a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

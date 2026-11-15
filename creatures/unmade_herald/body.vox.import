@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b5wui1wyiwaqu"
+path="res://.godot/imported/body.vox-406b028dd33f549060f8a798632d5553.tscn"
+
+[deps]
+
+source_file="res://creatures/unmade_herald/body.vox"
+dest_files=["res://.godot/imported/body.vox-406b028dd33f549060f8a798632d5553.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

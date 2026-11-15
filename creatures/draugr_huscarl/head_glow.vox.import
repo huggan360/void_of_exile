@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cjkit4roj7h0j"
+path="res://.godot/imported/head_glow.vox-c8c745e50a481053857e5bfa5a0d1522.tscn"
+
+[deps]
+
+source_file="res://creatures/draugr_huscarl/head_glow.vox"
+dest_files=["res://.godot/imported/head_glow.vox-c8c745e50a481053857e5bfa5a0d1522.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

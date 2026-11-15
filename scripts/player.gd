@@ -604,6 +604,17 @@ func _release_charge(weapon: Item, power: float) -> void:
 			for i in 2:
 				_emit_charged(origin, direction, weapon, mult * 0.5, PI * i,
 						{speed = 1.3, size = 1.8, range = 1.4, spiral = true, wave_amp = 1.1})
+		"beam":
+			# A torrent of the weapon's own shots down one line, sweeping a little.
+			var count: int = c.get("count", 24)
+			_burst = {weapon = weapon, mult = mult / count, interval = c.get("interval", 0.025), beam = true,
+				origin = origin, direction = direction, sweep = deg_to_rad(float(c.get("sweep", 6.0))), count = count}
+			_burst_left = count
+			_burst_timer = 0.0
+		"refract":
+			# One big prism that bursts into a ring of shards where it stops (Main._on_shot_burst).
+			_emit_charged(origin, direction, weapon, mult, 0.0,
+					{speed = 1.1, size = 1.9, range = 1.1, spiral = true, pierce = false, burst = "refract"})
 		"burst":
 			_burst = {weapon = weapon, mult = mult / int(c.get("count", 6)), interval = c.get("interval", 0.07)}
 			_burst_left = c.get("count", 5)
@@ -642,6 +653,12 @@ func _update_burst(delta: float) -> void:
 	_burst_timer = _burst.interval
 	_burst_left -= 1
 	var aim := _aim_origin_and_direction()
+	if _burst.get("beam", false):
+		model.play_shot()
+		var swing := sin(float(_burst.count - _burst_left) / _burst.count * TAU) * float(_burst.sweep)
+		_emit_charged(_burst.origin, (_burst.direction as Vector3).rotated(up_direction, swing), _burst.weapon, _burst.mult, 0.0,
+			{speed = 1.15, size = 1.15, range = 1.2})
+		return
 	if _burst.get("stream", false):
 		model.play_shot()
 		_emit_charged(_burst.origin, _burst.direction, _burst.weapon, _burst.mult, 0.0,

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cpxjp5p62w1uv"
+path="res://.godot/imported/cloth_glow.vox-161a5d7686a534dcf306beb1a55d0146.tscn"
+
+[deps]
+
+source_file="res://creatures/astral_reaver/cloth_glow.vox"
+dest_files=["res://.godot/imported/cloth_glow.vox-161a5d7686a534dcf306beb1a55d0146.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

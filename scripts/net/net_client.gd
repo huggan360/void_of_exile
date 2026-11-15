@@ -452,6 +452,10 @@ func _apply(ev: Array) -> void:
 		"light":
 			if is_instance_valid(world):
 				Boss.flash_light(world, ev[2], ev[3], ev[4], ev[5], ev[6])
+		"glow":
+			if GlowRipples.current: GlowRipples.current.add(ev[2], ev[3], ev[4])
+		"glowall":
+			if GlowRipples.current: GlowRipples.current.set_level(float(ev[2]), float(ev[3]), float(ev[4]))
 		"grave":
 			if is_instance_valid(world):
 				var at: Vector3 = ev[2]

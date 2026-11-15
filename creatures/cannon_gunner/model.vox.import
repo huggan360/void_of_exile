@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dnof7s3ktblrv"
+path="res://.godot/imported/model.vox-adf5ce762f9f21bc3ae5611ee2cdc28f.tscn"
+
+[deps]
+
+source_file="res://creatures/cannon_gunner/model.vox"
+dest_files=["res://.godot/imported/model.vox-adf5ce762f9f21bc3ae5611ee2cdc28f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b6lxfmkybg6eq"
+path="res://.godot/imported/model.vox-91b65678029316e645ea62b4d4242394.tscn"
+
+[deps]
+
+source_file="res://creatures/lantern_shepherd/model.vox"
+dest_files=["res://.godot/imported/model.vox-91b65678029316e645ea62b4d4242394.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://n4iurvygjojx"
+path="res://.godot/imported/model.vox-2ae425f39da3c9d123ec4d6430c1c4a9.tscn"
+
+[deps]
+
+source_file="res://creatures/boss_projectiles/glass_pane/model.vox"
+dest_files=["res://.godot/imported/model.vox-2ae425f39da3c9d123ec4d6430c1c4a9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

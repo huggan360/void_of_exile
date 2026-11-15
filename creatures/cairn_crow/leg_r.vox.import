@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://blh6skbvlpqp4"
+path="res://.godot/imported/leg_r.vox-6be1fecac9679094f7469307d04cc077.tscn"
+
+[deps]
+
+source_file="res://creatures/cairn_crow/leg_r.vox"
+dest_files=["res://.godot/imported/leg_r.vox-6be1fecac9679094f7469307d04cc077.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true
