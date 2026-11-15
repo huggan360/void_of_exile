@@ -11,7 +11,7 @@ const TODAY := {mono = 0.0, old = 0.0, grain = 0.3, vignette = 0.45, warmth = 0.
 
 const FILMS := {
 	realm_history = {
-		title = "What the Realm Remembers", world = "surface",
+		title = "What the Realm Remembers", world = "surface", music = "music.intro",
 		loading = {title = "What the Realm Remembers", subtitle = "As the old reels tell it"},
 		stage = "res://scenes/castle/hollow_castle.tscn", stage_offset = Vector3(0, -600, 0),
 		stage_lights = [Vector3(0, 8, -70), Vector3(0, 8, -46), Vector3(0, 9, -20)],

@@ -27,6 +27,10 @@ const PLANET_AMBIENCE := {verdance = "ambience.green_planet", rosamund = "ambien
 	hollowmoon = "ambience.spooky_planet", mawgrave = "ambience.spooky_planet", pale_eye = "ambience.spooky_planet"}
 ## Seconds an ambience loop's end overlaps its next pass.
 const AMBIENCE_CROSSFADE := 4.0
+## Surface dungeons played to Afterlife's two layers; the rest keep only their
+## ambience until they get scores of their own.
+const AFTERLIFE_SCORED := ["afterlife", "sporewomb", "rimewake_barrow"]
+const UNSCORED_DUNGEONS := ["saltbone_wreck", "jade_ziggurat", "glass_labyrinth", "unlit_cathedral", "starless_sepulchre"]
 ## Space is big: a sound out there carries this far (m) from the ship.
 const SPACE_REACH := 1400.0
 var events := {}
@@ -71,6 +75,7 @@ var _test_label := ""
 var _last_mode := ""
 var _duck := 0.0
 var _hushed := false  # after a death: no music until the next world (the new character's)
+var _film_music := ""  # a playing film's own score, in place of the world's
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -125,6 +130,14 @@ func _customize_events() -> void:
 	# the second is only turned up for the boss, so they never drift apart.
 	events["music.space.layer1"] = {paths=["res://assets/audio/music/space_music_layer1.ogg"],gain_db=-8.0,pitch_variance=0,loop=true}
 	events["music.space.layer2"] = {paths=["res://assets/audio/music/space_music_layer2.ogg"],gain_db=-10.0,pitch_variance=0,loop=true}
+	# Afterlife works the same way: one length, the second layer for the boss.
+	events["music.afterlife.layer1"] = {paths=["res://assets/audio/music/afterlife_layer1.ogg"],gain_db=-8.0,pitch_variance=0,loop=true}
+	events["music.afterlife.layer2"] = {paths=["res://assets/audio/music/afterlife_layer2.ogg"],gain_db=-10.0,pitch_variance=0,loop=true}
+	# The Surface's own theme (music.japanese stays for the other realms).
+	events["music.surface"] = {paths=["res://assets/audio/music/surface.ogg"],gain_db=-12.0,pitch_variance=0,loop=true}
+	# Chamber and intro are mixed quietly at the source; brought up to sit with the rest.
+	events["music.chamber"] = {paths=["res://assets/audio/music/chamber.ogg"],gain_db=2.0,pitch_variance=0,loop=true}
+	events["music.intro"] = {paths=["res://assets/audio/music/intro.ogg"],gain_db=-2.0,pitch_variance=0}
 	if events.has("combat.boss_impact"):
 		events["combat.boss_impact"].paths = ["res://assets/audio/sfx/heavy_boss_impact.wav"]
 	# Dragon vocalizations stay on the dragon; other bosses use human/monster variants.
@@ -341,7 +354,7 @@ func play(event: String, at: Vector3 = Vector3.INF, options: Dictionary = {}) ->
 	voices.append(v)
 	_start_players(v,seek)
 	_update_voice(v)
-	if priority>=3: _duck = maxf(_duck,1)
+	if priority>=3 and category!="Music": _duck = maxf(_duck,1)
 	return v
 
 func emit_from(event: String, source: Node3D, options: Dictionary = {}) -> Dictionary:
@@ -801,7 +814,9 @@ func _update_music() -> void:
 		_music = {}
 		_music_key = bed
 		if bed != "" and events.has(bed):
-			_music = play(bed, Vector3.INF, {loop = true, bus = "Music", fade = 2.5, fixed_pitch = true})
+			# A score that plays once (a film's) must not be the first voice dropped when voices run out.
+			var once := not bool(plan.get("loop", true))
+			_music = play(bed, Vector3.INF, {loop = not once, bus = "Music", fade = 2.5, fixed_pitch = true, priority = 5 if once else 1})
 	var audible := float(AppSettings.audio.music) > 0.0001 and float(AppSettings.audio.master) > 0.0001
 	var layer := str(plan.get("layer", "")) if audible else ""
 	var encounter := str(plan.get("encounter", "")) if layer != "" else ""
@@ -849,6 +864,12 @@ func player_died() -> void:
 	_music_encounter = ""
 
 
+## A film's `music` plays once from its first shot; "" hands back to the world's.
+func film_music(event: String) -> void:
+	_film_music = event
+	_tick = 0.0
+
+
 ## The reliable death event also covers a missed dying snapshot or a frame
 ## stall, so returning to a cleared winter arena cannot restart its score.
 func boss_defeated(id: String, realm: String) -> void:
@@ -866,11 +887,13 @@ func _music_world_key() -> String:
 
 
 func _music_plan() -> Dictionary:
-	var normal := "music.space_theme" if _world is SpaceWorld else "music.tavern" if Campaigns.is_tavern(_world.realm_id) else "music.japanese"
+	var normal := "music.space_theme" if _world is SpaceWorld else "music.tavern" if Campaigns.is_tavern(_world.realm_id) \
+		else "music.surface" if _world is IslandWorld else "music.chamber" if _world is ChambersWorld else "music.japanese"
 	# Give the death cue space until the next character/world. (Not the
 	# model's visibility: first person hides it while you are alive.)
 	if _hushed or _player.stats.hp <= 0.0:
 		return {}
+	if _film_music != "": return {bed = _film_music, loop = false}
 	var world_key := _music_world_key()
 	var active: Boss
 	var castle_king: Boss
@@ -893,6 +916,11 @@ func _music_plan() -> Dictionary:
 	var dungeon := _world as DungeonWorld
 	if dungeon != null and str(dungeon.record.get("dungeon", "")) == "goblins_cave":
 		return {bed = "music.battle2.layer1", layer = "music.battle2.layer2" if fighting else "", encounter = encounter}
+	if dungeon != null:
+		var dungeon_id := str(dungeon.record.get("dungeon", ""))
+		if dungeon_id in AFTERLIFE_SCORED:
+			return {bed = "music.afterlife.layer1", layer = "music.afterlife.layer2", sync = true, boss = fighting}
+		if dungeon_id in UNSCORED_DUNGEONS: return {}
 	var castle := _world as CastleWorld
 	if castle != null and is_instance_valid(castle.encounter):
 		var stage := int(castle.encounter.get("stage"))

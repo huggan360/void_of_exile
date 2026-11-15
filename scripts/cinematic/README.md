@@ -26,6 +26,7 @@ world and plays it with `CampaignCinematic`.
 | `fireworks` | fireworks over `village` shots |
 | `astral_station` | (viewer hint) the Surface with Orin's launch station |
 | `fov` | the film's field of view (default 55) |
+| `music` | a GameAudio music event played once from the start, in place of the world's music (`music.intro` for the realm history) |
 | `shots`, `actors` | below |
 
 ## A shot

@@ -174,6 +174,7 @@ func play(player: Player, film: Dictionary, film_set: FilmSet = null) -> void:
 	_apply_look(DEFAULT_LOOK.merged(film.get("look", {}), true))
 	_hide_ui(get_tree().root)
 	show()
+	if film.has("music"): GameAudio.film_music(str(film.music))
 	if _shots.is_empty() and _titles.is_empty():
 		_restore()
 		return
@@ -468,6 +469,7 @@ func _restore() -> void:
 	_viewer = null
 	_camera.attributes = null
 	if is_instance_valid(_player): _player.cinematic_locked = _was_locked
+	if _film.has("music"): GameAudio.film_music("")
 	if _camera.current:
 		if is_instance_valid(_previous): _previous.make_current()
 		elif is_instance_valid(_player) and is_instance_valid(_player.camera): _player.camera.make_current()
