@@ -99,7 +99,7 @@ func _warm_audio() -> void:
 	# Resolve imported resources and synthesize utility PCM before world streaming.
 	for entry in events.values():
 		for path in entry.get("paths",[]): _stream(str(path),bool(entry.get("loop",false)))
-	for kind in ["trident","flight","portal","xp_pickup","test","test_bass"]: _synth_stream(kind,kind in ["flight","portal"])
+	for kind in ["trident","flight","portal","xp_pickup","test","test_bass","glow_pulse"]: _synth_stream(kind,kind in ["flight","portal"])
 	for surface in ["stone","grass","sand","wood"]:
 		for variant in 4: _synth_stream("step_"+surface+str(variant),false)
 
@@ -125,6 +125,8 @@ func _customize_events() -> void:
 		events[entry[0]] = {paths=["res://assets/audio/generated/%s.wav" % entry[1]],gain_db=entry[2],pitch_variance=.035}
 	for entry in [["green_planet",-8.0],["island",-8.0],["purple_yellow_planet",-8.0],["spooky_planet",-8.0],["vesperis_city",-8.0],["vesperis_outside_city",-8.0]]:
 		events["ambience."+entry[0]] = {paths=["res://assets/audio/ambience/ambience_%s.ogg" % entry[0]],gain_db=entry[1],pitch_variance=0,loop=true}
+	# A ripple of light starting (GlowRipples): synthesized, see SoundSynth.
+	events["glow_pulse"] = {paths=[],gain_db=-7.0,pitch_variance=.06}
 	events["music.space_theme"] = {paths=["res://assets/audio/music/space_theme.ogg"],gain_db=-8.0,pitch_variance=0,loop=true}
 	# The Theory of Everything's two layers run together from the first beat;
 	# the second is only turned up for the boss, so they never drift apart.

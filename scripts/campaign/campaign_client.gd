@@ -142,6 +142,8 @@ func _objective_points(step: Dictionary, camp: Dictionary, here_campaign: bool, 
 	var destination := str(goal.get("world", camp.get("realm", "") if step.world == "campaign" else ("hall" if step.world == "hall" else camp.get("castle", ""))))
 	if destination != "" and _route_world(destination) != _route_world(_world.realm_id):
 		return _route_points(destination, camp)
+	# Outside, the marker leads to the dungeon's portal; inside it never gives the boss away.
+	if _world is DungeonWorld: return []
 	if goal.has("pos") and (goal.pos as Vector3).is_finite():
 		return [goal.pos]
 	var in_hall := Campaigns.is_tavern(_world.realm_id)

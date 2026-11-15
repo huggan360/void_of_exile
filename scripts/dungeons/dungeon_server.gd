@@ -1,6 +1,9 @@
 class_name DungeonServer
 extends Node
 ## Portal lifetimes and travel grants live only on the authoritative server.
+## Every creature's portal chance (EnemyDef.portal_drop) is scaled by this, up to the cap.
+const PORTAL_DROP_RATE := 2.0
+const PORTAL_DROP_CAP := 0.9
 var server: NetServer
 var portals := {}
 var grants := {}
@@ -24,12 +27,41 @@ func spawn(realm_id: String, pos: Vector3, dungeon: String, exit := false, story
 	if story:
 		pos = Campaigns.open_spot(pos, server.realms[realm_id].world)
 		if pos == Vector3.INF: return {}
+	elif not exit and server.realms[realm_id].world is IslandWorld:
+		pos = _level_spot(pos, server.realms[realm_id].world)
 	_serial += 1
 	var portal := {id = "portal_%d" % _serial, realm = realm_id, pos = pos, dungeon = dungeon,
 		exit = exit, expires = -1.0 if exit or story else Net.now() + 30.0, instance = "", story = story}
 	portals[portal.id] = portal
 	server._to_realm(realm_id, Vector3.INF, ["dng+", wire(portal)])
 	return portal
+
+## Where a dropped portal's hole lies flat: the hole is drawn at one height, so on
+## a slope the hill would cover part of it. Searches a few metres round `pos`;
+## failing level ground, the least sloped spot, lifted onto its highest voxel.
+func _level_spot(pos: Vector3, island: IslandWorld) -> Vector3:
+	var best := pos
+	var best_cut := INF
+	for ring in 7:
+		for k in maxi(1, ring * 6):
+			var angle := TAU * k / maxi(1, ring * 6)
+			var p := pos + Vector3(cos(angle), 0, sin(angle)) * ring * 1.5
+			p.y = island.ground_height(p.x, p.z)
+			if not island.is_walkable(p) or island.is_hazard(p): continue
+			var high := p.y
+			var low := p.y
+			for r in [1.0, 2.1]:
+				for i in 8:
+					var a := TAU * i / 8.0
+					var h := island.ground_height(p.x + cos(a) * r, p.z + sin(a) * r)
+					high = maxf(high, h)
+					low = minf(low, h)
+			var cut := high - p.y + (p.y - low) * 0.3
+			if high - p.y <= 0.26 and p.y - low <= 0.6: return Vector3(p.x, high, p.z)
+			if cut < best_cut:
+				best_cut = cut
+				best = Vector3(p.x, high, p.z)
+	return best
 
 func wire(portal: Dictionary) -> Dictionary:
 	return {id = portal.id, pos = portal.pos, dungeon = portal.dungeon, exit = portal.exit,
@@ -61,7 +93,7 @@ func enemy_killed(realm_id: String, definition: EnemyDef, pos: Vector3) -> void:
 			if follow != "" and not (campaigns and campaigns.story_dungeon(realm_id)) and randf() < chance:
 				spawn(realm_id, pos + Vector3(4, 0, 0), follow)
 			if campaigns: campaigns.dungeon_cleared(realm_id, pos)
-	elif not definition.portal_drop.is_empty() and randf() < float(definition.portal_drop.chance):
+	elif not definition.portal_drop.is_empty() and randf() < minf(PORTAL_DROP_CAP, float(definition.portal_drop.chance) * PORTAL_DROP_RATE):
 		spawn(realm_id, pos, str(definition.portal_drop.dungeon))
 
 func interact(p: Dictionary, id: String) -> void:

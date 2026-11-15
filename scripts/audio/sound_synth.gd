@@ -14,6 +14,7 @@ static func make(kind: String) -> AudioStreamWAV:
 		"boss_riser": duration = 1.4
 		"test": duration = 0.5
 		"test_bass": duration = 0.8
+		"glow_pulse": duration = 1.8
 	if kind.begins_with("step_"): duration = .22
 	var rate := 24000
 	var bytes := PackedByteArray()
@@ -40,6 +41,14 @@ static func make(kind: String) -> AudioStreamWAV:
 				sample = (smooth_noise*.5+sin(phase)*.35)*x
 			"test": sample = sin(TAU*480*t)*.35 + smooth_noise*.15
 			"test_bass": sample = sin(TAU*65*t)*.32
+			"glow_pulse":
+				# A ripple of light: a soft low bloom, a falling tone under very
+				# smooth noise, with a faint slow beat on top. Nothing bright.
+				foot_noise = lerpf(foot_noise, noise, .02)
+				foot_body = lerpf(foot_body, foot_noise, .02)
+				phase += TAU*(76.0+44.0*exp(-t*3.0))/rate
+				var beat := (sin(TAU*196.0*t)+sin(TAU*199.5*t))*.05*exp(-t*1.6)
+				sample = (sin(phase)*.32 + foot_body*2.2 + beat) * minf(1.0, t/.09) * exp(-t*2.1)
 			_: sample = sin(TAU*(840*t+280*t*t))*.3
 		if kind.begins_with("step_"):
 			# A soft heel/body thump, with two low-pass stages instead of raw
@@ -54,9 +63,9 @@ static func make(kind: String) -> AudioStreamWAV:
 			sample = heel + body
 
 		var envelope := minf(1,t/.004)*minf(1,(duration-t)/.035)
-		if not kind.begins_with("step_") and kind not in ["test","test_bass","warning_pulse","boss_riser","portal","flight"]: envelope *= exp(-x*5)
+		if not kind.begins_with("step_") and kind not in ["test","test_bass","warning_pulse","boss_riser","portal","flight","glow_pulse"]: envelope *= exp(-x*5)
 		bytes.encode_s16(i*2,roundi(clampf(sample*envelope,-.8,.8)*32767))
-	if kind.begins_with("step_"):
+	if kind.begins_with("step_") or kind == "glow_pulse":
 		var peak := 1.0
 		for i in bytes.size()/2: peak = maxf(peak, absf(float(bytes.decode_s16(i*2))))
 		var gain := 0.30 * 32767.0 / peak

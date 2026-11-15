@@ -285,7 +285,7 @@ static func _build() -> void:
 
 	var master := EnemyDef.new()
 	master.id = "goblin_master"
-	master.portal_drop = {dungeon = "goblins_cave", chance = 0.4}
+	master.portal_drop = {dungeon = "goblins_cave", chance = 0.45}
 	master.enemy_name = "Goblin Master"
 	master.model = "goblin_master"
 	master.body_height = 1.875

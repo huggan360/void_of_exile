@@ -538,6 +538,12 @@ func spawn_bag(realm_id: String, items: Array, origin: Vector3, viewer := PUBLIC
 		return 0
 	var taken: Array = _bags.values().filter(func(b: Dictionary) -> bool: return b.realm == realm_id).map(
 			func(b: Dictionary) -> Vector3: return b.pos)
+	# Never on a portal (a kill that opens one drops its chest beside it).
+	if Net.is_server():
+		for portal: Dictionary in Net.server.dungeons.portals.values():
+			if portal.realm != realm_id: continue
+			taken.append(portal.pos)
+			for i in 6: taken.append(portal.pos + Vector3(cos(TAU * i / 6.0), 0.0, sin(TAU * i / 6.0)) * 1.3)
 	var finder: Callable = _spot_finders.get(realm_id, Callable())
 	var pos: Vector3 = finder.call(origin, taken) if finder.is_valid() else origin
 	var contents := items.duplicate()

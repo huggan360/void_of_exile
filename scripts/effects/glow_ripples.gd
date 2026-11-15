@@ -34,6 +34,7 @@ var chatter_strength := 0.9
 var _materials: Array[ShaderMaterial] = []
 var _ripples: Array[Dictionary] = []  # {at, start, speed, width, range, strength, color, flat}
 var _now := 0.0
+var _last_sound := -10.0
 var _level := 0.0
 var _level_from := 0.0
 var _level_to := 0.0
@@ -78,6 +79,7 @@ func watch(material: ShaderMaterial) -> void:
 
 
 func add(at: Vector3, color: Color, opts := {}) -> void:
+	_sound(at, opts)
 	for ring in int(opts.get("rings", 1)):
 		_ripples.append({at = at, color = color, start = _now + float(opts.get("delay", 0.0)) + ring * float(opts.get("gap", 0.6)),
 			speed = float(opts.get("speed", 6.0)), width = float(opts.get("width", 1.6)), range = float(opts.get("range", 20.0)),
@@ -85,6 +87,21 @@ func add(at: Vector3, color: Color, opts := {}) -> void:
 	# The oldest give way when there are too many at once.
 	while _ripples.size() > MAX:
 		_ripples.pop_front()
+
+
+## A soft bloom where a ripple starts: fuller for a big pulse, sparse and
+## quiet for the plants' chatter.
+func _sound(at: Vector3, opts: Dictionary) -> void:
+	var chatter := bool(opts.get("chatter", false))
+	if _now - _last_sound < (1.2 if chatter else 0.2) or chatter and _rng.randf() > 0.35:
+		return
+	_last_sound = _now
+	var size := float(opts.get("range", 20.0)) * float(opts.get("strength", 1.5))
+	var volume := -13.0 if chatter else lerpf(-9.0, 1.0, clampf(size / 60.0, 0.0, 1.0))
+	var options := {bus = "SFX", volume_db = volume, max_distance = clampf(float(opts.get("range", 20.0)) + 20.0, 24.0, 70.0), cooldown = 0.1}
+	var delay := float(opts.get("delay", 0.0))
+	if delay > 0.0: get_tree().create_timer(delay).timeout.connect(func() -> void: GameAudio.play("glow_pulse", at, options))
+	else: GameAudio.play("glow_pulse", at, options)
 
 
 func set_level(level: float, time := 1.5, back := -1.0) -> void:
@@ -141,5 +158,5 @@ func _chatter(delta: float) -> void:
 		if camera and Vector2(at.x - near.x, at.z - near.z).length() > 38.0:
 			continue
 		add(at, chatter_colors[_rng.randi() % chatter_colors.size()], {speed = chatter_speed,
-			width = 0.9, range = _rng.randf_range(chatter_range.x, chatter_range.y), strength = chatter_strength})
+			width = 0.9, range = _rng.randf_range(chatter_range.x, chatter_range.y), strength = chatter_strength, chatter = true})
 		return

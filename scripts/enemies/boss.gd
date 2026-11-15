@@ -90,6 +90,11 @@ var _collider: CollisionShape3D
 var _body_shape: Shape3D
 var charge_arena_radius := 11.0
 var _charge := {}  # an active charge: {dir, left, from, damage, hits, done, stuck}
+## A boss that has run at least RUN_SPEED for RUN_TIME lands with an impact when it stops.
+const RUN_SPEED := 3.5
+const RUN_TIME := 0.6
+var _run_time := 0.0
+var _landed_ago := 0.0
 
 
 func setup(p_def: EnemyDef, p_pack: EnemyPack, p_director: EnemyDirector) -> Enemy:
@@ -222,6 +227,7 @@ func _physics_process(delta: float) -> void:
 			super._physics_process(delta)
 			if state == State.ACTIVE and not buffs.has_effect("static") and not buffs.has_effect("quiet"):
 				_update_charge(before, delta)
+				_update_run(before, delta)
 				_update_scheduled(delta)
 				_update_phase(delta)
 				_count_joiners(delta)
@@ -736,10 +742,32 @@ func _update_charge(before: Vector3, delta: float) -> void:
 	if _charge.left <= 0.0 or _charge.stuck > 0.25 or off_apron:
 		var done: Callable = _charge.done
 		_charge = {}
+		_land()
 		scripted_move = Vector3.ZERO
 		face_override = Vector3.ZERO
 		if done.is_valid():
 			done.call()
+
+
+## Running bosses (not charging) land with the same impact when they stop.
+func _update_run(before: Vector3, delta: float) -> void:
+	_landed_ago += delta
+	if not _charge.is_empty():
+		_run_time = 0.0
+		return
+	var speed := Vector2(global_position.x - before.x, global_position.z - before.z).length() / maxf(delta, 0.0001)
+	if speed >= RUN_SPEED:
+		_run_time += delta
+	elif speed < RUN_SPEED * 0.3:
+		if _run_time >= RUN_TIME: _land()
+		_run_time = 0.0
+
+
+## The heavy impact of a boss coming to a stop (a charge's end, a run's).
+func _land() -> void:
+	if _landed_ago < 1.5: return
+	_landed_ago = 0.0
+	GameAudio.emit_from("boss_impact", self, {source_id = encounter_id, cooldown = 0.25, max_distance = 64.0, volume_db = 2.0})
 
 
 ## Boss-specific contact damage and shove; called once per player per charge.
