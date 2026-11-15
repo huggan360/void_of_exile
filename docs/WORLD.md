@@ -10,12 +10,13 @@ A 2048 x 2048 m world in 0.25 m voxels, baked offline and streamed in.
 | Piece | Where | What it does |
 | --- | --- | --- |
 | Baker | `tools/surface/bake_surface.py` | numpy, about 30 s. Continent, islands, biomes, terraced hills, Fosen mountains, Doom volcanoes, rivers, lakes, waterfalls, settlements, roads, bridges, fields, glades, the launch pad. Writes `realm/surface/` |
-| Models | `tools/surface/make_surface_models.py` | Trees, bushes, stones (`obstacles/surface/`), barns, tents, windmills (`props/surface/`). Run before the baker |
+| Models | `tools/surface/make_surface_models.py` | Trees, bushes, stones and Deep Dark glow growth (`obstacles/surface/`), barns, tents, windmills (`props/surface/`). Run before the baker |
 | Map reader | `scripts/world/surface/surface_map.gd` | Loads the baked layers once; voxel heights, stone walls, beams and fences |
 | Generator | `scripts/world/island_generator.gd` | Fills voxel columns from the map; plans trees, obstacles, packs and lamps from the realm seed |
 | Blocks | `scripts/world/surface/surface_blocks.gd`, `shaders/surface_terrain.gdshader` | Every block in one material, one draw call per chunk |
 | Water | `scripts/world/surface/surface_water.gd` | River and lake sheets that slope downstream, waterfalls, mist |
 | Flora | `scripts/world/surface/surface_flora.gd` | Instanced trees (coarse copy beyond 75 m), ground cover on clients only; leans away from players and creatures |
+| Deep Dark glow | `scripts/world/surface/deep_dark_glow.gd`, `shaders/deep_dark_model.gdshader` | Client pink/lime ripple chatter through instanced plants and obstacles; four-second walking trails in the flora shader |
 | Fog | `shaders/surface_fog.gdshader`, `scripts/fog_of_war.gd` | Volumetric fog over Doom, Bluelay and the Deep Dark |
 | Towns | `VillageFeature.from_baked()` | Capital, towns, villages and farmsteads from the baker |
 
@@ -34,6 +35,15 @@ land, `WorldServer.MAP_SEED` places trees, obstacles, packs and features. Campai
 
 On foot, V switches between overhead and over the shoulder (no first person outdoors); depth of field keeps
 the area round the character sharp.
+
+The Deep Dark keeps its black ground and the pink `surface/crystal_violet` clusters. Black lantern trees,
+bushes and grass carry pink/lime bulbs, tips and flowers, with spires, crystals and lime fungus between them.
+Roads, trails and arrival clearings stay open. IslandWorld owns the client-only GlowRipples controller:
+streamed batches register a few glow sources, nearby sources chatter every 1.8 to 3.6 seconds, and unloading
+removes them. A 32-position ring tracks walking by the local player and one nearby player; only glow plants
+read it, lighting their accents within 1.4 m and fading over four seconds. Emission supplies the light without
+extra OmniLights. This dressing change needs no terrain or placement bake.
+Check the dressing, shader compilation and streaming cleanup headlessly with `tools/surface/check_deep_dark.tscn`.
 
 ## The Astral Reach
 

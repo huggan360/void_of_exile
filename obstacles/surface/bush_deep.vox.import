@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://occvitx4giij"
+path="res://.godot/imported/bush_deep.vox-f8b121abaff92d508e26b858cd1ac58e.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/bush_deep.vox"
+dest_files=["res://.godot/imported/bush_deep.vox-f8b121abaff92d508e26b858cd1ac58e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

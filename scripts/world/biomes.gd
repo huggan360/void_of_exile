@@ -314,8 +314,7 @@ static func _build() -> void:
 		particle_color = Color(1.0, 0.85, 0.5, 0.7), particle_velocity = Vector3(2.0, 0.1, 0.4),
 	})
 
-	# The very center: almost no light at all. Only your torch and a few
-	# drifting rainbow motes; no glowing plants, lanterns or lava.
+	# Black growth carries pink and lime light over the dark stone.
 	_all[DEEP_DARK] = _make({
 		id = DEEP_DARK, biome_name = "The Deep Dark",
 		god_stat = "speed", god_stats = ["speed", "mp"],
@@ -330,11 +329,12 @@ static func _build() -> void:
 		],
 		top_block = Blocks.DEEP_STONE, under_block = Blocks.DEEP_SLATE, stone_block = Blocks.DEEP_SLATE,
 		ruin_block = Blocks.DEEP_SLATE, lampposts = false,
-		obstacle_density = 0.35,
-		obstacles = {"surface/rock_dark": 4, "obelisk": 1, "pillar": 1, "surface/crystal_violet": 1},
+		obstacle_density = 0.62,
+		obstacles = {"surface/crystal_violet": 3, "surface/deep_pink_spire": 2,
+				"surface/deep_lime_crystal": 2, "surface/deep_glow_bulbs": 3, "surface/rock_dark": 1},
 		obstacle_colors = _colors(Color(0.17, 0.17, 0.2), Color(0.1, 0.1, 0.12),
-				Color(0.14, 0.16, 0.18), Color(0.13, 0.12, 0.12), Color(0.22, 0.22, 0.26), Color(0.08, 0.09, 0.1),
-				Color(0.05, 0.05, 0.06)),
+				Color(0.045, 0.065, 0.05), Color(0.055, 0.04, 0.06), Color(1.0, 0.28, 0.64), Color(0.025, 0.035, 0.03),
+				Color(1.0, 0.28, 0.64)),
 		decor = {decor_pebbles = 3, decor_tuft = 1}, decor_density = 0.15,
 		features = [
 			{type = "stone_circle", required = 1},
@@ -346,7 +346,7 @@ static func _build() -> void:
 		torch_energy = 2.2, mood = 1.0,
 		reveal_radius = 10.0, fog_of_war_color = Color(0.0, 0.0, 0.0),
 		particle_color = Color(1, 1, 1, 0.45), particle_velocity = Vector3(0.1, 0.2, 0.05),
-		# Mostly dark ash; now and then a single white or violet mote.
+		# Mostly dark ash; now and then a pink or lime spore.
 		particle_palette = [[0.0, Color(0.13, 0.12, 0.15)], [0.5, Color(0.08, 0.075, 0.1)],
-				[0.955, Color(0.9, 0.9, 0.95)], [0.975, Color(0.62, 0.32, 0.95)]],
+				[0.955, Color(1.0, 0.28, 0.64)], [0.975, Color(0.68, 1.0, 0.16)]],
 	})

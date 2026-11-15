@@ -64,6 +64,7 @@ var server_build := false
 var astral_site := Vector3.INF
 var astral_station: AstralStation
 var _obstacles := {}  # obstacle id -> Obstacle (built ones)
+var deep_dark_glow: DeepDarkGlow
 
 
 func _init(record: Dictionary, prepared_layout := {}) -> void:
@@ -193,6 +194,10 @@ func _warm_stream_assets() -> void:
 
 func _ready() -> void:
 	if not get_meta("assets_prepared",false): _warm_stream_assets()
+	if not server_build and not Net.is_server():
+		deep_dark_glow = DeepDarkGlow.new()
+		deep_dark_glow.world = self
+		add_child(deep_dark_glow)
 	var r := half_extent * IslandGenerator.FINE
 	var sources: Array = generator.map.sources + ["res://scripts/world/realm_feature.gd", "res://scripts/world/surface/surface_map.gd",
 		"res://scripts/world/surface/surface_blocks.gd", "res://scripts/world/stronghold_feature.gd",
@@ -645,6 +650,8 @@ func _build_obstacles(root: Node3D, area: Rect2i) -> void:
 		obstacle.rotation.y = site.yaw
 		obstacle.destroyed.connect(_on_obstacle_destroyed)
 		root.add_child(obstacle)
+		if deep_dark_glow and site.biome == Biomes.DEEP_DARK and site.prefab != "surface/rock_dark":
+			deep_dark_glow.register_points(obstacle, PackedVector3Array([site.pos + Vector3.UP * obstacle.prefab.height * 0.6]))
 		_obstacles[site.id] = obstacle
 		obstacle.tree_exiting.connect(func() -> void: _obstacles.erase(site.id))
 		if site.prefab == "campfire":
@@ -741,7 +748,7 @@ func _collect_decor(wait := false) -> void:
 func _finish_decor(root: Node3D, groups: Dictionary) -> void:
 	# One kind of plant per step, so no single frame builds them all.
 	for kind: String in groups:
-		_build_steps.push_front(SurfaceFlora.build_kind.bind(root, kind, groups[kind]))
+		_build_steps.push_front(SurfaceFlora.build_kind.bind(root, kind, groups[kind], deep_dark_glow))
 
 
 ## Trees: trunk collision everywhere, meshes on clients.

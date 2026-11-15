@@ -709,7 +709,7 @@ const TREES := {
 	Biomes.DEEP_DESERT: [{"surface/saguaro": 2, "surface/dead_tree": 1}],
 	Biomes.DOOM: [{"surface/burnt_tree": 4, "surface/dead_tree": 1}],
 	Biomes.BLUELAY: [{"surface/mushroom_giant": 3, "surface/willow": 1}],
-	Biomes.DEEP_DARK: [{"surface/ash_spire": 1}],
+	Biomes.DEEP_DARK: [{"surface/deep_lantern_tree": 4, "surface/ash_spire": 1}],
 }
 ## How thick each biome's forest grows (Fosen's tall firs are spread out so
 ## you can walk between them).

@@ -6,6 +6,7 @@ shader_type spatial;
 // dithering toward fade_end so a chunk never pops; their shadows don't dither
 // (a dithered shadow map is patchy) and end at fade_end.
 render_mode cull_disabled, world_vertex_coords;
+#include "res://shaders/include/glow_ripple.gdshaderinc"
 
 const int MAX_PUSHERS = 24;
 uniform vec4 pushers[MAX_PUSHERS];
@@ -13,9 +14,14 @@ instance uniform float sway = 0.5;
 instance uniform float height = 1.0;  // mesh units at the plant's top
 instance uniform float fade_end = 45.0;
 instance uniform float glow = 0.0;
+instance uniform bool deep_glow = false;
+uniform vec4 trail_points[32];  // xyz, time visited
+uniform float trail_now = 0.0;
+uniform int trail_count = 0;
 
 varying vec3 tint;
 varying float view_distance;  // from the player's camera, also in the shadow pass
+varying vec3 deep_light;
 
 float hash3(vec3 p) {
 	p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
@@ -30,6 +36,21 @@ vec3 srgb_to_linear(vec3 c) {
 void vertex() {
 	tint = INSTANCE_CUSTOM.rgb;
 	vec3 root = MODEL_MATRIX[3].xyz;
+	deep_light = vec3(0.0);
+	if (deep_glow) {
+		float seed = hash3(root);
+		float trail = 0.0;
+		for (int i = 0; i < trail_count; i++) {
+			vec4 p = trail_points[i];
+			float age = trail_now - p.w;
+			if (age < 0.0 || age >= 4.0 || abs(root.y - p.y) > 1.8) continue;
+			float touch = 1.0 - smoothstep(0.25, 1.4, distance(root.xz, p.xz));
+			trail = max(trail, touch * (1.0 - smoothstep(0.0, 4.0, age)));
+		}
+		vec3 hue = seed < 0.5 ? vec3(1.0, 0.28, 0.64) : vec3(0.68, 1.0, 0.16);
+		deep_light = glow_ripples(root) * 0.7 + hue * trail * 1.7;
+		deep_light += vec3(0.55 + glow_blink(seed, 0.4) * 0.3 + gr_level);
+	}
 	// The plant's own up: world up on the Surface, away from the centre on a planet.
 	vec3 up = normalize(MODEL_MATRIX[1].xyz);
 	float scale_y = length(MODEL_MATRIX[1].xyz);
@@ -97,6 +118,11 @@ void fragment() {
 	vec3 color = srgb_to_linear(COLOR.rgb) * (tint == vec3(0.0) ? vec3(1.0) : tint);
 	ALBEDO = glow > 0.0 ? color * 0.45 : color;
 	EMISSION = color * glow;
+	if (deep_glow) {
+		float mask = smoothstep(0.3, 0.65, max(COLOR.r, max(COLOR.g, COLOR.b)));
+		ALBEDO = color * (1.0 - mask * 0.5);
+		EMISSION = mask * (color * deep_light + max(deep_light - vec3(0.7), vec3(0.0)) * 0.35) * 2.4;
+	}
 	ROUGHNESS = 0.85;
 	BACKLIGHT = vec3(0.25) * color;
 }

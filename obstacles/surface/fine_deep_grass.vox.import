@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://qgcjvh77ta6h"
+path="res://.godot/imported/fine_deep_grass.vox-cf331b87794527bcedf560e14f947152.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/fine_deep_grass.vox"
+dest_files=["res://.godot/imported/fine_deep_grass.vox-cf331b87794527bcedf560e14f947152.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dl14lvhd6mjjg"
+path="res://.godot/imported/deep_glow_bulbs.vox-cd123e6d24f9886f6c9d9521f8fe48a1.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/deep_glow_bulbs.vox"
+dest_files=["res://.godot/imported/deep_glow_bulbs.vox-cd123e6d24f9886f6c9d9521f8fe48a1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

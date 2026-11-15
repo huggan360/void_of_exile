@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ch8irqw3h6y75"
+path="res://.godot/imported/deep_lantern_tree.vox-a156d4fba096b018e2b21cc6907bcfc9.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/deep_lantern_tree.vox"
+dest_files=["res://.godot/imported/deep_lantern_tree.vox-a156d4fba096b018e2b21cc6907bcfc9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

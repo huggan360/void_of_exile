@@ -638,6 +638,98 @@ def glow_mushrooms(rng):
     return v, pal
 
 
+# --- Deep Dark: black growth with pink and lime organs --------------------------------
+
+DEEP_PINK = (255, 72, 164)
+DEEP_LIME = (174, 255, 40)
+DEEP_LEAF = (13, 18, 16)
+
+
+def deep_grass(rng, flowers=False):
+    v, pal = {}, Palette()
+    for k in range(5 if flowers else 7):
+        x, z = rng.randint(-3, 3), rng.randint(-3, 3)
+        h = rng.randint(3, 6) if flowers else rng.randint(2, 5)
+        for y in range(h):
+            v[(x + y // 4, y, z)] = pal(DEEP_LEAF)
+        color = DEEP_PINK if k % 2 else DEEP_LIME
+        v[(x + (h - 1) // 4, h - 1, z)] = pal(color)
+        if flowers:
+            for dx, dz in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                v[(x + (h - 1) // 4 + dx, h - 1, z + dz)] = pal(color)
+    return v, pal
+
+
+def deep_fungus(rng):
+    v, pal = {}, Palette()
+    for k in range(4):
+        x, z = rng.randint(-4, 4), rng.randint(-4, 4)
+        h = rng.randint(2, 5)
+        box(v, x, x + 1, 0, h, z, z + 1, pal((18, 12, 22)))
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                if abs(dx) + abs(dz) <= 3:
+                    v[(x + dx, h, z + dz)] = pal(DEEP_LEAF)
+                    if abs(dx) + abs(dz) >= 2:
+                        v[(x + dx, h - 1, z + dz)] = pal(DEEP_LIME)
+        v[(x, h + 1, z)] = pal(DEEP_PINK)
+    return v, pal
+
+
+def deep_bush(rng):
+    v, pal = bush(rng, DEEP_LEAF, None, 0.7)
+    for p in list(v):
+        x, y, z = p
+        if (x, y + 1, z) not in v and rng.random() < 0.16:
+            v[p] = pal(DEEP_PINK if (x + z) % 3 else DEEP_LIME)
+    return v, pal
+
+
+def deep_crystal(rng, color):
+    v, pal = crystal(rng, color)
+    for p in list(v):
+        x, y, z = p
+        # Dark roots, bright ridges and tips rather than a solid neon lump.
+        v[p] = pal(color if y > 7 or (x + z) % 4 == 0 else (20, 15, 25))
+    return v, pal
+
+
+def deep_bulbs(rng, tree=False):
+    v, pal = {}, Palette()
+    h = 17 if tree else 4
+    wood = pal((16, 12, 20))
+    trunk(v, h, 0.85 if tree else 0.65, 0.4, wood, rng, roots=tree)
+    for k in range(5 if tree else 3):
+        a = k * math.tau / (5 if tree else 3) + rng.uniform(-0.3, 0.3)
+        y = h * (0.5 + k * 0.08)
+        x, z = math.cos(a) * (4 if tree else 2), math.sin(a) * (4 if tree else 2)
+        limb(v, (0, y, 0), (x, y + 3, z), 0.5, 0.4, wood)
+        light = pal(DEEP_PINK if k % 2 else DEEP_LIME)
+        shell = pal(DEEP_LEAF)
+        blob(v, x, y + 3, z, 1.6, 2.0, 1.6,
+             lambda px, py, pz, d: light if py < (y + 3.5) * G and (px + pz) % 3 else shell,
+             rng, 0.1)
+    # A narrow vein spirals up the black stem.
+    for y in range(2, round(h * G)):
+        a = y * 0.32
+        v[(round(math.cos(a)), y, round(math.sin(a)))] = pal(DEEP_LIME if tree else DEEP_PINK)
+    ground_trim(v)
+    return v, pal
+
+
+TREES.add("deep_lantern_tree")
+FLORA.update({
+    "deep_lantern_tree": lambda r: deep_bulbs(r, tree=True),
+    "deep_glow_bulbs": deep_bulbs,
+    "deep_pink_spire": lambda r: deep_crystal(r, DEEP_PINK),
+    "deep_lime_crystal": lambda r: deep_crystal(r, DEEP_LIME),
+    "bush_deep": deep_bush,
+    "fine_deep_grass": deep_grass,
+    "fine_deep_flowers": lambda r: deep_grass(r, flowers=True),
+    "fine_deep_fungus": deep_fungus,
+})
+
+
 # --- Buildings (0.125 m voxels) ------------------------------------------------------
 
 def barn(rng, wall=(156, 52, 42), roof=(70, 64, 62)):

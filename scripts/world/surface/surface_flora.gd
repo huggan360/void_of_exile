@@ -45,6 +45,7 @@ static func build_trees(world: IslandWorld, root: Node3D, area: Rect2i, drawn: b
 	body.collision_layer = Player.OBSTACLE_LAYER
 	body.collision_mask = 0
 	var groups := {}
+	var glowing := PackedVector3Array()
 	for site: Dictionary in sites:
 		var prefab := ObstacleLibrary.get_prefab(site.prefab)
 		var s: float = site.scale
@@ -57,10 +58,13 @@ static func build_trees(world: IslandWorld, root: Node3D, area: Rect2i, drawn: b
 		shape.position = site.pos + Vector3.UP * 1.3
 		body.add_child(shape)
 		if drawn:
+			if site.biome == Biomes.DEEP_DARK and site.prefab == "surface/deep_lantern_tree":
+				glowing.append(site.pos + Vector3.UP * prefab.height * s * 0.7)
 			var key := "%s|%d" % [site.prefab, site.biome]
 			if not groups.has(key): groups[key] = []
 			groups[key].append(Transform3D(Basis(Vector3.UP, site.yaw).scaled(Vector3.ONE * s), site.pos))
 	root.add_child(body)
+	if drawn and world.deep_dark_glow: world.deep_dark_glow.register_points(root, glowing)
 	for key: String in groups:
 		var parts := key.split("|")
 		var prefab := ObstacleLibrary.get_prefab(parts[0])
@@ -68,12 +72,13 @@ static func build_trees(world: IslandWorld, root: Node3D, area: Rect2i, drawn: b
 		var meshes := prefab.meshes_for(biome)
 		var local := Transform3D(Basis.from_scale(Vector3.ONE * prefab.voxel_size), prefab.mesh_offset())
 		var view := GraphicsSettings.view_scale()
+		var deep := biome.id == Biomes.DEEP_DARK
 		for i in 2:
 			if meshes[i] == null: continue
-			root.add_child(_multi(meshes[i], groups[key], local, VoxModel.glow_material() if i == 1 else VoxModel.material(),
+			root.add_child(_multi(meshes[i], groups[key], local, DeepDarkGlow.material() if deep else VoxModel.glow_material() if i == 1 else VoxModel.material(),
 				0.0, TREE_NEAR * view, i == 0))
 		var far_local := Transform3D(Basis.from_scale(Vector3.ONE * prefab.voxel_size * 2.0), prefab.mesh_offset())
-		var far := _multi(prefab.lod_mesh_for(biome), groups[key], far_local, VoxModel.material(), TREE_NEAR * view - 6.0, TREE_FAR * view, true)
+		var far := _multi(prefab.lod_mesh_for(biome), groups[key], far_local, DeepDarkGlow.material() if deep else VoxModel.material(), TREE_NEAR * view - 6.0, TREE_FAR * view, true)
 		far.visibility_range_begin_margin = 6.0
 		far.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 		root.add_child(far)
@@ -122,6 +127,7 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 				continue
 			var water := map.cell_water(mx, mz)
 			if water > 0:
+				if map.cell_biome(mx, mz) == Biomes.DEEP_DARK: continue
 				if flags & SurfaceMap.LAKE and h < 0.012 and _deep(map, mx, mz, water):
 					_put(groups, "vox:surface/fine_lilies", Vector3(x, water / 4.0 - 0.02, z), h2 * TAU, 0.9 + h * 8.0, Color.WHITE)
 				elif _bank(map, mx, mz) and h < 0.3:
@@ -136,6 +142,14 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 			var tone := Color(0.9 + h2 * 0.2, 0.9 + hx * 0.2, 0.9 + hz * 0.15)
 			var pos := Vector3(x, y, z)
 			var yaw := h2 * TAU
+			if map.cell_biome(mx, mz) == Biomes.DEEP_DARK:
+				if flags & IslandGenerator.BUSY or map.cell_shape(mx, mz) & SurfaceMap.CLIFF: continue
+				if _kept_clear(world, x, z) or gen.feature_at(mx, mz) != null: continue
+				if h < 0.36: _put(groups, "vox:surface/fine_deep_grass", pos, yaw, 0.7 + hx * 0.55, tone)
+				elif h < 0.44: _put(groups, "vox:surface/fine_deep_flowers", pos, yaw, 0.8 + hx * 0.4, Color.WHITE)
+				elif h < 0.49: _put(groups, "vox:surface/fine_deep_fungus", pos, yaw, 0.7 + hx * 0.4, Color.WHITE)
+				elif h < 0.52: _put(groups, "vox:surface/fine_stone_dark", pos, yaw, 0.8, Color.WHITE)
+				continue
 			if flags & SurfaceMap.TRAIL:
 				if mat != SurfaceMap.Mat.STAIRS and h < 0.08 and _trail_edge(map, mx, mz): _put(groups, "tuft", pos, yaw, 0.8, tone)
 				continue
@@ -214,7 +228,8 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 			var b := map.cell_biome(mx, mz)
 			var forest := map.cell_flora(mx, mz)
 			var chance := 0.03 + forest * 0.11
-			if b in [Biomes.DESERT, Biomes.DEEP_DESERT, Biomes.DOOM, Biomes.DEEP_DARK]: chance *= 0.35
+			if b in [Biomes.DESERT, Biomes.DEEP_DESERT, Biomes.DOOM]: chance *= 0.35
+			if b == Biomes.DEEP_DARK: chance = 0.15 + forest * 0.08
 			if h >= chance: continue
 			var y := map.ground_y(x, z)
 			if y < IslandGenerator.SEA_LEVEL + 0.5: continue
@@ -226,7 +241,9 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 				Biomes.DESERT, Biomes.DEEP_DESERT, Biomes.BEACH: kind = "vox:surface/bush_dry"
 				Biomes.BLUELAY: kind = "vox:surface/bush_blue" if pick < 0.7 else "vox:surface/crystal_blue"
 				Biomes.DOOM: kind = "vox:surface/rock_lava"
-				Biomes.DEEP_DARK: kind = "vox:surface/rock_dark"
+				Biomes.DEEP_DARK:
+					if map.cell_flags(mx, mz) & IslandGenerator.BUSY or map.cell_shape(mx, mz) & SurfaceMap.CLIFF or gen.feature_at(mx, mz) != null: continue
+					kind = "vox:surface/bush_deep" if pick < 0.7 else "vox:surface/fine_deep_fungus"
 				_:
 					if forest > 0.5 and pick < 0.12: kind = "vox:surface/log"
 					elif forest > 0.5 and pick < 0.2: kind = "vox:surface/stump"
@@ -306,7 +323,7 @@ static func build(root: Node3D, groups: Dictionary) -> void:
 
 
 ## One kind's MultiMesh.
-static func build_kind(root: Node3D, kind: String, list: Array) -> void:
+static func build_kind(root: Node3D, kind: String, list: Array, chatter: DeepDarkGlow = null) -> void:
 	if not is_instance_valid(root): return
 	var spec := _kind(kind)
 	var mm := MultiMesh.new()
@@ -332,23 +349,35 @@ static func build_kind(root: Node3D, kind: String, list: Array) -> void:
 	mmi.set_instance_shader_parameter("height", spec.height)
 	mmi.set_instance_shader_parameter("fade_end", far)
 	mmi.set_instance_shader_parameter("glow", spec.glow)
+	mmi.set_instance_shader_parameter("deep_glow", spec.deep_glow)
 	root.add_child(mmi)
+	if chatter and spec.deep_glow:
+		var points := PackedVector3Array()
+		var stride := maxi(1, ceili(list.size() / 24.0))
+		for i in range(0, list.size(), stride): points.append(list[i][0] + Vector3.UP * spec.height * spec.unit * 0.7)
+		chatter.register_points(mmi, points)
 
 
 # --- Plant meshes -----------------------------------------------------------------------
 
 static func _kind(kind: String) -> Dictionary:
 	if _kinds.has(kind): return _kinds[kind]
-	var spec := {unit = 1.0, offset = Vector3.ZERO, sway = 0.5, far = GRASS_FAR, shadow = false, glow = 0.0}
+	var spec := {unit = 1.0, offset = Vector3.ZERO, sway = 0.5, far = GRASS_FAR, shadow = false, glow = 0.0, deep_glow = false}
 	if kind.begins_with("vox:"):
 		var prefab := ObstacleLibrary.get_prefab(kind.trim_prefix("vox:"))
-		var meshes := prefab.meshes_for(Biomes.get_biome(Biomes.BLUELAY if prefab.has_glow else Biomes.WOODS))
+		var name := kind.get_file()
+		spec.deep_glow = name.begins_with("fine_deep_") or name == "bush_deep"
+		var meshes := prefab.meshes_for(Biomes.get_biome(Biomes.DEEP_DARK if spec.deep_glow else Biomes.BLUELAY if prefab.has_glow else Biomes.WOODS))
 		spec.mesh = meshes[1] if meshes[0] == null else meshes[0]
+		if spec.deep_glow and meshes[0] and meshes[1]:
+			var combined := meshes[0].duplicate() as ArrayMesh
+			for i in meshes[1].get_surface_count():
+				combined.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, meshes[1].surface_get_arrays(i))
+			spec.mesh = combined
 		if meshes[0] == null: spec.glow = 2.5
 		spec.unit = prefab.voxel_size
 		spec.offset = prefab.mesh_offset() / prefab.voxel_size
 		spec.height = float(prefab.size.y)
-		var name := kind.get_file()
 		var rigid := name.begins_with("rock") or name.begins_with("fine_stone") or name in ["log", "stump", "crystal_blue", "fine_lilies"]
 		spec.sway = 0.0 if rigid else 0.12 if name.begins_with("bush") else 0.35
 		spec.far = BUSH_FAR if not name.begins_with("fine") and not name.begins_with("decor") else GRASS_FAR + 10.0

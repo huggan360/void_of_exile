@@ -47,13 +47,13 @@ func _ready() -> void:
 			continue
 		var mi := MeshInstance3D.new()
 		mi.mesh = meshes[i]
-		mi.material_override = VoxModel.glow_material() if i == 1 else VoxModel.material()
+		mi.material_override = DeepDarkGlow.material() if biome.id == Biomes.DEEP_DARK else VoxModel.glow_material() if i == 1 else VoxModel.material()
 		mi.position = prefab.mesh_offset()
 		mi.scale = Vector3.ONE * prefab.voxel_size
 		mi.visibility_range_end = DRAW_DISTANCE * GraphicsSettings.view_scale()
 		mi.gi_mode = GeometryInstance3D.GI_MODE_DYNAMIC
 		_visual.add_child(mi)
-	if prefab.has_glow and drawn:
+	if prefab.has_glow and drawn and biome.id != Biomes.DEEP_DARK:
 		var light := OmniLight3D.new()
 		light.light_color = biome.obstacle_colors[ObstacleLibrary.GLOW_SLOT]
 		light.light_energy = 1.6
