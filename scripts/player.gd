@@ -848,17 +848,23 @@ func clear_spawn(place: GameWorld) -> void:
 ## local up) if there's room above it, only as high as the ledge needs (the
 ## Surface's 0.25 m voxels are small: a full lift there bounced the character
 ## up and down while running over them).
+## At most four collision tests: walking into a tall wall used to try every
+## STEP_TRY lift each frame, which cost the Surface's fine terrain dearly.
 func _try_step_up(dir: Vector3, normal := Vector3.UP, height := STEP_HEIGHT) -> bool:
-	var lift := STEP_TRY
-	while lift < height + 0.001:
-		var up := normal*minf(lift, height)
-		if test_move(global_transform, up):
-			return false  # no headroom
-		if not test_move(global_transform.translated(up), dir.normalized() * 0.3):
-			global_position += up
-			return true
-		lift += STEP_TRY
-	return false  # the wall is taller than one block
+	var top := normal*height
+	var ahead := dir.normalized()*0.3
+	if test_move(global_transform, top):
+		return false  # no headroom
+	if test_move(global_transform.translated(top), ahead):
+		return false  # the wall is taller than one block
+	# Drop back down onto the ledge to find how high it really is.
+	var hit := KinematicCollision3D.new()
+	if not test_move(global_transform.translated(top + ahead), -top, hit):
+		return false  # nothing to climb there
+	var up := normal*clampf(ceilf((height - hit.get_travel().length())/STEP_TRY)*STEP_TRY, STEP_TRY, height)
+	if test_move(global_transform.translated(up), ahead): up = top
+	global_position += up
+	return true
 
 
 func _update_zoom(delta: float) -> void:
