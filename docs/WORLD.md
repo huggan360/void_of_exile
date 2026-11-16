@@ -70,6 +70,9 @@ Open space with round planets, reached by ship from the Surface's Skyward Launch
   36k / 52k / 68k / 84k / 100k (Veiled Herald 50k), each with a status-effect shot in its last stage. Vaelith's
   second stage binds it to eight squid arms (`vaelith_arm` bodies, only hittable while down, hits pass to
   Vaelith). Their projectile models come from `tools/make_space_boss_projectiles.py`.
+- **Ship netcode**: everyone sees a ship interpolated 0.15 s in the past (`SpaceShipView`), except its pilot, whose
+  client flies it ahead on its own helm input and replays what the server hasn't flown yet on each snapshot
+  (`ShipPrediction`; snapshots carry the last helm input number and the ticks flown on it).
 - **Camera**: V toggles overhead and over the shoulder; first person only indoors (ship rooms, the diner, the
   Nexus's Lantern Bar, the Lantern City's shops).
 - **Campaigns** (`scripts/campaign/`): the Reach tales run in private spaces. Mission 6, The Eye Behind the
@@ -80,7 +83,7 @@ Open space with round planets, reached by ship from the Surface's Skyward Launch
 
 - `reach_kill` and `reach_repair` (Lantern Road, Shardfield tales) haven't been replayed online since the brood
   rework.
-- No pilot prediction online (input lag); ships vanish when the Reach unloads or the server restarts.
+- Ships vanish when the Reach unloads or the server restarts.
 - Planet terrain is smooth, not block-stepped; flora and props are voxel.
 - The voxel module prints harmless `!is_inside_tree` errors from `direct_static_body.cpp` on clients.
 

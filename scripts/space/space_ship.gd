@@ -90,6 +90,10 @@ var boost := 100.0
 var glasses := [1.0, 1.0, 1.0, 1.0]
 var smoking := {}
 var input_age := 0.0
+## The pilot's last helm input (its number) and the ticks flown on it since,
+## for the pilot's client to predict from (ShipPrediction).
+var input_seq := 0
+var input_ticks := 0
 var landing := {}  # {from: Transform3D, to: Transform3D, t: float, time: float, planet, port}
 var cooldowns := {}
 ## A campaign cripples the ship until its crew mends every repair aboard.
@@ -213,6 +217,7 @@ func begin_landing(p: Dictionary, entry: Dictionary) -> void:
 ## Authority step; returns impact damage taken (from asteroids).
 func step(delta: float) -> int:
 	input_age += delta
+	input_ticks += 1
 	# Nobody at the helm (or a pilot that went quiet): she holds her speed and
 	# heading, so a crew can set a course and leave the wheel.
 	if input_age>0.6: input = [float(input[0]), 0.0, 0.0, 0.0, false, bool(input[5]) if input.size()>5 else false]
@@ -365,7 +370,7 @@ static func pulse_clear(at: Vector3) -> bool:
 ## Compact snapshot for clients.
 func wire() -> Array:
 	return [id, slot, name, owner, party, tint.to_html(false), xform, speed, mode, planet, hp, crew.duplicate(), aims.duplicate(), broken, repairs.duplicate(true), pulse, turned_back,
-		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys(), fleet_id, account_id, velocity, port, queue.duplicate(), orbit, climbing, cruise()]
+		parts.duplicate(), roundi(boost), glasses.duplicate(), smoking.keys(), fleet_id, account_id, velocity, port, queue.duplicate(), orbit, climbing, cruise(), input_seq, input_ticks, _quiet]
 
 static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 	var s := into if into!=null else SpaceShip.new()
@@ -403,6 +408,10 @@ static func from_wire(data: Array, into: SpaceShip = null) -> SpaceShip:
 	if data.size()>28:
 		s.climbing = str(data[27])
 		s.input[0] = float(data[28])
+	if data.size()>31:
+		s.input_seq = int(data[29])
+		s.input_ticks = int(data[30])
+		s._quiet = float(data[31])
 	return s
 
 func fleet_state() -> Dictionary:

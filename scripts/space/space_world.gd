@@ -474,6 +474,8 @@ func server_action(p: Dictionary, args: Array) -> void:
 			if ship==null or ship.pilot()!=pid or args.size()<2 or not args[1] is Array or not (args[1] as Array).size() in [5, 6]: return
 			ship.input = (args[1] as Array)+([false] if (args[1] as Array).size()==5 else [])
 			ship.input_age = 0.0
+			ship.input_seq = int(args[2]) if args.size()>2 else 0
+			ship.input_ticks = 0
 		"land":
 			var ship := ship_of(pid)
 			if ship==null or ship.pilot()!=pid: return

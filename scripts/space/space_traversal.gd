@@ -34,6 +34,7 @@ var _crosshair: Control
 var _fade: ColorRect
 var map: SpaceMap
 var _input_timer := 0.0
+var _helm_sent: Array = []
 var _aim_timer := 0.0
 var _lock_timer := 0.0
 var _locked_targets: Array[Dictionary] = []
@@ -569,18 +570,22 @@ func _seated(delta: float) -> void:
 						throttle = clampf(snappedf(throttle+signf(axis)*THROTTLE_STEP, THROTTLE_STEP), -1.0, 1.0)
 			# Climbing out after a launch: no slower than launch speed (the server holds her there too).
 			if _ship.climbing!="": throttle = maxf(throttle, SpaceShip.LAUNCH_THRUST)
+			# A menu or the chat only frees the controls: the throttle holds.
+			var thrust := throttle if _ship.mode=="flying" else 0.0
+			var yaw := Input.get_axis("ship_left", "ship_right") if enabled else 0.0
+			if enabled and player.debug_input!=Vector2.ZERO:
+				thrust = -player.debug_input.y
+				yaw = player.debug_input.x
+			var pitch := Input.get_axis("ship_pitch_down", "ship_pitch_up") if enabled else 0.0
+			var roll := Input.get_axis("ship_roll_left", "ship_roll_right") if enabled else 0.0
+			var helm := [thrust, yaw, pitch, roll, enabled and Input.is_action_pressed("ship_boost"), false]
+			# Sent the moment it changes (this client flies ahead on it), else as a heartbeat.
 			_input_timer -= delta
-			if _input_timer<=0.0:
+			if _input_timer<=0.0 or helm!=_helm_sent:
 				_input_timer = INPUT_RATE
-				# A menu or the chat only frees the controls: the throttle holds.
-				var thrust := throttle if _ship.mode=="flying" else 0.0
-				var yaw := Input.get_axis("ship_left", "ship_right") if enabled else 0.0
-				if enabled and player.debug_input!=Vector2.ZERO:
-					thrust = -player.debug_input.y
-					yaw = player.debug_input.x
-				var pitch := Input.get_axis("ship_pitch_down", "ship_pitch_up") if enabled else 0.0
-				var roll := Input.get_axis("ship_roll_left", "ship_roll_right") if enabled else 0.0
-				world.request(["pilot", [thrust, yaw, pitch, roll, enabled and Input.is_action_pressed("ship_boost"), false]])
+				_helm_sent = helm
+				var view: SpaceShipView = world.ship_views.get(_ship.id)
+				world.request(["pilot", helm, view.helm(helm) if view else 0])
 			_fire_timer -= delta
 			if enabled and not Leisure.hands_busy(player.player_id) and Input.is_action_pressed("ship_fire") and _fire_timer<=0.0 and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 				_fire_timer = 0.2

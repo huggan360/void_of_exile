@@ -3,8 +3,15 @@ extends Node3D
 ## A ship as clients see it: the hull interpolated between authority
 ## snapshots (shown slightly in the past), turrets following their gunners,
 ## engines by speed, a boarding ramp while landed and a burst when lost.
+## Its pilot's client flies it ahead instead (ShipPrediction), so the helm
+## answers at once.
 const DELAY := 0.15
 const MAX_EXTRAPOLATION := 0.25
+## A change of what the pose comes from (a server correction to the
+## prediction, taking or leaving the helm) eases out at this rate (per
+## second), unless the gap is wider than CARRY_LIMIT metres.
+const CARRY_EASE := 6.0
+const CARRY_LIMIT := 150.0
 var world: SpaceWorld
 var ship_id := 0
 var hull: ShipHull
@@ -14,6 +21,10 @@ var _ramp: SpaceInteraction
 var _ship: SpaceShip
 var arrival_started := -1
 var _damage: ShipDamage
+var _predict := ShipPrediction.new()
+var _predicting := false
+var _carry_origin := Vector3.ZERO
+var _carry_rot := Quaternion.IDENTITY
 
 func setup(ship: SpaceShip) -> void:
 	process_priority = -30  # hull first, crew camera next, live windows last
@@ -70,6 +81,13 @@ func push(ship: SpaceShip, stamp := -1.0) -> void:
 			_samples.clear()  # a docking teleport must not fly across the world
 	_samples.append([time, ship.xform, ship.speed, ship.velocity])
 	while _samples.size()>12: _samples.pop_front()
+	var flown_here := _flown_here()
+	if flown_here or _predicting:
+		var before := _source()
+		if flown_here and _predicting: _predict.reconcile(ship)
+		elif flown_here: _predict.start(ship)
+		_predicting = flown_here
+		_carry(before, _source())
 	_label.text = ship.name
 	_ramp.enabled = ship.mode in ["landed", "berth"]
 	var hatch: Transform3D = hull.anchors.get("hatch", Transform3D(Basis.IDENTITY, Vector3(9, -3, 4)))
@@ -83,8 +101,37 @@ static var _clock_frame := -1
 static var _clock_usec := 0
 const CLOCK_SLEW := 0.04  # at most 4% faster or slower while catching up
 
-## The interpolated pose `DELAY` seconds ago.
+## The helm input this client just sent: its number for the server.
+func helm(input: Array) -> int:
+	return _predict.send(input)
+
+## This client's player flies her (and the server knows its helm inputs).
+func _flown_here() -> bool:
+	return _ship!=null and _ship.mode=="flying" and _ship.input_seq>0 and is_instance_valid(world.local_player) \
+			and _ship.pilot()==int(world.local_player.player_id)
+
+## Where the hull is drawn this frame (riders and windows follow it too).
 func pose() -> Transform3D:
+	var source := _source()
+	if _carry_origin.is_zero_approx() and _carry_rot.is_equal_approx(Quaternion.IDENTITY): return source
+	return Transform3D(Basis(_carry_rot)*source.basis, source.origin+_carry_origin)
+
+func _source() -> Transform3D:
+	return _predict.pose() if _predicting else _interpolated()
+
+## Keeps the hull where it was drawn when its source changes; _process eases the gap out.
+func _carry(before: Transform3D, after: Transform3D) -> void:
+	_carry_origin += before.origin-after.origin
+	_carry_rot = (_carry_rot*before.basis.get_rotation_quaternion()*after.basis.get_rotation_quaternion().inverse()).normalized()
+	if _carry_origin.length()>CARRY_LIMIT:
+		_carry_origin = Vector3.ZERO
+		_carry_rot = Quaternion.IDENTITY
+
+func _physics_process(delta: float) -> void:
+	if _predicting: _predict.tick(delta)
+
+## The interpolated pose `DELAY` seconds ago.
+func _interpolated() -> Transform3D:
 	if _samples.is_empty(): return global_transform
 	# One clock reading per frame, so the hull and whoever rides it agree.
 	var frame := Engine.get_process_frames()
@@ -119,8 +166,11 @@ func pose() -> Transform3D:
 	var rotation := (previous[1] as Transform3D).basis.slerp(latest.basis, 1.0+ahead/span).orthonormalized()
 	return Transform3D(rotation, latest.origin+velocity*ahead)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if _ship==null: return
+	var k := 1.0-exp(-delta*CARRY_EASE)
+	_carry_origin = _carry_origin.lerp(Vector3.ZERO, k)
+	_carry_rot = _carry_rot.slerp(Quaternion.IDENTITY, k)
 	global_transform = pose()
 	if arrival_started>=0:
 		var t := clampf(float(Time.get_ticks_msec()-arrival_started)/4200.0, 0.0, 1.0)
