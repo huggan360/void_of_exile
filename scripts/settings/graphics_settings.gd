@@ -8,14 +8,21 @@ extends RefCounted
 ## High is the game's original look.
 
 const PRESETS := ["low", "medium", "high"]
-## Every feature: [id, title, [[value, label], ...], hint].
+## Every feature: [id, title, [[value, label], ...], hint]. A slider has
+## {min, max, step} in place of the choices.
 const FEATURES := [
-	["render_scale", "Render scale", [[50, "50%"], [67, "67%"], [75, "75%"], [85, "85%"], [100, "100%"]],
-		"Renders the 3D world at fewer pixels; the interface stays sharp. The biggest win on weak GPUs."],
 	["upscaler", "Upscaling", [["off", "Off (native)"], ["bilinear", "Bilinear"], ["fsr", "AMD FSR 1"], ["fsr2", "AMD FSR 2"]],
-		"Off uses native window resolution and bypasses render scaling and reconstruction. Other modes resize a reduced 3D resolution."],
-	["antialiasing", "Anti-aliasing", [["off", "Off"], ["fxaa", "FXAA"], ["msaa2", "MSAA 2×"], ["msaa4", "MSAA 4×"], ["taa", "TAA"]],
-		"Smooths jagged voxel edges. FXAA is almost free; MSAA is sharper but costs more."],
+		"Renders the 3D world at fewer pixels and scales it up to the window; the interface stays sharp. FSR 2 rebuilds detail over several frames and smooths edges itself. Off draws at native resolution."],
+	["render_scale", "Render scale", [[50, "50%"], [67, "67%"], [75, "75%"], [85, "85%"], [100, "100%"]],
+		"How many pixels the upscaler starts from. The biggest win on weak GPUs."],
+	["supersampling", "Supersampling", [[100, "Off"], [150, "1.5x (2.25 samples)"], [200, "2x (4 samples)"]],
+		"Renders more pixels than the window has and shrinks them down: the cleanest edges, at a high cost (2x draws four times the pixels)."],
+	["sharpness", "Sharpening", {min = 0, max = 100, step = 5},
+		"How much the AMD FSR sharpening pass brings back crisp edges after upscaling or FSR 2 smoothing."],
+	["antialiasing", "Anti-aliasing", [["off", "Off"], ["fxaa", "FXAA"], ["smaa", "SMAA"], ["taa", "TAA"], ["native", "FSR 2 Native AA"]],
+		"Smooths edges after the frame is drawn, including edges against depth of field blur. FXAA is almost free, SMAA is cleaner, TAA blends frames over time. FSR 2 Native AA runs FSR 2 at full resolution (AMD's counterpart of DLAA): the smoothest result, with slight trails on fast movement."],
+	["msaa", "MSAA", [["off", "Off"], ["2x", "2x"], ["4x", "4x"], ["8x", "8x"]],
+		"Multisampling on the edges of voxels and models. Sharp and stable; works together with the anti-aliasing above. 8x is the most the renderer offers."],
 	["shadows", "Shadows", [["off", "Off"], ["low", "Low"], ["medium", "Medium"], ["high", "High"]],
 		"Sun and lamp shadows: resolution, softness and how far they reach."],
 	["gi", "Global illumination", [["off", "Off"], ["low", "Low"], ["high", "High"]],
@@ -26,27 +33,35 @@ const FEATURES := [
 		"Colored light bouncing between nearby surfaces (SSIL)."],
 	["volumetric_fog", "Volumetric light", [["off", "Off"], ["low", "Low"], ["medium", "Medium"], ["high", "High"]],
 		"Sunbeams through trees and windows, rays across the sky, glowing haze round lamps and in dark biomes. Low costs little; High is sharpest."],
-	["glow", "Glow / bloom", [["off", "Off"], ["on", "On"]],
-		"Bright magic, lava and loot beams bleed light."],
 	["lights", "Dynamic lights", [["low", "Low"], ["high", "High"]],
 		"Low: fewer glowing projectile lights and no shadows from small lamps."],
+	["glow", "Glow / bloom", [["off", "Off"], ["on", "On"]],
+		"Bright magic, lava and loot beams bleed light."],
+	["depth_of_field", "Depth of field", [["off", "Off"], ["on", "On"]],
+		"On the Surface and in the Tavern, the distance and things close to the camera go softly out of focus. Pair it with an anti-aliasing method (SMAA, TAA or FSR 2) so the edges in front of the blur stay smooth."],
 	["particles", "Ambient particles", [["off", "Off"], ["low", "Low"], ["high", "High"]],
 		"Embers, snow, spores and dust drifting around you."],
-	["depth_of_field", "Depth of field", [["off", "Off"], ["on", "On"]],
-		"On the Surface and in the Tavern, the distance and things close to the camera go softly out of focus."],
 	["view_distance", "View distance", [["short", "Short"], ["medium", "Medium"], ["far", "Far"]],
 		"How far terrain, trees, plants, rocks and planet towns are drawn on the Surface and on planets. Short helps weaker PCs the most. Takes full effect on the next load."],
 ]
+## How the Options page groups them.
+const SECTIONS := [
+	["Resolution and scaling", ["upscaler", "render_scale", "supersampling", "sharpness"]],
+	["Anti-aliasing", ["antialiasing", "msaa"]],
+	["Lighting and shadows", ["shadows", "gi", "ambient_occlusion", "indirect_light", "volumetric_fog", "lights"]],
+	["Effects", ["glow", "depth_of_field", "particles"]],
+	["World", ["view_distance"]],
+]
 const PRESET_VALUES := {
-	high = {render_scale = 100, upscaler = "off", antialiasing = "msaa2", shadows = "high", gi = "high",
-			ambient_occlusion = "high", indirect_light = "high", volumetric_fog = "high", glow = "on",
-			lights = "high", particles = "high", depth_of_field = "on", view_distance = "far"},
-	medium = {render_scale = 85, upscaler = "fsr", antialiasing = "fxaa", shadows = "medium", gi = "low",
-			ambient_occlusion = "low", indirect_light = "off", volumetric_fog = "medium", glow = "on",
-			lights = "high", particles = "low", depth_of_field = "on", view_distance = "medium"},
-	low = {render_scale = 67, upscaler = "fsr", antialiasing = "fxaa", shadows = "low", gi = "off",
-			ambient_occlusion = "off", indirect_light = "off", volumetric_fog = "off", glow = "off",
-			lights = "low", particles = "low", depth_of_field = "off", view_distance = "short"},
+	high = {upscaler = "off", render_scale = 100, supersampling = 100, sharpness = 80, antialiasing = "smaa", msaa = "2x",
+			shadows = "high", gi = "high", ambient_occlusion = "high", indirect_light = "high", volumetric_fog = "high",
+			glow = "on", lights = "high", particles = "high", depth_of_field = "on", view_distance = "far"},
+	medium = {upscaler = "fsr", render_scale = 85, supersampling = 100, sharpness = 80, antialiasing = "fxaa", msaa = "off",
+			shadows = "medium", gi = "low", ambient_occlusion = "low", indirect_light = "off", volumetric_fog = "medium",
+			glow = "on", lights = "high", particles = "low", depth_of_field = "on", view_distance = "medium"},
+	low = {upscaler = "fsr", render_scale = 67, supersampling = 100, sharpness = 80, antialiasing = "fxaa", msaa = "off",
+			shadows = "low", gi = "off", ambient_occlusion = "off", indirect_light = "off", volumetric_fog = "off",
+			glow = "off", lights = "low", particles = "low", depth_of_field = "off", view_distance = "short"},
 }
 ## Ambient light is lifted a little without global illumination, so caves
 ## don't turn pitch black.
@@ -83,18 +98,49 @@ static func choices(id: String) -> Array:
 	return feature(id)[2].map(func(c: Array) -> Variant: return c[0])
 
 
+static func is_slider(id: String) -> bool:
+	return feature(id)[2] is Dictionary
+
+
 ## Keeps only known keys and values; the preset becomes "custom" when the
 ## values no longer match it.
 static func sanitize(value: Dictionary) -> Dictionary:
 	var preset := str(value.get("preset", "high"))
 	var result := defaults(preset if preset in PRESETS else "high")
+	value = value.duplicate()
+	# Before 26.4 MSAA was one of the anti-aliasing choices; it now pairs with SMAA,
+	# which also smooths the edges depth of field leaves jagged.
+	if str(value.get("antialiasing", "")) in ["msaa2", "msaa4"]:
+		value.msaa = str(value.antialiasing).trim_prefix("msaa") + "x"
+		value.antialiasing = "smaa"
 	for f: Array in FEATURES:
 		var id: String = f[0]
-		if value.has(id) and value[id] in choices(id):
+		if not value.has(id): continue
+		if is_slider(id):
+			var limits: Dictionary = f[2]
+			result[id] = clampi(int(value[id]), int(limits.min), int(limits.max))
+		elif value[id] in choices(id):
 			result[id] = value[id]
 	if result.upscaler=="off": result.render_scale = 100
+	else: result.supersampling = 100
 	result.preset = matching_preset(result)
 	return result
+
+
+## Why a feature does nothing with these values ("" when it is in use): the
+## Options page hides or greys its row, as games do for settings another overrides.
+static func overridden(values: Dictionary, id: String) -> String:
+	var upscaler := str(values.get("upscaler", "off"))
+	match id:
+		"render_scale":
+			if upscaler=="off": return "hide"
+		"supersampling":
+			if upscaler!="off" or str(values.get("antialiasing", ""))=="native": return "hide"
+		"sharpness":
+			if not (upscaler in ["fsr", "fsr2"] or str(values.get("antialiasing", ""))=="native"): return "hide"
+		"antialiasing":
+			if upscaler=="fsr2": return "AMD FSR 2 upscaling already smooths edges."
+	return ""
 
 
 static func matching_preset(values: Dictionary) -> String:
@@ -117,23 +163,21 @@ static func level(values: Dictionary, id: String) -> int:
 ## Window and renderer-wide parts. `base_scale` is the fullscreen-resolution
 ## ratio AppSettings already works out.
 static func apply_viewport(viewport: Viewport, values: Dictionary, base_scale: float) -> void:
-	var scale := 1.0 if str(values.upscaler) == "off" else clampf(base_scale * float(values.render_scale) / 100.0, 0.25, 2.0)
-	viewport.scaling_3d_scale = scale
-	# Native resolution bypasses reconstruction, even if FSR remains selected.
-	# FSR 2 at 1:1 still accumulates history and can trail moving voxel art.
-	var temporal_upscale := str(values.upscaler) == "fsr2" and scale < 0.999
-	match str(values.upscaler):
-		"fsr2":
-			viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2 if temporal_upscale else Viewport.SCALING_3D_MODE_BILINEAR
-		"fsr":
-			viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if scale < 1.0 else Viewport.SCALING_3D_MODE_BILINEAR
-		_:
-			viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	var upscaler := str(values.upscaler)
 	var aa := str(values.antialiasing)
-	viewport.msaa_3d = Viewport.MSAA_4X if aa == "msaa4" else Viewport.MSAA_2X if aa == "msaa2" else Viewport.MSAA_DISABLED
-	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if aa == "fxaa" else Viewport.SCREEN_SPACE_AA_DISABLED
-	# FSR 2 brings its own temporal AA.
-	viewport.use_taa = aa == "taa" and not temporal_upscale
+	var native := aa=="native" and upscaler!="fsr2"
+	var scale := base_scale*float(values.supersampling)/100.0 if upscaler=="off" else base_scale*float(values.render_scale)/100.0
+	scale = clampf(scale, 0.25, 1.0 if native else 2.0)  # FSR 2 never renders above the window
+	viewport.scaling_3d_scale = scale
+	# FSR 2 upscales from fewer pixels, or (Native AA) runs at full size just to smooth.
+	var temporal := native or (upscaler=="fsr2" and scale<0.999)
+	if temporal: viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2
+	elif upscaler=="fsr" and scale<1.0: viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR
+	else: viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	viewport.fsr_sharpness = (100.0-float(values.sharpness))/50.0  # 0 is sharpest, 2 softest
+	viewport.msaa_3d = {"2x": Viewport.MSAA_2X, "4x": Viewport.MSAA_4X, "8x": Viewport.MSAA_8X}.get(str(values.msaa), Viewport.MSAA_DISABLED)
+	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_SMAA if aa=="smaa" else Viewport.SCREEN_SPACE_AA_FXAA if aa=="fxaa" else Viewport.SCREEN_SPACE_AA_DISABLED
+	viewport.use_taa = aa=="taa" and not temporal
 	var shadows := level(values, "shadows")
 	viewport.positional_shadow_atlas_size = [256, 1024, 2048, 2048][shadows]
 	if DisplayServer.get_name() == "headless":
@@ -145,9 +189,11 @@ static func apply_viewport(viewport: Viewport, values: Dictionary, base_scale: f
 	RenderingServer.positional_soft_shadow_filter_set_quality(soft)
 	# Depth of field: the default (Low) blurs at half resolution with few
 	# samples, which shimmers on fine voxel detail while the camera moves.
-	# Hexagon at High runs at full size with 24 samples; no jitter (it crawls without TAA).
+	# Hexagon at High runs at full size with 24 samples. Jittered samples hide
+	# the last sampling lines, but only a frame-blending method (TAA, FSR 2)
+	# settles their noise; without one the jitter crawls.
 	RenderingServer.camera_attributes_set_dof_blur_bokeh_shape(RenderingServer.DOF_BOKEH_HEXAGON)
-	RenderingServer.camera_attributes_set_dof_blur_quality(RenderingServer.DOF_BLUR_QUALITY_HIGH, false)
+	RenderingServer.camera_attributes_set_dof_blur_quality(RenderingServer.DOF_BLUR_QUALITY_HIGH, temporal or viewport.use_taa)
 	# High keeps the project's own renderer settings (the original look).
 	var high_gi := level(values, "gi") >= 3
 	RenderingServer.gi_set_use_half_resolution(not high_gi or _project("global_illumination/gi/use_half_resolution", false))

@@ -28,7 +28,8 @@ var _pending_binding := {}
 var _deadline := 0
 var _status: Label
 var _preset := OptionButton.new()
-var _graphics_options := {}  # feature id -> OptionButton
+var _graphics_options := {}  # feature id -> OptionButton (HSlider for sliders)
+var _graphics_rows := {}  # feature id -> its row, hidden when another setting overrides it
 var _audio_output := OptionButton.new()
 var _audio_dynamic := OptionButton.new()
 var _audio_width := HSlider.new()
@@ -378,33 +379,73 @@ func _build_graphics(page: Control) -> void:
 	_row(column,"Quality preset",_preset,"Low and Medium reduce graphics cost. High enables the full look. You can adjust each feature separately.\nGraphics card: "+adapter)
 	_preset.item_selected.connect(func(index: int) -> void:
 		if not _refreshing and index<3: AppSettings.set_graphics(GraphicsSettings.defaults(GraphicsSettings.PRESETS[index])))
-	for f: Array in GraphicsSettings.FEATURES:
-		var id: String = f[0]
-		var option := OptionButton.new()
-		for choice: Array in f[2]: option.add_item(str(choice[1]))
-		option.custom_minimum_size.x = 320
-		option.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		option.item_selected.connect(func(index: int) -> void:
-			if _refreshing: return
-			var values := AppSettings.graphics.duplicate()
-			values[id] = f[2][index][0]
-			if id=="upscaler" and values[id]=="off": values.render_scale = 100
-			AppSettings.set_graphics(values))
-		_row(column, str(f[1]), option, str(f[3]))
-		_graphics_options[id] = option
+	for section: Array in GraphicsSettings.SECTIONS:
+		var heading := UIStyle.heading(str(section[0]), 22)
+		heading.custom_minimum_size.y = 44
+		heading.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		column.add_child(heading)
+		column.add_child(UIStyle.dialogue_separator())
+		for id: String in section[1]:
+			var f := GraphicsSettings.feature(id)
+			var widget: Control = _graphics_slider(id, f[2]) if GraphicsSettings.is_slider(id) else _graphics_dropdown(id, f[2])
+			_graphics_rows[id] = _row(column, str(f[1]), widget, str(f[3])).get_parent()
+			_graphics_options[id] = widget
 	var reset := UIStyle.button("Auto-detect")
 	reset.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	reset.pressed.connect(func() -> void: AppSettings.set_graphics(GraphicsSettings.defaults(GraphicsSettings.suggested_preset())))
 	column.add_child(reset)
+
+func _graphics_dropdown(id: String, choices: Array) -> OptionButton:
+	var option := OptionButton.new()
+	for choice: Array in choices: option.add_item(str(choice[1]))
+	option.item_selected.connect(func(index: int) -> void:
+		if not _refreshing: _set_graphics(id, choices[index][0]))
+	return option
+
+## A slider with its value beside it; saved when let go.
+func _graphics_slider(id: String, limits: Dictionary) -> HBoxContainer:
+	var box := HBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	var slider := HSlider.new()
+	slider.min_value = limits.min
+	slider.max_value = limits.max
+	slider.step = limits.step
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	box.add_child(slider)
+	var shown := UIStyle.label("", 18)
+	shown.custom_minimum_size.x = 48
+	shown.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	box.add_child(shown)
+	slider.value_changed.connect(func(v: float) -> void: shown.text = "%d" % v)
+	slider.drag_ended.connect(func(changed: bool) -> void:
+		if changed and not _refreshing: _set_graphics(id, int(slider.value)))
+	slider.set_meta("slider", true)
+	return box
+
+func _set_graphics(id: String, value: Variant) -> void:
+	var values := AppSettings.graphics.duplicate()
+	values[id] = value
+	if id=="upscaler" and value=="off": values.render_scale = 100
+	AppSettings.set_graphics(values)
 
 func _refresh_graphics() -> void:
 	_refreshing = true
 	var values := AppSettings.graphics
 	_preset.select(maxi(0,(GraphicsSettings.PRESETS+["custom"]).find(values.preset)))
 	for id: String in _graphics_options:
-		_graphics_options[id].select(maxi(0,GraphicsSettings.choices(id).find(values[id])))
-	if _graphics_options.has("render_scale"):
-		_graphics_options["render_scale"].disabled = values.upscaler=="off"
+		var widget: Control = _graphics_options[id]
+		if widget is OptionButton:
+			(widget as OptionButton).select(maxi(0,GraphicsSettings.choices(id).find(values[id])))
+		else:
+			(widget.get_child(0) as HSlider).set_value_no_signal(float(values[id]))
+			(widget.get_child(1) as Label).text = "%d" % int(values[id])
+		# Like the big games: options another setting overrides hide, or grey out and say why.
+		var why := GraphicsSettings.overridden(values, id)
+		_graphics_rows[id].visible = why!="hide"
+		if widget is OptionButton:
+			(widget as OptionButton).disabled = why!="" and why!="hide"
+			widget.tooltip_text = why if why!="hide" else ""
 	_refreshing = false
 
 func _build_controls(page: Control) -> void:
