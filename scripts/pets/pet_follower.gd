@@ -21,6 +21,7 @@ func _init(data: Dictionary = {}, target: Node3D = null, place: GameWorld = null
 	world = place
 
 func _ready() -> void:
+	add_to_group("pet_visuals")  # the yard's grass leans away from pets
 	add_child(_pose)
 	model = make_model(str(pet.get("species", "duck")))
 	_pose.add_child(model)
@@ -53,7 +54,7 @@ func _ready() -> void:
 			_halo.mesh = ring
 			_halo.material_override = light_material(color)
 			add_child(_halo)
-	if is_instance_valid(follow_target): global_position = follow_target.global_position
+	_ready_follow()
 
 static func light_material(color: Color) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
@@ -83,31 +84,72 @@ static func make_model(species: String) -> Node3D:
 		root.add_child(mesh)
 	return root
 
+## Trails its owner like a pet on a loose lead: it stays where it is until the
+## owner walks away, then follows the owner's path (turning on the spot never
+## moves it). The local player moves on the physics tick with the camera, so
+## the pet steps there too; remote players are smoothed per frame.
+const FOLLOW_DISTANCE := 1.5
+const CATCH_UP := 3.2  # metres per second for each metre past FOLLOW_DISTANCE
+const MAX_SPEED := 16.0
+var _velocity := Vector3.ZERO
+var _speed := 0.0
+var _height := NAN
+
+func _ready_follow() -> void:
+	var physics := follow_target is CharacterBody3D
+	set_physics_process(physics)
+	process_physics_priority = 10  # after the player has moved
+	if not is_instance_valid(follow_target): return
+	var facing := follow_target.global_basis
+	var actor_model: Variant = follow_target.get("model")
+	if actor_model is Node3D: facing = actor_model.global_basis
+	global_position = follow_target.global_position + facing.z * FOLLOW_DISTANCE
+	_heading = atan2(facing.z.x, facing.z.z)  # looking the way its owner looks
+
+func _physics_process(delta: float) -> void:
+	_follow(delta)
+
 func _process(delta: float) -> void:
-	var speed := 0.0
-	if is_instance_valid(follow_target) and is_instance_valid(world):
-		var facing := follow_target.global_basis
-		var actor_model: Variant = follow_target.get("model")
-		if actor_model is Node3D: facing = actor_model.global_basis
-		var goal := follow_target.global_position + facing.z * 1.45 + facing.x * 0.7
-		var offset := goal - global_position
-		var distance := offset.length()
-		if distance > 25.0:
-			global_position = goal
-		elif distance > 0.12:
-			var step := minf(distance, (3.0 + distance * 2.8) * delta)
-			if pet.get("species") == "lilyhop" and distance < 5.0 and sin(_time * 4.95) < 0.0: step = 0.0
-			global_position += offset.normalized() * step
-			speed = minf(1.0, step / maxf(delta, 0.001) / 5.0)
-		var frame := Transform3D.IDENTITY
-		if world is SpatialWorld: frame = (world as SpatialWorld).surface_frame(global_position)
-		var local_offset := frame.basis.inverse() * offset
-		if Vector2(local_offset.x, local_offset.z).length_squared() > 0.005:
-			_heading = lerp_angle(_heading, atan2(-local_offset.x, -local_offset.z), minf(1.0, delta * 9.0))
-		global_basis = frame.basis * Basis(Vector3.UP, _heading)
-		if world is SpatialWorld: global_position = frame.origin
-		else: global_position.y = world.ground_height(global_position.x, global_position.z)
-	animate_gait(speed, delta)
+	if not is_physics_processing(): _follow(delta)
+	animate_gait(_speed, delta)
+
+func _follow(delta: float) -> void:
+	_speed = 0.0
+	if not is_instance_valid(follow_target) or not is_instance_valid(world): return
+	var frame := Transform3D.IDENTITY
+	if world is SpatialWorld: frame = (world as SpatialWorld).surface_frame(global_position)
+	var up := frame.basis.y if world is SpatialWorld else Vector3.UP
+	var away := global_position - follow_target.global_position
+	away -= up * away.dot(up)
+	var distance := away.length()
+	if distance > 25.0:
+		global_position = follow_target.global_position - (away / distance) * FOLLOW_DISTANCE
+		_velocity = Vector3.ZERO
+		_height = NAN
+		return
+	# Wanted speed grows with how far past the lead it is; the velocity eases
+	# toward it so starting and stopping never jerk.
+	var wanted := Vector3.ZERO
+	if distance > FOLLOW_DISTANCE:
+		wanted = -away / distance * minf(MAX_SPEED, (distance - FOLLOW_DISTANCE) * CATCH_UP)
+	elif distance > 0.01 and distance < 0.6:
+		wanted = away / distance * 1.5  # out from under the owner's feet
+	if pet.get("species") == "lilyhop" and sin(_time * 4.95) < 0.0: wanted *= 0.15
+	_velocity = _velocity.lerp(wanted, 1.0 - exp(-delta * 9.0))
+	global_position += _velocity * delta
+	_speed = minf(1.0, _velocity.length() / 4.0)
+	if _velocity.length() > 0.25:
+		var local := frame.basis.inverse() * _velocity
+		_heading = lerp_angle(_heading, atan2(-local.x, -local.z), 1.0 - exp(-delta * 10.0))
+	if world is SpatialWorld:
+		frame = (world as SpatialWorld).surface_frame(global_position)
+		global_position = frame.origin
+	else:
+		# Voxel steps under the feet blend into a smooth climb.
+		var ground: float = world.ground_height(global_position.x, global_position.z)
+		_height = ground if is_nan(_height) else lerpf(_height, ground, 1.0 - exp(-delta * 14.0))
+		global_position.y = _height
+	global_basis = frame.basis * Basis(Vector3.UP, _heading)
 
 func animate_gait(speed: float, delta: float) -> void:
 	if not is_instance_valid(model): return

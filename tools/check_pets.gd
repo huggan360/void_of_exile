@@ -329,8 +329,8 @@ func _visual_smoke() -> void:
 	check(follower.global_position.distance_to(actor.global_position) < 3, "Follower teleports to catch up")
 	check(follower.model != null and follower.get_children().all(func(n: Node) -> bool: return not n is CollisionObject3D), "Missing art has a noncolliding placeholder")
 	var beam := PetBeam.spawn(world, Vector3.ZERO, Vector3(1, 0, 0), "chain")
-	beam._process(0.36)
-	check(beam.is_queued_for_deletion(), "Beam expires after 0.35 seconds")
+	beam._process(PetBeam.LIFE + 0.01)
+	check(beam.is_queued_for_deletion(), "Beam expires after its life")
 	# Build the full panel headlessly as well, including its isolated 3D preview.
 	var rng := RandomNumberGenerator.new()
 	var pet := PetDefs.random_pet(rng)
@@ -338,7 +338,7 @@ func _visual_smoke() -> void:
 	PetsClient.receive({next_id = 2, equipped = 1, pets = [pet]})
 	var panel := PetPanel.new()
 	add_child(panel)
-	check(panel._preview_pet != null and panel._ability_labels[1].text.contains("Unlocks at level 30"), "Caretaker builds preview and locked ability")
+	check(panel._preview_pet != null and panel._abilities[1]._value.text == "Level 30", "Caretaker builds preview and locked ability")
 	panel.free()
 	PetsClient.receive(PetDefs.empty_state())
 	for species: String in PetDefs.SPECIES:

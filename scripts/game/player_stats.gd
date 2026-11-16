@@ -258,7 +258,7 @@ func fits(item: Item, place: Dictionary) -> bool:
 		return true
 	match place.kind:
 		"gear":
-			return item.slot == place.key and item.usable_by(class_id)
+			return place.key in GEAR_SLOTS and item.slot == place.key and item.usable_by(class_id)
 		"quick":
 			return item.is_consumable()
 		"bag":
@@ -424,8 +424,8 @@ func activate(place: Dictionary) -> bool:
 		return loot(place)
 	if item.is_consumable():
 		return use(place)
-	if item.is_key() or item.is_story():
-		return false  # used at its fortress gate / read on this screen, never worn
+	if item.is_key() or item.is_story() or item.slot == "pet":
+		return false  # used at its fortress gate / read on this screen / hatched at the nest, never worn
 	if place.kind == "pack":
 		var gear_place := {kind = "gear", key = item.slot}
 		if can_move(place, gear_place):
@@ -574,6 +574,10 @@ func _load_data(data: Dictionary) -> void:
 	var saved_pack: Array = data.get("backpack", [])
 	for i in mini(saved_pack.size(), backpack.size()):
 		backpack[i] = _item_from(saved_pack[i])
+	# Eggs once slipped into a hidden "pet" gear slot on a double-click: back to the backpack.
+	var lost_egg := _item_from(saved_gear.get("pet")) if saved_gear.has("pet") else null
+	if lost_egg and backpack.find(null) >= 0:
+		backpack[backpack.find(null)] = lost_egg
 	var saved_quick: Array = data.get("quick", [])
 	for i in mini(saved_quick.size(), QUICKSLOTS):
 		quick[i] = _item_from(saved_quick[i])

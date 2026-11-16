@@ -24,8 +24,6 @@ func build(world: PetYardWorld) -> void:
 		body.add_child(collider)
 	if not pet_prop(["caretaker_cottage"], PetYardWorld.COTTAGE_POS, PI, 1.6):
 		_prop("res://props/home/rose_cottage", PetYardWorld.COTTAGE_POS, PI)
-	if not pet_prop(["pet_store", "pet_store_stall", "store_stall", "stall"], PetYardWorld.STORE_POS, PI):
-		_prop("res://props/town/market", PetYardWorld.STORE_POS, PI)
 	if not pet_prop(["hatching_nest", "nest"], PetYardWorld.NEST_POS, 0.0, 1.25): _nest(PetYardWorld.NEST_POS)
 	for at: Vector3 in PetYardWorld.TREES:
 		_prop("res://props/home/blossom_tree" if at.x < 0 else "res://props/home/orchard_tree", at)
@@ -34,20 +32,17 @@ func build(world: PetYardWorld) -> void:
 		world._add_light(at + Vector3(0, 3, 0), Color("ffcf85"), 1.1, 8.0)
 	_fence()
 	_bridge()
-	_flowers()
 	for at in [Vector3(-8, 0, 8), Vector3(-10, 0, 8), Vector3(7, 0, -2)]:
 		if not pet_prop(["food_bowl", "bowl"], at): _bowl(at)
 	for at in [Vector3(-9, 0, 2), Vector3(4, 0, 13)]:
 		if not pet_prop(["toy_ball", "ball"], at): _ball(at)
-	pet_prop(["egg_crate"], PetYardWorld.STORE_POS + Vector3(3, 0, 0))
+	pet_prop(["egg_crate"], Vector3(-11, 0, -9))
 	var water := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
 	plane.size = PetYardWorld.POND.size
 	water.mesh = plane
-	water.position = Vector3(13, -0.35, 8)
-	var mat := ShaderMaterial.new()
-	mat.shader = preload("res://shaders/water.gdshader")
-	water.material_override = mat
+	water.position = Vector3(13, -0.3, 8)
+	water.material_override = SurfaceWater.sea_material()
 	water.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(water)
 	_flush()
@@ -94,17 +89,29 @@ func _obstacle(id: String, at: Vector3, yaw := 0.0, size := 1.0) -> void:
 
 
 func _fence() -> void:
+	var fence := PetYardWorld.FENCE
 	for side in [-1.0, 1.0]:
 		var art := false
 		for i in 22:
-			var offset := -26.0 + (i + 0.5) * 52.0 / 22.0
-			art = pet_prop(["pet_fence", "fence"], Vector3(side * 26, 0, offset), PI * 0.5)
-			pet_prop(["pet_fence", "fence"], Vector3(offset, 0, side * 26))
+			var offset := -fence + (i + 0.5) * fence * 2.0 / 22.0
+			art = pet_prop(["pet_fence", "fence"], Vector3(offset, 0, side * fence))
+			if side < 0 or not _in_gate(offset): pet_prop(["pet_fence", "fence"], Vector3(side * fence, 0, offset), PI * 0.5)
 		# The existing fallback uses squared timber posts and rails.
 		if not art:
 			for step in range(-26, 27, 2):
-				_fence_segment(Vector3(side * 26, 0, step), true, step < 26)
-				_fence_segment(Vector3(step, 0, side * 26), false, step < 26)
+				if side < 0 or not (_in_gate(step) or _in_gate(step + 2)): _fence_segment(Vector3(side * fence, 0, step), true, step < 26)
+				_fence_segment(Vector3(step, 0, side * fence), false, step < 26)
+	# A timber arch over the gate onto the trail.
+	for z in [PetYardWorld.GATE_Z - PetYardWorld.GATE_HALF, PetYardWorld.GATE_Z + PetYardWorld.GATE_HALF]:
+		_box(Vector3(fence, 1.5, z), Vector3(0.36, 3.0, 0.36), WOOD)
+		_box(Vector3(fence, 3.05, z), Vector3(0.46, 0.14, 0.46), PALE_WOOD)
+	_box(Vector3(fence, 2.75, PetYardWorld.GATE_Z), Vector3(0.3, 0.26, PetYardWorld.GATE_HALF * 2.0 + 0.8), PALE_WOOD)
+	_box(Vector3(fence, 2.45, PetYardWorld.GATE_Z), Vector3(0.18, 0.14, PetYardWorld.GATE_HALF * 2.0), WOOD)
+
+
+## A fence piece centred at `offset` along the east side would block the gate.
+func _in_gate(offset: float) -> bool:
+	return absf(offset - PetYardWorld.GATE_Z) < PetYardWorld.GATE_HALF
 
 
 func _fence_segment(at: Vector3, along_z: bool, rails: bool) -> void:
@@ -147,17 +154,6 @@ func _bowl(at: Vector3) -> void:
 func _ball(at: Vector3) -> void:
 	_box(at + Vector3.UP * 0.35, Vector3(0.6, 0.7, 0.6), Color("dd8a76"))
 	_box(at + Vector3.UP * 0.35, Vector3(0.72, 0.3, 0.62), Color("f2d686"))
-
-
-func _flowers() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 73151
-	for center in [Vector3(-17, 0, 14), Vector3(18, 0, -17), Vector3(-7, 0, -19), Vector3(5, 0, 4)]:
-		for i in 14:
-			var at: Vector3 = center + Vector3(rng.randf_range(-2, 2), 0, rng.randf_range(-2, 2))
-			at.y = _world.ground_height(at.x, at.z)
-			if _world.is_walkable(at) and not _world.is_road(at):
-				_obstacle("decor_flowers" if i % 3 else "decor_tuft", at, rng.randf() * TAU)
 
 
 func _box(at: Vector3, size: Vector3, color: Color) -> void:

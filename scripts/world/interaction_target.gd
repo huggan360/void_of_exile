@@ -25,6 +25,8 @@ var follows_player := false
 var key_action := "interact"
 ## Optional 1-10 dungeon rating.
 var difficulty := -1.0
+## Acts on the key press and closes the card at once (no response page).
+var instant := false
 
 func _ready() -> void:
 	add_to_group("interaction_targets")
@@ -37,7 +39,7 @@ func available(player: Node3D) -> bool:
 func activate(player: Node3D) -> bool:
 	if not available(player): return false
 	activated.emit(player)
-	return true
+	return not instant
 
 ## Called before the card shows its texts, so a target can describe the moment.
 func refresh(_player: Node3D) -> void:

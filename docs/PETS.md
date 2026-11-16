@@ -101,7 +101,7 @@ An account's pets: `{next_id = 18, equipped = 17 (0 = none), pets = [pet, ...]}`
 | `scripts/pets/pet_defs.gd` (`class_name PetDefs`) | core | species, abilities, numbers above, `xp_to_next`, `ability_value(id, level, rarity)`, `interval(level)`, `random_pet(rng)`, `merge(a, b)` |
 | `scripts/pets/pet_server.gd` (`class_name PetServer`) | core | owned by NetServer (`server.pets`): load/save per account, hatch, feed, merge, equip, ability pulses, egg drops |
 | `scripts/pets/pet_follower.gd` (`class_name PetFollower`) | core | the pet that follows a player (local or remote) on clients, with its gait |
-| `scripts/pets/pet_beam.gd` (`class_name PetBeam`) | core | the bolt of light (a short jagged lightning line that fades in ~0.35 s), coloured per ability |
+| `scripts/pets/pet_beam.gd` (`class_name PetBeam`) | core | the bolt of light (a jagged bright core in a soft glow, ~0.55 s, sparks on the owner), coloured per ability |
 | `scripts/pets/pets_client.gd` (`class_name PetsClient`) | core | client state: `PetsClient.state` (the account's pets as above), signal `changed`, requests `hatch()`, `feed(id, bites)`, `merge(a, b)`, `equip(id)` |
 | `scripts/ui/pet_panel.gd` (`class_name PetPanel`) | core | the Caretaker's big panel |
 | `scripts/world/pet_yard_world.gd` (`class_name PetYardWorld`) | yard | the Pet Yard world |
@@ -128,16 +128,20 @@ the account service shop `pets` (item `pet_egg`), shown through the existing sho
 
 Realm id `pty_<account id>` (`PetYardWorld.PREFIX = "pty_"`, `PetYardWorld.is_pet_yard(id)`), reached by a
 portal in the Tavern ("Pet Yard" sign) and left through a portal back to the Tavern, exactly like the Chambers.
-A cosy fenced meadow of voxel ground: paths, a pond, trees, a Hatching Nest, the Pet Store stall with the
-storekeeper, the Caretaker's cottage with the Caretaker, food bowls, a little bridge. All the account's pets
+An island in a quiet sea (docs/PET_YARD.md). Where you arrive is a cosy fenced meadow: paths, a pond and a
+little bridge, trees, a Hatching Nest, the Caretaker's cottage with the Caretaker, food bowls. A gate in the
+meadow's east fence opens onto a lantern-lit trail over wooded hills to the Pet Store, a walk-in shop by the
+shore with the storekeeper behind its counter. All the account's pets
 wander free inside the fence (client-side, using their gaits) except the equipped one, which follows its owner.
-Walk up to a wandering pet and interact to equip it ("Take <name> along"); walk up to your following pet to send
+Walk up to a wandering pet and press interact to lead it ("Lead"); walk up to your following pet and "Release" it to send
 it back to play.
 
 ## Following
 
-`PetFollower` keeps about 1.6 m behind and to the side of its owner, catching up faster when far (teleports past
-25 m), and faces where it goes. Gaits: waddle (side-to-side rock), hop (small bounces), leap (big bounces with
+`PetFollower` trails its owner on a loose lead: it stays put until the owner is more than 1.5 m away, then
+walks after them with eased speed (faster the further it is, teleports past 25 m), so turning on the spot never
+moves it and it follows the owner's path. It faces where it walks. It is purely client-side (the server only
+knows which pet is equipped); behind the local player it steps on the physics tick, in time with the camera. Gaits: waddle (side-to-side rock), hop (small bounces), leap (big bounces with
 pauses), squash (squash and stretch bounces), trot (quick bob), flap/glide (fly at 0.8 to 1.2 m, wing beats or
 gentle glide), float/pulse/swim (hover with a slow bob or a pulse), plod (slow heavy bob), stomp (heavy steps),
 wiggle (body sway). Idle: a small breathing bob, and now and then a cute idle (a turn, a hop).

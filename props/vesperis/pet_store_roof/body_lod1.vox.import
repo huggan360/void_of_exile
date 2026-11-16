@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://1q6sg2vaifww"
+path="res://.godot/imported/body_lod1.vox-4b2aad8c9eaa3cce1711e4b6d22c4e4e.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/pet_store_roof/body_lod1.vox"
+dest_files=["res://.godot/imported/body_lod1.vox-4b2aad8c9eaa3cce1711e4b6d22c4e4e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

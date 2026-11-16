@@ -28,7 +28,8 @@ func setup(world: PetYardWorld) -> void:
 	talk.title = "Caretaker"
 	talk.description = "Care for your pets."
 	talk.response = "A full bowl and a little care go a long way."
-	talk.action_text = "Care for pets"
+	talk.action_text = "Pets"
+	talk.instant = true
 	talk.position = Vector3.UP
 	_caretaker.add_child(talk)
 	talk.activated.connect(func(_actor: Node3D) -> void:
@@ -49,6 +50,8 @@ func setup(world: PetYardWorld) -> void:
 	_nest.activated.connect(func(_actor: Node3D) -> void: _hatch())
 	_following = InteractionTarget.new()
 	_following.reach = 2.8
+	_following.action_text = "Release"
+	_following.instant = true
 	_following.enabled = false
 	add_child(_following)
 	_following.activated.connect(func(_actor: Node3D) -> void: PetsClient.equip(0))
@@ -91,6 +94,8 @@ func _changed() -> void:
 			var wanderer := WANDERER.new().setup(pet, _world)
 			add_child(wanderer)
 			_wanderers[id] = wanderer
+		elif is_instance_valid(_wanderers[id].get("target")):
+			_wanderers[id].refresh(pet)
 	for id: int in _wanderers.keys():
 		if not present.has(id):
 			var wanderer: Node3D = _wanderers[id]
@@ -150,9 +155,7 @@ func _follow_target() -> void:
 	if not is_instance_valid(follower): return
 	_following.global_position = follower.global_position + Vector3.UP * 0.4
 	_following.title = str(pet.name)
-	_following.action_text = "Let %s play" % str(pet.name)
-	_following.description = "Let your companion play in the meadow."
-	_following.response = "%s is off to play." % str(pet.name)
+	_following.description = "%s - Level %d" % [str(pet.rarity).capitalize(), int(pet.level)]
 	_following.enabled = true
 
 

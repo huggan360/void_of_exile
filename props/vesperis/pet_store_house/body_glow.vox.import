@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bp0is1pk5m2ne"
+path="res://.godot/imported/body_glow.vox-6b68457c24c28a87931dbf476d56ded0.tscn"
+
+[deps]
+
+source_file="res://props/vesperis/pet_store_house/body_glow.vox"
+dest_files=["res://.godot/imported/body_glow.vox-6b68457c24c28a87931dbf476d56ded0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

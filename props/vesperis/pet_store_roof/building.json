@@ -1,0 +1,13 @@
+{
+  "footprint": [
+    14.625,
+    11.375
+  ],
+  "height": 8.25,
+  "center": [
+    0.0625,
+    0.0625
+  ],
+  "kind": "pet_store_roof",
+  "colliders": []
+}

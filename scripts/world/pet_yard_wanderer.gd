@@ -32,13 +32,18 @@ func _ready() -> void:
 	visual.set_process(false)
 	target = InteractionTarget.new()
 	target.title = str(pet.name)
-	target.description = "Playing in the meadow."
-	target.action_text = "Take %s along" % str(pet.name)
-	target.response = "%s is coming along." % str(pet.name)
+	target.action_text = "Lead"
+	target.instant = true
 	target.reach = 2.8
 	target.position.y = 0.4
 	add_child(target)
 	target.activated.connect(func(_actor: Node3D) -> void: PetsClient.equip(int(pet.id)))
+	refresh(pet)
+
+
+func refresh(record: Dictionary) -> void:
+	pet.level = record.level
+	target.description = "%s - Level %d" % [str(pet.rarity).capitalize(), int(pet.level)]
 
 
 func pop_out() -> void:
@@ -49,7 +54,7 @@ func _spot(from: Vector3) -> Vector3:
 	for attempt in 60:
 		var at := Vector3(_rng.randf_range(-23, 23), 0, _rng.randf_range(-22, 21))
 		at.y = _world.ground_height(at.x, at.z)
-		if _world.is_walkable(at) and (not from.is_finite() or _world.clear_segment(from, at)): return at
+		if _world.pet_walkable(at) and (not from.is_finite() or _world.clear_segment(from, at)): return at
 	return from if from.is_finite() else PetYardWorld.SPAWN_POINT
 
 
@@ -69,7 +74,7 @@ func _process(delta: float) -> void:
 		var speed := 0.65 if _gait == "plod" else 1.0 if _gait == "stomp" else 1.65
 		if _gait == "leap" and sin(_time * 4.0) < 0: speed = 0
 		var next := position.move_toward(Vector3(_goal.x, position.y, _goal.z), speed * delta)
-		if offset.length() < 0.15 or not _world.is_walkable(next):
+		if offset.length() < 0.15 or not _world.pet_walkable(next):
 			_pause = _rng.randf_range(1.5, 5)
 			_moving = false
 		else:
