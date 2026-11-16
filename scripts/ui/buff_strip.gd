@@ -50,9 +50,7 @@ func _sync() -> void:
 			timer_pill.name = "TimerPill"
 			timer_pill.position = Vector2(3, 0)
 			timer_pill.size = Vector2(54, 22)
-			var timer_style: StyleBoxTexture = UIStyle.panel_outlined(UIStyle.ACCENT).duplicate()
-			timer_style.set_content_margin_all(2)
-			timer_pill.add_theme_stylebox_override("panel", timer_style)
+			timer_pill.add_theme_stylebox_override("panel", UIStyle.framed(2, 4))
 			timer_pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			card.add_child(timer_pill)
 			var timer := Label.new()

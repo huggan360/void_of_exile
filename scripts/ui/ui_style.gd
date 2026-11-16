@@ -83,6 +83,7 @@ static func texture_path(filename: String) -> String:
 	return "res://assets/ui/"+(TEXTURE_SET+"/" if not TEXTURE_SET.is_empty() else "")+filename
 
 static var _skin_textures := {}
+static var _framed := {}
 
 
 static var _file: FontFile
@@ -192,9 +193,9 @@ static func theme() -> Theme:
 			_theme.set_color("font_placeholder_color", type, TEXT_DIM)
 		for type in ["HScrollBar", "VScrollBar"]:
 			_theme.set_stylebox("scroll", type, PixelArt.box(PixelArt.frame_image(OUTLINE, OUTLINE, BEVEL_DARK, BG_LIGHT), 0))
-			_theme.set_stylebox("grabber", type, panel())
-			_theme.set_stylebox("grabber_highlight", type, panel_outlined(ACCENT))
-			_theme.set_stylebox("grabber_pressed", type, panel_outlined(GOLD))
+			_theme.set_stylebox("grabber", type, panel_fill())
+			_theme.set_stylebox("grabber_highlight", type, panel_fill())
+			_theme.set_stylebox("grabber_pressed", type, panel_fill())
 		_theme.set_stylebox("panel", "TabContainer", content_panel())
 		_theme.set_stylebox("panel", "ScrollContainer", content_panel(0))
 		_theme.set_stylebox("tab_selected", "TabContainer", panel_outlined(GOLD))
@@ -263,15 +264,41 @@ static func _skin_box(kind: String, tint: Color, margin: float) -> StyleBoxTextu
 	return box
 
 
-## Inner cards use only the original moss frame artwork's dark interior.
-static func panel() -> StyleBoxTexture:
-	return _cached("panel", func() -> StyleBoxTexture:
-		return _skin_box("panel", Color.WHITE, 14))
+## Inner cards, tabs, banners and pills: the moss frame artwork's dark
+## interior inside a thin stone frame.
+static func panel() -> UIFrameBox:
+	if not _framed.has("panel"): _framed["panel"] = framed(14)
+	return _framed["panel"]
 
 
-static func panel_outlined(color: Color) -> StyleBoxTexture:
-	return _cached("panel_" + color.to_html(), func() -> StyleBoxTexture:
-		return _skin_box("panel", Color.WHITE, 12))
+static func panel_outlined(_color: Color) -> UIFrameBox:
+	if not _framed.has("outlined"): _framed["outlined"] = framed(12)
+	return _framed["outlined"]
+
+
+## A new framed card: `margin` px of padding, the buttons' bevelled stone edge
+## `edge` px wide drawn inside it (inside the padding, so sizes don't change).
+static func framed(margin: float, edge := 8) -> UIFrameBox:
+	var box := UIFrameBox.new()
+	box.fill = _cached("panel_fill", func() -> StyleBoxTexture: return _skin_box("panel", Color.WHITE, 0))
+	box.frame = _cached("frame_%d" % edge, func() -> StyleBoxTexture:
+		var stone := StyleBoxTexture.new()
+		var texture := ImageTexture.create_from_image(load(texture_path("ui_stone_button.png")).get_image().get_region(Rect2i(28, 152, 2116, 398)))
+		# The buttons' 9 px rim on a 192 x 48 face, scaled to `edge`.
+		texture.set_size_override(Vector2i(roundi(192.0 * edge / 9.0), roundi(48.0 * edge / 9.0)))
+		stone.texture = texture
+		stone.set_texture_margin_all(edge)
+		stone.draw_center = false
+		stone.modulate_color = Color(0.95, 0.95, 0.95)
+		return stone)
+	box.edge = edge
+	box.set_content_margin_all(margin)
+	return box
+
+
+## The interior alone, for slim parts like scrollbar grabbers.
+static func panel_fill() -> StyleBoxTexture:
+	return _cached("panel_fill", func() -> StyleBoxTexture: return _skin_box("panel", Color.WHITE, 0))
 
 
 ## Every window shares the original moss frame and its dark blue interior.

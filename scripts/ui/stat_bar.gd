@@ -27,7 +27,7 @@ var _shine := -1.0
 var _shine_timer := 0.0
 var _label := Label.new()
 var _value_pill := PanelContainer.new()
-var _rail: StyleBoxTexture
+var _rail: StyleBox
 var _caption := Label.new()
 
 
@@ -86,22 +86,13 @@ func restyle(p_color: Color, p_light: Color, caption: String) -> void:
 	queue_redraw()
 
 
-func _pill_style() -> StyleBoxTexture:
-	var style: StyleBoxTexture = UIStyle.panel_outlined(color).duplicate()
-	style.texture_margin_left = 4
-	style.texture_margin_right = 4
-	style.texture_margin_top = 4
-	style.texture_margin_bottom = 4
-	style.set_content_margin_all(2)
-	return style
+func _pill_style() -> StyleBox:
+	return UIStyle.framed(2, 4)
 
 
-## The stone rail with a border thin enough for the short bar.
-func _rail_style() -> StyleBoxTexture:
-	if _rail == null:
-		_rail = UIStyle.panel_outlined(color).duplicate()
-		_rail.set_texture_margin_all(PX * 2)
-		_rail.set_content_margin_all(0)
+## The stone rail with a frame thin enough for the short bar.
+func _rail_style() -> StyleBox:
+	if _rail == null: _rail = UIStyle.framed(0, PX)  # the rail shows one art pixel round the sockets
 	return _rail
 
 
