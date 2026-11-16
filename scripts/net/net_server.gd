@@ -705,6 +705,10 @@ func _unload_empty_realms(_delta: float) -> void:
 
 # --- What players send ---------------------------------------------------------------
 
+## Walking is the client's: it moves itself and the server takes where it says
+## it is. A correction (which lands a round trip late and feels like rubber
+## banding) only comes from game rules (a seat, the intro, Static, a sealed
+## gate, a station barrier) or a move no one could walk (a teleport).
 func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int) -> void:
 	var p: Dictionary = peers.get(peer_id, {})
 	if p.is_empty() or not p.joined or p.dead or p.realm == "":
@@ -716,12 +720,8 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 		pos = p.pos
 		speed = 0.0
 		if GameServer.intro_locked(p.player_id): flags = flags & ~1
+	if not pos.is_finite(): return
 	var active_realm: RealmInstance = realms.get(p.realm)
-	if _pet_yards.has(p.realm):
-		var yard: PetYardWorld = _pet_yards[p.realm]
-		if not pos.is_finite() or not yard.clear_segment(p.pos, pos) or absf(pos.y - yard.ground_height(pos.x, pos.z)) > 3.0:
-			Net.c_correct.rpc_id(peer_id, p.pos)
-			return
 	var lounge_seat := Leisure.seat_spec(int(p.player_id), active_realm.world if active_realm else null)
 	if not lounge_seat.is_empty():
 		pos = lounge_seat.pos
@@ -736,7 +736,6 @@ func on_move(peer_id: int, pos: Vector3, facing: float, speed: float, flags: int
 	if active_realm and active_realm.world is IslandWorld and SpaceLayout.pocket_at(p.pos)>=0:
 		spatial = active_realm.world.surface_ships
 	if spatial:
-		if not pos.is_finite(): return
 		# Still in a lost ship's room: the client hasn't heard yet. Wait for it.
 		if spatial is SpaceWorld and (spatial as SpaceWorld).stale_pocket(pos): return
 		if spatial is SpaceWorld and not spatial is SurfaceShipWorld:

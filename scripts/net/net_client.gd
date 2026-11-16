@@ -162,6 +162,8 @@ func on_character(data: Dictionary) -> void:
 
 func on_correct(pos: Vector3) -> void:
 	if player:
+		if player.global_position.distance_to(pos) > 0.5:
+			print("[net] the server moved you %.1f m" % player.global_position.distance_to(pos))
 		player.global_position = pos
 		player.velocity = Vector3.ZERO
 
