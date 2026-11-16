@@ -733,6 +733,7 @@ func take_damage(amount: float, armor_piercing := false, magic := false) -> bool
 	if GameServer.intro_protected(player_id) or stats.buffs.has_effect("invincible"): return false
 	if shield.active and magic:
 		return false
+	armor_piercing = armor_piercing or magic
 	var before := stats.hp
 	var result := GameServer.hit_player(player_id, amount, armor_piercing, shield.active,last_hit_by)
 	var landed: float = result.landed

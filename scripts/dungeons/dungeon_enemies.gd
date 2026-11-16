@@ -37,7 +37,9 @@ static func build(defs: Dictionary) -> void:
 	chest.id = "goblin_treasure"
 	chest.enemy_name = "Goblin Treasure Cache"
 	chest.model = "goblin_treasure"
-	chest.hp = 30
+	chest.hp = 20000
+	chest.is_treasure_cache = true
+	chest.loot_share_floor = 0.6
 	chest.behavior = "stationary"
 	chest.body_height = 1.0
 	chest.loot.assign([{pool = {tier = 4}, chance = 1.0}, {item = "elixir_of_dexterity", chance = 0.3}])

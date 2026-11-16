@@ -289,7 +289,11 @@ func _hurt(p: Node3D, h: Dictionary, now: float, tick: float) -> void:
 	# Actual fire pools/eruptions ignite; their zero-damage floor warnings do not.
 	if not Net.is_client() and h.damage.y>0 and is_instance_valid(boss) and boss.def.id in ["vharok", "magma_warden", "pyre_ent", "blue_dragon"]:
 		GameServer.apply_buff(p.player_id,"burning",Burning.CONTACT_DURATION,1,boss.def.enemy_name)
-	p.take_damage(float(randi_range(h.damage.x, h.damage.y)) * mult, false, h.opts.get("magic", false))
+	var damage: Vector2i = h.damage
+	if not Net.is_client() and h.opts.get("magic", false) and is_instance_valid(boss):
+		var magic := EnemyDamage.boss_magic({}, boss.def.id)
+		damage = Vector2i(magic.damage_min, magic.damage_max)
+	p.take_damage(float(EnemyDamage.roll(damage.x, damage.y)) * mult, false, h.opts.get("magic", false))
 
 
 ## The space bosses' hazards strike and slam audibly (clients only; one per
@@ -378,6 +382,9 @@ func _send(method: String, args: Array, h: Dictionary, damage_at: int) -> void:
 	if not Net.is_server() or _net_depth > 0:
 		return
 	if damage_at >= 0:
+		if args[-1] is Dictionary and args[-1].get("magic", false) and is_instance_valid(boss):
+			var magic := EnemyDamage.boss_magic({}, boss.def.id)
+			args[damage_at] = Vector2i(magic.damage_min, magic.damage_max)
 		args[damage_at] = Net.server.scaled_vector_damage(boss, args[damage_at])
 	Net.server.hazard_event(boss, ["hz", _boss_net_id(), method, args, h.net_id])
 

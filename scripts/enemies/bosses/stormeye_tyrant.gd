@@ -93,7 +93,7 @@ func _frost(speed := 9.0) -> Dictionary:
 	return PlanetBosses.shot("frost_shard", "shard", FROST, Vector2i(72, 94), speed, 24.0, 1.1,
 		{effects = [{id = "static", duration = 0.9}, {id = "speed", amount = -4, duration = 2.5}], effect_source = "Vaelith's frost"})
 
-## Mind bubbles: slow and wobbling; a hit leaves you drunk for five seconds.
+## Mind bubbles: slow and wobbling; the boss profile keeps their confusion brief.
 func _bubble(speed := 4.0) -> Dictionary:
 	return PlanetBosses.shot("dizzy_bubble", "orb", MIND, Vector2i(58, 76), speed, 22.0, 1.2,
 		{effects = [{id = "drunk", duration = 5.0}], effect_source = "Vaelith's mind bubble"})

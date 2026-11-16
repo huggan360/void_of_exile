@@ -55,7 +55,7 @@ func _effect(stat: String) -> String:
 		"attack":
 			return "+%s%% weapon damage" % String.num((stats.weapon_damage_multiplier()-1.0)*100.0,2)
 		"defense":
-			return "-%d damage per hit" % [stats.total("defense")]
+			return "-%d damage per non-magic hit" % [stats.total("defense")]
 		"magic":
 			return "Shield: %s%% protection" % String.num(minf(99.99,stats.shield_reduction()*100.0),2)
 	return ""
@@ -64,7 +64,7 @@ func _effect(stat: String) -> String:
 func _add_row(title: String, value: String, note: String, note_color := UIStyle.TEXT_DIM) -> void:
 	var row := HBoxContainer.new()
 	if title == PlayerStats.STAT_NAMES.magic:
-		row.tooltip_text = "While held, MAG reduces regular projectile damage first, then Defence applies. Protection approaches 100% but never reaches it. Hits never break the shield; holding it drains MP. Magic projectiles are blocked completely."
+		row.tooltip_text = "While held, MAG reduces regular projectile damage first, then Defence applies. Protection approaches 100% but never reaches it. Hits never break the shield; holding it drains MP. Magic hits ignore Defence and are blocked completely by the warp shield."
 	var name_label := UIStyle.label(title, UIStyle.SIZE_NORMAL, UIStyle.TEXT_DIM)
 	name_label.add_theme_font_override("font", UIStyle.bold())
 	name_label.custom_minimum_size = Vector2(110, 0)

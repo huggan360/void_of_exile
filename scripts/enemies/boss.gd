@@ -245,10 +245,15 @@ func _face_player(delta: float) -> void:
 	model.rotation.y = _facing
 
 
+## Shared by bosses and treasure caches; health never scales below solo.
+static func scaled_health(base_health: int, per_extra_player: float, participants: int) -> int:
+	return roundi(base_health * (1.0 + per_extra_player * (maxi(1, participants) - 1)))
+
+
 ## The fight starts: health from the number of players here, then phase 1.
 func _begin_fight() -> void:
 	players_counted = maxi(1, GameServer.players_near(director.realm_id, global_position, boss_def.bar_radius))
-	max_hp = int(round(def.hp * (1.0 + boss_def.hp_per_extra_player * (players_counted - 1))))
+	max_hp = scaled_health(def.hp, boss_def.hp_per_extra_player, players_counted)
 	hp = max_hp
 	_join_check = 1.0
 	state = State.ACTIVE
@@ -291,7 +296,7 @@ func _hit_shell(damage: int, by: int, at := Vector3.INF, direction := Vector3.ZE
 	if shell_hp == shell_max:
 		# Like boss health, the shell scales with the players here at the first hit.
 		var near := maxi(1, GameServer.players_near(director.realm_id, global_position, boss_def.bar_radius))
-		shell_max = int(round(boss_def.shell_hp * (1.0 + boss_def.hp_per_extra_player * (near - 1))))
+		shell_max = scaled_health(boss_def.shell_hp, boss_def.hp_per_extra_player, near)
 		shell_hp = shell_max
 	shell_hp = maxi(0, shell_hp - damage)
 	_last_by = by
@@ -637,13 +642,15 @@ func aim_dir(from := Vector3.INF) -> Vector3:
 	return d.normalized() if d.length() > 0.01 else Vector3.FORWARD
 
 
+func cast_ripple(pos: Vector3, ripple: Dictionary, color: Color, players: Array, skip: Array) -> void:
+	ripple = EnemyDamage.boss_magic(ripple, def.id)
+	if not Net.is_server() and director.world is DungeonWorld:
+		ripple = Enemies.scale_attack_damage(ripple, float(director.world.definition.enemy_damage_multiplier))
+	EnemyRipple.spawn(director.bullets, pos, ripple, color, players, skip)
+
+
 func shoot(origin: Vector3, dir: Vector3, attack: Dictionary) -> void:
 	if buffs.has_effect("static") or buffs.has_effect("quiet"): return
-	if director.world is DungeonWorld:
-		var mult: float = director.world.definition.enemy_damage_multiplier
-		attack = attack.duplicate(true)
-		attack.damage_min = roundi(float(attack.get("damage_min", 0)) * mult)
-		attack.damage_max = roundi(float(attack.get("damage_max", 0)) * mult)
 	director.bullets.fire(origin, dir, attack, self, origin.y)
 
 
@@ -772,7 +779,7 @@ func _land() -> void:
 
 ## Boss-specific contact damage and shove; called once per player per charge.
 func _charge_contact(player, _contact: Vector3) -> void:
-	player.take_damage(float(randi_range(_charge.damage.x,_charge.damage.y)),false,false)
+	player.take_damage(float(EnemyDamage.roll(_charge.damage.x, _charge.damage.y)),false,false)
 	GameAudio.emit_from("boss_impact", self, {source_id = encounter_id, cooldown = 0.25, max_distance = 64.0})
 	var side: Vector3 = (player.global_position-global_position).normalized()
 	player.knockback((side+_charge.dir*0.5).normalized()*4.0)
@@ -912,7 +919,7 @@ func _count_joiners(delta: float) -> void:
 	_join_check = 1.0
 	var near := GameServer.players_near(director.realm_id, global_position, boss_def.bar_radius)
 	if near <= players_counted: return
-	var added := int(round(def.hp * boss_def.hp_per_extra_player * (near - players_counted)))
+	var added := scaled_health(def.hp, boss_def.hp_per_extra_player, near) - max_hp
 	players_counted = near
 	hp = mini(max_hp + added, int(round(float(hp) * (max_hp + added) / max_hp)))
 	max_hp += added

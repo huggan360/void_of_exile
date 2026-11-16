@@ -75,7 +75,7 @@ func _charge_contact(player, contact: Vector3) -> void:
 	var lateral := side.dot(offset)
 	if lateral < 0.0 or (absf(lateral) < 0.01 and player.get_instance_id() % 2 == 0): side = -side
 	player.knockback(side * 14.0)
-	player.take_damage(float(randi_range(_charge.damage.x, _charge.damage.y)), true, false)
+	player.take_damage(float(EnemyDamage.roll(_charge.damage.x, _charge.damage.y)), true, false)
 
 
 func _phase_started(index: int) -> void:

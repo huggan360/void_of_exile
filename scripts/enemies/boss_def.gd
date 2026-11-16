@@ -26,7 +26,8 @@ extends EnemyDef
 @export var intro_time := 10.0
 ## Close the fortress portcullises while this encounter is running.
 @export var lock_gates := false
-@export var hp_per_extra_player := 0.2
+const HP_PER_EXTRA_PLAYER := 0.2
+@export var hp_per_extra_player := HP_PER_EXTRA_PLAYER
 ## Its health bar shows for players this close; they count for its health,
 ## and share its XP when it dies.
 @export var bar_radius := 45.0

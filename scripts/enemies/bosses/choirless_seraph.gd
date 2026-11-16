@@ -64,7 +64,7 @@ func _toll() -> void:
 	for stroke in strokes:
 		after(1.1 + stroke * 0.9, func() -> void:
 			model.boss_pose("slam_release", 0.5)
-			EnemyRipple.spawn(director.bullets, global_position, {radius = 18.0, speed = 4.2 + stroke * 0.5,
+			cast_ripple(global_position, {radius = 18.0, speed = 4.2 + stroke * 0.5,
 				damage_min = 70, damage_max = 92, knockback = 0.35}, BELL, players(), [])
 			fire_ring(shot_origin(), 26, _note(5.0 + stroke * 0.4), gap + stroke * 0.12, 50.0)
 			glow_wave(HYMN if stroke % 2 else CANDLE, {speed = 9.0, strength = 2.6}))

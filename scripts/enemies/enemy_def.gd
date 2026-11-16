@@ -22,6 +22,8 @@ extends Resource
 
 @export_group("Toughness")
 @export var hp := 50
+## Treasure caches use boss participant scaling from the first hit.
+@export var is_treasure_cache := false
 ## Subtracted from each hit (at least 15% always gets through).
 @export var defense := 0
 @export var xp := 10
@@ -88,6 +90,9 @@ extends Resource
 @export var loot: Array[Dictionary] = []
 ## Share of its health a player must deal to roll for personal loot.
 @export var loot_threshold := 0.1
+## Share of each personal chance a player just over the threshold rolls with;
+## it rises to the full chance for the top damage dealer (see Loot).
+@export var loot_share_floor := 0.9
 ## Optional server-side portal roll.
 @export var portal_drop := {}
 @export var dungeon_reward := false

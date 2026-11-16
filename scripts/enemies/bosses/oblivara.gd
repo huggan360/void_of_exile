@@ -179,7 +179,7 @@ func _unmaking() -> void:
 	after(2.6, func() -> void:
 		model.boss_pose("slam_release", 0.8)
 		status_text = ""
-		EnemyRipple.spawn(director.bullets, global_position, {radius = room_radius() + 6.0, speed = 6.5,
+		cast_ripple(global_position, {radius = room_radius() + 6.0, speed = 6.5,
 			damage_min = 170, damage_max = 210, knockback = 0.6}, WHITE, players(), [])
 		glow_wave(GOLD, {speed = 6.5, strength = 3.0, width = 3.0}))
 

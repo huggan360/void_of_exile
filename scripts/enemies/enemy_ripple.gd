@@ -42,7 +42,7 @@ static func spawn(parent: Node, pos: Vector3, ripple: Dictionary, color: Color, 
 	r._skip = skip.duplicate()
 	r._reach = ripple.get("radius", 3.0)
 	r._speed = ripple.get("speed", 6.0)
-	r._damage = randi_range(ripple.get("damage_min", 8), ripple.get("damage_max", 12))
+	r._damage = EnemyDamage.roll(ripple.get("damage_min", 8), ripple.get("damage_max", 12))
 	r._knockback = ripple.get("knockback", 1.0)
 	r.team = "enemies"
 	r.color = color

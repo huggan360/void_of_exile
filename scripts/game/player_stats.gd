@@ -12,7 +12,7 @@ extends RefCounted
 ##   speed      +1.5% movement speed per point
 ##   dexterity  +2% shots per second per point (negative slows you down)
 ##   attack     +1.4% weapon damage per point
-##   defense    subtracted from each normal hit (at least 15% still gets through);
+##   defense    subtracted from each non-magic, non-piercing hit (at least 15% still gets through);
 ##              armor-piercing hits ignore it
 ##   magic      shield reduction on a shared diminishing-returns curve, plus spell damage
 ## Gear can also raise max health ("hp") and max magic points ("mp").

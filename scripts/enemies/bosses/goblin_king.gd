@@ -46,7 +46,7 @@ func _pound() -> void:
 	hazards.circle(at, 3.0, 1.1, Vector2i(24, 32), GOLD)
 	after(1.1, func() -> void:
 		CameraShake.shake_from(self, at, 0.35, 24.0)
-		EnemyRipple.spawn(director.bullets, at, {radius = 10.0, speed = 4.0, damage_min = 16, damage_max = 24, knockback = 0.2}, MOSS, players(), []))
+		cast_ripple(at, {radius = 10.0, speed = 4.0, damage_min = 16, damage_max = 24, knockback = 0.2}, MOSS, players(), []))
 
 func _court() -> void:
 	model.boss_pose("summon", 2.0)

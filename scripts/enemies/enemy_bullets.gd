@@ -69,7 +69,12 @@ var _fire_looks := {}  # "color/size" -> {core, trail, burst: ParticleProcessMat
 ## that fired it (their source is null).
 func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node = null, shot_y := NAN, skip: Array = [],
 		owner := 0, boss_id := "") -> void:
-	attack = Burning.projectile(attack,(source as Enemy).def.id if source is Enemy else boss_id)
+	if source is Enemy or boss_id == "":
+		attack = Burning.projectile(attack,(source as Enemy).def.id if source is Enemy else boss_id)
+	if source is Enemy and (source as Enemy).def is BossDef:
+		attack = EnemyDamage.boss_attack(attack, (source as Enemy).def.id)
+		if (source as Enemy).director.world is DungeonWorld:
+			attack = Enemies.scale_attack_damage(attack, float((source as Enemy).director.world.definition.enemy_damage_multiplier))
 	if source is Enemy and (source as Enemy).director.world is TheoryWorld and (source as Enemy).director.world.zone_at(origin) in ["space","fracture"]:
 		attack = attack.duplicate()
 		attack.free_3d = true
@@ -89,6 +94,7 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 		attack = _boss_attack(attack,(source as Enemy).def.id)
 	elif boss_id != "":
 		attack = _boss_attack(attack, boss_id)
+	attack = EnemyDamage.effect_look(attack)
 	var mi := MeshInstance3D.new()
 	mi.mesh = _mesh_for(attack)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -131,7 +137,7 @@ func fire(origin: Vector3, direction: Vector3, attack: Dictionary, source: Node 
 		start_y = origin.y, shot_y = origin.y if is_nan(shot_y) else shot_y,
 		magic = magic, ripple = attack.get("ripple", {}), color = attack.get("color", Color.WHITE),
 		travelled = 0.0, range = attack.get("range", 10.0),
-		damage = randi_range(attack.get("damage_min", 5), attack.get("damage_max", 10)),
+		damage = EnemyDamage.roll(attack.get("damage_min", 5), attack.get("damage_max", 10)),
 		armor_piercing = attack.get("armor_piercing", false),
 		pierce = attack.get("pierce_players", false),
 		# Pieces of one attack (a cleave's two crescents) can share one hit list.

@@ -62,8 +62,8 @@ func _charge_contact(player, contact: Vector3) -> void:
 	var lateral := side.dot(offset)
 	if lateral<0.0 or (absf(lateral)<0.01 and player.get_instance_id()%2==0): side = -side
 	player.knockback(side*14.0)
-	# Body impact bypasses armor: an unshielded player loses 135–160 HP.
-	player.take_damage(float(randi_range(_charge.damage.x,_charge.damage.y)),true,false)
+	# Body impact bypasses armor: the shared enemy damage multiplier applies to the raw charge range.
+	player.take_damage(float(EnemyDamage.roll(_charge.damage.x, _charge.damage.y)),true,false)
 
 
 func _phase_started(index: int) -> void:
@@ -351,10 +351,10 @@ func _slam() -> void:
 		var hit: Array = []
 		for p in players():
 			if Vector2(p.global_position.x - spot.x, p.global_position.z - spot.z).length() < 2.2 + EnemyBullets.PLAYER_RADIUS * 0.6:
-				p.take_damage(float(randi_range(95, 110)), false, false)
+				p.take_damage(float(EnemyDamage.roll(95, 110)), false, false)
 				hit.append(p)
 		# The ring skips anyone the slam itself just hit.
-		EnemyRipple.spawn(director.bullets, spot, {radius = 12.0, speed = 6.0, damage_min = 70, damage_max = 83},
+		cast_ripple(spot, {radius = 12.0, speed = 6.0, damage_min = 70, damage_max = 83},
 				Color(1.0, 0.45, 0.2), director.bullets.players, hit)
 		CameraShake.shake_from(self, spot, 0.6, 24.0)
 		var pts := PackedVector3Array()

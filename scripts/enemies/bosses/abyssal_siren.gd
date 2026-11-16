@@ -44,7 +44,7 @@ func _song() -> void:
 		fire_ring(shot_origin(), 20 if phase < 2 else 26, Boss.shot("disc", PEARL, Vector2i(40, 51), 4.5, 0.2, 24.0,
 			{voxel_model = "boss_projectiles/siren_echo", authored_projectile = true, pixel_projectile = true,
 				effects = [{id = "quiet", duration = 1.25}], effect_source = "Abyssal Siren song"}), gap, 62.0)
-		EnemyRipple.spawn(director.bullets, at, {radius = 15.0, speed = 3.4, damage_min = 29, damage_max = 40, knockback = 0.25}, WATER, players(), []))
+		cast_ripple(at, {radius = 15.0, speed = 3.4, damage_min = 29, damage_max = 40, knockback = 0.25}, WATER, players(), []))
 
 func _crystals() -> void:
 	model.boss_pose("summon", 1.8)

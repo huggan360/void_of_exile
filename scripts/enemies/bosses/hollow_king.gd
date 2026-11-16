@@ -131,7 +131,7 @@ func _magic() -> void:
 	for sense in [-1.0, 1.0]:
 		fire_fan(shot_origin(), aim_dir().rotated(Vector3.UP, sense * 0.25), 4, 17.0,
 			shot("orb", MAGIC, Vector2i(55, 75), 9.0, 0.18, 36.0,
-			{turn = sense * 0.28, voxel_model = "boss_projectiles/king_spell", authored_projectile = true, pixel_projectile = true}))
+			{magic = true, turn = sense * 0.28, voxel_model = "boss_projectiles/king_spell", authored_projectile = true, pixel_projectile = true}))
 
 func _ring() -> void:
 	_ring_angle += 0.43
@@ -140,7 +140,7 @@ func _ring() -> void:
 	after(0.8, func() -> void:
 		fire_ring(shot_origin(), 28 if phase == 3 else 22,
 			shot("orb", MAGIC, Vector2i(55, 75), 8.0, 0.2, 38.0,
-			{voxel_model = "boss_projectiles/king_spell", authored_projectile = true, pixel_projectile = true}), _ring_angle, 36.0))
+			{magic = true, voxel_model = "boss_projectiles/king_spell", authored_projectile = true, pixel_projectile = true}), _ring_angle, 36.0))
 
 func _metal(damage: Vector2i, speed: float) -> Dictionary:
 	return shot("needle", IRON, damage, speed, 0.2, 38.0,

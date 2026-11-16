@@ -1,6 +1,6 @@
 # Realm combat balance
 
-Updated 2026-11-04.
+Updated 2026-11-16.
 
 Each Speed point now adds 1.5% movement speed; each Dexterity point adds 2%
 firing speed; each Attack point adds 1.4% weapon damage. These remain additive bonuses to
@@ -175,3 +175,28 @@ Bosses top out at G6. Harder ones (`Loot.BOSS_GRADES`) roll extra grades on top 
 on its own: grade 7 bosses G6 30% and G7 15%; grade 8 bosses (Vaelith, the Brood Matriarch, Selenarch, the
 Hollow King) G6 40%, G7 30% and G8 15%. The goblin treasure cache rolls the Fallenwood Divine set at 30% of the
 usual chances (`Items.DIVINE_SOURCE_SCALE`).
+
+## Enemy difficulty
+
+`EnemyDamage.ENEMY_DAMAGE_MULTIPLIER` multiplies rolled enemy projectile,
+ripple, hazard and boss contact damage by 1.2. Replicated ranges remain raw,
+so clients apply the same multiplier once. Dungeon and server configuration
+multipliers remain additional tuning. Regular gods' 80-point limit above is
+an authored limit, before this global multiplier.
+
+Boss main shots have a grade-based raw damage floor, from 42 for the Goblin
+King to 112 at grade 10. Existing heavier attacks retain their ranges. Boss
+magic shots and ripples use a smooth grade budget, from 25-33 raw damage for
+the King to 100-108 at grade 10, before the global multiplier. This replaces
+the old magic ranges, including unusually large outliers. Magic always ignores
+defence; only the player's own warp shield blocks it. Armour break removes
+equipment defence; selected heavy boss shots also pierce base defence.
+
+Boss projectile profiles permit at most two debuff kinds, excluding armour
+break. Effect trails have distinct bright colours. Control lasts 1.5-3 seconds,
+with stasis limited to 1 second. Boss fire projectiles use these same limits;
+ordinary enemy and player fire durations above remain unchanged.
+
+Treasure caches have 20000 solo HP and use the boss health formula: +20% per
+extra nearby player, counted on first hit and increased for later joiners.
+Loot eligibility uses their scaled maximum health.

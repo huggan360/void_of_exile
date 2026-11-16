@@ -31,7 +31,7 @@ func _bells() -> void:
 	for stroke in (3 if phase == 2 else 2):
 		after(1.2 + stroke * 0.85, func() -> void:
 			model.boss_pose("slam_release", 0.5)
-			EnemyRipple.spawn(director.bullets, at, {radius = 17.0, speed = 3.6 + stroke * 0.5,
+			cast_ripple(at, {radius = 17.0, speed = 3.6 + stroke * 0.5,
 				damage_min = 39, damage_max = 55, knockback = 0.3}, BELL, players(), [])
 			fire_ring(shot_origin(), 22, _note(5.0), gap, 65.0))
 

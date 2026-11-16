@@ -97,6 +97,8 @@ var _rooted := 0.0  # >0 while standing still to shoot
 var _damage_by := {}  # player id -> damage dealt (who gets to roll for loot)
 var _dust_timer := 0.0
 var _blink_timer := 0.0
+var _cache_players := 0
+var _cache_join_check := 0.0
 var _blink_busy := false
 var _torch: OmniLight3D
 var _torch_clock := 0.0
@@ -288,6 +290,11 @@ func _physics_step(delta: float) -> void:
 	if mirror:
 		mirror_update(delta)
 		return
+	if def.is_treasure_cache and _cache_players > 0:
+		_cache_join_check -= delta
+		if _cache_join_check <= 0.0:
+			_scale_cache_health()
+			_cache_join_check = 1.0
 	_target_timer -= delta
 	if state == State.BURIED:
 		_buried(delta)
@@ -660,7 +667,8 @@ func _fire(a: Dictionary) -> void:
 			for k in mini(count, int(a.get("max", 4)) - alive):
 				director.spawn_minion(kind, global_position + Vector3.FORWARD.rotated(Vector3.UP, randf() * TAU) * 2.5, pack)
 		"shockwave":
-			EnemyRipple.spawn(director.bullets, global_position, a.ripple, a.get("color", Color.WHITE),
+			var ripple: Dictionary = EnemyDamage.boss_magic(a.ripple, def.id) if def is BossDef else a.ripple
+			EnemyRipple.spawn(director.bullets, global_position, ripple, a.get("color", Color.WHITE),
 					director.bullets.players, [])
 			CameraShake.shake_from(self, global_position, a.get("shake", 0.35), 22.0)
 		"ring":
@@ -724,6 +732,7 @@ func take_hit(_hit_position: Vector3, direction: Vector3, damage := 10, source: 
 	if buffs.has_effect("invincible"): return
 	if state == State.DEAD or state == State.SPAWNING or state == State.BURIED:
 		return
+	if def.is_treasure_cache: _scale_cache_health()
 	var dealt := maxi(int(ceil(damage * MIN_DAMAGE_TAKEN)), damage - (0 if buffs.has_effect("armour_broken") else defense))
 	var by := hitter_id(source)
 	_damage_by[by] = _damage_by.get(by, 0) + mini(dealt, hp)
@@ -804,6 +813,15 @@ func _shed_voxels() -> void:
 			global_position + Vector3.UP * height() * 0.45, global_position.y, 0.6)
 
 
+func _scale_cache_health() -> void:
+	var near := maxi(1, GameServer.players_near(director.realm_id, global_position, 45.0))
+	if near <= _cache_players: return
+	_cache_players = near
+	var health := Boss.scaled_health(def.hp, BossDef.HP_PER_EXTRA_PLAYER, near)
+	hp = mini(health, roundi(float(hp) * health / max_hp))
+	max_hp = health
+
+
 func _die() -> void:
 	state = State.DEAD
 	GameAudio.emit_from(GameAudio.enemy_death_event(def, self), self, {cooldown = 0.08, max_distance = 52.0})
@@ -812,7 +830,7 @@ func _die() -> void:
 			global_position + Vector3.UP * height() * 0.4, global_position.y)
 	# The server rolls the loot and drops the XP.
 	GameServer.enemy_killed(director.realm_id, def, global_position, _damage_by,
-			_potion_stats())
+			_potion_stats(), max_hp)
 	died.emit(self)
 	queue_free()
 
