@@ -1,13 +1,15 @@
 {
-  "version": "26.2-beta",
-  "title": "Into the Deep",
-  "date": "2026-11-15",
+  "version": "26.3-beta",
+  "title": "Beta release",
+  "date": "2026-11-16",
   "notes": [
-    "Eight new dungeons below the Surface, from the Sporewomb to the Starless Sepulchre",
-    "Eight new bosses and eight Divine sets",
-    "Monsters remade with a new look",
-    "Sunbeams and light haze, with a new Volumetric fog setting",
-    "New music for the Surface, the Chambers, Afterlife and the realm history film",
-    "Smoother fights when the screen is full of shots"
+    "Pets: hatch 15 pets from eggs, level them with Dots and merge them",
+    "Your own Pet Yard island with a nest, the Caretaker and a Pet Store",
+    "Walking into voxel walls no longer drops the frame rate",
+    "Walking is no longer pulled back by the server",
+    "Ships turn and speed up the moment the pilot presses a key",
+    "The Deep Dark in lime and pink with glowing trails",
+    "Portals drop twice as often and chests keep clear of them",
+    "Frames on tabs, health and magic bars, banners and cutscene captions"
   ]
 }
