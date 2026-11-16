@@ -12,8 +12,12 @@ class_name Loot
 ## Ordinary public rolls remain shared unless merged into their top contributor's
 ## private chest. One ordinary chest per recipient uses its best item's tier;
 ## HP/MP elixirs are discarded above gray. Story chests always stay separate.
-
-const OTHERS_CHANCE := 0.9
+##
+## Private rolls follow damage: the top contributor (or a lone player) rolls
+## each item's full chance, someone just over the threshold only
+## EnemyDef.loot_share_floor of it (0.9: a 5% item rolls 4.5%), and everyone
+## between them slides along with what they dealt. A drop never holds two items
+## of the same kind (two bows): only the rarest stays, Divine before any grade.
 
 ## Every boss's two stat elixirs: each player over its damage threshold always
 ## gets one of them, 50/50. These replace any elixir_of_ entry in a boss's
@@ -74,6 +78,9 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 	for p in eligible:
 		if top == 0 or damage_by[p] > damage_by[top]:
 			top = p
+	var share := {}  # player id -> share of each chance they roll with
+	for p in eligible:
+		share[p] = share_factor(def.loot_share_floor, float(damage_by[p]), health * def.loot_threshold, float(damage_by[top]))
 
 	# Public rolls use the highest contributor's bonus once, never once per player.
 	var public_owner := 0
@@ -98,8 +105,7 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 				else: public.append(upgraded)
 			continue
 		for p in eligible:
-			var chance: float = Items.divine_chance(sample, def.id) if sample.is_divine() \
-					else entry.chance * (1.0 if p == top or eligible.size() == 1 else OTHERS_CHANCE)
+			var chance: float = (Items.divine_chance(sample, def.id) if sample.is_divine() else float(entry.chance)) * float(share[p])
 			var bonus: Dictionary = modifiers.get(p,{})
 			chance = minf(1.0,chance*(1.0+float(bonus.get("chance",0.0))))
 			if rng.randf() < chance:
@@ -133,10 +139,39 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 		if not personal.has(public_owner): personal[public_owner] = []
 		personal[public_owner].append_array(public)
 		public.clear()
-	_pack(bags, public, GameServer.PUBLIC)
+	_pack(bags, rarest_per_kind(public), GameServer.PUBLIC)
 	for p in personal:
-		_pack(bags, personal[p], p)
+		_pack(bags, rarest_per_kind(personal[p]), p)
 	return bags
+
+
+## The share of an item's chance a contributor rolls with: `floor` just over
+## the loot threshold, 1.0 for the top damage dealer, linear in between.
+static func share_factor(floor_share: float, dealt: float, threshold: float, top_dealt: float) -> float:
+	if top_dealt <= threshold: return 1.0
+	return lerpf(clampf(floor_share, 0.0, 1.0), 1.0, clampf((dealt - threshold) / (top_dealt - threshold), 0.0, 1.0))
+
+
+## Never two pieces of gear of the same kind in one drop: the rarest stays
+## (Divine before any grade, then the higher grade). Other items pass through.
+static func rarest_per_kind(items: Array) -> Array:
+	var best := {}  # kind -> index of the kept item
+	var kept: Array = []
+	for item: Item in items:
+		if item == null or not item.slot in PlayerStats.GEAR_SLOTS:
+			kept.append(item)
+			continue
+		var kind := item.slot + ":" + (item.kind if item.kind != "" else item.id.trim_prefix("G%d_" % item.tier))
+		if not best.has(kind):
+			best[kind] = kept.size()
+			kept.append(item)
+		elif _rarity(item) > _rarity(kept[best[kind]]):
+			kept[best[kind]] = item
+	return kept
+
+
+static func _rarity(item: Item) -> int:
+	return 100 if item.is_divine() else item.tier
 
 
 ## The loot table plus a harder boss's grade rolls (BOSS_GRADES) and every

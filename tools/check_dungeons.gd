@@ -80,8 +80,9 @@ func _run() -> void:
 					if bag.viewer == 2: has_secondary = true
 		rewarded += int(has_reward)
 		secondary += int(has_secondary)
-	assert(rewarded > 1850 and rewarded < 1950)
-	assert(secondary > 1850 and secondary < 1950)
+	# Every player over the threshold always gets one of the boss's two stat elixirs (Loot.BOSS_POTIONS).
+	assert(rewarded == 2000)
+	assert(secondary == 2000)
 	assert(white > 0 and black > 0)
 	assert(treasures > 12 and treasures < 48 and minibosses > 20 and minibosses < 65)
 	print("[check] PASS 128 connected deterministic layouts; treasure=", treasures, " miniboss=", minibosses,

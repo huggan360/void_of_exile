@@ -132,7 +132,7 @@ func _export() -> void:
 	for id in Enemies.pack_overrides:
 		if not pack_ids.has(id): pack_ids.append(id)
 	for id in pack_ids: data.packs[str(id)] = encode(Enemies.pack(str(id)))
-	data.loot_rules = {others_chance = Loot.OTHERS_CHANCE, boss_potions = encode(Loot.BOSS_POTIONS),
+	data.loot_rules = {share_floor = EnemyDef.new().loot_share_floor, share_rule = "Private chances slide from share_floor (just over the threshold) to 1.0 (top damage dealer); one item per kind, the rarest.", boss_potions = encode(Loot.BOSS_POTIONS),
 		boss_potion_rule = "Each player over the boss's damage threshold always gets one stat elixir: one of its two, 50/50.", public_bags = ["gray", "green"],
 		personal_bags = ["blue", "red", "purple", "white", "black"], source = "res://scripts/loot/loot.gd"}
 	data.projectile_manifest = JSON.parse_string(FileAccess.get_file_as_string("res://creatures/boss_projectiles/manifest.json"))
