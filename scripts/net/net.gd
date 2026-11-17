@@ -31,8 +31,8 @@ extends Node
 
 enum Mode { OFFLINE, CLIENT, SERVER }
 
-const PROTOCOL := 11
-const VERSION := "26.3-beta"  # the release version (release/release.json)
+const PROTOCOL := 12
+const VERSION := "26.4-beta"  # the release version (release/release.json)
 const DEFAULT_PORT := 24565
 ## UDP status queries (server list pings) go to the game port + this.
 const STATUS_PORT_OFFSET := 1

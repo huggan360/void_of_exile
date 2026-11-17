@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkipn5eyp55pi"
+path="res://.godot/imported/L_wand_thewandofash_glow.vox-7308dd98d66147a73b2d920fd2163d1d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_wand_thewandofash_glow.vox"
+dest_files=["res://.godot/imported/L_wand_thewandofash_glow.vox-7308dd98d66147a73b2d920fd2163d1d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

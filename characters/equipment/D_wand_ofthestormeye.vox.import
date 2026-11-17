@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://btb7i3asut7sy"
+path="res://.godot/imported/D_wand_ofthestormeye.vox-ac93a5b83615c3ccee7b61f6f6321067.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_ofthestormeye.vox"
+dest_files=["res://.godot/imported/D_wand_ofthestormeye.vox-ac93a5b83615c3ccee7b61f6f6321067.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

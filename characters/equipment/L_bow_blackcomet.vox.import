@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bdkx28ohfkt4p"
+path="res://.godot/imported/L_bow_blackcomet.vox-abd3548601fcb9a7addc956fd1b43cee.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_bow_blackcomet.vox"
+dest_files=["res://.godot/imported/L_bow_blackcomet.vox-abd3548601fcb9a7addc956fd1b43cee.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

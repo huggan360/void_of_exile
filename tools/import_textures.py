@@ -2,13 +2,18 @@
 """Import regular gear recursively and the divine sets assigned to bosses.
 Default: ~/Documents/Voidrealm_textures. Unassigned divine sets stay art-only.
 """
-import json,sys,zipfile
+import json,re,sys,zipfile
 from pathlib import Path
 from PIL import Image
-# Boss-assigned sets (keep in step with Items.DIVINE_SETS). Every set is live now.
-LIVE_SETS = {"Spirit", "Iron", "The_Blue", "Frost", "Satan", "Holy_Divine", "Void", "Fallenwood", "Silver", "Dragon_Fire",
-             "Storm", "Venom", "Eclipse", "Blood", "Madness", "Cindrella", "Goldslinger", "Ash",
-             "Mycelium", "Saltmourn", "Jade", "Afterlife", "Barrow", "Prism", "Requiem", "Unmade"}
+PROJECT = Path(__file__).resolve().parents[1]
+
+def special_ids():
+    """Only live Divine, Legendary and Artifact gear enters builds."""
+    source = (PROJECT / "scripts/game/items.gd").read_text()
+    sets = source.split("const DIVINE_SETS := {", 1)[1].split("\n}", 1)[0]
+    blue = source.split("const BLUE_DIVINE_IDS :=", 1)[1].split("]", 1)[0]
+    signatures = json.loads((PROJECT / "items/signatures.json").read_text())["items"]
+    return set(re.findall(r'"(D_[^"]+)"', sets + blue)) | {row["id"] for row in signatures}
 # Legacy source filenames -> runtime item ids.
 ALIASES = {"crucefix of thalao": "D_bonus_crucifix_ofthalao",
            "flame of the broken": "D_bonus_flame_ofthebroken","crucefix of the blue": "D_bonus_crucifix_oftheblue",
@@ -36,12 +41,13 @@ def main():
     import_buffs(src)
     if "--buffs-only" in sys.argv: return
     out=Path(__file__).resolve().parents[1]/"items/textures";out.mkdir(parents=True,exist_ok=True)
-    count=0;seen=set()
+    count=0;seen=set();live=special_ids()
     for path in sorted(src.rglob("*.pxo")):
-        divine="Divine" in path.relative_to(src).parts
-        if divine and path.parent.name not in LIVE_SETS:continue
-        if not divine and not (path.stem.startswith(("G","key_","story_")) or path.stem=="backpack"):continue
         name=ALIASES.get(path.stem,path.stem)
+        parts=path.relative_to(src).parts
+        special=any(folder in parts for folder in ("Divine", "Legendary", "Artifacts"))
+        if special and name not in live:continue
+        if not special and not (path.stem.startswith(("G","key_","story_")) or path.stem=="backpack"):continue
         assert name not in seen,f"Duplicate icon id: {name}"
         seen.add(name);flatten(path).save(out/(name+".png"));count+=1
     print(f"Imported {count} regular and boss-set icons into {out}")

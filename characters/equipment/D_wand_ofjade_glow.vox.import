@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://yydbaxece842"
+path="res://.godot/imported/D_wand_ofjade_glow.vox-f62491d4eef354d8a973ba5d96df9307.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_ofjade_glow.vox"
+dest_files=["res://.godot/imported/D_wand_ofjade_glow.vox-f62491d4eef354d8a973ba5d96df9307.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

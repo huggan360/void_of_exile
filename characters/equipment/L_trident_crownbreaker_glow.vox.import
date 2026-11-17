@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cywn45pytg1ap"
+path="res://.godot/imported/L_trident_crownbreaker_glow.vox-07b3ce7dbd4d22903c0594c1cf578877.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_trident_crownbreaker_glow.vox"
+dest_files=["res://.godot/imported/L_trident_crownbreaker_glow.vox-07b3ce7dbd4d22903c0594c1cf578877.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -39,6 +39,7 @@ func properties(value: Object) -> Dictionary:
 func item_record(item: Item, live: bool) -> Dictionary:
 	var row := properties(item)
 	row.registered = live
+	row.set_bonus = encode(DivineSetBonuses.definition(item))
 	row.icon_path = "res://items/textures/%s.png" % item.id
 	row.icon_exists = ResourceLoader.exists(row.icon_path)
 	row.bag_type = item.bag_type()
@@ -92,6 +93,9 @@ func _export() -> void:
 	else:
 		data.warnings.append("Unable to evaluate authored Divine items before the live filter.")
 	data.divine_sets = encode(Items.DIVINE_SETS)
+	data.divine_set_bonuses = encode(DivineSetBonuses.definitions())
+	data.boss_legendary_items = encode(Items.BOSS_LEGENDARY_ITEMS)
+	data.boss_artifact_items = encode(Items.BOSS_ARTIFACT_ITEMS)
 	data.boss_divine_sets = encode(Items.BOSS_DIVINE_SET)
 	data.boss_divine_extras = encode(Items.BOSS_DIVINE_EXTRAS)
 	data.item_gate_keys = encode(Items.GATE_KEYS)

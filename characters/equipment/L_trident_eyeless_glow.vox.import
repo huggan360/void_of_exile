@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dcggcdfpvh7if"
+path="res://.godot/imported/L_trident_eyeless_glow.vox-acc8e70311d9cfedb54eb482847ca489.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_trident_eyeless_glow.vox"
+dest_files=["res://.godot/imported/L_trident_eyeless_glow.vox-acc8e70311d9cfedb54eb482847ca489.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

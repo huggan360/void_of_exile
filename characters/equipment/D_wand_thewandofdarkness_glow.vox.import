@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b62jc7tyhum1p"
+path="res://.godot/imported/D_wand_thewandofdarkness_glow.vox-0bf01bd7525ca1ea4e2678261d0101aa.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_thewandofdarkness_glow.vox"
+dest_files=["res://.godot/imported/D_wand_thewandofdarkness_glow.vox-0bf01bd7525ca1ea4e2678261d0101aa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

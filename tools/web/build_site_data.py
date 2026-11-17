@@ -61,6 +61,10 @@ def icon(src, dst):
 
 def grade(item):
     tier = int(item.get("tier", 0) or 0)
+    if item["id"].startswith("A_"):
+        return "Artifact"
+    if item["id"].startswith("L_"):
+        return "Legendary"
     if item["id"].startswith("D_"):
         return "Divine"
     if item.get("slot") in ("weapon", "armor", "spell", "bonus") and tier > 0:
@@ -99,6 +103,7 @@ def main():
         items[i["id"]] = {
             "id": i["id"], "name": i.get("item_name", i["id"]), "kind": i.get("kind", ""), "slot": i.get("slot", ""),
             "tier": i.get("tier", 0), "grade": grade(i), "set": set_of.get(i["id"], ""), "lore": i.get("lore", ""),
+            "set_bonus": i.get("set_bonus") or None,
             "bonuses": {k: v for k, v in (i.get("bonuses") or {}).items() if v},
             "abilities": list(i.get("abilities") or []),
             "damage": [i.get("damage_min", 0), i.get("damage_max", 0)] if i.get("damage_max") else None,
@@ -149,6 +154,8 @@ def main():
         # The wiki shows what drops, never how often.
         divine = boss_sets.get(cid, "")
         drops = [{"item": i} for i in sets.get(divine, []) if i in items]
+        drops += [{"item": i} for i in c.get("boss_legendary_items", {}).get(cid, []) if i in items]
+        drops += [{"item": i} for i in c.get("boss_artifact_items", {}).get(cid, []) if i in items]
         for i in c.get("boss_divine_extras", {}).get(cid, []):
             if i in items and not any(d["item"] == i for d in drops):
                 drops.append({"item": i})

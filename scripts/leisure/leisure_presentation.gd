@@ -73,7 +73,7 @@ func _smoke(parent: Node3D) -> void:
 
 func _bind(model: Node3D) -> void:
 	for weapon in _weapons:
-		if is_instance_valid(weapon): weapon.visible = _weapons[weapon]
+		if is_instance_valid(weapon): weapon.visible = bool(weapon.get_meta("equipment_visible", _weapons[weapon]))
 	_weapons.clear()
 	_model = model
 	for name in ["Bow", "Staff"]:
@@ -91,7 +91,7 @@ func _process(delta: float) -> void:
 	var kind := "cigar" if Leisure.smoking(pid) else str(cup.get("kind", ""))
 	if kind!=_kind: _rebuild(kind)
 	for weapon in _weapons:
-		if is_instance_valid(weapon): weapon.visible = bool(_weapons[weapon]) and kind==""
+		if is_instance_valid(weapon): weapon.visible = bool(weapon.get_meta("equipment_visible", _weapons[weapon])) and kind==""
 	if kind=="": return
 	_time += delta
 	var age := Leisure.now()-float(s.get("use_at", -10.0))
@@ -122,6 +122,6 @@ func _process(delta: float) -> void:
 
 func _exit_tree() -> void:
 	for weapon in _weapons:
-		if is_instance_valid(weapon): weapon.visible = _weapons[weapon]
+		if is_instance_valid(weapon): weapon.visible = bool(weapon.get_meta("equipment_visible", _weapons[weapon]))
 	if is_instance_valid(_first): _first.queue_free()
 	if is_instance_valid(_third): _third.queue_free()

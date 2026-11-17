@@ -68,6 +68,8 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 		travelled = 0.0, range = weapon.projectile_range() * mods.get("range", 1.0), stuck = false, life = 0.0,
 		damage = damage, weapon = weapon, phase = phase, hit = {}, hit_object = false,
 		wave_amp = mods.get("wave_amp", p.get("wave_amp", 0.0)), wave_freq = p.get("wave_freq", 0.0),
+		lift_amp = mods.get("lift_amp", p.get("lift_amp", 0.0)), orbit = p.get("orbit", false),
+		up = mods.get("up", Vector3.UP),
 		pierce = mods.get("pierce", p.get("pierce", false)),
 		magic = p.get("style", "arrow") not in ["arrow", "trident"] if mods.has("style") else bool(p.get("magic", p.get("style", "arrow") not in ["arrow", "trident"])),
 		secondary = mods.get("secondary", false), cone_deg = mods.get("cone_deg", 0.0),
@@ -215,9 +217,10 @@ func _splash(s: Dictionary) -> void:
 	var points := PackedVector3Array()
 	var colors := PackedColorArray()
 	var tint: Color = s.weapon.projectile.get("color", Color.WHITE)
-	for i in 14:
+	var festival: bool = s.weapon.is_artifact() and str(s.weapon.projectile.get("style", "")) == "festival_orb"
+	for i in (42 if festival else 14):
 		points.append(s.node.global_position + Vector3(randf_range(-0.12, 0.12), randf_range(-0.12, 0.12), randf_range(-0.12, 0.12)))
-		colors.append(tint.lightened(randf_range(0.0, 0.4)))
+		colors.append(Color.from_hsv(float(i) / 42.0, 0.55, 1.0) if festival else tint.lightened(randf_range(0.0, 0.4)))
 	Debris.burst_flash(self, points, colors, 0.075, 14, s.node.global_position - s.direction * 0.1, s.node.global_position.y - 0.8, 0.45)
 
 
@@ -225,11 +228,17 @@ func _splash(s: Dictionary) -> void:
 ## to side around their straight line).
 func _position_at(s: Dictionary, distance: float) -> Vector3:
 	var pos: Vector3 = s.origin + s.direction * distance
-	if s.wave_amp > 0.0:
-		var side: Vector3 = s.direction.cross(Vector3.UP).normalized()
+	if s.wave_amp > 0.0 or s.lift_amp > 0.0:
+		var side: Vector3 = s.direction.cross(s.up).normalized()
+		if side.is_zero_approx():
+			var axis := Vector3.FORWARD if absf(s.direction.dot(Vector3.FORWARD)) < 0.95 else Vector3.RIGHT
+			side = s.direction.cross(axis).normalized()
+		var lift: Vector3 = side.cross(s.direction).normalized()
 		# Ramps in over the first meter so both shots leave the bow together.
 		var ramp := clampf(distance, 0.0, 1.0)
-		pos += side * sin(distance / s.speed * s.wave_freq + s.phase) * s.wave_amp * ramp
+		var phase: float = distance / s.speed * s.wave_freq + s.phase
+		pos += side * sin(phase) * s.wave_amp * ramp
+		pos += lift * (cos(phase) if s.orbit else sin(phase * 0.7)) * s.lift_amp * ramp
 	return pos
 
 
@@ -251,6 +260,8 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 	if weapon.id.ends_with("_ofiron"):
 		_iron_mesh(body, lit, weapon.kind)
 	match "iron" if weapon.id.ends_with("_ofiron") else style:
+		"facet_lance", "facet_crescent", "facet_comet", "solar_disc", "bell_shard", "seed_star", "ember_crown", "festival_orb", "festival_spark", "petal_kite", "orbit_pearl", "clock_shard":
+			_signature_mesh(body, lit, style, c1, c2)
 		"arrow":
 			_box(body, Vector3(0, 0, 0.05), Vector3(0.05, 0.05, 0.7), c2)  # shaft
 			_box(tip_tool, Vector3(0, 0, -0.34), Vector3(0.11, 0.11, 0.14), c1)  # head
@@ -469,6 +480,22 @@ func _make_trail(weapon: Item, trail_override: String) -> GPUParticles3D:
 	pm.gravity = Vector3.ZERO
 	pm.color = p.get("color", Color.WHITE)
 	match trail_override:
+		"facet":
+			var gradient := Gradient.new()
+			gradient.set_color(0, p.get("color2", Color.WHITE))
+			gradient.set_color(1, Color(pm.color, 0.0))
+			gradient.add_point(0.35, pm.color.lightened(0.25))
+			var ramp := GradientTexture1D.new()
+			ramp.gradient = gradient
+			pm.color = Color.WHITE
+			pm.color_ramp = ramp
+			pm.spread = 12.0
+			pm.initial_velocity_max = 0.35
+		"festival", "constellation":
+			pm.hue_variation_min = -1.0
+			pm.hue_variation_max = 1.0
+			pm.spread = 60.0
+			pm.gravity = Vector3(0, -0.4, 0)
 		"gold":
 			pm.color = Color(1.0, 0.82, 0.35)
 		"rainbow":
@@ -558,13 +585,76 @@ func _make_trail(weapon: Item, trail_override: String) -> GPUParticles3D:
 	var particles := GPUParticles3D.new()
 	particles.process_material = pm
 	particles.draw_pass_1 = cube
-	particles.amount = 24 if weapon.is_divine() else 14
+	particles.amount = 24 if weapon.is_special() else 14
 	particles.lifetime = 0.35
 	particles.local_coords = false  # stays behind in the air
 	particles.position = Vector3(0, 0, 0.3)
 	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	particles.visibility_aabb = AABB(Vector3(-2, -2, -2), Vector3(4, 4, 30))
 	return particles
+
+
+## Faceted gems, luminous edges and cut-glass silhouettes. These share the
+## appeal of Refraction's splinters without copying its rainbow rosette.
+func _signature_mesh(body: SurfaceTool, lit: SurfaceTool, style: String, main: Color, accent: Color) -> void:
+	match style:
+		"facet_lance":
+			_crystal(body, Vector3.ZERO, 0.12, 0.85, main)
+			for side in [-1.0, 1.0]:
+				_crystal(lit, Vector3(side * 0.12, 0, 0.15), 0.045, 0.7, accent)
+			_crystal(lit, Vector3(0, 0, -0.42), 0.07, 0.28, main.lightened(0.45))
+		"facet_crescent":
+			for i in 5:
+				var x := (i - 2) * 0.1
+				_crystal(lit if i % 2 == 0 else body, Vector3(x, 0, absf(x) * 1.7 - 0.2), 0.07, 0.4, main if i % 2 else accent)
+		"facet_comet":
+			_crystal(lit, Vector3(0, 0, -0.15), 0.15, 0.5, main.lightened(0.3))
+			for i in 4:
+				_crystal(body if i % 2 else lit, Vector3(sin(i * 1.6) * 0.1, cos(i * 1.6) * 0.07, i * 0.18), 0.09 - i * 0.012, 0.22, accent)
+		"solar_disc", "orbit_pearl":
+			_crystal(lit, Vector3.ZERO, 0.15, 0.3, main)
+			for i in 8:
+				var angle := TAU * i / 8.0
+				_crystal(lit if i % 2 else body, Vector3(cos(angle), sin(angle), 0) * 0.23, 0.055, 0.22, accent if i % 2 else main)
+		"bell_shard":
+			for i in 4:
+				var angle := TAU * i / 4.0
+				_crystal(lit, Vector3(cos(angle) * 0.16, sin(angle) * 0.16, 0.05), 0.07, 0.55, main)
+			_crystal(body, Vector3(0, 0, -0.27), 0.11, 0.25, accent)
+		"seed_star", "ember_crown":
+			_crystal(body, Vector3.ZERO, 0.15, 0.36, accent.darkened(0.3))
+			for i in 5:
+				var angle := TAU * i / 5.0
+				_crystal(lit, Vector3(cos(angle) * 0.14, sin(angle) * 0.14, -0.05), 0.065, 0.36 if style == "seed_star" else 0.52, main)
+		"festival_orb":
+			for x in range(-2, 3):
+				for y in range(-2, 3):
+					for z in range(-2, 3):
+						if x * x + y * y + z * z > 5: continue
+						_box(lit if (x + y + z) % 3 else body, Vector3(x, y, z) * 0.12, Vector3.ONE * 0.13, main.lerp(accent, float((x - y + z + 9) % 4) / 4.0))
+			for i in 5: _crystal(lit, Vector3(sin(i * 2.0), cos(i * 2.0), i * 0.18 + 0.2) * 0.2, 0.05, 0.28, accent)
+		"festival_spark", "petal_kite", "clock_shard":
+			_crystal(lit, Vector3.ZERO, 0.07, 0.5, main)
+			for i in 4:
+				var angle := TAU * i / 4.0
+				_crystal(lit, Vector3(cos(angle) * 0.12, sin(angle) * 0.12, 0.1), 0.055, 0.23, accent if i % 2 else main.lightened(0.4))
+
+func _crystal(tool: SurfaceTool, center: Vector3, radius: float, length: float, color: Color) -> void:
+	var ring: Array[Vector3] = [Vector3(radius, 0, 0), Vector3(0, radius, 0), Vector3(-radius, 0, 0), Vector3(0, -radius, 0)]
+	for end in [-1.0, 1.0]:
+		for i in 4:
+			var a := Vector3(0, 0, end * length * 0.5)
+			var b := ring[i]
+			var c := ring[(i + 1) % 4]
+			var normal := (b - a).cross(c - a).normalized()
+			if normal.dot((a + b + c) / 3.0) < 0.0:
+				var swap := b
+				b = c
+				c = swap
+				normal = -normal
+			tool.set_normal(normal)
+			tool.set_color(color.lightened(0.15) if i % 2 else color.darkened(0.1))
+			for point in [a, b, c]: tool.add_vertex(center + point)
 
 
 ## Black iron shafts with white edges; charged shots reuse the authored silhouette.

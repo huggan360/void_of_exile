@@ -17,9 +17,6 @@ func surface_frame(position: Vector3) -> Transform3D:
 func zone_at(position: Vector3) -> String:
 	return str(sample_gravity(position).zone)
 
-func first_person_at(_position: Vector3) -> bool:
-	return false
-
 ## A closed door between two points: {point} to put the mover back, or {}.
 func barrier_between(_from: Vector3,_to: Vector3) -> Dictionary:
 	return {}

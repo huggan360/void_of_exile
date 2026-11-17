@@ -1,6 +1,7 @@
 class_name GroundView
 extends SpatialController
 ## Camera and aiming only: the Surface and Tavern keep their terrain movement.
+var world: GameWorld
 var camera_mode := 0
 ## The over-the-shoulder camera's eye height, eased so it climbs and drops
 ## with the hills instead of stepping with every voxel.
@@ -12,7 +13,7 @@ var _hud: CanvasLayer
 var _sight: SpaceCrosshair
 
 func _ready() -> void:
-	# Overhead (0) or over the shoulder (1); there is no first person here.
+	# Overhead (0) or over the shoulder (1); enclosed rooms force first person.
 	camera_mode = clampi(int(AppSettings.video.get("space_camera", 0)), 0, 1)
 	_hud = ResponsiveUILayer.new()
 	_hud.layer = 32
@@ -25,7 +26,7 @@ func _ready() -> void:
 	_build_first_person_shield()
 
 func free_look() -> bool:
-	return camera_mode != 0
+	return camera_mode != 0 or world.first_person_at(player.global_position)
 
 func _input(event: InputEvent) -> void:
 	if player.controls_locked() or player.ui_blocked or player.interacting(): return
@@ -40,7 +41,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func update_camera(delta: float) -> void:
-	var fp := false
+	var fp := world.first_person_at(player.global_position)
 	first_person = 1.0 if fp else 0.0
 	var capture := free_look() and not player.controls_locked() and not player.ui_blocked and not player.interacting() and not player.frozen
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if capture else Input.MOUSE_MODE_VISIBLE
@@ -99,7 +100,7 @@ func aim_ray() -> Array:
 func _process(delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	# Films and other cinematics film with their own camera: no window, their own focus.
-	var own := camera == player.camera
+	var own := camera == player.camera and not world.first_person_at(player.global_position)
 	_update_see_through(camera, delta, (0.2 if camera_mode == 0 else 0.3) if own else 0.0)
 	_update_focus(camera, delta, not own)
 

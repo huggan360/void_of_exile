@@ -118,7 +118,7 @@ func _process(delta: float) -> void:
 	_brace = move_toward(_brace, _brace_target, delta * rate)
 	if active != _was_active:
 		_was_active = active
-		var heavy := _spell != null and _spell.is_divine()
+		var heavy := _spell != null and _spell.is_special()
 		for ring in _rings:
 			if active: SpellFX.gather(ring)
 			else: SpellFX.release(ring, heavy)

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bqqpid30cw3rx"
+path="res://.godot/imported/A_bow_midsummer.vox-5f0fe7d0f3a45a86739d6121b0865b3d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/A_bow_midsummer.vox"
+dest_files=["res://.godot/imported/A_bow_midsummer.vox-5f0fe7d0f3a45a86739d6121b0865b3d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

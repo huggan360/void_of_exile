@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://0vuteftcealj"
+path="res://.godot/imported/D_trident_ofthefallenwood.vox-c8ec2bf18d6ed72b8b558e241cdda68d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofthefallenwood.vox"
+dest_files=["res://.godot/imported/D_trident_ofthefallenwood.vox-c8ec2bf18d6ed72b8b558e241cdda68d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

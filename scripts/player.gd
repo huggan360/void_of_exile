@@ -39,11 +39,11 @@ const STEP_SMOOTHING := 12.0  # how fast the model catches up after a step
 ## The model follows the body over steps on a soft spring (its stiffness):
 ## it eases into and out of each bump instead of popping.
 const STEP_SPRING := 15.0
-const STEP_TRY := 0.15  # a step lifts in these increments, only as high as the ledge
 ## On the Surface's 0.25 m voxels the body climbs in hops; standing on that
 ## terrain the model (and the camera with it) follows the ground smoothed over
 ## this many metres instead, so a slope reads as a slope.
 const SMOOTH_GROUND := 1.0
+const STEP_GROUNDED_GRACE := 0.1  # keep footing through a rounded voxel edge
 const TERRAIN_GRACE := 0.25  # seconds the smoothing holds through a hop off a ledge
 
 const CAMERA_PITCH := deg_to_rad(72.0)
@@ -99,6 +99,7 @@ var walkable := Callable()
 var ground_height := Callable()
 var smooth_ground := false  # the world's ground_height is its walkable terrain (the Surface)
 var _on_terrain := 0.0
+var _step_grounded_time := 0.0
 ## func(position) -> true when standing there burns (lava pits).
 var hazard := Callable()
 ## func(position) -> true on a road or street (faster walking).
@@ -202,6 +203,7 @@ func set_spatial_world(place: GameWorld) -> void:
 	if place is HallWorld or place is IslandWorld or place is ChambersWorld or place is PetYardWorld:
 		ground_view = GroundView.new()
 		ground_view.player = self
+		ground_view.world = place
 		add_child(ground_view)
 
 
@@ -271,6 +273,7 @@ func _exit_tree() -> void:
 func refresh_gear() -> void:
 	if stats and stats.class_id != class_id:
 		set_class(stats.class_id)
+	model.set_equipment(stats.gear.weapon, stats.gear.armor)
 	shield.set_spell(stats.gear.spell)
 	aura.refresh(stats)
 
@@ -408,23 +411,49 @@ func _physics_process(delta: float) -> void:
 
 	var prev_y := global_position.y
 	var t_slide := Time.get_ticks_usec() if FrameTrace.enabled else 0
-	var before := global_position
-	move_and_slide()
-	if dir != Vector3.ZERO and is_on_floor() and is_on_wall() and _try_step_up(dir):
-		# Walk on with what the ledge cut short this frame, so climbing never stalls.
-		var flat := Vector2(velocity.x, velocity.z).length() * delta
-		var left := 1.0 - Vector2(global_position.x - before.x, global_position.z - before.z).length() / maxf(flat, 0.0001)
-		if left > 0.05:
-			var kept := velocity
-			velocity = Vector3(velocity.x * left, 0.0, velocity.z * left)
-			move_and_slide()
-			velocity = kept
+	_move_ground(delta)
 	if FrameTrace.enabled: FrameTrace.record("player/slide", t_slide)
-
 	glide_steps(global_position.y - prev_y, delta, _terrain_footing(delta))
 
 	_update_camera(delta)
 	_update_combat(delta,dir,speed)
+
+
+## Keep the requested motion: move_and_slide can zero it at a voxel corner
+## and can lose its floor flag for one frame while touching a rounded edge.
+func _move_ground(delta: float) -> void:
+	var wanted := velocity
+	var motion := wanted.slide(up_direction) * delta
+	_step_grounded_time = STEP_GROUNDED_GRACE if is_on_floor() else maxf(0.0, _step_grounded_time-delta)
+	var grounded := _step_grounded_time > 0.0
+	var before := global_position
+	var direction := motion.normalized()
+	var stepped := false
+	var attempted := false
+	if grounded and not motion.is_zero_approx() and wanted.dot(up_direction) <= 0.0:
+		var obstruction := KinematicCollision3D.new()
+		if test_move(global_transform, motion, obstruction) and obstruction.get_travel().dot(direction) < motion.length()*0.95:
+			attempted = true
+			stepped = _try_step_up(direction)
+			if stepped: velocity = wanted.slide(up_direction)
+	move_and_slide()
+	if stepped:
+		velocity = wanted.slide(up_direction)
+		return
+	if wanted.dot(up_direction) > 0.0:
+		_step_grounded_time = 0.0
+		return
+	if motion.is_zero_approx() or attempted: return
+	var made := (global_position-before).slide(up_direction)
+	if made.dot(direction) >= motion.length() * 0.95: return
+	if not grounded and not is_on_floor(): return
+	if not _try_step_up(direction): return
+	# Retry only the missing displacement using the intended velocity, not the
+	# wall-projected velocity. Sliding sideways does not count as forward progress.
+	var remaining := clampf(motion.length()-made.dot(direction), 0.0, motion.length())
+	velocity = direction * remaining / delta
+	move_and_slide()
+	velocity = wanted.slide(up_direction)
 
 
 ## Steps, floor snaps and bumps move the body in jumps (`rise` this frame);
@@ -433,18 +462,22 @@ func _physics_process(delta: float) -> void:
 ## With a `ground` height (see _terrain_footing) every rise is a hop and the
 ## model springs toward that ground instead of toward the body.
 func glide_steps(rise: float, delta: float, ground := NAN) -> void:
-	var target := 0.0
-	if not is_nan(ground):
-		_visual_offset -= rise
-		target = ground - global_position.y
-	elif absf(rise) > 0.12: _visual_offset -= rise
+	# Every vertical displacement uses the same spring, including small falls.
+	# Thresholds here create a visible velocity jump when a fall lands or passes
+	# the threshold. Large teleports reset the visual state instead of lagging.
+	if absf(rise) > STEP_HEIGHT*2.5:
+		_visual_offset = 0.0
+		_visual_speed = 0.0
+		model.position.y = 0.0
+		return
+	_visual_offset -= rise
+	var target := ground-global_position.y if not is_nan(ground) else 0.0
 	var left := delta
 	while left > 0.0:  # small steps keep the spring steady at low frame rates
 		var dt := minf(left, 1.0 / 120.0)
 		_visual_speed += (-STEP_SPRING * STEP_SPRING * (_visual_offset - target) - 2.0 * STEP_SPRING * _visual_speed) * dt
 		_visual_offset += _visual_speed * dt
 		left -= dt
-	_visual_offset = clampf(_visual_offset, -1.5, 1.5)
 	model.position.y = _visual_offset
 
 
@@ -456,10 +489,21 @@ func _terrain_footing(delta: float) -> float:
 	else: _on_terrain -= delta
 	if _on_terrain <= 0.0: return NAN
 	var ground := _smooth_ground(global_position.x, global_position.z)
-	return ground if absf(ground - global_position.y) < STEP_HEIGHT else NAN
+	# Fade out the broad terrain sample at cliffs instead of switching the
+	# target abruptly between sampled terrain and the actual feet.
+	var gap := absf(ground-global_position.y)
+	var blend := 1.0-smoothstep(STEP_HEIGHT*0.6, STEP_HEIGHT, gap)
+	return lerpf(global_position.y, ground, blend)
 
 
 func _standing_on_terrain() -> bool:
+	# The capsule can be supported by a ledge while its centre is still over
+	# the lower column. Prefer the actual supporting collision to a centre ray.
+	for i in get_slide_collision_count():
+		var contact := get_slide_collision(i)
+		for j in contact.get_collision_count():
+			if contact.get_normal(j).dot(up_direction) >= cos(floor_max_angle):
+				return PhysicsServer3D.body_get_collision_layer(contact.get_collider_rid(j)) & TERRAIN_LAYER != 0
 	var ray := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.4, global_position + Vector3.DOWN * 0.5, TERRAIN_LAYER | OBSTACLE_LAYER, [get_rid()])
 	var hit := get_world_3d().direct_space_state.intersect_ray(ray)
 	return not hit.is_empty() and PhysicsServer3D.body_get_collision_layer(hit.rid) & TERRAIN_LAYER != 0
@@ -543,10 +587,17 @@ func _fire() -> void:
 		return
 	var aim := _aim_origin_and_direction()
 	model.play_shot()
+	var display := SignaturePatterns.primary(aim[1], up_direction, weapon)
+	if not display.is_empty():
+		for entry: Dictionary in display:
+			shot.emit(aim[0], entry.direction, roundi(stats.roll_damage() * float(entry.share)), weapon, entry.phase, entry.mods)
+		return
 	for i in weapon.shots:
 		var offset := ((weapon.shots - 1) * 0.5 - i) * deg_to_rad(weapon.spread_deg)
 		var phase := PI * i
 		var mods := {}
+		if weapon.is_legendary() or weapon.is_artifact(): mods.up = up_direction
+		if weapon.projectile.get("burst", "") == "signature": mods.burst = "signature_primary"
 		if weapon.shots % 2 == 1 and float(weapon.projectile.get("wave_amp", 0.0)) > 0.0:
 			if i == weapon.shots / 2: mods.wave_amp = 0.0
 			phase = PI if i > weapon.shots / 2 else 0.0
@@ -617,6 +668,12 @@ func _release_charge(weapon: Item, power: float) -> void:
 	model.play_shot()
 	_aim_hold = AIM_HOLD
 	_cooldown = BASE_FIRE_COOLDOWN / stats.shots_per_second_multiplier()
+	var signature := SignaturePatterns.charged(direction, up_direction, weapon, mult)
+	if not signature.is_empty():
+		for entry: Dictionary in signature:
+			_emit_charged(origin, entry.direction, weapon, entry.share, entry.phase, entry.mods)
+		if power >= 1.0: CameraShake.shake_at(global_position, 0.12, 6.0)
+		return
 	var big := {speed = 1.6, size = 1.7, range = 1.5, spiral = true}
 	match c.style:
 		"serpent_fan":
@@ -842,6 +899,7 @@ func clear_spawn(place: GameWorld) -> void:
 	if not spot.is_finite(): return
 	global_position = spot
 	velocity = Vector3.ZERO
+	_step_grounded_time = 0.0
 	if Net.is_client(): Net.client.send_action("unstuck", [spot, true])
 
 
@@ -849,22 +907,39 @@ func clear_spawn(place: GameWorld) -> void:
 ## local up) if there's room above it, only as high as the ledge needs (the
 ## Surface's 0.25 m voxels are small: a full lift there bounced the character
 ## up and down while running over them).
-## At most four collision tests: walking into a tall wall used to try every
-## STEP_TRY lift each frame, which cost the Surface's fine terrain dearly.
+## At most four shape sweeps, with no per-height retry loop against tall walls.
 func _try_step_up(dir: Vector3, normal := Vector3.UP, height := STEP_HEIGHT) -> bool:
-	var top := normal*height
-	var ahead := dir.normalized()*0.3
-	if test_move(global_transform, top):
-		return false  # no headroom
+	var headroom := KinematicCollision3D.new()
+	var lift := height
+	if test_move(global_transform, normal*height, headroom):
+		lift = maxf(0.0, headroom.get_travel().dot(normal)-safe_margin)
+	if lift < 0.02: return false
+	var top := normal*lift
+	var ahead := dir.slide(normal).normalized()*0.3
 	if test_move(global_transform.translated(top), ahead):
-		return false  # the wall is taller than one block
-	# Drop back down onto the ledge to find how high it really is.
-	var hit := KinematicCollision3D.new()
-	if not test_move(global_transform.translated(top + ahead), -top, hit):
-		return false  # nothing to climb there
-	var up := normal*clampf(ceilf((height - hit.get_travel().length())/STEP_TRY)*STEP_TRY, STEP_TRY, height)
-	if test_move(global_transform.translated(up), ahead): up = top
+		return false  # a wall taller than the allowed step
+	var landing := KinematicCollision3D.new()
+	if not test_move(global_transform.translated(top+ahead), -top, landing):
+		return false
+	if landing.get_normal().dot(normal) < cos(floor_max_angle):
+		# A capsule resting on a voxel edge reports a rounded contact normal,
+		# even when the voxel's top is flat. Confirm that top with a short ray.
+		var at := landing.get_position()+ahead.normalized()*0.02
+		var query := PhysicsRayQueryParameters3D.create(at+normal*0.08, at-normal*0.16, collision_mask, [get_rid()])
+		var support := get_world_3d().direct_space_state.intersect_ray(query)
+		if support.is_empty() or (support.normal as Vector3).dot(normal) < cos(floor_max_angle): return false
+	var rise := lift+landing.get_travel().dot(normal)
+	if rise <= 0.01 or rise > height: return false
+	# Use the actual landing height rather than rounding every fine voxel up
+	# to 15 cm increments and then falling back down from the excess lift.
+	var up := normal*(rise+safe_margin+0.005)
+	var clearance := KinematicCollision3D.new()
+	if test_move(global_transform.translated(up), ahead, clearance):
+		if clearance.get_travel().dot(ahead.normalized()) < ahead.length()-0.02: return false
 	global_position += up
+	_step_grounded_time = STEP_GROUNDED_GRACE
+	if smooth_ground:
+		_on_terrain = TERRAIN_GRACE if PhysicsServer3D.body_get_collision_layer(landing.get_collider_rid()) & TERRAIN_LAYER != 0 else 0.0
 	return true
 
 

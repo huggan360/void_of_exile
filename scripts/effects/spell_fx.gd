@@ -42,7 +42,7 @@ static func style(spell: Item) -> Dictionary:
 		return s
 	s.accent = spell.shield_arcs
 	s.main = INK.lerp(spell.shield_arcs, 0.25)
-	if spell.is_divine():
+	if spell.is_special():
 		s.merge({motes = 70, size = 0.18, heavy = true, shape = STAR}, true)
 		match spell.id:
 			"D_spell_oftheblue": s.merge({shape = DOT, main = VOID, main_dark = true, accent = Color("#2f6fe0"),

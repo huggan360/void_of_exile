@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bng1xssumb55e"
+path="res://.godot/imported/L_wand_silentbell_glow.vox-168ae7ea1c718f1d6bfc3e222bf1e080.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_wand_silentbell_glow.vox"
+dest_files=["res://.godot/imported/L_wand_silentbell_glow.vox-168ae7ea1c718f1d6bfc3e222bf1e080.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

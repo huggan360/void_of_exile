@@ -9,6 +9,10 @@ var _orbit := GPUParticles3D.new()
 var _trail := GPUParticles3D.new()
 var _orbit_mat := ParticleProcessMaterial.new()
 var _trail_mat := ParticleProcessMaterial.new()
+var _crown := Node3D.new()
+var _showoff_light := OmniLight3D.new()
+var _showoff := false
+var _time := 0.0
 
 
 func _ready() -> void:
@@ -40,10 +44,30 @@ func _ready() -> void:
 	_setup(_trail, _trail_mat, 1.0, 0.09)
 	_trail.position.y = 0.1
 	_trail.local_coords = false  # left behind as the character walks
+	add_child(_crown)
+	_crown.position.y = 2.05
+	_crown.hide()
+	_showoff_light.position.y = 1.1
+	_showoff_light.omni_range = 4.0
+	_showoff_light.shadow_enabled = false
+	_showoff_light.hide()
+	add_child(_showoff_light)
+	for i in 8:
+		var mote := MeshInstance3D.new()
+		var cube := BoxMesh.new()
+		cube.size = Vector3.ONE * (0.07 if i % 2 else 0.1)
+		mote.mesh = cube
+		mote.material_override = VoxModel.glow_material()
+		mote.position = Vector3(cos(TAU * i / 8) * 0.55, sin(i * 2.0) * 0.12, sin(TAU * i / 8) * 0.55)
+		mote.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_crown.add_child(mote)
 
 
 ## Rebuilds the look from the equipped gear.
 func refresh(stats: PlayerStats) -> void:
+	_showoff = float(stats.effect("showoff", 0.0)) > 0.0
+	_crown.visible = _showoff
+	_showoff_light.visible = _showoff
 	var power := 0.0
 	var color := Color(0, 0, 0, 0)
 	var weight := 0.0
@@ -58,10 +82,18 @@ func refresh(stats: PlayerStats) -> void:
 		_orbit_mat.color = Color(color.r / weight, color.g / weight, color.b / weight)
 		_orbit_mat.hue_variation_min = -0.04
 		_orbit_mat.hue_variation_max = 0.04
+		_showoff_light.light_color = Color(color.r / weight, color.g / weight, color.b / weight)
+		_showoff_light.light_energy = 1.2
 
 	var trail: Variant = stats.effect("trail", "")
 	_trail.emitting = trail is String and trail != ""
 	match trail:
+		"festival", "constellation":
+			_trail_mat.color = Color("a0f5c8")
+			_trail_mat.hue_variation_min = -1.0
+			_trail_mat.hue_variation_max = 1.0
+			_orbit_mat.hue_variation_min = -1.0
+			_orbit_mat.hue_variation_max = 1.0
 		"embers":
 			_trail_mat.color = Color(1.0, 0.5, 0.15)
 			_trail_mat.hue_variation_min = -0.05
@@ -88,6 +120,14 @@ func refresh(stats: PlayerStats) -> void:
 			_trail_mat.hue_variation_max = 1.0
 			_orbit_mat.hue_variation_min = -1.0
 			_orbit_mat.hue_variation_max = 1.0
+
+
+func _process(delta: float) -> void:
+	if not _showoff: return
+	_time += delta
+	_crown.rotation.y += delta * 0.8
+	_crown.position.y = 2.05 + sin(_time * 1.7) * 0.08
+	_showoff_light.light_energy = 1.1 + sin(_time * 2.0) * 0.15
 
 
 func _setup(p: GPUParticles3D, pm: ParticleProcessMaterial, lifetime: float, cube_size: float) -> void:

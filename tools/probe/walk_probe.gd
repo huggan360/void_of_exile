@@ -7,6 +7,7 @@ func _parse_args() -> void:
 	_args.erase("online")
 	_args["shot"] = ""
 	_args["world"] = "realm"
+	GameServer.debug_godmode = true
 
 func _take_screenshot() -> void: pass
 
@@ -18,6 +19,7 @@ func _run() -> void:
 	while not is_instance_valid(world) or _traveling or player.frozen:
 		await get_tree().process_frame
 	var island := world as IslandWorld
+	if _args.has("terrain-only"): player.collision_mask = Player.TERRAIN_LAYER
 	var home := player.global_position
 	# Find steep-ish runs: a direction where the ground climbs 3-8 m over 20 m.
 	var runs: Array = []
@@ -34,7 +36,7 @@ func _run() -> void:
 					runs.append([p, d, h1-h0])
 		if runs.size() >= 3: break
 	print("[walk] runs ", runs.size())
-	for n in mini(3, runs.size()):
+	for n in mini(int(_args.get("runs", 3)), runs.size()):
 		var p: Vector3 = runs[n][0]
 		var d: Vector3 = runs[n][1]
 		for dir in [1, -1]:
@@ -64,6 +66,7 @@ func _report(label: String, trace: Array) -> void:
 		var dev := 0.0
 		var rev := 0
 		var jerk := 0.0
+		var peak := 0
 		for i in range(15, ys.size()-15):
 			var avg := 0.0
 			for j in range(i-15, i+15): avg += ys[j]
@@ -72,8 +75,11 @@ func _report(label: String, trace: Array) -> void:
 			var v0: float = ys[i]-ys[i-1]
 			var v1: float = ys[i+1]-ys[i]
 			if signf(v0) != signf(v1) and absf(v0-v1) > 0.004: rev += 1
-			jerk = maxf(jerk, absf(v1-v0))
+			if absf(v1-v0)>jerk:
+				jerk = absf(v1-v0)
+				peak = i
 		print("[walk] %s %s dev=%.3f reversals=%d max_dv=%.3f" % [label, ["body", "model", "camera"][col], dev, rev, jerk])
+		if col == 1 and jerk > 0.04: print("[walk] peak trace ", label, " ", trace.slice(peak-1,peak+2))
 	var flat: Array = []
 	for i in range(1, trace.size()):
 		flat.append((trace[i][3] as Vector2).distance_to(trace[i-1][3]))

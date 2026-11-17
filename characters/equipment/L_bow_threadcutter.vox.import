@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cf6mie7ng543x"
+path="res://.godot/imported/L_bow_threadcutter.vox-c6d34add6ac82a3df0028247ea3e2328.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_bow_threadcutter.vox"
+dest_files=["res://.godot/imported/L_bow_threadcutter.vox-c6d34add6ac82a3df0028247ea3e2328.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,6 +1,6 @@
 class_name DivineSets
 ## The Divine sets of the planet bosses, the farm and the glade (Venom, Eclipse,
-## Blood, Stormeye, Madness, Cindrella, Goldslinger, Ash), extra pieces for
+## Blood, Stormeye, Madness, Cindrella, Goldslinger), extra pieces for
 ## Silver and Satan, each set's own stat leaning,
 ## and the shot patterns, charged attacks, particles and magic of their gear.
 ##
@@ -20,8 +20,6 @@ const BLOOD := Color("d4202c")
 const BLOOD_DARK := Color("3a0608")
 const MADNESS := Color("ff4fd8")
 const MADNESS_ALT := Color("6cff6a")
-const ASH := Color("ff7a2e")
-const ASH_DARK := Color("2c2a28")
 const STORMEYE := Color("9ab0ff")
 const STORMEYE_FROST := Color("a0e8ff")
 const STORMEYE_INK := Color("8c5adc")
@@ -39,7 +37,6 @@ static func build(out: Array[Item]) -> void:
 	_stormeye(out)
 	_madness(out)
 	_cindrella(out)
-	_ash(out)
 	_extras(out)
 
 
@@ -206,14 +203,6 @@ static func _cindrella(out: Array[Item]) -> void:
 	_relics(out, "ofcindrella", Color("e45aa0"))
 
 
-# --- Ash: the Mad Farmer. ---------------------------------------------------------------
-
-static func _ash(out: Array[Item]) -> void:
-	_weapon(out, "D_wand_thewandofash", "Wand of Ash", "Wand", "Carved from the last scarecrow. It remembers the fire.",
-		{magic = 8, defense = 4}, ["Three short-range embers that set enemies alight",
-		"Charged: Ashfall, a burning ring that leaves the ground on fire"], Vector2i(105, 128))
-
-
 # --- Looks and patterns ---------------------------------------------------------------
 
 ## Projectile shape and particles, normal shot pattern, charged attack and hit
@@ -319,13 +308,6 @@ static func _signature(item: Item) -> void:
 			_hits(item, [{id = "burning", duration = 2.0}], [{id = "burning", duration = 5.0}])
 		"D_bow_Cindrella":
 			p.particles = "petals"
-		"D_wand_thewandofash":
-			_look(p, "cinder", ASH, ASH_DARK, "ash", 20.0, 13.0, 0.9)
-			item.shots = 3
-			item.spread_deg = 14.0
-			p.wave_amp = 0.0
-			item.charge = {style = "inferno", name = "Ashfall", mult = 2.6, ring_damage = 170, ring_range = 6.0}
-			_hits(item, [{id = "burning", duration = 2.0}], [{id = "burning", duration = 4.0}])
 
 
 static func _look(p: Dictionary, style: String, color: Color, color2: Color, particles: String, speed: float,
@@ -376,51 +358,23 @@ const STATS := {
 	D_cloak_ofthestormeye = {defense = 14, speed = 6, dexterity = 6, magic = 4},
 	# Crucifixes
 	D_bonus_crucifix_ofsatan = {hp = -60, attack = 14, dexterity = 8, speed = 4},
-	D_bonus_crucifix_offrost = {defense = 8, hp = 40, dexterity = 4},
-	D_bonus_crucifix_ofstorm = {defense = 6, hp = 40, speed = 4},
 	D_bonus_crucifix_ofblood = {hp = 40, attack = 8, defense = -4},
 	D_bonus_crucifix_ofmadness = {attack = 4, dexterity = 4, speed = 4, magic = 4, hp = 20, defense = -8},
-	D_bonus_crucifix_ofeclipse = {defense = 6, hp = 30, magic = 6, attack = 4},
-	D_bonus_crucifix_ofvenom = {defense = 6, hp = 30, dexterity = 6},
-	D_bonus_crucifix_ofthestormeye = {defense = 6, hp = 30, magic = 5, speed = 3},
-	# Crystals
-	D_bonus_crystal_ofstorm = {magic = 9, mp = 40, speed = 3},
-	D_bonus_crystal_ofeclipse = {magic = 16, mp = 60, hp = -20},
-	D_bonus_crystal_ofvenom = {magic = 10, mp = 40, dexterity = 4},
-	D_bonus_crystal_ofthestormeye = {magic = 14, mp = 50, speed = 3, defense = -3},
 	# Eyes
-	D_bonus_eye_ofstorm = {dexterity = 8, speed = 3},
-	D_bonus_eye_ofeclipse = {dexterity = 10, attack = 4},
-	D_bonus_eye_ofvenom = {dexterity = 12, attack = 3, defense = -3},
-	D_bonus_eye_ofthestormeye = {dexterity = 9, magic = 5, speed = 4, hp = -20},
+	D_bonus_eye_ofvenom = {dexterity = 15, attack = 6, magic = 6, speed = 4, defense = -3},
+	D_bonus_eye_ofthestormeye = {dexterity = 12, magic = 10, speed = 5, mp = 50, hp = -20},
 	# Flames
-	D_bonus_flame_ofstorm = {attack = 6, speed = 3},
-	D_bonus_flame_ofeclipse = {attack = 10, magic = 6, hp = -20},
-	D_bonus_flame_ofvenom = {attack = 8, dexterity = 4},
+	D_bonus_flame_ofeclipse = {attack = 12, magic = 14, mp = 60, hp = -30},
 	D_bonus_flame_ofcindrella = {attack = 6, speed = 4, hp = 20},
-	# Talismans
-	D_bonus_talisman_ofstorm = {hp = 40, speed = 8},
-	D_bonus_talisman_ofeclipse = {hp = 50, speed = 4, magic = 4},
-	D_bonus_talisman_ofvenom = {hp = 40, speed = 6, dexterity = 3},
 }
 
 ## Names, lore and effects of the new relics (stats are in STATS).
 const RELICS := {
-	D_bonus_crucifix_ofvenom = ["Crucifix of the Brood", "A cross of black chitin. Things move under it."],
-	D_bonus_crystal_ofvenom = ["Venom Crystal", "Clear green, with a single egg frozen inside."],
 	D_bonus_eye_ofvenom = ["Eye of the Swarm", "It sees in a thousand pieces and misses nothing."],
-	D_bonus_flame_ofvenom = ["Venom Flame", "It burns without heat and eats without fire."],
-	D_bonus_talisman_ofvenom = ["Hive Talisman", "A ring of wax that is always faintly warm."],
-	D_bonus_crucifix_ofeclipse = ["Crucifix of the Eclipse", "Gold on one arm, night on the other."],
-	D_bonus_crystal_ofeclipse = ["Eclipse Crystal", "It holds the moment the sun went out, and won't let go of it."],
-	D_bonus_eye_ofeclipse = ["Eye of the Corona", "Look into it and you see the edge of the sun."],
 	D_bonus_flame_ofeclipse = ["Flame of the Dark Sun", "A black fire with a golden rim. It burns its bearer a little."],
-	D_bonus_talisman_ofeclipse = ["Eclipse Talisman", "Moonstone set in sunstone. They don't get along."],
 	D_bonus_crucifix_ofblood = ["Crucifix of Blood", "Thorned rose-iron. It drinks a little from the hand that holds it."],
 	D_bonus_crucifix_ofmadness = ["Crucifix of Madness", "It is the wrong shape, and it changes when you look away."],
 	D_bonus_flame_ofcindrella = ["Flame of Cindrella", "A pink flame that dances to a song only it can hear."],
-	D_bonus_crucifix_ofthestormeye = ["Crucifix of the Pale Eye", "Cold iron round a sliver of the Eye. It blinks."],
-	D_bonus_crystal_ofthestormeye = ["Frozen Storm Crystal", "A thunderhead caught mid-roll. Your fingers go numb."],
 	D_bonus_eye_ofthestormeye = ["The Stormeye", "Vaelith's own, or one of them. It still looks for you."],
 }
 

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ccw6tq3th5mnt"
+path="res://.godot/imported/L_bow_heartwoodengine.vox-19a3b590469435446f45a10e75937443.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_bow_heartwoodengine.vox"
+dest_files=["res://.godot/imported/L_bow_heartwoodengine.vox-19a3b590469435446f45a10e75937443.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

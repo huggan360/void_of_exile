@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://pyi5iixw7jyu"
+path="res://.godot/imported/D_trident_ofmadness_glow.vox-942a48f566c0836e94cd4d0f9cb17c27.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofmadness_glow.vox"
+dest_files=["res://.godot/imported/D_trident_ofmadness_glow.vox-942a48f566c0836e94cd4d0f9cb17c27.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwso16qt3mihi"
+path="res://.godot/imported/D_wand_oftheunmade.vox-bcb29132679dba93547dae8224b93b51.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_oftheunmade.vox"
+dest_files=["res://.godot/imported/D_wand_oftheunmade.vox-bcb29132679dba93547dae8224b93b51.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

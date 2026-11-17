@@ -6,6 +6,12 @@ extends PanelContainer
 
 var _text := RichTextLabel.new()
 var stats: PlayerStats
+var _set_panel := DivineSetPanel.new()
+var _item: Item
+var _gear_signature := ""
+var _fit_step := 0
+var _fit_wait := 0
+var _last_view := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -20,18 +26,24 @@ func _ready() -> void:
 	_text.add_theme_font_size_override("italics_font_size", UIStyle.SIZE_SMALL)
 	_text.add_theme_font_size_override("bold_font_size", UIStyle.SIZE_NORMAL)
 	_text.add_theme_constant_override("line_separation", 4)
-	add_child(_text)
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 10)
+	add_child(content)
+	content.add_child(_text)
+	content.add_child(_set_panel)
 	hide()
 
 
 func show_item(item: Item) -> void:
+	_item = item
 	if item == null:
 		hide()
 		return
 	add_theme_stylebox_override("panel", UIStyle.popup_panel())
+	_reset_text_size()
 	var lines := PackedStringArray()
 	lines.append("[font_size=24][b]%s[/b][/font_size]" % TextMarkup.color(item.item_name, UIStyle.grade_color(item)))
-	lines.append(TextMarkup.color(item.grade_name(), UIStyle.DIVINE_COLOR if item.is_divine() else UIStyle.TEXT_DIM)
+	lines.append(TextMarkup.color(item.grade_name(), UIStyle.grade_color(item) if item.is_special() else UIStyle.TEXT_DIM)
 		+ TextMarkup.color("  -  " + item.kind, UIStyle.TEXT_DIM))
 	var numbers := PackedStringArray()
 	if item.is_weapon():
@@ -100,6 +112,8 @@ func show_item(item: Item) -> void:
 			lore = lore.left(107).rsplit(" ", true, 1)[0] + "…"
 		lines.append("\n[i]%s[/i]" % TextMarkup.color(lore, UIStyle.TEXT_DIM))
 	_text.text = "\n".join(lines)
+	_set_panel.show_set(item, stats)
+	_gear_signature = _equipment_signature()
 	reset_size()
 	show()
 
@@ -107,13 +121,50 @@ func show_item(item: Item) -> void:
 func _process(_delta: float) -> void:
 	if not visible:
 		return
+	if _item and _gear_signature != _equipment_signature():
+		show_item(_item)
 	var mouse := get_global_mouse_position()
 	var view: Vector2 = get_parent().size if get_parent() is Control else get_viewport_rect().size
+	if view != _last_view:
+		_last_view = view
+		_reset_text_size()
+	# Keep the footer at its designed size. Only dense body text contracts on
+	# small screens, after containers have had time to settle their layout.
+	if _fit_wait > 0:
+		_fit_wait -= 1
+	elif size.y > view.y - 16 and _fit_step < 3:
+		_fit_step += 1
+		var font_size: int = [UIStyle.SIZE_NORMAL, 14, 13, 12][_fit_step]
+		_text.add_theme_font_size_override("normal_font_size", font_size)
+		_text.add_theme_font_size_override("bold_font_size", font_size)
+		_text.add_theme_font_size_override("italics_font_size", mini(UIStyle.SIZE_SMALL, font_size))
+		_text.add_theme_constant_override("line_separation", maxi(0, 3 - _fit_step))
+		reset_size()
+		_fit_wait = 2
 	# Prefer left of the cursor (the slots sit on the right edge of the screen).
 	var pos := mouse + Vector2(-size.x - 16, 16)
 	pos.x = clampf(pos.x, 8, view.x - size.x - 8)
 	pos.y = clampf(pos.y, 8, view.y - size.y - 8)
 	global_position = pos
+
+
+func _reset_text_size() -> void:
+	_fit_step = 0
+	_fit_wait = 2
+	_text.add_theme_font_size_override("normal_font_size", UIStyle.SIZE_NORMAL)
+	_text.add_theme_font_size_override("bold_font_size", UIStyle.SIZE_NORMAL)
+	_text.add_theme_font_size_override("italics_font_size", UIStyle.SIZE_SMALL)
+	_text.add_theme_constant_override("line_separation", 4)
+	reset_size()
+
+
+func _equipment_signature() -> String:
+	if stats == null: return ""
+	var ids := PackedStringArray()
+	for slot: String in PlayerStats.GEAR_SLOTS:
+		var item: Item = stats.gear.get(slot)
+		ids.append(item.id if item else "")
+	return "/".join(ids)
 
 
 func _effect_lines(effects: Array[Dictionary], source: String) -> PackedStringArray:

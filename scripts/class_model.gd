@@ -23,6 +23,7 @@ const CAST_TIP := deg_to_rad(-35.0)  # +Y shaft tips toward -Z
 var class_id := ""
 ## 0..1: how far a charged/wound-up attack is held.
 var hold := 0.0
+var _armed := true
 var _rig: Node3D
 var _arm_l: Node3D
 var _arm_r: Node3D
@@ -47,6 +48,7 @@ func _ready() -> void:
 	_arm_r = _rig.get_node_or_null("ArmR")
 	_leg_l = _rig.get_node_or_null("LegL")
 	_leg_r = _rig.get_node_or_null("LegR")
+	EquipmentAppearance.fit_hands(self)
 	_pose(0.0)
 
 
@@ -58,6 +60,7 @@ func animate(move_ratio: float, delta: float) -> void:
 	_phase = fmod(_phase + delta * STRIDE_SPEED * move_ratio, TAU)
 	var w := _walk_blend
 	var stride := sin(_phase)
+	EquipmentAppearance.animate_garment(self, stride, w)
 	if _leg_l:
 		_leg_l.rotation.x = stride * STRIDE_ANGLE * w
 	if _leg_r:
@@ -80,6 +83,15 @@ func play_shot() -> void:
 func _pose(cast: float) -> void:
 	var stride := sin(_phase) * _walk_blend
 	ArmRig.pose(_arm_l, -stride * STRIDE_ANGLE * ARM_SWING, deg_to_rad(15.0 + absf(stride) * 12.0), 0.0, deg_to_rad(-10.0))
+	if not _armed:
+		ArmRig.pose(_arm_r, stride * STRIDE_ANGLE * ARM_SWING, deg_to_rad(12.0), 0.0, deg_to_rad(8.0))
+		return
 	var tremble := sin(_time * 55.0) * deg_to_rad(1.0) if hold >= 1.0 else 0.0
 	var shoulder := lerpf(WEAPON_ARM_REST + stride * deg_to_rad(4.0), CAST_RAISE, cast)
 	ArmRig.pose(_arm_r, shoulder + tremble, lerpf(ELBOW_REST, deg_to_rad(5.0), cast), CAST_TIP * cast)
+
+
+func set_equipment(weapon: Item, armor: Item) -> void:
+	_armed = weapon != null
+	if not _armed: hold = 0.0
+	EquipmentAppearance.apply(self, weapon, armor)

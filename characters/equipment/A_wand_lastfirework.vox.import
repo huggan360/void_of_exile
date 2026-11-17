@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b8sfb5gqalarh"
+path="res://.godot/imported/A_wand_lastfirework.vox-d547b213575ba3075b5fbce4b4be2fa7.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/A_wand_lastfirework.vox"
+dest_files=["res://.godot/imported/A_wand_lastfirework.vox-d547b213575ba3075b5fbce4b4be2fa7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

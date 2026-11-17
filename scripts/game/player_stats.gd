@@ -182,11 +182,15 @@ func stat_display(stat: String) -> String:
 
 
 func gear_bonus(stat: String) -> int:
-	var total := 0
+	var total := set_bonus(stat)
 	for item: Item in gear.values():
 		if item:
 			total += item.bonuses.get(stat, 0)
 	return total
+
+
+func set_bonus(stat: String) -> int:
+	return int(DivineSetBonuses.bonuses_for(gear).get(stat, 0))
 
 
 func total(stat: String) -> int:
@@ -516,11 +520,12 @@ func shield_reduction() -> float:
 ## Spell damage grows with Magic, independently of bow Attack. When hovering
 ## a different spell, predict Magic with that spell equipped rather than double-counting it.
 func spell_multiplier(spell: Item) -> float:
-	var magic := total("magic")
-	var equipped: Item = gear.spell
-	if equipped:
-		magic -= equipped.bonuses.get("magic", 0)
-	magic += spell.bonuses.get("magic", 0)
+	var preview := gear.duplicate()
+	preview.spell = spell
+	var raw := int(base.magic) + int(DivineSetBonuses.bonuses_for(preview).get("magic", 0))
+	for item: Item in preview.values():
+		if item: raw += int(item.bonuses.get("magic", 0))
+	var magic := maxi(0, raw + roundi(buffs.additive("magic", raw)))
 	return 1.0 + maxf(0.0, magic) * 0.015
 
 

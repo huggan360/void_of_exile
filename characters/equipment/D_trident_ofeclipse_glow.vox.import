@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://6vghwvb36gh8"
+path="res://.godot/imported/D_trident_ofeclipse_glow.vox-6664a06ed65e7c87c64dc64fc7e25c43.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofeclipse_glow.vox"
+dest_files=["res://.godot/imported/D_trident_ofeclipse_glow.vox-6664a06ed65e7c87c64dc64fc7e25c43.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

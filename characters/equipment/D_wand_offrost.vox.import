@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dwt37lnlp0tl6"
+path="res://.godot/imported/D_wand_offrost.vox-0ce2cf123b41e0d87d05cdbf5e3d37c9.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_offrost.vox"
+dest_files=["res://.godot/imported/D_wand_offrost.vox-0ce2cf123b41e0d87d05cdbf5e3d37c9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

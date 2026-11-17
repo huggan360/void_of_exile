@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://can522u03culf"
+path="res://.godot/imported/L_wand_seedoftomorrow_glow.vox-181ab4ad0be2dbc3e12ca546ac336c50.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_wand_seedoftomorrow_glow.vox"
+dest_files=["res://.godot/imported/L_wand_seedoftomorrow_glow.vox-181ab4ad0be2dbc3e12ca546ac336c50.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

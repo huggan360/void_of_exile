@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bpgp2a1fmlvms"
+path="res://.godot/imported/L_trident_sunfeather.vox-ee1469af8601f3598e9958079da84ec5.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_trident_sunfeather.vox"
+dest_files=["res://.godot/imported/L_trident_sunfeather.vox-ee1469af8601f3598e9958079da84ec5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

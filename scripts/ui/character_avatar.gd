@@ -9,6 +9,9 @@ var _viewport := SubViewport.new()
 var _model: Node3D
 var _camera := Camera3D.new()
 var _live := false
+var _gear: Dictionary = {}
+var _gear_key := "unset"
+static var _portrait_materials: Dictionary = {}
 
 
 ## size_px: square size; live: keeps animating (breathing) instead of a still.
@@ -42,10 +45,12 @@ func set_class(p_class_id: String) -> void:
 	if p_class_id == class_id and _model != null:
 		return
 	class_id = p_class_id
+	_gear_key = "unset"
 	if _model:
 		_model.queue_free()
 	_model = PlayerClasses.make_model(class_id)
 	_viewport.add_child(_model)
+	set_gear(_gear)
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_frame_head.call_deferred(_model)
 
@@ -58,6 +63,18 @@ func _frame_head(model: Node3D) -> void:
 	await get_tree().process_frame
 	if model != _model or not is_instance_valid(model):
 		return
+	# Portraits have their own camera and must ignore the world's dissolve window.
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var part := node as MeshInstance3D
+		var material := part.material_override as ShaderMaterial
+		if material == null: continue
+		var material_key := material.get_instance_id()
+		if not _portrait_materials.has(material_key):
+			var portrait_material := material.duplicate() as ShaderMaterial
+			portrait_material.set_shader_parameter("see_through_cut", false)
+			_portrait_materials[material_key] = portrait_material
+			_portrait_materials[portrait_material.get_instance_id()] = portrait_material
+		part.material_override = _portrait_materials[material_key]
 	var body := model.find_child("Body", true, false) as Node3D
 	var shoulder := model.find_child("ArmL", true, false) as Node3D
 	if body == null or shoulder == null:
@@ -98,3 +115,21 @@ func _sync_visibility() -> void:
 func _process(delta: float) -> void:
 	if _live and is_visible_in_tree() and _model and _model.has_method("animate"):
 		_model.animate(0.0, delta)
+
+
+## Accepts live Items or serialized gear from character/death records.
+func set_gear(gear: Dictionary) -> void:
+	_gear = gear
+	if _model == null: return
+	var items := {}
+	for slot: String in ["weapon", "armor"]:
+		var value: Variant = gear.get(slot)
+		if value is Item: items[slot] = value
+		elif value is String: items[slot] = Items.make(value)
+		elif value is Dictionary: items[slot] = Items.make(str(value.get("id", "")))
+		else: items[slot] = PlayerClasses.gear_item(class_id, slot, 1) if gear.is_empty() else null
+	var key := "%s|%s" % [items.weapon.id if items.weapon else "", items.armor.id if items.armor else ""]
+	if key == _gear_key: return
+	_gear_key = key
+	_model.set_equipment(items.weapon, items.armor)
+	_frame_head.call_deferred(_model)

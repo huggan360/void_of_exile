@@ -24,6 +24,7 @@ const STRING_DRAW := 0.5 * VOXEL_SIZE
 var class_id := "archer"
 ## 0..1: string draw during windup/charge. At 1 the bow trembles a little.
 var hold := 0.0
+var _armed := true
 var _rig: Node3D
 var _left_arm: Node3D
 var _right_arm: Node3D
@@ -53,6 +54,7 @@ func _ready() -> void:
 	_bow = _right_hand.get_node("Bow")
 	_string_top = _bow.get_node("StringTop")
 	_string_bottom = _bow.get_node("StringBottom")
+	EquipmentAppearance.fit_hands(self)
 	_pose(0.0, 0.0)
 
 
@@ -63,6 +65,7 @@ func animate(move_ratio: float, delta: float) -> void:
 	_phase = fmod(_phase + delta * STRIDE_SPEED * move_ratio, TAU)
 	var w := _walk_blend
 	var stride := sin(_phase)
+	EquipmentAppearance.animate_garment(self, stride, w)
 	_left_leg.rotation.x = stride * STRIDE_ANGLE * w
 	_right_leg.rotation.x = -stride * STRIDE_ANGLE * w
 	_shot = maxf(0.0, _shot - delta)
@@ -85,6 +88,10 @@ func play_shot() -> void:
 
 func _pose(extension: float, draw: float) -> void:
 	var stride := sin(_phase) * _walk_blend
+	if not _armed:
+		ArmRig.pose(_right_arm, stride * STRIDE_ANGLE * ARM_SWING, deg_to_rad(12.0), 0.0, deg_to_rad(8.0))
+		ArmRig.pose(_left_arm, -stride * STRIDE_ANGLE * ARM_SWING, deg_to_rad(12.0), 0.0, deg_to_rad(-8.0))
+		return
 	var target := BOW_REST.lerp(BOW_EXTENDED, extension)
 	# Clear the face before bringing the bow across from the side.
 	target.z = lerpf(BOW_REST.z, BOW_EXTENDED.z, smoothstep(0.0, 0.4, extension))
@@ -111,3 +118,9 @@ func _string_segment(segment: MeshInstance3D, start: Vector3, end: Vector3) -> v
 	segment.position = (start + end) * 0.5
 	segment.basis = Basis(Quaternion(Vector3.UP, offset.normalized()))
 	segment.scale.y = offset.length()
+
+
+func set_equipment(weapon: Item, armor: Item) -> void:
+	_armed = weapon != null
+	if not _armed: hold = 0.0
+	EquipmentAppearance.apply(self, weapon, armor)

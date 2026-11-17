@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dq3iaca7u4788"
+path="res://.godot/imported/L_trident_bellwether_glow.vox-feb22b5fc100e21ac1f8c809156ab576.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_trident_bellwether_glow.vox"
+dest_files=["res://.godot/imported/L_trident_bellwether_glow.vox-feb22b5fc100e21ac1f8c809156ab576.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

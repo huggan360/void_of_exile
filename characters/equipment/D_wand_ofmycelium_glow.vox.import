@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b14hsra57br8q"
+path="res://.godot/imported/D_wand_ofmycelium_glow.vox-1d779e2740bb9d69234a36b86c39b83d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_ofmycelium_glow.vox"
+dest_files=["res://.godot/imported/D_wand_ofmycelium_glow.vox-1d779e2740bb9d69234a36b86c39b83d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

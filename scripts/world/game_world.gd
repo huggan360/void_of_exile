@@ -42,6 +42,11 @@ func is_walkable(_pos: Vector3) -> bool:
 	return true
 
 
+## Enclosed rooms force first person over the selected outdoor camera.
+func first_person_at(_position: Vector3) -> bool:
+	return false
+
+
 ## Whether this spot is road or street (walking there is faster).
 func is_road(_pos: Vector3) -> bool:
 	return false

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bjljs56r0k3u4"
+path="res://.godot/imported/G4_wand_glow.vox-a7b5ca237ff7b19d3bd6fc730f68ef6b.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/G4_wand_glow.vox"
+dest_files=["res://.godot/imported/G4_wand_glow.vox-a7b5ca237ff7b19d3bd6fc730f68ef6b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

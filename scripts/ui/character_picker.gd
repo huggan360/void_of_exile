@@ -127,6 +127,7 @@ func is_open() -> bool:
 
 func _refresh() -> void:
 	_avatar.set_class(stats.class_id)
+	_avatar.set_gear(stats.gear)
 	_name.text = Account.username() if Account.username() != "" else "Adventurer"
 	_sub.text = "%s - %s\n%s - %s" % [TextMarkup.escape(PlayerClasses.display_name(stats.class_id)),
 		TextMarkup.color("Level %d" % stats.level, UIStyle.XP), UIStyle.stat_text("hp", stats.max_hp, false), UIStyle.stat_text("mp", stats.max_mp, false)]
@@ -182,7 +183,9 @@ func _alive_row(c: Dictionary, playing: bool) -> Control:
 	inside.offset_bottom = -6
 	inside.add_theme_constant_override("separation", 10)
 	inside.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	inside.add_child(CharacterAvatar.new(str(c.get("class", "archer")), 48))
+	var face := CharacterAvatar.new(str(c.get("class", "archer")), 48)
+	inside.add_child(face)
+	face.set_gear(stats.gear if playing else c.get("gear", {}))
 	var text := VBoxContainer.new()
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -271,6 +274,7 @@ func _fill_fallen() -> void:
 		inside.add_theme_constant_override("separation", 10)
 		inside.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var face := CharacterAvatar.new(str(d.get("class", "archer")), 48)
+		face.set_gear(d.get("gear", {}))
 		face.modulate = Color(0.7, 0.7, 0.75)
 		inside.add_child(face)
 		var text := VBoxContainer.new()

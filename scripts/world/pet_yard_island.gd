@@ -1,6 +1,6 @@
 extends Node3D
-## The Pet Yard island's look on clients: the walk-in Pet Store (its roof hides
-## while you are inside), the woods, bushes and rocks, grass and flowers in
+## The Pet Yard island's look on clients: the enclosed walk-in Pet Store,
+## the woods, bushes and rocks, grass and flowers in
 ## 24 m chunks (SurfaceFlora's plants, leaning away from players and pets),
 ## lanterns along the trail and a signpost at the meadow's gate.
 
@@ -11,7 +11,6 @@ const RANGES: Array[Vector2] = [Vector2(0, 90), Vector2(90, 260), Vector2(260, 2
 const KEEP_CLEAR: Array[Vector3] = [Vector3(0, 0, 17), Vector3(0, 0, 23), Vector3(0, 0, -13),
 		Vector3(-15, 0, -7), Vector3(-16, 0, -14)]  # spawn, portal, nest, Caretaker, cottage (x, z)
 var _world: PetYardWorld
-var _roof: Array[MeshInstance3D] = []
 var _pushers := PackedVector4Array()
 var _rng := RandomNumberGenerator.new()
 
@@ -31,8 +30,8 @@ func build(world: PetYardWorld) -> void:
 
 func _shop() -> void:
 	var xform := Transform3D(Basis(Vector3.UP, PetYardWorld.SHOP_YAW), PetYardWorld.SHOP_POS)
-	_model("pet_store_house", xform, false)
-	_model("pet_store_roof", xform, true)
+	_model("pet_store_house", xform)
+	_model("pet_store_roof", xform)
 	var body := StaticBody3D.new()
 	body.collision_layer = Player.OBSTACLE_LAYER
 	body.collision_mask = 0
@@ -49,7 +48,7 @@ func _shop() -> void:
 	_light(xform * Vector3(5.75, 1.6, -2.9), Color("5ac8ec"), 0.8, 4.0)  # the fish tank
 
 
-func _model(name: String, xform: Transform3D, roof: bool) -> void:
+func _model(name: String, xform: Transform3D) -> void:
 	var info := CityHouses.info(name)
 	var lods: Array = info.get("lods", [])
 	for k in lods.size():
@@ -66,7 +65,6 @@ func _model(name: String, xform: Transform3D, roof: bool) -> void:
 			node.visibility_range_end = RANGES[k].y
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if k == 0 and not entry[1] else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(node)
-			if roof and k == 0: _roof.append(node)
 
 
 func _collider(body: StaticBody3D, box: AABB) -> void:
@@ -341,13 +339,10 @@ func _process(_delta: float) -> void:
 	if camera == null: return
 	var eye := camera.global_position
 	var found: Array = []
-	var inside := false
 	for node in get_tree().get_nodes_in_group("local_player") + get_tree().get_nodes_in_group("remote_players"):
 		var body := node as Node3D
 		if body == null or not body.is_visible_in_tree(): continue
 		found.append([body.global_position, 0.75])
-		if node.is_in_group("local_player") and PetYardWorld.SHOP_FLOOR.grow(-0.2).has_point(Vector2(body.global_position.x, body.global_position.z)):
-			inside = true
 	for node in get_tree().get_nodes_in_group("pet_visuals"):
 		var pet := node as Node3D
 		if pet and pet.is_inside_tree() and pet.global_position.distance_squared_to(eye) < 3600.0: found.append([pet.global_position, 0.45])
@@ -356,4 +351,3 @@ func _process(_delta: float) -> void:
 		var p: Vector3 = found[i][0] if i < found.size() else Vector3.ZERO
 		_pushers[i] = Vector4(p.x, p.y, p.z, found[i][1]) if i < found.size() else Vector4.ZERO
 	SurfaceFlora.set_pushers(_pushers)
-	for node in _roof: node.visible = not inside

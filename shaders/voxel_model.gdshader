@@ -5,7 +5,10 @@ shader_type spatial;
 
 uniform float jitter = 0.07;
 uniform float glow_strength = 0.0;
+// Player bodies mask rear cloth in vertex alpha. Other meshes leave this at zero.
+uniform float garment_swing = 0.0;
 instance uniform float glow_boost = 0.0;  // extra glow on one model (a boss about to burst)
+instance uniform float garment_glow = 0.0;  // Artifact cloth's existing vertex mask
 
 varying vec3 local_pos;
 varying vec3 local_normal;
@@ -30,6 +33,10 @@ instance uniform vec2 lod_band = vec2(-1.0, 1e9);
 void vertex() {
 	local_pos = VERTEX;
 	local_normal = NORMAL;
+	if (garment_swing > 0.0 && COLOR.a > 0.5 && VERTEX.y < 5.5) {
+		VERTEX.z += (5.5 - VERTEX.y) * garment_swing;
+		NORMAL = normalize(vec3(NORMAL.x, NORMAL.y + garment_swing * NORMAL.z, NORMAL.z));
+	}
 	if (lod_band.x >= 0.0) {
 		float d = distance(MODEL_MATRIX[3].xyz, lod_eye);
 		if (d < lod_band.x || d >= lod_band.y) VERTEX = vec3(0.0);
@@ -73,6 +80,6 @@ void fragment() {
 	color *= 1.0 + h * 2.0 * jitter;
 	color *= vec3(1.0 + warm * jitter * 0.6, 1.0, 1.0 - warm * jitter * 0.6);
 	ALBEDO = glow_strength > 0.0 ? color * 0.4 : color;
-	EMISSION = color * (glow_strength + glow_boost);
+	EMISSION = color * (glow_strength + glow_boost + garment_glow * step(0.5, COLOR.a));
 	ROUGHNESS = glow_strength > 0.0 ? 0.4 : 0.85;
 }

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b57md0uehdpxv"
+path="res://.godot/imported/L_wand_sunsplinter.vox-0a7be98d73fac40d2940fbea6c56008f.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_wand_sunsplinter.vox"
+dest_files=["res://.godot/imported/L_wand_sunsplinter.vox-0a7be98d73fac40d2940fbea6c56008f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

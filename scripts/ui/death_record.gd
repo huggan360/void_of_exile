@@ -49,7 +49,9 @@ func _init(p_record: Dictionary, can_delete := true, continue_text := "Close", j
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 22)
 	col.add_child(top)
-	top.add_child(CharacterAvatar.new(_stats.class_id, 170, true))
+	var face := CharacterAvatar.new(_stats.class_id, 170, true)
+	top.add_child(face)
+	face.set_gear(_stats.gear)
 	var who := VBoxContainer.new()
 	who.alignment = BoxContainer.ALIGNMENT_CENTER
 	who.add_theme_constant_override("separation", 6)

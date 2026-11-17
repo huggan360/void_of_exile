@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://7jptg56wc5hl"
+path="res://.godot/imported/D_bow_ofthestormeye.vox-7ca36bb8aba579bef4d527b620eb35a6.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_ofthestormeye.vox"
+dest_files=["res://.godot/imported/D_bow_ofthestormeye.vox-7ca36bb8aba579bef4d527b620eb35a6.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

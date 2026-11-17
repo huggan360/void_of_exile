@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://csvahpq8yq2qf"
+path="res://.godot/imported/G8_trident.vox-f9a2b2eb7027ad9322c6a274f15127d7.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/G8_trident.vox"
+dest_files=["res://.godot/imported/G8_trident.vox-f9a2b2eb7027ad9322c6a274f15127d7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

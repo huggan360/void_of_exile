@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://skq5it27j7dg"
+path="res://.godot/imported/G7_bow.vox-394794ff227cf1c5c4f8aeb352f9a4da.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/G7_bow.vox"
+dest_files=["res://.godot/imported/G7_bow.vox-394794ff227cf1c5c4f8aeb352f9a4da.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

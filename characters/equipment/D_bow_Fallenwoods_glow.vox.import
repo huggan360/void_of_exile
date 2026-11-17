@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkxb2np36c0r0"
+path="res://.godot/imported/D_bow_Fallenwoods_glow.vox-5ea4003f1a8fdc19a08c81e5634c7d20.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_Fallenwoods_glow.vox"
+dest_files=["res://.godot/imported/D_bow_Fallenwoods_glow.vox-5ea4003f1a8fdc19a08c81e5634c7d20.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

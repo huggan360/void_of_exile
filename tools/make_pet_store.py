@@ -10,8 +10,9 @@ the back (the storekeeper stands behind it, PetYardWorld.STORE_POS), shelves
 of speckled eggs in straw along the left wall, a glowing fish tank, pet beds
 and a cat tree on the right, potted plants, hanging lanterns.
 
-The roof is its own model (pet_store_roof) so the yard can hide it while you
-are inside. Front is -Z; the floor's top is y = 0 (its planks lie just under).
+The roof is its own model (pet_store_roof) and stays visible inside, where the
+camera uses first person. Front is -Z; the floor's top is y = 0 (its planks
+lie just under).
 Run: python3 tools/make_pet_store.py, then bake with
 tools/bake_vesperis_houses.tscn (both models land in its catalogue).
 """
@@ -72,7 +73,7 @@ def shell(b):
 	b.solid(-HX, HX+1, 0, TOP, HZ-2, HZ+1)
 	b.solid(-HX, -HX+3, 0, TOP, -HZ, HZ+1)
 	b.solid(HX-2, HX+1, 0, TOP, -HZ, HZ+1)
-	# Ceiling beams across the room (the roof sits above, hidden when inside).
+	# Ceiling beams across the room (the roof sits above).
 	for x in range(-HX+8, HX-6, 16):
 		box(v, x, x+2, TOP-2, TOP, -HZ+3, HZ-2, 'beam')
 

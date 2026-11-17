@@ -1,0 +1,2685 @@
+{
+  "schema": 1,
+  "items": [
+    {
+      "id": "L_bow_kingfisher",
+      "name": "Kingfisher",
+      "boss": "goblin_king",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "A crown pawned for a bow. It was a very good trade.",
+      "chance": 0.0275,
+      "colors": [
+        "739cdb",
+        "ffe3ad"
+      ],
+      "bonuses": {
+        "attack": 9,
+        "dexterity": 4
+      },
+      "damage": [
+        148,
+        174
+      ],
+      "rate": 1.015,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_lance",
+        "speed": 30,
+        "range": 25,
+        "size": 0.995,
+        "wave_amp": 0.18,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "Kingfisher Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "739cdb",
+        "accent": "ffe3ad"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 163.12,
+        "g8_ratio": 0.58,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_thewandofash",
+      "name": "Wand of Ash",
+      "boss": "mad_farmer",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "Carved from the last scarecrow. It remembers the fire.",
+      "chance": 0.03,
+      "colors": [
+        "f3a54b",
+        "80b9ee"
+      ],
+      "bonuses": {
+        "magic": 21,
+        "dexterity": 5
+      },
+      "damage": [
+        121,
+        142
+      ],
+      "rate": 1.0,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "ember_crown",
+        "speed": 31,
+        "range": 26,
+        "size": 1.04,
+        "wave_amp": 0.25,
+        "wave_freq": 12,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "inferno",
+        "name": "Ashfall",
+        "mult": 2.6,
+        "ring_damage": 220,
+        "ring_range": 6.0
+      },
+      "primary_effects": [
+        {
+          "id": "burning",
+          "duration": 3.0
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "burning",
+          "duration": 5.0
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "f3a54b",
+        "accent": "80b9ee"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 131.82,
+        "g8_ratio": 0.78,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_thornclock",
+      "name": "Thornclock",
+      "boss": "thornmaw_bloom",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "It flowers once for every second you refuse to waste.",
+      "chance": 0.025,
+      "colors": [
+        "de944a",
+        "61d4bf"
+      ],
+      "bonuses": {
+        "attack": 11,
+        "dexterity": 5
+      },
+      "damage": [
+        151,
+        177
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_crescent",
+        "speed": 31,
+        "range": 26,
+        "size": 1.04,
+        "wave_amp": 0.32,
+        "wave_freq": 14,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Thornclock Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "de944a",
+        "accent": "61d4bf"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 174.38,
+        "g8_ratio": 0.62,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_tideglass",
+      "name": "Tideglass",
+      "boss": "blue_dragon",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "The dragon swallowed a sunrise. This was left between its teeth.",
+      "chance": 0.0225,
+      "colors": [
+        "f0b4a0",
+        "fff3d8"
+      ],
+      "bonuses": {
+        "attack": 13,
+        "dexterity": 6,
+        "defense": 6
+      },
+      "damage": [
+        238,
+        279
+      ],
+      "rate": 0.915,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "facet_lance",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.18,
+        "wave_freq": 16,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "Tideglass Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "f0b4a0",
+        "accent": "fff3d8"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 236.38,
+        "g8_ratio": 0.84,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_sunsplinter",
+      "name": "Sunsplinter",
+      "boss": "rimeheart_prism",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "The first sunrise of winter, trapped inside a stubborn shard.",
+      "chance": 0.0225,
+      "colors": [
+        "ffd15c",
+        "82488d"
+      ],
+      "bonuses": {
+        "magic": 24,
+        "dexterity": 6
+      },
+      "damage": [
+        118,
+        139
+      ],
+      "rate": 1.0,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "solar_disc",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.25,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Sunsplinter Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "ffd15c",
+        "accent": "82488d"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 128.44,
+        "g8_ratio": 0.76,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_blackcomet",
+      "name": "Black Comet",
+      "boss": "vharok",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "Its light arrives before the thing that casts it.",
+      "chance": 0.02,
+      "colors": [
+        "8799ff",
+        "61e5d4"
+      ],
+      "bonuses": {
+        "attack": 15,
+        "dexterity": 7
+      },
+      "damage": [
+        223,
+        263
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_comet",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.32,
+        "wave_freq": 12,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Black Comet Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "8799ff",
+        "accent": "61e5d4"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 258.75,
+        "g8_ratio": 0.92,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_mirageengine",
+      "name": "The Mirage Engine",
+      "boss": "scarab_regent",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "A convincing argument that the horizon is within reach.",
+      "chance": 0.0225,
+      "colors": [
+        "6095f4",
+        "f887c2"
+      ],
+      "bonuses": {
+        "magic": 24,
+        "dexterity": 6
+      },
+      "damage": [
+        152,
+        178
+      ],
+      "rate": 0.975,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_crescent",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.18,
+        "wave_freq": 14,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "The Mirage Engine Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "6095f4",
+        "accent": "f887c2"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 160.55,
+        "g8_ratio": 0.95,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_crownbreaker",
+      "name": "Crownbreaker",
+      "boss": "hollow_crown",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "The empty throne could not survive the first throw.",
+      "chance": 0.02,
+      "colors": [
+        "65d4a6",
+        "fff1d1"
+      ],
+      "bonuses": {
+        "attack": 15,
+        "dexterity": 7,
+        "defense": 7
+      },
+      "damage": [
+        259,
+        304
+      ],
+      "rate": 0.94,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "facet_lance",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.25,
+        "wave_freq": 16,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Crownbreaker Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "65d4a6",
+        "accent": "fff1d1"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 264.52,
+        "g8_ratio": 0.94,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_secondhand",
+      "name": "The Second Hand",
+      "boss": "hollow_king",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "It steals the instant between a promise and its breaking.",
+      "chance": 0.0175,
+      "colors": [
+        "5ae0cf",
+        "d9aa62"
+      ],
+      "bonuses": {
+        "attack": 17,
+        "dexterity": 8
+      },
+      "damage": [
+        214,
+        251
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "solar_disc",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.32,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "The Second Hand Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "5ae0cf",
+        "accent": "d9aa62"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 247.5,
+        "g8_ratio": 0.88,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_silentbell",
+      "name": "The Silent Bell",
+      "boss": "abyssal_siren",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "The note is gone. The shape it left still cuts.",
+      "chance": 0.0225,
+      "colors": [
+        "e47b81",
+        "f3eee0"
+      ],
+      "bonuses": {
+        "magic": 24,
+        "dexterity": 6
+      },
+      "damage": [
+        131,
+        153
+      ],
+      "rate": 0.975,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "bell_shard",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.18,
+        "wave_freq": 12,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "The Silent Bell Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "e47b81",
+        "accent": "f3eee0"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 138.58,
+        "g8_ratio": 0.82,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_bellwether",
+      "name": "Bellwether",
+      "boss": "drowned_cantor",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "The chorus follows, even when nobody sings.",
+      "chance": 0.02,
+      "colors": [
+        "e9cc5c",
+        "67b78d"
+      ],
+      "bonuses": {
+        "attack": 15,
+        "dexterity": 7,
+        "defense": 7
+      },
+      "damage": [
+        237,
+        278
+      ],
+      "rate": 0.94,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "bell_shard",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.25,
+        "wave_freq": 14,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Bellwether Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "e9cc5c",
+        "accent": "67b78d"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 242.0,
+        "g8_ratio": 0.86,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_falsepromise",
+      "name": "False Promise",
+      "boss": "gilded_vizier",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "It misses only the promises you were foolish enough to believe.",
+      "chance": 0.0225,
+      "colors": [
+        "6289db",
+        "ffbe64"
+      ],
+      "bonuses": {
+        "attack": 13,
+        "dexterity": 6
+      },
+      "damage": [
+        192,
+        225
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_comet",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.32,
+        "wave_freq": 16,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "False Promise Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "6289db",
+        "accent": "ffbe64"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 222.19,
+        "g8_ratio": 0.79,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_coldverdict",
+      "name": "Cold Verdict",
+      "boss": "magma_warden",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "Forged in the furnace. It has never been warm.",
+      "chance": 0.0225,
+      "colors": [
+        "b8e5ff",
+        "3d5c93"
+      ],
+      "bonuses": {
+        "attack": 13,
+        "dexterity": 6,
+        "defense": 6
+      },
+      "damage": [
+        235,
+        276
+      ],
+      "rate": 0.915,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "facet_lance",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.18,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "Cold Verdict Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "b8e5ff",
+        "accent": "3d5c93"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 233.56,
+        "g8_ratio": 0.83,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_seedoftomorrow",
+      "name": "Seed of Tomorrow",
+      "boss": "pyre_ent",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "The forest after the fire, impatient to begin.",
+      "chance": 0.02,
+      "colors": [
+        "c6e66a",
+        "a489df"
+      ],
+      "bonuses": {
+        "magic": 27,
+        "dexterity": 7
+      },
+      "damage": [
+        135,
+        159
+      ],
+      "rate": 1.0,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "seed_star",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.25,
+        "wave_freq": 12,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Seed of Tomorrow Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "c6e66a",
+        "accent": "a489df"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 147.03,
+        "g8_ratio": 0.87,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_heartwoodengine",
+      "name": "Heartwood Engine",
+      "boss": "queen_briarrose",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "A second heartbeat, wound tight enough to loose.",
+      "chance": 0.02,
+      "colors": [
+        "84e3e8",
+        "d29b72"
+      ],
+      "bonuses": {
+        "attack": 15,
+        "dexterity": 7
+      },
+      "damage": [
+        175,
+        205
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_crescent",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.32,
+        "wave_freq": 14,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Heartwood Engine Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "84e3e8",
+        "accent": "d29b72"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 202.5,
+        "g8_ratio": 0.72,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_timesunder",
+      "name": "Timesunder",
+      "boss": "amber_colossus",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "The ancient creature caught it before it had been thrown.",
+      "chance": 0.02,
+      "colors": [
+        "b6a0f1",
+        "ffce74"
+      ],
+      "bonuses": {
+        "attack": 15,
+        "dexterity": 7,
+        "defense": 7
+      },
+      "damage": [
+        243,
+        286
+      ],
+      "rate": 0.915,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "solar_disc",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.18,
+        "wave_freq": 16,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "Timesunder Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "b6a0f1",
+        "accent": "ffce74"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 242.0,
+        "g8_ratio": 0.86,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_daybreaker",
+      "name": "Daybreaker",
+      "boss": "selenarch",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "What the Moon-Eater could not digest.",
+      "chance": 0.0175,
+      "colors": [
+        "edfaff",
+        "ee8dd0"
+      ],
+      "bonuses": {
+        "magic": 30,
+        "dexterity": 8
+      },
+      "damage": [
+        163,
+        192
+      ],
+      "rate": 1.0,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "solar_disc",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.25,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Daybreaker Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "edfaff",
+        "accent": "ee8dd0"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 177.45,
+        "g8_ratio": 1.05,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_threadcutter",
+      "name": "Threadcutter",
+      "boss": "brood_matriarch",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "One pull and the whole web remembers it was only thread.",
+      "chance": 0.0175,
+      "colors": [
+        "e97888",
+        "faf2de"
+      ],
+      "bonuses": {
+        "attack": 17,
+        "dexterity": 8
+      },
+      "damage": [
+        218,
+        257
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_lance",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.32,
+        "wave_freq": 12,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Threadcutter Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "e97888",
+        "accent": "faf2de"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 253.12,
+        "g8_ratio": 0.9,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_eyeless",
+      "name": "The Eyeless",
+      "boss": "stormeye_tyrant",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "It does not need to see the storm to split it.",
+      "chance": 0.0175,
+      "colors": [
+        "f4a65d",
+        "514065"
+      ],
+      "bonuses": {
+        "attack": 17,
+        "dexterity": 8,
+        "defense": 8
+      },
+      "damage": [
+        294,
+        345
+      ],
+      "rate": 0.915,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "facet_comet",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.18,
+        "wave_freq": 14,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "The Eyeless Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "f4a65d",
+        "accent": "514065"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 292.66,
+        "g8_ratio": 1.04,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_stillpoint",
+      "name": "Stillpoint",
+      "boss": "veil_herald",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "The one quiet thought the Herald could not unravel.",
+      "chance": 0.02,
+      "colors": [
+        "f5e4aa",
+        "556fa6"
+      ],
+      "bonuses": {
+        "magic": 27,
+        "dexterity": 7
+      },
+      "damage": [
+        168,
+        197
+      ],
+      "rate": 1.0,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "bell_shard",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.25,
+        "wave_freq": 16,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Stillpoint Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "f5e4aa",
+        "accent": "556fa6"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 182.52,
+        "g8_ratio": 1.08,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_eventhorizon",
+      "name": "Event Horizon",
+      "boss": "void_empress",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "Everything bends toward it. The arrow knows the way out.",
+      "chance": 0.0175,
+      "colors": [
+        "81efba",
+        "b6c6ec"
+      ],
+      "bonuses": {
+        "attack": 17,
+        "dexterity": 8
+      },
+      "damage": [
+        248,
+        291
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_crescent",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.32,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Event Horizon Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "81efba",
+        "accent": "b6c6ec"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 286.88,
+        "g8_ratio": 1.02,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_dewglass",
+      "name": "Dewglass",
+      "boss": "mother_mycora",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "The morning after the spores have settled.",
+      "chance": 0.0275,
+      "colors": [
+        "efaccf",
+        "e2f3ed"
+      ],
+      "bonuses": {
+        "magic": 20,
+        "dexterity": 4
+      },
+      "damage": [
+        101,
+        118
+      ],
+      "rate": 0.975,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "seed_star",
+        "speed": 30,
+        "range": 25,
+        "size": 0.995,
+        "wave_amp": 0.18,
+        "wave_freq": 12,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "Dewglass Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "efaccf",
+        "accent": "e2f3ed"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 106.47,
+        "g8_ratio": 0.63,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_landfall",
+      "name": "Landfall",
+      "boss": "captain_saltmourn",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "A shore the captain never reached, drawn in a single line.",
+      "chance": 0.025,
+      "colors": [
+        "e8ba73",
+        "9d8ac9"
+      ],
+      "bonuses": {
+        "attack": 11,
+        "dexterity": 5
+      },
+      "damage": [
+        174,
+        204
+      ],
+      "rate": 1.04,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_lance",
+        "speed": 31,
+        "range": 26,
+        "size": 1.04,
+        "wave_amp": 0.25,
+        "wave_freq": 14,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Landfall Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "e8ba73",
+        "accent": "9d8ac9"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 196.88,
+        "g8_ratio": 0.7,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_sunfeather",
+      "name": "Sunfeather",
+      "boss": "ixalith",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "A blue feather from the serpent that carried the sun.",
+      "chance": 0.0225,
+      "colors": [
+        "79b7f2",
+        "f3a38a"
+      ],
+      "bonuses": {
+        "attack": 13,
+        "dexterity": 6,
+        "defense": 6
+      },
+      "damage": [
+        215,
+        252
+      ],
+      "rate": 0.965,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "facet_crescent",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.32,
+        "wave_freq": 16,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Sunfeather Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "79b7f2",
+        "accent": "f3a38a"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 225.12,
+        "g8_ratio": 0.8,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_wakeful",
+      "name": "The Wakeful",
+      "boss": "lantern_shepherd",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "Some lights remain awake after the crossing.",
+      "chance": 0.0225,
+      "colors": [
+        "ffd47c",
+        "6179ab"
+      ],
+      "bonuses": {
+        "magic": 24,
+        "dexterity": 6
+      },
+      "damage": [
+        141,
+        164
+      ],
+      "rate": 0.975,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "bell_shard",
+        "speed": 32,
+        "range": 27,
+        "size": 1.085,
+        "wave_amp": 0.18,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "The Wakeful Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "ffd47c",
+        "accent": "6179ab"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 148.72,
+        "g8_ratio": 0.88,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_ninthsun",
+      "name": "The Ninth Sun",
+      "boss": "jarl_hrimvald",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "Eight winters waited for the ninth sunrise.",
+      "chance": 0.02,
+      "colors": [
+        "dd8b90",
+        "fff0c8"
+      ],
+      "bonuses": {
+        "attack": 15,
+        "dexterity": 7
+      },
+      "damage": [
+        279,
+        327
+      ],
+      "rate": 1.04,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "solar_disc",
+        "speed": 33,
+        "range": 28,
+        "size": 1.13,
+        "wave_amp": 0.25,
+        "wave_freq": 12,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "The Ninth Sun Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "dd8b90",
+        "accent": "fff0c8"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 315.0,
+        "g8_ratio": 1.12,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bow_kaleidoscope",
+      "name": "Kaleidoscope",
+      "boss": "solenne",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Bow",
+      "lore": "The glass remembers every shape except the one it used to be.",
+      "chance": 0.0175,
+      "colors": [
+        "eab1ea",
+        "95e6de"
+      ],
+      "bonuses": {
+        "attack": 17,
+        "dexterity": 8
+      },
+      "damage": [
+        252,
+        297
+      ],
+      "rate": 1.065,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "facet_crescent",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.32,
+        "wave_freq": 14,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Kaleidoscope Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "eab1ea",
+        "accent": "95e6de"
+      },
+      "balance": {
+        "g8_reference_primary": 281.25,
+        "target_primary": 292.5,
+        "g8_ratio": 1.04,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_wand_counterhymn",
+      "name": "Counterhymn",
+      "boss": "choirless_seraph",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Wand",
+      "lore": "A melody played in the space between the last two notes.",
+      "chance": 0.0175,
+      "colors": [
+        "8de4d7",
+        "e99681"
+      ],
+      "bonuses": {
+        "magic": 30,
+        "dexterity": 8
+      },
+      "damage": [
+        169,
+        198
+      ],
+      "rate": 0.975,
+      "shots": 2,
+      "shares": [
+        0.52,
+        0.48
+      ],
+      "spread": 4.5,
+      "projectile": {
+        "style": "bell_shard",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.18,
+        "wave_freq": 16,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_burst",
+        "name": "Counterhymn Unbound",
+        "mult": 2.7,
+        "count": 10,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 1.3
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "quiet",
+          "duration": 1.7
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "8de4d7",
+        "accent": "e99681"
+      },
+      "balance": {
+        "g8_reference_primary": 169.0,
+        "target_primary": 179.14,
+        "g8_ratio": 1.06,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_trident_worldneedle",
+      "name": "Worldneedle",
+      "boss": "oblivara",
+      "rarity": "L",
+      "slot": "weapon",
+      "kind": "Trident",
+      "lore": "A needle large enough to mend the horizon.",
+      "chance": 0.0175,
+      "colors": [
+        "7de5de",
+        "e9a8c0"
+      ],
+      "bonuses": {
+        "attack": 17,
+        "dexterity": 8,
+        "defense": 8
+      },
+      "damage": [
+        319,
+        375
+      ],
+      "rate": 0.94,
+      "shots": 3,
+      "shares": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "spread": 6,
+      "projectile": {
+        "style": "facet_lance",
+        "speed": 34,
+        "range": 29,
+        "size": 1.1749999999999998,
+        "wave_amp": 0.25,
+        "wave_freq": 10,
+        "pierce": true,
+        "particles": "facet"
+      },
+      "charge": {
+        "style": "facet_volley",
+        "name": "Worldneedle Unbound",
+        "mult": 2.7,
+        "count": 7,
+        "shard_total": 1.15
+      },
+      "primary_effects": [
+        {
+          "id": "speed",
+          "amount": -3,
+          "duration": 1.7
+        }
+      ],
+      "secondary_effects": [
+        {
+          "id": "armour_broken",
+          "duration": 2.8
+        }
+      ],
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "7de5de",
+        "accent": "e9a8c0"
+      },
+      "balance": {
+        "g8_reference_primary": 281.4,
+        "target_primary": 326.42,
+        "g8_ratio": 1.16,
+        "role": "Standalone signature; pattern and utility trade against raw damage"
+      }
+    },
+    {
+      "id": "L_bonus_talisman_turnkey",
+      "name": "The Turnkey",
+      "boss": "goblin_king",
+      "rarity": "L",
+      "slot": "bonus",
+      "kind": "Talisman",
+      "lore": "It opens nothing. The king kept it closer than his keys.",
+      "chance": 0.03,
+      "colors": [
+        "ffe3ad",
+        "739cdb"
+      ],
+      "bonuses": {
+        "dexterity": 10,
+        "speed": 8,
+        "mp": 50,
+        "hp": 50
+      },
+      "effects": {
+        "mp_regen": 1.1
+      },
+      "appearance": {
+        "form": 0,
+        "main": "ffe3ad",
+        "accent": "739cdb"
+      }
+    },
+    {
+      "id": "L_cloak_sundaybest",
+      "name": "Sunday Best",
+      "boss": "mad_farmer",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Cloak",
+      "lore": "The farmer saved it for a day that never came.",
+      "chance": 0.03,
+      "colors": [
+        "80b9ee",
+        "f3a54b"
+      ],
+      "bonuses": {
+        "defense": 26,
+        "dexterity": 10,
+        "speed": 7,
+        "hp": 45
+      },
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "80b9ee",
+        "accent": "f3a54b"
+      }
+    },
+    {
+      "id": "L_robe_harborlight",
+      "name": "Harborlight",
+      "boss": "blue_dragon",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Robe",
+      "lore": "A safe harbor, stitched into the shape of a coat.",
+      "chance": 0.0275,
+      "colors": [
+        "fff3d8",
+        "f0b4a0"
+      ],
+      "bonuses": {
+        "defense": 21,
+        "magic": 24,
+        "mp": 90,
+        "speed": 3
+      },
+      "effects": {
+        "shield_drain": 0.9
+      },
+      "appearance": {
+        "form": 2,
+        "main": "fff3d8",
+        "accent": "f0b4a0"
+      }
+    },
+    {
+      "id": "L_cloak_lastword",
+      "name": "The Last Word",
+      "boss": "hollow_king",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Cloak",
+      "lore": "The king wore it after he had run out of things to say.",
+      "chance": 0.022500000000000003,
+      "colors": [
+        "d9aa62",
+        "5ae0cf"
+      ],
+      "bonuses": {
+        "defense": 31,
+        "attack": 9,
+        "hp": 95,
+        "speed": -3
+      },
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "d9aa62",
+        "accent": "5ae0cf"
+      }
+    },
+    {
+      "id": "L_bonus_crystal_heldbreath",
+      "name": "A Held Breath",
+      "boss": "abyssal_siren",
+      "rarity": "L",
+      "slot": "bonus",
+      "kind": "Crystal",
+      "lore": "The last breath before the song began. It has never been released.",
+      "chance": 0.0275,
+      "colors": [
+        "f3eee0",
+        "e47b81"
+      ],
+      "bonuses": {
+        "magic": 17,
+        "mp": 85,
+        "speed": 2
+      },
+      "effects": {
+        "shield_drain": 0.9
+      },
+      "appearance": {
+        "form": 0,
+        "main": "f3eee0",
+        "accent": "e47b81"
+      }
+    },
+    {
+      "id": "L_robe_counterfeitking",
+      "name": "The Counterfeit King",
+      "boss": "gilded_vizier",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Robe",
+      "lore": "A better imitation than the original ruler.",
+      "chance": 0.0275,
+      "colors": [
+        "ffbe64",
+        "6289db"
+      ],
+      "bonuses": {
+        "defense": 23,
+        "magic": 25,
+        "mp": 80,
+        "hp": 40
+      },
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "ffbe64",
+        "accent": "6289db"
+      }
+    },
+    {
+      "id": "L_cloak_secondheart",
+      "name": "Second Heart",
+      "boss": "queen_briarrose",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Cloak",
+      "lore": "One heart for living. One for coming back.",
+      "chance": 0.025,
+      "colors": [
+        "d29b72",
+        "84e3e8"
+      ],
+      "bonuses": {
+        "defense": 25,
+        "dexterity": 11,
+        "speed": 7,
+        "hp": 50
+      },
+      "effects": {
+        "lifesteal": 1
+      },
+      "appearance": {
+        "form": 2,
+        "main": "d29b72",
+        "accent": "84e3e8"
+      }
+    },
+    {
+      "id": "L_robe_nosun",
+      "name": "No Sun at Noon",
+      "boss": "selenarch",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Robe",
+      "lore": "The Moon-Eater hid a clear day inside its lining.",
+      "chance": 0.022500000000000003,
+      "colors": [
+        "ee8dd0",
+        "edfaff"
+      ],
+      "bonuses": {
+        "defense": 24,
+        "magic": 28,
+        "mp": 100,
+        "hp": 60,
+        "attack": -4
+      },
+      "effects": {},
+      "appearance": {
+        "form": 3,
+        "main": "ee8dd0",
+        "accent": "edfaff"
+      }
+    },
+    {
+      "id": "L_cloak_unravelled",
+      "name": "Unravelled",
+      "boss": "brood_matriarch",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Cloak",
+      "lore": "The thread is gone. Somehow the garment remembers its shape.",
+      "chance": 0.022500000000000003,
+      "colors": [
+        "faf2de",
+        "e97888"
+      ],
+      "bonuses": {
+        "defense": 26,
+        "dexterity": 12,
+        "speed": 8,
+        "attack": 5
+      },
+      "effects": {},
+      "appearance": {
+        "form": 0,
+        "main": "faf2de",
+        "accent": "e97888"
+      }
+    },
+    {
+      "id": "L_bonus_eye_clearweather",
+      "name": "Clear Weather",
+      "boss": "stormeye_tyrant",
+      "rarity": "L",
+      "slot": "bonus",
+      "kind": "Eye",
+      "lore": "The Eye closes. For one small moment, the sky is yours.",
+      "chance": 0.022500000000000003,
+      "colors": [
+        "514065",
+        "f4a65d"
+      ],
+      "bonuses": {
+        "magic": 12,
+        "dexterity": 10,
+        "speed": 5,
+        "defense": 4
+      },
+      "effects": {},
+      "appearance": {
+        "form": 1,
+        "main": "514065",
+        "accent": "f4a65d"
+      }
+    },
+    {
+      "id": "L_cloak_dryland",
+      "name": "Dry Land",
+      "boss": "captain_saltmourn",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Cloak",
+      "lore": "The captain packed for the shore. The coat made it.",
+      "chance": 0.03,
+      "colors": [
+        "9d8ac9",
+        "e8ba73"
+      ],
+      "bonuses": {
+        "defense": 27,
+        "attack": 10,
+        "speed": 5,
+        "hp": 60
+      },
+      "effects": {},
+      "appearance": {
+        "form": 2,
+        "main": "9d8ac9",
+        "accent": "e8ba73"
+      }
+    },
+    {
+      "id": "L_robe_wordless",
+      "name": "Wordless",
+      "boss": "choirless_seraph",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Robe",
+      "lore": "The choir wore it when the music became too much to bear.",
+      "chance": 0.022500000000000003,
+      "colors": [
+        "e99681",
+        "8de4d7"
+      ],
+      "bonuses": {
+        "defense": 26,
+        "magic": 29,
+        "mp": 110,
+        "speed": 3
+      },
+      "effects": {
+        "shield_heal": 1
+      },
+      "appearance": {
+        "form": 3,
+        "main": "e99681",
+        "accent": "8de4d7"
+      }
+    },
+    {
+      "id": "L_cloak_wholestitch",
+      "name": "The Whole Stitch",
+      "boss": "oblivara",
+      "rarity": "L",
+      "slot": "armor",
+      "kind": "Cloak",
+      "lore": "One unbroken seam through everything the world has lost.",
+      "chance": 0.022500000000000003,
+      "colors": [
+        "e9a8c0",
+        "7de5de"
+      ],
+      "bonuses": {
+        "defense": 29,
+        "attack": 11,
+        "dexterity": 10,
+        "speed": 6,
+        "hp": 70
+      },
+      "effects": {
+        "shield_drain": 0.9
+      },
+      "appearance": {
+        "form": 0,
+        "main": "e9a8c0",
+        "accent": "7de5de"
+      }
+    },
+    {
+      "id": "A_wand_lastfirework",
+      "name": "The Last Firework",
+      "boss": "magma_warden",
+      "kind": "Wand",
+      "slot": "weapon",
+      "colors": [
+        "ffb64b",
+        "78dbef"
+      ],
+      "damage": [
+        180,
+        220
+      ],
+      "rate": 0.065,
+      "shots": 1,
+      "shares": [
+        1.0
+      ],
+      "spread": 0,
+      "bonuses": {
+        "magic": 3,
+        "speed": -2
+      },
+      "projectile": {
+        "style": "festival_orb",
+        "speed": 9,
+        "range": 27,
+        "size": 3.2,
+        "wave_amp": 0,
+        "wave_freq": 0,
+        "pierce": false,
+        "particles": "festival",
+        "burst": "signature",
+        "burst_count": 28,
+        "burst_total": 0.45
+      },
+      "charge": {
+        "style": "firework",
+        "name": "Grand Finale",
+        "mult": 0.7,
+        "count": 36,
+        "shard_total": 0.7
+      },
+      "lore": "One enormous firework. An unreasonable wait. Completely worth it.",
+      "rarity": "A",
+      "chance": 0.01,
+      "appearance": {
+        "form": 0,
+        "main": "ffb64b",
+        "accent": "78dbef",
+        "body_glow": 0
+      },
+      "effects": {},
+      "primary_effects": [],
+      "secondary_effects": []
+    },
+    {
+      "id": "A_bow_midsummer",
+      "name": "Midsummer",
+      "boss": "queen_briarrose",
+      "kind": "Bow",
+      "slot": "weapon",
+      "colors": [
+        "ef9dce",
+        "92efb7"
+      ],
+      "damage": [
+        82,
+        102
+      ],
+      "rate": 0.46,
+      "shots": 12,
+      "shares": [
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333,
+        0.08333333333333333
+      ],
+      "spread": 0,
+      "bonuses": {
+        "speed": 3
+      },
+      "projectile": {
+        "style": "petal_kite",
+        "speed": 14,
+        "range": 18,
+        "size": 1.15,
+        "wave_amp": 0.65,
+        "wave_freq": 8,
+        "lift_amp": 0.7,
+        "pierce": false,
+        "particles": "festival",
+        "pattern": "radial"
+      },
+      "charge": {
+        "style": "canopy",
+        "name": "A Crown of Summer",
+        "mult": 1.6,
+        "count": 18
+      },
+      "lore": "Flowers in every direction. The gardener has given up.",
+      "rarity": "A",
+      "chance": 0.01,
+      "appearance": {
+        "form": 1,
+        "main": "ef9dce",
+        "accent": "92efb7",
+        "body_glow": 0
+      },
+      "effects": {},
+      "primary_effects": [],
+      "secondary_effects": []
+    },
+    {
+      "id": "A_wand_pocketplanetarium",
+      "name": "Pocket Planetarium",
+      "boss": "solenne",
+      "kind": "Wand",
+      "slot": "weapon",
+      "colors": [
+        "89c8f5",
+        "f4cb7e"
+      ],
+      "damage": [
+        68,
+        88
+      ],
+      "rate": 0.5,
+      "shots": 10,
+      "shares": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ],
+      "spread": 0,
+      "bonuses": {
+        "mp": 25
+      },
+      "projectile": {
+        "style": "orbit_pearl",
+        "speed": 11,
+        "range": 17,
+        "size": 1.05,
+        "wave_amp": 0.85,
+        "lift_amp": 0.85,
+        "wave_freq": 9,
+        "orbit": true,
+        "pierce": false,
+        "particles": "constellation",
+        "pattern": "canopy"
+      },
+      "charge": {
+        "style": "canopy",
+        "name": "All the Little Worlds",
+        "mult": 1.7,
+        "count": 24
+      },
+      "lore": "It includes all the planets you can carry, and several you cannot.",
+      "rarity": "A",
+      "chance": 0.01,
+      "appearance": {
+        "form": 2,
+        "main": "89c8f5",
+        "accent": "f4cb7e",
+        "body_glow": 0
+      },
+      "effects": {},
+      "primary_effects": [],
+      "secondary_effects": []
+    },
+    {
+      "id": "A_trident_badidea",
+      "name": "A Very Bad Idea",
+      "boss": "veil_herald",
+      "kind": "Trident",
+      "slot": "weapon",
+      "colors": [
+        "aff267",
+        "f49cdd"
+      ],
+      "damage": [
+        72,
+        92
+      ],
+      "rate": 0.4,
+      "shots": 14,
+      "shares": [
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142,
+        0.07142857142857142
+      ],
+      "spread": 0,
+      "bonuses": {
+        "dexterity": 2,
+        "defense": -3
+      },
+      "projectile": {
+        "style": "clock_shard",
+        "speed": 16,
+        "range": 16,
+        "size": 1.0,
+        "wave_amp": 0.75,
+        "lift_amp": 0.35,
+        "wave_freq": 14,
+        "orbit": true,
+        "pierce": false,
+        "particles": "festival",
+        "pattern": "sphere"
+      },
+      "charge": {
+        "style": "canopy",
+        "name": "An Even Worse Idea",
+        "mult": 1.8,
+        "count": 24
+      },
+      "lore": "You were warned. In writing. On all three prongs.",
+      "rarity": "A",
+      "chance": 0.01,
+      "appearance": {
+        "form": 3,
+        "main": "aff267",
+        "accent": "f49cdd",
+        "body_glow": 0
+      },
+      "effects": {},
+      "primary_effects": [],
+      "secondary_effects": []
+    },
+    {
+      "id": "A_cloak_starparade",
+      "name": "Star Parade",
+      "boss": "void_empress",
+      "kind": "Cloak",
+      "slot": "armor",
+      "colors": [
+        "354870",
+        "98f4e3"
+      ],
+      "bonuses": {
+        "defense": 6,
+        "speed": 2,
+        "hp": 10
+      },
+      "effects": {
+        "trail": "festival",
+        "showoff": 1.0
+      },
+      "body_glow": 1.4,
+      "lore": "A cloak for people who would rather be seen from orbit.",
+      "rarity": "A",
+      "chance": 0.01,
+      "appearance": {
+        "form": 0,
+        "main": "354870",
+        "accent": "98f4e3",
+        "body_glow": 1.4
+      },
+      "primary_effects": [],
+      "secondary_effects": []
+    },
+    {
+      "id": "A_robe_impossiblemorning",
+      "name": "An Impossible Morning",
+      "boss": "oblivara",
+      "kind": "Robe",
+      "slot": "armor",
+      "colors": [
+        "91e6a6",
+        "ffefb7"
+      ],
+      "bonuses": {
+        "defense": 7,
+        "magic": 4,
+        "mp": 25
+      },
+      "effects": {
+        "trail": "constellation",
+        "showoff": 1.0
+      },
+      "body_glow": 1.0,
+      "lore": "Dress for the sunrise that never happened.",
+      "rarity": "A",
+      "chance": 0.01,
+      "appearance": {
+        "form": 1,
+        "main": "91e6a6",
+        "accent": "ffefb7",
+        "body_glow": 1.0
+      },
+      "primary_effects": [],
+      "secondary_effects": []
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://biiru78vfc6vm"
+path="res://.godot/imported/D_bow_dragon.vox-6234ab975a72cdc0966f59d9dd976c51.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_dragon.vox"
+dest_files=["res://.godot/imported/D_bow_dragon.vox-6234ab975a72cdc0966f59d9dd976c51.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

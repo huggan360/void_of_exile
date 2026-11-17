@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bkk8hes7cpjcq"
+path="res://.godot/imported/D_wand_ofeclipse.vox-078a9bf884b211e73724bd6a987d8b71.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_ofeclipse.vox"
+dest_files=["res://.godot/imported/D_wand_ofeclipse.vox-078a9bf884b211e73724bd6a987d8b71.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

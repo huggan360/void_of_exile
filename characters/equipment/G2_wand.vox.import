@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://u1spvcc2q2m"
+path="res://.godot/imported/G2_wand.vox-f63549b20a1a62063f50d6ecc568f98e.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/G2_wand.vox"
+dest_files=["res://.godot/imported/G2_wand.vox-f63549b20a1a62063f50d6ecc568f98e.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

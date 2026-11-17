@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cf12weocuqt47"
+path="res://.godot/imported/L_wand_stillpoint.vox-2a12a6cd9a857bff0a2f07c265a7c971.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_wand_stillpoint.vox"
+dest_files=["res://.godot/imported/L_wand_stillpoint.vox-2a12a6cd9a857bff0a2f07c265a7c971.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

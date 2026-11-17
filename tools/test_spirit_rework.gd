@@ -21,14 +21,14 @@ func _run() -> void:
 	var wand := Items.make(WAND)
 	check(wand != null and wand.icon() != null, "Spirit wand and original texture are registered")
 	check(wand.is_divine() and wand.bag_type() == "white" and wand.soulbound(), "Spirit wand uses personal White Chests")
-	check(wand.bonuses == {speed = 5, dexterity = 5}, "Wand grants exactly five speed and dexterity")
+	check(wand.bonuses == {speed = 3, dexterity = 3}, "Spirit wand uses the reduced standalone Divine stat budget")
 	check(wand.usable_by("wizard") and not wand.usable_by("archer"), "Spirit wand follows normal wand class restrictions")
 	var stats := PlayerStats.new()
 	stats.class_id = "wizard"
 	var before_speed := stats.total("speed")
 	var before_dex := stats.total("dexterity")
 	stats.gear.weapon = wand
-	check(stats.total("speed") == before_speed + 5 and stats.total("dexterity") == before_dex + 5, "Equipping applies both stat bonuses")
+	check(stats.total("speed") == before_speed + 3 and stats.total("dexterity") == before_dex + 3, "Equipping applies both stat bonuses")
 	stats.gear.weapon = null
 	check(stats.total("speed") == before_speed and stats.total("dexterity") == before_dex, "Unequipping removes both bonuses")
 	var tooltip := ItemTooltip.new()
@@ -117,5 +117,5 @@ func _test_loot() -> void:
 				if item.id != WAND: continue
 				check(bag.viewer in [1, 2] and LootBag.type_for(bag.items) == "white", "Wand is personal, eligible-only White Chest loot")
 				drops[bag.viewer] += 1
-	check(drops[1] > 230 and drops[1] < 370 and drops[2] > 230 and drops[2] < 370, "Seeded loot rolls exercise independent 3% chances for both eligible players")
+	check(drops[1] > 400 and drops[1] < 600 and drops[2] > 375 and drops[2] < 575, "Seeded loot rolls exercise the live Divine chance and contributor shares")
 	print("SPIRIT WAND / 10000 kills: ", drops)

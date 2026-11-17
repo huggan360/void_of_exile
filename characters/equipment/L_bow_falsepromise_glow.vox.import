@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bh710byyxoqus"
+path="res://.godot/imported/L_bow_falsepromise_glow.vox-5d558d33039532d0f1242fecfc3cd755.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_bow_falsepromise_glow.vox"
+dest_files=["res://.godot/imported/L_bow_falsepromise_glow.vox-5d558d33039532d0f1242fecfc3cd755.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

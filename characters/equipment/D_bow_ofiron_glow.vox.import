@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://du1e2ct05dxu"
+path="res://.godot/imported/D_bow_ofiron_glow.vox-4f7cdd7324c582d1d14441cc6606caff.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_ofiron_glow.vox"
+dest_files=["res://.godot/imported/D_bow_ofiron_glow.vox-4f7cdd7324c582d1d14441cc6606caff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

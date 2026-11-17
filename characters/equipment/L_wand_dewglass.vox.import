@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cowbmxx8cfirx"
+path="res://.godot/imported/L_wand_dewglass.vox-17d7ae1e3d03ccfd34882aae71143734.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_wand_dewglass.vox"
+dest_files=["res://.godot/imported/L_wand_dewglass.vox-17d7ae1e3d03ccfd34882aae71143734.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

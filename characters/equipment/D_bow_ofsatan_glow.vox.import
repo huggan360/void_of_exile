@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://30ftolutl7by"
+path="res://.godot/imported/D_bow_ofsatan_glow.vox-17ea4f570ab314ecc89ddaa0b0a228d1.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_ofsatan_glow.vox"
+dest_files=["res://.godot/imported/D_bow_ofsatan_glow.vox-17ea4f570ab314ecc89ddaa0b0a228d1.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

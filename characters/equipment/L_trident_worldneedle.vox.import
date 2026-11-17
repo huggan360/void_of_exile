@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d0no8hprm3kx3"
+path="res://.godot/imported/L_trident_worldneedle.vox-be2aad77226922d2a2c1b5b1d06e6e91.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_trident_worldneedle.vox"
+dest_files=["res://.godot/imported/L_trident_worldneedle.vox-be2aad77226922d2a2c1b5b1d06e6e91.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

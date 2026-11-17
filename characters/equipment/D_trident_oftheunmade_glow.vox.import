@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bskeybo3lb2we"
+path="res://.godot/imported/D_trident_oftheunmade_glow.vox-03a5993683c4742424a5f5c6d0efd8fc.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_oftheunmade_glow.vox"
+dest_files=["res://.godot/imported/D_trident_oftheunmade_glow.vox-03a5993683c4742424a5f5c6d0efd8fc.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

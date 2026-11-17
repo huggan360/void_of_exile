@@ -59,6 +59,7 @@ func set_look(player_name: String, gear: String) -> void:
 	var ids := parts[-1].split(",")
 	for i in mini(ids.size(), PlayerStats.GEAR_SLOTS.size()):
 		_look.gear[PlayerStats.GEAR_SLOTS[i]] = Items.make(ids[i]) if Items.exists(ids[i]) else null
+	model.set_equipment(_look.gear.weapon, _look.gear.armor)
 	shield.set_spell(_look.gear.spell)
 	aura.refresh(_look)
 

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dil01er8c00p"
+path="res://.godot/imported/D_wand_thewandofthedivine_glow.vox-af49c610c72c1c22c3da5f6977ba6a9b.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_thewandofthedivine_glow.vox"
+dest_files=["res://.godot/imported/D_wand_thewandofthedivine_glow.vox-af49c610c72c1c22c3da5f6977ba6a9b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

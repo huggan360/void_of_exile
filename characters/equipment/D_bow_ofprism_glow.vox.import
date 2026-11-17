@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bpp5m1a6gcxbg"
+path="res://.godot/imported/D_bow_ofprism_glow.vox-0d11dc50363b37cc06d404692bbb30ff.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_ofprism_glow.vox"
+dest_files=["res://.godot/imported/D_bow_ofprism_glow.vox-0d11dc50363b37cc06d404692bbb30ff.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,2378 @@
+{
+  "A_bow_midsummer": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "A_cloak_starparade": {
+    "main": [
+      53,
+      72,
+      112
+    ],
+    "accent": [
+      152,
+      244,
+      227
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 0,
+    "body_glow": 1.4
+  },
+  "A_robe_impossiblemorning": {
+    "main": [
+      145,
+      230,
+      166
+    ],
+    "accent": [
+      255,
+      239,
+      183
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 1,
+    "body_glow": 1.0
+  },
+  "A_trident_badidea": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "A_wand_lastfirework": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "A_wand_pocketplanetarium": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_bow_Blood": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_Cindrella": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_Darkmatter": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_Fallenwoods": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_dragon": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_goldslinger": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofeclipse": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_offrost": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofiron": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofprism": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofrequiem": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofsaltmourn": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofsatan": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofstorm": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofthestormeye": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_oftheunmade": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_bow_ofvenom": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "D_cloak_blood": {
+    "main": [
+      15,
+      15,
+      15
+    ],
+    "accent": [
+      235,
+      27,
+      27
+    ],
+    "ornate": true
+  },
+  "D_cloak_burningman": {
+    "main": [
+      220,
+      220,
+      220
+    ],
+    "accent": [
+      254,
+      122,
+      17
+    ],
+    "ornate": true
+  },
+  "D_cloak_goldslinger": {
+    "main": [
+      15,
+      15,
+      15
+    ],
+    "accent": [
+      235,
+      173,
+      27
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofcindrella": {
+    "main": [
+      122,
+      69,
+      106
+    ],
+    "accent": [
+      244,
+      163,
+      199
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofeclipse": {
+    "main": [
+      116,
+      52,
+      69
+    ],
+    "accent": [
+      243,
+      160,
+      77
+    ],
+    "ornate": true
+  },
+  "D_cloak_offallenwood": {
+    "main": [
+      70,
+      87,
+      58
+    ],
+    "accent": [
+      167,
+      223,
+      128
+    ],
+    "ornate": true
+  },
+  "D_cloak_offrost": {
+    "main": [
+      124,
+      171,
+      191
+    ],
+    "accent": [
+      83,
+      213,
+      228
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofiron": {
+    "main": [
+      39,
+      43,
+      57
+    ],
+    "accent": [
+      232,
+      235,
+      242
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofjade": {
+    "main": [
+      132,
+      223,
+      142
+    ],
+    "accent": [
+      243,
+      205,
+      105
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofprism": {
+    "main": [
+      127,
+      167,
+      192
+    ],
+    "accent": [
+      238,
+      127,
+      149
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofrequiem": {
+    "main": [
+      66,
+      52,
+      79
+    ],
+    "accent": [
+      239,
+      206,
+      131
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofsaltmourn": {
+    "main": [
+      41,
+      63,
+      89
+    ],
+    "accent": [
+      229,
+      185,
+      105
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofsatan": {
+    "main": [
+      109,
+      31,
+      42
+    ],
+    "accent": [
+      247,
+      99,
+      54
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofstorm": {
+    "main": [
+      86,
+      88,
+      152
+    ],
+    "accent": [
+      249,
+      216,
+      74
+    ],
+    "ornate": true
+  },
+  "D_cloak_oftheafterlife": {
+    "main": [
+      53,
+      53,
+      100
+    ],
+    "accent": [
+      131,
+      233,
+      242
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofthebarrow": {
+    "main": [
+      164,
+      182,
+      191
+    ],
+    "accent": [
+      240,
+      245,
+      237
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofthedivine": {
+    "main": [
+      155,
+      119,
+      64
+    ],
+    "accent": [
+      255,
+      227,
+      119
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofthestormeye": {
+    "main": [
+      105,
+      119,
+      165
+    ],
+    "accent": [
+      160,
+      232,
+      255
+    ],
+    "ornate": true
+  },
+  "D_cloak_oftheunmade": {
+    "main": [
+      74,
+      80,
+      103
+    ],
+    "accent": [
+      246,
+      207,
+      102
+    ],
+    "ornate": true
+  },
+  "D_cloak_ofvenom": {
+    "main": [
+      101,
+      119,
+      72
+    ],
+    "accent": [
+      188,
+      242,
+      53
+    ],
+    "ornate": true
+  },
+  "D_cloak_silvershield": {
+    "main": [
+      220,
+      220,
+      220
+    ],
+    "accent": [
+      255,
+      255,
+      255
+    ],
+    "ornate": true
+  },
+  "D_cloak_theblue": {
+    "main": [
+      29,
+      29,
+      29
+    ],
+    "accent": [
+      126,
+      225,
+      255
+    ],
+    "ornate": true
+  },
+  "D_cloak_thevoid": {
+    "main": [
+      21,
+      7,
+      27
+    ],
+    "accent": [
+      40,
+      20,
+      53
+    ],
+    "ornate": true
+  },
+  "D_cloak_unlimitedmadness": {
+    "main": [
+      220,
+      220,
+      220
+    ],
+    "accent": [
+      92,
+      18,
+      238
+    ],
+    "ornate": true
+  },
+  "D_robe_ofeclipse": {
+    "main": [
+      116,
+      52,
+      69
+    ],
+    "accent": [
+      243,
+      160,
+      77
+    ],
+    "ornate": true
+  },
+  "D_robe_offallenwood": {
+    "main": [
+      70,
+      87,
+      58
+    ],
+    "accent": [
+      167,
+      223,
+      128
+    ],
+    "ornate": true
+  },
+  "D_robe_offrost": {
+    "main": [
+      52,
+      87,
+      119
+    ],
+    "accent": [
+      83,
+      213,
+      228
+    ],
+    "ornate": true
+  },
+  "D_robe_ofiron": {
+    "main": [
+      232,
+      235,
+      242
+    ],
+    "accent": [
+      232,
+      235,
+      242
+    ],
+    "ornate": true
+  },
+  "D_robe_ofmycelium": {
+    "main": [
+      164,
+      92,
+      42
+    ],
+    "accent": [
+      233,
+      169,
+      66
+    ],
+    "ornate": true
+  },
+  "D_robe_ofprism": {
+    "main": [
+      245,
+      255,
+      255
+    ],
+    "accent": [
+      242,
+      206,
+      120
+    ],
+    "ornate": true
+  },
+  "D_robe_ofrequiem": {
+    "main": [
+      181,
+      131,
+      66
+    ],
+    "accent": [
+      239,
+      206,
+      131
+    ],
+    "ornate": true
+  },
+  "D_robe_ofsatan": {
+    "main": [
+      109,
+      31,
+      42
+    ],
+    "accent": [
+      247,
+      99,
+      54
+    ],
+    "ornate": true
+  },
+  "D_robe_ofsilver": {
+    "main": [
+      159,
+      166,
+      180
+    ],
+    "accent": [
+      170,
+      210,
+      255
+    ],
+    "ornate": true
+  },
+  "D_robe_ofspirit": {
+    "main": [
+      101,
+      39,
+      94
+    ],
+    "accent": [
+      240,
+      28,
+      222
+    ],
+    "ornate": true
+  },
+  "D_robe_ofstorm": {
+    "main": [
+      86,
+      88,
+      152
+    ],
+    "accent": [
+      249,
+      216,
+      74
+    ],
+    "ornate": true
+  },
+  "D_robe_ofthebarrow": {
+    "main": [
+      48,
+      76,
+      108
+    ],
+    "accent": [
+      72,
+      157,
+      213
+    ],
+    "ornate": true
+  },
+  "D_robe_oftheblue": {
+    "main": [
+      134,
+      245,
+      245
+    ],
+    "accent": [
+      134,
+      245,
+      245
+    ],
+    "ornate": true
+  },
+  "D_robe_ofthedivine": {
+    "main": [
+      155,
+      119,
+      64
+    ],
+    "accent": [
+      255,
+      227,
+      119
+    ],
+    "ornate": true
+  },
+  "D_robe_ofthedragonsbreath": {
+    "main": [
+      226,
+      64,
+      0
+    ],
+    "accent": [
+      251,
+      187,
+      19
+    ],
+    "ornate": true
+  },
+  "D_robe_ofthegalaxy": {
+    "main": [
+      17,
+      17,
+      17
+    ],
+    "accent": [
+      235,
+      242,
+      3
+    ],
+    "ornate": true
+  },
+  "D_robe_ofthestormeye": {
+    "main": [
+      105,
+      119,
+      165
+    ],
+    "accent": [
+      160,
+      232,
+      255
+    ],
+    "ornate": true
+  },
+  "D_robe_oftheunmade": {
+    "main": [
+      74,
+      80,
+      103
+    ],
+    "accent": [
+      246,
+      207,
+      102
+    ],
+    "ornate": true
+  },
+  "D_robe_ofvenom": {
+    "main": [
+      101,
+      119,
+      72
+    ],
+    "accent": [
+      188,
+      242,
+      53
+    ],
+    "ornate": true
+  },
+  "D_robe_robeofpower": {
+    "main": [
+      17,
+      18,
+      18
+    ],
+    "accent": [
+      155,
+      0,
+      0
+    ],
+    "ornate": true
+  },
+  "D_trident_ofblood": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofeclipse": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_offrost": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofiron": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofmadness": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofsaltmourn": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofsatan": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofstorm": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofthebarrow": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_oftheblue": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofthedivine": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofthefallenwood": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofthestormeye": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_oftheunmade": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofthevoid": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_trident_ofvenom": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofeclipse": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_offrost": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofiron": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofjade": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofmycelium": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofrequiem": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofstorm": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_oftheafterlife": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofthestormeye": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_oftheunmade": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_ofvenom": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_thewandofdarkness": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_thewandofpower": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_thewandofsatan": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_thewandofsteel": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_thewandofthedivine": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_thewandofthefallenwood": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "D_wand_thewandofthespitit": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G1_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -0.4
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G1_cloak": {
+    "main": [
+      43,
+      51,
+      35
+    ],
+    "accent": [
+      101,
+      142,
+      64
+    ],
+    "ornate": false
+  },
+  "G1_robe": {
+    "main": [
+      77,
+      107,
+      53
+    ],
+    "accent": [
+      72,
+      125,
+      63
+    ],
+    "ornate": false
+  },
+  "G1_trident": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G1_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G2_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -0.4
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G2_cloak": {
+    "main": [
+      129,
+      86,
+      58
+    ],
+    "accent": [
+      129,
+      86,
+      58
+    ],
+    "ornate": false
+  },
+  "G2_robe": {
+    "main": [
+      107,
+      72,
+      53
+    ],
+    "accent": [
+      125,
+      85,
+      63
+    ],
+    "ornate": false
+  },
+  "G2_trident": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G2_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G3_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -0.4
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G3_cloak": {
+    "main": [
+      35,
+      51,
+      47
+    ],
+    "accent": [
+      129,
+      86,
+      58
+    ],
+    "ornate": false
+  },
+  "G3_robe": {
+    "main": [
+      53,
+      65,
+      107
+    ],
+    "accent": [
+      120,
+      71,
+      48
+    ],
+    "ornate": false
+  },
+  "G3_trident": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G3_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G4_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -0.4
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G4_cloak": {
+    "main": [
+      66,
+      57,
+      35
+    ],
+    "accent": [
+      195,
+      88,
+      46
+    ],
+    "ornate": false
+  },
+  "G4_robe": {
+    "main": [
+      90,
+      34,
+      73
+    ],
+    "accent": [
+      214,
+      96,
+      174
+    ],
+    "ornate": false
+  },
+  "G4_trident": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G4_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G5_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -0.4
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G5_cloak": {
+    "main": [
+      63,
+      63,
+      63
+    ],
+    "accent": [
+      124,
+      46,
+      195
+    ],
+    "ornate": false
+  },
+  "G5_robe": {
+    "main": [
+      142,
+      143,
+      140
+    ],
+    "accent": [
+      142,
+      143,
+      140
+    ],
+    "ornate": false
+  },
+  "G5_trident": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G5_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G6_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -0.4
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G6_cloak": {
+    "main": [
+      35,
+      45,
+      51
+    ],
+    "accent": [
+      87,
+      58,
+      129
+    ],
+    "ornate": false
+  },
+  "G6_robe": {
+    "main": [
+      62,
+      172,
+      22
+    ],
+    "accent": [
+      126,
+      211,
+      24
+    ],
+    "ornate": false
+  },
+  "G6_trident": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G6_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G7_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G7_cloak": {
+    "main": [
+      57,
+      57,
+      57
+    ],
+    "accent": [
+      238,
+      163,
+      18
+    ],
+    "ornate": true
+  },
+  "G7_robe": {
+    "main": [
+      219,
+      128,
+      0
+    ],
+    "accent": [
+      231,
+      108,
+      0
+    ],
+    "ornate": true
+  },
+  "G7_trident": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G7_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G8_bow": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": false
+  },
+  "G8_cloak": {
+    "main": [
+      220,
+      220,
+      220
+    ],
+    "accent": [
+      238,
+      163,
+      18
+    ],
+    "ornate": true
+  },
+  "G8_robe": {
+    "main": [
+      192,
+      99,
+      0
+    ],
+    "accent": [
+      238,
+      142,
+      7
+    ],
+    "ornate": true
+  },
+  "G8_trident": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "G8_wand": {
+    "offset": [
+      -2.25,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_bow_blackcomet": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_eventhorizon": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_falsepromise": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_heartwoodengine": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_kaleidoscope": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_kingfisher": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_landfall": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_ninthsun": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_secondhand": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_thornclock": {
+    "offset": [
+      -1.35,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_bow_threadcutter": {
+    "offset": [
+      -0.45,
+      -6.5,
+      -1.2000000000000002
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.8
+    ],
+    "glow": true
+  },
+  "L_cloak_dryland": {
+    "main": [
+      157,
+      138,
+      201
+    ],
+    "accent": [
+      232,
+      186,
+      115
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 2,
+    "body_glow": 0.0
+  },
+  "L_cloak_lastword": {
+    "main": [
+      217,
+      170,
+      98
+    ],
+    "accent": [
+      90,
+      224,
+      207
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 3,
+    "body_glow": 0.0
+  },
+  "L_cloak_secondheart": {
+    "main": [
+      210,
+      155,
+      114
+    ],
+    "accent": [
+      132,
+      227,
+      232
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 2,
+    "body_glow": 0.0
+  },
+  "L_cloak_sundaybest": {
+    "main": [
+      128,
+      185,
+      238
+    ],
+    "accent": [
+      243,
+      165,
+      75
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 1,
+    "body_glow": 0.0
+  },
+  "L_cloak_unravelled": {
+    "main": [
+      250,
+      242,
+      222
+    ],
+    "accent": [
+      233,
+      120,
+      136
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 0,
+    "body_glow": 0.0
+  },
+  "L_cloak_wholestitch": {
+    "main": [
+      233,
+      168,
+      192
+    ],
+    "accent": [
+      125,
+      229,
+      222
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 0,
+    "body_glow": 0.0
+  },
+  "L_robe_counterfeitking": {
+    "main": [
+      255,
+      190,
+      100
+    ],
+    "accent": [
+      98,
+      137,
+      219
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 1,
+    "body_glow": 0.0
+  },
+  "L_robe_harborlight": {
+    "main": [
+      255,
+      243,
+      216
+    ],
+    "accent": [
+      240,
+      180,
+      160
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 2,
+    "body_glow": 0.0
+  },
+  "L_robe_nosun": {
+    "main": [
+      238,
+      141,
+      208
+    ],
+    "accent": [
+      237,
+      250,
+      255
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 3,
+    "body_glow": 0.0
+  },
+  "L_robe_wordless": {
+    "main": [
+      233,
+      150,
+      129
+    ],
+    "accent": [
+      141,
+      228,
+      215
+    ],
+    "ornate": true,
+    "signature": true,
+    "form": 3,
+    "body_glow": 0.0
+  },
+  "L_trident_bellwether": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_trident_coldverdict": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_trident_crownbreaker": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_trident_eyeless": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_trident_sunfeather": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_trident_tideglass": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_trident_timesunder": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_trident_worldneedle": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_counterhymn": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_daybreaker": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_dewglass": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_mirageengine": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_seedoftomorrow": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_silentbell": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_stillpoint": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_sunsplinter": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_thewandofash": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  },
+  "L_wand_wakeful": {
+    "offset": [
+      -3.1500000000000004,
+      -3,
+      -1.35
+    ],
+    "scale": [
+      0.9,
+      1,
+      0.9
+    ],
+    "glow": true
+  }
+}

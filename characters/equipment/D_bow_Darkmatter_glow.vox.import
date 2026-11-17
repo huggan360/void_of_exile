@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bi4dkfnwekuqw"
+path="res://.godot/imported/D_bow_Darkmatter_glow.vox-6eafbe1672086642b35381c3e46e68a0.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_Darkmatter_glow.vox"
+dest_files=["res://.godot/imported/D_bow_Darkmatter_glow.vox-6eafbe1672086642b35381c3e46e68a0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c3f7by1sdmwqj"
+path="res://.godot/imported/D_trident_ofthefallenwood_glow.vox-bed9de9ce4e02f80f2f7d97f7cfdc370.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofthefallenwood_glow.vox"
+dest_files=["res://.godot/imported/D_trident_ofthefallenwood_glow.vox-bed9de9ce4e02f80f2f7d97f7cfdc370.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

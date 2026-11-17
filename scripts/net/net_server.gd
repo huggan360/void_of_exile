@@ -916,7 +916,7 @@ func on_shot(peer_id: int, origin: Vector3, direction: Vector3, weapon_id: Strin
 	var stats := GameServer.character(p.player_id)
 	if stats == null or GameServer.intro_locked(p.player_id) or GameServer.interacting(p.player_id) or stats.buffs.has_effect("quiet"): return
 	var clean := {}
-	for key in ["speed", "size", "range", "spiral", "pierce", "wave_amp", "burst", "secondary", "style", "cone_deg"]:
+	for key in ["speed", "size", "range", "spiral", "pierce", "wave_amp", "lift_amp", "up", "burst", "secondary", "style", "cone_deg"]:
 		if mods.has(key):
 			clean[key] = mods[key]
 	_to_realm(p.realm, origin, ["shot", p.player_id, origin, direction, weapon_id, phase, clean], 0, peer_id)

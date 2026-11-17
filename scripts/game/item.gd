@@ -2,7 +2,7 @@ class_name Item
 extends Resource
 ## A piece of gear. Slots: "weapon" (bows), "armor" (cloaks), "spell" (warp
 ## magic) and "bonus". Tier 1-8 are graded items (G1...G8); tier 0 means
-## Divine: special, untiered items with their own abilities.
+## Divine sets; tier -1 means Legendary standalone gear, tier -2 Artifact collectibles.
 ## Consumables (slot "consumable", e.g. elixirs) stack up to stack_max and
 ## can sit in the quickslots.
 ##
@@ -13,6 +13,8 @@ extends Resource
 ## tools/import_textures.py).
 
 const DIVINE := 0
+const LEGENDARY := -1
+const ARTIFACT := -2
 
 @export var id := ""  # icon file name, e.g. "G3_bow"
 @export var item_name := ""
@@ -118,6 +120,18 @@ func is_divine() -> bool:
 	return tier == DIVINE
 
 
+func is_legendary() -> bool:
+	return tier == LEGENDARY
+
+
+func is_artifact() -> bool:
+	return tier == ARTIFACT
+
+
+func is_special() -> bool:
+	return is_divine() or is_legendary() or is_artifact()
+
+
 ## Only the Archer is playable in this pass. Other gear is collectible for future classes.
 func usable_by(class_id: String) -> bool:
 	return slot == "pet" or PlayerClasses.allows(class_id, self)
@@ -146,27 +160,28 @@ func is_elixir() -> bool:
 
 
 ## The bag it drops in: gray (elixirs), green (G1-G4), red (G5),
-## purple (G6-G8); blue is reserved for stat potions, white or black (Divine). See LootBag.
+## purple (G6-G8); blue is reserved for stat potions, white (Divine) or black (Legendary/Artifact). See LootBag.
 func bag_type() -> String:
+	# Rarity wins over legacy per-item overrides, including old black Divine drops.
+	if is_divine(): return "white"
+	if is_legendary() or is_artifact(): return "black"
 	if drop_bag != "":
 		return drop_bag
 	if is_consumable():
 		return "gray"
-	if is_divine():
-		return "white"
 	return ["green", "green", "green", "green", "red", "purple", "purple", "purple"][clampi(tier - 1, 0, 7)]
 
 
 ## Bound to its owner: can't be traded or put in bags others can see.
 func soulbound() -> bool:
-	return LootBag.is_personal(bag_type())
+	return is_special() or LootBag.is_personal(bag_type())
 
 
-## "G3", "D" for Divine, nothing for consumables and keys.
+## "G3", "D" for Divine, "L" for Legendary, "A" for Artifact; no badge for consumables or keys.
 func badge() -> String:
 	if slot == "pet" or is_consumable() or is_key() or is_story():
 		return ""
-	return "D" if is_divine() else "G%d" % tier
+	return "A" if is_artifact() else "L" if is_legendary() else "D" if is_divine() else "G%d" % tier
 
 
 func grade_name() -> String:
@@ -177,7 +192,7 @@ func grade_name() -> String:
 		return "Key"
 	if is_story():
 		return "Story item"
-	return "Divine" if is_divine() else "Grade %d" % tier
+	return "Artifact" if is_artifact() else "Legendary" if is_legendary() else "Divine" if is_divine() else "Grade %d" % tier
 
 
 ## The item's 8 x 8 pixel art.

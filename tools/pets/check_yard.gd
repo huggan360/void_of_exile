@@ -89,12 +89,62 @@ func _run() -> void:
 	residents._process(0.01)
 	check(residents._wanderers.has(int(newborn.id)) and not residents._hatching, "new pet pops out after account confirmation")
 	check(Shops.DEFS.has("pets") and Shops.fallback().shops.pets.stock[0].id == "pet_egg", "Pet Store uses the pets shop")
+	_check_store_camera(world)
 	world.free()
 	actor.free()
 	PetsClient.receive(PetDefs.empty_state())
 	await get_tree().process_frame
 	print("[pet-yard] complete failures=", _failures)
 	get_tree().quit(1 if _failures else 0)
+
+func _check_store_camera(world: PetYardWorld) -> void:
+	var player := Player.new()
+	player.stats = PlayerStats.new()
+	player.frozen = false
+	add_child(player)
+	player.add_child(player.aim_marker)
+	player.set_physics_process(false)
+	player.set_spatial_world(world)
+	var view := player.ground_view
+	var indoors := Vector3(64, 1, -33)
+	var outdoors := Vector3(64, 1, -30)
+	check(world.first_person_at(indoors) and world.first_person_at(Vector3(64, 1, -31.1)), "store room and doorway force first person")
+	check(not world.first_person_at(outdoors) and not world.first_person_at(indoors + Vector3(0, 6, 0)), "square and rooftop keep the outdoor view")
+	for mode in 2:
+		view.camera_mode = mode
+		player.position = outdoors
+		player._update_camera(1.0 / 60)
+		check(view.first_person == 0.0 and player.model.visible, "outdoor mode %d shows the player" % mode)
+		player.position = indoors
+		player._update_camera(1.0 / 60)
+		check(view.free_look() and view.first_person == 1.0 and not player.model.visible, "entering from mode %d forces first person" % mode)
+		check(player.camera.global_position.distance_to(indoors + Vector3(0, 1.57, 0)) < 0.01, "indoor camera stays at eye height")
+		check(not player.status_visuals.visible and not player.aura.visible, "first person hides local equipment effects")
+		check(view._sight.mode == "fp", "indoor view enables mouse aiming and crosshair")
+		view._see_through = 1.0
+		view._process(1.0)
+		check(view._see_through == 0.0 and view._focus_distance == -1.0, "first person closes the see-through window and ground focus")
+		player.ui_blocked = true
+		player._update_camera(1.0 / 60)
+		check(view.first_person == 1.0 and view._sight.mode == "", "shop UI keeps first person and releases aiming")
+		player.ui_blocked = false
+		player.position = outdoors
+		player._update_camera(1.0 / 60)
+		check(view.camera_mode == mode and view.first_person == 0.0 and view.free_look() == (mode != 0) and player.model.visible, "leaving restores outdoor mode %d" % mode)
+	player.position = indoors
+	player._update_camera(1.0 / 60)
+	var roofs := 0
+	var roof_visible := true
+	for child in world.get_children():
+		if child.get_script() != PetYardWorld.ISLAND_ART: continue
+		child._process(1.0 / 60)
+		for mesh in child.get_children():
+			if mesh is MeshInstance3D and mesh.mesh.resource_path.begins_with("res://scenes/vesperis/pet_store_roof"):
+				roofs += 1
+				roof_visible = roof_visible and mesh.visible
+	check(roofs > 0 and roof_visible, "store roof meshes stay visible with the player inside")
+	player.set_spatial_world(null)
+	player.free()
 
 func _reachable(world: PetYardWorld) -> Dictionary:
 	var start := Vector2i(roundi(world.spawn_point.x), roundi(world.spawn_point.z))

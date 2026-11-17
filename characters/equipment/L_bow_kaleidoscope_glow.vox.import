@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cdr443bq1k2fy"
+path="res://.godot/imported/L_bow_kaleidoscope_glow.vox-5c687fc2fc4ab267da581ed3fb5bc39b.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_bow_kaleidoscope_glow.vox"
+dest_files=["res://.godot/imported/L_bow_kaleidoscope_glow.vox-5c687fc2fc4ab267da581ed3fb5bc39b.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

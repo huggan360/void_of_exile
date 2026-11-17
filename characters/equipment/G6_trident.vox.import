@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bnt034ush42y2"
+path="res://.godot/imported/G6_trident.vox-002eac61fcb5c085ad3fb0b6de82c12c.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/G6_trident.vox"
+dest_files=["res://.godot/imported/G6_trident.vox-002eac61fcb5c085ad3fb0b6de82c12c.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,15 +1,16 @@
 {
-  "version": "26.3-beta",
-  "title": "Beta release",
-  "date": "2026-11-16",
+  "version": "26.4-beta",
+  "title": "Divine sets, Legendaries and Artifacts",
+  "date": "2026-11-17",
   "notes": [
-    "Pets: hatch 15 pets from eggs, level them with Dots and merge them",
-    "Your own Pet Yard island with a nest, the Caretaker and a Pet Store",
-    "Walking into voxel walls no longer drops the frame rate",
-    "Walking is no longer pulled back by the server",
-    "Ships turn and speed up the moment the pilot presses a key",
-    "The Deep Dark in lime and pink with glowing trails",
-    "Portals drop twice as often and chests keep clear of them",
-    "Frames on tabs, health and magic bars, banners and cutscene captions"
+    "Divine sets grant cumulative bonuses at 2, 3 and 4 equipped pieces",
+    "42 Legendary boss items and 6 collectible Artifacts with new projectiles and worn appearances",
+    "Divine items use white chests; Legendaries and Artifacts use black chests",
+    "Lower item stat bonuses, varied Legendary damage and safe migration of retired items",
+    "Red Divine set banners and stage bonuses in item hovers and the website wiki",
+    "The Pet Store keeps its roof and switches to first person indoors",
+    "Smoother Surface movement over voxel steps and slopes",
+    "Harder boss fights and personal loot chances based on damage contribution",
+    "Expanded graphics settings with anti-aliasing and sharpening controls"
   ]
 }

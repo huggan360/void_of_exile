@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dp1i5b2xreyub"
+path="res://.godot/imported/D_bow_ofeclipse.vox-8e5d710dc86db3f56c414dec7d54f3bb.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_ofeclipse.vox"
+dest_files=["res://.godot/imported/D_bow_ofeclipse.vox-8e5d710dc86db3f56c414dec7d54f3bb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

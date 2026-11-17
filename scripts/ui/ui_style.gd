@@ -32,9 +32,15 @@ const GRADE_COLORS := [Color(0.82, 0.82, 0.86), Color(0.7, 0.9, 0.6), Color(0.45
 		Color(0.45, 0.78, 1.0), Color(0.62, 0.55, 1.0), Color(0.86, 0.5, 1.0), Color(1.0, 0.62, 0.35),
 		Color(1.0, 0.85, 0.35)]
 const DIVINE_COLOR := Color(1.0, 0.55, 0.8)
+const LEGENDARY_COLOR := Color("4ba9ff")
+const ARTIFACT_COLOR := Color("65ef89")
 
 
 static func grade_color(item: Item) -> Color:
+	if item.is_artifact():
+		return ARTIFACT_COLOR
+	if item.is_legendary():
+		return LEGENDARY_COLOR
 	if item.is_divine():
 		return DIVINE_COLOR
 	return GRADE_COLORS[clampi(item.tier - 1, 0, GRADE_COLORS.size() - 1)]

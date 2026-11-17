@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dlg0jx51kgi6t"
+path="res://.godot/imported/L_bow_ninthsun.vox-bf2cb578da6de8ba16e993446b0c2cfd.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_bow_ninthsun.vox"
+dest_files=["res://.godot/imported/L_bow_ninthsun.vox-bf2cb578da6de8ba16e993446b0c2cfd.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

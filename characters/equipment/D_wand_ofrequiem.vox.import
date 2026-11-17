@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://d041u6kixtlu4"
+path="res://.godot/imported/D_wand_ofrequiem.vox-7efd9549e19f44508e07ba1a241f8efa.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_ofrequiem.vox"
+dest_files=["res://.godot/imported/D_wand_ofrequiem.vox-7efd9549e19f44508e07ba1a241f8efa.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

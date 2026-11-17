@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://wxv8h8vvhybt"
+path="res://.godot/imported/D_wand_thewandofsatan_glow.vox-01794695bff6b80c7c25cbe169ba18e4.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_thewandofsatan_glow.vox"
+dest_files=["res://.godot/imported/D_wand_thewandofsatan_glow.vox-01794695bff6b80c7c25cbe169ba18e4.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

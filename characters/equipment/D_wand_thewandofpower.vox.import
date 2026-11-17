@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bwhmsocpn5uh4"
+path="res://.godot/imported/D_wand_thewandofpower.vox-ff3c8aa3adc76a56c6a822da06071c15.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_thewandofpower.vox"
+dest_files=["res://.godot/imported/D_wand_thewandofpower.vox-ff3c8aa3adc76a56c6a822da06071c15.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

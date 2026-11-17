@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bg808ph85i3sw"
+path="res://.godot/imported/G2_bow.vox-0abcaefeee0dad6ed97c0e923d5b96e0.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/G2_bow.vox"
+dest_files=["res://.godot/imported/G2_bow.vox-0abcaefeee0dad6ed97c0e923d5b96e0.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

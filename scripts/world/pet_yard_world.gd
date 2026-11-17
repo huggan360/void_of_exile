@@ -74,6 +74,11 @@ static func id_for(account_id: int) -> String:
 	return PREFIX + str(account_id)
 
 
+func first_person_at(position: Vector3) -> bool:
+	return position.y > SHOP_POS.y - 0.5 and position.y < SHOP_POS.y + 3.75 \
+		and SHOP_FLOOR.grow(-0.2).has_point(Vector2(position.x, position.z))
+
+
 ## [kind, base center, size]. Collision never depends on installed artwork.
 static func furnishing_layout() -> Array:
 	var out: Array = [

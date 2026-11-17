@@ -76,7 +76,7 @@ func _begin() -> void:
 	set_physics_process(true)
 	for p in _sparks: p.emitting = true
 	SpellFX.cast(get_parent(), global_position, spell)
-	CameraShake.shake_at(global_position, SHAKE_STRENGTH * (1.4 if spell.is_divine() else 1.0), SHAKE_RADIUS)
+	CameraShake.shake_at(global_position, SHAKE_STRENGTH * (1.4 if spell.is_special() else 1.0), SHAKE_RADIUS)
 
 
 func _physics_process(delta: float) -> void:
@@ -99,7 +99,7 @@ func _burst() -> void:
 	_bursting = 0.0
 	for p in _sparks: p.emitting = false
 	SpellFX.ring_burst(get_parent(), global_transform, radius, spell)
-	if spell.is_divine():
+	if spell.is_special():
 		CameraShake.shake_at(global_position, SHAKE_STRENGTH * 0.6, SHAKE_RADIUS)
 
 

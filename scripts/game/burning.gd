@@ -45,4 +45,4 @@ static func weapon_duration(item: Item, secondary: bool) -> float:
 		or str(item.projectile.get("style","")) in ["fireball", "flame_shard"] \
 		or item.id in ["D_bow_dragon", "D_trident_ofsatan", "D_wand_thewandofsatan", "D_bow_ofsatan"]
 	if not fiery: return 0.0
-	return clampf(float(item.projectile.get("burn_duration",6.0 if item.is_divine() else 4.0)),3.0,10.0)
+	return clampf(float(item.projectile.get("burn_duration",6.0 if item.is_special() else 4.0)),3.0,10.0)

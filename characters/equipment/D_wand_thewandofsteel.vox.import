@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://fj3xnme5yy0e"
+path="res://.godot/imported/D_wand_thewandofsteel.vox-f2990477eb34b591f9891ac50aba3fd9.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_thewandofsteel.vox"
+dest_files=["res://.godot/imported/D_wand_thewandofsteel.vox-f2990477eb34b591f9891ac50aba3fd9.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cqu5og64vcs15"
+path="res://.godot/imported/L_trident_coldverdict.vox-bd049c0bd4ed41d79a74916cbf06952d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_trident_coldverdict.vox"
+dest_files=["res://.godot/imported/L_trident_coldverdict.vox-bd049c0bd4ed41d79a74916cbf06952d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

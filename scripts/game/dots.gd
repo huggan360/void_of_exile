@@ -10,6 +10,7 @@ const COLOR_DARK := Color(0.1, 0.45, 0.18)
 ## By grade (index = tier, G1..G8), and Divine.
 const GRADE := [0, 10, 25, 45, 75, 120, 250, 450, 650]
 const DIVINE := 1200
+const LEGENDARY := 1200
 const CAMPAIGN_FIRST := 250
 const PACK_FIRST := 1000
 
@@ -19,7 +20,9 @@ static func dismantle_value(item: Item) -> int:
 	if item == null or item.is_story() or item.is_key():
 		return 0
 	var count := maxi(1, item.count)
-	if item.id.begins_with("D_"):
+	if item.is_legendary() or item.is_artifact():
+		return LEGENDARY * count
+	if item.is_divine():
 		return DIVINE * count
 	if item.id.length() > 2 and item.id[0] == "G" and item.id[1].is_valid_int():
 		return int(GRADE[clampi(int(item.id[1]), 1, 8)]) * count

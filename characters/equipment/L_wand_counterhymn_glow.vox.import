@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bipqqdhe1p3bp"
+path="res://.godot/imported/L_wand_counterhymn_glow.vox-5d8be6bbe751851baaff657bab30f2e3.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_wand_counterhymn_glow.vox"
+dest_files=["res://.godot/imported/L_wand_counterhymn_glow.vox-5d8be6bbe751851baaff657bab30f2e3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

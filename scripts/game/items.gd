@@ -1,7 +1,7 @@
 class_name Items
 ## Every item in the game. Graded items (G1-G8) follow steady curves; Divine
-## items (D) are hand-made with their own abilities. Projectile, shield and
-## aura colors are taken from each item's icon.
+## sets (D), standalone Legendary gear (L) and collectible Artifacts (A)
+## have their own abilities, colors, projectiles and character appearances.
 
 ## Bow damage per grade (G1 ... G8).
 const BOW_DAMAGE := [[25, 35], [40, 52], [58, 72], [78, 94], [100, 118], [124, 144], [148, 170], [175, 200]]
@@ -59,7 +59,7 @@ const SPELL_LORE := [
 ]
 
 
-## Every item, graded first, then Divine, then consumables.
+## Every item, graded first, then Divine and Legendary, then consumables.
 const BLUE_DIVINE_IDS := ["D_cloak_theblue", "D_spell_oftheblue", "D_robe_oftheblue",
         "D_trident_oftheblue", "D_bonus_crucifix_oftheblue"]
 ## Divine sets that are live, by set folder. Bosses set their per-item chances.
@@ -67,46 +67,52 @@ const BLUE_DIVINE_IDS := ["D_cloak_theblue", "D_spell_oftheblue", "D_robe_oftheb
 ## "croucefix of satan" -> D_bonus_crucifix_ofsatan, "flame of the divine" ->
 ## D_bonus_flame_ofthedivine (see tools/import_textures.py).
 const DIVINE_SETS := {
-	Spirit = ["D_wand_thewandofthespitit"],
-	Iron = ["D_bow_ofiron", "D_wand_ofiron", "D_trident_ofiron", "D_cloak_ofiron", "D_robe_ofiron", "D_spell_ofiron", "D_bonus_crucifix_ofiron"],
-	Storm = ["D_bonus_crucifix_ofstorm", "D_bonus_crystal_ofstorm", "D_bonus_eye_ofstorm", "D_bonus_flame_ofstorm", "D_bonus_talisman_ofstorm", "D_bow_ofstorm", "D_cloak_ofstorm", "D_robe_ofstorm", "D_spell_ofstorm", "D_trident_ofstorm", "D_wand_ofstorm"],
-	Silver = ["D_cloak_silvershield", "D_wand_thewandofsteel", "D_bonus_crucifix_ofthalao", "D_robe_ofsilver"],
-	Dragon_Fire = ["D_bow_dragon", "D_cloak_burningman", "D_robe_ofthedragonsbreath", "D_bonus_flame_ofthebroken"],
-	Fallenwood = ["D_bow_Fallenwoods", "D_trident_ofthefallenwood", "D_wand_thewandofthefallenwood"],
+	Spirit = ["D_wand_thewandofthespitit", "D_robe_ofspirit", "D_spell_ofspirit", "D_bonus_talisman_ofspirit"],
+	Iron = ["D_bow_ofiron", "D_wand_ofiron", "D_trident_ofiron", "D_cloak_ofiron", "D_robe_ofiron", "D_spell_ofiron",
+		"D_bonus_crucifix_ofiron"],
+	Storm = ["D_bow_ofstorm", "D_cloak_ofstorm", "D_robe_ofstorm", "D_spell_ofstorm", "D_trident_ofstorm",
+		"D_wand_ofstorm", "D_bonus_talisman_ofstorm"],
+	Silver = ["D_cloak_silvershield", "D_wand_thewandofsteel", "D_bonus_crucifix_ofthalao", "D_robe_ofsilver",
+		"D_spell_ofsilver"],
+	Dragon_Fire = ["D_bow_dragon", "D_cloak_burningman", "D_robe_ofthedragonsbreath", "D_bonus_flame_ofthebroken",
+		"D_spell_ofdragonfire"],
+	Fallenwood = ["D_bow_Fallenwoods", "D_trident_ofthefallenwood", "D_wand_thewandofthefallenwood",
+		"D_cloak_offallenwood", "D_robe_offallenwood", "D_spell_offallenwood", "D_bonus_talisman_offallenwood"],
 	The_Blue = BLUE_DIVINE_IDS,
 	Frost = ["D_bow_offrost", "D_wand_offrost", "D_trident_offrost", "D_spell_offrost", "D_cloak_offrost",
-		"D_robe_offrost", "D_bonus_crucifix_offrost", "D_bonus_flame_offrost", "D_bonus_eye_offrost",
-		"D_bonus_crystal_offrost", "D_bonus_talisman_offrost"],
-	Satan = ["D_trident_ofsatan", "D_wand_thewandofsatan", "D_bonus_crucifix_ofsatan", "D_bow_ofsatan"],
+		"D_robe_offrost", "D_bonus_crystal_offrost"],
+	Satan = ["D_trident_ofsatan", "D_wand_thewandofsatan", "D_bonus_crucifix_ofsatan", "D_bow_ofsatan",
+		"D_cloak_ofsatan", "D_robe_ofsatan", "D_spell_ofsatan"],
 	Holy_Divine = ["D_spell_ofthedivine", "D_trident_ofthedivine", "D_wand_thewandofthedivine",
-		"D_bonus_flame_ofthedivine"],
+		"D_bonus_flame_ofthedivine", "D_cloak_ofthedivine", "D_robe_ofthedivine"],
 	Void = ["D_bow_Darkmatter", "D_cloak_thevoid", "D_robe_ofthegalaxy", "D_trident_ofthevoid",
-		"D_wand_thewandofdarkness"],
+		"D_wand_thewandofdarkness", "D_spell_ofthevoid", "D_bonus_crystal_ofthevoid"],
 	Venom = ["D_bow_ofvenom", "D_wand_ofvenom", "D_trident_ofvenom", "D_spell_ofvenom", "D_cloak_ofvenom",
-		"D_robe_ofvenom", "D_bonus_crucifix_ofvenom", "D_bonus_flame_ofvenom", "D_bonus_eye_ofvenom",
-		"D_bonus_crystal_ofvenom", "D_bonus_talisman_ofvenom"],
+		"D_robe_ofvenom", "D_bonus_eye_ofvenom"],
 	Eclipse = ["D_bow_ofeclipse", "D_wand_ofeclipse", "D_trident_ofeclipse", "D_spell_ofeclipse", "D_cloak_ofeclipse",
-		"D_robe_ofeclipse", "D_bonus_crucifix_ofeclipse", "D_bonus_flame_ofeclipse", "D_bonus_eye_ofeclipse",
-		"D_bonus_crystal_ofeclipse", "D_bonus_talisman_ofeclipse"],
+		"D_robe_ofeclipse", "D_bonus_flame_ofeclipse"],
 	Blood = ["D_bow_Blood", "D_trident_ofblood", "D_wand_thewandofpower", "D_cloak_blood", "D_robe_robeofpower",
-		"D_bonus_crucifix_ofblood"],
+		"D_bonus_crucifix_ofblood", "D_spell_ofblood"],
 	Stormeye = ["D_bow_ofthestormeye", "D_wand_ofthestormeye", "D_trident_ofthestormeye", "D_spell_ofthestormeye",
-		"D_cloak_ofthestormeye", "D_robe_ofthestormeye", "D_bonus_crucifix_ofthestormeye", "D_bonus_eye_ofthestormeye",
-		"D_bonus_crystal_ofthestormeye"],
-	Madness = ["D_trident_ofmadness", "D_cloak_unlimitedmadness", "D_bonus_crucifix_ofmadness"],
-	Cindrella = ["D_bow_Cindrella", "D_bonus_flame_ofcindrella"],
-	Goldslinger = ["D_cloak_goldslinger", "D_bow_goldslinger"],
-	Ash = ["D_wand_thewandofash"],
+		"D_cloak_ofthestormeye", "D_robe_ofthestormeye", "D_bonus_eye_ofthestormeye"],
+	Madness = ["D_trident_ofmadness", "D_cloak_unlimitedmadness", "D_bonus_crucifix_ofmadness", "D_spell_ofmadness"],
+	Cindrella = ["D_bow_Cindrella", "D_bonus_flame_ofcindrella", "D_cloak_ofcindrella", "D_spell_ofcindrella"],
+	Goldslinger = ["D_cloak_goldslinger", "D_bow_goldslinger", "D_spell_ofgoldslinger",
+		"D_bonus_talisman_ofgoldslinger"],
 	# The Surface dungeons (DungeonDivineSets).
-	Mycelium = ["D_wand_ofmycelium", "D_bonus_talisman_ofmycelium"],
-	Saltmourn = ["D_bow_ofsaltmourn", "D_trident_ofsaltmourn", "D_cloak_ofsaltmourn"],
-	Jade = ["D_wand_ofjade", "D_cloak_ofjade", "D_bonus_eye_ofjade"],
-	Afterlife = ["D_wand_oftheafterlife", "D_cloak_oftheafterlife", "D_bonus_talisman_oftheafterlife"],
-	Barrow = ["D_trident_ofthebarrow", "D_cloak_ofthebarrow", "D_robe_ofthebarrow", "D_bonus_crucifix_ofthebarrow"],
-	Prism = ["D_bow_ofprism", "D_spell_ofprism", "D_robe_ofprism", "D_bonus_crystal_ofprism"],
-	Requiem = ["D_wand_ofrequiem", "D_bow_ofrequiem", "D_robe_ofrequiem", "D_spell_ofrequiem", "D_bonus_flame_ofrequiem"],
+	Mycelium = ["D_wand_ofmycelium", "D_bonus_talisman_ofmycelium", "D_robe_ofmycelium", "D_spell_ofmycelium"],
+	Saltmourn = ["D_bow_ofsaltmourn", "D_trident_ofsaltmourn", "D_cloak_ofsaltmourn", "D_spell_ofsaltmourn",
+		"D_bonus_crucifix_ofsaltmourn"],
+	Jade = ["D_wand_ofjade", "D_cloak_ofjade", "D_bonus_eye_ofjade", "D_spell_ofjade"],
+	Afterlife = ["D_wand_oftheafterlife", "D_cloak_oftheafterlife", "D_bonus_talisman_oftheafterlife",
+		"D_spell_oftheafterlife"],
+	Barrow = ["D_trident_ofthebarrow", "D_cloak_ofthebarrow", "D_robe_ofthebarrow", "D_bonus_crucifix_ofthebarrow",
+		"D_spell_ofthebarrow"],
+	Prism = ["D_bow_ofprism", "D_spell_ofprism", "D_robe_ofprism", "D_bonus_crystal_ofprism", "D_cloak_ofprism"],
+	Requiem = ["D_wand_ofrequiem", "D_bow_ofrequiem", "D_robe_ofrequiem", "D_spell_ofrequiem",
+		"D_bonus_flame_ofrequiem", "D_cloak_ofrequiem"],
 	Unmade = ["D_bow_oftheunmade", "D_wand_oftheunmade", "D_trident_oftheunmade", "D_cloak_oftheunmade",
-		"D_robe_oftheunmade", "D_bonus_eye_oftheunmade"],
+		"D_robe_oftheunmade", "D_bonus_eye_oftheunmade", "D_spell_oftheunmade"],
 }
 ## Encounters assigned a Divine set; unassigned enemies cannot drop Divine items.
 const BOSS_DIVINE_SET := {
@@ -117,13 +123,57 @@ const BOSS_DIVINE_SET := {
 	goblin_king = "Fallenwood", goblin_treasure = "Fallenwood", blue_dragon = "The_Blue", rimeheart_prism = "Frost", vharok = "Satan",
 	scarab_regent = "Holy_Divine", hollow_crown = "Void",
 	# Sets matched to each boss's look; stronger bosses carry stronger sets.
-	thornmaw_bloom = "Cindrella", mad_farmer = "Ash", queen_briarrose = "Blood", amber_colossus = "Goldslinger",
+	thornmaw_bloom = "Cindrella", queen_briarrose = "Blood", amber_colossus = "Goldslinger",
 	selenarch = "Eclipse", brood_matriarch = "Venom", stormeye_tyrant = "Stormeye", veil_herald = "Madness",
 	void_empress = "Void",
 	# The Surface dungeons.
 	mother_mycora = "Mycelium", captain_saltmourn = "Saltmourn", ixalith = "Jade", lantern_shepherd = "Afterlife",
 	jarl_hrimvald = "Barrow", solenne = "Prism", choirless_seraph = "Requiem", oblivara = "Unmade",
 }
+## Legendary gear is an individual boss signature, at most two items per boss.
+static var BOSS_LEGENDARY_ITEMS: Dictionary = SignatureItems.sources("L")
+static var BOSS_ARTIFACT_ITEMS: Dictionary = SignatureItems.sources("A")
+const LEGENDARY_CHANCE := 0.03
+
+## Saved copies of retired relics become the stronger surviving relic of their
+## set. Old Ash wands retain their identity and become Legendary on load.
+const RETIRED_ITEM_IDS := {
+	"D_wand_thewandofash": "L_wand_thewandofash",
+	"D_bonus_crucifix_ofstorm": "D_bonus_talisman_ofstorm",
+	"D_bonus_crystal_ofstorm": "D_bonus_talisman_ofstorm",
+	"D_bonus_eye_ofstorm": "D_bonus_talisman_ofstorm",
+	"D_bonus_flame_ofstorm": "D_bonus_talisman_ofstorm",
+	"D_bonus_crucifix_offrost": "D_bonus_crystal_offrost",
+	"D_bonus_flame_offrost": "D_bonus_crystal_offrost",
+	"D_bonus_eye_offrost": "D_bonus_crystal_offrost",
+	"D_bonus_talisman_offrost": "D_bonus_crystal_offrost",
+	"D_bonus_crucifix_ofvenom": "D_bonus_eye_ofvenom",
+	"D_bonus_flame_ofvenom": "D_bonus_eye_ofvenom",
+	"D_bonus_crystal_ofvenom": "D_bonus_eye_ofvenom",
+	"D_bonus_talisman_ofvenom": "D_bonus_eye_ofvenom",
+	"D_bonus_crucifix_ofeclipse": "D_bonus_flame_ofeclipse",
+	"D_bonus_eye_ofeclipse": "D_bonus_flame_ofeclipse",
+	"D_bonus_crystal_ofeclipse": "D_bonus_flame_ofeclipse",
+	"D_bonus_talisman_ofeclipse": "D_bonus_flame_ofeclipse",
+	"D_bonus_crucifix_ofthestormeye": "D_bonus_eye_ofthestormeye",
+	"D_bonus_crystal_ofthestormeye": "D_bonus_eye_ofthestormeye",
+}
+
+static func canonical_id(id: String) -> String:
+	return RETIRED_ITEM_IDS.get(id, id)
+
+static func legendary_ids_for(enemy_id: String) -> Array:
+	return BOSS_LEGENDARY_ITEMS.get(enemy_id, [])
+
+static func artifact_ids_for(enemy_id: String) -> Array:
+	return BOSS_ARTIFACT_ITEMS.get(enemy_id, [])
+
+static func signature_chance(item: Item) -> float:
+	return SignatureItems.drop_chance(item.id)
+
+static func loot_ids_for(enemy_id: String) -> Array:
+	return divine_ids_for(enemy_id) + legendary_ids_for(enemy_id) + artifact_ids_for(enemy_id)
+
 ## Sets two bosses share. The first boss favours even items, the second odd
 ## ones: a boss drops its favourites 1% more often.
 const SHARED_SETS := {
@@ -188,6 +238,8 @@ static func all() -> Array[Item]:
 		for family in BONUS_KINDS:
 			out.append(bonus(t, family))
 	out.append_array(divine())
+	out.append_array(legendary())
+	out.append_array(artifacts())
 	out.append(elixir("elixir_hp"))
 	out.append(elixir("elixir_mp"))
 	for stat in STAT_ELIXIRS:
@@ -206,7 +258,7 @@ static func make(id: String) -> Item:
 	if _catalog.is_empty():
 		for item in all():
 			_catalog[item.id] = item
-	var source: Item = _catalog.get(id)
+	var source: Item = _catalog.get(canonical_id(id))
 	return source.duplicate(true) as Item if source != null else null
 
 
@@ -214,7 +266,7 @@ static func make(id: String) -> Item:
 static func exists(id: String) -> bool:
 	if _catalog.is_empty():
 		make("G1_bow")
-	return _catalog.has(id)
+	return _catalog.has(canonical_id(id))
 
 
 ## Spells only go up to G5, so they have their own scale: a pool's spell is
@@ -229,7 +281,7 @@ static func from_pool(pool: Dictionary, rng: RandomNumberGenerator) -> Item:
 		make("G1_bow")
 	var spell_tier: int = SPELL_TIER[clampi(int(pool.tier), 1, 8) - 1]
 	var matches: Array = _catalog.values().filter(func(i: Item) -> bool:
-		if i.is_consumable() or i.is_divine() or not i.slot in slots: return false
+		if i.is_consumable() or i.is_special() or not i.slot in slots: return false
 		return i.tier == (spell_tier if i.slot == "spell" else int(pool.tier)))
 	return null if matches.is_empty() else (matches[rng.randi() % matches.size()] as Item).duplicate(true) as Item
 
@@ -427,7 +479,7 @@ static func bow(tier: int) -> Item:
 		i.aura_color = colors[0]
 		i.aura_power = (tier - 5) * 0.12
 	_weapon_attacks(i)
-	return i
+	return ItemBalance.apply(i)
 
 
 static func cloak(tier: int) -> Item:
@@ -443,7 +495,7 @@ static func cloak(tier: int) -> Item:
 	if tier >= 5:
 		i.aura_color = CLOAK_COLORS[tier - 1]
 		i.aura_power = (tier - 4) * 0.12
-	return i
+	return ItemBalance.apply(i)
 
 
 static func spell(tier: int) -> Item:
@@ -472,7 +524,7 @@ static func spell(tier: int) -> Item:
 		i.aura_color = SPELL_COLORS[tier - 1][1]
 		i.aura_power = (tier - 3) * 0.12
 	_ring_effects(i)
-	return i
+	return ItemBalance.apply(i)
 
 
 static func wand(tier: int) -> Item:
@@ -487,7 +539,7 @@ static func wand(tier: int) -> Item:
 	i.bonuses = {magic = tier * 2}
 	i.projectile = {style = "bolt", color = SPELL_COLORS[mini(tier - 1, 4)][1], speed = 22.0, range = 20.0}
 	_weapon_attacks(i)
-	return i
+	return ItemBalance.apply(i)
 
 
 static func trident(tier: int) -> Item:
@@ -502,7 +554,7 @@ static func trident(tier: int) -> Item:
 	i.fire_rate = 0.8
 	i.projectile = {style = "bolt", color = BOW_COLORS[tier - 1][0], speed = 22.0, range = 16.0}
 	_weapon_attacks(i)
-	return i
+	return ItemBalance.apply(i)
 
 
 static func robe(tier: int) -> Item:
@@ -513,7 +565,7 @@ static func robe(tier: int) -> Item:
 	i.kind = "Robe"
 	i.tier = tier
 	i.bonuses = {defense = 2 + (tier - 1) * 2, magic = tier * 3, mp = tier * 10}
-	return i
+	return ItemBalance.apply(i)
 
 
 static func bonus(tier: int, family: String) -> Item:
@@ -530,7 +582,7 @@ static func bonus(tier: int, family: String) -> Item:
 		"eye": i.bonuses = {dexterity = tier * 2}
 		"crystal": i.bonuses = {magic = tier * 2, mp = tier * 5}
 		"talisman": i.bonuses = {speed = tier, hp = tier * 8}
-	return i
+	return ItemBalance.apply(i)
 
 
 static func divine() -> Array[Item]:
@@ -539,7 +591,7 @@ static func divine() -> Array[Item]:
 	# --- Bows -------------------------------------------------------------------
 	out.append(_divine("D_bow_Blood", "Bow of the Blood Moon", "weapon", "Bow",
 			"It drinks a little of whatever it hits, and shares.", {dexterity = 20},
-			["+20 Dexterity: very fast, lighter shots", "Each hit heals you 2 HP"],
+			["Fast firing, lighter shots", "Each hit heals you 2 HP"],
 			{lifesteal = 2}))
 	out[-1].charge = {style = "burst", count = 6, interval = 0.07, mult = 1.3}
 	out[-1].abilities.append("Charged: Blood Torrent, a rapid burst of 6 arrows")
@@ -618,7 +670,7 @@ static func divine() -> Array[Item]:
 	out.append(_divine("D_cloak_unlimitedmadness", "Cloak of Unlimited Madness", "armor", "Cloak",
 			"Every color at once, all the time. You get used to it. Mostly.",
 			{defense = 10, speed = 3, attack = 3, dexterity = 3, magic = 3},
-			["+3 to every stat", "Rainbow aura"], {trail = "rainbow"}, Color("#c040ff"), 0.8))
+			["Rainbow aura"], {trail = "rainbow"}, Color("#c040ff"), 0.8))
 
 	# --- Spells -----------------------------------------------------------------
 	out.append(_divine("D_spell_oftheblue", "Spell of the Blue", "spell", "Spell",
@@ -664,22 +716,27 @@ static func divine() -> Array[Item]:
 	_spirit_set(out)
 	DivineSets.build(out)
 	DungeonDivineSets.build(out)
+	DivineSetAdditions.build(out)
 
 	for item in out:
 		if item.is_weapon(): _weapon_attacks(item)
 		if not item.ring.is_empty(): _ring_effects(item)
 		if item.slot == "weapon":
 			item.aura_color = item.projectile.color  # divine weapons glow in their shot color
-		# Dark blood relics use black bags. Other explicit exceptions, such as
-		# the Goblin King's rare scepter, are assigned by their set builder.
-		if item.id in ["D_bow_Blood", "D_cloak_blood"]:
-			item.drop_bag = "black"
 	DivineSets.finish(out)
 	DungeonDivineSets.finish(out)
+	DivineBalance.apply(out)
 	var live := []
 	for ids: Array in DIVINE_SETS.values():
 		live.append_array(ids)
 	return out.filter(func(i: Item) -> bool: return i.id in live)
+
+
+static func legendary() -> Array[Item]:
+	return LegendaryItems.build()
+
+static func artifacts() -> Array[Item]:
+	return SignatureItems.build("A")
 
 
 ## Rimeheart Prism's Frost set: cold, patient, magic and dexterity.
@@ -719,13 +776,9 @@ static func _frost_set(out: Array[Item]) -> void:
 	out.append(_divine("D_robe_offrost", "Robe of Frost", "armor", "Robe",
 			"Woven from the hush that falls before a blizzard.", {defense = 16, magic = 15, mp = 50},
 			["Magic recovers 25% faster"], {mp_regen = 1.25}, ice, 0.5))
-	for kind in [["crucifix", "Crucifix", {defense = 7, hp = 40}, "Its cold keeps the heart steady."],
-			["flame", "Flame", {attack = 8, magic = 4}, "A cold flame. It burns the other way."],
-			["eye", "Eye", {dexterity = 10, magic = 4}, "It never blinks. Frost does not need to."],
-			["crystal", "Crystal", {magic = 12, mp = 50}, "A shard from the Rimeheart, still faintly humming."],
-			["talisman", "Talisman", {speed = 6, hp = 50}, "Lighter than snow, harder than ice."]]:
-		out.append(_divine("D_bonus_%s_offrost" % kind[0], "%s of Frost" % kind[1], "bonus", kind[1],
-				kind[3], kind[2], [], {}, ice, 0.35))
+	out.append(_divine("D_bonus_crystal_offrost", "Heart of the Rime", "bonus", "Crystal",
+			"The Rimeheart's last beat, held in an unmelting shard.", {magic = 16, mp = 70, defense = 6, dexterity = 5},
+			["Shield costs 10% less MP"], {shield_drain = 0.9}, ice, 0.45))
 
 
 ## Vharok's Satan set: brutal, red, attack.
@@ -820,7 +873,6 @@ static func _court_sets(out: Array[Item]) -> void:
 	out[-1].damage_min = 115
 	out[-1].damage_max = 145
 	out[-1].projectile = {style = "orb", color = Color("c5d9ed"), speed = 28.0, range = 24.0, pierce = true}
-	out[-1].drop_bag = "black"
 	out.append(_divine("D_bonus_crucifix_ofthalao", "Thalao's Silver Seal", "bonus", "Crucifix",
 			"The court's oath survives beneath the sand.", {defense = 7, hp = 55, magic = 5},
 			["Magic recovers 15% faster"], {mp_regen = 1.15}, Color("cadbea"), 0.4))
@@ -830,7 +882,6 @@ static func _court_sets(out: Array[Item]) -> void:
 	out.append(_divine("D_bonus_flame_ofthebroken", "Flame of the Broken Grove", "bonus", "Flame",
 			"Even ash remembers the shape of a tree.", {attack = 9, magic = 7, hp = 30},
 			[], {}, Color("ffb34b"), 0.7))
-	out[-1].drop_bag = "black"
 
 
 static func _fallenwood_set(out: Array[Item]) -> void:
@@ -843,7 +894,6 @@ static func _fallenwood_set(out: Array[Item]) -> void:
 		item.damage_min = 100
 		item.damage_max = 130
 		item.projectile = {style = "bolt", color = Color("91c36a"), speed = 20.0, range = 22.0, size = 1.0, pierce = true, glow = true}
-		if spec[2] == "Wand": item.drop_bag = "black"
 
 
 ## Colors match the crystals / metal in the authored 8x8 icons.
@@ -851,7 +901,7 @@ const MAGIC_COLORS := [Color("e7e7e7"), Color("50cf4b"), Color("1b9adf"), Color(
 	Color("8314c7"), Color("f41bdc"), Color("f6a802"), Color("ffe300")]
 
 static func _weapon_attacks(item: Item) -> void:
-	var divine := item.is_divine()
+	var divine := item.is_special()
 	var grade := 8 if divine else item.tier
 	if item.kind in ["Wand", "Trident"]:
 		var tint: Color = item.projectile.get("color", Color.WHITE)
@@ -984,7 +1034,7 @@ static func _weapon_attacks(item: Item) -> void:
 		if grade >= 7: item.primary_effects = [{id="speed", amount=-2, duration=1.0}]
 
 static func _ring_effects(item: Item) -> void:
-	if item.ring.is_empty(): return
+	if item.ring.is_empty() or not item.secondary_effects.is_empty(): return
 	# Every Divine spell's ring does its own thing.
 	const DIVINE_RINGS := {
 		D_spell_oftheblue = [{id = "speed", amount = -4, duration = 3.0}],
@@ -998,7 +1048,7 @@ static func _ring_effects(item: Item) -> void:
 		item.secondary_effects.assign(DIVINE_RINGS[item.id])
 	elif "frost" in item.id:
 		item.secondary_effects = [{id="static", duration=4.4}]
-	elif item.is_divine():
+	elif item.is_special():
 		item.secondary_effects = [{id="armour_broken", duration=3.0}]
 	elif item.tier >= 5:
 		item.secondary_effects = [{id="static", duration=1.8}]
@@ -1035,11 +1085,9 @@ static func _storm_set(out: Array[Item]) -> void:
 	out.append(_divine("D_robe_ofstorm", "Robe of Storm", "armor", "Robe",
 		"Woven from rain that never reached the sea.", {defense = 17, magic = 16, mp = 60},
 		["Magic recovers 20% faster"], {mp_regen = 1.2}, storm, 0.5))
-	for spec in [["crucifix", "Crucifix", {defense = 7, hp = 45}],
-		["flame", "Flame", {attack = 7, magic = 5}], ["eye", "Eye", {dexterity = 9, magic = 4}],
-		["crystal", "Crystal", {magic = 11, mp = 55}], ["talisman", "Talisman", {speed = 6, hp = 45}]]:
-		out.append(_divine("D_bonus_%s_ofstorm" % spec[0], "%s of Storm" % spec[1], "bonus", spec[1],
-			"A small echo of the choir beneath Bluelay.", spec[2], [], {}, storm, 0.35))
+	out.append(_divine("D_bonus_talisman_ofstorm", "Heart of the Storm", "bonus", "Talisman",
+			"The whole drowned chorus, caught in one unbroken note.", {speed = 8, dexterity = 5, magic = 6, hp = 55},
+			["Magic recovers 20% faster"], {mp_regen = 1.2}, storm, 0.45))
 
 
 static func _iron_set(out: Array[Item]) -> void:
@@ -1058,9 +1106,12 @@ static func _iron_set(out: Array[Item]) -> void:
 	out.append(_divine("D_robe_ofiron", "Vestment of the Iron Oath", "armor", "Robe",
 		"A king's funeral shroud, threaded with iron.", {defense = 18, magic = 20, mp = 80}, ["Magic recovers 20% faster"], {mp_regen = 1.2}))
 	out.append(_divine("D_spell_ofiron", "Spell of the Iron Oath", "spell", "Spell",
-		"The crown breaks. The oath remains.", {defense = 8, magic = 17, mp = 65}, ["Iron ward"], {}))
+		"The crown breaks. The oath remains.", {defense = 8, magic = 17, mp = 65},
+		["Shield costs 15% less MP", "Warp ring rolls out twice"], {shield_drain = 0.85}))
 	out[-1].shield_tint = Color("9ea9c1")
 	out[-1].shield_arcs = Color("f4eaff")
+	out[-1].shield_rainbow = 0.0
+	out[-1].ring = {damage = 270, range = 12.0, speed = 11.0, cost = 45, cooldown = 1.5, pulses = 2}
 	out.append(_divine("D_bonus_crucifix_ofiron", "Seal of the Last King", "bonus", "Crucifix",
 		"A pale cross hammered into black iron.", {defense = 8, attack = 8, magic = 8, hp = 60}, [], {}))
 

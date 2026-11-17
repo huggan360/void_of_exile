@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dvudg0ncvx5io"
+path="res://.godot/imported/L_trident_timesunder.vox-ddcba27f2591f1778b5aa7f812685503.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/L_trident_timesunder.vox"
+dest_files=["res://.godot/imported/L_trident_timesunder.vox-ddcba27f2591f1778b5aa7f812685503.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

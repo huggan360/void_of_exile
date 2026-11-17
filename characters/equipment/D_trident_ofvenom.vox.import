@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cj12q7tfd1fe6"
+path="res://.godot/imported/D_trident_ofvenom.vox-0b273b70890e5ef45688badc4dc86ae5.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofvenom.vox"
+dest_files=["res://.godot/imported/D_trident_ofvenom.vox-0b273b70890e5ef45688badc4dc86ae5.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://qkut4nrc3q0b"
+path="res://.godot/imported/D_trident_offrost_glow.vox-ae655cd02351fcdf814b31bdf64edc7f.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_offrost_glow.vox"
+dest_files=["res://.godot/imported/D_trident_offrost_glow.vox-ae655cd02351fcdf814b31bdf64edc7f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

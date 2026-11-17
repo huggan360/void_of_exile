@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ciwiptdm03rn2"
+path="res://.godot/imported/D_trident_ofblood_glow.vox-633d417c5441b4c5bbce3ea172b2c5f7.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofblood_glow.vox"
+dest_files=["res://.godot/imported/D_trident_ofblood_glow.vox-633d417c5441b4c5bbce3ea172b2c5f7.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

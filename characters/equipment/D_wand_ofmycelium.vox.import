@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://c1ap7oqvnhf7y"
+path="res://.godot/imported/D_wand_ofmycelium.vox-04978b9f2384ae8a2a5b601b8d58cbed.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_wand_ofmycelium.vox"
+dest_files=["res://.godot/imported/D_wand_ofmycelium.vox-04978b9f2384ae8a2a5b601b8d58cbed.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://duqn2sptwtnmi"
+path="res://.godot/imported/A_trident_badidea.vox-b7c653870fb021af6972da84053bd00d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/A_trident_badidea.vox"
+dest_files=["res://.godot/imported/A_trident_badidea.vox-b7c653870fb021af6972da84053bd00d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

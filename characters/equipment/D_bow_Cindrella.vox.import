@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://kdn3ch1lp5uv"
+path="res://.godot/imported/D_bow_Cindrella.vox-32b30c0a3c98ddb78a312bdd7606ff29.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_bow_Cindrella.vox"
+dest_files=["res://.godot/imported/D_bow_Cindrella.vox-32b30c0a3c98ddb78a312bdd7606ff29.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -17,7 +17,7 @@ class_name Loot
 ## each item's full chance, someone just over the threshold only
 ## EnemyDef.loot_share_floor of it (0.9: a 5% item rolls 4.5%), and everyone
 ## between them slides along with what they dealt. A drop never holds two items
-## of the same kind (two bows): only the rarest stays, Divine before any grade.
+## of the same kind (two bows): only the rarest stays, Divine or Legendary before any grade.
 
 ## Every boss's two stat elixirs: each player over its damage threshold always
 ## gets one of them, 50/50. These replace any elixir_of_ entry in a boss's
@@ -90,7 +90,7 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 	var public: Array[Item] = []
 	var personal := {}  # player id -> Array[Item]
 	var pair: Array = BOSS_POTIONS.get(def.id, []) if def is BossDef else []
-	for entry: Dictionary in _with_divine(def):
+	for entry: Dictionary in _with_special(def):
 		if not pair.is_empty() and str(entry.get("item", "")).begins_with("elixir_of_"):
 			continue
 		var sample := _make(entry, rng, biome_stat)
@@ -105,7 +105,8 @@ static func roll(def: EnemyDef, damage_by: Dictionary, rng: RandomNumberGenerato
 				else: public.append(upgraded)
 			continue
 		for p in eligible:
-			var chance: float = (Items.divine_chance(sample, def.id) if sample.is_divine() else float(entry.chance)) * float(share[p])
+			var base_chance := Items.signature_chance(sample) if sample.is_legendary() or sample.is_artifact() else Items.divine_chance(sample, def.id) if sample.is_divine() else float(entry.chance)
+			var chance: float = base_chance * float(share[p])
 			var bonus: Dictionary = modifiers.get(p,{})
 			chance = minf(1.0,chance*(1.0+float(bonus.get("chance",0.0))))
 			if rng.randf() < chance:
@@ -152,12 +153,25 @@ static func share_factor(floor_share: float, dealt: float, threshold: float, top
 	return lerpf(clampf(floor_share, 0.0, 1.0), 1.0, clampf((dealt - threshold) / (top_dealt - threshold), 0.0, 1.0))
 
 
-## Never two pieces of gear of the same kind in one drop: the rarest stays
-## (Divine before any grade, then the higher grade). Other items pass through.
+## Preserve every distinct special item. For regular gear, only the best
+## grade per kind survives, and special gear displaces that graded kind.
 static func rarest_per_kind(items: Array) -> Array:
-	var best := {}  # kind -> index of the kept item
-	var kept: Array = []
+	# Every distinct special reward survives. A Legendary bow must never erase
+	# a Divine bow (or an Artifact) rolled alongside it in the same black chest.
+	var specials := {}
+	var special_kinds := {}
+	var unique: Array = []
 	for item: Item in items:
+		if item == null or not item.is_special(): continue
+		# A showpiece may be weak in combat; keep useful graded gear beside it.
+		if not item.is_artifact(): special_kinds[item.slot + ":" + item.kind] = true
+		if specials.has(item.id): continue
+		specials[item.id] = true
+		unique.append(item)
+	var best := {}  # kind -> index of the kept item
+	var kept: Array = unique
+	for item: Item in items:
+		if item != null and (item.is_special() or special_kinds.has(item.slot + ":" + item.kind)): continue
 		if item == null or not item.slot in PlayerStats.GEAR_SLOTS:
 			kept.append(item)
 			continue
@@ -171,20 +185,32 @@ static func rarest_per_kind(items: Array) -> Array:
 
 
 static func _rarity(item: Item) -> int:
-	return 100 if item.is_divine() else item.tier
+	return 200 if item.is_legendary() or item.is_artifact() else 100 if item.is_divine() else item.tier
 
 
 ## The loot table plus a harder boss's grade rolls (BOSS_GRADES) and every
-## piece of the enemy's Divine set (and its listed cross-set relics) that the
+## piece of the enemy's Divine set, listed cross-set relics and Legendary gear that the
 ## table doesn't name. Divine chances come from
 ## Items.divine_chance, not from the table.
-static func _with_divine(def: EnemyDef) -> Array:
-	var table: Array = def.loot.duplicate()
-	if def is BossDef: table.append_array(GRADE_ROLLS.get(BOSS_GRADES.get(def.id, 0), []))
+static func _with_special(def: EnemyDef) -> Array:
+	var table: Array = []
 	var named := {}
-	for entry: Dictionary in table:
-		if entry.has("item"): named[entry.item] = true
-	for id in Items.divine_ids_for(def.id) + Items.BOSS_DIVINE_EXTRAS.get(def.id, []):
+	for original: Dictionary in def.loot:
+		var entry := original
+		if entry.has("item"):
+			var id := str(entry.item)
+			# Old server overrides must not turn four retired relics into four
+			# extra rolls for the surviving one. Save migration is separate.
+			if Items.RETIRED_ITEM_IDS.has(id) and id != "D_wand_thewandofash": continue
+			id = Items.canonical_id(id)
+			if id.begins_with("D_") or id.begins_with("L_") or id.begins_with("A_"):
+				if named.has(id): continue
+				entry = entry.duplicate()
+				entry.item = id
+			named[id] = true
+		table.append(entry)
+	if def is BossDef: table.append_array(GRADE_ROLLS.get(BOSS_GRADES.get(def.id, 0), []))
+	for id in Items.loot_ids_for(def.id) + Items.BOSS_DIVINE_EXTRAS.get(def.id, []):
 		if not named.has(id): table.append({item = id, chance = 0.0})
 	return table
 
@@ -200,6 +226,10 @@ static func _make(entry: Dictionary, rng: RandomNumberGenerator, biome_stat: Var
 
 ## Realm safety rules apply even if a future loot table accidentally exceeds its cap.
 static func _allowed(def: EnemyDef, item: Item) -> bool:
+	if item.is_artifact():
+		return def is BossDef and item.id in Items.artifact_ids_for(def.id)
+	if item.is_legendary():
+		return def is BossDef and item.id in Items.legendary_ids_for(def.id)
 	if item.is_divine():
 		# Assigned full set plus explicitly listed cross-set boss relics.
 		return item.id in Items.divine_ids_for(def.id) or item.id in Items.BOSS_DIVINE_EXTRAS.get(def.id, [])
@@ -222,9 +252,9 @@ static func _pack(bags: Array[Dictionary], items: Array, viewer: int) -> void:
 	if not ordinary.is_empty(): bags.append({items = ordinary, viewer = viewer, type = tier})
 
 
-## Upgrade only already-dropped graded gear, by exactly one step. Never divine or consumables.
+## Upgrade already-dropped graded gear one step. Never Divine, Legendary or consumables.
 static func upgrade(item: Item, chance: float, rng: RandomNumberGenerator) -> Item:
-	if item == null or item.is_consumable() or item.is_divine() or item.tier>=8 or chance<=0.0:
+	if item == null or item.is_consumable() or item.is_special() or item.tier>=8 or chance<=0.0:
 		return item
 	if rng.randf()>=clampf(chance,0.0,1.0): return item
 	var prefix := "G%d_" % item.tier

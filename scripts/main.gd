@@ -680,6 +680,15 @@ func _on_shot(origin: Vector3, direction: Vector3, damage: int, weapon: Item, ph
 func _on_shot_burst(pos: Vector3, burst: String, weapon: Item, hit_object: bool) -> void:
 	if hit_object: GameAudio.play("magic_explosion", pos, {cooldown = 0.12})
 	var c: Dictionary = weapon.charge
+	if burst in ["signature", "signature_primary"]:
+		var up: Vector3 = (world as SpatialWorld).surface_frame(pos).basis.y if world is SpatialWorld else Vector3.UP
+		# The projectile's own weapon supplies the budget even if the player
+		# changed weapons while a slow firework was still in flight.
+		var base_damage := roundi(randi_range(weapon.damage_min, weapon.damage_max) * stats.weapon_damage_multiplier())
+		for entry: Dictionary in SignaturePatterns.burst(weapon, up, burst == "signature"):
+			_on_shot(pos + entry.direction * 0.3, entry.direction, maxi(1, roundi(base_damage * float(entry.share))),
+				weapon, entry.phase, entry.mods)
+		return
 	if burst == "refract":
 		# The prism splits into a ring of shards, every one a share of a shot.
 		var count := int(c.get("count", 10))

@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b8oad6iax5mo4"
+path="res://.godot/imported/D_trident_oftheblue_glow.vox-fe3b5af112b3a6277f646f018f4bc58d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_oftheblue_glow.vox"
+dest_files=["res://.godot/imported/D_trident_oftheblue_glow.vox-fe3b5af112b3a6277f646f018f4bc58d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -1,8 +1,8 @@
 class_name ItemSlot
 extends Control
 ## An item slot in pixel art: a recessed square holding the item's 8 x 8 icon
-## at 6x with a hairline white outline, a tiny grade badge ("G3", "D"), and a
-## hover tooltip. Divine items shimmer with a soft glow. Empty slots show a
+## at 6x with a hairline white outline, a tiny grade badge ("G3", "D", "L", "A"), and a
+## hover tooltip. Divine items shimmer pink, Legendary blue, Artifacts green. Empty slots show a
 ## faint dotted outline.
 ##
 ## Slots can be dragged between: give a slot `stats` and a `place`
@@ -149,11 +149,11 @@ func _draw() -> void:
 		_art.position = icon_pos
 		_art.size = icon_size
 		_art.show_item(item)
-		if item.is_divine():
+		if item.is_special():
 			# Shimmer: small, quick, out-of-step flickers rather than a slow pulse.
 			var t := Time.get_ticks_msec() / 1000.0
 			var shimmer := 0.5 + 0.08 * sin(t * 9.1) + 0.06 * sin(t * 14.7 + 1.3) + 0.05 * sin(t * 23.3 + 0.7)
-			var glow := Color(UIStyle.DIVINE_COLOR.lerp(Color.WHITE, 0.15 + 0.1 * sin(t * 6.3)), shimmer)
+			var glow := Color(UIStyle.grade_color(item).lerp(Color.WHITE, 0.15 + 0.1 * sin(t * 6.3)), shimmer)
 			draw_texture_rect(item.glow_mask(), Rect2(icon_pos - Vector2.ONE * ICON_SCALE, icon_size + Vector2.ONE * ICON_SCALE * 2), false, glow)
 	elif item == null:
 		# Dotted outline where an item would go.
@@ -186,8 +186,8 @@ func _frame_style(highlighted: bool) -> StyleBoxTexture:
 
 
 func _process(_delta: float) -> void:
-	if (_hover and get_viewport().gui_is_dragging()) or (item and item.is_divine()):
-		queue_redraw()  # drop highlight follows dragging; divine glow pulses
+	if (_hover and get_viewport().gui_is_dragging()) or (item and item.is_special()):
+		queue_redraw()  # drop highlight follows dragging; special-item glow pulses
 
 
 func _ready() -> void:

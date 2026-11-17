@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://kkplv34bgaho"
+path="res://.godot/imported/D_trident_ofsaltmourn.vox-0e0a8d57b86340c2fc866240e0b0476d.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofsaltmourn.vox"
+dest_files=["res://.godot/imported/D_trident_ofsaltmourn.vox-0e0a8d57b86340c2fc866240e0b0476d.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

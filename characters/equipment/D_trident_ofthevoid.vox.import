@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://ch0o74j8wxw61"
+path="res://.godot/imported/D_trident_ofthevoid.vox-1cc3c9c2fc36c228dd08e09894165c8f.tscn"
+
+[deps]
+
+source_file="res://characters/equipment/D_trident_ofthevoid.vox"
+dest_files=["res://.godot/imported/D_trident_ofthevoid.vox-1cc3c9c2fc36c228dd08e09894165c8f.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true
