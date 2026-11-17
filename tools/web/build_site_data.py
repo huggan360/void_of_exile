@@ -8,7 +8,7 @@ flat render background out to transparency and writes WebP images.
 
 <out_dir>/wiki.json, <out_dir>/items/*.webp, creatures/*.webp, shots/*.webp
 """
-import argparse, ast, json, sys, time
+import argparse, ast, hashlib, json, sys, time
 from pathlib import Path
 
 import numpy as np
@@ -111,7 +111,9 @@ def main():
             "range": round(float(proj["range"]) * 0.6, 1) if proj.get("range") else None,
             "projectile": {"style": proj.get("style"), "color": color(proj.get("color"))} if proj else None,
             "consumable": i.get("consumable") or None, "bag": i.get("bag_type", ""),
-            "icon": "items/%s.webp" % i["id"], "shot": shot}
+            # A replacement release keeps its version and icon filenames. Changed
+            # bow art gets a new URL so CDN/browser caches cannot serve the old string.
+            "icon": "items/%s.webp%s" % (i["id"], "?v=" + hashlib.sha256(png.read_bytes()).hexdigest()[:12] if i["id"].startswith("L_bow_") else ""), "shot": shot}
 
     where = {}
     for b in c["biomes"]:
