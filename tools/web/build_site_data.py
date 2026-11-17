@@ -113,7 +113,7 @@ def main():
             "consumable": i.get("consumable") or None, "bag": i.get("bag_type", ""),
             # A replacement release keeps its version and icon filenames. Changed
             # bow art gets a new URL so CDN/browser caches cannot serve the old string.
-            "icon": "items/%s.webp%s" % (i["id"], "?v=" + hashlib.sha256(png.read_bytes()).hexdigest()[:12] if i["id"].startswith("L_bow_") else ""), "shot": shot}
+            "icon": "items/%s.webp%s" % (i["id"], "?v=" + hashlib.sha256((out / "items" / (i["id"] + ".webp")).read_bytes()).hexdigest()[:12] if i["id"].startswith("L_bow_") else ""), "shot": shot}
 
     where = {}
     for b in c["biomes"]:
