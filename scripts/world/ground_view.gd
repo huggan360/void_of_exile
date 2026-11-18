@@ -11,6 +11,7 @@ var _head_y := NAN
 var _head_speed := 0.0
 var _hud: CanvasLayer
 var _sight: SpaceCrosshair
+var _shoulder_camera := ShoulderCameraSmoothing.new()
 
 func _ready() -> void:
 	# Overhead (0) or over the shoulder (1); enclosed rooms force first person.
@@ -56,6 +57,7 @@ func update_camera(delta: float) -> void:
 	player.camera.fov = (78.0 if fp else 72.0) if free_look() else Player.CAMERA_FOV
 	if not free_look():
 		_head_y = NAN
+		_shoulder_camera.reset()
 		return
 	var head_y := player.global_position.y + 1.57 + player._visual_offset
 	if is_nan(_head_y) or absf(head_y - _head_y) > 6.0:  # first frame or a teleport
@@ -68,15 +70,22 @@ func update_camera(delta: float) -> void:
 	var head := Vector3(player.global_position.x, _head_y, player.global_position.z)
 	var view := Basis(Vector3.UP, player.camera_yaw) * Basis(Vector3.RIGHT, look_pitch)
 	var at := head
+	var pose := Transform3D(view, at)
 	if not fp:
 		at += view * Vector3(0.35, 1.05, 4.6)  # over the head: the crosshair sits mid-screen
-		# Only the ground pushes the camera in; trees and houses turn see-through.
-		var ray := PhysicsRayQueryParameters3D.create(head, at, Player.TERRAIN_LAYER)
+		if not player.camera.current: _shoulder_camera.reset()
+		pose = _shoulder_camera.follow(Transform3D(view, at), head, delta)
+		# Recheck the eased position so smoothing cannot put the camera through
+		# a dungeon wall. Outdoor trees and houses keep their see-through window.
+		var mask := Player.TERRAIN_LAYER | Player.OBSTACLE_LAYER if world is DungeonWorld else Player.TERRAIN_LAYER
+		var ray := PhysicsRayQueryParameters3D.create(head, pose.origin, mask)
 		ray.exclude = [player.get_rid()]
 		var hit := player.get_world_3d().direct_space_state.intersect_ray(ray)
-		if not hit.is_empty(): at = hit.position - (at-head).normalized() * 0.25
-		player.model.visible = alive and at.distance_to(head) > 0.65
-	player.camera.global_transform = Transform3D(view, at)
+		if not hit.is_empty(): pose.origin = hit.position - (pose.origin-head).normalized() * 0.25
+		player.model.visible = alive and pose.origin.distance_to(head) > 0.65
+	else:
+		_shoulder_camera.reset()
+	player.camera.global_transform = pose
 	player._apply_shake(delta)
 
 func mouse_point() -> Vector3:

@@ -122,7 +122,7 @@ info["commit"] = commit
 info["platforms"] = platforms("game_platforms.txt")
 json.dump(info, open(work + "/release.json", "w"), indent=2)
 server = {"version": version, "kind": "server", "date": info.get("date", ""), "commit": commit,
-          "title": "Void of Exile server " + version, "notes": ["The dedicated server for Void of Exile " + version],
+          "title": info["title"], "notes": ["The dedicated server for Void of Exile " + version],
           "platforms": platforms("server_platforms.txt")}
 json.dump(server, open(work + "/server/release.json", "w"), indent=2)
 PY
@@ -164,7 +164,7 @@ git tag -a "$TAG" "$COMMIT" -m "Void of Exile $VERSION"
 git push origin "$TAG"
 BODY="$(python3 -c '
 import json; i = json.load(open("release/release.json"))
-print(json.dumps({"tag_name": "v" + i["version"], "name": "Void of Exile " + i["version"],
+print(json.dumps({"tag_name": "v" + i["version"], "name": i["title"],
     "body": "\n".join("- " + n for n in i.get("notes", [])), "prerelease": False, "make_latest": "true"}))')"
 RELEASE="$(api -X POST "https://api.github.com/repos/$REPO/releases" -d "$BODY")"
 UPLOAD="$(python3 -c 'import json,sys;print(json.load(sys.stdin)["upload_url"].split("{")[0])' <<<"$RELEASE")"
@@ -179,7 +179,7 @@ info "Server release $TAG in $SERVER_REPO"
 SERVER_HEAD="$(api "https://api.github.com/repos/$SERVER_REPO/commits/main" | python3 -c 'import json,sys;print(json.load(sys.stdin)["sha"])')"
 BODY="$(python3 -c '
 import json, sys; v = sys.argv[1]
-print(json.dumps({"tag_name": "v" + v, "target_commitish": sys.argv[2], "name": "Void of Exile server " + v,
+print(json.dumps({"tag_name": "v" + v, "target_commitish": sys.argv[2], "name": json.load(open("release/release.json"))["title"],
     "body": "The dedicated server for Void of Exile " + v + ". Run it from the launcher (Server), or see the README.",
     "prerelease": False, "make_latest": "true"}))' "$VERSION" "$SERVER_HEAD")"
 RELEASE="$(api -X POST "https://api.github.com/repos/$SERVER_REPO/releases" -d "$BODY")"

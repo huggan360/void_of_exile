@@ -7,6 +7,8 @@ extends PanelContainer
 
 ## The conversation ended (left, walked away...): what it opened closes too.
 signal conversation_closed
+const DIFFICULTY_DOT_ROWS := ["..oooo..", ".ohfffo.", "ohfffffo", "offffffo", "offffffo", "offffffo", ".offffo.", "..oooo.."]
+const DIFFICULTY_COLORS := ["6de89e", "83e695", "a7dd7d", "c7d774", "e5cf67", "eeb554", "f49847", "f17454", "e65563", "d94283"]
 var world: GameWorld
 var target: InteractionTarget
 var opened := false
@@ -50,22 +52,20 @@ func _ready() -> void:
 	row.add_child(column)
 	UIStyle.text(_title, 32, UIStyle.GOLD)
 	column.add_child(_title)
-	column.add_child(UIStyle.dialogue_separator())
-	_difficulty.add_theme_constant_override("separation", 3)
+	_difficulty.add_theme_constant_override("separation", 4)
+	var empty_dot := _difficulty_texture(Color("050507"))
 	for index in 10:
 		var pip := TextureProgressBar.new()
-		pip.custom_minimum_size = Vector2(13, 4)
-		var image := Image.create_empty(1, 1, false, Image.FORMAT_RGBA8)
-		image.fill(Color("394039"))
-		pip.texture_under = ImageTexture.create_from_image(image)
-		image = image.duplicate()
-		image.fill(Color("a8cb6c"))
-		pip.texture_progress = ImageTexture.create_from_image(image)
+		pip.custom_minimum_size = Vector2(16, 16)
+		pip.texture_under = empty_dot
+		pip.texture_progress = _difficulty_texture(Color(DIFFICULTY_COLORS[index]))
 		pip.nine_patch_stretch = true
+		pip.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_difficulty.add_child(pip)
 	_difficulty.hide()
 	column.add_child(_difficulty)
+	column.add_child(UIStyle.dialogue_separator())
 	_message.bbcode_enabled = true
 	_message.fit_content = true
 	_message.scroll_active = false
@@ -78,6 +78,7 @@ func _ready() -> void:
 	_message.add_theme_color_override("default_color", UIStyle.TEXT)
 	var speech_row := HBoxContainer.new()
 	speech_row.add_theme_constant_override("separation", 18)
+	speech_row.alignment = BoxContainer.ALIGNMENT_END
 	column.add_child(speech_row)
 	_message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UIStyle.dialogue_text(_message)
@@ -181,7 +182,8 @@ func update_prompt(player: Player, blocked: bool) -> void:
 		target.refresh(player)
 		var person := target.get_parent() is TownNPC
 		_portrait.visible = not person and not _chair_target(target)
-		_message.visible = true
+		if target.difficulty >= 0.0 and target.portrait == null: _portrait.hide()
+		_message.visible = not target.description.strip_edges().is_empty()
 		_message.visible_ratio = 1.0
 		_portrait.texture = target.portrait
 		var quest := person and target.get_parent().get_children().any(func(n: Node) -> bool: return n is QuestMarker)
@@ -221,6 +223,7 @@ func accept() -> void:
 		close()
 		return
 	_portrait.visible = not target.get_parent() is TownNPC
+	if target.difficulty >= 0.0 and target.portrait == null: _portrait.hide()
 	_message.show()
 	_pages = TextMarkup.pages(target.response)
 	_shown_response = target.response
@@ -237,6 +240,7 @@ func accept() -> void:
 func _show_page(index: int) -> void:
 	_page = index
 	_message.text = TextMarkup.to_bbcode(_pages[index])
+	_message.visible = not _pages[index].strip_edges().is_empty()
 	_message.visible_ratio = 0.0
 	if _typing:
 		_typing.kill()
@@ -249,6 +253,13 @@ func _show_page(index: int) -> void:
 	var confirm := last and is_instance_valid(target) and target.confirm_text != ""
 	_accept.text = (target.confirm_text if confirm else "Exit" if last else "Next") + " [" + AppSettings.binding_text("interact") + "]"
 	_sync_choices()
+
+
+static func _difficulty_texture(fill: Color) -> ImageTexture:
+	var image := PixelArt.image_from_rows(PackedStringArray(DIFFICULTY_DOT_ROWS), {
+		"o": Color("474352"), "f": fill, "h": fill.lightened(0.22) if fill.v > 0.1 else fill,
+	})
+	return ImageTexture.create_from_image(image)
 
 
 func _sync_choices() -> void:

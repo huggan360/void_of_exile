@@ -8,7 +8,7 @@ func check(ok: bool, message: String) -> void:
 func _ready() -> void:
 	run.call_deferred()
 func run() -> void:
-	for pair: Array in [["G1_bow", "archer/bow_frame"], ["G1_wand", "wizard/staff"], ["G1_wand_glow", "wizard/staff_glow"], ["G1_trident", "merrow/staff"], ["G1_trident_glow", "merrow/staff_glow"]]:
+	for pair: Array in [["G1_bow", "archer/bow_frame"], ["G1_trident", "merrow/staff"], ["G1_trident_glow", "merrow/staff_glow"]]:
 		check(FileAccess.get_file_as_bytes("res://characters/equipment/%s.vox" % pair[0]) == FileAccess.get_file_as_bytes("res://characters/%s.vox" % pair[1]), "G1 differs from original sculpt: " + pair[0])
 	var count := 0
 	for class_id: String in PlayerClasses.ORDER:
@@ -50,7 +50,13 @@ func run() -> void:
 			var authored := socket.get_node("BowFrame" if class_id == "archer" else "Staff") as Node3D
 			for part: Node3D in socket.get_children():
 				if part.has_meta("equipped_art"):
-					check(part.transform.is_equal_approx(authored.transform), "G1 socket fitting differs from original: " + class_id)
+					if class_id == "wizard":
+						# Deeper crowns change the mesh's minimum x/z. Their profile
+						# compensates for that; grip coordinates are checked offline.
+						check(part.scale.is_equal_approx(authored.scale), "Wand scale changed hand fitting")
+						check(is_equal_approx(part.position.y, authored.position.y - EquipmentAppearance.UNIT), "Wand must sit one voxel below the original fitting")
+					else:
+						check(part.transform.is_equal_approx(authored.transform), "G1 socket fitting differs from original: " + class_id)
 		model.set_equipment(null, null)
 		model.animate(0.0, 1.0)
 		var right := model.find_child("ArmR", true, false) as Node3D

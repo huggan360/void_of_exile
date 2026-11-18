@@ -6,7 +6,7 @@ class_name VoxModel
 ## it anew.
 
 ## Bump when the mesher or how meshes are built changes (old files are skipped).
-const CACHE_VERSION := 1
+const CACHE_VERSION := 2  # Solid wand crowns, including updates within 26.4.
 const CACHE_DIR := "user://cache/vox/"
 static var _material: ShaderMaterial
 static var _glow_material: ShaderMaterial

@@ -12,6 +12,7 @@ const MOUSE_SENSITIVITY := 0.0022
 var world: SpaceWorld
 enum CameraMode { ANGLED, SHOULDER, FIRST_PERSON }
 var camera_mode := CameraMode.ANGLED
+var _shoulder_camera := ShoulderCameraSmoothing.new()
 var city_seat := ""
 var _lounge_seat := ""
 var _ship_slot := -1
@@ -1190,6 +1191,7 @@ func update_camera(delta: float) -> void:
 	var want_fp := _cockpit if seat=="pilot" else _seat_interior if seat!="" or _lounge_seat!="" else mode==CameraMode.FIRST_PERSON or world.first_person_at(player.global_position)
 	first_person = move_toward(first_person, 1.0 if want_fp else 0.0, delta/0.25)
 	var shoulder := mode==CameraMode.SHOULDER and not want_fp
+	if not shoulder or cinematic or seat != "": _shoulder_camera.reset()
 	var allow_capture := (want_fp or shoulder or spacewalk or seat!="" or _lounge_seat!="") and not player.controls_locked() \
 		and not player.ui_blocked and not player.interacting() and not map.visible and not cinematic
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if allow_capture else Input.MOUSE_MODE_VISIBLE
@@ -1226,14 +1228,19 @@ func update_camera(delta: float) -> void:
 	var view := orbit*Basis(Vector3.RIGHT, look_pitch)
 	if want_fp or shoulder or (spacewalk and mode==CameraMode.ANGLED):
 		var at := head
+		var pose := Transform3D(view, at)
 		if not want_fp:
 			at += view*(Vector3(0.35, 1.05, 4.6) if shoulder else Vector3(0.65, 0.25, 6.5))  # shoulder: over the head
-			var ray := PhysicsRayQueryParameters3D.create(head, at, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
+			if shoulder:
+				if not player.camera.current: _shoulder_camera.reset()
+				pose = _shoulder_camera.follow(Transform3D(view, at), head, delta)
+			else: pose.origin = at
+			var ray := PhysicsRayQueryParameters3D.create(head, pose.origin, Player.TERRAIN_LAYER|Player.OBSTACLE_LAYER)
 			ray.exclude = [player.get_rid()]
 			var hit := player.get_world_3d().direct_space_state.intersect_ray(ray)
-			if not hit.is_empty(): at = (hit.position as Vector3)-(at-head).normalized()*0.25
-			player.model.visible = alive and at.distance_to(head)>0.65
-		player.camera.global_transform = Transform3D(view, at)
+			if not hit.is_empty(): pose.origin = (hit.position as Vector3)-(pose.origin-head).normalized()*0.25
+			player.model.visible = alive and pose.origin.distance_to(head)>0.65
+		player.camera.global_transform = pose
 		player.camera.fov = 78.0 if want_fp else 72.0
 		_shake_camera()
 		return

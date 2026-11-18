@@ -77,35 +77,35 @@ Charged attacks release controlled volleys or a central gem that splits.
 
 | Weapon | Damage per shot before share | Projectiles | Base rate multiplier | Projectile |
 | --- | ---: | ---: | ---: | --- |
-| L Kingfisher | 148-174 | 2 | 1.015 | `facet_lance` |
-| L Wand of Ash | 121-142 | 2 | 1.0 | `ember_crown` |
-| L Thornclock | 151-177 | 2 | 1.065 | `facet_crescent` |
-| L Tideglass | 238-279 | 3 | 0.915 | `facet_lance` |
-| L Sunsplinter | 118-139 | 2 | 1.0 | `solar_disc` |
-| L Black Comet | 223-263 | 2 | 1.065 | `facet_comet` |
-| L The Mirage Engine | 152-178 | 2 | 0.975 | `facet_crescent` |
-| L Crownbreaker | 259-304 | 3 | 0.94 | `facet_lance` |
-| L The Second Hand | 214-251 | 2 | 1.065 | `solar_disc` |
-| L The Silent Bell | 131-153 | 2 | 0.975 | `bell_shard` |
-| L Bellwether | 237-278 | 3 | 0.94 | `bell_shard` |
-| L False Promise | 192-225 | 2 | 1.065 | `facet_comet` |
-| L Cold Verdict | 235-276 | 3 | 0.915 | `facet_lance` |
-| L Seed of Tomorrow | 135-159 | 2 | 1.0 | `seed_star` |
-| L Heartwood Engine | 175-205 | 2 | 1.065 | `facet_crescent` |
-| L Timesunder | 243-286 | 3 | 0.915 | `solar_disc` |
-| L Daybreaker | 163-192 | 2 | 1.0 | `solar_disc` |
-| L Threadcutter | 218-257 | 2 | 1.065 | `facet_lance` |
-| L The Eyeless | 294-345 | 3 | 0.915 | `facet_comet` |
-| L Stillpoint | 168-197 | 2 | 1.0 | `bell_shard` |
-| L Event Horizon | 248-291 | 2 | 1.065 | `facet_crescent` |
-| L Dewglass | 101-118 | 2 | 0.975 | `seed_star` |
-| L Landfall | 174-204 | 2 | 1.04 | `facet_lance` |
-| L Sunfeather | 215-252 | 3 | 0.965 | `facet_crescent` |
-| L The Wakeful | 141-164 | 2 | 0.975 | `bell_shard` |
-| L The Ninth Sun | 279-327 | 2 | 1.04 | `solar_disc` |
-| L Kaleidoscope | 252-297 | 2 | 1.065 | `facet_crescent` |
-| L Counterhymn | 169-198 | 2 | 0.975 | `bell_shard` |
-| L Worldneedle | 319-375 | 3 | 0.94 | `facet_lance` |
+| L Kingfisher | 148-174 | 2 | 1.015 | `legend_kingfisher` |
+| L Wand of Ash | 121-142 | 2 | 1.0 | `legend_ash` |
+| L Thornclock | 151-177 | 3 | 1.065 | `legend_thornclock` |
+| L Tideglass | 238-279 | 3 | 0.915 | `legend_tideglass` |
+| L Sunsplinter | 118-139 | 2 | 1.0 | `legend_sunsplinter` |
+| L Black Comet | 223-263 | 1 | 1.065 | `legend_blackcomet` |
+| L The Mirage Engine | 152-178 | 3 | 0.975 | `legend_mirage` |
+| L Crownbreaker | 259-304 | 3 | 0.94 | `legend_crownbreaker` |
+| L The Second Hand | 214-251 | 2 | 1.065 | `legend_secondhand` |
+| L The Silent Bell | 131-153 | 1 | 0.975 | `legend_silentbell` |
+| L Bellwether | 237-278 | 3 | 0.94 | `legend_bellwether` |
+| L False Promise | 192-225 | 2 | 1.065 | `legend_falsepromise` |
+| L Cold Verdict | 235-276 | 2 | 0.915 | `legend_coldverdict` |
+| L Seed of Tomorrow | 135-159 | 1 | 1.0 | `legend_seed` |
+| L Heartwood Engine | 175-205 | 3 | 1.065 | `legend_heartwood` |
+| L Timesunder | 243-286 | 2 | 0.915 | `legend_timesunder` |
+| L Daybreaker | 163-192 | 1 | 1.0 | `legend_daybreaker` |
+| L Threadcutter | 218-257 | 2 | 1.065 | `legend_threadcutter` |
+| L The Eyeless | 294-345 | 3 | 0.915 | `legend_eyeless` |
+| L Stillpoint | 168-197 | 1 | 1.0 | `legend_stillpoint` |
+| L Event Horizon | 248-291 | 3 | 1.065 | `legend_eventhorizon` |
+| L Dewglass | 101-118 | 1 | 0.975 | `legend_dewglass` |
+| L Landfall | 174-204 | 1 | 1.04 | `legend_landfall` |
+| L Sunfeather | 215-252 | 4 | 0.965 | `legend_sunfeather` |
+| L The Wakeful | 141-164 | 1 | 0.975 | `legend_wakeful` |
+| L The Ninth Sun | 279-327 | 3 | 1.04 | `legend_ninthsun` |
+| L Kaleidoscope | 252-297 | 3 | 1.065 | `legend_kaleidoscope` |
+| L Counterhymn | 169-198 | 2 | 0.975 | `legend_counterhymn` |
+| L Worldneedle | 319-375 | 1 | 0.94 | `legend_worldneedle` |
 | A The Last Firework | 180-220 | 1 | 0.065 | `festival_orb` |
 | A Midsummer | 82-102 | 12 | 0.46 | `petal_kite` |
 | A Pocket Planetarium | 68-88 | 10 | 0.5 | `orbit_pearl` |

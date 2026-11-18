@@ -39,22 +39,14 @@ GRIDS = {
 }
 
 
-# Match the regular bows' orientation: curved limbs above/left of a taut
-# string running from (6, 1) to (0, 7), not vertically down the icon.
-LEGENDARY_BOW_GRIDS = [
-    ('...amma.', '..amh.h.', '.amh.h..', 'amh.h...', 'am.h....', 'amh.....', 'ah......', 'ho......'),
-    ('...hmmh.', '..ham.h.', '.ham.h..', 'ham.h...', 'am.h....', 'amhs....', 'ah......', 'ho......'),
-    ('...ahmh.', '..ahm.h.', '.ham.h..', 'ham.h...', 'am.h....', 'smh.....', 'ah......', 'ho......'),
-    ('...hmma.', '..hma.h.', '.hma.h..', 'hma.h...', 'ma.h....', 'mah.....', 'ah......', 'ho......'),
-]
 
 
 def draw(row):
     main, accent = [ImageColor.getrgb('#'+c) for c in row['colors']]
     colors = {'m': (*main, 255), 'a': (*accent, 255), 'h': (*(round(c*.45+255*.55) for c in accent), 255),
               's': (*(round(c*.6) for c in main), 255), 'o': (*(round(c*.28) for c in main), 255), '.': (0,0,0,0)}
-    variants = LEGENDARY_BOW_GRIDS if row['rarity'] == 'L' and row['kind'] == 'Bow' else GRIDS[row['kind']]
-    rows = variants[int(row['appearance']['form']) % len(variants)]
+    variants = GRIDS[row['kind']]
+    rows = row.get('icon_grid') or variants[int(row['appearance']['form']) % len(variants)]
     assert len(rows)==8 and all(len(r)==8 for r in rows), row['id']
     image = Image.new('RGBA', (8,8))
     image.putdata([colors[p] for r in rows for p in r])

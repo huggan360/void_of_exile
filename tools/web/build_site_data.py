@@ -98,7 +98,7 @@ def main():
         shot = None
         if i["id"] in media["items"]:
             keyed(WORK / "media" / media["items"][i["id"]], out / "shots" / ("item_" + i["id"] + ".webp"), 320)
-            shot = "shots/item_%s.webp" % i["id"]
+            shot = "shots/item_%s.webp?v=%s" % (i["id"], hashlib.sha256((out / "shots" / ("item_" + i["id"] + ".webp")).read_bytes()).hexdigest()[:12])
         proj = i.get("projectile") or {}
         items[i["id"]] = {
             "id": i["id"], "name": i.get("item_name", i["id"]), "kind": i.get("kind", ""), "slot": i.get("slot", ""),
@@ -111,9 +111,8 @@ def main():
             "range": round(float(proj["range"]) * 0.6, 1) if proj.get("range") else None,
             "projectile": {"style": proj.get("style"), "color": color(proj.get("color"))} if proj else None,
             "consumable": i.get("consumable") or None, "bag": i.get("bag_type", ""),
-            # A replacement release keeps its version and icon filenames. Changed
-            # bow art gets a new URL so CDN/browser caches cannot serve the old string.
-            "icon": "items/%s.webp%s" % (i["id"], "?v=" + hashlib.sha256((out / "items" / (i["id"] + ".webp")).read_bytes()).hexdigest()[:12] if i["id"].startswith("L_bow_") else ""), "shot": shot}
+            # Hash delivered WebP bytes so updated icons and shots bypass old caches.
+            "icon": "items/%s.webp?v=%s" % (i["id"], hashlib.sha256((out / "items" / (i["id"] + ".webp")).read_bytes()).hexdigest()[:12]), "shot": shot}
 
     where = {}
     for b in c["biomes"]:

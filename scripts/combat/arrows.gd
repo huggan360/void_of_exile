@@ -70,6 +70,7 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 		wave_amp = mods.get("wave_amp", p.get("wave_amp", 0.0)), wave_freq = p.get("wave_freq", 0.0),
 		lift_amp = mods.get("lift_amp", p.get("lift_amp", 0.0)), orbit = p.get("orbit", false),
 		up = mods.get("up", Vector3.UP),
+		motion = str(p.get("signature", "")), delay = clampf(float(mods.get("delay", 0)), 0.0, 0.5),
 		pierce = mods.get("pierce", p.get("pierce", false)),
 		magic = p.get("style", "arrow") not in ["arrow", "trident"] if mods.has("style") else bool(p.get("magic", p.get("style", "arrow") not in ["arrow", "trident"])),
 		secondary = mods.get("secondary", false), cone_deg = mods.get("cone_deg", 0.0),
@@ -77,6 +78,9 @@ func spawn(origin: Vector3, direction: Vector3, damage: int, weapon: Item, phase
 		spinner = spinner, burst = mods.get("burst", ""), done = false, visual = mods.get("visual", false),
 		exclude = mods.get("exclude", RID()),
 	})
+	if float(mods.get("delay", 0)) > 0:
+		node.hide()
+		for particles: GPUParticles3D in node.find_children("*", "GPUParticles3D", true, false): particles.emitting = false
 
 
 func clear() -> void:
@@ -97,6 +101,11 @@ func _physics_process(delta: float) -> void:
 func _physics_step(delta: float) -> void:
 	var space := get_world_3d().direct_space_state
 	for s in _shots:
+		if s.delay > 0.0:
+			s.delay = maxf(0.0, float(s.delay) - delta)
+			if s.delay > 0.0: continue
+			s.node.show()
+			for particles: GPUParticles3D in s.node.find_children("*", "GPUParticles3D", true, false): particles.emitting = true
 		if s.stuck:
 			s.life -= delta
 			s.node.scale = Vector3.ONE * clampf(s.life / 0.3, 0.01, 1.0)
@@ -228,6 +237,14 @@ func _splash(s: Dictionary) -> void:
 ## to side around their straight line).
 func _position_at(s: Dictionary, distance: float) -> Vector3:
 	var pos: Vector3 = s.origin + s.direction * distance
+	if str(s.get("motion", "")) != "":
+		var side: Vector3 = s.direction.cross(s.up).normalized()
+		if side.is_zero_approx():
+			var axis := Vector3.FORWARD if absf(s.direction.dot(Vector3.FORWARD)) < 0.95 else Vector3.RIGHT
+			side = s.direction.cross(axis).normalized()
+		var lift: Vector3 = side.cross(s.direction).normalized()
+		var offset := LegendaryProjectiles.offset(s, distance)
+		return pos + side * offset.x + lift * offset.y + s.direction * offset.z
 	if s.wave_amp > 0.0 or s.lift_amp > 0.0:
 		var side: Vector3 = s.direction.cross(s.up).normalized()
 		if side.is_zero_approx():
@@ -259,7 +276,9 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 	var tip_tool := lit if glow else body
 	if weapon.id.ends_with("_ofiron"):
 		_iron_mesh(body, lit, weapon.kind)
-	match "iron" if weapon.id.ends_with("_ofiron") else style:
+	if style.begins_with("legend_"):
+		LegendaryProjectiles.build(self, body, lit, style.trim_prefix("legend_"), c1, c2)
+	match "iron" if weapon.id.ends_with("_ofiron") else ("legendary" if style.begins_with("legend_") else style):
 		"facet_lance", "facet_crescent", "facet_comet", "solar_disc", "bell_shard", "seed_star", "ember_crown", "festival_orb", "festival_spark", "petal_kite", "orbit_pearl", "clock_shard":
 			_signature_mesh(body, lit, style, c1, c2)
 		"arrow":
@@ -578,6 +597,10 @@ func _make_trail(weapon: Item, trail_override: String) -> GPUParticles3D:
 	pm.scale_curve = shrink_tex
 	var cube := BoxMesh.new()
 	cube.size = Vector3.ONE * 0.07
+	var identity := {}
+	if weapon.is_legendary():
+		identity = LegendaryProjectiles.trail(pm, str(p.get("trail_identity", "")))
+		cube.size = identity.size
 	var mat := ShaderMaterial.new()
 	mat.shader = preload("res://shaders/fire_voxel.gdshader")
 	mat.set_shader_parameter("brightness", 2.5)
@@ -585,8 +608,8 @@ func _make_trail(weapon: Item, trail_override: String) -> GPUParticles3D:
 	var particles := GPUParticles3D.new()
 	particles.process_material = pm
 	particles.draw_pass_1 = cube
-	particles.amount = 24 if weapon.is_special() else 14
-	particles.lifetime = 0.35
+	particles.amount = int(identity.get("amount", 24 if weapon.is_special() else 14))
+	particles.lifetime = float(identity.get("life", 0.35))
 	particles.local_coords = false  # stays behind in the air
 	particles.position = Vector3(0, 0, 0.3)
 	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

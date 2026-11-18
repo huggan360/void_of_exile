@@ -32,7 +32,9 @@ static func build(rarity: String) -> Array[Item]:
 		var abilities: Array = []
 		if row.slot == "weapon":
 			abilities.append("Charged: " + str(row.charge.name))
-			if rarity == "L": abilities.append("Cut crystal projectiles with a luminous trail")
+			if rarity == "L":
+				abilities.append(str(row.projectile.get("description", "")))
+				abilities.append(str(row.charge.get("description", "")))
 			elif row.projectile.get("pattern", "") != "": abilities.append("Fires a display around and above you")
 			elif row.projectile.get("burst", "") != "": abilities.append("A huge, slow firework that scatters sparks on impact")
 		if row.effects.has("showoff"): abilities.append("A luminous garment with a crown of drifting lights")

@@ -25,26 +25,76 @@
       "rate": 1.015,
       "shots": 2,
       "shares": [
-        0.52,
-        0.48
+        0.5,
+        0.5
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_lance",
+        "style": "legend_kingfisher",
         "speed": 30,
         "range": 25,
         "size": 0.995,
-        "wave_amp": 0.18,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "feathers",
+        "signature": "kingfisher",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -1.4,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1.4,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Two feather darts dive together, then peel apart.",
+        "trail_identity": "feathers"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "Kingfisher Unbound",
+        "style": "legendary",
+        "name": "Royal Flight",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 5,
+        "description": "A five-bird V with a fast leading feather.",
+        "pattern": [
+          {
+            "yaw": -9,
+            "pitch": 1,
+            "speed": 1.12,
+            "delay": 0
+          },
+          {
+            "yaw": -4,
+            "pitch": 0,
+            "speed": 1.04,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 2,
+            "speed": 1.2,
+            "delay": 0
+          },
+          {
+            "yaw": 4,
+            "pitch": 0,
+            "speed": 1.04,
+            "delay": 0
+          },
+          {
+            "yaw": 9,
+            "pitch": 1,
+            "speed": 1.12,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -69,7 +119,17 @@
         "target_primary": 163.12,
         "g8_ratio": 0.58,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...ma..h",
+        "..ma..h.",
+        ".ma..h..",
+        "ma..h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_wand_thewandofash",
@@ -95,26 +155,45 @@
       "rate": 1.0,
       "shots": 2,
       "shares": [
-        0.52,
-        0.48
+        0.5,
+        0.5
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "ember_crown",
+        "style": "legend_ash",
         "speed": 31,
         "range": 26,
         "size": 1.04,
-        "wave_amp": 0.25,
-        "wave_freq": 12,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "embers",
+        "signature": "ash",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -2,
+            "pitch": 0,
+            "speed": 0.93,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 0,
+            "speed": 1.07,
+            "delay": 0.08
+          }
+        ],
+        "description": "Paired ember buds rise in opposite corkscrews.",
+        "trail_identity": "embers"
       },
       "charge": {
         "style": "inferno",
         "name": "Ashfall",
         "mult": 2.6,
         "ring_damage": 220,
-        "ring_range": 6.0
+        "ring_range": 6.0,
+        "description": "An ember heart bursts into the existing burning ring."
       },
       "primary_effects": [
         {
@@ -139,7 +218,17 @@
         "target_primary": 131.82,
         "g8_ratio": 0.78,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        ".....h..",
+        "....hah.",
+        ".....m..",
+        "....am..",
+        "...am...",
+        "..am....",
+        ".am.....",
+        "so......"
+      ]
     },
     {
       "id": "L_bow_thornclock",
@@ -163,28 +252,91 @@
         177
       ],
       "rate": 1.065,
-      "shots": 2,
+      "shots": 3,
       "shares": [
-        0.52,
-        0.48
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_crescent",
+        "style": "legend_thornclock",
         "speed": 31,
         "range": 26,
         "size": 1.04,
-        "wave_amp": 0.32,
-        "wave_freq": 14,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "thorns",
+        "signature": "thornclock",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 0.92,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.05,
+            "delay": 0.045
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 0.92,
+            "delay": 0.09
+          }
+        ],
+        "description": "Three thorn hooks move in stepped teeth.",
+        "trail_identity": "thorns"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Thornclock Unbound",
+        "style": "legendary",
+        "name": "Escapement",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 6,
+        "description": "Six hooks escape in a staggered toothed comb.",
+        "pattern": [
+          {
+            "yaw": -11,
+            "pitch": 0,
+            "speed": 0.95,
+            "delay": 0
+          },
+          {
+            "yaw": -7,
+            "pitch": 1,
+            "speed": 1.1,
+            "delay": 0.04
+          },
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 0.95,
+            "delay": 0.08
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 1.1,
+            "delay": 0.12
+          },
+          {
+            "yaw": 7,
+            "pitch": 1,
+            "speed": 0.95,
+            "delay": 0.16
+          },
+          {
+            "yaw": 11,
+            "pitch": 0,
+            "speed": 1.1,
+            "delay": 0.2
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -204,7 +356,17 @@
         "target_primary": 174.38,
         "g8_ratio": 0.62,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "...ammma",
+        "...m...h",
+        "..ma..h.",
+        ".ma..h..",
+        "ma..h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_trident_tideglass",
@@ -231,27 +393,83 @@
       "rate": 0.915,
       "shots": 3,
       "shares": [
-        0.25,
-        0.5,
-        0.25
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "facet_lance",
+        "style": "legend_tideglass",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.18,
-        "wave_freq": 16,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "spray",
+        "signature": "tideglass",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -4,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.12,
+            "delay": 0
+          },
+          {
+            "yaw": 4,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "A glass fork opens and folds back like a tide.",
+        "trail_identity": "spray"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "Tideglass Unbound",
+        "style": "legendary",
+        "name": "High Tide",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 5,
+        "description": "Five tidal forks curl into a wide breaking wave.",
+        "pattern": [
+          {
+            "yaw": -12,
+            "pitch": 0,
+            "speed": 0.95,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 2,
+            "speed": 1.05,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.18,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 2,
+            "speed": 1.05,
+            "delay": 0
+          },
+          {
+            "yaw": 12,
+            "pitch": 0,
+            "speed": 0.95,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -276,7 +494,17 @@
         "target_primary": 236.38,
         "g8_ratio": 0.84,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "..h.h.h.",
+        "..a.m.a.",
+        "..am.ma.",
+        "...amh..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_wand_sunsplinter",
@@ -302,26 +530,94 @@
       "rate": 1.0,
       "shots": 2,
       "shares": [
-        0.52,
-        0.48
+        0.5,
+        0.5
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "solar_disc",
+        "style": "legend_sunsplinter",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.25,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "snow",
+        "signature": "sunsplinter",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -1,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Twin snowflake prisms trace sharp mirrored zigzags.",
+        "trail_identity": "snow"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Sunsplinter Unbound",
+        "style": "legendary",
+        "name": "Shattered Sun",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 8,
+        "description": "An eight-point icy sun flies forward as a hollow cone.",
+        "pattern": [
+          {
+            "yaw": 7.391,
+            "pitch": 1.531,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.061,
+            "pitch": 3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.061,
+            "pitch": 3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -7.391,
+            "pitch": 1.531,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -7.391,
+            "pitch": -1.531,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.061,
+            "pitch": -3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.061,
+            "pitch": -3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 7.391,
+            "pitch": -1.531,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -347,7 +643,17 @@
         "target_primary": 128.44,
         "g8_ratio": 0.76,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....h.h.",
+        ".....a..",
+        "...hamah",
+        ".....a..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_bow_blackcomet",
@@ -371,28 +677,59 @@
         263
       ],
       "rate": 1.065,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_comet",
+        "style": "legend_blackcomet",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.32,
-        "wave_freq": 12,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "cinders",
+        "signature": "blackcomet",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "One heavy obsidian comet snakes in a broad S.",
+        "trail_identity": "cinders"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Black Comet Unbound",
+        "style": "legendary",
+        "name": "Three Falls",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 3,
+        "description": "A fast comet leads two slower climbing fragments.",
+        "pattern": [
+          {
+            "yaw": -8,
+            "pitch": 2,
+            "speed": 0.82,
+            "delay": 0.1
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.15,
+            "delay": 0
+          },
+          {
+            "yaw": 8,
+            "pitch": 2,
+            "speed": 0.82,
+            "delay": 0.1
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -412,7 +749,17 @@
         "target_primary": 258.75,
         "g8_ratio": 0.92,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...ma..h",
+        "..m...h.",
+        ".m...h..",
+        "ma..h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_wand_mirageengine",
@@ -436,28 +783,97 @@
         178
       ],
       "rate": 0.975,
-      "shots": 2,
+      "shots": 3,
       "shares": [
-        0.52,
-        0.48
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_crescent",
+        "style": "legend_mirage",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.18,
-        "wave_freq": 14,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "glass",
+        "signature": "mirage",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 1,
+            "speed": 0.86,
+            "delay": 0
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Three hollow diamonds separate into wavering mirages.",
+        "trail_identity": "glass"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "The Mirage Engine Unbound",
+        "style": "legendary",
+        "name": "Seven Horizons",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 7,
+        "description": "Seven mirage panes unfold at different speeds.",
+        "pattern": [
+          {
+            "yaw": -9,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 2,
+            "speed": 0.9,
+            "delay": 0.03
+          },
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 1.1,
+            "delay": 0.06
+          },
+          {
+            "yaw": 0,
+            "pitch": 3,
+            "speed": 0.8,
+            "delay": 0.09
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 1.1,
+            "delay": 0.06
+          },
+          {
+            "yaw": 6,
+            "pitch": 2,
+            "speed": 0.9,
+            "delay": 0.03
+          },
+          {
+            "yaw": 9,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -482,7 +898,17 @@
         "target_primary": 160.55,
         "g8_ratio": 0.95,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        ".....h..",
+        "....a.a.",
+        "...h...h",
+        "....a.a.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..o....."
+      ]
     },
     {
       "id": "L_trident_crownbreaker",
@@ -509,27 +935,83 @@
       "rate": 0.94,
       "shots": 3,
       "shares": [
-        0.25,
-        0.5,
-        0.25
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "facet_lance",
+        "style": "legend_crownbreaker",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.25,
-        "wave_freq": 16,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "metal",
+        "signature": "crownbreaker",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -3.5,
+            "pitch": 0,
+            "speed": 0.98,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.15,
+            "delay": 0
+          },
+          {
+            "yaw": 3.5,
+            "pitch": 0,
+            "speed": 0.98,
+            "delay": 0
+          }
+        ],
+        "description": "Three broken crown prongs plait into a narrow braid.",
+        "trail_identity": "metal"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Crownbreaker Unbound",
+        "style": "legendary",
+        "name": "Uncrowned",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 5,
+        "description": "Five prongs form an arched crown around the aim line.",
+        "pattern": [
+          {
+            "yaw": -12,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 2,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 4,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 2,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 12,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -555,7 +1037,17 @@
         "target_primary": 264.52,
         "g8_ratio": 0.94,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "...h.h.h",
+        "...m.a.m",
+        "....mam.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_bow_secondhand",
@@ -581,26 +1073,118 @@
       "rate": 1.065,
       "shots": 2,
       "shares": [
-        0.52,
-        0.48
+        0.5,
+        0.5
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "solar_disc",
+        "style": "legend_secondhand",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.32,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "ticks",
+        "signature": "secondhand",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 0.8,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.2,
+            "delay": 0.08
+          }
+        ],
+        "description": "Two clock hands orbit at different speeds.",
+        "trail_identity": "ticks"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "The Second Hand Unbound",
+        "style": "legendary",
+        "name": "Last Twelve Seconds",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 12,
+        "description": "Twelve ticking hands describe a moving clock face.",
+        "pattern": [
+          {
+            "yaw": 6.0,
+            "pitch": 0.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 5.196,
+            "pitch": 1.75,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.0,
+            "pitch": 3.031,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0.0,
+            "pitch": 3.5,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.0,
+            "pitch": 3.031,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -5.196,
+            "pitch": 1.75,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6.0,
+            "pitch": 0.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -5.196,
+            "pitch": -1.75,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.0,
+            "pitch": -3.031,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -0.0,
+            "pitch": -3.5,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.0,
+            "pitch": -3.031,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 5.196,
+            "pitch": -1.75,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -620,7 +1204,17 @@
         "target_primary": 247.5,
         "g8_ratio": 0.88,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...m...h",
+        "..m...h.",
+        ".m...h..",
+        "ma..h...",
+        "ma.h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_wand_silentbell",
@@ -644,28 +1238,71 @@
         153
       ],
       "rate": 0.975,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "bell_shard",
+        "style": "legend_silentbell",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.18,
-        "wave_freq": 12,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "sound",
+        "signature": "silentbell",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "One open bell wobbles in an expanding sound spiral.",
+        "trail_identity": "sound"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "The Silent Bell Unbound",
+        "style": "legendary",
+        "name": "Soundless Peal",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 5,
+        "description": "Five bell mouths form a silent forward-facing ring.",
+        "pattern": [
+          {
+            "yaw": 5.5,
+            "pitch": 0.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1.7,
+            "pitch": 5.231,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -4.45,
+            "pitch": 3.233,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -4.45,
+            "pitch": -3.233,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1.7,
+            "pitch": -5.231,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -690,7 +1327,17 @@
         "target_primary": 138.58,
         "g8_ratio": 0.82,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....h.h.",
+        "....m.m.",
+        "....m.m.",
+        "...ha.ah",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..o....."
+      ]
     },
     {
       "id": "L_trident_bellwether",
@@ -717,27 +1364,95 @@
       "rate": 0.94,
       "shots": 3,
       "shares": [
-        0.25,
-        0.5,
-        0.25
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "bell_shard",
+        "style": "legend_bellwether",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.25,
-        "wave_freq": 14,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "chimes",
+        "signature": "bellwether",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -4,
+            "pitch": 0,
+            "speed": 0.88,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 1,
+            "speed": 1.1,
+            "delay": 0.06
+          },
+          {
+            "yaw": 4,
+            "pitch": 0,
+            "speed": 0.98,
+            "delay": 0.12
+          }
+        ],
+        "description": "Three tuning forks travel in a rippling procession.",
+        "trail_identity": "chimes"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Bellwether Unbound",
+        "style": "legendary",
+        "name": "Call and Answer",
         "mult": 2.7,
         "count": 7,
-        "shard_total": 1.15
+        "description": "Seven staggered forks fan out in a rising call.",
+        "pattern": [
+          {
+            "yaw": -12,
+            "pitch": 0,
+            "speed": 0.9,
+            "delay": 0
+          },
+          {
+            "yaw": -8,
+            "pitch": 1,
+            "speed": 0.94,
+            "delay": 0.035
+          },
+          {
+            "yaw": -4,
+            "pitch": 2,
+            "speed": 0.98,
+            "delay": 0.07
+          },
+          {
+            "yaw": 0,
+            "pitch": 3,
+            "speed": 1.14,
+            "delay": 0.105
+          },
+          {
+            "yaw": 4,
+            "pitch": 2,
+            "speed": 0.98,
+            "delay": 0.14
+          },
+          {
+            "yaw": 8,
+            "pitch": 1,
+            "speed": 0.94,
+            "delay": 0.175
+          },
+          {
+            "yaw": 12,
+            "pitch": 0,
+            "speed": 0.9,
+            "delay": 0.21
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -763,7 +1478,17 @@
         "target_primary": 242.0,
         "g8_ratio": 0.86,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "...h..h.",
+        "...m..m.",
+        "...m..m.",
+        "....mm..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_bow_falsepromise",
@@ -789,26 +1514,82 @@
       "rate": 1.065,
       "shots": 2,
       "shares": [
-        0.52,
-        0.48
+        0.5,
+        0.5
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_comet",
+        "style": "legend_falsepromise",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.32,
-        "wave_freq": 16,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "coins",
+        "signature": "falsepromise",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -4,
+            "pitch": 0,
+            "speed": 1.1,
+            "delay": 0
+          },
+          {
+            "yaw": 4,
+            "pitch": 0,
+            "speed": 0.9,
+            "delay": 0
+          }
+        ],
+        "description": "Two pierced coins cross, then abandon the aim line.",
+        "trail_identity": "coins"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "False Promise Unbound",
+        "style": "legendary",
+        "name": "Gilded Lie",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 6,
+        "description": "Six coins cross through a false diamond-shaped fan.",
+        "pattern": [
+          {
+            "yaw": -10,
+            "pitch": 0,
+            "speed": 1.2,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 2,
+            "speed": 0.9,
+            "delay": 0
+          },
+          {
+            "yaw": -2,
+            "pitch": 0,
+            "speed": 1.05,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 0,
+            "speed": 1.05,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 2,
+            "speed": 0.9,
+            "delay": 0
+          },
+          {
+            "yaw": 10,
+            "pitch": 0,
+            "speed": 1.2,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -828,7 +1609,17 @@
         "target_primary": 222.19,
         "g8_ratio": 0.79,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        ".....mma",
+        "...ma..h",
+        "..m...h.",
+        ".ma..h..",
+        "ma..h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_trident_coldverdict",
@@ -853,29 +1644,66 @@
         276
       ],
       "rate": 0.915,
-      "shots": 3,
+      "shots": 2,
       "shares": [
-        0.25,
         0.5,
-        0.25
+        0.5
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "facet_lance",
+        "style": "legend_coldverdict",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.18,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "shavings",
+        "signature": "coldverdict",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -2.5,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 2.5,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Paired guillotine blades descend through a shallow arc.",
+        "trail_identity": "shavings"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "Cold Verdict Unbound",
+        "style": "legendary",
+        "name": "Final Sentence",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 3,
+        "description": "Three heavy edges fall around a fast central verdict.",
+        "pattern": [
+          {
+            "yaw": -7,
+            "pitch": 3,
+            "speed": 0.88,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.2,
+            "delay": 0
+          },
+          {
+            "yaw": 7,
+            "pitch": 3,
+            "speed": 0.88,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -900,7 +1728,17 @@
         "target_primary": 233.56,
         "g8_ratio": 0.83,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "..hhh.h.",
+        "...m..m.",
+        "...m.am.",
+        "....mm..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_wand_seedoftomorrow",
@@ -924,28 +1762,95 @@
         159
       ],
       "rate": 1.0,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "seed_star",
+        "style": "legend_seed",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.25,
-        "wave_freq": 12,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "seeds",
+        "signature": "seed",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "One split seed opens into a three-lobed flight.",
+        "trail_identity": "seeds"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Seed of Tomorrow Unbound",
+        "style": "legendary",
+        "name": "First Spring",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 9,
+        "description": "Nine seed husks blossom into a forward flower.",
+        "pattern": [
+          {
+            "yaw": 0.0,
+            "pitch": 4.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -5.785,
+            "pitch": 3.064,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -8.863,
+            "pitch": 0.695,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -7.794,
+            "pitch": -2.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.078,
+            "pitch": -3.759,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.078,
+            "pitch": -3.759,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 7.794,
+            "pitch": -2.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 8.863,
+            "pitch": 0.695,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 5.785,
+            "pitch": 3.064,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -971,7 +1876,17 @@
         "target_primary": 147.03,
         "g8_ratio": 0.87,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        ".....a..",
+        "....ham.",
+        "....ma..",
+        ".....m..",
+        "...a.m..",
+        "....m...",
+        "...m....",
+        "..o....."
+      ]
     },
     {
       "id": "L_bow_heartwoodengine",
@@ -995,28 +1910,85 @@
         205
       ],
       "rate": 1.065,
-      "shots": 2,
+      "shots": 3,
       "shares": [
-        0.52,
-        0.48
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_crescent",
+        "style": "legend_heartwood",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.32,
-        "wave_freq": 14,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "leaves",
+        "signature": "heartwood",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Three leaf lances braid like growing roots.",
+        "trail_identity": "leaves"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Heartwood Engine Unbound",
+        "style": "legendary",
+        "name": "Root and Bough",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 5,
+        "description": "Five branches grow outward, each with a different curl.",
+        "pattern": [
+          {
+            "yaw": -11,
+            "pitch": 1,
+            "speed": 0.9,
+            "delay": 0
+          },
+          {
+            "yaw": -5,
+            "pitch": 0,
+            "speed": 1.04,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 3,
+            "speed": 1.12,
+            "delay": 0
+          },
+          {
+            "yaw": 5,
+            "pitch": 0,
+            "speed": 1.04,
+            "delay": 0
+          },
+          {
+            "yaw": 11,
+            "pitch": 1,
+            "speed": 0.9,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -1036,7 +2008,17 @@
         "target_primary": 202.5,
         "g8_ratio": 0.72,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...ma..h",
+        "a.m...h.",
+        ".m...h..",
+        "ma..h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_trident_timesunder",
@@ -1061,29 +2043,84 @@
         286
       ],
       "rate": 0.915,
-      "shots": 3,
+      "shots": 2,
       "shares": [
-        0.25,
         0.5,
-        0.25
+        0.5
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "solar_disc",
+        "style": "legend_timesunder",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.18,
-        "wave_freq": 16,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "sand",
+        "signature": "timesunder",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -1.5,
+            "pitch": 0,
+            "speed": 1.12,
+            "delay": 0
+          },
+          {
+            "yaw": 1.5,
+            "pitch": 0,
+            "speed": 0.88,
+            "delay": 0
+          }
+        ],
+        "description": "Twin hourglasses pulse forward with a pendulum sway.",
+        "trail_identity": "sand"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "Timesunder Unbound",
+        "style": "legendary",
+        "name": "Borrowed Hours",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 6,
+        "description": "Six hourglasses arrive as a slowing and speeding ladder.",
+        "pattern": [
+          {
+            "yaw": -9,
+            "pitch": 2,
+            "speed": 0.85,
+            "delay": 0
+          },
+          {
+            "yaw": -5,
+            "pitch": 0,
+            "speed": 1.15,
+            "delay": 0.05
+          },
+          {
+            "yaw": -1,
+            "pitch": 2,
+            "speed": 0.95,
+            "delay": 0.1
+          },
+          {
+            "yaw": 1,
+            "pitch": 2,
+            "speed": 0.95,
+            "delay": 0.15
+          },
+          {
+            "yaw": 5,
+            "pitch": 0,
+            "speed": 1.15,
+            "delay": 0.2
+          },
+          {
+            "yaw": 9,
+            "pitch": 2,
+            "speed": 0.85,
+            "delay": 0.25
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1108,7 +2145,17 @@
         "target_primary": 242.0,
         "g8_ratio": 0.86,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....h.h.",
+        "...h.m.h",
+        "....mam.",
+        "....m.m.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..o....."
+      ]
     },
     {
       "id": "L_wand_daybreaker",
@@ -1132,28 +2179,83 @@
         192
       ],
       "rate": 1.0,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "solar_disc",
+        "style": "legend_daybreaker",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.25,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "rays",
+        "signature": "daybreaker",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "One sun spear rises along a clean dawn arc.",
+        "trail_identity": "rays"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Daybreaker Unbound",
+        "style": "legendary",
+        "name": "First Light",
         "mult": 2.7,
         "count": 7,
-        "shard_total": 1.15
+        "description": "Seven rays open around a high, fast leading spear.",
+        "pattern": [
+          {
+            "yaw": -12,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -8,
+            "pitch": 1,
+            "speed": 1.04,
+            "delay": 0
+          },
+          {
+            "yaw": -4,
+            "pitch": 2,
+            "speed": 1.08,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 4,
+            "speed": 1.25,
+            "delay": 0
+          },
+          {
+            "yaw": 4,
+            "pitch": 2,
+            "speed": 1.08,
+            "delay": 0
+          },
+          {
+            "yaw": 8,
+            "pitch": 1,
+            "speed": 1.04,
+            "delay": 0
+          },
+          {
+            "yaw": 12,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1179,7 +2281,17 @@
         "target_primary": 177.45,
         "g8_ratio": 1.05,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        ".....h..",
+        "...h.a.h",
+        "....hah.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_bow_threadcutter",
@@ -1205,26 +2317,94 @@
       "rate": 1.065,
       "shots": 2,
       "shares": [
-        0.52,
-        0.48
+        0.5,
+        0.5
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_lance",
+        "style": "legend_threadcutter",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.32,
-        "wave_freq": 12,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "threads",
+        "signature": "threadcutter",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Two scissor blades repeatedly cross the same line.",
+        "trail_identity": "threads"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Threadcutter Unbound",
+        "style": "legendary",
+        "name": "Sever the Weave",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 8,
+        "description": "Eight opposed blades weave into a cutting lattice.",
+        "pattern": [
+          {
+            "yaw": -10,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -7,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -4,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -1,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 4,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 7,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 10,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -1244,7 +2424,17 @@
         "target_primary": 253.12,
         "g8_ratio": 0.9,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...ma..h",
+        "..m...h.",
+        ".ma..h..",
+        "m...h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_trident_eyeless",
@@ -1271,27 +2461,107 @@
       "rate": 0.915,
       "shots": 3,
       "shares": [
-        0.25,
-        0.5,
-        0.25
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "facet_comet",
+        "style": "legend_eyeless",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.18,
-        "wave_freq": 14,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "sparks",
+        "signature": "eyeless",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 1,
+            "speed": 0.9,
+            "delay": 0.04
+          },
+          {
+            "yaw": 2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0.08
+          }
+        ],
+        "description": "Three hollow eyes follow jagged lightning lanes.",
+        "trail_identity": "sparks"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "The Eyeless Unbound",
+        "style": "legendary",
+        "name": "Blind Storm",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 9,
+        "description": "Three eye-shaped clusters fork into a blind storm.",
+        "pattern": [
+          {
+            "yaw": -10,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -8,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -2,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 2,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 8,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 10,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1316,7 +2586,17 @@
         "target_primary": 292.66,
         "g8_ratio": 1.04,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "..h.h.h.",
+        "...mam..",
+        "...m.m..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".m......",
+        "o......."
+      ]
     },
     {
       "id": "L_wand_stillpoint",
@@ -1340,28 +2620,89 @@
         197
       ],
       "rate": 1.0,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "bell_shard",
+        "style": "legend_stillpoint",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.25,
-        "wave_freq": 16,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "silence",
+        "signature": "stillpoint",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "One nested cube moves perfectly straight, with a faint trail.",
+        "trail_identity": "silence"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Stillpoint Unbound",
+        "style": "legendary",
+        "name": "Perfect Silence",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 8,
+        "description": "Eight quiet cubes outline a narrow square-circle cage.",
+        "pattern": [
+          {
+            "yaw": 3.696,
+            "pitch": 1.531,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1.531,
+            "pitch": 3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -1.531,
+            "pitch": 3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.696,
+            "pitch": 1.531,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.696,
+            "pitch": -1.531,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -1.531,
+            "pitch": -3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1.531,
+            "pitch": -3.696,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.696,
+            "pitch": -1.531,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1387,7 +2728,17 @@
         "target_primary": 182.52,
         "g8_ratio": 1.08,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....hhh.",
+        "....m.h.",
+        "....hhh.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_bow_eventhorizon",
@@ -1411,28 +2762,91 @@
         291
       ],
       "rate": 1.065,
-      "shots": 2,
+      "shots": 3,
       "shares": [
-        0.52,
-        0.48
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_crescent",
+        "style": "legend_eventhorizon",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.32,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "void",
+        "signature": "eventhorizon",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Three dark rings spiral outward, then close inward.",
+        "trail_identity": "void"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Event Horizon Unbound",
+        "style": "legendary",
+        "name": "No Return",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 6,
+        "description": "Six counter-rotating rings collapse toward the aim line.",
+        "pattern": [
+          {
+            "yaw": 6.0,
+            "pitch": 0.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.0,
+            "pitch": 2.598,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.0,
+            "pitch": 2.598,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6.0,
+            "pitch": 0.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3.0,
+            "pitch": -2.598,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3.0,
+            "pitch": -2.598,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -1452,7 +2866,17 @@
         "target_primary": 286.88,
         "g8_ratio": 1.02,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...m...h",
+        "..ma..h.",
+        ".ma..h..",
+        "m...h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_wand_dewglass",
@@ -1476,28 +2900,71 @@
         118
       ],
       "rate": 0.975,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "seed_star",
+        "style": "legend_dewglass",
         "speed": 30,
         "range": 25,
         "size": 0.995,
-        "wave_amp": 0.18,
-        "wave_freq": 12,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "drops",
+        "signature": "dewglass",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "One hanging droplet bobs along a soft vertical wave.",
+        "trail_identity": "drops"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "Dewglass Unbound",
+        "style": "legendary",
+        "name": "Morning Dew",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 5,
+        "description": "Five rising droplets fall through different rain arcs.",
+        "pattern": [
+          {
+            "yaw": -6,
+            "pitch": 1,
+            "speed": 0.9,
+            "delay": 0
+          },
+          {
+            "yaw": -3,
+            "pitch": 3,
+            "speed": 1.02,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 4,
+            "speed": 1.1,
+            "delay": 0
+          },
+          {
+            "yaw": 3,
+            "pitch": 3,
+            "speed": 1.02,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 1,
+            "speed": 0.9,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1522,7 +2989,17 @@
         "target_primary": 106.47,
         "g8_ratio": 0.63,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        ".....h..",
+        "....hah.",
+        "....mam.",
+        ".....a..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_bow_landfall",
@@ -1546,28 +3023,59 @@
         204
       ],
       "rate": 1.04,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_lance",
+        "style": "legend_landfall",
         "speed": 31,
         "range": 26,
         "size": 1.04,
-        "wave_amp": 0.25,
-        "wave_freq": 14,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "brine",
+        "signature": "landfall",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "A single anchor-harpoon follows a low ballistic arc.",
+        "trail_identity": "brine"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Landfall Unbound",
+        "style": "legendary",
+        "name": "Safe Harbor",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 3,
+        "description": "Three harpoons drag separate curving wakes.",
+        "pattern": [
+          {
+            "yaw": -7,
+            "pitch": 2,
+            "speed": 0.92,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.12,
+            "delay": 0
+          },
+          {
+            "yaw": 7,
+            "pitch": 2,
+            "speed": 0.92,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1593,7 +3101,17 @@
         "target_primary": 196.88,
         "g8_ratio": 0.7,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...m...h",
+        "..ma..h.",
+        ".ma..h..",
+        "ma..h...",
+        "ma.h....",
+        "mah.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_trident_sunfeather",
@@ -1618,29 +3136,110 @@
         252
       ],
       "rate": 0.965,
-      "shots": 3,
+      "shots": 4,
       "shares": [
         0.25,
-        0.5,
+        0.25,
+        0.25,
         0.25
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "facet_crescent",
+        "style": "legend_sunfeather",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.32,
-        "wave_freq": 16,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "sunfeathers",
+        "signature": "sunfeather",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -6,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Four feather flames sweep upward in an open wing.",
+        "trail_identity": "sunfeathers"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Sunfeather Unbound",
+        "style": "legendary",
+        "name": "Phoenix Wing",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 8,
+        "description": "Eight phoenix quills spread into a broad climbing wing.",
+        "pattern": [
+          {
+            "yaw": -14,
+            "pitch": 0,
+            "speed": 0.9,
+            "delay": 0
+          },
+          {
+            "yaw": -10,
+            "pitch": 1,
+            "speed": 0.96,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 2,
+            "speed": 1.02,
+            "delay": 0
+          },
+          {
+            "yaw": -2,
+            "pitch": 3,
+            "speed": 1.1,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 3,
+            "speed": 1.1,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 2,
+            "speed": 1.02,
+            "delay": 0
+          },
+          {
+            "yaw": 10,
+            "pitch": 1,
+            "speed": 0.96,
+            "delay": 0
+          },
+          {
+            "yaw": 14,
+            "pitch": 0,
+            "speed": 0.9,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -1660,7 +3259,17 @@
         "target_primary": 225.12,
         "g8_ratio": 0.8,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "..h.h.h.",
+        "..m.m.m.",
+        "...mam..",
+        "..a.m.a.",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_wand_wakeful",
@@ -1684,28 +3293,71 @@
         164
       ],
       "rate": 0.975,
-      "shots": 2,
+      "shots": 1,
       "shares": [
-        0.52,
-        0.48
+        1.0
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "bell_shard",
+        "style": "legend_wakeful",
         "speed": 32,
         "range": 27,
         "size": 1.085,
-        "wave_amp": 0.18,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "wisps",
+        "signature": "wakeful",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "A lantern cage carries a rising, wandering wisp.",
+        "trail_identity": "wisps"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "The Wakeful Unbound",
+        "style": "legendary",
+        "name": "Night Watch",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 5,
+        "description": "Five lanterns leave in a gently climbing procession.",
+        "pattern": [
+          {
+            "yaw": -5,
+            "pitch": 0,
+            "speed": 0.8,
+            "delay": 0
+          },
+          {
+            "yaw": -2.5,
+            "pitch": 2,
+            "speed": 0.9,
+            "delay": 0.055
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0.11
+          },
+          {
+            "yaw": 2.5,
+            "pitch": 2,
+            "speed": 0.9,
+            "delay": 0.165
+          },
+          {
+            "yaw": 5,
+            "pitch": 0,
+            "speed": 0.8,
+            "delay": 0.22
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1730,7 +3382,17 @@
         "target_primary": 148.72,
         "g8_ratio": 0.88,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        ".....h..",
+        "....a.a.",
+        "....m.m.",
+        "....hah.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..o....."
+      ]
     },
     {
       "id": "L_bow_ninthsun",
@@ -1754,28 +3416,109 @@
         327
       ],
       "rate": 1.04,
-      "shots": 2,
+      "shots": 3,
       "shares": [
-        0.52,
-        0.48
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "solar_disc",
+        "style": "legend_ninthsun",
         "speed": 33,
         "range": 28,
         "size": 1.13,
-        "wave_amp": 0.25,
-        "wave_freq": 12,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "sundust",
+        "signature": "ninthsun",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 1.08,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 0.86,
+            "delay": 0
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 1.08,
+            "delay": 0
+          }
+        ],
+        "description": "A cold halo arrow travels between two sweeping sun motes.",
+        "trail_identity": "sundust"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "The Ninth Sun Unbound",
+        "style": "legendary",
+        "name": "Ninefold Dawn",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 9,
+        "description": "Nine halo arrows form an expanding solar corona.",
+        "pattern": [
+          {
+            "yaw": 0.0,
+            "pitch": 4.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -4.5,
+            "pitch": 3.064,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6.894,
+            "pitch": 0.695,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6.062,
+            "pitch": -2.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -2.394,
+            "pitch": -3.759,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 2.394,
+            "pitch": -3.759,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 6.062,
+            "pitch": -2.0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 6.894,
+            "pitch": 0.695,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 4.5,
+            "pitch": 3.064,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1801,7 +3544,17 @@
         "target_primary": 315.0,
         "g8_ratio": 1.12,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...m...h",
+        "..m...h.",
+        ".m...h..",
+        "m...h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_bow_kaleidoscope",
@@ -1825,28 +3578,109 @@
         297
       ],
       "rate": 1.065,
-      "shots": 2,
+      "shots": 3,
       "shares": [
-        0.52,
-        0.48
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "facet_crescent",
+        "style": "legend_kaleidoscope",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.32,
-        "wave_freq": 14,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "prism",
+        "signature": "kaleidoscope",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Three prismatic kites trace alternating angular lanes.",
+        "trail_identity": "prism"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Kaleidoscope Unbound",
+        "style": "legendary",
+        "name": "Broken Spectrum",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 9,
+        "description": "Nine kites form three interlocking triangular fans.",
+        "pattern": [
+          {
+            "yaw": -9,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 2,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -3,
+            "pitch": 2,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3,
+            "pitch": 2,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 6,
+            "pitch": 2,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 9,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [],
       "secondary_effects": [
@@ -1866,7 +3700,17 @@
         "target_primary": 292.5,
         "g8_ratio": 1.04,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....mmma",
+        "...m...h",
+        "..ma..h.",
+        ".m...h..",
+        "ma..h...",
+        "m..h....",
+        "m.h.....",
+        "mh......"
+      ]
     },
     {
       "id": "L_wand_counterhymn",
@@ -1892,26 +3736,88 @@
       "rate": 0.975,
       "shots": 2,
       "shares": [
-        0.52,
-        0.48
+        0.5,
+        0.5
       ],
-      "spread": 4.5,
+      "spread": 0,
       "projectile": {
-        "style": "bell_shard",
+        "style": "legend_counterhymn",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.18,
-        "wave_freq": 16,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "notes",
+        "signature": "counterhymn",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": -1.5,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": 1.5,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "Two tuning glyphs rise and fall in opposite vertical waves.",
+        "trail_identity": "notes"
       },
       "charge": {
-        "style": "facet_burst",
-        "name": "Counterhymn Unbound",
+        "style": "legendary",
+        "name": "Unwritten Verse",
         "mult": 2.7,
-        "count": 10,
-        "shard_total": 1.15
+        "count": 7,
+        "description": "Seven notes ripple across a travelling musical staff.",
+        "pattern": [
+          {
+            "yaw": -9,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          },
+          {
+            "yaw": -6,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0.03
+          },
+          {
+            "yaw": -3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0.06
+          },
+          {
+            "yaw": 0,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0.09
+          },
+          {
+            "yaw": 3,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0.12
+          },
+          {
+            "yaw": 6,
+            "pitch": 1,
+            "speed": 1,
+            "delay": 0.15
+          },
+          {
+            "yaw": 9,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0.18
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -1936,7 +3842,17 @@
         "target_primary": 179.14,
         "g8_ratio": 1.06,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "....h.h.",
+        "....m.m.",
+        "....mam.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".o......"
+      ]
     },
     {
       "id": "L_trident_worldneedle",
@@ -1961,29 +3877,59 @@
         375
       ],
       "rate": 0.94,
-      "shots": 3,
+      "shots": 1,
       "shares": [
-        0.25,
-        0.5,
-        0.25
+        1.0
       ],
-      "spread": 6,
+      "spread": 0,
       "projectile": {
-        "style": "facet_lance",
+        "style": "legend_worldneedle",
         "speed": 34,
         "range": 29,
         "size": 1.1749999999999998,
-        "wave_amp": 0.25,
-        "wave_freq": 10,
+        "wave_amp": 0,
+        "wave_freq": 0,
         "pierce": true,
-        "particles": "facet"
+        "particles": "stitches",
+        "signature": "worldneedle",
+        "pattern": "legendary",
+        "primary_pattern": [
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1,
+            "delay": 0
+          }
+        ],
+        "description": "One long needle sews a fine, precise zigzag seam.",
+        "trail_identity": "stitches"
       },
       "charge": {
-        "style": "facet_volley",
-        "name": "Worldneedle Unbound",
+        "style": "legendary",
+        "name": "The Last Stitch",
         "mult": 2.7,
-        "count": 7,
-        "shard_total": 1.15
+        "count": 3,
+        "description": "Three eyed needles cross-stitch a narrow corridor.",
+        "pattern": [
+          {
+            "yaw": -2,
+            "pitch": 0,
+            "speed": 0.95,
+            "delay": 0
+          },
+          {
+            "yaw": 0,
+            "pitch": 0,
+            "speed": 1.25,
+            "delay": 0
+          },
+          {
+            "yaw": 2,
+            "pitch": 0,
+            "speed": 0.95,
+            "delay": 0
+          }
+        ]
       },
       "primary_effects": [
         {
@@ -2009,7 +3955,17 @@
         "target_primary": 326.42,
         "g8_ratio": 1.16,
         "role": "Standalone signature; pattern and utility trade against raw damage"
-      }
+      },
+      "icon_grid": [
+        "...h.h.h",
+        "....mam.",
+        ".....m..",
+        "....m...",
+        "...m....",
+        "..m.....",
+        ".m......",
+        "o......."
+      ]
     },
     {
       "id": "L_bonus_talisman_turnkey",

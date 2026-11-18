@@ -27,6 +27,10 @@ func _init(p_record: Dictionary) -> void:
 	_biome = Biomes.get_biome(theme.base).duplicate()
 	_biome.biome_name = theme.name
 	_biome.indoor = true
+	# Dungeon discovery is independent of the outdoor biome used for its palette.
+	# Both the world fog and minimap read this flag.
+	_biome.fog_of_war_enabled = true
+	_biome.fog_of_war_opacity = 1.0
 	_biome.sky_top_color = theme.sky
 	_biome.sky_horizon_color = theme.horizon
 	_biome.sun_color = theme.sun

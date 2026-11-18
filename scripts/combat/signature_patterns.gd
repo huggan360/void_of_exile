@@ -3,12 +3,16 @@ class_name SignaturePatterns
 ## handler and previews. Every radial display has a fixed total budget.
 
 static func primary(direction: Vector3, up: Vector3, weapon: Item) -> Array[Dictionary]:
+	if weapon.is_legendary():
+		return _volley(direction, up, weapon.projectile.get("primary_pattern", []), 1.0, false)
 	var mode := str(weapon.projectile.get("pattern", ""))
 	if mode == "": return []
 	return _display(direction, up, mode, weapon.shots, 1.0)
 
 static func charged(direction: Vector3, up: Vector3, weapon: Item, multiplier: float) -> Array[Dictionary]:
 	var c := weapon.charge
+	if weapon.is_legendary() and c.get("style", "") == "legendary":
+		return _volley(direction, up, c.get("pattern", []), multiplier, true)
 	var count := clampi(int(c.get("count", 7)), 1, 40)
 	var out: Array[Dictionary] = []
 	match str(c.style):
@@ -23,6 +27,23 @@ static func charged(direction: Vector3, up: Vector3, weapon: Item, multiplier: f
 			out.append({direction = direction, share = multiplier, phase = 0.0,
 				mods = {up = up, speed = 0.8 if c.style == "firework" else 1.05, size = 1.25 if c.style == "firework" else 1.8,
 					range = 1.15, pierce = false, burst = "signature", secondary = true}})
+	return out
+
+static func _volley(direction: Vector3, up: Vector3, pattern: Array, total: float, secondary: bool) -> Array[Dictionary]:
+	var right := direction.cross(up).normalized()
+	if right.is_zero_approx():
+		var fallback := Vector3.FORWARD if absf(direction.dot(Vector3.FORWARD)) < 0.95 else Vector3.RIGHT
+		right = direction.cross(fallback).normalized()
+	var lift := right.cross(direction).normalized()
+	var out: Array[Dictionary] = []
+	for i in pattern.size():
+		var entry: Dictionary = pattern[i]
+		var yaw := deg_to_rad(float(entry.get("yaw", 0)))
+		var pitch := deg_to_rad(float(entry.get("pitch", 0)))
+		var heading := (direction + right * tan(yaw) + lift * tan(pitch)).normalized()
+		out.append({direction = heading, share = total / pattern.size(), phase = float(i),
+			mods = {up = up, speed = float(entry.get("speed", 1)), delay = float(entry.get("delay", 0)),
+				size = 1.35 if secondary else 1.0, range = 1.08 if secondary else 1.0, secondary = secondary}})
 	return out
 
 static func burst(weapon: Item, up: Vector3, secondary: bool) -> Array[Dictionary]:

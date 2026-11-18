@@ -1,17 +1,13 @@
 {
-  "version": "26.4-beta",
-  "title": "Divine sets, Legendaries and Artifacts",
-  "date": "2026-11-17",
+  "version": "26.5-beta",
+  "title": "Beta Release",
+  "date": "2026-11-18",
   "notes": [
-    "Divine sets grant cumulative bonuses at 2, 3 and 4 equipped pieces",
-    "42 Legendary boss items and 6 collectible Artifacts with new projectiles and worn appearances",
-    "Divine items use white chests; Legendaries and Artifacts use black chests",
-    "Lower item stat bonuses, varied Legendary damage and safe migration of retired items",
-    "Red Divine set banners and stage bonuses in item hovers and the website wiki",
-    "The Pet Store keeps its roof and switches to first person indoors",
-    "Smoother Surface movement over voxel steps and slopes",
-    "Harder boss fights and personal loot chances based on damage contribution",
-    "Expanded graphics settings with anti-aliasing and sharpening controls",
-    "Corrected Legendary bow icons with diagonal strings matching the regular bows"
+    "Unique Legendary weapon icons, projectile shapes, trails and firing patterns",
+    "Full 3D wand heads with matching detail on every side and corrected hand placement",
+    "Subtle third-person camera smoothing in the Surface, Space and standard dungeons",
+    "Dungeon exploration now reveals rooms gradually; Theory of Everything keeps its own cameras",
+    "Portal difficulty uses ten pixel markers below the dungeon name",
+    "Updated website item icons and projectile previews with fresh image cache keys"
   ]
 }

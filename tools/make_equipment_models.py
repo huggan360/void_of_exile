@@ -8,6 +8,7 @@ from pathlib import Path
 from PIL import Image
 import make_hero
 from make_player_class_models import write_vox, bounds, wizard, merrow, COMMON, SPECS
+from sculpt_wand_heads import sculpt as sculpt_wand_head
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'characters/equipment'
 SIGNATURES = {row['id']: row for row in json.loads((ROOT/'items/signatures.json').read_text())['items']}
@@ -25,17 +26,26 @@ def weapon_template(kind):
     name, builder = ('wizard', wizard) if kind == 'wand' else ('merrow', merrow)
     palette = dict(COMMON)
     palette.update({k: v for k, v in SPECS[name].items() if k != 'title'})
-    return dict(builder()[1]), palette, (.9, 1, .9), (-.45, 0, -.45)
+    return dict(builder()[1]), palette, (.9, 1, .9), (-.45, -1 if kind == 'wand' else 0, -.45)
 
 
 def weapon_variant(kind, grade, item_id, counts):
     voxels, palette, scale, offset = weapon_template(kind)
-    # G1 is the original sculpt, palette and fitting, shared by all wand users.
-    if grade == 'G1':
+    # Bows and tridents retain their original G1 sculpt. Wand crowns are now
+    # solid on every side; the original shaft and hand origin remain fixed.
+    if grade == 'G1' and kind != 'wand':
         return voxels, palette, scale, offset
+    if kind == 'wand':
+        # The shaft's brown pixels must not override a pearl or silver crown.
+        icon = Image.open(ROOT/'items/textures'/f'{item_id}.png').convert('RGBA')
+        crown_colors = colors(icon.crop((4, 0, 8, 3)))
+        if crown_colors:
+            counts = crown_colors
     ranked = [c for c, _ in counts.most_common() if max(c) > 50] or [c for c, _ in counts.most_common()]
     chromatic = [c for c in ranked if max(c)-min(c) > 35]
     finish = max(chromatic, key=lambda c: max(c)-min(c)) if chromatic else ranked[0]
+    if kind == 'wand' and grade == 'G1':
+        finish = max(ranked, key=lambda c: min(c))
     bright = tuple(min(255, int(v*.65+255*.35)) for v in finish)
     signature = SIGNATURES.get(item_id)
     if signature:
@@ -58,16 +68,8 @@ def weapon_variant(kind, grade, item_id, counts):
                 voxels[0, side*5, 0] = 'finish'
                 voxels[0, side*4, -1] = 'glow' if grade in ['D', 'L', 'A'] else 'trim'
         elif kind == 'wand':
-            for x in [-2, 2]:
-                voxels[x, 12, 0] = 'finish'
-                voxels[x, 13, 0] = 'trim'
-            voxels[0, 14, 0] = 'glow'
             for y in [-2, 5]:
                 voxels[0, y, 0] = 'finish_shade'
-            if any(theme in item_id for theme in ['frost', 'storm', 'jade']):
-                voxels[0, 15, 0] = 'glow'
-            if 'mycelium' in item_id:
-                for x in range(-2, 3): voxels[x, 13, 0] = 'finish'
         else:
             for side in [-1, 1]:
                 voxels[side*3, 10, 0] = 'trim'
@@ -83,20 +85,14 @@ def weapon_variant(kind, grade, item_id, counts):
                     voxels[(1 if form % 2 else -1), side*y, 1] = 'trim'
                 voxels[0, side*5, -1] = 'glow'
                 voxels[(1 if form < 2 else -1), side*4, -1] = 'glow'
-        elif kind == 'wand':
-            for side in [-1, 1]:
-                voxels[side*3, 12, 0] = 'trim'
-                voxels[side*3, 13+(form % 2), 0] = 'glow'
-            voxels[0, 15, 0] = 'glow'
-            if form >= 2:
-                voxels[-1, 14, 0] = 'trim'
-                voxels[1, 14, 0] = 'trim'
-        else:
+        elif kind == 'trident':
             for side in [-1, 1]:
                 voxels[side*3, 11, 0] = 'trim'
                 voxels[side*3, 12+(form % 2), 0] = 'glow'
             voxels[0, 15, 0] = 'glow'
             voxels[-1 if form < 2 else 1, 14, 0] = 'trim'
+    if kind == 'wand':
+        sculpt_wand_head(voxels, item_id)
     return voxels, palette, scale, offset
 
 
