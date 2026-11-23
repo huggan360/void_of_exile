@@ -59,10 +59,11 @@ are clamped when loaded; existing legal potion gains are retained.
 
 ## Regeneration
 
-Regeneration (`vitality`, REG) is the sixth combat stat, modelled on RotMG's Vitality: health comes
+Regeneration (`regeneration`, REG) is the sixth combat stat, modelled on RotMG's Vitality: health comes
 back at `hp_regen` (1.5) plus 0.12 per point each second. Caps are Merrow 75, Priest 60, Alchemist 55,
-Archer 50 and Wizard 40; an Elixir of Regeneration gives one point. Unlike RotMG it never stops: for
-`hp_regen_delay` (4 s) after a hit the rate is `hp_regen_combat_share` (50%), then full. A regeneration
+Archer 50 and Wizard 40; an Elixir of Regeneration gives one point. It keeps running in a fight: for
+`hp_regen_delay` (4 s) after a hit the rate is `hp_regen_combat_share` (50%), then full. The stat and the
+regeneration buff share the name: the buff multiplies the rate and never adds points. A regeneration
 buff of 1x or more keeps the full rate in a fight. Gear: grade crucifixes (+grade), the Wand and Flame
 of the Divine. Characters saved before the stat get the average growth of their levels on load.
 The server ticks it with the other vitals and sends HP in the usual snapshots: no extra traffic.

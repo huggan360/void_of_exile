@@ -293,19 +293,13 @@ const STAT_ELIXIRS := {
 	attack = ["Attack", 1, Color("#3cc854")], defense = ["Defence", 4, Color("#3c3c4a")],
 	speed = ["Speed", 2, Color("#48c8e0")], dexterity = ["Dexterity", 2, Color("#e08a30")],
 	magic = ["Magic", 4, Color("#a050e8")], hp = ["Health", 20, Color("#ff5070")],
-	mp = ["Magic Points", 20, Color("#ffd040")], vitality = ["Regeneration", 1, Color("#e84a8c")],
+	mp = ["Magic Points", 20, Color("#ffd040")], regeneration = ["Regeneration", 1, Color("#e84a8c")],
 }
-
-
-## Regeneration's elixir keeps the stat's display name in its id (and icon).
-static func stat_elixir_id(stat: String) -> String:
-	return "elixir_of_regeneration" if stat == "vitality" else "elixir_of_" + stat
-
 
 static func stat_elixir(stat: String) -> Item:
 	var info: Array = STAT_ELIXIRS[stat]
 	var i := Item.new()
-	i.id = stat_elixir_id(stat)
+	i.id = "elixir_of_" + stat
 	i.item_name = "Elixir of %s" % info[0]
 	i.slot = "consumable"
 	i.kind = "Stat Elixir"
@@ -582,7 +576,7 @@ static func bonus(tier: int, family: String) -> Item:
 	i.tier = tier
 	i.lore = "A relic carried by adventurers of every class."
 	match family:
-		"crucifix": i.bonuses = {defense = tier + 1, hp = tier * 5, vitality = tier}
+		"crucifix": i.bonuses = {defense = tier + 1, hp = tier * 5, regeneration = tier}
 		"flame": i.bonuses = {attack = tier * 2}
 		"eye": i.bonuses = {dexterity = tier * 2}
 		"crystal": i.bonuses = {magic = tier * 2, mp = tier * 5}
@@ -812,12 +806,12 @@ static func _holy_set(out: Array[Item]) -> void:
 	out[-1].damage_max = 185
 	out[-1].projectile = {style = "bolt", color = Color("#fdb800"), speed = 25.0, range = 17.0}
 	out.append(_divine("D_wand_thewandofthedivine", "The Wand of the Divine", "weapon", "Wand",
-			"Light pours out of it like water from a cracked jar.", {magic = 10, hp = 20, vitality = 8}, [], {}))
+			"Light pours out of it like water from a cracked jar.", {magic = 10, hp = 20, regeneration = 8}, [], {}))
 	out[-1].damage_min = 125
 	out[-1].damage_max = 155
 	out[-1].projectile = {style = "bolt", color = Color("#fdb800"), speed = 24.0, range = 20.0}
 	out.append(_divine("D_bonus_flame_ofthedivine", "Flame of the Divine", "bonus", "Flame",
-			"A candle lit at the Court of the Sun. It never gutters.", {attack = 6, magic = 6, hp = 30, vitality = 6},
+			"A candle lit at the Court of the Sun. It never gutters.", {attack = 6, magic = 6, hp = 30, regeneration = 6},
 			["Shield heals you 2 HP per second"], {shield_heal = 2.0}, Color("#fca434"), 0.45))
 
 

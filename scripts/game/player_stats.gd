@@ -15,8 +15,9 @@ extends RefCounted
 ##   defense    subtracted from each non-magic, non-piercing hit (at least 15% still gets through);
 ##              armor-piercing hits ignore it
 ##   magic      shield reduction on a shared diminishing-returns curve, plus spell damage
-##   vitality   shown as Regeneration: +0.12 HP per second per point (RotMG's
-##              Vitality), always on; half rate for a while after being hit
+##   regeneration  +0.12 HP per second per point, always on; half rate for a
+##                 while after being hit. The regeneration buff multiplies the
+##                 rate instead of adding points (hp_regen_per_second)
 ## Gear can also raise max health ("hp") and max magic points ("mp").
 
 signal changed
@@ -26,10 +27,10 @@ signal consumed(item: Item)
 ## XP earned (the account earns it too, see NetServer).
 signal xp_gained(amount: int)
 
-const STATS := ["speed", "attack", "dexterity", "defense", "magic", "vitality"]
+const STATS := ["speed", "attack", "dexterity", "defense", "magic", "regeneration"]
 const STAT_NAMES := {speed = "Speed", attack = "Attack", dexterity = "Dexterity",
-		defense = "Defence", magic = "Magic", vitality = "Regeneration", hp = "Health", mp = "Magic points"}
-const BASE := {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, vitality = 0}
+		defense = "Defence", magic = "Magic", regeneration = "Regeneration", hp = "Health", mp = "Magic points"}
+const BASE := {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, regeneration = 0}
 const BASE_HP := 100
 const BASE_MP := 100
 const MAX_LEVEL := 50
@@ -200,6 +201,7 @@ func set_bonus(stat: String) -> int:
 func total(stat: String) -> int:
 	var gear_stat := 0 if stat == "defense" and buffs.has_effect("armour_broken") else gear_bonus(stat)
 	var raw: int = base[stat] + gear_stat
+	if stat == "regeneration": return maxi(0,raw)  # its buff is a rate multiplier, not points
 	return maxi(0,raw + roundi(buffs.additive(stat,raw)))
 
 
@@ -486,7 +488,7 @@ func dexterity_multiplier() -> float:
 ## Health back per second: the base rate plus Regeneration. It keeps going
 ## in a fight, at `combat_share` of the rate until you've gone unhurt a while.
 func hp_regen_per_second(base_rate: float, in_combat := false, combat_share := 0.5) -> float:
-	var rate := base_rate + total("vitality") * REGEN_PER_POINT
+	var rate := base_rate + total("regeneration") * REGEN_PER_POINT
 	return rate * (combat_share if in_combat else 1.0) * buffs.multiplier("regeneration")
 
 
@@ -580,8 +582,8 @@ func _load_data(data: Dictionary) -> void:
 	for stat in STATS:
 		base[stat] = clampi(int(data.get("base", {}).get(stat, base[stat])), 0, stat_max(stat))
 	# Characters from before Regeneration existed get the average growth of their levels.
-	if not (data.get("base", {}) as Dictionary).has("vitality"):
-		base.vitality = clampi(base.vitality + roundi(PlayerClasses.growth_average(class_id, "vitality") * (level - 1)), 0, stat_max("vitality"))
+	if not (data.get("base", {}) as Dictionary).has("regeneration"):
+		base.regeneration = clampi(base.regeneration + roundi(PlayerClasses.growth_average(class_id, "regeneration") * (level - 1)), 0, stat_max("regeneration"))
 	base_hp = clampi(int(data.get("base_hp", base_hp)), 1, stat_max("hp"))
 	base_mp = clampi(int(data.get("base_mp", base_mp)), 0, stat_max("mp"))
 	has_backpack = bool(data.get("has_backpack", false))

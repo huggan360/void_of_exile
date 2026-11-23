@@ -52,7 +52,7 @@ static func stat_color(stat: String) -> Color:
 
 static func stat_name(stat: String) -> String:
 	return {"speed": "SPD", "attack": "ATK", "dexterity": "DEX", "defense": "DEF",
-		"magic": "MAG", "vitality": "REG", "hp": "HP", "mp": "MP"}.get(stat, stat.to_upper())
+		"magic": "MAG", "regeneration": "REG", "hp": "HP", "mp": "MP"}.get(stat, stat.to_upper())
 
 
 static func stat_text(stat: String, value: int, signed := true) -> String:

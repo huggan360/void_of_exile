@@ -21,20 +21,20 @@ class_name Loot
 
 ## Every boss's two stat elixirs: each player over its damage threshold always
 ## gets one of them, 50/50. These replace any elixir_of_ entry in a boss's
-## table (and dungeon boss potions). Regeneration (vitality) took one stat from six
+## table (and dungeon boss potions). Regeneration took one stat from six
 ## realm bosses and Mother Mycora.
 const BOSS_POTIONS := {
 	vharok = ["attack", "defense"], goblin_king = ["attack", "speed"], magma_warden = ["attack", "dexterity"],
-	stormeye_tyrant = ["attack", "magic"], hollow_king = ["attack", "hp"], pyre_ent = ["attack", "vitality"],
+	stormeye_tyrant = ["attack", "magic"], hollow_king = ["attack", "hp"], pyre_ent = ["attack", "regeneration"],
 	amber_colossus = ["defense", "speed"], veil_herald = ["defense", "dexterity"], gilded_vizier = ["defense", "magic"],
-	scarab_regent = ["defense", "vitality"], abyssal_siren = ["defense", "mp"],
-	mad_farmer = ["speed", "dexterity"], selenarch = ["speed", "magic"], thornmaw_bloom = ["speed", "vitality"],
+	scarab_regent = ["defense", "regeneration"], abyssal_siren = ["defense", "mp"],
+	mad_farmer = ["speed", "dexterity"], selenarch = ["speed", "magic"], thornmaw_bloom = ["speed", "regeneration"],
 	hollow_crown = ["speed", "mp"],
-	rimeheart_prism = ["dexterity", "magic"], void_empress = ["dexterity", "hp"], drowned_cantor = ["dexterity", "vitality"],
-	queen_briarrose = ["magic", "vitality"], blue_dragon = ["magic", "mp"],
-	brood_matriarch = ["hp", "vitality"],
+	rimeheart_prism = ["dexterity", "magic"], void_empress = ["dexterity", "hp"], drowned_cantor = ["dexterity", "regeneration"],
+	queen_briarrose = ["magic", "regeneration"], blue_dragon = ["magic", "mp"],
+	brood_matriarch = ["hp", "regeneration"],
 	# The Surface dungeons (Oblivara rolls one to three of any stat instead: EnemyDef.dungeon_potions).
-	mother_mycora = ["vitality", "mp"], captain_saltmourn = ["attack", "dexterity"], ixalith = ["magic", "speed"],
+	mother_mycora = ["regeneration", "mp"], captain_saltmourn = ["attack", "dexterity"], ixalith = ["magic", "speed"],
 	lantern_shepherd = ["speed", "dexterity"], jarl_hrimvald = ["defense", "attack"], solenne = ["magic", "mp"],
 	choirless_seraph = ["attack", "mp"],
 }

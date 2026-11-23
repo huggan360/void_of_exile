@@ -43,7 +43,7 @@ static func seconds(value: Variant) -> float:
 
 static func normalize(id: String, amount: Variant) -> Variant:
 	var text := str(amount).strip_edges().to_lower()
-	if text in ["+max", "max", "-max"] and id in PlayerStats.STATS + ["hp","mp"]:
+	if text in ["+max", "max", "-max"] and id in PlayerStats.STATS + ["hp","mp"] and id != "regeneration":
 		return "-max" if text == "-max" else "+max"
 	var percent := text.ends_with("%")
 	text = text.trim_suffix("%")

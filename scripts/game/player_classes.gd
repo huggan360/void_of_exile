@@ -9,7 +9,7 @@ class_name PlayerClasses
 ##   Alchemist  Wand,    Cloak  quick, nimble mixer of both
 ##   Merrow     Trident, Cloak  tough sea warrior, heavy slow hits
 ##
-## Regeneration caps (RotMG Vitality style): Merrow 75, Priest 60,
+## Regeneration caps: Merrow 75, Priest 60,
 ## Alchemist 55, Archer 50, Wizard 40.
 
 const ORDER := ["archer", "wizard", "priest", "alchemist", "merrow"]
@@ -17,33 +17,33 @@ const ORDER := ["archer", "wizard", "priest", "alchemist", "merrow"]
 const CLASSES := {
 	archer = {name = "Archer", weapon = "Bow", armor = "Cloak", color = Color(0.45, 0.85, 0.4),
 		about = "Keep your distance and line up arrows. Strong attack growth.",
-		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, vitality = 0}, hp = 100, mp = 100,
+		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, regeneration = 0}, hp = 100, mp = 100,
 		growth = {speed = 1, attack = 2, dexterity = 1, defense = 1, magic = 2},
-		maximum = {speed = 60, attack = 42, dexterity = 68, defense = 86, vitality = 50, magic = 58, hp = 850, mp = 450},
+		maximum = {speed = 60, attack = 42, dexterity = 68, defense = 86, regeneration = 50, magic = 58, hp = 850, mp = 450},
 	},
 	wizard = {name = "Wizard", weapon = "Wand", armor = "Robe", color = Color(0.55, 0.5, 1.0),
 		about = "High attack and magic, low defense. Make every opening count.",
-		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, vitality = 0}, hp = 90, mp = 130,
+		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, regeneration = 0}, hp = 90, mp = 130,
 		growth = {speed = 1, attack = 2, dexterity = 1, defense = 1, magic = 2},
-		maximum = {speed = 60, attack = 45, dexterity = 62, defense = 84, vitality = 40, magic = 65, hp = 750, mp = 540},
+		maximum = {speed = 60, attack = 45, dexterity = 62, defense = 84, regeneration = 40, magic = 65, hp = 750, mp = 540},
 	},
 	priest = {name = "Priest", weapon = "Wand", armor = "Robe", color = Color(1.0, 0.85, 0.45),
 		about = "Deep magic fuels a sturdy warp shield. Best magic growth.",
-		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, vitality = 0}, hp = 110, mp = 140,
+		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, regeneration = 0}, hp = 110, mp = 140,
 		growth = {speed = 1, attack = 1, dexterity = 1, defense = 1, magic = 3},
-		maximum = {speed = 60, attack = 32, dexterity = 62, defense = 88, vitality = 60, magic = 70, hp = 860, mp = 600},
+		maximum = {speed = 60, attack = 32, dexterity = 62, defense = 88, regeneration = 60, magic = 70, hp = 860, mp = 600},
 	},
 	alchemist = {name = "Alchemist", weapon = "Wand", armor = "Cloak", color = Color(0.3, 0.85, 0.75),
 		about = "Quick feet and rapid wand fire. Strong dexterity growth.",
-		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, vitality = 0}, hp = 100, mp = 120,
+		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, regeneration = 0}, hp = 100, mp = 120,
 		growth = {speed = 1, attack = 1, dexterity = 2, defense = 1, magic = 2},
-		maximum = {speed = 66, attack = 40, dexterity = 66, defense = 86, vitality = 55, magic = 60, hp = 850, mp = 530},
+		maximum = {speed = 66, attack = 40, dexterity = 66, defense = 86, regeneration = 55, magic = 60, hp = 850, mp = 530},
 	},
 	merrow = {name = "Merrow", weapon = "Trident", armor = "Cloak", color = Color(0.35, 0.8, 0.95),
 		about = "High health and defense. Trade rapid fire for heavy throws.",
-		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, vitality = 0}, hp = 125, mp = 90,
+		base = {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, regeneration = 0}, hp = 125, mp = 90,
 		growth = {speed = 1, attack = 2, dexterity = 1, defense = 2, magic = 1},
-		maximum = {speed = 60, attack = 45, dexterity = 60, defense = 116, vitality = 75, magic = 55, hp = 975, mp = 440},
+		maximum = {speed = 60, attack = 45, dexterity = 60, defense = 116, regeneration = 75, magic = 55, hp = 975, mp = 440},
 	},
 }
 
