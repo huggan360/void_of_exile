@@ -274,7 +274,7 @@ static func _signature(item: Item) -> void:
 			_hits(item, [{id = "static", duration = 0.4}, {id = "speed", amount = -2, duration = 1.0}],
 				[{id = "static", duration = 2.5}, {id = "speed", amount = -4, duration = 3.0}])
 		"D_bow_ofthestormeye":
-			_look(p, "shard", STORMEYE_FROST, STORMEYE, "stormeye", 30.0, 25.0, 1.0)
+			_look(p, "stormbolt", STORMEYE_FROST, STORMEYE, "stormeye", 30.0, 25.0, 1.0)
 			item.shots = 2
 			item.spread_deg = 0.0
 			p.wave_amp = 0.4
@@ -291,12 +291,12 @@ static func _signature(item: Item) -> void:
 			item.charge = {style = "singularity", name = "The Stormeye", mult = 2.2, ring_damage = 280, ring_range = 7.0}
 			_hits(item, [{id = "speed", amount = -2, duration = 1.0}], [{id = "static", duration = 2.0}])
 		"D_trident_ofthestormeye":
-			_look(p, "shard", STORMEYE_INK, STORMEYE_RED, "stormeye", 24.0, 18.0, 1.05)
+			_look(p, "stormbolt", STORMEYE_INK, STORMEYE_RED, "stormeye", 24.0, 18.0, 1.15)
 			p.pierce = true
 			item.charge = {style = "nova", name = "Eight Arms", count = 8, range = 0.9, wave = 0.3, mult = 3.0}
 			_hits(item, [{id = "speed", amount = -3, duration = 1.2}], [{id = "speed", amount = -5, duration = 3.0}])
 		"D_bow_goldslinger":
-			_look(p, "shard", GOLD, GOLD_DARK, "gold", 32.0, 24.0, 0.8)
+			_look(p, "goldshot", GOLD, GOLD_DARK, "gold", 32.0, 24.0, 0.9)
 			item.shots = 3
 			item.spread_deg = 8.0
 			p.magic = false

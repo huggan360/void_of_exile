@@ -328,13 +328,14 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 				_box(body, at * Vector3(0.7, 1, 0.7) + Vector3(0, 0, 0.07), Vector3(0.08, 0.05, 0.08), c2)
 			_box(lit, Vector3(0, 0, -0.08), Vector3(0.09, 0.09, 0.09), c1.lightened(0.4))
 		"thorn":
-			# A crimson needle with thorns along it.
-			_box(body, Vector3(0, 0, 0.08), Vector3(0.05, 0.05, 0.7), c2)
-			_box(tip_tool, Vector3(0, 0, -0.32), Vector3(0.09, 0.09, 0.18), c1)
-			for k in 3:
-				var side := 1.0 if k % 2 == 0 else -1.0
-				_box(lit, Vector3(side * 0.06, 0.02, -0.08 + k * 0.17), Vector3(0.07, 0.03, 0.05), c1)
-			_box(lit, Vector3(0, 0, 0.42), Vector3(0.12, 0.12, 0.08), c1.darkened(0.2))
+			# A rose stem: dark stem, paired thorns, a crimson point and a bud at the back.
+			_box(body, Vector3(0, 0, 0.06), Vector3(0.07, 0.07, 0.72), c2)
+			_box(tip_tool, Vector3(0, 0, -0.36), Vector3(0.12, 0.12, 0.2), c1)
+			_box(tip_tool, Vector3(0, 0, -0.5), Vector3(0.06, 0.06, 0.1), c1.lightened(0.3))
+			for z in [-0.12, 0.14]:
+				for side in [-1.0, 1.0]: _box(lit, Vector3(side * 0.08, 0, z), Vector3(0.09, 0.04, 0.06), c1)
+			for side in [-1.0, 1.0]: _box(lit, Vector3(side * 0.07, 0, 0.42), Vector3(0.08, 0.1, 0.12), c1.darkened(0.15))
+			_box(lit, Vector3(0, 0.05, 0.44), Vector3(0.09, 0.09, 0.14), c1.lightened(0.15))
 		"heart":
 			# A big beating heart of blood.
 			for x: int in [-1, 0, 1]:
@@ -345,6 +346,29 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 						Vector3(0.12, 0.12, 0.16), c1 if lobe or (x == 0 and y == 0) else c1.darkened(0.25))
 			_box(body, Vector3(0, -0.21, 0), Vector3(0.07, 0.08, 0.1), c2)
 			_box(lit, Vector3(0.04, 0.1, -0.09), Vector3(0.05, 0.05, 0.04), Color("ffb0b0"))
+		"stormbolt":
+			# A forked lightning bolt, mirrored around the flight line, a storm-eye core at the back.
+			_box(lit, Vector3(0, 0, -0.42), Vector3(0.07, 0.07, 0.12), c1.lightened(0.4))
+			for side in [-1.0, 1.0]:
+				for k in 3:
+					_box(lit, Vector3(side * (0.05 + (k % 2) * 0.07), 0, -0.3 + k * 0.12), Vector3(0.07, 0.06, 0.1), c1)
+			_box(lit, Vector3(0, 0, 0.12), Vector3(0.1, 0.07, 0.1), c1.lightened(0.2))
+			_box(body, Vector3(0, 0, 0.26), Vector3(0.16, 0.08, 0.14), c2)
+			_box(lit, Vector3(0, 0.05, 0.26), Vector3(0.06, 0.04, 0.06), c1.lightened(0.5))
+		"goldshot":
+			# A gilded slug: bright nose, banded casing.
+			_box(lit, Vector3(0, 0, -0.04), Vector3(0.13, 0.13, 0.24), c1)
+			_box(lit, Vector3(0, 0, -0.2), Vector3(0.09, 0.09, 0.08), c1.lightened(0.35))
+			_box(body, Vector3(0, 0, 0.1), Vector3(0.15, 0.15, 0.05), c2)
+			_box(body, Vector3(0, 0, 0.17), Vector3(0.12, 0.12, 0.06), c1.darkened(0.3))
+		"prism":
+			# A flat triangular prism, point forward, splitting light into bands.
+			var bands := [Color("e8365f"), Color("f08a1c"), Color("e6c81e"), Color("2fc46a"), Color("2f8ee8"), Color("8a4fe8")]
+			for row in 5:
+				var half := row
+				for x in range(-half, half + 1):
+					_box(lit, Vector3(x * 0.06, 0, -0.2 + row * 0.07), Vector3(0.06, 0.07, 0.07), bands[(absi(x) + row) % bands.size()])
+			_box(body, Vector3(0, 0.02, 0.1), Vector3(0.58, 0.06, 0.04), c1.darkened(0.3))
 		"shard":
 			# Prismatic splinters that never agree on a colour.
 			var hues := [c1, c2, Color("6cc8ff"), Color("fff35c"), Color("b66bff")]
@@ -408,11 +432,12 @@ func _meshes_for(weapon: Item, style: String) -> Array:
 			_box(lit, Vector3(0, 0, 0.14), Vector3(0.1, 0.1, 0.14), c2)
 			_box(body, Vector3(0, -0.08, 0.2), Vector3(0.05, 0.05, 0.08), Color("ece6d8"))
 		"star":
-			_box(lit, Vector3.ZERO, Vector3(0.1, 0.1, 0.1), Color("fffbe8"))
+			# Five points lying flat (so the game camera sees the whole star), one aimed forward.
+			_box(lit, Vector3.ZERO, Vector3(0.13, 0.08, 0.13), Color("fffbe8"))
 			for i in 5:
-				var a := i * TAU / 5.0
-				_box(lit, Vector3(cos(a) * 0.12, sin(a) * 0.12, 0), Vector3(0.07, 0.07, 0.07), c1)
-				_box(body, Vector3(cos(a) * 0.2, sin(a) * 0.2, 0.02), Vector3(0.05, 0.05, 0.05), c2)
+				var a := -PI * 0.5 + i * TAU / 5.0
+				_box(lit, Vector3(cos(a) * 0.12, 0, sin(a) * 0.12), Vector3(0.09, 0.07, 0.09), c1)
+				_box(lit, Vector3(cos(a) * 0.21, 0, sin(a) * 0.21), Vector3(0.06, 0.05, 0.06), c2)
 		"orb":
 			for x: int in [-1, 0, 1]:
 				for y: int in [-1, 0, 1]:

@@ -180,7 +180,7 @@ static func _signature(item: Item) -> void:
 			item.charge = {style = "stream", name = "Wintermarch", count = 14, interval = 0.045, mult = 2.6}
 			_hits(item, [{id = "speed", amount = -3, duration = 1.5}], [{id = "static", duration = 2.5}])
 		"D_bow_ofprism":
-			_look(p, "shard", PRISM, PRISM_PINK, "prism", 28.0, 25.0, 1.0)
+			_look(p, "prism", PRISM, PRISM_PINK, "prism", 28.0, 25.0, 1.05)
 			item.shots = 3
 			item.spread_deg = 6.0
 			item.charge = {style = "refract", name = "Spectrum", count = 10, mult = 2.4, shard_mult = 0.55}
@@ -194,7 +194,7 @@ static func _signature(item: Item) -> void:
 			item.charge = {style = "nova", name = "Requiem Chord", count = 14, range = 0.95, pierce = true, mult = 3.2}
 			_hits(item, [{id = "quiet", duration = 0.4}], [{id = "quiet", duration = 3.0}])
 		"D_bow_ofrequiem":
-			_look(p, "pane", Color("e04a8a"), HYMN, "wax", 29.0, 26.0, 1.05)
+			_look(p, "pane", Color("e04a8a"), HYMN, "wax", 29.0, 26.0, 1.35)
 			p.pierce = true
 			item.charge = {style = "volley", name = "Rose Window", count = 9, spread = 5.0, wave = 0.4, mult = 2.6}
 			_hits(item, [{id = "quiet", duration = 0.3}], [{id = "quiet", duration = 2.5}])

@@ -50,7 +50,9 @@ static func build(rarity: String) -> Array[Item]:
 			item.projectile_shares.assign(row.shares)
 			item.spread_deg = float(row.spread)
 			item.projectile = row.projectile.duplicate(true)
-			item.projectile.merge({color = color, color2 = accent, glow = true, trail = true, magic = true}, true)
+			# A row may turn glow or trail off; colours always come from the row.
+			item.projectile.merge({glow = true, trail = true, magic = true})
+			item.projectile.merge({color = color, color2 = accent}, true)
 			item.charge = row.charge.duplicate(true)
 			item.primary_effects.assign(row.primary_effects)
 			item.secondary_effects.assign(row.secondary_effects)
