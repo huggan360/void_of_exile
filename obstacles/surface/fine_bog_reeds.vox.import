@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://b0d6bqvkweqx0"
+path="res://.godot/imported/fine_bog_reeds.vox-6e2f03ebbb6b92e7a263976bc8a475af.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/fine_bog_reeds.vox"
+dest_files=["res://.godot/imported/fine_bog_reeds.vox-6e2f03ebbb6b92e7a263976bc8a475af.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

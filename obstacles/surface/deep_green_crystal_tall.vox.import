@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dtt6xt1xety8x"
+path="res://.godot/imported/deep_green_crystal_tall.vox-46cb2589bb650c305f8d786874004dd3.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/deep_green_crystal_tall.vox"
+dest_files=["res://.godot/imported/deep_green_crystal_tall.vox-46cb2589bb650c305f8d786874004dd3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

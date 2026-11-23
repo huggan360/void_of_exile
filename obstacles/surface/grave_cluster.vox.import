@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://2rcoy78i8frg"
+path="res://.godot/imported/grave_cluster.vox-b80c5896a6531265ad90f37cd028ef20.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/grave_cluster.vox"
+dest_files=["res://.godot/imported/grave_cluster.vox-b80c5896a6531265ad90f37cd028ef20.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

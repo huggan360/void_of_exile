@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cdelmld6vi3ay"
+path="res://.godot/imported/doom_ribcage.vox-c031aea1eafc83929d0978846e1526e3.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/doom_ribcage.vox"
+dest_files=["res://.godot/imported/doom_ribcage.vox-c031aea1eafc83929d0978846e1526e3.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -707,13 +707,14 @@ const TREES := {
 	Biomes.BEACH: [{"surface/palm": 1}],
 	Biomes.DESERT: [{"surface/saguaro": 3, "surface/acacia": 2, "surface/palm": 0.5}],
 	Biomes.DEEP_DESERT: [{"surface/saguaro": 2, "surface/dead_tree": 1}],
-	Biomes.DOOM: [{"surface/burnt_tree": 4, "surface/dead_tree": 1}],
+	Biomes.DOOM: [{"surface/burnt_tree": 3, "surface/dead_tree": 1}],
 	Biomes.BLUELAY: [{"surface/mushroom_giant": 3, "surface/willow": 1}],
-	Biomes.DEEP_DARK: [{"surface/deep_lantern_tree": 4, "surface/ash_spire": 1}],
+	Biomes.DEEP_DARK: [{"surface/swamp_willow": 4, "surface/swamp_snag": 2, "surface/deep_lantern_tree": 1},
+		{"surface/swamp_willow": 2, "surface/deep_lantern_tree": 2, "surface/ash_spire": 1}],
 }
 ## How thick each biome's forest grows (Fosen's tall firs are spread out so
 ## you can walk between them).
-const TREE_DENSITY := {Biomes.FOSEN: 0.4, Biomes.WOODS: 0.855, Biomes.JUNGLE: 0.9}
+const TREE_DENSITY := {Biomes.FOSEN: 0.4, Biomes.WOODS: 0.855, Biomes.JUNGLE: 0.9, Biomes.DOOM: 0.3, Biomes.DEEP_DARK: 0.55}
 ## Near water: willows and reeds in the green biomes.
 const WATERSIDE := {"surface/willow": 3, "surface/birch": 1}
 

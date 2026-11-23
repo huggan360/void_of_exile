@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dtrp22jyb8307"
+path="res://.godot/imported/doom_basalt_pillars.vox-da2b7604d37125624dad039b5c7a4f3a.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/doom_basalt_pillars.vox"
+dest_files=["res://.godot/imported/doom_basalt_pillars.vox-da2b7604d37125624dad039b5c7a4f3a.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

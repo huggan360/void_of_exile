@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://dgt6kcryl4pqi"
+path="res://.godot/imported/swamp_snag.vox-4680ce94ee59d9178cde5b754947d643.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/swamp_snag.vox"
+dest_files=["res://.godot/imported/swamp_snag.vox-4680ce94ee59d9178cde5b754947d643.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

@@ -58,7 +58,8 @@ const TEXTURES := {
 	DESERT_FINE: [S.SAND, [Color("e8bc78"), Color("dcae6a"), Color("c89a58"), Color("f8e0b0"), Color.BLACK], 0.0, 0.9],
 	DEEP_SAND_FINE: [S.SAND, [Color("f2c460"), Color("e8b450"), Color("d8a040"), Color("fff0c0"), Color.BLACK], 0.0, 0.9],
 	BLUE_MOSS_FINE: [S.MOSS, [Color("34557e"), Color("2c4a70"), Color("3e6690"), Color("5ae6ff"), Color("3a4058")], 3.0, 0.9],
-	DEEP_STONE_FINE: [S.SPECKLE, [Color("232327"), Color("1c1c20"), Color("2a2a30"), Color("38384a"), Color.BLACK], 0.0, 0.9],
+	# The Deep Dark's bog: black peat and moss with faint green glints.
+	DEEP_STONE_FINE: [S.MOSS, [Color("15180f"), Color("1b1f14"), Color("0f120b"), Color("3dff8a"), Color("0b0c09")], 0.6, 0.97],
 	JUNGLE_FINE: [S.GRASS, [Color("2f7a2c"), Color("38882f"), Color("4a9a38"), Color("ee5a7a"), Color("4c3a24")], 0.0, 0.92],
 	PLANKS: [Style.PLANKS, [Color("9a6e44"), Color("8a6240"), Color("4e3624"), Color("2a2a2a"), Color.BLACK], 0.0, 0.85],
 	SEAFLOOR_FINE: [S.SAND, [Color("a89c78"), Color("9a8e6c"), Color("8a7e5e"), Color("c8c0a8"), Color.BLACK], 0.0, 0.9],

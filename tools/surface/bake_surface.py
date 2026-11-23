@@ -45,7 +45,7 @@ from surface_noise import (fbm, ridged, smoothstep, sample, terrace, block_mean,
                            distance_to, chaikin, resample)
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-OUT = os.path.join(ROOT, "realm", "surface")
+OUT = os.environ.get("SURFACE_OUT", os.path.join(ROOT, "realm", "surface"))
 N = 2048
 HALF = N // 2
 SEA = 8.0  # meters (IslandGenerator.SEA_LEVEL)
@@ -204,12 +204,14 @@ def relief(scores, land, coast_in, coast_out):
     weights = {b: np.exp((scores[b] - smax) / 0.045) for b in BIOME_LIST}
     total = sum(weights.values())
     rel = sum(weights[b] * H[b] for b in BIOME_LIST) / total
+    dd_spires = weights[DEEP_DARK] * spires / total
     cliffy = (weights[FOSEN] + weights[DOOM] + weights[DEEP_DARK]) / total
 
     # Coast: beaches slope gently into the sea, rocky biomes drop as cliffs.
     beach = 0.5 + 0.035 * coast_in
     ramp = smoothstep(1.0, 42.0, coast_in) * (1 - cliffy) + smoothstep(0.0, 7.0, coast_in) * cliffy
     rel = beach + (rel - beach) * ramp
+    LATE["dd_spires"] = np.where(land, dd_spires * ramp, 0.0)
     sea_floor = -0.9 - 0.13 * coast_out
     rel = np.where(land, np.maximum(rel, 0.35), np.maximum(sea_floor, -7.5))
     return rel, weights, total
@@ -430,6 +432,7 @@ def vox_dims(folder):
 
 
 ASSETS = {}
+LATE = {}  # parts of the relief kept for late passes (haunted_swamp)
 
 
 def asset(folder, solid_shrink=0.86):
@@ -521,6 +524,9 @@ def main():
     keep_above_sea(W)
     log("reaching every plateau and island...")
     connect_land(W)
+    log("haunted swamp...")
+    no_farms(W)
+    haunted_swamp(W)
     log("materials...")
     materials(W)
     log("flora...")
@@ -1974,6 +1980,220 @@ def camps(W):
 
 # --------------------------------------------------------------------------------------
 
+def no_farms(W):
+    """Fields that spilled into the Deep Dark or Doom from a neighbouring farm
+    are taken up again (afterwards, so every roll before stays the same)."""
+    kept = []
+    for f in W.json.get("fields", []):
+        (cx, cz), (hx, hz), yaw = f["center"], f["half"], f["yaw"]
+        gz, gx, out = rect_pixels(cx, cz, hx, hz, yaw, 2)
+        if not np.isin(W.biome[gz[out <= 0], gx[out <= 0]], [DEEP_DARK, DOOM]).any():
+            kept.append(f)
+            continue
+        inner = out <= 0
+        farm = W.material[gz[inner], gx[inner]] == M_FARM
+        W.material[gz[inner][farm], gx[inner][farm]] = 0
+        W.flags[gz[inner], gx[inner]] &= ~np.uint8(F_FIELD)
+        c, s = math.cos(yaw), math.sin(yaw)
+
+        def inside(x, z):
+            px, pz = x - cx, z - cz
+            return abs(px * c - pz * s) <= hx + 1.5 and abs(px * s + pz * c) <= hz + 1.5
+
+        W.json["posts"] = [p for p in W.json["posts"] if not inside(p["x"], p["z"])]
+        W.json["beams"] = [b for b in W.json["beams"] if not all(inside(q[0], q[1]) for q in b["line"])]
+    log("  fields taken up from the swamp and the ash: %d" % (len(W.json.get("fields", [])) - len(kept)))
+    W.json["fields"] = kept
+
+
+HAUNTED = ["res://props/surface/haunted_cottage", "res://props/surface/haunted_tall"]
+CHAPEL = "res://props/surface/haunted_chapel"
+
+
+def haunted_swamp(W):
+    """The Deep Dark as a black haunted swamp: its rock spires sink back into the
+    bog, a haunted hamlet and a ruined chapel stand in it, and dark cobbled
+    paths join them to the fortress and the roads outside. It rolls its own
+    random numbers, so nothing else on the Surface moves."""
+    hr = random.Random(SEED + 404)
+    dd = (W.biome == DEEP_DARK) & W.land
+    # The spires go, except beside water and anything built (banks and pads keep their shape).
+    built = (W.water > 0) | (W.flags != 0) | (W.occupied > 0) | W.lava
+    keep = smoothstep(2.0, 8.0, distance_to(built, 10).astype(np.float32))
+    lower = W.rel - LATE["dd_spires"] * keep
+    lower = np.where(lower < 0.6, np.minimum(W.rel, 0.6), lower)
+    W.rel = np.where(dd & ~built, lower, W.rel)
+    h4 = block_mean(W.rel, C)
+    m1 = box_blur(h4, 3)
+    W.rough12 = np.sqrt(np.maximum(box_blur(h4 * h4, 3) - m1 * m1, 0))  # not stats_maps: it would forget what is built
+    fort = next((f for f in W.json["strongholds"] if f["biome"] == DEEP_DARK), None)
+
+    def site(min_from, others, near=None):
+        best = None
+        for _ in range(1500):
+            if near:
+                a, r = hr.uniform(0, math.tau), hr.uniform(near[2] * 0.5, near[2])
+                x, z = near[0] + math.cos(a) * r, near[1] + math.sin(a) * r
+            else:
+                x, z = hr.uniform(-HALF + 60, HALF - 60), hr.uniform(-HALF + 60, HALF - 60)
+            pz, px = pix(x, z)
+            if not dd[pz, px] or W.rel[pz, px] < 0.9 or W.occupied[pz, px]:
+                continue
+            cz, cx = to_coarse(x, z)
+            if W.wet_dist4[cz, cx] < 16 or W.rough12[cz, cx] > 1.6:
+                continue
+            if fort and math.hypot(x - fort["at"][0], z - fort["at"][1]) < 90:
+                continue
+            if any(math.hypot(x - o[0], z - o[1]) < max(min_from, o[2]) for o in others):
+                continue
+            score = -W.rough12[cz, cx] + hr.random() * 0.3
+            if best is None or score > best[0]:
+                best = (score, x, z)
+        return None if best is None else (best[1], best[2])
+
+    def lantern(s, x, z):
+        b = place_building(W, "res://props/home/lantern", x, z, 0.0, "prop", skirt=0.4, check=False, kind="lantern", margin=0.4)
+        s["props"].append(b)
+        s["lights"].append([round(x, 2), 3.3, round(z, 2)])
+
+    def record(name, x, z, radius):
+        pz, px = pix(x, z)
+        return {"name": name, "kind": "hamlet", "haunted": True, "biome": DEEP_DARK, "center": [round(x, 2), round(z, 2)],
+                "radius": radius, "plaza_radius": 4.0, "height": round(SEA + round(float(W.rel[pz, px]) * FINE) / FINE, 3),
+                "map_color": [0.36, 0.9, 0.56], "houses": [], "props": [], "trees": [], "exits": [], "lights": []}
+
+    def yard(x, z, r):
+        """A level, dark-cobbled yard."""
+        gz, gx, out = rect_pixels(x, z, r + 6, r + 6, 0.0, 2)
+        d = np.sqrt((gx - HALF + 0.5 - x) ** 2 + (gz - HALF + 0.5 - z) ** 2)
+        pz, px = pix(x, z)
+        target = round(float(W.rel[pz, px]) * FINE) / FINE
+        flatten(W, gz[d <= r], gx[d <= r], target, gz[(d > r) & (d < r + 6)], gx[(d > r) & (d < r + 6)],
+                smoothstep(r, r + 6, d[(d > r) & (d < r + 6)]))
+        cob = d <= r * 0.6
+        W.material[gz[cob], gx[cob]] = M_ROAD_ASH
+        W.flags[gz[d <= r], gx[d <= r]] |= F_CLEAR
+
+    made = []
+    # Gloamhollow: haunted houses round a dark yard, doors facing in.
+    at = site(0, [])
+    if at:
+        x, z = at
+        s = record("Gloamhollow", x, z, 30.0)
+        yard(x, z, 7.0)
+        a0 = hr.uniform(0, math.tau)
+        for k in range(4):
+            for attempt in range(12):
+                a = a0 + k * math.tau / 4 + hr.uniform(-0.35, 0.35)
+                r = hr.uniform(12.5, 16.0)
+                hx, hz = x + math.cos(a) * r, z + math.sin(a) * r
+                b = place_building(W, HAUNTED[k % 2] if k < 3 else HAUNTED[0], hx, hz, math.atan2(x - hx, z - hz) + math.pi, "home")
+                if b:
+                    s["houses"].append(b)
+                    door = (hx + (x - hx) / r * 4.5, hz + (z - hz) / r * 4.5)
+                    carve_path(W, [door, (x + (hx - x) / r * 5.0, z + (hz - z) / r * 5.0)], 0.8, M_ROAD_ASH, F_ROAD, 0.4,
+                               shoulder=0.8, smooth=0)
+                    break
+        for k in range(3):
+            a = a0 + (k + 0.5) * math.tau / 3
+            lantern(s, x + math.cos(a) * 6.2, z + math.sin(a) * 6.2)
+        for k in range(4):
+            a, r = hr.uniform(0, math.tau), hr.uniform(19, 26)
+            tx, tz = x + math.cos(a) * r, z + math.sin(a) * r
+            qz, qx = pix(tx, tz)
+            if W.occupied[max(qz - 2, 0):qz + 3, max(qx - 2, 0):qx + 3].max() == 0 and W.water[qz, qx] <= 0:
+                W.occupied[max(qz - 1, 0):qz + 2, max(qx - 1, 0):qx + 2] = 2
+                s["trees"].append({"prefab": "swamp_willow", "pos": [round(tx, 2), round(SEA + float(W.rel[qz, qx]), 3), round(tz, 2)],
+                                   "yaw": round(hr.uniform(0, math.tau), 3)})
+        if len(s["houses"]) >= 2:
+            gz, gx, out = rect_pixels(x, z, 34, 34, 0.0, 0)
+            d = np.sqrt((gx - HALF + 0.5 - x) ** 2 + (gz - HALF + 0.5 - z) ** 2)
+            W.flags[gz[d < 30], gx[d < 30]] |= F_TOWN
+            W.json["settlements"].append(s)
+            made.append((x, z, 50))
+    # The Drowned Chapel, a ruin with one crooked house beside it.
+    at = site(110, made)
+    if at:
+        x, z = at
+        s = record("The Drowned Chapel", x, z, 24.0)
+        yard(x, z, 5.0)
+        for attempt in range(16):
+            a = hr.uniform(0, math.tau)
+            hx, hz = x + math.cos(a) * 11, z + math.sin(a) * 11
+            b = place_building(W, CHAPEL, hx, hz, math.atan2(x - hx, z - hz) + math.pi, "home")
+            if b:
+                s["houses"].append(b)
+                break
+        for attempt in range(16):
+            a = hr.uniform(0, math.tau)
+            hx, hz = x + math.cos(a) * 14, z + math.sin(a) * 14
+            b = place_building(W, HAUNTED[1], hx, hz, math.atan2(x - hx, z - hz) + math.pi, "home")
+            if b:
+                s["houses"].append(b)
+                break
+        lantern(s, x + 3.5, z)
+        if s["houses"]:
+            gz, gx, out = rect_pixels(x, z, 28, 28, 0.0, 0)
+            d = np.sqrt((gx - HALF + 0.5 - x) ** 2 + (gz - HALF + 0.5 - z) ** 2)
+            W.flags[gz[d < 24], gx[d < 24]] |= F_TOWN
+            W.json["settlements"].append(s)
+            made.append((x, z, 40))
+    # Houses leave grassy yards behind them: in the bog they are bog again.
+    W.material[dd & (W.material == M_YARD)] = 0
+    # Dark cobbled paths: hamlet to chapel, both to the fortress gate, the hamlet out to the roads.
+    cost, h4 = route_cost(W, "trail")
+    cost[np.isinf(cost)] = math.inf
+    road4 = block_mean((W.flags & (F_ROAD | F_TRAIL)).astype(bool).astype(np.float32), C) > 0.2
+    dd4 = W.biome[C // 2::C, C // 2::C] == DEEP_DARK
+    trail4 = np.zeros((NC, NC), bool)
+
+    def free(p):
+        c = to_coarse(*p)
+        for r in range(0, 8):
+            for dz in range(-r, r + 1):
+                for dx in range(-r, r + 1):
+                    q = (min(max(c[0] + dz, 0), NC - 1), min(max(c[1] + dx, 0), NC - 1))
+                    if math.isfinite(cost[q]):
+                        return q
+        return c
+
+    def link(a, b, goal=None):
+        start = free(a)
+        goal = goal or free(b)
+        path = astar(cost.copy(), h4, start, goal, slope_k=5.0, slope_max=0.45, road_mask=trail4, road_bonus=0.5, cliff_cost=7.0)
+        if path is None or len(path) < 3:
+            return
+        for q in path:
+            trail4[q] = True
+        pts = [from_coarse(*q) for q in path]
+        pts[0] = a
+        if b:
+            pts[-1] = b
+        pts = chaikin(straighten_soft(pts), 3)
+        carve_path(W, pts, 1.0, M_ROAD_ASH, F_TRAIL, 0.3, shoulder=1.2, smooth=2, stairs_grade=0.45)
+        W.json["trails"].append({"points": [[round(p[0], 1), round(p[1], 1)] for p in pts[::3]]})
+
+    gate = None
+    if fort:
+        ga = fort["gate_angle"]
+        gate = (fort["at"][0] + math.cos(ga) * 62, fort["at"][1] + math.sin(ga) * 62)
+    spots = [(m[0], m[1]) for m in made]
+    if len(spots) == 2:
+        link(spots[0], spots[1])
+    for p in spots:
+        if gate:
+            link(p, gate)
+    if spots:
+        # Out to the nearest road or trail beyond the swamp.
+        rz, rx = np.nonzero(road4 & ~dd4)
+        if len(rz):
+            pc = to_coarse(*spots[0])
+            j = int(np.argmin((rz - pc[0]) ** 2 + (rx - pc[1]) ** 2))
+            link(spots[0], None, goal=(int(rz[j]), int(rx[j])))
+    log("  haunted swamp: %d places, spires flattened" % len(made))
+
+
+
 def materials(W):
     b = W.biome
     m = W.material
@@ -2008,7 +2228,7 @@ def materials(W):
     put(b == DESERT, M_DESERT_SAND)
     put(b == DEEP_DESERT, M_DEEP_SAND)
     put(b == BLUELAY, M_BLUE_MOSS)
-    put(b == DEEP_DARK, M_DEEP_STONE)
+    put(b == DEEP_DARK, M_DEEP_STONE)  # the Deep Dark's black bog
     put(b == BEACH, M_SAND)
     put(b == OCEAN, M_SEAFLOOR)
     river = (W.flags & F_RIVER).astype(bool) | (W.flags & F_LAKE).astype(bool)
@@ -2065,8 +2285,9 @@ def shape_bits(W, height):
     ivy = fbm(rng, 70, N, 2) > -0.05
     out[(rise >= 6) & green & ivy & (W.water <= 0)] |= S_VINES
     rough = fbm(rng, 90, N, 2) > 0.25
-    out[(np.isin(W.material, [M_ROCK, M_MOSS_ROCK, M_BASALT, M_OBSIDIAN, M_SANDSTONE, M_DEEP_STONE]) | rough)
-        & ~(W.flags & (F_ROAD | F_TRAIL | F_FIELD | F_CLEAR | F_TOWN)).astype(bool)] |= S_ROCKY
+    # The Deep Dark is a soft black bog: no rock bumps there.
+    out[(np.isin(W.material, [M_ROCK, M_MOSS_ROCK, M_BASALT, M_OBSIDIAN, M_SANDSTONE]) | rough)
+        & ~(W.flags & (F_ROAD | F_TRAIL | F_FIELD | F_CLEAR | F_TOWN)).astype(bool) & (W.biome != DEEP_DARK)] |= S_ROCKY
     return out
 
 

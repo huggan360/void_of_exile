@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://3qx1cmhxfyv0"
+path="res://.godot/imported/doom_brazier.vox-88eecf4c3cfc1dbaccdcb306c7d9ff25.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/doom_brazier.vox"
+dest_files=["res://.godot/imported/doom_brazier.vox-88eecf4c3cfc1dbaccdcb306c7d9ff25.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

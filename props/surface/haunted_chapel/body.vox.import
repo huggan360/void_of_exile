@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://cwohd203oohih"
+path="res://.godot/imported/body.vox-7fec804278fd773b3e85ef7c0807e741.tscn"
+
+[deps]
+
+source_file="res://props/surface/haunted_chapel/body.vox"
+dest_files=["res://.godot/imported/body.vox-7fec804278fd773b3e85ef7c0807e741.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true

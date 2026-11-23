@@ -643,6 +643,10 @@ def glow_mushrooms(rng):
 DEEP_PINK = (255, 72, 164)
 DEEP_LIME = (174, 255, 40)
 DEEP_LEAF = (13, 18, 16)
+SWAMP_GREEN = (70, 255, 140)
+SWAMP_TEAL = (90, 255, 210)
+# The glow plants are mostly swamp green and teal, now and then pink.
+DEEP_GLOWS = (SWAMP_GREEN, SWAMP_TEAL, SWAMP_GREEN, DEEP_PINK)
 
 
 def deep_grass(rng, flowers=False):
@@ -652,7 +656,7 @@ def deep_grass(rng, flowers=False):
         h = rng.randint(3, 6) if flowers else rng.randint(2, 5)
         for y in range(h):
             v[(x + y // 4, y, z)] = pal(DEEP_LEAF)
-        color = DEEP_PINK if k % 2 else DEEP_LIME
+        color = DEEP_GLOWS[k % len(DEEP_GLOWS)]
         v[(x + (h - 1) // 4, h - 1, z)] = pal(color)
         if flowers:
             for dx, dz in ((-1, 0), (1, 0), (0, -1), (0, 1)):
@@ -671,8 +675,8 @@ def deep_fungus(rng):
                 if abs(dx) + abs(dz) <= 3:
                     v[(x + dx, h, z + dz)] = pal(DEEP_LEAF)
                     if abs(dx) + abs(dz) >= 2:
-                        v[(x + dx, h - 1, z + dz)] = pal(DEEP_LIME)
-        v[(x, h + 1, z)] = pal(DEEP_PINK)
+                        v[(x + dx, h - 1, z + dz)] = pal(SWAMP_GREEN)
+        v[(x, h + 1, z)] = pal(SWAMP_TEAL)
     return v, pal
 
 
@@ -681,7 +685,7 @@ def deep_bush(rng):
     for p in list(v):
         x, y, z = p
         if (x, y + 1, z) not in v and rng.random() < 0.16:
-            v[p] = pal(DEEP_PINK if (x + z) % 3 else DEEP_LIME)
+            v[p] = pal(DEEP_GLOWS[(x + z) % len(DEEP_GLOWS)])
     return v, pal
 
 
@@ -727,6 +731,277 @@ FLORA.update({
     "fine_deep_grass": deep_grass,
     "fine_deep_flowers": lambda r: deep_grass(r, flowers=True),
     "fine_deep_fungus": deep_fungus,
+})
+
+
+# --- Deep Dark swamp: black willows, green crystals, graves, bog plants ---------------
+
+SWAMP_MOSS = (40, 50, 30)
+SWAMP_BARK = (20, 18, 22)
+
+
+def swamp_willow(rng):
+    """A black swamp willow leaning over the bog, hung with moss; a few green buds glow."""
+    v, pal = {}, Palette()
+    bark = lambda x, y, z: pal(shade(SWAMP_BARK, rng.choice((0.9, 1.0, 1.15))))
+    lean = (rng.uniform(-2.0, 2.0), rng.uniform(-2.0, 2.0))
+    top = trunk(v, 12, 1.4, 0.7, bark, rng, lean=lean)
+    tips = []
+    for k in range(6):
+        a = k * math.tau / 6 + rng.uniform(-0.4, 0.4)
+        y0 = top[1] * rng.uniform(0.6, 0.95)
+        mid = (top[0] + math.cos(a) * 3.5, y0 + rng.uniform(1.5, 3.0), top[2] + math.sin(a) * 3.5)
+        end = (top[0] + math.cos(a) * 6.5, y0 + rng.uniform(-0.5, 1.5), top[2] + math.sin(a) * 6.5)
+        limb(v, (top[0] * y0 / top[1], y0, top[2] * y0 / top[1]), mid, 0.65, 0.45, bark)
+        limb(v, mid, end, 0.45, 0.3, bark)
+        tips.append(end)
+    # Dark moss clumps along the limbs give the crown its drooping shape.
+    for t in tips:
+        blob(v, t[0], t[1] + 0.4, t[2], 2.2, 1.3, 2.2, lambda x, y, z, d: pal(shade(SWAMP_MOSS, rng.choice((0.7, 0.9, 1.1)))), rng, 0.35)
+    # Moss strands hang from every branch; some end in a glowing bud.
+    for p in [q for q in v if q[1] > 6 * G]:
+        if (p[0], p[1] - 1, p[2]) in v or rng.random() > 0.4:
+            continue
+        length = rng.randint(4, 14)
+        for d in range(1, length + 1):
+            q = (p[0], p[1] - d, p[2])
+            if q[1] < 2 or q in v:
+                break
+            v[q] = pal(shade(SWAMP_MOSS, rng.choice((0.8, 1.0, 1.2))))
+        if rng.random() < 0.12:
+            v[(p[0], p[1] - length - 1, p[2])] = pal(SWAMP_GREEN)
+    ground_trim(v)
+    return v, pal
+
+
+def swamp_snag(rng):
+    """A broken, hollow dead trunk ringed with glowing shelf fungus."""
+    v, pal = {}, Palette()
+    bark = lambda x, y, z: pal(shade((30, 26, 28), rng.choice((0.85, 1.0, 1.2))))
+    trunk(v, 6, 1.4, 1.1, bark, rng)
+    top = max(p[1] for p in v)
+    for p in list(v):
+        if p[1] > top - 4 * G and (rng.random() < 0.45 or abs(p[0]) + abs(p[2]) <= 1):
+            del v[p]  # a jagged, hollow break
+    for k in range(5):
+        a = rng.uniform(0, math.tau)
+        y = round(rng.uniform(1.5, 4.5) * G)
+        r = 1.4 * G
+        for t in range(-2, 3):
+            for out in range(1, 3):
+                q = (round(math.cos(a) * (r + out) - math.sin(a) * t), y, round(math.sin(a) * (r + out) + math.cos(a) * t))
+                v[q] = pal(SWAMP_TEAL if out == 2 or abs(t) == 2 else (36, 60, 48))
+    limb(v, (0, 3.5, 0), (2.5, 5.0, 0.5), 0.45, 0.25, bark)
+    limb(v, (0, 4.0, 0), (-2.0, 5.8, -1.0), 0.4, 0.2, bark)
+    ground_trim(v)
+    return v, pal
+
+
+def green_crystal(rng, tall=False):
+    """Green crystal prisms bursting from a dark rock: bright ridges, dark cores."""
+    v, pal = {}, Palette()
+    rock = lambda x, y, z, d=0: pal(shade((26, 30, 28), rng.choice((0.85, 1.0, 1.15))))
+    blob(v, 0, 0.5, 0, 3.2, 1.6, 3.2, rock, rng, 0.3)
+    shards = [(0.0, 0.0, 15 if tall else 9, 1.8 if tall else 1.4)]
+    for k in range(5 if tall else 4):
+        a = k * math.tau / (5 if tall else 4) + rng.uniform(-0.4, 0.4)
+        shards.append((a, rng.uniform(0.35, 0.7), rng.uniform(4, 8) if tall else rng.uniform(4, 7), rng.uniform(0.9, 1.3)))
+    for a, tilt, length, r in shards:
+        base = (math.cos(a) * 1.2, 1.0, math.sin(a) * 1.2)
+        tip = (base[0] + math.cos(a) * math.sin(tilt) * length, base[1] + math.cos(tilt) * length, base[2] + math.sin(a) * math.sin(tilt) * length)
+        top_y = tip[1] * G
+        limb(v, base, tip, r, 0.25, lambda x, y, z: pal(
+            SWAMP_GREEN if (x + z) % 3 == 0 or y > top_y - 2 * G else (22, 70, 46) if y % 3 else (40, 150, 96)))
+    ground_trim(v)
+    return v, pal
+
+
+def grave_cluster(rng):
+    """Crooked old graves: slabs, a cross and a rounded stone, one candle burning green."""
+    v, pal = {}, Palette()
+    stone_c = lambda: pal(shade((74, 74, 80), rng.choice((0.8, 0.9, 1.0, 1.1))))
+    moss = pal((38, 54, 34))
+    spots = [(-4, -3), (1, -4), (4, 1), (-2, 3)]
+    for k, (cx, cz) in enumerate(spots):
+        kind = ("slab", "cross", "round", "slab")[k]
+        lean = rng.choice((-1, 0, 1))
+        h = rng.randint(5, 7)
+        for y in range(h):
+            dx = lean if y >= h // 2 else 0
+            if kind == "cross":
+                v[(cx + dx, y, cz)] = stone_c()
+                if y == h - 2:
+                    for w in (-2, -1, 1, 2):
+                        v[(cx + dx + w, y, cz)] = stone_c()
+            else:
+                for w in range(-1, 2):
+                    if kind == "round" and y == h - 1 and w != 0:
+                        continue
+                    v[(cx + dx + w, y, cz)] = moss if y == 0 or (y < 2 and rng.random() < 0.5) else stone_c()
+        for w in range(-1, 2):  # a sunken mound in front
+            v[(cx + w, 0, cz - 1)] = pal((30, 28, 26))
+            v[(cx + w, 0, cz - 2)] = pal((30, 28, 26))
+    v[(0, 0, 0)] = pal((210, 200, 176))
+    v[(0, 1, 0)] = pal((210, 200, 176))
+    v[(0, 2, 0)] = pal(SWAMP_GREEN)
+    return v, pal
+
+
+def bog_reeds(rng):
+    """Dark cattails for the bog between the glowing patches."""
+    v, pal = {}, Palette()
+    for k in range(rng.randint(9, 14)):
+        x, z = rng.randint(-4, 4), rng.randint(-4, 4)
+        h = rng.randint(6, 13)
+        bend = rng.choice((-1, 0, 1))
+        for y in range(h):
+            v[(x + (bend if y > h * 0.6 else 0), y, z)] = pal(shade((34, 40, 26), 0.9 if y % 3 else 1.1))
+        if rng.random() < 0.55:
+            for y in (h, h + 1, h + 2):
+                v[(x + bend, y, z)] = pal((52, 34, 26))
+    return v, pal
+
+
+def bog_moss(rng):
+    """Low black-green moss mounds."""
+    v, pal = {}, Palette()
+    for k in range(rng.randint(3, 5)):
+        cx, cz, r = rng.uniform(-4, 4), rng.uniform(-4, 4), rng.uniform(1.5, 3.0)
+        for x in range(math.floor(cx - r), math.ceil(cx + r) + 1):
+            for z in range(math.floor(cz - r), math.ceil(cz + r) + 1):
+                d = math.hypot(x - cx, z - cz)
+                if d <= r:
+                    v[(x, 0, z)] = pal(shade((26, 32, 22), rng.choice((0.8, 1.0, 1.25))))
+                    if d < r * 0.5:
+                        v[(x, 1, z)] = pal((34, 44, 28))
+    return v, pal
+
+
+def deep_bells(rng):
+    """Arched black stems hung with glowing bell flowers (they light up as you pass)."""
+    v, pal = {}, Palette()
+    for k in range(3):
+        a = k * math.tau / 3 + rng.uniform(-0.4, 0.4)
+        h = rng.randint(6, 9)
+        x = z = 0
+        for y in range(h):
+            v[(round(x), y, round(z))] = pal(DEEP_LEAF)
+            x += math.cos(a) * 0.35
+            z += math.sin(a) * 0.35
+        bx, bz = round(x + math.cos(a)), round(z + math.sin(a))
+        color = SWAMP_GREEN if k % 2 == 0 else DEEP_PINK
+        v[(bx, h - 1, bz)] = pal(DEEP_LEAF)
+        for dx, dz in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+            v[(bx + dx, h - 2, bz + dz)] = pal(color)
+        v[(bx, h - 3, bz)] = pal(color)
+    return v, pal
+
+
+# --- Doom: obsidian, basalt ruins, old bones, braziers ----------------------------------
+
+def obsidian_spikes(rng):
+    """Glassy black spikes split from the ground, embers in the cracks at their feet."""
+    v, pal = {}, Palette()
+    blob(v, 0, 0.3, 0, 3.5, 1.2, 3.5, lambda x, y, z, d: GLOW if d < 0.35 and rng.random() < 0.35 else pal((40, 34, 36)), rng, 0.3)
+    for k in range(6):
+        a = k * math.tau / 6 + rng.uniform(-0.3, 0.3)
+        tilt = rng.uniform(0.1, 0.55)
+        length = rng.uniform(6, 13) if k else 14
+        base = (math.cos(a) * 1.3 * (k > 0), 0.5, math.sin(a) * 1.3 * (k > 0))
+        tip = (base[0] + math.cos(a) * math.sin(tilt) * length, base[1] + math.cos(tilt) * length,
+               base[2] + math.sin(a) * math.sin(tilt) * length)
+        limb(v, base, tip, rng.uniform(1.1, 1.6), 0.2,
+             lambda x, y, z: pal((70, 56, 96) if (x - z) % 5 == 0 else (22, 18, 28) if y % 2 else (30, 24, 38)))
+    ground_trim(v)
+    return v, pal
+
+
+def basalt_pillars(rng):
+    """A ring of broken hexagonal basalt columns, glowing seams at the base."""
+    v, pal = {}, Palette()
+    for k in range(5):
+        a = k * math.tau / 5 + rng.uniform(-0.25, 0.25)
+        cx, cz = round(math.cos(a) * 4), round(math.sin(a) * 4)
+        h = rng.randint(6, 16) if k != 2 else 4
+        slant = rng.choice((0, 1, 2))
+        for y in range(h + 2):
+            for dx in range(-1, 2):
+                for dz in range(-1, 2):
+                    if abs(dx) + abs(dz) == 2 and y % 4 == 0:
+                        continue
+                    if y >= h - slant + dx + 1:
+                        continue  # broken, slanted tops
+                    v[(cx + dx, y, cz + dz)] = pal(shade((60, 54, 54), 0.85 if (y // 4) % 2 else 1.0))
+        v[(cx, 0, cz + 2)] = GLOW
+        v[(cx + 2, 0, cz)] = GLOW
+    for k in range(3):  # fallen drums between them
+        a = rng.uniform(0, math.tau)
+        for t in range(-2, 3):
+            v[(round(math.cos(a) * t), 0, round(math.sin(a) * t) - 1)] = pal((50, 46, 46))
+    return v, pal
+
+
+def ribcage(rng):
+    """The bleached ribs of something enormous, half sunk in the ash; its skull's eyes still smoulder."""
+    v, pal = {}, Palette()
+    bone = lambda x, y, z: pal(shade((214, 200, 170), rng.choice((0.85, 0.95, 1.0))))
+    for z in range(-12, 11):
+        v[(0, 9 - abs(z) // 6, z)] = bone(0, 0, z)
+        if z % 2 == 0:
+            v[(0, 10 - abs(z) // 6, z)] = bone(0, 0, z)
+    for z in range(-9, 10, 3):
+        top = 9 - abs(z) // 6
+        span = 7 - abs(z) // 4
+        for side in (-1, 1):
+            pts = [(side * span * math.sin(t / 8 * math.pi * 0.5), top * math.cos(t / 8 * math.pi * 0.5) ** 0.6, z + t * 0.15) for t in range(9)]
+            for p0, p1 in zip(pts[:-1], pts[1:]):
+                limb(v, p0, p1, 0.6, 0.55, bone)
+    blob(v, 0, 3.5, -14, 2.6, 2.2, 2.8, lambda x, y, z, d: bone(x, y, z), rng, 0.15)
+    for side in (-1, 1):
+        v[(side, 4, -17)] = GLOW
+        v[(side, 4, -16)] = pal((30, 20, 18))
+    ground_trim(v)
+    return v, pal
+
+
+def brazier(rng):
+    """A stone fire bowl on three legs."""
+    v, pal = {}, Palette()
+    stone_c = lambda x, y, z: pal(shade((70, 62, 58), rng.choice((0.85, 1.0, 1.1))))
+    for k in range(3):
+        a = k * math.tau / 3
+        limb(v, (math.cos(a) * 2.2, 0, math.sin(a) * 2.2), (math.cos(a) * 1.2, 4, math.sin(a) * 1.2), 0.5, 0.5, stone_c)
+    for x in range(-3, 4):
+        for z in range(-3, 4):
+            d = math.hypot(x, z)
+            if d <= 3.3:
+                v[(x, 4, z)] = stone_c(x, 4, z)
+                if d > 2.3:
+                    v[(x, 5, z)] = stone_c(x, 5, z)
+                else:
+                    v[(x, 5, z)] = GLOW
+    for y, r in ((6, 1.6), (7, 1.2), (8, 0.8), (9, 0.4)):
+        for x in range(-2, 3):
+            for z in range(-2, 3):
+                if math.hypot(x, z) <= r and rng.random() < 0.85:
+                    v[(x, y, z)] = GLOW
+    return v, pal
+
+
+TREES.update({"swamp_willow", "swamp_snag"})
+FLORA.update({
+    "swamp_willow": swamp_willow,
+    "swamp_snag": swamp_snag,
+    "deep_green_crystal": lambda r: green_crystal(r),
+    "deep_green_crystal_tall": lambda r: green_crystal(r, tall=True),
+    "grave_cluster": grave_cluster,
+    "fine_bog_reeds": bog_reeds,
+    "fine_bog_moss": bog_moss,
+    "fine_deep_bells": deep_bells,
+    "doom_obsidian_spikes": obsidian_spikes,
+    "doom_basalt_pillars": basalt_pillars,
+    "doom_ribcage": ribcage,
+    "doom_brazier": brazier,
 })
 
 
@@ -874,10 +1149,207 @@ def windmill(rng):
     return v, pal, glow
 
 
+# --- Haunted houses for the Deep Dark (0.125 m voxels, front = -z) ---------------------
+
+GHOST_LIGHT = (120, 255, 160)
+
+
+def _haunted_shell(rng, v, pal, W, D, H, wall, roof, lean, sag, holes):
+    """Plank walls on a stone footing, a steep sagging gable roof with missing slates."""
+    stone_c = lambda: pal(shade((56, 54, 60), rng.choice((0.8, 0.92, 1.05))))
+    box(v, -W, W + 1, 0, 3, -D, D + 1, lambda x, y, z: stone_c())
+    plank = lambda x, y, z: pal(shade(wall, 0.7 if x % 4 == 0 or z % 4 == 0 else rng.choice((0.85, 1.0, 1.12))))
+    for y in range(3, H):
+        for x in range(-W, W + 1):
+            for z in (-D, D):
+                if rng.random() > holes * (y / H):
+                    v[(x, y, z)] = plank(x, y, z)
+        for z in range(-D, D + 1):
+            for x in (-W, W):
+                if rng.random() > holes * (y / H):
+                    v[(x, y, z)] = plank(x, y, z)
+    post = pal((26, 22, 24))
+    for y in range(3, H + 1):
+        for c in ((-W, -D), (W, -D), (-W, D), (W, D)):
+            v[(c[0], y, c[1])] = post
+    for y in range(H, H + W + 3):
+        half = W + 2 - (y - H)
+        if half < 0:
+            break
+        for x in range(-half, half + 1):
+            for z in (-D, D):
+                if abs(x) < half - 1:
+                    v[(x, y, z)] = plank(x, y, z)
+        for z in range(-D - 3, D + 4):
+            drop = round(sag * (1 - (z / (D + 3)) ** 2)) if half <= 2 else 0
+            for x in (-half, half):
+                if rng.random() < holes * 0.6 and abs(z) < D:
+                    continue
+                v[(x, y - drop, z)] = pal(shade(roof, 1.1 if (z // 3 + y) % 2 else 0.9))
+    # Creeping black moss up the footing.
+    for (x, y, z) in list(v):
+        if y < 7 and rng.random() < 0.18 - y * 0.02:
+            v[(x, y, z)] = pal((34, 46, 30))
+    # Everything leans a little.
+    shifted = {}
+    for (x, y, z), c in v.items():
+        shifted[(x + int(max(0, y - 3) * lean), y, z)] = c
+    return shifted
+
+
+def _window(v, glow, pal, x0, y0, z, w, h, lit, boarded=False, side=None):
+    frame = pal((24, 20, 22))
+    for x in range(x0, x0 + w):
+        for y in range(y0, y0 + h):
+            edge = x in (x0, x0 + w - 1) or y in (y0, y0 + h - 1)
+            q = (x, y, z) if side is None else (side, y, x)
+            if edge:
+                v[q] = frame
+            elif boarded and (y - y0 + x - x0) % 3 == 0:
+                v[q] = pal((70, 58, 50))
+            else:
+                v.pop(q, None)
+                if lit:
+                    glow[q] = pal(GHOST_LIGHT)
+                else:
+                    v[q] = pal((8, 8, 10))
+
+
+def haunted_cottage(rng):
+    v, pal, glow = {}, Palette(), {}
+    W, D, H = 20, 24, 20
+    lean = 0.05
+    v = _haunted_shell(rng, v, pal, W, D, H, (88, 78, 70), (52, 56, 68), lean, 3, 0.05)
+    sh = lambda y: int(max(0, y - 3) * lean)
+    # A crooked door, ajar: a sliver of green light.
+    for y in range(3, 16):
+        for x in range(-4, 5):
+            q = (x + sh(y), y, -D)
+            if abs(x) == 4 or y == 15:
+                v[q] = pal((24, 20, 22))
+            elif x == 3:
+                v.pop(q, None)
+                glow[q] = pal(GHOST_LIGHT)
+            else:
+                v[q] = pal((44, 34, 30))
+    _window(v, glow, pal, -15 + sh(10), 8, -D, 6, 7, False, boarded=True)
+    _window(v, glow, pal, 10 + sh(10), 8, -D, 6, 7, True)
+    _window(v, glow, pal, -6 + sh(10), 8, 0, 6, 6, True, side=W + sh(10))
+    # A leaning stone chimney.
+    for y in range(H - 6, H + 18):
+        for dx in range(2):
+            for dz in range(3):
+                v[(-W + 4 + dx + int(y * 0.08), y, 6 + dz)] = pal(shade((60, 58, 64), rng.choice((0.85, 1.0))))
+    return v, pal, glow
+
+
+def haunted_tall(rng):
+    v, pal, glow = {}, Palette(), {}
+    W, D, H = 16, 18, 34
+    lean = -0.07
+    v = _haunted_shell(rng, v, pal, W, D, H, (78, 76, 86), (46, 44, 58), lean, 4, 0.04)
+    sh = lambda y: int(max(0, y - 3) * lean)
+    # An overhanging upper floor on the front.
+    for x in range(-W - 1, W + 2):
+        v[(x + sh(19), 19, -D - 1)] = pal((26, 22, 24))
+        for y in range(20, H):
+            if (x + sh(y), y, -D - 1) not in v:
+                v[(x + sh(y), y, -D - 1)] = pal(shade((78, 76, 86), 0.9 if x % 4 else 0.7))
+    for y in range(3, 15):
+        for x in range(-3, 4):
+            v[(x + sh(y), y, -D)] = pal((24, 20, 22)) if abs(x) == 3 or y == 14 else pal((40, 30, 28))
+    _window(v, glow, pal, -12 + sh(8), 6, -D, 5, 6, False, boarded=True)
+    _window(v, glow, pal, 7 + sh(8), 6, -D, 5, 6, False)
+    _window(v, glow, pal, -10 + sh(24), 22, -D - 1, 6, 8, True)
+    _window(v, glow, pal, 4 + sh(24), 22, -D - 1, 6, 8, False, boarded=True)
+    # A round attic window, glowing.
+    for x in range(-3, 4):
+        for y in range(H + 5, H + 12):
+            d = math.hypot(x, y - (H + 8))
+            q = (x + sh(y), y, -D)
+            if d <= 3.4:
+                if d > 2.4:
+                    v[q] = pal((24, 20, 22))
+                else:
+                    v.pop(q, None)
+                    glow[q] = pal(GHOST_LIGHT)
+    return v, pal, glow
+
+
+def haunted_chapel(rng):
+    v, pal, glow = {}, Palette(), {}
+    W, D, H = 15, 28, 26
+    stone_c = lambda x, y, z: pal(shade((70, 70, 78), 0.78 if (y // 3 + x // 4 + z // 4) % 2 else rng.choice((0.92, 1.0, 1.08))))
+    box(v, -W, W + 1, 0, 2, -D, D + 1, lambda x, y, z: pal((48, 46, 52)))
+    for y in range(2, H):
+        for x in range(-W, W + 1):
+            for z in (-D, D):
+                v[(x, y, z)] = stone_c(x, y, z)
+        for z in range(-D, D + 1):
+            for x in (-W, W):
+                if not (z > D - 10 and y > H - 6 and rng.random() < 0.5):
+                    v[(x, y, z)] = stone_c(x, y, z)
+    # A broken roof: the back third has fallen in.
+    for y in range(H, H + W + 2):
+        half = W + 1 - (y - H)
+        for x in range(-half, half + 1):
+            if abs(x) < half - 1:
+                v[(x, y, -D)] = stone_c(x, y, -D)
+        for z in range(-D - 2, D - 8):
+            for x in (-half, half):
+                if rng.random() < 0.06:
+                    continue
+                v[(x, y, z)] = pal(shade((34, 34, 42), 1.1 if (z // 3) % 2 else 0.9))
+    # Tall pointed windows glowing green down both sides.
+    for z in range(-18, 18, 9):
+        for side in (-W, W):
+            for y in range(7, 21):
+                for dz in range(-2, 3):
+                    if y > 18 and abs(dz) > 20 - y:
+                        continue
+                    q = (side, y, z + dz)
+                    if abs(dz) == 2 or y == 7:
+                        v[q] = pal((30, 28, 34))
+                    else:
+                        v.pop(q, None)
+                        glow[q] = pal(GHOST_LIGHT)
+    # The bell tower over the door, with a pointed spire.
+    T = 7
+    for y in range(0, H + 22):
+        for x in range(-T, T + 1):
+            for z in range(-D - 2 * T, -D + 1):
+                if abs(x) == T or z in (-D - 2 * T, -D):
+                    v[(x, y, z)] = stone_c(x, y, z)
+    for y in range(H + 12, H + 20):  # the belfry openings, a green bell inside
+        for x in range(-T + 2, T - 1):
+            for z in (-D - 2 * T, -D):
+                v.pop((x, y, z), None)
+    for y in range(H + 13, H + 18):
+        for x in range(-2, 3):
+            for z in range(-D - T - 2, -D - T + 3):
+                if abs(x) + abs(z + D + T) <= (y - H - 12):
+                    glow[(x, y, z)] = pal(GHOST_LIGHT)
+    for y in range(H + 22, H + 40):
+        half = max(0, round(T * (1 - (y - H - 22) / 18)))
+        for x in range(-half, half + 1):
+            for z in range(-D - T - half, -D - T + half + 1):
+                if abs(x) == half or abs(z + D + T) == half:
+                    v[(x, y, z)] = pal(shade((34, 34, 42), 1.0 if y % 2 else 0.85))
+    # A pointed door at the tower's foot.
+    for y in range(0, 18):
+        for x in range(-4, 5):
+            if y > 14 and abs(x) > 18 - y:
+                continue
+            q = (x, y, -D - 2 * T)
+            v[q] = pal((24, 20, 22)) if abs(x) == 4 or y == 17 else pal((40, 30, 28))
+    return v, pal, glow
+
+
 BUILDINGS = {
     "barn_red": lambda r: barn(r), "barn_grey": lambda r: barn(r, (120, 112, 104), (60, 74, 84)), "shed": shed,
     "tent_canvas": lambda r: tent(r, (214, 200, 168)), "tent_green": lambda r: tent(r, (96, 128, 80)),
     "tent_red": lambda r: tent(r, (176, 76, 58)), "windmill": windmill,
+    "haunted_cottage": haunted_cottage, "haunted_tall": haunted_tall, "haunted_chapel": haunted_chapel,
 }
 
 

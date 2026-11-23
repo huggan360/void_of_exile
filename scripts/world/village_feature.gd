@@ -22,6 +22,8 @@ var village_seed := 0
 var kind := ""
 var biome_id := Biomes.WOODS
 var capital := false
+## A Deep Dark hamlet: haunted houses, green lights, nobody living there.
+var haunted := false
 ## Directions (radians, Vector2.from_angle) of the streets leaving town.
 var exits := PackedFloat32Array()
 var plaza_radius := 6.0
@@ -115,7 +117,8 @@ static func from_baked(s: Dictionary, generator: IslandGenerator) -> VillageFeat
 	f.radius = float(s.radius)
 	f.plaza_radius = float(s.plaza_radius)
 	f.map_color = Color(s.map_color[0], s.map_color[1], s.map_color[2])
-	f.light_color = Color(1.0, 0.72, 0.4)
+	f.haunted = bool(s.get("haunted", false))
+	f.light_color = Color(0.4, 1.0, 0.6) if f.haunted else Color(1.0, 0.72, 0.4)
 	f.bounds = Rect2i(f.center - Vector2i.ONE * int(f.radius), Vector2i.ONE * (int(f.radius) * 2 + 1))
 	f._side = int(f.radius) * 2 + 1
 	f._occupied.resize(f._side * f._side)
@@ -166,7 +169,7 @@ static func from_baked(s: Dictionary, generator: IslandGenerator) -> VillageFeat
 	for l: Array in s.lights:
 		f.light_spots.append(Vector3(l[0], l[1], l[2]))
 	var c := Vector2(f.center) + Vector2(0.5, 0.5)
-	var folk: int = {"capital": 10, "town": 6, "village": 4, "hamlet": 1}.get(f.kind, 2)
+	var folk: int = 0 if f.haunted else {"capital": 10, "town": 6, "village": 4, "hamlet": 1}.get(f.kind, 2)
 	for k in folk:
 		var role: String = ["villager", "gardener", "baker", "traveler"][k % 4] if f.kind != "hamlet" else "gardener"
 		var start := c + Vector2.from_angle(k * TAU / maxf(folk, 1.0) + 0.3) * (f.plaza_radius + 1.0)

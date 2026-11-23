@@ -58,7 +58,7 @@ static func build_trees(world: IslandWorld, root: Node3D, area: Rect2i, drawn: b
 		shape.position = site.pos + Vector3.UP * 1.3
 		body.add_child(shape)
 		if drawn:
-			if site.biome == Biomes.DEEP_DARK and site.prefab == "surface/deep_lantern_tree":
+			if site.biome == Biomes.DEEP_DARK and site.prefab in ["surface/deep_lantern_tree", "surface/swamp_willow"]:
 				glowing.append(site.pos + Vector3.UP * prefab.height * s * 0.7)
 			var key := "%s|%d" % [site.prefab, site.biome]
 			if not groups.has(key): groups[key] = []
@@ -145,10 +145,15 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 			if map.cell_biome(mx, mz) == Biomes.DEEP_DARK:
 				if flags & IslandGenerator.BUSY or map.cell_shape(mx, mz) & SurfaceMap.CLIFF: continue
 				if _kept_clear(world, x, z) or gen.feature_at(mx, mz) != null: continue
-				if h < 0.36: _put(groups, "vox:surface/fine_deep_grass", pos, yaw, 0.7 + hx * 0.55, tone)
-				elif h < 0.44: _put(groups, "vox:surface/fine_deep_flowers", pos, yaw, 0.8 + hx * 0.4, Color.WHITE)
-				elif h < 0.49: _put(groups, "vox:surface/fine_deep_fungus", pos, yaw, 0.7 + hx * 0.4, Color.WHITE)
-				elif h < 0.52: _put(groups, "vox:surface/fine_stone_dark", pos, yaw, 0.8, Color.WHITE)
+				# Glow plants grow in patches (they light up as you walk through);
+				# between them the bog is dark reeds and moss.
+				if glow_region(x, z) > 0.58:
+					if h < 0.4: _put(groups, "vox:surface/fine_deep_grass", pos, yaw, 0.7 + hx * 0.55, tone)
+					elif h < 0.5: _put(groups, "vox:surface/fine_deep_flowers", pos, yaw, 0.8 + hx * 0.4, Color.WHITE)
+					elif h < 0.58: _put(groups, "vox:surface/fine_deep_bells", pos, yaw, 0.8 + hx * 0.5, Color.WHITE)
+					elif h < 0.61: _put(groups, "vox:surface/fine_deep_fungus", pos, yaw, 0.7 + hx * 0.4, Color.WHITE)
+				elif h < 0.1: _put(groups, "vox:surface/fine_bog_reeds", pos, yaw, 0.8 + hx * 0.5, Color.WHITE)
+				elif h < 0.2: _put(groups, "vox:surface/fine_bog_moss", pos, yaw, 0.8 + hx * 0.5, Color.WHITE)
 				continue
 			if flags & SurfaceMap.TRAIL:
 				if mat != SurfaceMap.Mat.STAIRS and h < 0.08 and _trail_edge(map, mx, mz): _put(groups, "tuft", pos, yaw, 0.8, tone)
@@ -228,7 +233,8 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 			var b := map.cell_biome(mx, mz)
 			var forest := map.cell_flora(mx, mz)
 			var chance := 0.03 + forest * 0.11
-			if b in [Biomes.DESERT, Biomes.DEEP_DESERT, Biomes.DOOM]: chance *= 0.35
+			if b in [Biomes.DESERT, Biomes.DEEP_DESERT]: chance *= 0.35
+			if b == Biomes.DOOM: chance *= 0.12
 			if b == Biomes.DEEP_DARK: chance = 0.15 + forest * 0.08
 			if h >= chance: continue
 			var y := map.ground_y(x, z)
@@ -243,7 +249,8 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 				Biomes.DOOM: kind = "vox:surface/rock_lava"
 				Biomes.DEEP_DARK:
 					if map.cell_flags(mx, mz) & IslandGenerator.BUSY or map.cell_shape(mx, mz) & SurfaceMap.CLIFF or gen.feature_at(mx, mz) != null: continue
-					kind = "vox:surface/bush_deep" if pick < 0.7 else "vox:surface/fine_deep_fungus"
+					if glow_region(x, z) > 0.58: kind = "vox:surface/bush_deep" if pick < 0.7 else "vox:surface/fine_deep_fungus"
+					else: kind = "vox:surface/fine_bog_reeds" if pick < 0.6 else "vox:surface/fine_bog_moss"
 				_:
 					if forest > 0.5 and pick < 0.12: kind = "vox:surface/log"
 					elif forest > 0.5 and pick < 0.2: kind = "vox:surface/stump"
@@ -251,6 +258,24 @@ static func gather(world: IslandWorld, area: Rect2i, groups: Dictionary) -> void
 					elif pick < 0.7: kind = "vox:surface/bush_berry"
 					else: kind = "vox:surface/bush_flower"
 			_put(groups, kind, Vector3(x, y - 0.05, z), SurfaceMap.hash01(cx, cz, 95) * TAU, 0.75 + SurfaceMap.hash01(cx, cz, 96) * 0.5, Color.WHITE)
+
+
+## 0..1 over the Deep Dark: smooth patches (about 20 m across) where the
+## glowing plants grow; the same on every client.
+static func glow_region(x: float, z: float) -> float:
+	var v := 0.0
+	for octave: Vector2 in [Vector2(22.0, 0.7), Vector2(8.0, 0.3)]:
+		var gx := x / octave.x
+		var gz := z / octave.x
+		var ix := floori(gx)
+		var iz := floori(gz)
+		var tx := smoothstep(0.0, 1.0, gx - ix)
+		var tz := smoothstep(0.0, 1.0, gz - iz)
+		var seed := int(octave.x)
+		var a := lerpf(SurfaceMap.hash01(ix, iz, 170 + seed), SurfaceMap.hash01(ix + 1, iz, 170 + seed), tx)
+		var b := lerpf(SurfaceMap.hash01(ix, iz + 1, 170 + seed), SurfaceMap.hash01(ix + 1, iz + 1, 170 + seed), tx)
+		v += lerpf(a, b, tz) * octave.y
+	return v
 
 
 ## Bushes and logs keep off the spots trees keep off (arrival, portal,

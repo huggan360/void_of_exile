@@ -1,0 +1,17 @@
+[remap]
+
+importer="VoxelVoxSceneImporter"
+type="PackedScene"
+uid="uid://bloyvy6ok1uic"
+path="res://.godot/imported/doom_obsidian_spikes.vox-79228b0a8b62ce706ed15cecb87374cb.tscn"
+
+[deps]
+
+source_file="res://obstacles/surface/doom_obsidian_spikes.vox"
+dest_files=["res://.godot/imported/doom_obsidian_spikes.vox-79228b0a8b62ce706ed15cecb87374cb.tscn"]
+
+[params]
+
+store_colors_in_texture=false
+scale=1.0
+enable_baked_lighting=true
