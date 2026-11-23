@@ -109,6 +109,11 @@ Test accounts: `p1` / `12345` and `p2` / `12345`.
   looks-only events (`COSMETIC_EVENTS`: others' shots, debris, damage numbers, shakes) go unreliably
   (`Net.c_looks`) so a lost packet never holds up shots and hits. Enemy attacks are stripped and keyed
   once per attack (`_wire_cache`). New bags and XP pickups (`xp-`) reach the whole realm.
+  Built for crowds (about 50 players): each tick works out every enemy's state once per realm, in a 72 m grid
+  (`_realm_view`), and every player's looks once (`_gear_of`), so a tick costs players + enemies, not
+  players x enemies. An enemy whose state hasn't changed is re-sent to a viewer only once a second
+  (`IDLE_RESEND`; the client holds it, `NetClient._push`), and a viewer gets at most the 24 nearest of other
+  players' shots per tick (`MAX_OTHER_SHOTS`, looks only).
 * `scripts/net/net_client.gd`: clock sync, interpolation, enemy mirrors (`Enemy.mirror`), remote players,
   replaying events, predicted hp/mp.
 * `scripts/net/realm_instance.gd`: one realm in its own physics world (SubViewport).

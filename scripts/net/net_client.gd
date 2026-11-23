@@ -31,6 +31,10 @@ signal social_event(ev: Array)
 const CONNECT_TIMEOUT := 8.0
 const SEND_RATE := 20.0
 const KEEP_SNAPSHOTS := 8
+## A longer silence than this is a hold, not lost packets (seconds).
+const HOLD_GAP := 0.2
+## One server tick at the default 20 per second.
+const SNAPSHOT_STEP := 0.05
 const PLAYER_PREDICTION_LIMIT := 0.10
 const PLAYER_MAX_PREDICT_SPEED := 20.0
 const PLAYER_TELEPORT_DISTANCE := 6.0
@@ -310,6 +314,10 @@ func _sync_clock(t: float) -> void:
 static func _push(buffer: Array, entry: Array) -> void:
 	# Ignore duplicate/late unreliable packets instead of reversing time.
 	if not buffer.is_empty() and float(entry[0]) <= float(buffer[-1][0]): return
+	# The server skips enemies that stood still (NetServer.IDLE_RESEND): hold the
+	# old state until just before this one, so it doesn't glide across the gap.
+	if not buffer.is_empty() and float(entry[0]) - float(buffer[-1][0]) > HOLD_GAP:
+		buffer.append([float(entry[0]) - SNAPSHOT_STEP, buffer[-1][1]])
 	buffer.append(entry)
 	if buffer.size() > KEEP_SNAPSHOTS:
 		buffer.pop_front()

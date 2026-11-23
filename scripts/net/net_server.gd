@@ -25,6 +25,14 @@ const XP_PER_OBSTACLE := 3  # same as Main
 const SNAPSHOT_FLOATS := 240  # floats per snapshot packet (keeps each under the MTU)
 ## Events that are only looks: sent unreliably so a lost packet never holds up shots and hits.
 const COSMETIC_EVENTS := ["shot", "db", "bv", "ft", "sh"]
+## Grid cell for finding the enemies near a viewer (flat worlds), meters.
+const VIEW_CELL := 72.0
+## An enemy whose state hasn't changed is only re-sent to a viewer this often (seconds).
+## The client holds its last state meanwhile (NetClient._push).
+const IDLE_RESEND := 1.0
+## Other players' shots one viewer gets per tick, nearest first. They are only
+## looks (each client decides its own hits), so a crowd's extra ones are skipped.
+const MAX_OTHER_SHOTS := 24
 
 var config: ServerConfig
 var api := AccountApi.new()
@@ -66,6 +74,11 @@ var _next_share := 1
 var _next_status_shot := 1
 var _status_shots := {}
 var _bag_realms := {}  # bag id -> realm id
+# Built once per tick and shared by every viewer (_tick_peer), so the cost of a
+# tick grows with players + enemies rather than players x enemies.
+var _view_enemies := {}  # realm id -> {list: [[net id, Enemy, net_state]], grid: {cell: [index]}, always: [index], spatial}
+var _view_players := {}  # realm id -> [peer id] of the players playing there
+var _view_gear := {}  # player id -> _gear_key
 
 
 func start(p_config: ServerConfig) -> Error:
@@ -174,6 +187,14 @@ func _physics_process(delta: float) -> void:
 	_tick_timer += 1.0 / float(config.value("network", "tick_rate", 20))
 	_tick_timer = maxf(_tick_timer, 0.0)
 	var t := Net.now()
+	_view_enemies.clear()
+	_view_players.clear()
+	_view_gear.clear()
+	for peer_id in peers:
+		var p: Dictionary = peers[peer_id]
+		if p.joined and not p.dead and p.realm != "":
+			if not _view_players.has(p.realm): _view_players[p.realm] = []
+			_view_players[p.realm].append(peer_id)
 	for peer_id in peers:
 		var p: Dictionary = peers[peer_id]
 		if p.joined and not p.dead:
@@ -1339,12 +1360,15 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 	var bosses: Array = []
 	if realm:
 		var seen := {}
-		for id: int in realm.enemies:
-			var e: Enemy = realm.enemies[id]
-			if not is_instance_valid(e) or not e.is_inside_tree():
-				continue
-			var spatial := realm.world is TheoryWorld or (realm.world is SpaceWorld and not realm.world is SurfaceShipWorld)
-			var enemy_interest := maxf(interest, 400.0) if spatial else interest
+		if not p.has("sent_states"): p.sent_states = {}
+		var view := _realm_view(p.realm, realm)
+		var spatial: bool = view.spatial
+		var enemy_interest := maxf(interest, 400.0) if spatial else interest
+		for index: int in _view_candidates(view, here, outside, enemy_interest):
+			var entry: Array = view.list[index]
+			var id: int = entry[0]
+			var e: Enemy = entry[1]
+			if seen.has(id): continue
 			var flat := minf(e.global_position.distance_to(here), e.global_position.distance_to(outside)) if spatial else minf(Vector2(e.global_position.x - here.x, e.global_position.z - here.z).length(), Vector2(e.global_position.x - outside.x, e.global_position.z - outside.z).length())
 			if flat > enemy_interest and not (e is Boss and flat < (e as Boss).boss_def.bar_radius + 10.0):
 				continue
@@ -1356,26 +1380,32 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 			if not p.known.has(id) or p.known_enemy_effects.get(id, -1) != e.buffs.revision:
 				events.append([t, "enemy_buffs", id, e.buffs.wire()])
 				p.known_enemy_effects[id] = e.buffs.revision
-			snap.append_array(e.net_state())
+			# Standing still: the viewer already has this exact state.
+			var state: PackedFloat32Array = entry[2]
+			var sent: Array = p.sent_states.get(id, [])
+			if not p.known.has(id) or sent.is_empty() or sent[1] != state or t - float(sent[0]) >= IDLE_RESEND:
+				snap.append_array(state)
+				p.sent_states[id] = [t, state]
 			if e is Boss:
 				bosses.append((e as Boss).net_boss_state(int(p.player_id)))
 		for id in p.known:
 			if not seen.has(id):
 				events.append([t, "e-", id])
+				p.sent_states.erase(id)
 				if p.has("known_enemy_effects"): p.known_enemy_effects.erase(id)
 		p.known = seen
 	# Other players.
 	var players := PackedFloat32Array()
 	var seen_players := {}
 	if not p.has("known_effects"): p.known_effects = {}
-	for other_id: int in peers:
+	for other_id: int in _view_players.get(p.realm, []):
 		var o: Dictionary = peers[other_id]
-		if other_id == peer_id or not o.joined or o.dead or o.realm != p.realm or p.realm == "":
+		if other_id == peer_id:
 			continue
 		if minf(Vector2(o.pos.x - here.x, o.pos.z - here.z).length(), Vector2(o.pos.x - outside.x, o.pos.z - outside.z).length()) > interest:
 			continue
 		seen_players[o.player_id] = true
-		var gear := _gear_key(o.player_id)
+		var gear := _gear_of(o.player_id)
 		if p.known_players.get(o.player_id, "") != gear:
 			events.append([t, "p+", o.player_id, o.name, gear, {pet = pets.looks(o)}])
 		var other_stats := GameServer.character(o.player_id)
@@ -1389,13 +1419,14 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 			p.known_effects.erase(pid)
 	var known_players := {}
 	for pid in seen_players:
-		known_players[pid] = _gear_key(pid)
+		known_players[pid] = _gear_of(pid)
 	p.known_players = known_players
 	var own_stats := GameServer.character(p.player_id)
 	if own_stats and p.known_effects.get(p.player_id,-1) != own_stats.buffs.revision:
 		events.append([t,"buffs",p.player_id,own_stats.buffs.wire()])
 		p.known_effects[p.player_id] = own_stats.buffs.revision
 	# Events near them.
+	var shots: Array = []  # [distance, event] of other players' shots
 	for queue_id in [p.realm, "_limbo"]:
 		for entry: Dictionary in _pending.get(queue_id, []):
 			if entry.only != 0 and entry.only != peer_id:
@@ -1407,11 +1438,19 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 			if entry.pos != Vector3.INF and minf(Vector2(entry.pos.x - here.x, entry.pos.z - here.z).length(), Vector2(entry.pos.x - outside.x, entry.pos.z - outside.z).length()) > event_radius:
 				continue
 			var ev: Array = entry.ev
+			if ev[1] == "shot":
+				shots.append([Vector2(entry.pos.x - here.x, entry.pos.z - here.z).length_squared(), ev])
+				continue
 			if ev[1] == "b" and not p.sent_attacks.has(ev[4]):
 				p.sent_attacks[ev[4]] = true
 				events.append([ev[0], "ad", ev[4], _attack_keys[ev[4]]])
 			if ev[1] in COSMETIC_EVENTS: looks.append(ev)
 			else: events.append(ev)
+	if shots.size() > MAX_OTHER_SHOTS:
+		shots.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+		shots.resize(MAX_OTHER_SHOTS)
+	for shot: Array in shots:
+		looks.append(shot[1])
 	if not events.is_empty():
 		Net.c_events.rpc_id(peer_id, events)
 	if not looks.is_empty():
@@ -1440,6 +1479,52 @@ func _tick_peer(peer_id: int, p: Dictionary, t: float) -> void:
 		p_at += p_take
 		first = false
 
+
+
+## This tick's enemies of a realm, with their states, built once for all its viewers.
+func _realm_view(realm_id: String, realm: RealmInstance) -> Dictionary:
+	if _view_enemies.has(realm_id):
+		return _view_enemies[realm_id]
+	var spatial := realm.world is TheoryWorld or (realm.world is SpaceWorld and not realm.world is SurfaceShipWorld)
+	var view := {list = [], grid = {}, always = [], spatial = spatial}
+	for id: int in realm.enemies:
+		var e: Enemy = realm.enemies[id]
+		if not is_instance_valid(e) or not e.is_inside_tree():
+			continue
+		var index: int = view.list.size()
+		view.list.append([id, e, e.net_state()])
+		# Bosses are seen from further away (their bar radius), and Space has no grid: always checked.
+		if e is Boss or spatial:
+			view.always.append(index)
+		else:
+			var cell := Vector2i(floori(e.global_position.x / VIEW_CELL), floori(e.global_position.z / VIEW_CELL))
+			if not view.grid.has(cell): view.grid[cell] = []
+			view.grid[cell].append(index)
+	_view_enemies[realm_id] = view
+	return view
+
+
+## Indices into view.list that may be within `radius` of either point (may repeat).
+func _view_candidates(view: Dictionary, here: Vector3, outside: Vector3, radius: float) -> Array:
+	var out: Array = (view.always as Array).duplicate()
+	if view.spatial:
+		return out
+	var cells := {}
+	for at: Vector3 in ([here] if outside == here else [here, outside]):
+		for cx in range(floori((at.x - radius) / VIEW_CELL), floori((at.x + radius) / VIEW_CELL) + 1):
+			for cz in range(floori((at.z - radius) / VIEW_CELL), floori((at.z + radius) / VIEW_CELL) + 1):
+				var cell := Vector2i(cx, cz)
+				if cells.has(cell): continue
+				cells[cell] = true
+				out.append_array(view.grid.get(cell, []))
+	return out
+
+
+## _gear_key, worked out once per tick however many players see them.
+func _gear_of(player_id: int) -> String:
+	if not _view_gear.has(player_id):
+		_view_gear[player_id] = _gear_key(player_id)
+	return _view_gear[player_id]
 
 
 ## What another player looks like: their gear (for colors and auras).
