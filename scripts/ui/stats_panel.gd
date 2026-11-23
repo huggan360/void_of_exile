@@ -58,6 +58,8 @@ func _effect(stat: String) -> String:
 			return "-%d damage per non-magic hit" % [stats.total("defense")]
 		"magic":
 			return "Shield: %s%% protection" % String.num(minf(99.99,stats.shield_reduction()*100.0),2)
+		"vitality":
+			return "%s HP per second" % String.num(stats.hp_regen_per_second(GameServer.HP_REGEN),2)
 	return ""
 
 

@@ -15,6 +15,8 @@ extends RefCounted
 ##   defense    subtracted from each non-magic, non-piercing hit (at least 15% still gets through);
 ##              armor-piercing hits ignore it
 ##   magic      shield reduction on a shared diminishing-returns curve, plus spell damage
+##   vitality   shown as Regeneration: +0.12 HP per second per point (RotMG's
+##              Vitality), always on; half rate for a while after being hit
 ## Gear can also raise max health ("hp") and max magic points ("mp").
 
 signal changed
@@ -24,10 +26,10 @@ signal consumed(item: Item)
 ## XP earned (the account earns it too, see NetServer).
 signal xp_gained(amount: int)
 
-const STATS := ["speed", "attack", "dexterity", "defense", "magic"]
+const STATS := ["speed", "attack", "dexterity", "defense", "magic", "vitality"]
 const STAT_NAMES := {speed = "Speed", attack = "Attack", dexterity = "Dexterity",
-		defense = "Defence", magic = "Magic", hp = "Health", mp = "Magic points"}
-const BASE := {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0}
+		defense = "Defence", magic = "Magic", vitality = "Regeneration", hp = "Health", mp = "Magic points"}
+const BASE := {speed = 0, attack = 0, dexterity = 0, defense = 0, magic = 0, vitality = 0}
 const BASE_HP := 100
 const BASE_MP := 100
 const MAX_LEVEL := 50
@@ -36,6 +38,8 @@ const MIN_DAMAGE_TAKEN := 0.15
 const SPEED_PER_POINT := 0.015
 const DEXTERITY_PER_POINT := 0.02
 const ATTACK_PER_POINT := 0.014
+## RotMG: 1 + 0.12 x VIT HP per second. Here the base comes from GameServer.HP_REGEN.
+const REGEN_PER_POINT := 0.12
 ## One exponential curve for every class: 20 MAG = 35%, 70 ~= 80%, 110 = 93%.
 const SHIELD_MAGIC_LINEAR := 0.020953380151240326
 const SHIELD_MAGIC_QUADRATIC := 0.000029288282669119175
@@ -479,6 +483,13 @@ func dexterity_multiplier() -> float:
 	return maxf(0.25, 1.0 + total("dexterity") * DEXTERITY_PER_POINT)
 
 
+## Health back per second: the base rate plus Regeneration. It keeps going
+## in a fight, at `combat_share` of the rate until you've gone unhurt a while.
+func hp_regen_per_second(base_rate: float, in_combat := false, combat_share := 0.5) -> float:
+	var rate := base_rate + total("vitality") * REGEN_PER_POINT
+	return rate * (combat_share if in_combat else 1.0) * buffs.multiplier("regeneration")
+
+
 func weapon_damage_multiplier() -> float:
 	return 1.0 + total("attack") * ATTACK_PER_POINT
 
@@ -568,6 +579,9 @@ func _load_data(data: Dictionary) -> void:
 	travel = (data.get("travel", {}) as Dictionary).duplicate(true) if data.get("travel", {}) is Dictionary else {}
 	for stat in STATS:
 		base[stat] = clampi(int(data.get("base", {}).get(stat, base[stat])), 0, stat_max(stat))
+	# Characters from before Regeneration existed get the average growth of their levels.
+	if not (data.get("base", {}) as Dictionary).has("vitality"):
+		base.vitality = clampi(base.vitality + roundi(PlayerClasses.growth_average(class_id, "vitality") * (level - 1)), 0, stat_max("vitality"))
 	base_hp = clampi(int(data.get("base_hp", base_hp)), 1, stat_max("hp"))
 	base_mp = clampi(int(data.get("base_mp", base_mp)), 0, stat_max("mp"))
 	has_backpack = bool(data.get("has_backpack", false))

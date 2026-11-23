@@ -46,8 +46,9 @@ signal xp_dropped(realm_id: String, pos: Vector3, orbs: Array)
 ## An orb was picked up (by anyone): every client drops it from view.
 signal xp_taken(realm_id: String, orb_id: int)
 
-var HP_REGEN := 1.5  # per second, once you haven't been hurt for a while
-var HP_REGEN_DELAY := 4.0
+var HP_REGEN := 1.5  # per second before Regeneration (PlayerStats.hp_regen_per_second)
+var HP_REGEN_DELAY := 4.0  # this long after a hit counts as in combat
+var HP_REGEN_COMBAT_SHARE := 0.5  # share of the regen rate kept while in combat
 var MP_REGEN := 7.0
 var MP_REGEN_DELAY := 0.8
 var SHIELD_DRAIN := 16.0  # MP per second while the shield is up
@@ -363,8 +364,9 @@ func _tick_vitals(p: Dictionary, delta: float) -> void:
 		# Offline death resets this same stats object; stop processing the old life.
 		if float(result.landed)>=before: return
 	p.since_hurt += delta
-	if p.since_hurt > HP_REGEN_DELAY or (stats.buffs.has_effect("regeneration") and stats.buffs.multiplier("regeneration")>=1.0):
-		stats.hp = minf(stats.max_hp, stats.hp + HP_REGEN * stats.buffs.multiplier("regeneration") * delta)
+	# Continuous: a fight only slows it down. A regeneration buff of 1x or more lifts that.
+	var in_combat: bool = p.since_hurt <= HP_REGEN_DELAY and not (stats.buffs.has_effect("regeneration") and stats.buffs.multiplier("regeneration")>=1.0)
+	stats.hp = minf(stats.max_hp, stats.hp + stats.hp_regen_per_second(HP_REGEN, in_combat, HP_REGEN_COMBAT_SHARE) * delta)
 	if p.shield:
 		stats.mp = maxf(0.0, stats.mp - SHIELD_DRAIN * stats.effect("shield_drain", 1.0) * delta)
 		stats.hp = minf(stats.max_hp, stats.hp + stats.effect("shield_heal") * delta)

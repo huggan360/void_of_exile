@@ -211,7 +211,7 @@ static func _boss(spec: Array) -> BossDef:
 				{until = 0.4, defense = b.defense - 4, variant = variants[0]}, {until = 0.2, defense = b.defense - 6, variant = variants[1]},
 				{until = 0.0, defense = b.defense - 8, variant = variants[1]}])
 			b.hp_per_extra_player = 0.35
-			b.dungeon_potions = ["attack", "defense", "speed", "dexterity", "magic", "hp", "mp"]
+			b.dungeon_potions = ["attack", "defense", "speed", "dexterity", "magic", "vitality", "hp", "mp"]
 			b.dungeon_potion_max = 3
 			b.loot_threshold = 0.03
 			b.intro_time = 8.0

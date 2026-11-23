@@ -295,11 +295,11 @@ static func _default_spawns() -> Dictionary:
 
 static func _default_player() -> Dictionary:
 	var tunables := {}
-	for key in ["HP_REGEN", "HP_REGEN_DELAY", "MP_REGEN", "MP_REGEN_DELAY", "SHIELD_DRAIN", "SHIELD_MIN_MP",
+	for key in ["HP_REGEN", "HP_REGEN_DELAY", "HP_REGEN_COMBAT_SHARE", "MP_REGEN", "MP_REGEN_DELAY", "SHIELD_DRAIN", "SHIELD_MIN_MP",
 			"RING_COOLDOWN", "XP_PER_ORB", "MAX_ORBS_PER_DROP", "XP_ORB_LIFETIME"]:
 		tunables[key.to_lower()] = GameServer.get(key)
 	return {
-		_about = "tunables: health/magic regeneration (per second, after a delay), warp shield MP drain, ring cooldown, XP orbs. Shield protection scales with MAG. starting_kit: what a new character has besides its class gear (backpack and quickslot item ids). Class gear comes from the class, graded up by account level rewards.",
+		_about = "tunables: health regeneration (per second plus 0.12 per Regeneration point, hp_regen_combat_share of it within hp_regen_delay of a hit), magic regeneration (per second, after a delay), warp shield MP drain, ring cooldown, XP orbs. Shield protection scales with MAG. starting_kit: what a new character has besides its class gear (backpack and quickslot item ids). Class gear comes from the class, graded up by account level rewards.",
 		tunables = tunables,
 		starting_kit = {
 			backpack = [],

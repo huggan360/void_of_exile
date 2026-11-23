@@ -57,6 +57,16 @@ at level 50. Combat rolls vary more than HP/MP rolls. A character may need more
 or fewer elixirs after a good or bad set of rolls. Saved stats above the new caps
 are clamped when loaded; existing legal potion gains are retained.
 
+## Regeneration
+
+Regeneration (`vitality`, REG) is the sixth combat stat, modelled on RotMG's Vitality: health comes
+back at `hp_regen` (1.5) plus 0.12 per point each second. Caps are Merrow 75, Priest 60, Alchemist 55,
+Archer 50 and Wizard 40; an Elixir of Regeneration gives one point. Unlike RotMG it never stops: for
+`hp_regen_delay` (4 s) after a hit the rate is `hp_regen_combat_share` (50%), then full. A regeneration
+buff of 1x or more keeps the full rate in a fight. Gear: grade crucifixes (+grade), the Wand and Flame
+of the Divine. Characters saved before the stat get the average growth of their levels on load.
+The server ticks it with the other vitals and sends HP in the usual snapshots: no extra traffic.
+
 ## Developer level command
 
 Only accounts authenticated by the server as developers can use `/lvl`.
@@ -162,7 +172,8 @@ Existing headless shutdown cleanup warnings remain; no full playthrough ran.
 
 ## Boss stat elixirs and health
 
-Every boss has two stat elixirs (`Loot.BOSS_POTIONS`, one unique pair of the seven stats per boss). Each
+Every boss has two stat elixirs (`Loot.BOSS_POTIONS`, a pair of the eight stats per boss; Regeneration drops from Pyre Ent, Scarab Regent,
+Thornmaw Bloom, Drowned Cantor, Queen Briarrose, Brood Matriarch and Mother Mycora, and Oblivara). Each
 player over the boss's damage threshold always gets exactly one of the two, 50/50; `elixir_of_` entries in
 boss loot tables and the old dungeon boss potion rolls are ignored for bosses with a pair. Boss health grows by
 `hp_per_extra_player` (20%) for each extra player near when the fight starts, and for players who join later

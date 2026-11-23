@@ -20,7 +20,7 @@ class_name Enemies
 ## bag. Bosses are BossDefs (see Boss).
 
 const STAT_ELIXIR_IDS := ["elixir_of_attack", "elixir_of_defense", "elixir_of_speed", "elixir_of_dexterity",
-		"elixir_of_magic", "elixir_of_hp", "elixir_of_mp"]
+		"elixir_of_magic", "elixir_of_hp", "elixir_of_mp", "elixir_of_regeneration"]
 
 static var _defs := {}
 ## Pack definitions replaced by the server's spawn config (id -> pack).

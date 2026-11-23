@@ -23,7 +23,7 @@ static func boss_loot(boss_id: String, potions: Dictionary) -> Array:
 		{pool = {tier = 6}, chance = 0.50}, {item = "backpack", chance = 0.05},
 	]
 	for stat in potions:
-		loot.append({item = "elixir_of_" + stat, chance = potions[stat]})
+		loot.append({item = Items.stat_elixir_id(stat), chance = potions[stat]})
 	for item_id in Items.loot_ids_for(boss_id):
 		loot.append({item = item_id, chance = 0.03})
 	return loot
