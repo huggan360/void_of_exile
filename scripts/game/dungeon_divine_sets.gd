@@ -36,7 +36,7 @@ static func build(out: Array[Item]) -> void:
 		{hp = 30, mp = 20}, ["Two slow spore puffs that slow what they touch",
 		"Charged: Spore Bloom, ten drifting puffs all around you"], Vector2i(85, 105))
 	_relic(out, "D_bonus_talisman_ofmycelium", "Mycelium Heart", "Talisman",
-		"A knot of threads that beats, very slowly, in time with the woods.", {hp = 60, defense = 4, speed = -2}, SPORE_TEAL)
+		"A knot of threads that beats, very slowly, in time with the woods.", {hp = 30, regeneration = 6, defense = 4, speed = -2}, SPORE_TEAL)
 	# --- Saltmourn (Captain Saltmourn, 4.5): heavy, slow, loud.
 	_weapon(out, "D_bow_ofsaltmourn", "Broadside Longbow", "Bow", "Every shot is a cannon going off below decks.",
 		{attack = 4, dexterity = -4}, ["Slow, heavy iron shots that crack armour",

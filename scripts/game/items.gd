@@ -576,7 +576,7 @@ static func bonus(tier: int, family: String) -> Item:
 	i.tier = tier
 	i.lore = "A relic carried by adventurers of every class."
 	match family:
-		"crucifix": i.bonuses = {defense = tier + 1, hp = tier * 5, regeneration = tier}
+		"crucifix": i.bonuses = {defense = tier + 1, regeneration = tier}
 		"flame": i.bonuses = {attack = tier * 2}
 		"eye": i.bonuses = {dexterity = tier * 2}
 		"crystal": i.bonuses = {magic = tier * 2, mp = tier * 5}
@@ -806,12 +806,12 @@ static func _holy_set(out: Array[Item]) -> void:
 	out[-1].damage_max = 185
 	out[-1].projectile = {style = "bolt", color = Color("#fdb800"), speed = 25.0, range = 17.0}
 	out.append(_divine("D_wand_thewandofthedivine", "The Wand of the Divine", "weapon", "Wand",
-			"Light pours out of it like water from a cracked jar.", {magic = 10, hp = 20, regeneration = 8}, [], {}))
+			"Light pours out of it like water from a cracked jar.", {magic = 10, regeneration = 4}, [], {}))
 	out[-1].damage_min = 125
 	out[-1].damage_max = 155
 	out[-1].projectile = {style = "bolt", color = Color("#fdb800"), speed = 24.0, range = 20.0}
 	out.append(_divine("D_bonus_flame_ofthedivine", "Flame of the Divine", "bonus", "Flame",
-			"A candle lit at the Court of the Sun. It never gutters.", {attack = 6, magic = 6, hp = 30, regeneration = 6},
+			"A candle lit at the Court of the Sun. It never gutters.", {attack = 6, magic = 6, regeneration = 6},
 			["Shield heals you 2 HP per second"], {shield_heal = 2.0}, Color("#fca434"), 0.45))
 
 
@@ -879,7 +879,7 @@ static func _court_sets(out: Array[Item]) -> void:
 			"Woven from the smoke of the first burning grove.", {defense = 16, magic = 17, mp = 65},
 			["Magic recovers 20% faster"], {mp_regen = 1.2}, Color("f88432"), 0.6))
 	out.append(_divine("D_bonus_flame_ofthebroken", "Flame of the Broken Grove", "bonus", "Flame",
-			"Even ash remembers the shape of a tree.", {attack = 9, magic = 7, hp = 30},
+			"Even ash remembers the shape of a tree.", {attack = 9, magic = 7, regeneration = 6},
 			[], {}, Color("ffb34b"), 0.7))
 
 

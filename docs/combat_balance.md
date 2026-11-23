@@ -64,8 +64,11 @@ back at `hp_regen` (1.5) plus 0.12 per point each second. Caps are Merrow 75, Pr
 Archer 50 and Wizard 40; an Elixir of Regeneration gives one point. It keeps running in a fight: for
 `hp_regen_delay` (4 s) after a hit the rate is `hp_regen_combat_share` (50%), then full. The stat and the
 regeneration buff share the name: the buff multiplies the rate and never adds points. A regeneration
-buff of 1x or more keeps the full rate in a fight. Gear: grade crucifixes (+grade), the Wand and Flame
-of the Divine. Characters saved before the stat get the average growth of their levels on load.
+buff of 1x or more keeps the full rate in a fight. Gear trades health for it (about 5 HP per point) on
+the healing sets only: grade crucifixes (Defence and Regeneration), Wand and Flame of the Divine and the
+Holy Divine four-piece bonus, Flame of the Broken Grove (Dragon Fire), Flame of Cindrella, Mycelium Heart
+and the Mycelium four-piece bonus. Blood pays health for power and has none.
+Characters saved before the stat get the average growth of their levels on load.
 The server ticks it with the other vitals and sends HP in the usual snapshots: no extra traffic.
 
 ## Developer level command
@@ -173,8 +176,8 @@ Existing headless shutdown cleanup warnings remain; no full playthrough ran.
 
 ## Boss stat elixirs and health
 
-Every boss has two stat elixirs (`Loot.BOSS_POTIONS`, a pair of the eight stats per boss; Regeneration drops from Pyre Ent, Scarab Regent,
-Thornmaw Bloom, Drowned Cantor, Queen Briarrose, Brood Matriarch and Mother Mycora, and Oblivara). Each
+Every boss has two stat elixirs (`Loot.BOSS_POTIONS`, a pair of the eight stats per boss; Regeneration only from bosses whose sets heal:
+Pyre Ent, Thornmaw Bloom, Scarab Regent and Mother Mycora, plus Oblivara's any-stat roll). Each
 player over the boss's damage threshold always gets exactly one of the two, 50/50; `elixir_of_` entries in
 boss loot tables and the old dungeon boss potion rolls are ignored for bosses with a pair. Boss health grows by
 `hp_per_extra_player` (20%) for each extra player near when the fight starts, and for players who join later

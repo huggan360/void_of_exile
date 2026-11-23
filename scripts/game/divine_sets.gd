@@ -365,7 +365,7 @@ const STATS := {
 	D_bonus_eye_ofthestormeye = {dexterity = 12, magic = 10, speed = 5, mp = 50, hp = -20},
 	# Flames
 	D_bonus_flame_ofeclipse = {attack = 12, magic = 14, mp = 60, hp = -30},
-	D_bonus_flame_ofcindrella = {attack = 6, speed = 4, hp = 20},
+	D_bonus_flame_ofcindrella = {attack = 6, speed = 4, regeneration = 4},
 }
 
 ## Names, lore and effects of the new relics (stats are in STATS).

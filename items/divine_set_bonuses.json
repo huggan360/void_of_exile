@@ -250,7 +250,8 @@
         {
           "pieces": 4,
           "bonuses": {
-            "hp": 35,
+            "hp": 15,
+            "regeneration": 4,
             "mp": 20,
             "magic": 3
           }
@@ -485,7 +486,8 @@
         {
           "pieces": 4,
           "bonuses": {
-            "hp": 25,
+            "hp": 10,
+            "regeneration": 3,
             "mp": 20,
             "magic": 1
           }
